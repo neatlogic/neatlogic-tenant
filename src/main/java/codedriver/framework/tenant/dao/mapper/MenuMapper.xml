@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tenant.dao.mapper.MenuMapper">
+	<resultMap type="codedriver.framework.tenant.dto.MenuVo" id="menuByIdMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="classPath" property="classPath" />
+		<result column="parentId" property="parentId" />
+		<result column="parentName" property="parentName" />
+		<result column="url" property="url" />
+		<result column="sort" property="sort" />
+		<result column="isActive" property="isActive" />
+		<result column="description" property="description" />
+		<result column="module" property="module" />
+		<result column="closable" property="closable" />
+		<result column="defaultOpen" property="defaultOpen" />
+		<result column="newOpen" property="newOpen" />
+		<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+			<id column="role_name" property="roleName" />
+		</collection>
+		<collection property="childMenuList" ofType="codedriver.framework.tenant.dto.MenuVo">
+			<id column="childId" property="id" />
+			<result column="childName" property="name" />
+			<result column="childClassPath" property="classPath" />
+			<result column="childParentId" property="parentId" />
+			<result column="childParentName" property="parentName" />
+			<result column="childUrl" property="url" />
+			<result column="childSort" property="sort" />
+			<result column="childIsActive" property="isActive" />
+			<result column="childDescription" property="description" />
+			<result column="childModule" property="module" />
+			<result column="childClosable" property="closable" />
+			<result column="childDefaultOpen" property="defaultOpen" />
+			<result column="childNewOpen" property="newOpen" />
+			<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+				<id column="childRoleName" property="roleName" />
+			</collection>
+		</collection>
+	</resultMap>
+	<select id="getMenuList" parameterType="codedriver.framework.tenant.dto.MenuVo" resultMap="menuByIdMap">
+		SELECT
+		a.id,
+		a.name,
+		a.class_path AS classPath,
+		a.parent_id AS parentId,
+		a.url,
+		a.sort,
+		a.isActive,
+		c.role_name,
+		a.description,
+		a.module,
+		a.closable,
+		a.default_open AS defaultOpen,
+		a.new_open AS newOpen,
+		
+		b.id AS childId,
+		b.name AS childName,
+		b.class_path AS childClassPath,
+		b.parent_id AS childParentId,
+		b.url AS childUrl,
+		b.sort AS childSort,
+		b.isActive AS childIsActive,
+		d.role_name AS childRoleName,
+		b.description AS childDescription,
+		b.module AS childModule,
+		b.closable AS childClosable,
+		b.default_open AS childDefaultOpen,
+		b.new_open AS childNewOpen
+		
+		
+		FROM menu a
+		LEFT JOIN menu b ON b.`parent_id` = a.`id`
+		LEFT JOIN menu_role c ON a.id = c.menu_id
+		LEFT JOIN menu_role d ON b.id = d.menu_id
+
+		WHERE a.isActive = 1
+		<choose>
+			<when test="parentId !=null">
+				AND a.parent_id = #{parentId}
+			</when>
+			<otherwise>
+				AND a.parent_id != 0		
+			</otherwise>
+		</choose>
+		<if test="module!=null and module != ''">
+			AND a.module = #{module}
+		</if>
+		<if test="id!=null and id != ''">
+			AND a.id = #{id}
+		</if>
+		ORDER BY a.parent_id, a.sort
+	</select>
+
+	<select id="getParentIdMaxSort" parameterType="codedriver.framework.tenant.dto.MenuVo" resultType="java.lang.Integer">
+		SELECT IFNULL(MAX(sort)+ 1, 1) FROM menu WHERE parent_id = #{parentId}
+	</select>
+	
+	<select id="checkIsChaildern" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM menu WHERE parent_id = #{value}
+	</select>
+	
+	<insert id="insertMenu" parameterType="codedriver.framework.tenant.dto.MenuVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO menu
+		(
+		NAME,
+		parent_id,
+		url,
+		class_path,
+		sort,
+		isActive,
+		description,
+		module,
+		closable,
+		default_open,
+		new_open
+		)
+		VALUES
+		(
+		#{name},
+		#{parentId},
+		#{url},
+		#{classPath},
+		#{sort},
+		#{isActive},
+		#{description},
+		#{module},
+		#{closable},
+		#{defaultOpen},
+		#{newOpen}
+		)
+	</insert>
+	
+	<insert id="insertMenuRole">
+		REPLACE INTO menu_role
+		(menu_id,
+		role_name
+		)
+		VALUES
+		(#{menuId},
+		#{roleName}
+		)
+	</insert>
+	
+	<update id="updateMenu" parameterType="codedriver.framework.tenant.dto.MenuVo">
+		UPDATE menu
+		SET
+		NAME = #{name},
+		parent_id = #{parentId},
+		url = #{url},
+		class_path = #{classPath},
+		isActive = #{isActive},
+		description = #{description},
+		module
+		= #{module},
+		closable = #{closable},
+		default_open = #{defaultOpen},
+		new_open = #{newOpen}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="deleteMenuRoleByMenuId" parameterType="java.lang.Long">
+		DELETE
+		FROM menu_role
+		WHERE menu_id = #{value}
+	</delete>
+	
+	<delete id="deleteMenu" parameterType="java.lang.Long">
+		DELETE FROM menu WHERE id = #{value}
+	</delete>
+
+
+</mapper>
+
