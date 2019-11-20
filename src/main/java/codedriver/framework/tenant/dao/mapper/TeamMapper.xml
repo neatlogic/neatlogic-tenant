@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
+
+	<select id="selectRoleTeamList" parameterType="codedriver.framework.tenant.dto.TeamVo" resultType="codedriver.framework.tenant.dto.TeamVo">
+		SELECT distinct
+		t.id,
+		t.name,
+		t.description ,
+		t.time_id as timeId,
+		t.parent_id as parentId,
+		(SELECT COUNT(1) FROM team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
+		tr.role_name as roleName,
+		t.lft,
+		t.rht
+		FROM
+		team t
+		LEFT JOIN team_role tr ON tr.team_id = t.id
+		WHERE
+		t.id &gt;0
+		<if test="roleName != null and  roleName!='' ">
+			 AND tr.role_name = #{roleName}
+		</if>
+		<if test="id != null">
+			AND t.id = #{id}
+		</if>
+		<if test='parentId != null'>
+			AND t.parent_id = #{parentId}
+		</if>
+		ORDER BY lft ASC
+	</select>
+	
+	<select id="selectTeamList" parameterType="codedriver.framework.tenant.dto.TeamVo" resultType="codedriver.framework.tenant.dto.TeamVo">
+		SELECT distinct
+		t.id,
+		t.name,
+		t.description ,
+		t.time_id as timeId,
+		t.parent_id as parentId,
+		(SELECT COUNT(1) FROM team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
+		t.lft,
+		t.rht
+		FROM
+		team t
+		WHERE
+		t.id &gt;0
+		<if test="id != null">
+			AND t.id = #{id}
+		</if>
+		<if test='parentId != null'>
+			AND t.parent_id = #{parentId}
+		</if>
+		ORDER BY lft ASC
+	</select>
+	
+</mapper>

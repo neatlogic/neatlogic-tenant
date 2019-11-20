@@ -1,7 +1,6 @@
 package codedriver.framework.tenant.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import codedriver.framework.common.dto.BasePageVo;
 
@@ -13,6 +12,7 @@ public class RoleVo extends BasePageVo implements Serializable{
 
 	private String name;
 	private String description;
+	private int userCount;
 	
 	public String getName() {
 		return name;
@@ -26,8 +26,12 @@ public class RoleVo extends BasePageVo implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
-	
+	public int getUserCount() {
+		return userCount;
+	}
+	public void setUserCount(int userCount) {
+		this.userCount = userCount;
+	}
 
 }
 
