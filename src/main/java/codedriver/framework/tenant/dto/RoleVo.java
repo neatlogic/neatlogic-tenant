@@ -11,39 +11,23 @@ public class RoleVo extends BasePageVo implements Serializable{
 
 	public static final String USER_DEFAULT_ROLE = "R_SYSTEM_USER";
 
-	private String roleName;
-	private String roleDesc;
+	private String name;
+	private String description;
 	
-	public RoleVo(String roleName) {
-		this.roleName = roleName;
+	public String getName() {
+		return name;
 	}
-
-	public RoleVo() {
-		this.setPageSize(20);
+	public void setName(String name) {
+		this.name = name;
 	}
-
-	public RoleVo(String roleName, String roleDesc) {
-		this.roleName = roleName;
-		this.roleDesc = roleDesc;
+	public String getDescription() {
+		return description;
 	}
-
-	public String getRoleName() {
-		return this.roleName == null ? this.roleName : roleName.toUpperCase();
+	public void setDescription(String description) {
+		this.description = description;
 	}
-
-	public void setRoleName(String roleName) {
-		if(roleName != null) {
-			this.roleName = roleName.toUpperCase();
-		}
-	}
-
-	public String getRoleDesc() {
-		return roleDesc;
-	}
-
-	public void setRoleDesc(String roleDesc) {
-		this.roleDesc = roleDesc;
-	}
+	
+	
 
 }
 
