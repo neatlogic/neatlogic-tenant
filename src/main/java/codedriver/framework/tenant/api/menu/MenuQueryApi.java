@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.tenant.dto.MenuVo;
 import codedriver.framework.tenant.service.MenuService;
@@ -26,7 +30,7 @@ public class MenuQueryApi extends ApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "查询租户菜单接口";
+		return "查询菜单接口";
 	}
 
 	@Override
@@ -34,6 +38,9 @@ public class MenuQueryApi extends ApiComponentBase{
 		return null;
 	}
 
+	@Input({ @Param(name = "id", type = "int", desc = "菜单id") })
+	@Output({})
+	@Description(desc = "查询菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		//List<MenuVo> menuList = menuService.getAllMenu();
