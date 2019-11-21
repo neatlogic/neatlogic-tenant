@@ -19,7 +19,7 @@ import codedriver.framework.tenant.service.TeamService;
 
 @AuthAction(name="SYSTEM_ROLE_EDIT")
 @Service
-public class getRoleTeamListApi extends ApiComponentBase{
+public class GetRoleTeamListApi extends ApiComponentBase{
 
 	@Autowired
 	private TeamService teamService;
