@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
 
-	<select id="selectRoleTeamList" parameterType="codedriver.framework.tenant.dto.TeamVo" resultType="codedriver.framework.tenant.dto.TeamVo">
+	<select id="selectRoleTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
 		t.id,
 		t.name,
@@ -30,7 +30,7 @@
 		ORDER BY lft ASC
 	</select>
 	
-	<select id="selectTeamList" parameterType="codedriver.framework.tenant.dto.TeamVo" resultType="codedriver.framework.tenant.dto.TeamVo">
+	<select id="selectTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
 		t.id,
 		t.name,
@@ -52,5 +52,52 @@
 		</if>
 		ORDER BY lft ASC
 	</select>
+	
+	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.tenant.dto.TeamUserVo">
+		SELECT
+		ut.user_id AS userId,
+		ut.team_id AS teamId,
+		ut.online AS online,
+		ut.type AS type
+		FROM user_team ut
+		where ut.user_id = #{userId}
+		AND ut.team_id IN
+		<foreach collection="teamList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="searchTeamByName" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+		SELECT t.id, t.name,
+		(SELECT t0.name FROM team t0 WHERE t0.id =t.parent_id) AS parentName
+		FROM team t
+		<if test="module != null">
+			JOIN team_module t1 ON t.id = t1.team_id AND t1.module = #{module}
+		</if>
+		<if test="componentId != null">
+			JOIN team_module t2 ON t.id = t2.team_id
+			JOIN workflow_component t3 ON t2.module = t3.module AND t3.id = #{componentId}
+		</if>
+		WHERE is_delete = 0
+		<if test="id != null">
+			AND t.id = #{id}
+		</if>
+		<if test="searchFlag == 0">
+			AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
+		</if>
+		<if test="searchFlag == 1">
+			AND (lower(t.name) = trim(lower(#{name})) or t.id = #{name})
+		</if>
+		ORDER BY LENGTH(t.name),t.name ASC
+		<if test="pageSize != null">
+			limit #{pageSize}
+		</if>
+	</select>
+	
+	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamVo">
+		insert into
+		user_team(user_id,team_id,type)
+		values(#{userId},#{teamId},#{type})
+	</insert>
 	
 </mapper>

@@ -2,7 +2,10 @@ package codedriver.framework.tenant.dao.mapper;
 
 import java.util.List;
 
-import codedriver.framework.tenant.dto.TeamVo;
+import org.apache.ibatis.annotations.Param;
+
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.tenant.dto.TeamUserVo;
 
 public interface TeamMapper {
 
@@ -10,4 +13,9 @@ public interface TeamMapper {
 	
 	public List<TeamVo> selectTeamList(TeamVo teamVo);
 	
+	public List<TeamUserVo> getTeamUserByUserIdTeamIds(@Param("userId") String userId,@Param("teamList") List<Long> teamList);
+	
+	public List<TeamVo> searchTeamByName(TeamVo teamVo);
+	
+	public int insertUserTeam(TeamUserVo teamUserVo);
 }
