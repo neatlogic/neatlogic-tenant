@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.tenant.dao.mapper.RoleMapper;
-import codedriver.framework.tenant.dto.RoleVo;
-import codedriver.framework.tenant.dto.TeamVo;
 
 @Service
 public class RoleServiceImpl implements RoleService{
@@ -16,6 +16,12 @@ public class RoleServiceImpl implements RoleService{
 	@Autowired 
 	RoleMapper roleMapper;
 		
+	
+	@Override
+	public RoleVo getRoleInfoByName(String name) {
+		return roleMapper.getRoleInfoByName(name);
+	}
+
 	@Override
 	public List<RoleVo> selectAllRole() {
 		return roleMapper.selectAllRole();

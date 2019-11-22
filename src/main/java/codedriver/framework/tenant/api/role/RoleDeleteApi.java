@@ -11,7 +11,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.tenant.dto.RoleVo;
 import codedriver.framework.tenant.service.RoleService;
 
 @AuthAction(name="SYSTEM_ROLE_EDIT")

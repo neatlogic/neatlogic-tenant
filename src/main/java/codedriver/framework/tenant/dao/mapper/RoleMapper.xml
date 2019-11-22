@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.RoleMapper">
 
-	<select id="selectAllRole" resultType="codedriver.framework.tenant.dto.RoleVo">
+	<select id="selectAllRole" resultType="codedriver.framework.dto.RoleVo">
 		select
 		a.`name` as name,
 		a.description as description,
@@ -11,7 +11,7 @@
 		order by a.`name`
 	</select>
 	
-	<select id="getRoleByName" resultType="codedriver.framework.tenant.dto.RoleVo" parameterType="codedriver.framework.tenant.dto.RoleVo">
+	<select id="getRoleByName" resultType="codedriver.framework.dto.RoleVo" parameterType="codedriver.framework.dto.RoleVo">
 		select
 		a.`name` as name,
 		a.description as description,
@@ -35,7 +35,16 @@
 		</if>
 	</select>
 	
-	<select id="selectRoleTeamList" parameterType="codedriver.framework.tenant.dto.TeamVo" resultType="codedriver.framework.tenant.dto.TeamVo">
+	<select id="getRoleInfoByName" parameterType="java.lang.String" resultType="codedriver.framework.dto.RoleVo">
+		SELECT
+		`name` AS name,
+		`description` AS description
+		FROM
+		`role`
+		WHERE name = #{name}
+	</select>
+	
+	<select id="selectRoleTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
 		t.id,
 		t.name,
@@ -71,16 +80,16 @@
 		ORDER BY lft ASC
 	</select>
 	
-	<select id="checkRoleNameExist" parameterType="codedriver.framework.tenant.dto.RoleVo" resultType="int">
+	<select id="checkRoleNameExist" parameterType="codedriver.framework.dto.RoleVo" resultType="int">
 		select count(1) from role where `name` = #{name}
 	</select>	
 	
-	<insert id="insertRole" parameterType="codedriver.framework.tenant.dto.RoleVo">
+	<insert id="insertRole" parameterType="codedriver.framework.dto.RoleVo">
 		insert into role (name , description)
 		values (#{name}, #{description})
 	</insert>
 	
-	<update id="updateRole" parameterType="codedriver.framework.tenant.dto.RoleVo">
+	<update id="updateRole" parameterType="codedriver.framework.dto.RoleVo">
 		UPDATE role
 		SET description = #{description}
 		WHERE `name` = #{name}
