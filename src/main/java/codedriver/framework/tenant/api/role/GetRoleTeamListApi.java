@@ -50,7 +50,7 @@ public class GetRoleTeamListApi extends ApiComponentBase{
 		@Param(name = "lft", type = "int", desc = "左编码"),
 		@Param(name = "rht", type = "int", desc = "右编码"),
 		})
-	@Description(desc = "菜单查询接口")
+	@Description(desc = "根据角色获取组织列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = new TeamVo();
