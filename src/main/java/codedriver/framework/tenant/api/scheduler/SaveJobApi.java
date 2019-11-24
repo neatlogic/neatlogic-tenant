@@ -23,11 +23,10 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
-import codedriver.framework.tenant.service.SchedulerService;
+import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
 public class SaveJobApi extends ApiComponentBase {
@@ -35,9 +34,6 @@ public class SaveJobApi extends ApiComponentBase {
 	private Logger logger = LoggerFactory.getLogger(SaveJobApi.class);
 	@Autowired
 	private SchedulerService schedulerService;
-	
-	@Autowired
-	private SchedulerManager schedulerManager;
 	
 	@Override
 	public String getToken() {
@@ -105,13 +101,16 @@ public class SaveJobApi extends ApiComponentBase {
 		}
 		jobVo.setClasspath(classpath);
 		String isActive = jsonObj.getString("isActive");
-		if(JobVo.YES.equals(isActive) || JobVo.NO.equals(isActive)) {
-			jobVo.setIsActive(isActive);
+		if(JobVo.YES.equals(isActive)) {
+			jobVo.setStatus(JobVo.RUNNING);			
+		}else if(JobVo.NO.equals(isActive)) {
+			jobVo.setStatus(JobVo.NOT_LOADED);
 		}else {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("isActive参数值必须是" + JobVo.YES + "或" + JobVo.NO + "'");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
+		jobVo.setIsActive(isActive);
 		String needAudit = jsonObj.getString("needAudit");
 		if(JobVo.YES.equals(needAudit) || JobVo.NO.equals(needAudit)) {
 			jobVo.setNeedAudit(needAudit);
@@ -168,11 +167,7 @@ public class SaveJobApi extends ApiComponentBase {
 			jobVo.setEndTime(new Date(endTime));
 		}
 		jobVo.setServerId(Config.SCHEDULE_SERVER_ID);
-		int count = schedulerService.saveJob(jobVo);
-		if(count == 1) {
-			JobObject jobObject = JobObject.buildJobObject(jobVo);
-			schedulerManager.loadJob(jobObject);
-		}
+		schedulerService.saveJob(jobVo);		
 		return "OK";
 	}
 

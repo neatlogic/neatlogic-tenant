@@ -12,14 +12,12 @@ import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
-import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
+import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
 public class DeleteJobByIdApi extends ApiComponentBase {
@@ -27,7 +25,7 @@ public class DeleteJobByIdApi extends ApiComponentBase {
 	private Logger logger = LoggerFactory.getLogger(DeleteJobByIdApi.class);
 	
 	@Autowired
-	private SchedulerManager schedulerManager;
+	private SchedulerService schedulerService;
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -59,9 +57,7 @@ public class DeleteJobByIdApi extends ApiComponentBase {
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
-		JobObject jobObject = JobObject.buildJobObject(job);
-		schedulerManager.deleteJob(jobObject);
-		schedulerMapper.deleteJobById(jobId);				
+		schedulerService.deleteJob(jobId);				
 		return "OK";
 	}
 

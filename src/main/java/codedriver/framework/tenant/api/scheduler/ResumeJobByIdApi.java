@@ -14,11 +14,10 @@ import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
-import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
+import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
 public class ResumeJobByIdApi extends ApiComponentBase {
@@ -26,7 +25,7 @@ public class ResumeJobByIdApi extends ApiComponentBase {
 	Logger logger = LoggerFactory.getLogger(ResumeJobByIdApi.class);
 	
 	@Autowired
-	private SchedulerManager schedulerManager;
+	private SchedulerService schedulerService;
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -50,22 +49,15 @@ public class ResumeJobByIdApi extends ApiComponentBase {
 	@Description(desc="恢复定时作业")
 	@Example(example="{\"jobId\":1}")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		
+	public Object myDoService(JSONObject jsonObj) throws Exception {		
 		Long jobId = jsonObj.getLong("jobId");
 		JobVo job = schedulerMapper.getJobById(jobId);
 		if(job == null) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobId + " 不存在");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
-		}
-		JobVo jobVo = new JobVo();
-		jobVo.setId(jobId);
-		jobVo.setStatus(JobVo.RUNNING);
-		schedulerMapper.updateJobById(jobVo);
-		JobObject jobObject = JobObject.buildJobObject(job);
-		schedulerManager.loadJob(jobObject);
-			
+		}		
+		schedulerService.loadJob(job);			
 		return "OK";
 	}
 

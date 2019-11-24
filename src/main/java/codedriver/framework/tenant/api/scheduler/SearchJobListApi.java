@@ -15,7 +15,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.tenant.service.SchedulerService;
+import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
 public class SearchJobListApi extends ApiComponentBase {
