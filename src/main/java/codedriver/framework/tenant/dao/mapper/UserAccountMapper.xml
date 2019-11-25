@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tenant.dao.mapper.UserAccountMapper">
+	<select id="getUserList" parameterType="codedriver.framework.dto.UserVo" resultType="codedriver.framework.dto.UserVo">
+		SELECT
+		a.user_id AS userId,
+		a.user_name AS userName,
+		a.email AS email,
+		a.is_active AS isActive
+		FROM user a
+		where 1 = 1
+		<if test="userName != null and userName != ''">
+			and (a.user_id like CONCAT('%', #{userName}, '%') OR a.user_name like CONCAT('%', #{userName}, '%'))
+		</if>
+		ORDER BY a.user_id desc
+		<if test="needPage == true">
+			LIMIT #{startNum}, #{pageSize}
+		</if>
+	</select>
+	
+	<resultMap id="userDetailMap" type="codedriver.framework.dto.UserVo">
+		<id property="userId" column="userId" />
+		<result property="userName" column="userName" />
+		<result property="isActive" column="isActive" />
+		<result property="password" column="password" />
+		<result property="email" column="email" />
+ 		<collection property="roleVoList" ofType="codedriver.framework.dto.RoleVo">
+			<id property="name" column="roleName" />
+			<id property="description" column="description" />
+		</collection>
+		<collection property="teamList" ofType="codedriver.framework.dto.TeamVo">
+			<id property="id" column="teamId" />
+			<result property="name" column="teamName" />
+			<result property="importId" column="importId" />
+			<result property="isShow" column="isShow" />
+			<result property="lft" column="lft" />
+			<result property="rht" column="rht" />
+		</collection> 
+	</resultMap>
+	
+	<select id="getUserDetailByUserId" parameterType="java.lang.String" resultMap="userDetailMap">
+		SELECT
+		a.user_id AS userId,
+		a.user_name AS userName,
+		a.is_active AS isActive,
+		a.email AS email,
+		b.role_name AS roleName,
+		e.description AS description,
+		c.team_id AS teamId,
+		d.name AS teamName,
+		d.import_id AS importId,
+		d.is_show AS isShow,
+		d.lft,
+		d.rht
+		FROM user a
+		LEFT JOIN user_role b ON a.user_id = b.user_id
+		LEFT JOIN user_team c ON a.user_id = c.user_id
+		LEFT JOIN role e ON e.name = b.role_name
+		LEFT JOIN
+		team d ON c.team_id = d.id
+		WHERE a.user_id = #{userId}
+	</select>
+	
+	<select id="getUserListCount" parameterType="codedriver.framework.dto.UserVo" resultType="int">
+		SELECT COUNT(1)
+		FROM user a
+		where 1=1
+		<if test="userId != null and userId != ''">
+			and a.user_id = #{userId}
+		</if>
+		<if test="userName != null and userName != ''">
+			and (a.user_id like CONCAT('%', #{userName}, '%') OR a.user_name like CONCAT('%', #{userName}, '%'))
+		</if>
+	</select>
+	
+	<select id="checkUserExists" parameterType="codedriver.framework.dto.UserVo" resultType="codedriver.framework.dto.UserVo">
+		SELECT
+		user_id AS userId,
+		user_name AS userName
+		FROM user
+		WHERE
+		user_id = #{userId}
+	</select>
+	
+	<insert id="insertUser" parameterType="codedriver.framework.dto.UserVo">
+		insert into
+		user(user_id,user_name,email,password,is_active)
+		values(#{userId},#{userName},#{email},#{password},#{isActive})
+	</insert>
+	
+	<insert id="insertUserRole">
+		insert into
+		user_role (user_id,role_name)
+		values
+		(
+		#{userId},#{roleName}
+		)
+	</insert>
+	
+	<update id="updateUser" parameterType="codedriver.framework.dto.UserVo">
+		update user
+		set
+		user_name = #{userName},
+		email = #{email},
+		is_active = #{isActive}
+		where user_id = #{userId}
+	</update>
+	
+	<delete id="deleteTeamUser">
+		delete from
+		user_team
+		where user_id = #{userId}
+		<if test="teamId != null and  teamId != ''">
+			and team_id = #{teamId}
+		</if>
+	</delete>
+	
+	<delete id="deleteUserRoleByUserId" parameterType="java.lang.String">
+		DELETE FROM
+		user_role
+		WHERE user_id = #{value}
+	</delete>
+	
+	<delete id="deleteUser" parameterType="java.lang.String">
+		DELETE FROM
+		user
+		WHERE
+		user_id = #{value}
+	</delete>
+</mapper>

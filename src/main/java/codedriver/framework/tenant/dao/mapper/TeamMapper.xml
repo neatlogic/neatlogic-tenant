@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
+	
+	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.tenant.dto.TeamUserVo">
+		SELECT
+		ut.user_id AS userId,
+		ut.team_id AS teamId,
+		ut.online AS online,
+		ut.type AS type
+		FROM user_team ut
+		where ut.user_id = #{userId}
+		AND ut.team_id IN
+		<foreach collection="teamList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+
+	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamVo">
+		insert into
+		user_team(user_id,team_id,type)
+		values(#{userId},#{teamId},#{type})
+	</insert>
+	
+	
+</mapper>
