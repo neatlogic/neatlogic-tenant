@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
@@ -23,17 +24,24 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
+import codedriver.framework.scheduler.dto.ServerNewJobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 import codedriver.framework.scheduler.service.SchedulerService;
+import codedriver.framework.server.dao.mapper.ServerMapper;
+import codedriver.framework.server.dto.ServerClusterVo;
 @Service
-@Transactional
 public class SaveJobApi extends ApiComponentBase {
 
 	private Logger logger = LoggerFactory.getLogger(SaveJobApi.class);
 	@Autowired
 	private SchedulerService schedulerService;
+	@Autowired 
+	private ServerMapper serverMapper;
+	@Autowired 
+	private SchedulerMapper schedulerMapper;
 	
 	@Override
 	public String getToken() {
@@ -168,6 +176,19 @@ public class SaveJobApi extends ApiComponentBase {
 		}
 		jobVo.setServerId(Config.SCHEDULE_SERVER_ID);
 		schedulerService.saveJob(jobVo);
+		if(JobVo.YES.equals(isActive)) {
+			TenantContext tenant = TenantContext.get();
+			String tenantUuid = tenant.getTenantUuid();
+			tenant.setUseDefaultDatasource(true);
+			List<ServerClusterVo> serverList = serverMapper.getServerByStatus(ServerClusterVo.STARTUP);
+			for(ServerClusterVo server : serverList) {
+				int serverId = server.getServerId();
+				if(Config.SCHEDULE_SERVER_ID == serverId) {
+					continue;
+				}
+				schedulerMapper.insertServerNewJob(new ServerNewJobVo(serverId, jobVo.getId(), tenantUuid));
+			}
+		}		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("id",jobVo.getId());
 		return resultObj;
