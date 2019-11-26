@@ -28,7 +28,7 @@ public interface UserAccountMapper {
 	
 	public int deleteUserRoleByUserId(String userId);
 	
-	public int deleteTeamUser(@Param("userId") String userId, @Param("teamId") Long teamId);
+	public int deleteTeamUser(@Param("userId") String userId, @Param("teamUuid") Long teamUuid);
 	
 	public int deleteUser(String userId);
 	

@@ -34,7 +34,7 @@
 			<id property="description" column="description" />
 		</collection>
 		<collection property="teamList" ofType="codedriver.framework.dto.TeamVo">
-			<id property="id" column="teamId" />
+			<id property="uuid" column="teamUuid" />
 			<result property="name" column="teamName" />
 			<result property="importId" column="importId" />
 			<result property="isShow" column="isShow" />
@@ -44,7 +44,7 @@
 	</resultMap>
 	
 	<select id="getUserDetailByUserId" parameterType="java.lang.String" resultMap="userDetailMap">
-		SELECT
+		SELECT		
 		a.user_id AS userId,
 		a.user_name AS userName,
 		a.is_active AS isActive,
@@ -55,7 +55,7 @@
 		f.position AS position,
 		b.role_name AS roleName,
 		e.description AS description,
-		c.team_id AS teamId,
+		d.uuid AS teamUuid,
 		d.name AS teamName,
 		d.import_id AS importId,
 		d.is_show AS isShow,
@@ -65,7 +65,7 @@
 		LEFT JOIN user_role b ON a.user_id = b.user_id
 		LEFT JOIN user_team c ON a.user_id = c.user_id
 		LEFT JOIN role e ON e.name = b.role_name
-		LEFT JOIN team d ON c.team_id = d.id
+		LEFT JOIN team d ON c.team_uuid = d.uuid
 		LEFT JOIN user_info f ON f.user_id = a.user_id
 		WHERE a.user_id = #{userId}
 	</select>
@@ -135,8 +135,8 @@
 		delete from
 		user_team
 		where user_id = #{userId}
-		<if test="teamId != null and  teamId != ''">
-			and team_id = #{teamId}
+		<if test="teamUuid != null and  teamUuid != ''">
+			and team_uuid = #{teamUuid}
 		</if>
 	</delete>
 	

@@ -5,21 +5,21 @@
 	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.tenant.dto.TeamUserVo">
 		SELECT
 		ut.user_id AS userId,
-		ut.team_id AS teamId,
+		ut.team_uuid AS teamUuid,
 		ut.type AS type
 		FROM user_team ut
 		where ut.user_id = #{userId}
-		AND ut.team_id IN
-		<foreach collection="teamList" item="item" open="(" separator="," close=")">
+		AND ut.team_uuid IN
+		<foreach collection="teamUuidList" item="item" open="(" separator="," close=")">
 			#{item}
 		</foreach>
 	</select>
 	
 
-	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamVo">
+	<insert id="insertUserTeam" parameterType="codedriver.framework.tenant.dto.TeamUserVo">
 		insert into
-		user_team(user_id,team_id,type)
-		values(#{userId},#{teamId},#{type})
+		user_team(user_id,team_uuid,type)
+		values(#{userId},#{teamUuid},#{type})
 	</insert>
 	
 	

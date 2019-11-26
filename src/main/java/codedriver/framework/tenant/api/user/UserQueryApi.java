@@ -46,6 +46,10 @@ public class UserQueryApi extends ApiComponentBase{
 		@Param(name = "pageCount", type = "int", desc = "总页数"),
 		@Param(name = "currentPage", type = "int", desc = "当前页数"),
 		@Param(name = "pageSize", type = "int", desc = "每页展示数量"),
+		@Param(name = "userId", type = "String", desc = "用户Id"),
+		@Param(name = "userName", type = "String", desc = "用户名"),
+		@Param(name = "email", type = "String", desc = "邮箱"),
+		@Param(name = "phone", type = "String", desc = "电话")
 		})
 	@Description(desc = "查询用户接口")
 	@Override

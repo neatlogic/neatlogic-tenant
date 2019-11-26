@@ -10,13 +10,11 @@ public class TeamUserVo  extends BasePageVo{
 	public static int TYPE_USER;
 	public static int TYPE_MANAGER;
 	
-	private Long teamId;
+	private String teamUuid;
 	private String userId;
 	private String userName;
 	private String teamName;
-	private int online;
 	private int type;
-	private String email ; 
 	List<Long> teamIdList ; 
 	
 	public TeamUserVo() {
@@ -24,14 +22,13 @@ public class TeamUserVo  extends BasePageVo{
 	public TeamUserVo(List<Long> teamIdList) {
 		this.teamIdList = teamIdList ; 
 	}
-	public Long getTeamId() {
-		return teamId;
-	}
 
-	public void setTeamId(Long teamId) {
-		this.teamId = teamId;
+	public String getTeamUuid() {
+		return teamUuid;
 	}
-
+	public void setTeamUuid(String teamUuid) {
+		this.teamUuid = teamUuid;
+	}
 	public String getUserId() {
 		return userId;
 	}
@@ -56,14 +53,6 @@ public class TeamUserVo  extends BasePageVo{
 		this.teamName = teamName;
 	}
 
-	public int getOnline() {
-		return online;
-	}
-
-	public void setOnline(int online) {
-		this.online = online;
-	}
-
 	public int getType() {
 		return type;
 	}
@@ -78,12 +67,6 @@ public class TeamUserVo  extends BasePageVo{
 
 	public void setTeamIdList(List<Long> teamIdList) {
 		this.teamIdList = teamIdList;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
 	}
 	
 }

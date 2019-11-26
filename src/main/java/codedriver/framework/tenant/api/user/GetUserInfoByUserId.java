@@ -37,10 +37,14 @@ public class GetUserInfoByUserId extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "Long", desc = "用户Id")})
-	@Output({ @Param(name = "userId", type = "Long", desc = "用户Id"),
+	@Input({ @Param(name = "userId", type = "String", desc = "用户Id")})
+	@Output({ @Param(name = "userId", type = "String", desc = "用户Id"),
 		@Param(name = "userName", type = "String", desc = "用户姓名"),
 		@Param(name = "email", type = "String", desc = "邮箱"),
+		@Param(name = "phone", type = "String", desc = "电话"),
+		@Param(name = "company", type = "String", desc = "公司"),
+		@Param(name = "dept", type = "String", desc = "部门"),
+		@Param(name = "position", type = "String", desc = "职位"),
 		@Param(name = "isActive", type = "int", desc = "是否激活(1:激活;0:未激活)"),
 		@Param(name = "roleVoList", type = "int", desc = "是否激活(1:激活;0:未激活)"),
 		@Param(name = "isActive", type = "int", desc = "是否激活(1:激活;0:未激活)"),

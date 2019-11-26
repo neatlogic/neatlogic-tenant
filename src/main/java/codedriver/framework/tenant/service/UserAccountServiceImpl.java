@@ -58,19 +58,19 @@ public class UserAccountServiceImpl implements UserAccountService{
 				}
 			}
 			List<TeamUserVo> teamUserNewList = new ArrayList<>();
-			List<Long> teamIdList = userVo.getTeamIdList();			
-			if(teamIdList != null && teamIdList.size() > 0) {
-				List<TeamUserVo> teamUserOldList = teamMapper.getTeamUserByUserIdTeamIds(userId,teamIdList);
+			List<String> teamUuidList = userVo.getTeamUuidList();		
+			if(teamUuidList != null && teamUuidList.size() > 0) {
+				List<TeamUserVo> teamUserOldList = teamMapper.getTeamUserByUserIdTeamIds(userId,teamUuidList);
 				if(teamUserOldList != null && teamUserOldList.size()>0) {
 					teamUserNewList.addAll(teamUserOldList);
 					for(TeamUserVo teamUserOld : teamUserOldList) {
-						teamIdList.remove(teamUserOld.getTeamId());
+						teamUuidList.remove(teamUserOld.getTeamUuid());
 					}
 				}
-				for(Long teamId : teamIdList) {
+				for(String teamId : teamUuidList) {
 					TeamUserVo teamUserNew = new TeamUserVo();
 					teamUserNew.setUserId(userId);
-					teamUserNew.setTeamId(teamId);
+					teamUserNew.setTeamUuid(teamId);
 					teamUserNewList.add(teamUserNew);
 				}
 			}
