@@ -44,9 +44,11 @@ public class UserAccountServiceImpl implements UserAccountService{
 		String userId = userVo.getUserId();	
 		if (userAccountMapper.checkUserExists(userVo) == null) {
 			userAccountMapper.insertUser(userVo);
+			userAccountMapper.insertUserInfo(userVo);
 			//updateUserToken(userVo);不需要userToken了
 		}else {
 			userAccountMapper.updateUser(userVo);
+			userAccountMapper.updateUserInfo(userVo);
 			userAccountMapper.deleteUserRoleByUserId(userId);	
 		}
 
@@ -83,6 +85,7 @@ public class UserAccountServiceImpl implements UserAccountService{
 	@Override
 	public int deleteUser(String userId) {
 		userAccountMapper.deleteUser(userId);
+		userAccountMapper.deleteUserInfo(userId);
 		userAccountMapper.deleteUserRoleByUserId(userId);
 		userAccountMapper.deleteTeamUser(userId, null);
 		return 1;

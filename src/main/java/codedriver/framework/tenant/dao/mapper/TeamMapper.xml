@@ -6,7 +6,6 @@
 		SELECT
 		ut.user_id AS userId,
 		ut.team_id AS teamId,
-		ut.online AS online,
 		ut.type AS type
 		FROM user_team ut
 		where ut.user_id = #{userId}

@@ -43,6 +43,10 @@ public class UserSaveApi extends ApiComponentBase{
 		@Param(name = "userName", type = "String", desc = "用户姓名"),
 		@Param(name = "password", type = "String", desc = "用户密码"),
 		@Param(name = "email", type = "String", desc = "用户邮箱"),
+		@Param(name = "phone", type = "String", desc = "用户电话"),
+		@Param(name = "company", type = "String", desc = "公司"),
+		@Param(name = "dept", type = "String", desc = "部门"),
+		@Param(name = "position", type = "String", desc = "职位"),
 		@Param(name = "is_active", type = "int", desc = "是否激活"),
 		@Param(name = "teamIdList", type = "String", desc = "组织id,如有多个,逗号隔开"),
 		@Param(name = "roleList", type = "String", desc = "角色名称,如有多个,逗号隔开"),})
@@ -56,6 +60,10 @@ public class UserSaveApi extends ApiComponentBase{
 			userVo.setUserName(jsonObj.getString("userName"));
 			userVo.setPassword(jsonObj.getString("password"));
 			userVo.setEmail(jsonObj.getString("email"));
+			userVo.setPhone(jsonObj.getString("phone"));
+			userVo.setCompany(jsonObj.getString("company"));
+			userVo.setDept(jsonObj.getString("dept"));
+			userVo.setPosition(jsonObj.getString("position"));
 			userVo.setIsActive(jsonObj.getInteger("isActive"));
 			//保存角色
 			String roles = jsonObj.getString("roleList");

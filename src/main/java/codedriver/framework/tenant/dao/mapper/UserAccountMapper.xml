@@ -6,6 +6,7 @@
 		a.user_id AS userId,
 		a.user_name AS userName,
 		a.email AS email,
+		a.phone AS phone,
 		a.is_active AS isActive
 		FROM user a
 		where 1 = 1
@@ -24,6 +25,10 @@
 		<result property="isActive" column="isActive" />
 		<result property="password" column="password" />
 		<result property="email" column="email" />
+		<result property="phone" column="phone" />
+		<result property="company" column="company" />
+		<result property="dept" column="dept" />
+		<result property="position" column="position" />
  		<collection property="roleVoList" ofType="codedriver.framework.dto.RoleVo">
 			<id property="name" column="roleName" />
 			<id property="description" column="description" />
@@ -44,6 +49,10 @@
 		a.user_name AS userName,
 		a.is_active AS isActive,
 		a.email AS email,
+		a.phone AS phone,
+		f.company AS company,
+		f.dept AS dept,
+		f.position AS position,
 		b.role_name AS roleName,
 		e.description AS description,
 		c.team_id AS teamId,
@@ -56,8 +65,8 @@
 		LEFT JOIN user_role b ON a.user_id = b.user_id
 		LEFT JOIN user_team c ON a.user_id = c.user_id
 		LEFT JOIN role e ON e.name = b.role_name
-		LEFT JOIN
-		team d ON c.team_id = d.id
+		LEFT JOIN team d ON c.team_id = d.id
+		LEFT JOIN user_info f ON f.user_id = a.user_id
 		WHERE a.user_id = #{userId}
 	</select>
 	
@@ -88,6 +97,12 @@
 		values(#{userId},#{userName},#{email},#{password},#{isActive})
 	</insert>
 	
+	<insert id="insertUserInfo" parameterType="codedriver.framework.dto.UserVo">
+		insert into
+		user_info(user_id,company,dept,position)
+		values(#{userId},#{company},#{dept},#{position})
+	</insert>
+	
 	<insert id="insertUserRole">
 		insert into
 		user_role (user_id,role_name)
@@ -102,7 +117,17 @@
 		set
 		user_name = #{userName},
 		email = #{email},
+		phone = #{phone},
 		is_active = #{isActive}
+		where user_id = #{userId}
+	</update>
+	
+	<update id="updateUserInfo" parameterType="codedriver.framework.dto.UserVo">
+		update user_info
+		set
+		company = #{company},
+		dept = #{dept},
+		position = #{position}
 		where user_id = #{userId}
 	</update>
 	
@@ -124,6 +149,13 @@
 	<delete id="deleteUser" parameterType="java.lang.String">
 		DELETE FROM
 		user
+		WHERE
+		user_id = #{value}
+	</delete>
+	
+	<delete id="deleteUserInfo" parameterType="java.lang.String">
+		DELETE FROM
+		user_info
 		WHERE
 		user_id = #{value}
 	</delete>

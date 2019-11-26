@@ -18,14 +18,20 @@ public interface UserAccountMapper {
 	
 	public int insertUser(UserVo userVo);
 	
+	public int insertUserInfo(UserVo userVo);
+	
 	public int insertUserRole(@Param("userId") String userId, @Param("roleName") String roleName);
 	
 	public int updateUser(UserVo userVo);
+	
+	public int updateUserInfo(UserVo userVo);
 	
 	public int deleteUserRoleByUserId(String userId);
 	
 	public int deleteTeamUser(@Param("userId") String userId, @Param("teamId") Long teamId);
 	
 	public int deleteUser(String userId);
+	
+	public int deleteUserInfo(String userId);
 
 }
