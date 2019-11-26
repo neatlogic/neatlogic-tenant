@@ -39,19 +39,19 @@ public class SearchJobClassListApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name="currentPage",type="Integer",isRequired="false",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="false",desc="页码大小"),
-		@Param(name="name",type="String",isRequired="false",desc="定时作业组件名称"),
+		@Param(name="pageSize",type="Integer",isRequired="false",desc="页大小"),
+		@Param(name="name",type="String",isRequired="false",desc="定时作业组件名称(支持模糊查询)"),
 		@Param(name="moduleName",type="String",isRequired="false",desc="模块名称"),
-		@Param(name="type",type="String",isRequired="false",desc="类型")
+		@Param(name="type",type="String",isRequired="false",desc="类型(flow-流程级别，task-任务级别，once-只允许配一次)")
 		})
 	@Description(desc="查询定时作业组件列表")
 	@Example(example="{\"name\":\"自动评分job\", \"moduleName\":\"flow\",\"type\":\"flow\"}")
 	@Output({
 		@Param(name="currentPage",type="Integer",isRequired="true",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="true",desc="页码大小"),
+		@Param(name="pageSize",type="Integer",isRequired="true",desc="页大小"),
 		@Param(name="pageCount",type="Integer",isRequired="true",desc="总页数"),
 		@Param(name="rowNum",type="Integer",isRequired="true",desc="总行数"),
-		@Param(name="jobClassList",type="Array",isRequired="true",desc=""),
+		@Param(name="jobClassList",type="Array",isRequired="true",desc="定时作业组件列表"),
 		@Param(name="name",type="String",isRequired="true",desc="定时作业组件名称"),
 		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件classpath"),
 		@Param(name="moduleName",type="String",isRequired="true",desc="定时作业组件所属模块名"),
@@ -89,6 +89,8 @@ public class SearchJobClassListApi extends ApiComponentBase {
 		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobClassList", jobClassList);
+		resultObj.put("currentPage",jobClassVo.getCurrentPage());
+		resultObj.put("pageSize",jobClassVo.getPageSize());
 		resultObj.put("pageCount", jobClassVo.getPageCount());
 		resultObj.put("rowNum", jobClassVo.getRowNum());
 		return resultObj;

@@ -40,14 +40,14 @@ public class SearchJobAuditListApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name="currentPage",type="Integer",isRequired="false",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="false",desc="页码大小"),
+		@Param(name="pageSize",type="Integer",isRequired="false",desc="页大小"),
 		@Param(name="jobId",type="Long",isRequired="true",desc="定时作业id")
 		})
 	@Description(desc="查询定时作业执行记录列表")
 	@Example(example="{\"jobId\":1}")
 	@Output({
 		@Param(name="currentPage",type="Integer",isRequired="true",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="true",desc="页码大小"),
+		@Param(name="pageSize",type="Integer",isRequired="true",desc="页大小"),
 		@Param(name="pageCount",type="Integer",isRequired="true",desc="总页数"),
 		@Param(name="rowNum",type="Integer",isRequired="true",desc="总行数"),
 		@Param(name="jobAuditList",type="Array",isRequired="true",desc="执行记录列表"),
@@ -55,7 +55,7 @@ public class SearchJobAuditListApi extends ApiComponentBase {
 		@Param(name="jobAuditList[0].jobId",type="Long",isRequired="true",desc="定时作业id"),
 		@Param(name="jobAuditList[0].startTime",type="Long",isRequired="true",desc="开始时间"),
 		@Param(name="jobAuditList[0].endTime",type="Long",isRequired="true",desc="结束时间"),
-		@Param(name="jobAuditList[0].state",type="String",isRequired="true",desc="执行状态"),
+		@Param(name="jobAuditList[0].state",type="String",isRequired="true",desc="执行状态(success:成功；error异常；processing:进行中)"),
 		@Param(name="jobAuditList[0].isLogEmpty",type="Integer",isRequired="true",desc="日志是否为空")
 		})
 	@Override
@@ -74,6 +74,8 @@ public class SearchJobAuditListApi extends ApiComponentBase {
 		List<JobAuditVo> jobAuditList = schedulerService.searchJobAuditList(jobAuditVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobAuditList", jobAuditList);
+		resultObj.put("currentPage",jobAuditVo.getCurrentPage());
+		resultObj.put("pageSize",jobAuditVo.getPageSize());
 		resultObj.put("pageCount", jobAuditVo.getPageCount());
 		resultObj.put("rowNum", jobAuditVo.getRowNum());
 		return resultObj;

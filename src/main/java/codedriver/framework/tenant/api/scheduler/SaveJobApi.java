@@ -62,7 +62,7 @@ public class SaveJobApi extends ApiComponentBase {
 		@Param(name="interval",type="Integer",isRequired="false",desc="间隔时间，单位是秒"),
 		@Param(name="cron",type="String",isRequired="false",desc="corn表达式"),
 		@Param(name="isActive",type="String",isRequired="false",desc="是否激活(no:禁用，yes：激活)"),
-		@Param(name="needAudit",type="String",isRequired="false",desc="是否保存执行记录no:不保存，yes:保存"),
+		@Param(name="needAudit",type="String",isRequired="false",desc="是否保存执行记录(no:不保存，yes:保存)"),
 		@Param(name="propList",type="Array",isRequired="false",desc="属性列表"),
 		@Param(name="propList[0].name",type="String",isRequired="false",desc="属性名"),
 		@Param(name="propList[0].value",type="String",isRequired="false",desc="属性值")
@@ -167,8 +167,10 @@ public class SaveJobApi extends ApiComponentBase {
 			jobVo.setEndTime(new Date(endTime));
 		}
 		jobVo.setServerId(Config.SCHEDULE_SERVER_ID);
-		schedulerService.saveJob(jobVo);		
-		return "OK";
+		schedulerService.saveJob(jobVo);
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("id",jobVo.getId());
+		return resultObj;
 	}
 
 }

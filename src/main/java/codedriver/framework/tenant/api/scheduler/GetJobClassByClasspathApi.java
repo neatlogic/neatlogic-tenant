@@ -55,11 +55,11 @@ public class GetJobClassByClasspathApi extends ApiComponentBase {
 		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件classpath"),
 		@Param(name="moduleName",type="String",isRequired="true",desc="定时作业组件所属模块名"),
 		@Param(name="type",type="String",isRequired="true",desc="定时作业组件级别类型"),
-		@Param(name="inputList",type="Array",isRequired="true",desc="参数列表"),
-		@Param(name="inputList[0].name",type="String",isRequired="true",desc="参数名称"),
-		@Param(name="inputList[0].dataType",type="String",isRequired="true",desc="参数数据类型"),
-		@Param(name="inputList[0].description",type="String",isRequired="true",desc="参数说明"),
-		@Param(name="inputList[0].required",type="Boolean",isRequired="true",desc="参数是否必填")		
+		@Param(name="inputList",type="Array",isRequired="true",desc="属性列表"),
+		@Param(name="inputList[0].name",type="String",isRequired="true",desc="属性名称"),
+		@Param(name="inputList[0].dataType",type="String",isRequired="true",desc="属性数据类型"),
+		@Param(name="inputList[0].description",type="String",isRequired="true",desc="属性说明"),
+		@Param(name="inputList[0].required",type="Boolean",isRequired="true",desc="属性是否必填")		
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
