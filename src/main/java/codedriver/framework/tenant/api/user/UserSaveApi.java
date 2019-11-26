@@ -62,6 +62,26 @@ public class UserSaveApi extends ApiComponentBase{
 		JSONObject json = new JSONObject();
 		UserVo userVo = new UserVo();	
 		userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>(){});
+		
+		//保存角色
+		String roles = jsonObj.getString("roleList");
+		if (roles != null) {
+			List<String> roleNameList = new ArrayList<String>();
+			for (String role : roles.split(",")) {
+				roleNameList.add(role);
+			}
+			userVo.setRoleList(roleNameList);
+		}
+		//保存用户组
+		String teamIds = jsonObj.getString("teamUuidList");
+		if (teamIds != null) {
+			List<String> teamUuidList = new ArrayList<String>();
+			for (String teamUuid : teamIds.split(",")) {
+				teamUuidList.add(teamUuid);
+			}
+			userVo.setTeamUuidList(teamUuidList);
+		}
+	
 		try {
 			userService.saveUser(userVo);
 			json.put("userId", userVo.getUserId());
