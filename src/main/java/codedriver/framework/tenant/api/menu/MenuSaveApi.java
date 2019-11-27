@@ -40,15 +40,16 @@ public class MenuSaveApi extends ApiComponentBase{
 
 	@Input({ 
 		@Param(name = "id", type = "long", desc = "菜单id",isRequired="false"),
-		@Param(name = "parentId", type = "long", desc = "菜单id",isRequired="true") ,
-		@Param(name = "name", type = "string", desc = "菜单id",isRequired="true"),
-		@Param(name = "url", type = "string", desc = "菜单id",isRequired="true"),
-		@Param(name = "description", type = "string", desc = "菜单id",isRequired="true"),
-		@Param(name = "module", type = "string", desc = "菜单id",isRequired="true"),
-		@Param(name = "isActive", type = "int", desc = "菜单id",isRequired="true"),
-		@Param(name = "isAuto", type = "int", desc = "菜单id",isRequired="true"),
-		@Param(name = "openMode", type = "string", desc = "菜单id",isRequired="true"),
-		@Param(name = "icon", type = "string", desc = "菜单id",isRequired="true") 
+		@Param(name = "parentId", type = "long", desc = "父节点id",isRequired="true") ,
+		@Param(name = "name", type = "string", desc = "菜单名称",isRequired="true"),
+		@Param(name = "url", type = "string", desc = "菜单url",isRequired="true"),
+		@Param(name = "description", type = "string", desc = "菜单描述",isRequired="true"),
+		@Param(name = "module", type = "string", desc = "模块名",isRequired="true"),
+		@Param(name = "isActive", type = "int", desc = "是否启用，0:正常，1:禁用",isRequired="true"),
+		@Param(name = "isAuto", type = "int", desc = "是否自动打开，0:否，1:是",isRequired="true"),
+		@Param(name = "openMode", type = "string", desc = "打开页面方式，tab:打开新tab页面   blank:打开新标签页",isRequired="true"),
+		@Param(name = "icon", type = "string", desc = "目录对应的图标class",isRequired="true"), 
+		@Param(name = "roleNameList", type = "list", desc = "角色",isRequired="false") 
 		})
 	@Output({
 		@Param(name = "id", type = "long", desc = "菜单id")
