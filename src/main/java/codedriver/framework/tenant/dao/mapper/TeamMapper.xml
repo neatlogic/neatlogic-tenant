@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
 	
-	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.tenant.dto.TeamUserVo">
+	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
 		SELECT
 		ut.user_id AS userId,
 		ut.team_uuid AS teamUuid,
@@ -16,7 +16,7 @@
 	</select>
 	
 
-	<insert id="insertUserTeam" parameterType="codedriver.framework.tenant.dto.TeamUserVo">
+	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamUserVo">
 		insert into
 		user_team(user_id,team_uuid,type)
 		values(#{userId},#{teamUuid},#{type})

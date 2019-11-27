@@ -4,8 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.tenant.dto.TeamUserVo;
+import codedriver.framework.dto.TeamUserVo;
 
 public interface TeamMapper {
 
