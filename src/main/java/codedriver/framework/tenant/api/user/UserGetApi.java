@@ -16,14 +16,14 @@ import codedriver.framework.tenant.service.UserAccountService;
 
 @AuthAction(name="SYSTEM_USER_EDIT")
 @Service
-public class GetUserInfoByUserId extends ApiComponentBase{
+public class UserGetApi extends ApiComponentBase{
 	
 	@Autowired
 	private UserAccountService userService;
 	
 	@Override
 	public String getToken() {
-		return "user/getUserInfoByUserId";
+		return "user/get";
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class GetUserInfoByUserId extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "String", desc = "用户Id")})
+	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="true")})
 	@Output({ @Param(name = "userId", type = "String", desc = "用户Id"),
 		@Param(name = "userName", type = "String", desc = "用户姓名"),
 		@Param(name = "email", type = "String", desc = "邮箱"),
@@ -54,14 +54,9 @@ public class GetUserInfoByUserId extends ApiComponentBase{
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
-		if(jsonObj!=null && jsonObj.containsKey("userId")) {			
-			UserVo userVo = userService.getUserDetailByUserId(jsonObj.getString("userId"));
-			json.put("userVo", userVo);
-		}else {
-			throw new RuntimeException("请输入参数userId");
-		}
-		
+		JSONObject json = new JSONObject();		
+		UserVo userVo = userService.getUserDetailByUserId(jsonObj.getString("userId"));
+		json.put("userVo", userVo);
 		return json;
 	}
 }

@@ -10,6 +10,8 @@ public interface UserAccountMapper {
 	
 	public List<UserVo> getUserList(UserVo userVo);
 	
+	public List<UserVo> getUserListByRole(UserVo vo);
+	
 	public UserVo getUserDetailByUserId(@Param("userId") String userId);
 	
 	public int getUserListCount(UserVo userVo);

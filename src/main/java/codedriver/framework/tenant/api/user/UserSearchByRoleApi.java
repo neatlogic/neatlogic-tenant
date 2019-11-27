@@ -1,11 +1,15 @@
 package codedriver.framework.tenant.api.user;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -15,19 +19,19 @@ import codedriver.framework.tenant.service.UserAccountService;
 
 @AuthAction(name="SYSTEM_USER_EDIT")
 @Service
-public class UserDeleteApi extends ApiComponentBase{
+public class UserSearchByRoleApi extends ApiComponentBase{
 	
 	@Autowired
 	private UserAccountService userService;
 	
 	@Override
 	public String getToken() {
-		return "user/delete";
+		return "user/search/role";
 	}
 
 	@Override
 	public String getName() {
-		return "删除用户接口";
+		return "根据角色查询用户";
 	}
 
 	@Override
@@ -36,18 +40,18 @@ public class UserDeleteApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="true")})
-	@Output({ @Param(name = "Status", type = "String", desc = "状态"),
-			@Param(name = "userId", type = "String", desc = "删除的userId"),})
-	@Description(desc = "删除用户接口")
+	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="false"),
+		@Param(name = "roleName", type = "String", desc = "角色名成",isRequired="true")})
+	@Output({ @Param(name = "userList", type = "JsonArray", desc = "用户信息list")})
+	@Description(desc = "根据角色查询用户")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
-		String userId = jsonObj.getString("userId");
-		userService.deleteUser(userId);
-		json.put("userId", userId);
-		json.put("Status", "OK");
+		UserVo userVo = new UserVo();
+		userVo.setUserId(jsonObj.getString("userId"));
+		userVo.setRoleName(jsonObj.getString("roleName"));
+		List<UserVo> userList = userService.getUserListByRole(userVo);
+		json.put("userList",userList);
 		return json;
 	}
 }
-

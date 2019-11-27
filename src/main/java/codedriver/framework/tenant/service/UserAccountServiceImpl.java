@@ -34,6 +34,11 @@ public class UserAccountServiceImpl implements UserAccountService{
 		return resultMap;
 	}
 	
+	@Override	
+	public List<UserVo> getUserListByRole(UserVo userVo) {
+		return userAccountMapper.getUserListByRole(userVo);
+	}
+
 	@Override
 	public UserVo getUserDetailByUserId(String userId) {
 		return userAccountMapper.getUserDetailByUserId(userId);
