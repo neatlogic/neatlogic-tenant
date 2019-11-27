@@ -59,7 +59,6 @@ public class MenuSaveApi extends ApiComponentBase{
 		menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>(){});
 		menuService.saveMenu(menuVo);
 		jsonObject.put("id", menuVo.getId());
-		jsonObject.put("Status", "OK");
 		return jsonObject;
 	}
 }

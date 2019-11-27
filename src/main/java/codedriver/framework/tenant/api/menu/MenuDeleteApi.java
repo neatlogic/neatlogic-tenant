@@ -33,19 +33,18 @@ public class MenuDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "menuId", type = "int", desc = "菜单id") })
-	@Output({})
+	@Input({ @Param(name = "id", type = "int", desc = "菜单id") })
+	@Output({ @Param(name = "Status", type = "String", desc = "状态") })
 	@Description(desc = "删除菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long menuId = jsonObj.getLong("menuId"); 
+        Long menuId = jsonObj.getLong("id"); 
 		JSONObject jsonObject = new JSONObject();
 		int count = this.menuService.checkIsChildern(menuId);
 		if (count > 0) {
 			throw new RuntimeException("当前菜单含有" + count + "个子菜单，请先移除。");
 		} else {
 			this.menuService.deleteMenu(menuId);
-			jsonObject.put("id", menuId);
 		}
 		return jsonObject;
 	}
