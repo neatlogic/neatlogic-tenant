@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -41,7 +42,8 @@ public class MenuSearchApi extends ApiComponentBase{
 
 	@Input({ 
 		@Param(name = "id", type = "int", desc = "菜单id" ,isRequired="false"),
-		@Param(name = "parentId", type = "int", desc = "菜单父节点id" ,isRequired="false")
+		@Param(name = "parentId", type = "int", desc = "菜单父节点id" ,isRequired="false"),
+		@Param(name = "type", type = "int", desc = "默认0，0:返回全部菜单，1:根据角色返回" ,isRequired="false")
 		})
 	@Output({})
 	@Description(desc = "查询菜单接口")
@@ -49,7 +51,13 @@ public class MenuSearchApi extends ApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
 		List<MenuVo> menuList = new ArrayList<MenuVo>();
-		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"),jsonObj.getLong("parentId")));
+		List<String> roleNameList = new ArrayList<String>();
+		//如果是根据角色返回对应菜单
+		if(jsonObj.containsKey("type") && jsonObj.getIntValue("type") == 1) {
+			UserContext userContext = UserContext.get();
+			roleNameList = userContext.getRoleNameList();
+		}
+		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"),jsonObj.getLong("parentId"),roleNameList));
 		json.put("menuList",menuList);
 		return json;
 	}

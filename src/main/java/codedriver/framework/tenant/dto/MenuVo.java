@@ -17,7 +17,7 @@ public class MenuVo {
 	private int isAuto = 0;
 	private String openMode = "tab";
 	private List<RoleVo> roleList;
-	private List<String> roleIdList;
+	private List<String> roleNameList;
 	private List<MenuVo> childMenuList; 
 
 	public String getParentName() {
@@ -28,12 +28,12 @@ public class MenuVo {
 		this.parentName = parentName;
 	}
 
-	public List<String> getRoleIdList() {
-		return roleIdList;
+	public List<String> getRoleNameList() {
+		return roleNameList;
 	}
 
-	public void setRoleIdList(List<String> roleIdList) {
-		this.roleIdList = roleIdList;
+	public void setRoleNameList(List<String> roleNameList) {
+		this.roleNameList = roleNameList;
 	}
 
 	public Long getId() {
@@ -48,9 +48,10 @@ public class MenuVo {
 		this.id = id ; 
 	}
 	
-	public MenuVo(Long id,Long parentId) {
+	public MenuVo(Long id,Long parentId,List<String> roleNameList) {
 		this.id = id;
 		this.parentId = parentId;
+		this.roleNameList = roleNameList;
 	}
 	
 	public void setId(Long id) {

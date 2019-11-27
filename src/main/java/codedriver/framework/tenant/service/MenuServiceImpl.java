@@ -33,8 +33,8 @@ public class MenuServiceImpl implements MenuService {
 			menuMapper.deleteMenuRoleByMenuId(menuVo.getId());
 			menuMapper.updateMenu(menuVo);
 		}
-		if (menuVo.getRoleIdList() != null) {
-			for (String roleName : menuVo.getRoleIdList()) {
+		if (menuVo.getRoleNameList() != null) {
+			for (String roleName : menuVo.getRoleNameList()) {
 				this.menuMapper.insertMenuRole(menuVo.getId(), roleName);
 			}
 		}

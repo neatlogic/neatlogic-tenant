@@ -49,7 +49,6 @@
 		a.module,
 		a.is_auto AS isAuto,
 		a.open_mode openMode ,
-		
 		b.id AS childId,
 		b.name AS childName,
 		b.icon AS childIcon,
@@ -62,8 +61,6 @@
 		b.module AS childModule,
 		b.open_mode AS childOpenMode,
 		b.is_auto AS childIsAuto
-		
-		
 		FROM menu a
 		LEFT JOIN menu b ON b.`parent_id` = a.`id`
 		LEFT JOIN menu_role c ON a.id = c.menu_id
@@ -83,6 +80,19 @@
 		</if>
 		<if test="id!=null and id != ''">
 			AND a.id = #{id}
+		</if>
+		<if test="roleNameList != null and roleNameList.size() > 0 ">
+			AND (c.role_name IN
+			<foreach collection="roleNameList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			or c.role_name is null)
+			
+			AND (d.role_name IN
+			<foreach collection="roleNameList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			or d.role_name is null)
 		</if>
 		ORDER BY a.parent_id, a.sort
 	</select>
