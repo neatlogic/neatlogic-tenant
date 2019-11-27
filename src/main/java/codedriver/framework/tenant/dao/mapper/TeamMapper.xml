@@ -97,4 +97,16 @@
 		values(#{userId},#{teamId},#{type})
 	</insert>
 	
+	<insert id="insertTeamRole" parameterType="codedriver.framework.dto.TeamVo">
+		insert into team_role (team_uuid , role_name)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.uuid}, #{item.roleName})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
+		delete from team_role where role_name = #{roleName}
+	</delete>
+	
 </mapper>

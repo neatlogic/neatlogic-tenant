@@ -18,4 +18,10 @@ public interface TeamMapper {
 	public List<TeamVo> searchTeamByName(TeamVo teamVo);
 	
 	public int insertUserTeam(TeamUserVo teamUserVo);
+	
+	public int insertTeamRole(List<TeamVo> list);
+	
+	public int insertTeamChildrenRole(@Param("parentId") Long parentId, @Param("roleName") String roleName);
+	
+	public int deleteTeamRoleByRoleName(String roleName);
 }

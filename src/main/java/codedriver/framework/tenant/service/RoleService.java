@@ -13,5 +13,4 @@ public interface RoleService {
 	public RoleVo getRoleInfoByName(String name);
 	public int saveRole(RoleVo roleVo);
 	public int deleteRole(String name);
-	//public int updateTeamRole(List<Map<String,Object>> teamList,String roleName,String flag);
 }

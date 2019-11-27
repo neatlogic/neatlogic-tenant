@@ -27,4 +27,14 @@ public class TeamServiceImpl implements TeamService{
 		return teamMapper.selectTeamList(teamVo);
 	}
 
+	@Override
+	public int updateTeamRole(List<TeamVo> teamList, String roleName) {
+		this.teamMapper.deleteTeamRoleByRoleName(roleName);
+		int count = 0;
+		if (teamList.size() > 0) {
+			count = teamMapper.insertTeamRole(teamList);
+		}
+		return count;
+	}
+
 }

@@ -12,9 +12,7 @@ public interface RoleMapper {
 	public RoleVo getRoleInfoByName(@Param("name") String name);
 		
 	public int insertRole(RoleVo roleVo);
-	
-	//public int insertTeamRole(List<Map<String, Object>> list);
-	
+		
 	public int insertTeamChildrenRole(@Param("parentId") Long parentId, @Param("roleName") String roleName);
 	
 	public int updateRole(RoleVo roleVo);
