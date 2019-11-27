@@ -50,10 +50,10 @@ public class ResumeJobByIdApi extends ApiComponentBase {
 	@Example(example="{\"jobId\":1}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {		
-		Long jobId = jsonObj.getLong("jobId");
-		JobVo job = schedulerMapper.getJobById(jobId);
+		String jobUuid = jsonObj.getString("jobUuid");
+		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobId + " 不存在");
+			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}		

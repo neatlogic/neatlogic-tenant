@@ -52,7 +52,7 @@ public class SearchJobAuditListApi extends ApiComponentBase {
 		@Param(name="rowNum",type="Integer",isRequired="true",desc="总行数"),
 		@Param(name="jobAuditList",type="Array",isRequired="true",desc="执行记录列表"),
 		@Param(name="jobAuditList[0].id",type="Long",isRequired="true",desc="记录id"),
-		@Param(name="jobAuditList[0].jobId",type="Long",isRequired="true",desc="定时作业id"),
+		@Param(name="jobAuditList[0].jobUuid",type="String",isRequired="true",desc="定时作业uuid"),
 		@Param(name="jobAuditList[0].startTime",type="Long",isRequired="true",desc="开始时间"),
 		@Param(name="jobAuditList[0].endTime",type="Long",isRequired="true",desc="结束时间"),
 		@Param(name="jobAuditList[0].state",type="String",isRequired="true",desc="执行状态(success:成功；error异常；processing:进行中)"),
@@ -61,8 +61,8 @@ public class SearchJobAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JobAuditVo jobAuditVo = new JobAuditVo();
-		Long jobId = jsonObj.getLong("jobId");
-		jobAuditVo.setJobId(jobId);
+		String jobUuid = jsonObj.getString("jobUuid");
+		jobAuditVo.setJobUuid(jobUuid);
 		if(jsonObj.containsKey("currentPage")) {
 			Integer currentPage = jsonObj.getInteger("currentPage");
 			jobAuditVo.setCurrentPage(currentPage);

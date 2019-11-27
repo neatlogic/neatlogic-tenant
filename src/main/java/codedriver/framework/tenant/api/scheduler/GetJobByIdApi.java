@@ -42,11 +42,11 @@ public class GetJobByIdApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name="jobId",type="Long",isRequired="true",desc="定时作业id")})
+	@Input({@Param(name="jobUuid",type="String",isRequired="true",desc="定时作业uuid")})
 	@Description(desc="获取定时作业信息")
 	@Example(example="{\"jobId\":1}")
 	@Output({
-		@Param(name="id",type="Long",isRequired="true",desc="定时作业id"),
+		@Param(name="uuid",type="String",isRequired="true",desc="定时作业uuid"),
 		@Param(name="name",type="String",isRequired="true",desc="定时作业名称"),
 		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件类路径"),
 		@Param(name="beginTime",type="Long",isRequired="false",desc="开始时间"),
@@ -70,10 +70,10 @@ public class GetJobByIdApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long jobId = jsonObj.getLong("jobId");
-		JobVo job = schedulerMapper.getJobById(jobId);
+		String jobUuid = jsonObj.getString("jobUuid");
+		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobId + " 不存在");
+			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}

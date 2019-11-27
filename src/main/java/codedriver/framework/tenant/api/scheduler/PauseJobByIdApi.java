@@ -45,19 +45,19 @@ public class PauseJobByIdApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name="jobId",type="Long",isRequired="true",desc="定时作业id")})
+	@Input({@Param(name="jobUuid",type="String",isRequired="true",desc="定时作业uuid")})
 	@Description(desc="停止定时作业")
-	@Example(example="{\"jobId\":1}")
+	@Example(example="{\"jobUuid\":1}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Long jobId = jsonObj.getLong("jobId");
-		JobVo job = schedulerMapper.getJobById(jobId);
+		String jobUuid = jsonObj.getString("jobUuid");
+		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobId + " 不存在");
+			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}		
-		schedulerService.stopJob(jobId);			
+		schedulerService.stopJob(jobUuid);			
 		return "OK";
 	}
 

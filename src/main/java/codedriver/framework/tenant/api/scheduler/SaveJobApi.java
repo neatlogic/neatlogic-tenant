@@ -60,7 +60,7 @@ public class SaveJobApi extends ApiComponentBase {
 
 	
 	@Input({
-		@Param(name="id",type="Long",isRequired="false",desc="定时作业id"),
+		@Param(name="uuid",type="String",isRequired="false",desc="定时作业uuid"),
 		@Param(name="name",type="String",isRequired="true",desc="定时作业名称"),
 		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件类路径"),
 		@Param(name="beginTime",type="Long",isRequired="false",desc="开始时间"),
@@ -80,9 +80,9 @@ public class SaveJobApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JobVo jobVo = new JobVo();
-		if(jsonObj.containsKey("id")) {
-			Long id = jsonObj.getLong("id");
-			jobVo.setId(id);
+		if(jsonObj.containsKey("uuid")) {
+			String uuid = jsonObj.getString("uuid");
+			jobVo.setUuid(uuid);
 		}
 		String name = jsonObj.getString("name");
 		jobVo.setName(name);
@@ -186,11 +186,11 @@ public class SaveJobApi extends ApiComponentBase {
 				if(Config.SCHEDULE_SERVER_ID == serverId) {
 					continue;
 				}
-				schedulerMapper.insertServerNewJob(new ServerNewJobVo(serverId, jobVo.getId(), tenantUuid));
+				schedulerMapper.insertServerNewJob(new ServerNewJobVo(serverId, jobVo.getUuid(), tenantUuid));
 			}
 		}		
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("id",jobVo.getId());
+		resultObj.put("id",jobVo.getUuid());
 		return resultObj;
 	}
 
