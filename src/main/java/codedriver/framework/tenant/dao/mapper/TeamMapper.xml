@@ -50,7 +50,7 @@
 		ORDER BY lft ASC
 	</select>
 	
-	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.tenant.dto.TeamUserVo">
+	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
 		SELECT
 		ut.user_id AS userId,
 		ut.team_uuid AS teamId,
