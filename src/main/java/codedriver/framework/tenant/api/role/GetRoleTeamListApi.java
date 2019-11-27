@@ -41,7 +41,7 @@ public class GetRoleTeamListApi extends ApiComponentBase{
 
 	@Input({ @Param(name = "name", type = "String", desc = "角色名称")})
 	@Output({ @Param(name = "id", type = "Long", desc = "菜单ID"),
-		@Param(name = "id", type = "Long", desc = "组ID"),
+		@Param(name = "uuid", type = "Long", desc = "组ID"),
 		@Param(name = "pId", type = "Long", desc = "父组ID"),
 		@Param(name = "name", type = "String", desc = "组名"),
 		@Param(name = "open", type = "boolean", desc = "默认true"),
@@ -67,7 +67,7 @@ public class GetRoleTeamListApi extends ApiComponentBase{
 		JSONArray jsonList = new JSONArray();
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();
-			json.put("id", team.getId());
+			json.put("uuid", team.getUuid());
 			json.put("pId", team.getParentId());
 			json.put("name", team.getName());
 			json.put("open", true);

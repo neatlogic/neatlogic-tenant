@@ -1,6 +1,7 @@
 package codedriver.framework.tenant.dao.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -21,9 +22,15 @@ public interface RoleMapper {
 		
 	public int insertRole(RoleVo roleVo);
 	
+	public int insertTeamRole(List<Map<String, Object>> list);
+	
+	public int insertTeamChildrenRole(@Param("parentId") Long parentId, @Param("roleName") String roleName);
+	
 	public int updateRole(RoleVo roleVo);
 	
 	public int checkRoleNameExist(RoleVo roleVo);
 	
 	public int deleteRole(@Param("name") String name);
+	
+	public int deleteTeamRoleByRoleName(@Param("name") String name);
 }

@@ -46,33 +46,24 @@
 	
 	<select id="selectRoleTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
-		t.id,
+		t.uuid,
 		t.name,
 		t.description ,
 		t.time_id as timeId,
 		t.parent_id as parentId,
 		(SELECT COUNT(1) FROM flow_team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
-		tr.role_id as roleId,
+		tr.role_name as roleName,
 		t.lft,
 		t.rht
 		FROM
 		team t
 		<if test="roleName != null and  roleName!='' ">
-			<if test='parentId != null'>
-				left
-			</if>
-			JOIN (SELECT distinct t.id FROM
-			(SELECT DISTINCT t1.lft,t1.rht FROM team t1
-			JOIN team_role tr ON tr.team_id = t1.id AND tr.is_parent = 1 AND tr.role_id = #{roleId}) t1
-			JOIN team t ON
-			t.lft &lt; t1.lft AND t.rht > t1.rht) t1
-			ON t.parent_id = t1.id
-			LEFT JOIN team_role tr ON tr.team_id = t.id AND tr.role_name = #{roleName}
+		LEFT JOIN team_role tr ON tr.team_uuid = t.uuid AND tr.role_name = #{roleName}
 		</if>
 		WHERE
 		t.id &gt;0
-		<if test="id != null">
-			AND t.id = #{id}
+		<if test="uuid != null">
+			AND t.uuid = #{uuid}
 		</if>
 		<if test='parentId != null'>
 			AND t.parent_id = #{parentId}
@@ -89,6 +80,27 @@
 		values (#{name}, #{description})
 	</insert>
 	
+	<insert id="insertTeamRole" parameterType="java.util.List">
+		insert into team_role (team_uuid , role_name)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.teamUuId},#{item.roleName})
+		</foreach>
+	</insert>
+	
+	<insert id="insertTeamChildrenRole">
+		REPLACE INTO team_role
+		SELECT distinct
+		ct.id,
+		r.role_name
+		FROM flow_team ct
+		JOIN flow_team pt ON pt.uuid = #{parentId}
+		JOIN flow_role r ON
+		r.id = #{roleId}
+		WHERE ct.lft > pt.lft
+		AND ct.rht &lt; pt.rht
+	</insert>
+	
 	<update id="updateRole" parameterType="codedriver.framework.dto.RoleVo">
 		UPDATE role
 		SET description = #{description}
@@ -100,5 +112,9 @@
     	LEFT JOIN user_role c ON a.name = c.role_name
     	LEFT JOIN team_role d ON a.name = d.role_name
     	WHERE a.name = #{name}
+	</delete>
+	
+	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
+		delete from team_role where role_name = #{name}
 	</delete>
 </mapper>

@@ -2,7 +2,7 @@ package codedriver.framework.tenant.service;
 
 import java.util.List;
 
-import codedriver.framework.tenant.dto.TeamVo;
+import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
 	
