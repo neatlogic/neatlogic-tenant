@@ -20,21 +20,7 @@
 		where a.name like concat("%",#{name},"%") or a.description like concat("%",#{name},"%")
 		order by a.`name`
 	</select>
-	
-	<select id="viewUsers" parameterType="codedriver.framework.dto.UserVo" resultType="codedriver.framework.dto.UserVo">
-		SELECT
-		b.user_id AS userId,
-		b.user_name AS UserName
-		FROM user_role a JOIN user b ON a.user_id = b.user_id
-		WHERE 1=1
-		<if test="roleName != null and roleName != ''">
-			AND a.role_name = #{roleName}
-		</if>
-		<if test="userId != null and userId != ''">
-			AND b.user_id = #{userId}
-		</if>
-	</select>
-	
+		
 	<select id="getRoleInfoByName" parameterType="java.lang.String" resultType="codedriver.framework.dto.RoleVo">
 		SELECT
 		`name` AS name,
@@ -42,34 +28,7 @@
 		FROM
 		`role`
 		WHERE name = #{name}
-	</select>
-	
-	<select id="selectRoleTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
-		SELECT distinct
-		t.uuid,
-		t.name,
-		t.description ,
-		t.time_id as timeId,
-		t.parent_id as parentId,
-		(SELECT COUNT(1) FROM flow_team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
-		tr.role_name as roleName,
-		t.lft,
-		t.rht
-		FROM
-		team t
-		<if test="roleName != null and  roleName!='' ">
-		LEFT JOIN team_role tr ON tr.team_uuid = t.uuid AND tr.role_name = #{roleName}
-		</if>
-		WHERE
-		t.id &gt;0
-		<if test="uuid != null">
-			AND t.uuid = #{uuid}
-		</if>
-		<if test='parentId != null'>
-			AND t.parent_id = #{parentId}
-		</if>
-		ORDER BY lft ASC
-	</select>
+	</select>	
 	
 	<select id="checkRoleNameExist" parameterType="codedriver.framework.dto.RoleVo" resultType="int">
 		select count(1) from role where `name` = #{name}
@@ -80,13 +39,13 @@
 		values (#{name}, #{description})
 	</insert>
 	
-	<insert id="insertTeamRole" parameterType="java.util.List">
+<!-- 	<insert id="insertTeamRole" parameterType="java.util.List">
 		insert into team_role (team_uuid , role_name)
 		values
 		<foreach collection="list" item="item" index="index" separator=",">
 			(#{item.teamUuId},#{item.roleName})
 		</foreach>
-	</insert>
+	</insert> -->
 	
 	<insert id="insertTeamChildrenRole">
 		REPLACE INTO team_role

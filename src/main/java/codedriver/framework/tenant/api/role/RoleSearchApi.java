@@ -1,5 +1,6 @@
 package codedriver.framework.tenant.api.role;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.AuthAction;
-import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -18,19 +19,19 @@ import codedriver.framework.tenant.service.RoleService;
 
 @AuthAction(name="SYSTEM_ROLE_EDIT")
 @Service
-public class RoleViewUsersApi extends ApiComponentBase{
+public class RoleSearchApi extends ApiComponentBase{
 
 	@Autowired
 	private RoleService roleService;
 	
 	@Override
 	public String getToken() {
-		return "role/viewUsersApi";
+		return "role/search";
 	}
 
 	@Override
 	public String getName() {
-		return "查询角色的用户详情";
+		return "查询角色信息接口";
 	}
 
 	@Override
@@ -38,20 +39,24 @@ public class RoleViewUsersApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称"),})
-	@Output({@Param(name = "userList", type = "JsonArray", desc = "用户信息")})
-	@Description(desc = "查询该角色下用户信息")
+	@Input({ @Param(name = "keyName", type = "String", desc = "关键字,根据关键字查找",isRequired="ture"),})
+	@Output({@Param(name = "name", type = "String", desc = "角色名称"),
+		@Param(name = "description", type = "String", desc = "角色描述"),
+		@Param(name = "userCount", type = "int", desc = "用户数量")
+		})
+	@Description(desc = "角色查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
-		UserVo vo = new UserVo();
-		vo.setRoleName(jsonObj.getString("name"));
-		List<UserVo> userList = roleService.viewUsers(vo);
-		json.put("userList", userList);
+		List<RoleVo> roleList = new ArrayList<>();
+		if(jsonObj.containsKey("keyName")) {
+			RoleVo roleVo = new RoleVo();//根据关键字查找
+			roleVo.setName(jsonObj.getString("keyName"));
+			roleList = roleService.getRoleByName(roleVo);
+		}else {
+			roleList = roleService.selectAllRole();//查找所有
+		}		
+		json.put("roleList",roleList);
 		return json;
 	}
 }
-
-
-
-

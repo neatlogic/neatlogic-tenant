@@ -22,7 +22,7 @@ public class RoleDeleteApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "role/roleDeleteApi";
+		return "role/delete";
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class RoleDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称")})
+	@Input({ @Param(name = "name", type = "String", desc = "角色名称",isRequired="ture")})
 	@Output({@Param(name = "Status", type = "String", desc = "删除状态"),
 		@Param(name = "name", type = "String", desc = "角色名称")})
 	@Description(desc = "角色删除接口")

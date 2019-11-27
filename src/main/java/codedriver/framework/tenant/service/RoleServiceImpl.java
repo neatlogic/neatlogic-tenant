@@ -29,17 +29,7 @@ public class RoleServiceImpl implements RoleService{
 	public List<RoleVo> selectAllRole() {
 		return roleMapper.selectAllRole();
 	}	
-	
-	@Override
-	public List<UserVo> viewUsers(UserVo vo) {
-		return roleMapper.viewUsers(vo);
-	}
-	
-	@Override
-	public List<TeamVo> selectRoleTeamList(TeamVo teamVo) {
-		return roleMapper.selectRoleTeamList(teamVo);
-	}
-	
+		
 	@Override
 	public List<RoleVo> getRoleByName(RoleVo roleVo) {
 		return roleMapper.getRoleByName(roleVo);

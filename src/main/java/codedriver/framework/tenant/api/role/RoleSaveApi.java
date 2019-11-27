@@ -23,7 +23,7 @@ public class RoleSaveApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "role/roleSaveApi";
+		return "role/save";
 	}
 
 	@Override
