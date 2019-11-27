@@ -1,19 +1,16 @@
 package codedriver.framework.tenant.service;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-
+import org.springframework.transaction.annotation.Transactional;
 import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.dto.UserVo;
+
 import codedriver.framework.tenant.dao.mapper.RoleMapper;
 
 @Service
+@Transactional
 public class RoleServiceImpl implements RoleService{
 
 	@Autowired 
