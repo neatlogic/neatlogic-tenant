@@ -36,7 +36,7 @@ public class RoleGetApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称", isRequired="ture"),})
+	@Input({ @Param(name = "name", type = "String", desc = "角色名称", isRequired="ture")})
 	@Output({@Param(name = "name", type = "String", desc = "角色名称"),
 		@Param(name = "description", type = "String", desc = "角色描述")
 		})

@@ -36,8 +36,8 @@ public class RoleSaveApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称"),
-		@Param(name = "description", type = "String", desc = "角色描述")})
+	@Input({ @Param(name = "name", type = "String", desc = "角色名称", isRequired="ture"),
+		@Param(name = "description", type = "String", desc = "角色描述", isRequired="ture")})
 	@Output({@Param(name = "Status", type = "String", desc = "保存状态"),
 		@Param(name = "name", type = "String", desc = "角色名称")})
 	@Description(desc = "角色保存接口")
