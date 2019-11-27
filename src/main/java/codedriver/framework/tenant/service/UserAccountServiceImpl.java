@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.TeamUserVo;
@@ -15,6 +16,7 @@ import codedriver.framework.tenant.dao.mapper.TeamMapper;
 import codedriver.framework.tenant.dao.mapper.UserAccountMapper;
 
 @Service
+@Transactional
 public class UserAccountServiceImpl implements UserAccountService{
 	
 	@Autowired
