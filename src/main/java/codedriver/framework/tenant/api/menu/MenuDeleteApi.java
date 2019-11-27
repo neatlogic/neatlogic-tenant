@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -13,6 +14,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.tenant.service.MenuService;
 
 @Service
+@AuthAction(name="SYSTEM_MENU_EDIT")
 public class MenuDeleteApi extends ApiComponentBase{
 
 	@Autowired

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -16,6 +17,7 @@ import codedriver.framework.tenant.dto.MenuVo;
 import codedriver.framework.tenant.service.MenuService;
 
 @Service
+@AuthAction(name="SYSTEM_MENU_EDIT")
 public class MenuSaveApi extends ApiComponentBase{
 
 	@Autowired
@@ -23,12 +25,12 @@ public class MenuSaveApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "menu/menuSaveApi";
+		return "menu/save";
 	}
 
 	@Override
 	public String getName() {
-		return "保存租户菜单接口";
+		return "保存菜单接口";
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class MenuSaveApi extends ApiComponentBase{
 	@Output({
 		@Param(name = "id", type = "long", desc = "菜单id")
 	})
-	@Description(desc = "查询菜单接口")
+	@Description(desc = "保存菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject jsonObject = new JSONObject();
