@@ -42,10 +42,7 @@ public class TeamSaveRoleApi extends ApiComponentBase{
 
 	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="ture"),
 			@Param(name = "nodeJson", type = "String", desc = "角色和组信息",isRequired="ture"),})
-	@Output({@Param(name = "parentId", type = "Long", desc = "父组Id"),
-		@Param(name = "description", type = "String", desc = "角色描述"),
-		@Param(name = "userCount", type = "int", desc = "用户数量")
-		})
+	@Output({})
 	@Example(example="{\r\n" + 
 			"	\"nodeJson\":\"[{'uuid':130,'roleName':'R_TEST'},{'uuid':140,'roleName':'R_TEST'},{'uuid':150,'roleName':'R_TEST'}]\",\r\n" + 
 			"	\"roleName\":\"R_TEST\"\r\n" + 
