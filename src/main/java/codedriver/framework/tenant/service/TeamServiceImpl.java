@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.tenant.dao.mapper.TeamMapper;
 
 
 @Service
+@Transactional
 public class TeamServiceImpl implements TeamService{
 
 	@Autowired
