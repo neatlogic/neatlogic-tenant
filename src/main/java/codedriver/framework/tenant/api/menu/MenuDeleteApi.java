@@ -36,7 +36,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 	}
 
 	@Input({ @Param(name = "id", type = "int", desc = "菜单id") })
-	@Output({ @Param(name = "Status", type = "String", desc = "状态") })
+	@Output({})
 	@Description(desc = "删除菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

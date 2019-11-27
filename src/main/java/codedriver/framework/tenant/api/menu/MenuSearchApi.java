@@ -45,7 +45,19 @@ public class MenuSearchApi extends ApiComponentBase{
 		@Param(name = "parentId", type = "int", desc = "菜单父节点id" ,isRequired="false"),
 		@Param(name = "type", type = "int", desc = "默认0，0:返回全部菜单，1:根据角色返回" ,isRequired="false")
 		})
-	@Output({})
+	@Output({
+		@Param(name = "id", type = "long", desc = "菜单id"),
+		@Param(name = "parentId", type = "long", desc = "父节点id") ,
+		@Param(name = "name", type = "string", desc = "菜单名称"),
+		@Param(name = "url", type = "string", desc = "菜单url"),
+		@Param(name = "description", type = "string", desc = "菜单描述"),
+		@Param(name = "module", type = "string", desc = "模块名"),
+		@Param(name = "isActive", type = "int", desc = "是否启用，0:正常，1:禁用"),
+		@Param(name = "isAuto", type = "int", desc = "是否自动打开，0:否，1:是"),
+		@Param(name = "openMode", type = "string", desc = "打开页面方式，tab:打开新tab页面   blank:打开新标签页"),
+		@Param(name = "icon", type = "string", desc = "目录对应的图标class"), 
+		@Param(name = "roleName", type = "string", desc = "角色") 
+	})
 	@Description(desc = "查询菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
