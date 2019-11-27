@@ -8,15 +8,14 @@ public class MenuVo {
 	private String name;
 	private Long parentId;
 	private String parentName;
-	private String classPath;
+	private String icon;
 	private String url;
 	private Integer sort;
 	private int isActive;
 	private String module ; 
 	private String description ;
-	private int closable = 1;
-	private int defaultOpen = 0;
-	private int newOpen = 0;
+	private int isAuto = 0;
+	private String openMode = "tab";
 	private List<RoleVo> roleList;
 	private List<String> roleIdList;
 	private List<MenuVo> childMenuList; 
@@ -49,6 +48,11 @@ public class MenuVo {
 		this.id = id ; 
 	}
 	
+	public MenuVo(Long id,Long parentId) {
+		this.id = id;
+		this.parentId = parentId;
+	}
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -67,22 +71,6 @@ public class MenuVo {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
-	}
-
-	public int getNewOpen() {
-		return newOpen;
-	}
-
-	public void setNewOpen(int newOpen) {
-		this.newOpen = newOpen;
-	}
-
-	public String getClassPath() {
-		return classPath;
-	}
-
-	public void setClassPath(String classPath) {
-		this.classPath = classPath;
 	}
 
 	public String getUrl() {
@@ -125,22 +113,6 @@ public class MenuVo {
 		this.childMenuList = childMenuList;
 	}
 
-	public int getClosable() {
-		return closable;
-	}
-
-	public void setClosable(int closable) {
-		this.closable = closable;
-	}
-
-	public int getDefaultOpen() {
-		return defaultOpen;
-	}
-
-	public void setDefaultOpen(int defaultOpen) {
-		this.defaultOpen = defaultOpen;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -157,5 +129,30 @@ public class MenuVo {
 		this.module = module;
 	}
 
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	public int getIsAuto() {
+		return isAuto;
+	}
+
+	public void setIsAuto(int isAuto) {
+		this.isAuto = isAuto;
+	}
+
+	public String getOpenMode() {
+		return openMode;
+	}
+
+	public void setOpenMode(String openMode) {
+		this.openMode = openMode;
+	}
+
+	
 }
 

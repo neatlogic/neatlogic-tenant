@@ -1,5 +1,6 @@
 package codedriver.framework.tenant.api.menu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,14 @@ import codedriver.framework.tenant.service.MenuService;
 
 @Service
 @AuthAction(name="SYSTEM_MENU_EDIT")
-public class MenuQueryApi extends ApiComponentBase{
+public class MenuSearchApi extends ApiComponentBase{
 
 	@Autowired
 	private MenuService menuService;
 	
 	@Override
 	public String getToken() {
-		return "menuQueryApi";
+		return "menu/search";
 	}
 
 	@Override
@@ -38,18 +39,17 @@ public class MenuQueryApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "id", type = "int", desc = "菜单id") })
+	@Input({ 
+		@Param(name = "id", type = "int", desc = "菜单id" ,isRequired="false"),
+		@Param(name = "parentId", type = "int", desc = "菜单父节点id" ,isRequired="false")
+		})
 	@Output({})
 	@Description(desc = "查询菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		//List<MenuVo> menuList = menuService.getAllMenu();
 		JSONObject json = new JSONObject();
-		MenuVo vo = new MenuVo();
-		vo.setId(jsonObj.getLong("id"));
-		vo.setParentId(jsonObj.getLong("parentId"));
-		vo.setModule(jsonObj.getString("module"));
-		List<MenuVo> menuList = menuService.getMenuList(vo);
+		List<MenuVo> menuList = new ArrayList<MenuVo>();
+		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"),jsonObj.getLong("parentId")));
 		json.put("menuList",menuList);
 		return json;
 	}

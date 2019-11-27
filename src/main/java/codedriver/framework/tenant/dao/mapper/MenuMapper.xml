@@ -4,7 +4,7 @@
 	<resultMap type="codedriver.framework.tenant.dto.MenuVo" id="menuByIdMap">
 		<id column="id" property="id" />
 		<result column="name" property="name" />
-		<result column="classPath" property="classPath" />
+		<result column="icon" property="icon" />
 		<result column="parentId" property="parentId" />
 		<result column="parentName" property="parentName" />
 		<result column="url" property="url" />
@@ -12,16 +12,15 @@
 		<result column="isActive" property="isActive" />
 		<result column="description" property="description" />
 		<result column="module" property="module" />
-		<result column="closable" property="closable" />
-		<result column="defaultOpen" property="defaultOpen" />
-		<result column="newOpen" property="newOpen" />
+		<result column="openMode" property="openMode" />
+		<result column="isAuto" property="isAuto" />
 		<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
-			<id column="role_name" property="roleName" />
+			<id column="roleName" property="roleName" />
 		</collection>
 		<collection property="childMenuList" ofType="codedriver.framework.tenant.dto.MenuVo">
 			<id column="childId" property="id" />
 			<result column="childName" property="name" />
-			<result column="childClassPath" property="classPath" />
+			<result column="childIcon" property="icon" />
 			<result column="childParentId" property="parentId" />
 			<result column="childParentName" property="parentName" />
 			<result column="childUrl" property="url" />
@@ -29,9 +28,8 @@
 			<result column="childIsActive" property="isActive" />
 			<result column="childDescription" property="description" />
 			<result column="childModule" property="module" />
-			<result column="childClosable" property="closable" />
-			<result column="childDefaultOpen" property="defaultOpen" />
-			<result column="childNewOpen" property="newOpen" />
+			<result column="childIsAuto" property="isAuto" />
+			<result column="childOpenMode" property="openMode" />
 			<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
 				<id column="childRoleName" property="roleName" />
 			</collection>
@@ -41,31 +39,29 @@
 		SELECT
 		a.id,
 		a.name,
-		a.class_path AS classPath,
+		a.icon AS icon,
 		a.parent_id AS parentId,
 		a.url,
 		a.sort,
-		a.isActive,
-		c.role_name,
+		a.is_active as isActive,
+		c.role_name as roleName, 
 		a.description,
 		a.module,
-		a.closable,
-		a.default_open AS defaultOpen,
-		a.new_open AS newOpen,
+		a.is_auto AS isAuto,
+		a.open_mode openMode ,
 		
 		b.id AS childId,
 		b.name AS childName,
-		b.class_path AS childClassPath,
+		b.icon AS childIcon,
 		b.parent_id AS childParentId,
 		b.url AS childUrl,
 		b.sort AS childSort,
-		b.isActive AS childIsActive,
+		b.is_active AS childIsActive,
 		d.role_name AS childRoleName,
 		b.description AS childDescription,
 		b.module AS childModule,
-		b.closable AS childClosable,
-		b.default_open AS childDefaultOpen,
-		b.new_open AS childNewOpen
+		b.open_mode AS childOpenMode,
+		b.is_auto AS childIsAuto
 		
 		
 		FROM menu a
@@ -73,7 +69,7 @@
 		LEFT JOIN menu_role c ON a.id = c.menu_id
 		LEFT JOIN menu_role d ON b.id = d.menu_id
 
-		WHERE a.isActive = 1
+		WHERE a.is_active = 1
 		<choose>
 			<when test="parentId !=null">
 				AND a.parent_id = #{parentId}
@@ -108,28 +104,26 @@
 		NAME,
 		parent_id,
 		url,
-		class_path,
+		icon,
 		sort,
-		isActive,
+		is_active,
 		description,
 		module,
-		closable,
-		default_open,
-		new_open
+		is_auto,
+		open_mode
 		)
 		VALUES
 		(
 		#{name},
 		#{parentId},
 		#{url},
-		#{classPath},
+		#{icon},
 		#{sort},
 		#{isActive},
 		#{description},
 		#{module},
-		#{closable},
-		#{defaultOpen},
-		#{newOpen}
+		#{isAuto},
+		#{openMode}
 		)
 	</insert>
 	
@@ -150,14 +144,12 @@
 		NAME = #{name},
 		parent_id = #{parentId},
 		url = #{url},
-		class_path = #{classPath},
-		isActive = #{isActive},
+		icon = #{icon},
+		is_active = #{isActive},
 		description = #{description},
-		module
-		= #{module},
-		closable = #{closable},
-		default_open = #{defaultOpen},
-		new_open = #{newOpen}
+		module = #{module},
+		is_auto = #{isAuto},
+		open_mode = #{openMode}
 		WHERE id = #{id}
 	</update>
 	
