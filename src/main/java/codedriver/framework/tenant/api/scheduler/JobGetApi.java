@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -20,16 +21,17 @@ import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Service
 @Transactional
-public class GetJobByIdApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobGetApi extends ApiComponentBase {
 
-	Logger logger = LoggerFactory.getLogger(GetJobByIdApi.class);
+	Logger logger = LoggerFactory.getLogger(JobGetApi.class);
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
 	
 	@Override
 	public String getToken() {
-		return "getJobByIdApi";
+		return "job/get";
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -16,16 +17,17 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
-public class SavaJobClassApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobClassSaveApi extends ApiComponentBase {
 	
-	Logger logger = LoggerFactory.getLogger(GetJobByIdApi.class);
+	Logger logger = LoggerFactory.getLogger(JobClassSaveApi.class);
 	
 	@Autowired
 	private SchedulerService schedulerService;
 	
 	@Override
 	public String getToken() {
-		return "savaJobClassApi";
+		return "job/class/save";
 	}
 
 	@Override

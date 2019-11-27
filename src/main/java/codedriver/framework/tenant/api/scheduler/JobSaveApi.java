@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
@@ -33,9 +33,10 @@ import codedriver.framework.scheduler.service.SchedulerService;
 import codedriver.framework.server.dao.mapper.ServerMapper;
 import codedriver.framework.server.dto.ServerClusterVo;
 @Service
-public class SaveJobApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobSaveApi extends ApiComponentBase {
 
-	private Logger logger = LoggerFactory.getLogger(SaveJobApi.class);
+	private Logger logger = LoggerFactory.getLogger(JobSaveApi.class);
 	@Autowired
 	private SchedulerService schedulerService;
 	@Autowired 
@@ -45,7 +46,7 @@ public class SaveJobApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "saveJobApi";
+		return "job/save";
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -18,14 +19,15 @@ import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
-public class SearchJobAuditListApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobAuditSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private SchedulerService schedulerService;
 	
 	@Override
 	public String getToken() {
-		return "searchJobAuditListApi";
+		return "job/audit/search";
 	}
 
 	@Override

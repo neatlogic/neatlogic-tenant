@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -17,14 +18,15 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
-public class SearchJobClassListApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobClassSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private SchedulerService schedulerService;
 	
 	@Override
 	public String getToken() {
-		return "searchJobClassListApi";
+		return "job/class/search";
 	}
 
 	@Override

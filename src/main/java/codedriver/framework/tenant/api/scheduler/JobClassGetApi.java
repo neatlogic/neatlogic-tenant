@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -25,16 +26,17 @@ import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Service
-public class GetJobClassByClasspathApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobClassGetApi extends ApiComponentBase {
 	
-	Logger logger = LoggerFactory.getLogger(GetJobClassByClasspathApi.class);
+	Logger logger = LoggerFactory.getLogger(JobClassGetApi.class);
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
 	
 	@Override
 	public String getToken() {
-		return "getJobClassByClasspathApi";
+		return "job/class/get";
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.AuthAction;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -20,9 +21,10 @@ import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
-public class DeleteJobByIdApi extends ApiComponentBase {
+@AuthAction(name="SYSTEM_JOB_EDIT")
+public class JobDeleteApi extends ApiComponentBase {
 
-	private Logger logger = LoggerFactory.getLogger(DeleteJobByIdApi.class);
+	private Logger logger = LoggerFactory.getLogger(JobDeleteApi.class);
 	
 	@Autowired
 	private SchedulerService schedulerService;
@@ -32,7 +34,7 @@ public class DeleteJobByIdApi extends ApiComponentBase {
 	
 	@Override
 	public String getToken() {
-		return "deleteJobByIdApi";
+		return "job/delete";
 	}
 
 	@Override
