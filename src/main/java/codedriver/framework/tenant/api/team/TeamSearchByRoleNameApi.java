@@ -39,9 +39,9 @@ public class TeamSearchByRoleNameApi extends ApiComponentBase{
 	}
 
 	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="ture"),
-			@Param(name = "parentId", type = "Long", desc = "父组Id",isRequired="false")})
+			@Param(name = "parentId", type = "String", desc = "父组Id",isRequired="false")})
 	@Output({@Param(name = "id", type = "String", desc = "组uuid"),
-		@Param(name = "pId", type = "Long", desc = "父组Id"),
+		@Param(name = "pId", type = "String", desc = "父组Id"),
 		@Param(name = "name", type = "String", desc = "组名"),
 		@Param(name = "open", type = "boolean", desc = "是否打开"),
 		@Param(name = "isParent", type = "boolean", desc = "是否是父级"),
@@ -52,7 +52,7 @@ public class TeamSearchByRoleNameApi extends ApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = new TeamVo();
 		teamVo.setRoleName(jsonObj.getString("roleName"));
-		teamVo.setParentId(jsonObj.getLong("parentId"));
+		teamVo.setParentId(jsonObj.getString("parentId"));
 		List<TeamVo> teamList = teamService.selectRoleTeamList(teamVo);
 		JSONArray jsonList = new JSONArray();
 		for (TeamVo team : teamList) {
