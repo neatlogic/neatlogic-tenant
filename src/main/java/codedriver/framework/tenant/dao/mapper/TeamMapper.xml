@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
 
-	<select id="selectRoleTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+	<select id="selectTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
 		t.uuid AS uuid,
 		t.name,
@@ -20,29 +20,6 @@
 		1=1
 		<if test="roleName != null and  roleName!='' ">
 			 AND tr.role_name = #{roleName}
-		</if>
-		<if test='parentId != null'>
-			AND t.parent_id = #{parentId}
-		</if>
-		ORDER BY lft ASC
-	</select>
-	
-	<select id="selectTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
-		SELECT distinct
-		t.uuid,
-		t.name,
-		t.description ,
-		t.time_id as timeId,
-		t.parent_id as parentId,
-		(SELECT COUNT(1) FROM team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
-		t.lft,
-		t.rht
-		FROM
-		team t
-		WHERE
-		1=1
-		<if test="uuid != null">
-			AND t.uuid = #{uuid}
 		</if>
 		<if test='parentId != null'>
 			AND t.parent_id = #{parentId}

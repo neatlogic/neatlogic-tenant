@@ -15,12 +15,7 @@ import codedriver.framework.tenant.dao.mapper.TeamMapper;
 public class TeamServiceImpl implements TeamService{
 
 	@Autowired
-	TeamMapper teamMapper;
-	
-	@Override
-	public List<TeamVo> selectRoleTeamList(TeamVo teamVo) {
-		return teamMapper.selectRoleTeamList(teamVo);
-	}
+	TeamMapper teamMapper;	
 
 	@Override
 	public List<TeamVo> selectTeamList(TeamVo teamVo) {

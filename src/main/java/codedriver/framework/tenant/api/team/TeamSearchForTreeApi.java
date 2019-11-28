@@ -18,19 +18,19 @@ import codedriver.framework.tenant.service.TeamService;
 
 @AuthAction(name="SYSTEM_TEAM_EDIT")
 @Service
-public class TeamSearchByRoleNameApi extends ApiComponentBase{
+public class TeamSearchForTreeApi extends ApiComponentBase{
 
 	@Autowired
 	private TeamService teamService;
 	
 	@Override
 	public String getToken() {
-		return "team/search/role";
+		return "team/tree/search";
 	}
 
 	@Override
 	public String getName() {
-		return "根据角色查询组";
+		return "查询组接口";
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class TeamSearchByRoleNameApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="ture"),
+	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="false"),
 			@Param(name = "parentId", type = "String", desc = "父组Id",isRequired="false")})
 	@Output({@Param(name = "id", type = "String", desc = "组uuid"),
 		@Param(name = "pId", type = "String", desc = "父组Id"),
@@ -47,13 +47,13 @@ public class TeamSearchByRoleNameApi extends ApiComponentBase{
 		@Param(name = "isParent", type = "boolean", desc = "是否是父级"),
 		@Param(name = "lft", type = "int", desc = "左编码"),
 		@Param(name = "rht", type = "int", desc = "右编码")})
-	@Description(desc = "根据角色查询组")
+	@Description(desc = "查询组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = new TeamVo();
 		teamVo.setRoleName(jsonObj.getString("roleName"));
 		teamVo.setParentId(jsonObj.getString("parentId"));
-		List<TeamVo> teamList = teamService.selectRoleTeamList(teamVo);
+		List<TeamVo> teamList = teamService.selectTeamList(teamVo);
 		JSONArray jsonList = new JSONArray();
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();

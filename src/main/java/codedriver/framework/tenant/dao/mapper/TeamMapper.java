@@ -7,8 +7,6 @@ import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.dto.TeamVo;
 
 public interface TeamMapper {
-
-	public List<TeamVo> selectRoleTeamList(TeamVo teamVo);
 	
 	public List<TeamVo> selectTeamList(TeamVo teamVo);
 	

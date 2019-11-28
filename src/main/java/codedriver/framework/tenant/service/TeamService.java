@@ -6,7 +6,6 @@ import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
 	
-	public List<TeamVo> selectRoleTeamList(TeamVo teamVo);
 	public List<TeamVo> selectTeamList(TeamVo teamVo);
 	
 	public int updateTeamRole(List<TeamVo> teamList, String roleName);
