@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
@@ -36,10 +37,10 @@ public class RoleSaveApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称", isRequired="ture"),
-		@Param(name = "description", type = "String", desc = "角色描述", isRequired="ture")})
-	@Output({@Param(name = "Status", type = "String", desc = "保存状态"),
-		@Param(name = "name", type = "String", desc = "角色名称")})
+	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "角色名称", isRequired=true),
+		@Param(name = "description", type = ApiParamType.STRING, desc = "角色描述", isRequired=true)})
+	@Output({@Param(name = "Status", type = ApiParamType.STRING, desc = "保存状态"),
+		@Param(name = "name", type = ApiParamType.STRING, desc = "角色名称")})
 	@Description(desc = "角色保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

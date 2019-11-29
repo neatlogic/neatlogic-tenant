@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -35,9 +36,9 @@ public class RoleDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = "String", desc = "角色名称",isRequired="ture")})
-	@Output({@Param(name = "Status", type = "String", desc = "删除状态"),
-		@Param(name = "name", type = "String", desc = "角色名称")})
+	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "角色名称",isRequired=true)})
+	@Output({@Param(name = "Status", type = ApiParamType.STRING, desc = "删除状态"),
+		@Param(name = "name", type = ApiParamType.STRING, desc = "角色名称")})
 	@Description(desc = "角色删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
