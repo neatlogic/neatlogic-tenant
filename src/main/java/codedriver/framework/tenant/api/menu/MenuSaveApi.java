@@ -9,6 +9,10 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.MenuExceptionMessage;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.type.ApiRuntimeException;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -58,11 +62,15 @@ public class MenuSaveApi extends ApiComponentBase{
 	@Description(desc = "保存菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject jsonObject = new JSONObject();
-		MenuVo menuVo = new MenuVo();
-		menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>(){});
-		menuService.saveMenu(menuVo);
-		jsonObject.put("id", menuVo.getId());
-		return jsonObject;
+		try {
+			JSONObject jsonObject = new JSONObject();
+			MenuVo menuVo = new MenuVo();
+			menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>(){});
+			menuService.saveMenu(menuVo);
+			jsonObject.put("id", menuVo.getId());
+			return jsonObject;
+		}catch(Exception ex) {
+			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage("保存菜单异常"))));
+		}
 	}
 }
