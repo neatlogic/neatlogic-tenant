@@ -7,6 +7,10 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.MenuExceptionMessage;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.type.ApiRuntimeException;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -45,7 +49,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 		JSONObject jsonObject = new JSONObject();
 		int count = this.menuService.checkIsChildern(menuId);
 		if (count > 0) {
-			throw new RuntimeException("当前菜单含有" + count + "个子菜单，请先移除。");
+			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage("当前菜单含有" + count + "个子菜单，请先移除。"))));
 		} else {
 			this.menuService.deleteMenu(menuId);
 		}
