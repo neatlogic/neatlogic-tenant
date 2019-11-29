@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.param.AuthParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -35,7 +36,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "id", type = "int", desc = "菜单id") })
+	@Input({ @Param(name = "id", type = AuthParamType.LONG, desc = "菜单id",isRequired = true) })
 	@Output({})
 	@Description(desc = "删除菜单接口")
 	@Override
