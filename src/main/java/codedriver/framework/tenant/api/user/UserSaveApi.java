@@ -51,7 +51,7 @@ public class UserSaveApi extends ApiComponentBase{
 		@Param(name = "company", type = ApiParamType.STRING, desc = "公司",isRequired=false),
 		@Param(name = "dept", type = ApiParamType.STRING, desc = "部门",isRequired=false),
 		@Param(name = "position", type = ApiParamType.STRING, desc = "职位",isRequired=false),
-		@Param(name = "is_active", type = ApiParamType.LONG, desc = "是否激活",isRequired=false),
+		@Param(name = "is_active", type = ApiParamType.INTEGER, desc = "是否激活",isRequired=false),
 		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "组织id,如有多个,逗号隔开",isRequired=false),
 		@Param(name = "roleList", type = ApiParamType.JSONARRAY, desc = "角色名称,如有多个,逗号隔开",isRequired=true)})
 	@Output({ @Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),

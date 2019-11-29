@@ -46,9 +46,9 @@ public class UserGetApi extends ApiComponentBase{
 		@Param(name = "company", type = ApiParamType.STRING, desc = "公司"),
 		@Param(name = "dept", type = ApiParamType.STRING, desc = "部门"),
 		@Param(name = "position", type = ApiParamType.STRING, desc = "职位"),
-		@Param(name = "isActive", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "roleVoList", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "isActive", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "roleVoList", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
 		@Param(name = "roleVoList", type = ApiParamType.JSONARRAY, desc = "用户角色信息"),
 		@Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "用户所在组信息")
 		})

@@ -41,12 +41,12 @@ public class UserSearchApi extends ApiComponentBase{
 	
 	
 	@Input({ @Param(name = "userName", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询",isRequired=false),
-		@Param(name = "currentPage", type = ApiParamType.LONG, desc = "当前页数",isRequired=false),
-		@Param(name = "pageSize", type = ApiParamType.LONG, desc = "每页展示数量 默认10",isRequired=true)})
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数",isRequired=false),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10",isRequired=true)})
 	@Output({ @Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户信息list"),
-		@Param(name = "pageCount", type = ApiParamType.LONG, desc = "总页数"),
-		@Param(name = "currentPage", type = ApiParamType.LONG, desc = "当前页数"),
-		@Param(name = "pageSize", type = ApiParamType.LONG, desc = "每页展示数量"),
+		@Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量"),
 		@Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id"),
 		@Param(name = "userName", type = ApiParamType.STRING, desc = "用户名"),
 		@Param(name = "email", type = ApiParamType.STRING, desc = "邮箱"),
