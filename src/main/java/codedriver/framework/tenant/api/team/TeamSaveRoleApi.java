@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
@@ -40,8 +41,8 @@ public class TeamSaveRoleApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="ture"),
-			@Param(name = "nodeJson", type = "String", desc = "角色和组信息",isRequired="ture"),})
+	@Input({ @Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名称",isRequired=true),
+			@Param(name = "nodeJson", type = ApiParamType.STRING, desc = "角色和组信息",isRequired=true),})
 	@Output({})
 	@Example(example="{\r\n" + 
 			"	\"nodeJson\":\"[{'uuid':130,'roleName':'R_TEST'},{'uuid':140,'roleName':'R_TEST'},{'uuid':150,'roleName':'R_TEST'}]\",\r\n" + 

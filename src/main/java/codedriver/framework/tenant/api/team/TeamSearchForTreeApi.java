@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
@@ -38,15 +39,15 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "roleName", type = "String", desc = "角色名称",isRequired="false"),
-			@Param(name = "parentId", type = "String", desc = "父组Id",isRequired="false")})
-	@Output({@Param(name = "id", type = "String", desc = "组uuid"),
-		@Param(name = "pId", type = "String", desc = "父组Id"),
-		@Param(name = "name", type = "String", desc = "组名"),
-		@Param(name = "open", type = "boolean", desc = "是否打开"),
-		@Param(name = "isParent", type = "boolean", desc = "是否是父级"),
-		@Param(name = "lft", type = "int", desc = "左编码"),
-		@Param(name = "rht", type = "int", desc = "右编码")})
+	@Input({ @Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名称",isRequired=false),
+			@Param(name = "parentId", type = ApiParamType.STRING, desc = "父组Id",isRequired=false)})
+	@Output({@Param(name = "id", type = ApiParamType.STRING, desc = "组uuid"),
+		@Param(name = "pId", type = ApiParamType.STRING, desc = "父组Id"),
+		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
+		@Param(name = "open", type = ApiParamType.BOOLEAN, desc = "是否打开"),
+		@Param(name = "isParent", type = ApiParamType.BOOLEAN, desc = "是否是父级"),
+		@Param(name = "lft", type = ApiParamType.INTEGER, desc = "左编码"),
+		@Param(name = "rht", type = ApiParamType.INTEGER, desc = "右编码")})
 	@Description(desc = "查询组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
