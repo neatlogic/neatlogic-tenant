@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -40,9 +41,9 @@ public class UserSearchByRoleApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="false"),
-		@Param(name = "roleName", type = "String", desc = "角色名成",isRequired="true")})
-	@Output({ @Param(name = "userList", type = "JsonArray", desc = "用户信息list")})
+	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=false),
+		@Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名成",isRequired=true)})
+	@Output({ @Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户信息list")})
 	@Description(desc = "根据角色查询用户")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

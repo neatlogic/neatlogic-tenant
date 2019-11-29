@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -39,17 +40,17 @@ public class UserSearchApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userName", type = "String", desc = "关键字(用户id或名称),模糊查询",isRequired="false"),
-		@Param(name = "currentPage", type = "int", desc = "当前页数",isRequired="false"),
-		@Param(name = "pageSize", type = "int", desc = "每页展示数量 默认10",isRequired="true")})
-	@Output({ @Param(name = "userList", type = "JsonArray", desc = "用户信息list"),
-		@Param(name = "pageCount", type = "int", desc = "总页数"),
-		@Param(name = "currentPage", type = "int", desc = "当前页数"),
-		@Param(name = "pageSize", type = "int", desc = "每页展示数量"),
-		@Param(name = "userId", type = "String", desc = "用户Id"),
-		@Param(name = "userName", type = "String", desc = "用户名"),
-		@Param(name = "email", type = "String", desc = "邮箱"),
-		@Param(name = "phone", type = "String", desc = "电话")
+	@Input({ @Param(name = "userName", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询",isRequired=false),
+		@Param(name = "currentPage", type = ApiParamType.LONG, desc = "当前页数",isRequired=false),
+		@Param(name = "pageSize", type = ApiParamType.LONG, desc = "每页展示数量 默认10",isRequired=true)})
+	@Output({ @Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户信息list"),
+		@Param(name = "pageCount", type = ApiParamType.LONG, desc = "总页数"),
+		@Param(name = "currentPage", type = ApiParamType.LONG, desc = "当前页数"),
+		@Param(name = "pageSize", type = ApiParamType.LONG, desc = "每页展示数量"),
+		@Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id"),
+		@Param(name = "userName", type = ApiParamType.STRING, desc = "用户名"),
+		@Param(name = "email", type = ApiParamType.STRING, desc = "邮箱"),
+		@Param(name = "phone", type = ApiParamType.STRING, desc = "电话")
 		})
 	@Description(desc = "查询用户接口")
 	@Override

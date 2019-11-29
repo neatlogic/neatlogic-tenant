@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -36,9 +37,9 @@ public class UserDeleteApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="true")})
-	@Output({ @Param(name = "Status", type = "String", desc = "状态"),
-			@Param(name = "userId", type = "String", desc = "删除的userId"),})
+	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=true)})
+	@Output({ @Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
+			@Param(name = "userId", type = ApiParamType.STRING, desc = "删除的userId"),})
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

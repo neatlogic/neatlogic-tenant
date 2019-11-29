@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -37,19 +38,19 @@ public class UserGetApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = "String", desc = "用户Id",isRequired="true")})
-	@Output({ @Param(name = "userId", type = "String", desc = "用户Id"),
-		@Param(name = "userName", type = "String", desc = "用户姓名"),
-		@Param(name = "email", type = "String", desc = "邮箱"),
-		@Param(name = "phone", type = "String", desc = "电话"),
-		@Param(name = "company", type = "String", desc = "公司"),
-		@Param(name = "dept", type = "String", desc = "部门"),
-		@Param(name = "position", type = "String", desc = "职位"),
-		@Param(name = "isActive", type = "int", desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "roleVoList", type = "int", desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "isActive", type = "int", desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "roleVoList", type = "JsonArray", desc = "用户角色信息"),
-		@Param(name = "teamList", type = "JsonArray", desc = "用户所在组信息")
+	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=true)})
+	@Output({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id"),
+		@Param(name = "userName", type = ApiParamType.STRING, desc = "用户姓名"),
+		@Param(name = "email", type = ApiParamType.STRING, desc = "邮箱"),
+		@Param(name = "phone", type = ApiParamType.STRING, desc = "电话"),
+		@Param(name = "company", type = ApiParamType.STRING, desc = "公司"),
+		@Param(name = "dept", type = ApiParamType.STRING, desc = "部门"),
+		@Param(name = "position", type = ApiParamType.STRING, desc = "职位"),
+		@Param(name = "isActive", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "roleVoList", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "isActive", type = ApiParamType.LONG, desc = "是否激活(1:激活;0:未激活)"),
+		@Param(name = "roleVoList", type = ApiParamType.JSONARRAY, desc = "用户角色信息"),
+		@Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "用户所在组信息")
 		})
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
