@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -41,24 +42,24 @@ public class JobAuditSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name="currentPage",type="Integer",isRequired="false",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="false",desc="页大小"),
-		@Param(name="jobId",type="Long",isRequired="true",desc="定时作业id")
+		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=false,desc="当前页码"),
+		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=false,desc="页大小"),
+		@Param(name="jobId",type=ApiParamType.LONG,isRequired=true,desc="定时作业id")
 		})
 	@Description(desc="查询定时作业执行记录列表")
 	@Example(example="{\"jobId\":1}")
 	@Output({
-		@Param(name="currentPage",type="Integer",isRequired="true",desc="当前页码"),
-		@Param(name="pageSize",type="Integer",isRequired="true",desc="页大小"),
-		@Param(name="pageCount",type="Integer",isRequired="true",desc="总页数"),
-		@Param(name="rowNum",type="Integer",isRequired="true",desc="总行数"),
-		@Param(name="jobAuditList",type="Array",isRequired="true",desc="执行记录列表"),
-		@Param(name="jobAuditList[0].id",type="Long",isRequired="true",desc="记录id"),
-		@Param(name="jobAuditList[0].jobUuid",type="String",isRequired="true",desc="定时作业uuid"),
-		@Param(name="jobAuditList[0].startTime",type="Long",isRequired="true",desc="开始时间"),
-		@Param(name="jobAuditList[0].endTime",type="Long",isRequired="true",desc="结束时间"),
-		@Param(name="jobAuditList[0].state",type="String",isRequired="true",desc="执行状态(success:成功；error异常；processing:进行中)"),
-		@Param(name="jobAuditList[0].isLogEmpty",type="Integer",isRequired="true",desc="日志是否为空")
+		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
+		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
+		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
+		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
+		@Param(name="jobAuditList",type=ApiParamType.JSONARRAY,isRequired=true,desc="执行记录列表"),
+		@Param(name="jobAuditList[0].id",type=ApiParamType.LONG,isRequired=true,desc="记录id"),
+		@Param(name="jobAuditList[0].jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid"),
+		@Param(name="jobAuditList[0].startTime",type=ApiParamType.LONG,isRequired=true,desc="开始时间"),
+		@Param(name="jobAuditList[0].endTime",type=ApiParamType.LONG,isRequired=true,desc="结束时间"),
+		@Param(name="jobAuditList[0].state",type=ApiParamType.STRING,isRequired=true,desc="执行状态(success:成功；error异常；processing:进行中)"),
+		@Param(name="jobAuditList[0].isLogEmpty",type=ApiParamType.INTEGER,isRequired=true,desc="日志是否为空")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

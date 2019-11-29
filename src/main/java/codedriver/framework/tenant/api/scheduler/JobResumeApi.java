@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
-import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -45,9 +45,9 @@ public class JobResumeApi extends ApiComponentBase {
 		return null;
 	}
 	
-	@Input({@Param(name="jobId",type="Long",isRequired="true",desc="定时作业id")})
+	@Input({@Param(name="jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业id")})
 	@Description(desc="恢复定时作业")
-	@Example(example="{\"jobId\":1}")
+	@Example(example="{\"jobUuid\":1}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {		
 		String jobUuid = jsonObj.getString("jobUuid");
@@ -55,7 +55,7 @@ public class JobResumeApi extends ApiComponentBase {
 		if(job == null) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
 			logger.error(message.toString());
-			throw new ApiRuntimeException(message);
+			throw new RuntimeException(message.toString());
 		}
 		JobObject jobObject = JobObject.buildJobObject(job, JobObject.FRAMEWORK);
 		schedulerManager.loadJob(jobObject);

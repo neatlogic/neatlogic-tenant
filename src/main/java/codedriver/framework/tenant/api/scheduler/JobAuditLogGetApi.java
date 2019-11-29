@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
-import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -43,10 +43,10 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-	@Input({@Param(name="auditId",type="Long",isRequired="true",desc="定时作业执行记录id")})
+	@Input({@Param(name="auditId",type=ApiParamType.LONG,isRequired=true,desc="定时作业执行记录id")})
 	@Description(desc="获取定时作业执行记录日志")
 	@Example(example="{\"auditId\":1}")
-	@Output({@Param(name="logContent",type="String",isRequired="true",desc="日志内容")})
+	@Output({@Param(name="logContent",type=ApiParamType.STRING,isRequired=true,desc="日志内容")})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long auditId = jsonObj.getLong("auditId");
@@ -54,7 +54,7 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 		if(jobAudit == null) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业执行记录：" + auditId + "不存在");
 			logger.error(message.toString());
-			throw new ApiRuntimeException(message);
+			throw new RuntimeException(message.toString());
 		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("logContent", jobAudit.getLogContent());

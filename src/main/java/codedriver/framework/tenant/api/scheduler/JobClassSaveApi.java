@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
@@ -41,10 +42,10 @@ public class JobClassSaveApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name="name",type="String",isRequired="true",desc="定时作业组件名称"),
-		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件classpath"),
-		@Param(name="moduleName",type="String",isRequired="true",desc="定时作业组件所属模块名"),
-		@Param(name="type",type="String",isRequired="true",desc="定时作业组件级别类型")
+		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件名称"),
+		@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件classpath"),
+		@Param(name="moduleName",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块名"),
+		@Param(name="type",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件级别类型")
 		})
 	@Description(desc="保存定时作业组件信息")
 	@Example(example="{name:\"测试_1\", classpath:\"codedriver.framework.scheduler.core.TestJob\", moduleName:\"framework\", type:\"task\"}")

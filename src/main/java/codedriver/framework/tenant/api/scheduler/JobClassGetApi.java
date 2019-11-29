@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.api.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
-import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -49,19 +49,19 @@ public class JobClassGetApi extends ApiComponentBase {
 		return null;
 	}
 	
-	@Input({@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件classpath")})
+	@Input({@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件classpath")})
 	@Description(desc="获取定时作业组件信息")
 	@Example(example="{\"classpath\":\"codedriver.framework.scheduler.core.TestJob\"}")
 	@Output({
-		@Param(name="name",type="String",isRequired="true",desc="定时作业组件名称"),
-		@Param(name="classpath",type="String",isRequired="true",desc="定时作业组件classpath"),
-		@Param(name="moduleName",type="String",isRequired="true",desc="定时作业组件所属模块名"),
-		@Param(name="type",type="String",isRequired="true",desc="定时作业组件级别类型"),
-		@Param(name="inputList",type="Array",isRequired="true",desc="属性列表"),
-		@Param(name="inputList[0].name",type="String",isRequired="true",desc="属性名称"),
-		@Param(name="inputList[0].dataType",type="String",isRequired="true",desc="属性数据类型"),
-		@Param(name="inputList[0].description",type="String",isRequired="true",desc="属性说明"),
-		@Param(name="inputList[0].required",type="Boolean",isRequired="true",desc="属性是否必填")		
+		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件名称"),
+		@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件classpath"),
+		@Param(name="moduleName",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块名"),
+		@Param(name="type",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件级别类型"),
+		@Param(name="inputList",type=ApiParamType.JSONARRAY,isRequired=true,desc="属性列表"),
+		@Param(name="inputList[0].name",type=ApiParamType.STRING,isRequired=true,desc="属性名称"),
+		@Param(name="inputList[0].dataType",type=ApiParamType.STRING,isRequired=true,desc="属性数据类型"),
+		@Param(name="inputList[0].description",type=ApiParamType.STRING,isRequired=true,desc="属性说明"),
+		@Param(name="inputList[0].required",type=ApiParamType.BOOLEAN,isRequired=true,desc="属性是否必填")		
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -73,7 +73,7 @@ public class JobClassGetApi extends ApiComponentBase {
 		if(jobClass == null) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业组件："+ classpath + " 不存在");
 			logger.error(message.toString());
-			throw new ApiRuntimeException(message);
+			throw new RuntimeException(message.toString());
 		}
 		JSONArray inputList = new JSONArray();
 		IJob job = SchedulerManager.getInstance(jobClass.getClasspath());
