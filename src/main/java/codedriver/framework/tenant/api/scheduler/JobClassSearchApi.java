@@ -83,10 +83,7 @@ public class JobClassSearchApi extends ApiComponentBase {
 			Integer pageSize = jsonObj.getInteger("pageSize");
 			jobClassVo.setPageSize(pageSize);
 		}
-		TenantContext tenant = TenantContext.get();
-		tenant.setUseDefaultDatasource(true);
-		String tenantUuid = tenant.getTenantUuid();
-		System.out.println(tenantUuid);
+		TenantContext.get().setUseDefaultDatasource(true);
 		List<JobClassVo> jobClassList = schedulerService.searchJobClassList(jobClassVo);
 		
 		JSONObject resultObj = new JSONObject();

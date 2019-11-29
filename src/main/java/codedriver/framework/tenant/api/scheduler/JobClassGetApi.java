@@ -68,8 +68,7 @@ public class JobClassGetApi extends ApiComponentBase {
 		String classpath = jsonObj.getString("classpath");
 		JobClassVo jobClassVo = new JobClassVo();
 		jobClassVo.setClasspath(classpath);
-		TenantContext tenant = TenantContext.get();
-		tenant.setUseDefaultDatasource(true);
+		TenantContext.get().setUseDefaultDatasource(true);
 		JobClassVo jobClass = schedulerMapper.getJobClassByClasspath(jobClassVo);
 		if(jobClass == null) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业组件："+ classpath + " 不存在");

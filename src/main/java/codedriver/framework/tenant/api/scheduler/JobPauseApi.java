@@ -15,10 +15,11 @@ import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
-import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @Transactional
 @AuthAction(name="SYSTEM_JOB_EDIT")
@@ -27,7 +28,7 @@ public class JobPauseApi extends ApiComponentBase {
 	Logger logger = LoggerFactory.getLogger(JobPauseApi.class);
 	
 	@Autowired
-	private SchedulerService schedulerService;
+	private SchedulerManager schedulerManager;
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -58,8 +59,8 @@ public class JobPauseApi extends ApiComponentBase {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
-		}		
-		schedulerService.stopJob(jobUuid);			
+		}
+		schedulerManager.deleteJob(jobUuid);			
 		return "OK";
 	}
 

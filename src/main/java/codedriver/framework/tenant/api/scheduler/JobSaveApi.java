@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
-import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.ApiRuntimeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -24,14 +22,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.dto.ServerNewJobVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 import codedriver.framework.scheduler.service.SchedulerService;
-import codedriver.framework.server.dao.mapper.ServerMapper;
-import codedriver.framework.server.dto.ServerClusterVo;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobSaveApi extends ApiComponentBase {
@@ -39,11 +34,8 @@ public class JobSaveApi extends ApiComponentBase {
 	private Logger logger = LoggerFactory.getLogger(JobSaveApi.class);
 	@Autowired
 	private SchedulerService schedulerService;
-	@Autowired 
-	private ServerMapper serverMapper;
-	@Autowired 
-	private SchedulerMapper schedulerMapper;
-	
+	@Autowired
+	private SchedulerManager schedulerManager;
 	@Override
 	public String getToken() {
 		return "job/save";
@@ -110,11 +102,7 @@ public class JobSaveApi extends ApiComponentBase {
 		}
 		jobVo.setClasspath(classpath);
 		String isActive = jsonObj.getString("isActive");
-		if(JobVo.YES.equals(isActive)) {
-			jobVo.setStatus(JobVo.RUNNING);			
-		}else if(JobVo.NO.equals(isActive)) {
-			jobVo.setStatus(JobVo.NOT_LOADED);
-		}else {
+		if(!JobVo.YES.equals(isActive) && !JobVo.NO.equals(isActive)) {
 			SchedulerExceptionMessage message = new SchedulerExceptionMessage("isActive参数值必须是" + JobVo.YES + "或" + JobVo.NO + "'");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
@@ -128,45 +116,18 @@ public class JobSaveApi extends ApiComponentBase {
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
-		String triggerType = jsonObj.getString("triggerType");
-		jobVo.setTriggerType(triggerType);		
-		if(JobVo.SIMPLE_TRIGGER.equals(triggerType)) {
-			if(jsonObj.containsKey("repeat")) {
-				Integer repeat = jsonObj.getInteger("repeat");
-				jobVo.setRepeat(repeat);
-			}else {
-				SchedulerExceptionMessage message = new SchedulerExceptionMessage(JobVo.SIMPLE_TRIGGER + "类型触发器必须传repeat参数");
-				logger.error(message.toString());
-				throw new ApiRuntimeException(message);
-			}
-			if(jsonObj.containsKey("interval")) {
-				Integer interval = jsonObj.getInteger("interval");
-				jobVo.setInterval(interval);
-			}else {
-				SchedulerExceptionMessage message = new SchedulerExceptionMessage(JobVo.SIMPLE_TRIGGER + "类型触发器必须传interval参数");
-				logger.error(message.toString());
-				throw new ApiRuntimeException(message);
-			}
-		}else if(JobVo.CRON_TRIGGER.equals(triggerType)) {
-			if(jsonObj.containsKey("cron")) {
-				String cron = jsonObj.getString("cron");
-				if(CronExpression.isValidExpression(cron)) {
-					jobVo.setCron(cron);
-				}else {
-					SchedulerExceptionMessage message = new SchedulerExceptionMessage("cron表达式参数格式不正确");
-					logger.error(message.toString());
-					throw new ApiRuntimeException(message);
-				}				
-			}else {
-				SchedulerExceptionMessage message = new SchedulerExceptionMessage(JobVo.CRON_TRIGGER + "类型触发器必须传cron参数");
-				logger.error(message.toString());
-				throw new ApiRuntimeException(message);
-			}
+		
+		
+		String cron = jsonObj.getString("cron");
+		if(CronExpression.isValidExpression(cron)) {
+			jobVo.setCron(cron);
 		}else {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("触发器类型必须必须是'" + JobVo.CRON_TRIGGER + "'或'" + JobVo.SIMPLE_TRIGGER + "'");
+			SchedulerExceptionMessage message = new SchedulerExceptionMessage("cron表达式参数格式不正确");
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
-		}
+		}				
+		
+		
 		if(jsonObj.containsKey("beginTime")) {
 			Long beginTime = jsonObj.getLong("beginTime");
 			jobVo.setBeginTime(new Date(beginTime));
@@ -175,21 +136,12 @@ public class JobSaveApi extends ApiComponentBase {
 			Long endTime = jsonObj.getLong("endTime");
 			jobVo.setEndTime(new Date(endTime));
 		}
-		jobVo.setServerId(Config.SCHEDULE_SERVER_ID);
 		schedulerService.saveJob(jobVo);
-		if(JobVo.YES.equals(isActive)) {
-			TenantContext tenant = TenantContext.get();
-			String tenantUuid = tenant.getTenantUuid();
-			tenant.setUseDefaultDatasource(true);
-			List<ServerClusterVo> serverList = serverMapper.getServerByStatus(ServerClusterVo.STARTUP);
-			for(ServerClusterVo server : serverList) {
-				int serverId = server.getServerId();
-				if(Config.SCHEDULE_SERVER_ID == serverId) {
-					continue;
-				}
-				schedulerMapper.insertServerNewJob(new ServerNewJobVo(serverId, jobVo.getUuid(), tenantUuid));
-			}
-		}		
+		if(JobVo.YES.equals(jobVo.getIsActive())) {
+			JobObject jobObject = JobObject.buildJobObject(jobVo, JobObject.FRAMEWORK);
+			schedulerManager.loadJob(jobObject);				
+		}
+				
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("id",jobVo.getUuid());
 		return resultObj;

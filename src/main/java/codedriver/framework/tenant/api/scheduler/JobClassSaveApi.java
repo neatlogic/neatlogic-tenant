@@ -59,8 +59,7 @@ public class JobClassSaveApi extends ApiComponentBase {
 		jobClassVo.setType(type);
 		jobClassVo.setClasspath(classpath);
 		jobClassVo.setModuleName(moduleName);
-		TenantContext tenant = TenantContext.get();
-		tenant.setUseDefaultDatasource(true);
+		TenantContext.get().setUseDefaultDatasource(true);
 		schedulerService.saveJobClass(jobClassVo);
 		return "OK";
 	}
