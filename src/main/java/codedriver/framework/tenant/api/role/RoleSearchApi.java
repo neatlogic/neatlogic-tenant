@@ -43,7 +43,7 @@ public class RoleSearchApi extends ApiComponentBase{
 	@Input({ @Param(name = "keyName", type = ApiParamType.STRING, desc = "关键字,根据关键字查找",isRequired=true),})
 	@Output({@Param(name = "name", type = ApiParamType.STRING, desc = "角色名称"),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "角色描述"),
-		@Param(name = "userCount", type = ApiParamType.LONG, desc = "用户数量")
+		@Param(name = "userCount", type = ApiParamType.INTEGER, desc = "用户数量")
 		})
 	@Description(desc = "角色查询接口")
 	@Override
