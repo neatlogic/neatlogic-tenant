@@ -11,9 +11,13 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.api.core.ApiParamType;
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.core.IApiExceptionMessage;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -71,9 +75,9 @@ public class JobClassGetApi extends ApiComponentBase {
 		TenantContext.get().setUseDefaultDatasource(true);
 		JobClassVo jobClass = schedulerMapper.getJobClassByClasspath(jobClassVo);
 		if(jobClass == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业组件："+ classpath + " 不存在");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		JSONArray inputList = new JSONArray();
 		IJob job = SchedulerManager.getInstance(jobClass.getClasspath());

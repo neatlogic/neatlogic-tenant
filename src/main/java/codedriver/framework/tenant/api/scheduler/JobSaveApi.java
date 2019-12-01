@@ -10,11 +10,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
-import codedriver.framework.api.core.ApiParamType;
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.core.IApiExceptionMessage;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -97,25 +103,25 @@ public class JobSaveApi extends ApiComponentBase {
 				jobVo.setPropList(propList);
 			}
 		}else {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业组件："+ classpath + " 不存在");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		jobVo.setClasspath(classpath);
 		String isActive = jsonObj.getString("isActive");
 		if(!JobVo.YES.equals(isActive) && !JobVo.NO.equals(isActive)) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("isActive参数值必须是" + JobVo.YES + "或" + JobVo.NO + "'");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("isActive参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		jobVo.setIsActive(isActive);
 		String needAudit = jsonObj.getString("needAudit");
 		if(JobVo.YES.equals(needAudit) || JobVo.NO.equals(needAudit)) {
 			jobVo.setNeedAudit(needAudit);
 		}else {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		
 		
@@ -123,7 +129,7 @@ public class JobSaveApi extends ApiComponentBase {
 		if(CronExpression.isValidExpression(cron)) {
 			jobVo.setCron(cron);
 		}else {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("cron表达式参数格式不正确");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("cron表达式参数格式不正确")));
 			logger.error(message.toString());
 			throw new RuntimeException(message.toString());
 		}				
@@ -137,6 +143,8 @@ public class JobSaveApi extends ApiComponentBase {
 			Long endTime = jsonObj.getLong("endTime");
 			jobVo.setEndTime(new Date(endTime));
 		}
+		JobVo jobVo2 = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});
+		System.out.println((new Date()).getTime());
 		schedulerService.saveJob(jobVo);
 		if(JobVo.YES.equals(jobVo.getIsActive())) {
 			JobObject jobObject = JobObject.buildJobObject(jobVo, JobObject.FRAMEWORK);

@@ -8,8 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.api.core.ApiParamType;
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.core.IApiExceptionMessage;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -52,9 +56,9 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 		Long auditId = jsonObj.getLong("auditId");
 		JobAuditVo jobAudit = schedulerMapper.getJobAuditLogById(auditId);
 		if(jobAudit == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业执行记录：" + auditId + "不存在");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业执行记录：" + auditId + "不存在")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("logContent", jobAudit.getLogContent());

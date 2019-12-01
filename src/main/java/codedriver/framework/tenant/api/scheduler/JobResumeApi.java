@@ -7,8 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.api.core.ApiParamType;
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.core.IApiExceptionMessage;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -53,9 +57,9 @@ public class JobResumeApi extends ApiComponentBase {
 		String jobUuid = jsonObj.getString("jobUuid");
 		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
-			SchedulerExceptionMessage message = new SchedulerExceptionMessage("定时作业："+ jobUuid + " 不存在");
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业："+ jobUuid + " 不存在")));
 			logger.error(message.toString());
-			throw new RuntimeException(message.toString());
+			throw new ApiRuntimeException(message);
 		}
 		JobObject jobObject = JobObject.buildJobObject(job, JobObject.FRAMEWORK);
 		schedulerManager.loadJob(jobObject);
