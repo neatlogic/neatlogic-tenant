@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -69,13 +71,15 @@ public class JobClassGetApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String classpath = jsonObj.getString("classpath");
-		JobClassVo jobClassVo = new JobClassVo();
-		jobClassVo.setClasspath(classpath);
-		TenantContext.get().setUseDefaultDatasource(true);
+		JobClassVo jobClassVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobClassVo>() {});
+		TenantContext tenant = TenantContext.get();
+		tenant.setUseDefaultDatasource(false);
+		String tenantUuid = tenant.getTenantUuid();
+		jobClassVo.setTenantUuid(tenantUuid);
+		tenant.setUseDefaultDatasource(true);
 		JobClassVo jobClass = schedulerMapper.getJobClassByClasspath(jobClassVo);
 		if(jobClass == null) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ jobClassVo.getClasspath() + " 不存在")));
 			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}

@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
@@ -79,23 +81,7 @@ public class JobSearchApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JobVo jobVo = new JobVo();
-		if(jsonObj.containsKey("name")) {
-			String name = jsonObj.getString("name");
-			jobVo.setName(name);
-		}
-		if(jsonObj.containsKey("classpath")) {
-			String classpath = jsonObj.getString("classpath");
-			jobVo.setClasspath(classpath);
-		}
-		if(jsonObj.containsKey("currentPage")) {
-			Integer currentPage = jsonObj.getInteger("currentPage");
-			jobVo.setCurrentPage(currentPage);
-		}
-		if(jsonObj.containsKey("pageSize")) {
-			Integer pageSize = jsonObj.getInteger("pageSize");
-			jobVo.setPageSize(pageSize);
-		}
+		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});
 		List<JobVo> jobList = schedulerService.searchJobList(jobVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobList", jobList);

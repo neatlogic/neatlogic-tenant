@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
@@ -44,10 +46,10 @@ public class JobAuditSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=false,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=false,desc="页大小"),
-		@Param(name="jobId",type=ApiParamType.LONG,isRequired=true,desc="定时作业id")
+		@Param(name="jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")
 		})
 	@Description(desc="查询定时作业执行记录列表")
-	@Example(example="{\"jobId\":1}")
+	@Example(example="{\"jobUuid\":1}")
 	@Output({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
@@ -63,17 +65,7 @@ public class JobAuditSearchApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JobAuditVo jobAuditVo = new JobAuditVo();
-		String jobUuid = jsonObj.getString("jobUuid");
-		jobAuditVo.setJobUuid(jobUuid);
-		if(jsonObj.containsKey("currentPage")) {
-			Integer currentPage = jsonObj.getInteger("currentPage");
-			jobAuditVo.setCurrentPage(currentPage);
-		}
-		if(jsonObj.containsKey("pageSize")) {
-			Integer pageSize = jsonObj.getInteger("pageSize");
-			jobAuditVo.setPageSize(pageSize);
-		}		
+		JobAuditVo jobAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobAuditVo>() {});		
 		List<JobAuditVo> jobAuditList = schedulerService.searchJobAuditList(jobAuditVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobAuditList", jobAuditList);
