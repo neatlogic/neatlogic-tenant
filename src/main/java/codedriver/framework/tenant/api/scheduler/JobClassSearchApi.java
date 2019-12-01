@@ -57,11 +57,11 @@ public class JobClassSearchApi extends ApiComponentBase {
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
 		@Param(name="jobClassList",type=ApiParamType.JSONARRAY,isRequired=true,desc="定时作业组件列表"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件名称"),
-		@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件classpath"),
-		@Param(name="moduleName",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块名"),
-		@Param(name="moduleDesc",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块描述"),
-		@Param(name="type",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件级别类型")
+		@Param(name="jobClassList[0].name",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件名称"),
+		@Param(name="jobClassList[0].classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件classpath"),
+		@Param(name="jobClassList[0].moduleName",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块名"),
+		@Param(name="jobClassList[0].moduleDesc",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件所属模块描述"),
+		@Param(name="jobClassList[0].type",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件级别类型")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
