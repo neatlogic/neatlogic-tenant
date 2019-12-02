@@ -47,10 +47,8 @@ public class UserGetApi extends ApiComponentBase{
 		@Param(name = "dept", type = ApiParamType.STRING, desc = "部门"),
 		@Param(name = "position", type = ApiParamType.STRING, desc = "职位"),
 		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "roleVoList", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活(1:激活;0:未激活)"),
-		@Param(name = "roleVoList", type = ApiParamType.JSONARRAY, desc = "用户角色信息"),
-		@Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "用户所在组信息")
+		@Param(name = "roleVoList", type = ApiParamType.JSONARRAY, desc = "用户角色信息列表"),
+		@Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "用户所在组信息列表")
 		})
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override

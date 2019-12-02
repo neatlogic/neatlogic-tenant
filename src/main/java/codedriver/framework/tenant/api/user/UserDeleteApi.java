@@ -38,8 +38,7 @@ public class UserDeleteApi extends ApiComponentBase{
 	
 	
 	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=true)})
-	@Output({ @Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
-			@Param(name = "userId", type = ApiParamType.STRING, desc = "删除的userId"),})
+	@Output({})
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

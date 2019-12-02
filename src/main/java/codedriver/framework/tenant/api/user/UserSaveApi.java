@@ -1,6 +1,5 @@
 package codedriver.framework.tenant.api.user;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +53,7 @@ public class UserSaveApi extends ApiComponentBase{
 		@Param(name = "is_active", type = ApiParamType.INTEGER, desc = "是否激活",isRequired=false),
 		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "组织id,如有多个,逗号隔开",isRequired=false),
 		@Param(name = "roleList", type = ApiParamType.JSONARRAY, desc = "角色名称,如有多个,逗号隔开",isRequired=true)})
-	@Output({ @Param(name = "Status", type = ApiParamType.STRING, desc = "状态"),
-		@Param(name = "userId", type = ApiParamType.STRING, desc = "保存的用户Id")
-		})
+	@Output({})
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
