@@ -1,5 +1,7 @@
 package codedriver.framework.tenant.api.menu;
 
+import java.sql.SQLException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,15 +64,14 @@ public class MenuSaveApi extends ApiComponentBase{
 	@Description(desc = "保存菜单接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		try {
-			JSONObject jsonObject = new JSONObject();
-			MenuVo menuVo = new MenuVo();
-			menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>(){});
-			menuService.saveMenu(menuVo);
-			jsonObject.put("id", menuVo.getId());
-			return jsonObject;
-		}catch(Exception ex) {
-			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage("保存菜单异常"))));
+		JSONObject jsonObject = new JSONObject();
+		MenuVo menuVo = new MenuVo();
+		menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>(){});
+		if(menuVo.getId() == menuVo.getParentId()) {
+			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage(" 菜单id不合法，不能与父菜单id相同"))));
 		}
+		menuService.saveMenu(menuVo);
+		jsonObject.put("id", menuVo.getId());
+		return jsonObject;
 	}
 }
