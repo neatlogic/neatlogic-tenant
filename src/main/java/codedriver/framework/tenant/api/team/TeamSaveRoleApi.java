@@ -51,19 +51,12 @@ public class TeamSaveRoleApi extends ApiComponentBase{
 	@Description(desc = "保存组角色")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		String nodeJson = jsonObj.getString("nodeJson");
 		String roleName = jsonObj.getString("roleName");
-		try {
-			JSONArray nodeArray = JSONArray.parseArray(nodeJson);
-			List<TeamVo> list = JSONObject.parseArray(nodeArray.toJSONString(), TeamVo.class);
-			this.teamService.updateTeamRole(list, roleName);
-			json.put("Status", "OK");
-		} catch (Exception e) {
-			json.put("Status", "Error");
-			throw new RuntimeException(e);
-		}
-		return json;
+		JSONArray nodeArray = JSONArray.parseArray(nodeJson);
+		List<TeamVo> list = JSONObject.parseArray(nodeArray.toJSONString(), TeamVo.class);
+		this.teamService.updateTeamRole(list, roleName);
+		return null;
 	}
 }
 
