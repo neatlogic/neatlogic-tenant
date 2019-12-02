@@ -43,9 +43,6 @@ public class RoleDeleteApi extends ApiComponentBase{
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
-		if(jsonObj==null || !jsonObj.containsKey("name")) {
-			throw new RuntimeException("不存在参数name，请传入正确的name");
-		}
 		String name = jsonObj.getString("name");
 		try {
 			roleService.deleteRole(name);
