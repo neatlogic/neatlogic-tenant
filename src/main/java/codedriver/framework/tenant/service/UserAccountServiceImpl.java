@@ -52,11 +52,11 @@ public class UserAccountServiceImpl implements UserAccountService{
 		if (userAccountMapper.checkUserExists(userVo) == null) {
 			userAccountMapper.insertUser(userVo);
 			userAccountMapper.insertUserInfo(userVo);
-			//updateUserToken(userVo);不需要userToken了
 		}else {
 			userAccountMapper.updateUser(userVo);
 			userAccountMapper.updateUserInfo(userVo);
-			userAccountMapper.deleteUserRoleByUserId(userId);	
+			userAccountMapper.deleteUserRoleByUserId(userId);
+			userAccountMapper.deleteTeamUser(userId, null);
 		}
 
 			if (userVo.getRoleList() != null && userVo.getRoleList().size() > 0) {
@@ -81,7 +81,6 @@ public class UserAccountServiceImpl implements UserAccountService{
 					teamUserNewList.add(teamUserNew);
 				}
 			}
-			userAccountMapper.deleteTeamUser(userId, null);
 			for(TeamUserVo teamUserNew : teamUserNewList) {
 				teamMapper.insertUserTeam(teamUserNew);
 			}
