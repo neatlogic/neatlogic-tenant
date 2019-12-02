@@ -60,7 +60,6 @@ public class UserSaveApi extends ApiComponentBase{
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		UserVo userVo = new UserVo();	
 		userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>(){});
 		
@@ -70,17 +69,9 @@ public class UserSaveApi extends ApiComponentBase{
 		
 		//保存用户组
 		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-		userVo.setTeamUuidList(teamUuidList);
-	
-		try {
-			userService.saveUser(userVo);
-			json.put("userId", userVo.getUserId());
-			json.put("Status", "OK");
-		} catch (Exception e) {
-			json.put("Status", "ERROR");
-			json.put("Message", e.getMessage());
-		}
-		return json;
+		userVo.setTeamUuidList(teamUuidList);	
+		userService.saveUser(userVo);
+		return null;
 	}
 }
 

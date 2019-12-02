@@ -43,12 +43,9 @@ public class UserDeleteApi extends ApiComponentBase{
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		String userId = jsonObj.getString("userId");
 		userService.deleteUser(userId);
-		json.put("userId", userId);
-		json.put("Status", "OK");
-		return json;
+		return null;
 	}
 }
 
