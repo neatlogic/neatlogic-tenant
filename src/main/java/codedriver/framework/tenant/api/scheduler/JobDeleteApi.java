@@ -60,7 +60,7 @@ public class JobDeleteApi extends ApiComponentBase {
 		}
 		schedulerManager.deleteJob(jobUuid);
 		schedulerMapper.deleteJobByUuid(jobUuid);				
-		return "OK";
+		return null;
 	}
 
 }

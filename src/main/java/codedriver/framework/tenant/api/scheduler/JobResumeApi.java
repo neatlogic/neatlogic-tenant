@@ -59,7 +59,7 @@ public class JobResumeApi extends ApiComponentBase {
 		JobObject jobObject = JobObject.buildJobObject(job, JobObject.FRAMEWORK);
 		schedulerManager.loadJob(jobObject);
 		
-		return "OK";
+		return null;
 	}
 
 }

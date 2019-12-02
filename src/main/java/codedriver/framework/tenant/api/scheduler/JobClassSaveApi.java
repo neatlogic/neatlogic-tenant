@@ -60,7 +60,7 @@ public class JobClassSaveApi extends ApiComponentBase {
 		jobClassVo.setTenantUuid(tenantUuid);
 		tenant.setUseDefaultDatasource(true);
 		schedulerService.saveJobClass(jobClassVo);
-		return "OK";
+		return null;
 	}
 
 }

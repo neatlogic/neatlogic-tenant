@@ -59,7 +59,7 @@ public class JobPauseApi extends ApiComponentBase {
 			throw new ApiRuntimeException(message);
 		}
 		schedulerManager.pauseJob(jobUuid);			
-		return "OK";
+		return null;
 	}
 
 }
