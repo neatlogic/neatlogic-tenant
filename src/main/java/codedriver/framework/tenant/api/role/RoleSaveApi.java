@@ -44,18 +44,10 @@ public class RoleSaveApi extends ApiComponentBase{
 	@Description(desc = "角色保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		RoleVo roleVo = new RoleVo();
 		roleVo.setName(jsonObj.getString("name"));
 		roleVo.setDescription(jsonObj.getString("description"));
-		try {
-			roleService.saveRole(roleVo);
-			json.put("name", roleVo.getName());
-			json.put("Status", "OK");
-		} catch (Exception e) {
-			json.put("Status", "ERROR");
-			json.put("Message", e.getMessage());
-		}
-		return json;
+		roleService.saveRole(roleVo);
+		return null;
 	}
 }

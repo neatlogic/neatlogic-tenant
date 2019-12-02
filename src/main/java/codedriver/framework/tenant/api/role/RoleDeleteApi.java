@@ -37,21 +37,12 @@ public class RoleDeleteApi extends ApiComponentBase{
 	}
 
 	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "角色名称",isRequired=true)})
-	@Output({@Param(name = "Status", type = ApiParamType.STRING, desc = "删除状态"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "角色名称")})
+	@Output({})
 	@Description(desc = "角色删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		String name = jsonObj.getString("name");
-		try {
-			roleService.deleteRole(name);
-			json.put("name", name);
-			json.put("Status", "OK");
-		} catch (Exception e) {
-			json.put("Status", "ERROR");
-			json.put("Message", e.getMessage());
-		}
-		return json;
+		roleService.deleteRole(name);
+		return null;
 	}
 }
