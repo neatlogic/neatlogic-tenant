@@ -5,8 +5,12 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.auth.param.AuthParamType;
+import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.exception.MenuExceptionMessage;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
+import codedriver.framework.exception.type.CustomExceptionMessage;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -36,7 +40,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "id", type = AuthParamType.LONG, desc = "菜单id",isRequired = true) })
+	@Input({ @Param(name = "id", type = ApiParamType.LONG, desc = "菜单id",isRequired = true) })
 	@Output({})
 	@Description(desc = "删除菜单接口")
 	@Override
@@ -45,7 +49,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 		JSONObject jsonObject = new JSONObject();
 		int count = this.menuService.checkIsChildern(menuId);
 		if (count > 0) {
-			throw new RuntimeException("当前菜单含有" + count + "个子菜单，请先移除。");
+			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage("当前菜单含有" + count + "个子菜单，请先移除。"))));
 		} else {
 			this.menuService.deleteMenu(menuId);
 		}
