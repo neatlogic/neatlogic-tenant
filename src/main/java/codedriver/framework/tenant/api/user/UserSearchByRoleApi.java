@@ -42,7 +42,7 @@ public class UserSearchByRoleApi extends ApiComponentBase{
 	
 	
 	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=false),
-		@Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名成",isRequired=true)})
+		@Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名称",isRequired=true)})
 	@Output({ @Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户信息list")})
 	@Description(desc = "根据角色查询用户")
 	@Override
