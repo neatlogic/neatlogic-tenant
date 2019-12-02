@@ -41,6 +41,7 @@
 		a.name,
 		a.icon AS icon,
 		a.parent_id AS parentId,
+		e.name AS parentName,
 		a.url,
 		a.sort,
 		a.is_active as isActive,
@@ -63,6 +64,7 @@
 		b.is_auto AS childIsAuto
 		FROM menu a
 		LEFT JOIN menu b ON b.`parent_id` = a.`id`
+		LEFT JOIN menu e ON a.`parent_id` = e.`id`
 		LEFT JOIN menu_role c ON a.id = c.menu_id
 		LEFT JOIN menu_role d ON b.id = d.menu_id
 
