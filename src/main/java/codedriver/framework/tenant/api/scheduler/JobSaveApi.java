@@ -1,8 +1,6 @@
 package codedriver.framework.tenant.api.scheduler;
 
 import org.quartz.CronExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +29,6 @@ import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobSaveApi extends ApiComponentBase {
-
-	private Logger logger = LoggerFactory.getLogger(JobSaveApi.class);
 	@Autowired
 	private SchedulerService schedulerService;
 	@Autowired
@@ -77,25 +73,21 @@ public class JobSaveApi extends ApiComponentBase {
 		IJob job = SchedulerManager.getInstance(classpath);
 		if(job == null) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
 		String isActive = jsonObj.getString("isActive");
 		if(!JobVo.YES.equals(isActive) && !JobVo.NO.equals(isActive)) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("isActive参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
 		String needAudit = jsonObj.getString("needAudit");
 		if(!JobVo.YES.equals(needAudit) && !JobVo.NO.equals(needAudit)) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}	
 		String cron = jsonObj.getString("cron");
 		if(!CronExpression.isValidExpression(cron)) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("cron表达式参数格式不正确")));
-			logger.error(message.toString());
 			throw new RuntimeException(message.toString());
 		}					
 		

@@ -1,7 +1,5 @@
 package codedriver.framework.tenant.api.scheduler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +25,6 @@ import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Transactional
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobAuditLogGetApi extends ApiComponentBase {
-
-	private Logger logger = LoggerFactory.getLogger(JobAuditLogGetApi.class);
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -57,7 +53,6 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 		JobAuditVo jobAudit = schedulerMapper.getJobAuditLogById(auditId);
 		if(jobAudit == null) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业执行记录：" + auditId + "不存在")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
 		JSONObject resultObj = new JSONObject();

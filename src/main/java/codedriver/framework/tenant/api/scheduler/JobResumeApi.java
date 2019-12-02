@@ -1,7 +1,5 @@
 package codedriver.framework.tenant.api.scheduler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +24,6 @@ import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobResumeApi extends ApiComponentBase {
-
-	Logger logger = LoggerFactory.getLogger(JobResumeApi.class);
 	
 	@Autowired
 	private SchedulerManager schedulerManager;
@@ -58,7 +54,6 @@ public class JobResumeApi extends ApiComponentBase {
 		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业："+ jobUuid + " 不存在")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
 		JobObject jobObject = JobObject.buildJobObject(job, JobObject.FRAMEWORK);

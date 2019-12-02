@@ -3,8 +3,6 @@ package codedriver.framework.tenant.api.scheduler;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +32,6 @@ import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobClassGetApi extends ApiComponentBase {
-	
-	Logger logger = LoggerFactory.getLogger(JobClassGetApi.class);
 	
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -80,7 +76,6 @@ public class JobClassGetApi extends ApiComponentBase {
 		JobClassVo jobClass = schedulerMapper.getJobClassByClasspath(jobClassVo);
 		if(jobClass == null) {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ jobClassVo.getClasspath() + " 不存在")));
-			logger.error(message.toString());
 			throw new ApiRuntimeException(message);
 		}
 		JSONArray inputList = new JSONArray();
