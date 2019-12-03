@@ -14,7 +14,7 @@
 		<result column="module" property="module" />
 		<result column="openMode" property="openMode" />
 		<result column="isAuto" property="isAuto" />
-		<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+		<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
 			<id column="roleName" property="name" />
 		</collection>
 		<collection property="childMenuList" ofType="codedriver.framework.tenant.dto.MenuVo">
@@ -30,7 +30,7 @@
 			<result column="childModule" property="module" />
 			<result column="childIsAuto" property="isAuto" />
 			<result column="childOpenMode" property="openMode" />
-			<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+			<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
 				<id column="childRoleName" property="name" />
 			</collection>
 		</collection>
