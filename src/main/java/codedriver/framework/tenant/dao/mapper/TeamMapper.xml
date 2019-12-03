@@ -1,6 +1,70 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
+	<select id="selectTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+		SELECT distinct
+		t.uuid AS uuid,
+		t.name,
+		t.description ,
+		t.time_id as timeId,
+		t.parent_id as parentId,
+		(SELECT COUNT(1) FROM team WHERE lft &gt; t.lft AND rht &lt; t.rht) AS childCount,
+		tr.role_name as roleName,
+		t.lft,
+		t.rht
+		FROM
+		team t
+		LEFT JOIN team_role tr ON tr.team_uuid = t.uuid
+		WHERE
+		1=1
+		<if test="roleName != null and  roleName!='' ">
+			 AND tr.role_name = #{roleName}
+		</if>
+		<if test='parentId != null'>
+			AND t.parent_id = #{parentId}
+		</if>
+		ORDER BY lft ASC
+	</select>
+	
+	<select id="searchTeamByName" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+		SELECT t.uuid, t.name,
+		(SELECT t0.name FROM team t0 WHERE t0.id =t.parent_id) AS parentName
+		FROM team t
+		<if test="module != null">
+			JOIN team_module t1 ON t.uuid = t1.team_uuid AND t1.module = #{module}
+		</if>
+		<if test="componentId != null">
+			JOIN team_module t2 ON t.uuid = t2.team_uuid
+			JOIN workflow_component t3 ON t2.module = t3.module AND t3.id = #{componentId}
+		</if>
+		WHERE is_delete = 0
+		<if test="uuid != null">
+			AND t.uuid = #{uuid}
+		</if>
+		<if test="searchFlag == 0">
+			AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
+		</if>
+		<if test="searchFlag == 1">
+			AND (lower(t.name) = trim(lower(#{name})) or t.uuid = #{name})
+		</if>
+		ORDER BY LENGTH(t.name),t.name ASC
+		<if test="pageSize != null">
+			limit #{pageSize}
+		</if>
+	</select>
+	
+	<insert id="insertTeamRole" parameterType="codedriver.framework.dto.TeamVo">
+		insert into team_role (team_uuid , role_name)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.uuid}, #{item.roleName})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
+		delete from team_role where role_name = #{roleName}
+	</delete>
+
 	
 	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
 		SELECT
@@ -22,5 +86,6 @@
 		values(#{userId},#{teamUuid},#{type})
 	</insert>
 	
+
 	
 </mapper>
