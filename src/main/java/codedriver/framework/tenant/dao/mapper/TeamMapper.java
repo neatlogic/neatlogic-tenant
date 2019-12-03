@@ -21,6 +21,31 @@ public interface TeamMapper {
 	
 	public int insertTeamChildrenRole(@Param("parentId") Long parentId, @Param("roleName") String roleName);
 	
-	public int deleteTeamRoleByRoleName(String roleName);
+	public int deleteTeamRoleByRoleName(String roleName);	
 	
+	public TeamVo getTeamByUuid(String teamUuid);
+	
+	public TeamVo selectTeamById(String teamId);
+	
+	public List<TeamVo> getTeamListByParentId(@Param("parentId") String parentId);
+	
+	public int updateTeamRightForInsert(Integer right);
+
+	public int updateTeamLeftForInsert(Integer left);
+	
+	public int updateTeam(TeamVo teamVo);
+	
+	public int updateTeamLeftForDelete(TeamVo teamVo);
+
+	public int updateTeamRightForDelete(TeamVo teamVo);
+	
+	public int updateTeamLeftRightCode(@Param("uuid") String uuid, @Param("lft") Integer lft, @Param("rht") Integer rht);
+	
+	public int insertTeamModule(@Param("teamUuid") String teamUuid, @Param("module") String module);
+	
+	public int insertTeam(TeamVo teamVo);
+	
+	public int deleteTeamModuleByTeamId(String teamUuid);
+	
+	public int deleteTeam(String teamUuid);
 }

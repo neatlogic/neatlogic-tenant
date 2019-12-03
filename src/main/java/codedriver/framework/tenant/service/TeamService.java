@@ -9,5 +9,17 @@ public interface TeamService {
 	public List<TeamVo> selectTeamList(TeamVo teamVo);
 	
 	public int updateTeamRole(List<TeamVo> teamList, String roleName);
+		
+	public List<TeamVo> searchTeamByName(TeamVo teamVo);
+	
+	public TeamVo getTeamByUuid(String teamUuid);
+	
+	public int insertTeam(TeamVo teamVo);
+	
+	public int updateTeam(TeamVo teamVo);
+
+	public void deleteTeam(String teamUuid);
+	
+	public Integer rebuildLeftRightCode(String parentId, Integer parentLft);
 
 }

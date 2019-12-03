@@ -28,25 +28,17 @@
 	
 	<select id="searchTeamByName" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT t.uuid, t.name,
-		(SELECT t0.name FROM team t0 WHERE t0.id =t.parent_id) AS parentName
+		(SELECT t0.name FROM team t0 WHERE t0.uuid =t.parent_id) AS parentName
 		FROM team t
 		<if test="module != null">
-			JOIN team_module t1 ON t.uuid = t1.team_uuid AND t1.module = #{module}
+			JOIN team_module t1 ON t.uuid = t1.team_uuid AND t1.module_name = #{module}
 		</if>
 		<if test="componentId != null">
 			JOIN team_module t2 ON t.uuid = t2.team_uuid
-			JOIN workflow_component t3 ON t2.module = t3.module AND t3.id = #{componentId}
+			JOIN workflow_component t3 ON t2.module_name = t3.module_name AND t3.id = #{componentId}
 		</if>
 		WHERE is_delete = 0
-		<if test="uuid != null">
-			AND t.uuid = #{uuid}
-		</if>
-		<if test="searchFlag == 0">
-			AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
-		</if>
-		<if test="searchFlag == 1">
-			AND (lower(t.name) = trim(lower(#{name})) or t.uuid = #{name})
-		</if>
+		AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
 		ORDER BY LENGTH(t.name),t.name ASC
 		<if test="pageSize != null">
 			limit #{pageSize}
@@ -77,8 +69,7 @@
 		<foreach collection="teamUuidList" item="item" open="(" separator="," close=")">
 			#{item}
 		</foreach>
-	</select>
-	
+	</select>	
 
 	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamUserVo">
 		insert into
@@ -86,6 +77,95 @@
 		values(#{userId},#{teamUuid},#{type})
 	</insert>
 	
+	<select id="selectTeamById" parameterType="java.lang.String" resultType="codedriver.framework.dto.TeamVo">
+		SELECT uuid, name, lft, rht, parent_id as parentId, is_handle_childtask AS isHandleChildtask FROM
+		team WHERE uuid =
+		#{value}
+	</select>
+	
+	<select id="getTeamListByParentId" resultType="codedriver.framework.dto.TeamVo">
+		SELECT a.uuid, (select count(1) from team WHERE parent_id = a.uuid) as childCount from team a WHERE
+		<choose>
+			<when test="parentId == null">
+				a.uuid = 0
+			</when>
+			<otherwise>
+				a.parent_id = #{parentId}
+			</otherwise>
+		</choose>
+		ORDER by a.lft
+	</select>
+	
+	<resultMap type="codedriver.framework.dto.TeamVo" id="teamInfoMap">
+		<id column="uuid" property="uuid" />
+		<result column="name" property="name" />
+		<result column="description" property="description" />
+		<result column="isHandleChildtask" property="isHandleChildtask" />
+		<collection property="moduleList" ofType="java.lang.String">
+			<id column="module" />
+		</collection>
+	</resultMap>
 
+	<select id="getTeamByUuid" parameterType="java.lang.String" resultMap="teamInfoMap">
+		SELECT uuid, NAME, a.description, b.module_name AS module,is_handle_childtask as isHandleChildtask FROM team a 
+		LEFT JOIN team_module b ON a.uuid = b.team_uuid
+		WHERE
+		a.uuid = #{value}
+	</select>	
+	
+	<insert id="insertTeam" parameterType="codedriver.framework.dto.TeamVo">
+		insert into team
+		(uuid,name,description, lft, rht, parent_id,is_handle_childtask, import_id)
+		values
+		(#{uuid},#{name},#{description}, #{lft}, #{rht}, #{parentId} ,#{isHandleChildtask}, #{importId})
+	</insert>
+	
+	<insert id="insertTeamModule">
+		INSERT INTO team_module (team_uuid, module_name ) VALUES ( #{teamUuid}, #{module})
+	</insert>
+	
+	<update id="updateTeamRightForInsert" parameterType="java.lang.Integer">
+		update team set rht = rht + 2 where rht &gt;= #{value}
+	</update>
+
+	<update id="updateTeamLeftForInsert" parameterType="java.lang.Integer">
+		update team set lft = lft + 2 where lft &gt;= #{value}
+	</update>
+	
+	<update id="updateTeamLeftRightCode" parameterType="codedriver.framework.dto.TeamVo">
+		update team
+		set
+		lft = #{lft},
+		rht = #{rht}
+		where
+		uuid = #{uuid}
+	</update>
+	
+	<delete id="deleteTeamModuleByTeamId" parameterType="java.lang.String">
+		DELETE FROM team_module WHERE team_uuid = #{value}
+	</delete>
+	
+	<delete id="deleteTeam" parameterType="java.lang.String">
+		delete from team where uuid = #{value}
+	</delete>
+	
+	<update id="updateTeam" parameterType="codedriver.framework.dto.TeamVo">
+		update team
+		set
+		name = #{name},
+		description = #{description},
+		is_handle_childtask = #{isHandleChildtask}
+		where
+		uuid = #{uuid}
+	</update>
+	
+	<update id="updateTeamLeftForDelete" parameterType="codedriver.framework.dto.TeamVo">
+		UPDATE team set lft = lft - (#{rht} - #{lft} + 1) where lft &gt; #{lft}
+	</update>
+
+	<update id="updateTeamRightForDelete" parameterType="codedriver.framework.dto.TeamVo">
+		UPDATE
+		team SET rht = rht - (#{rht} - #{lft} + 1) WHERE rht &gt; #{rht}
+	</update>
 	
 </mapper>
