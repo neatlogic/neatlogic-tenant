@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tenant.dao.mapper.TeamMapper">
-
 	<select id="selectTeamList" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
 		SELECT distinct
 		t.uuid AS uuid,
@@ -25,20 +24,6 @@
 			AND t.parent_id = #{parentId}
 		</if>
 		ORDER BY lft ASC
-	</select>
-	
-	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
-		SELECT
-		ut.user_id AS userId,
-		ut.team_uuid AS teamId,
-		ut.online AS online,
-		ut.type AS type
-		FROM user_team ut
-		where ut.user_id = #{userId}
-		AND ut.team_uuid IN
-		<foreach collection="teamList" item="item" open="(" separator="," close=")">
-			#{item}
-		</foreach>
 	</select>
 	
 	<select id="searchTeamByName" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
@@ -68,12 +53,6 @@
 		</if>
 	</select>
 	
-	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamVo">
-		insert into
-		user_team(user_id,team_uuid,type)
-		values(#{userId},#{teamId},#{type})
-	</insert>
-	
 	<insert id="insertTeamRole" parameterType="codedriver.framework.dto.TeamVo">
 		insert into team_role (team_uuid , role_name)
 		values
@@ -85,5 +64,28 @@
 	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
 		delete from team_role where role_name = #{roleName}
 	</delete>
+
+	
+	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
+		SELECT
+		ut.user_id AS userId,
+		ut.team_uuid AS teamUuid,
+		ut.type AS type
+		FROM user_team ut
+		where ut.user_id = #{userId}
+		AND ut.team_uuid IN
+		<foreach collection="teamUuidList" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+
+	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamUserVo">
+		insert into
+		user_team(user_id,team_uuid,type)
+		values(#{userId},#{teamUuid},#{type})
+	</insert>
+	
+
 	
 </mapper>

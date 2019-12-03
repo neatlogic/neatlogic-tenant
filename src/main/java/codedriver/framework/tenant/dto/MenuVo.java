@@ -2,6 +2,8 @@ package codedriver.framework.tenant.dto;
 
 import java.util.List;
 
+import codedriver.framework.dto.RoleVo;
+
 public class MenuVo {
 
 	private Long id;
