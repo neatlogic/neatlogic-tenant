@@ -47,14 +47,8 @@ public class TeamRebuildApi extends ApiComponentBase{
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
-		try {
-			teamService.rebuildLeftRightCode(null, 0);
-			json.put("Status", "OK");
-		} catch (Exception ex) {
-			json.put("Status", "ERROR");
-			json.put("Message", ex.getMessage());
-		}
-		return json;
+		teamService.rebuildLeftRightCode(null, 0);
+		return null;
 	}
 }
 

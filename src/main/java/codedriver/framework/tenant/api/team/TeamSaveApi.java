@@ -55,42 +55,16 @@ public class TeamSaveApi extends ApiComponentBase{
 	@Description(desc = "保存组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {
 		});
 		// 保存组模块
-		List<String> list = JSONObject.parseArray(jsonObj.getString("moduleList"),  String.class);
+		List<String> list = JSONObject.parseArray(jsonObj.getString("moduleList"), String.class);
 		teamVo.setModuleList(list);
-//		String modules = jsonObj.getString("moduleList");
-//		if (modules != null) {
-//			List<String> moduleList = new ArrayList<String>();
-//			for (String module : modules.split(",")) {
-//				moduleList.add(module);
-//			}
-//			teamVo.setModuleList(moduleList);
-//		}
 		if (jsonObj.getString("uuid") == null) {
-			try {
-				teamService.insertTeam(teamVo);
-				json.put("Status", "OK");
-				json.put("id", teamVo.getUuid());
-				json.put("name", teamVo.getName());
-				json.put("desc", teamVo.getDescription());
-			} catch (Exception ex) {
-				json.put("Status", "ERROR");
-				json.put("Message", ex.getMessage());
-			}
+			teamService.insertTeam(teamVo);
 		} else {
-			try {
-				teamService.updateTeam(teamVo);
-				json.put("Status", "OK");
-				json.put("name", teamVo.getName());
-				json.put("desc", teamVo.getDescription());
-			} catch (Exception ex) {
-				json.put("Status", "ERROR");
-				json.put("Message", ex.getMessage());
-			}
+			teamService.updateTeam(teamVo);
 		}
-		return json;
+		return null;
 	}
 }

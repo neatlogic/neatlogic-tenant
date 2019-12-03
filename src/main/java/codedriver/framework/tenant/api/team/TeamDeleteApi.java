@@ -41,16 +41,9 @@ public class TeamDeleteApi extends ApiComponentBase{
 	@Description(desc = "删除组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
-		String teamUuid = jsonObj.getString("uuid");
-		try {			
-			teamService.deleteTeam(teamUuid);
-			json.put("Status", "OK");
-		} catch (Exception ex) {
-			json.put("Status", "ERROR");
-			json.put("Message", ex.getMessage());
-		}
-		return json;
+		String teamUuid = jsonObj.getString("uuid");		
+		teamService.deleteTeam(teamUuid);
+		return null;
 	}
 }
 
