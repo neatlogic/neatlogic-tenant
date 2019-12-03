@@ -37,7 +37,7 @@ public class TeamDeleteApi extends ApiComponentBase{
 
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=true)})
-	@Output({@Param(name = "Status", type = ApiParamType.STRING, desc = "状态")})
+	@Output({})
 	@Description(desc = "删除组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

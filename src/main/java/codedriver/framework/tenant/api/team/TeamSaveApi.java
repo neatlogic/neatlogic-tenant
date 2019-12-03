@@ -50,8 +50,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true),
 		@Param(name = "moduleList", type = ApiParamType.JSONARRAY, desc = "关联模块，多个逗号隔开",isRequired=false)
 	})
-	@Output({@Param(name = "Status", type = ApiParamType.STRING, desc = "保存状态"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "角色名称")})
+	@Output({})
 	@Description(desc = "保存组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

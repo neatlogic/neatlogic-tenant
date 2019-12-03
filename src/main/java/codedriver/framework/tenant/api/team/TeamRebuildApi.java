@@ -38,15 +38,10 @@ public class TeamRebuildApi extends ApiComponentBase{
 
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=true)})
-	@Output({@Param(name = "id", type = ApiParamType.STRING, desc = "组id"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
-		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述"),
-		@Param(name = "isHandletask", type = ApiParamType.STRING, desc = "是否允许处理下级任务"),
-		@Param(name = "moduleList", type = ApiParamType.STRING, desc = "关联模块")})
+	@Output({})
 	@Description(desc = "获取组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
 		teamService.rebuildLeftRightCode(null, 0);
 		return null;
 	}

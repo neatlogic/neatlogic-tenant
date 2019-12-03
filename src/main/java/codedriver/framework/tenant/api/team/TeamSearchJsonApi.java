@@ -47,7 +47,6 @@ public class TeamSearchJsonApi extends ApiComponentBase{
 		@Param(name = "module", type = ApiParamType.STRING, desc = "模块名",isRequired=false),
 		@Param(name = "componentId", type = ApiParamType.LONG, desc = "组件Id",isRequired=false)})
 	@Output({@Param(name = "value", type = ApiParamType.STRING, desc = "组Id"),
-		@Param(name = "value", type = ApiParamType.STRING, desc = "组Id"),
 		@Param(name = "text", type = ApiParamType.STRING, desc = "显示名")})
 	@Description(desc = "根据条件查询组(组名模糊查询,根据模块查询,根据组件查询),返回{text,value}格式")
 	@Override
