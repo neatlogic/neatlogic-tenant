@@ -1,9 +1,7 @@
 package codedriver.framework.tenant.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,15 +24,13 @@ public class UserAccountServiceImpl implements UserAccountService{
 	TeamMapper teamMapper;
 
 	@Override
-	public Map<String, Object> getUserList(UserVo userVo) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	public List<UserVo> getUserList(UserVo userVo) {
 		List<UserVo> userList = userAccountMapper.getUserList(userVo);
 		int rownum = userAccountMapper.getUserListCount(userVo);
+		userVo.setRowNum(rownum);
 		int pageCount = PageUtil.getPageCount(rownum, userVo.getPageSize());
-		resultMap.put("totalCount", rownum);
-		resultMap.put("pageCount", pageCount);
-		resultMap.put("resultList", userList);
-		return resultMap;
+		userVo.setPageCount(pageCount);
+		return userList;
 	}
 	
 	@Override	
