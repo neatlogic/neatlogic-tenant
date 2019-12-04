@@ -43,7 +43,7 @@ public class TeamGetApi extends ApiComponentBase{
 		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
 		@Param(name = "parentId", type = ApiParamType.STRING, desc = "组id"),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述"),
-		@Param(name = "isHandletask", type = ApiParamType.STRING, desc = "是否允许处理下级任务")})
+		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务")})
 	@Description(desc = "获取组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
