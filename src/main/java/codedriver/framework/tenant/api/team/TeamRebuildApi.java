@@ -39,7 +39,7 @@ public class TeamRebuildApi extends ApiComponentBase{
 
 	@Input({})
 	@Output({})
-	@Description(desc = "获取组信息")
+	@Description(desc = "重建前序排列接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		teamService.rebuildLeftRightCode(null, 0);
