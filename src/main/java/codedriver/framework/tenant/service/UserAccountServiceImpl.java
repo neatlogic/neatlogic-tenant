@@ -96,5 +96,18 @@ public class UserAccountServiceImpl implements UserAccountService{
 		userAccountMapper.deleteTeamUser(userId, null);
 		return 1;
 	}
+
+	@Override
+	public int batchUpdateUser(Integer isActive, List<String> userIdList) {
+		if(isActive==null) {
+			userAccountMapper.batchDeleteUser(userIdList);
+			userAccountMapper.batchDeleteUserRoleByUserIdList(userIdList);
+			userAccountMapper.batchDeleteTeamUserByUserIdList(userIdList);
+			userAccountMapper.batchDeleteUserInfoByUserIdList(userIdList);
+		}else {
+			userAccountMapper.batchUpdateUserStatus(isActive, userIdList);
+		}
+		return 0;
+	}
 	
 }
