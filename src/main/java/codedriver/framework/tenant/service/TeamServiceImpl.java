@@ -55,23 +55,12 @@ public class TeamServiceImpl implements TeamService{
 			teamVo.setRht(right + 1);
 		}
 		teamMapper.insertTeam(teamVo);
-		if (teamVo.getModuleList() != null && teamVo.getModuleList().size() > 0) {
-			for (String module : teamVo.getModuleList()) {
-				teamMapper.insertTeamModule(teamVo.getUuid(), module);
-			}
-		}
 		return 1;
 	}
 
 	@Override
 	public int updateTeam(TeamVo teamVo) {
-		teamMapper.deleteTeamModuleByTeamId(teamVo.getUuid());
 		teamMapper.updateTeam(teamVo);
-		if (teamVo.getModuleList() != null && teamVo.getModuleList().size() > 0) {
-			for (String module : teamVo.getModuleList()) {
-				teamMapper.insertTeamModule(teamVo.getUuid(), module);
-			}
-		}
 		return 1;
 	}
 	
@@ -80,7 +69,6 @@ public class TeamServiceImpl implements TeamService{
 		TeamVo teamVo = teamMapper.selectTeamById(teamUuid);
 		teamMapper.updateTeamLeftForDelete(teamVo);
 		teamMapper.updateTeamRightForDelete(teamVo);
-		teamMapper.deleteTeamModuleByTeamId(teamUuid);
 		teamMapper.deleteTeam(teamUuid);
 	}
 	
