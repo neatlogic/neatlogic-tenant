@@ -55,7 +55,7 @@ public class TeamGetApi extends ApiComponentBase{
 			json.put("name", teamVo.getName());
 			json.put("parentId", teamVo.getParentId());
 			json.put("description", teamVo.getDescription());
-			json.put("isHandletask", teamVo.getIsHandleChildtask());
+			json.put("isHandleChildtask", teamVo.getIsHandleChildtask());
 		}
 		return json;
 	}
