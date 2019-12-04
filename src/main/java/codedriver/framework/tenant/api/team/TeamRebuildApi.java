@@ -37,7 +37,7 @@ public class TeamRebuildApi extends ApiComponentBase{
 	}
 
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=true)})
+	@Input({})
 	@Output({})
 	@Description(desc = "获取组信息")
 	@Override
