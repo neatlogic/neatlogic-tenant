@@ -14,6 +14,8 @@ public interface TeamService {
 	
 	public TeamVo getTeamByUuid(String teamUuid);
 	
+	public List<TeamVo> getTreePathByTeamUuid(TeamVo teamVo);
+	
 	public int insertTeam(TeamVo teamVo);
 	
 	public int updateTeam(TeamVo teamVo);
@@ -21,5 +23,7 @@ public interface TeamService {
 	public void deleteTeam(String teamUuid);
 	
 	public Integer rebuildLeftRightCode(String parentId, Integer parentLft);
+	
+	public int moveTeam(String parentId, String teamUuid, Integer lft, Integer rht, String targetTeamUuid, String moveType);
 
 }

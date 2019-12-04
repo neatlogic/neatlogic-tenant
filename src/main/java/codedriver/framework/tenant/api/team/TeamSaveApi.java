@@ -47,10 +47,11 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述",isRequired=true),
 		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)
 	})
-	@Output({})
+	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
 	@Description(desc = "保存组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		JSONObject json = new JSONObject();
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {
 		});
 		if (jsonObj.getString("uuid") == null) {
@@ -58,6 +59,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		} else {
 			teamService.updateTeam(teamVo);
 		}
-		return null;
+		json.put("uuid", teamVo.getUuid());
+		return json;
 	}
 }
