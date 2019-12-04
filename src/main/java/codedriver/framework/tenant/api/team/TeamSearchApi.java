@@ -21,14 +21,14 @@ import codedriver.framework.tenant.service.TeamService;
 
 @AuthAction(name="SYSTEM_TEAM_EDIT")
 @Service
-public class TeamSearchJsonApi extends ApiComponentBase{
+public class TeamSearchApi extends ApiComponentBase{
 
 	@Autowired
 	private TeamService teamService;
 	
 	@Override
 	public String getToken() {
-		return "team/search/name";
+		return "team/search";
 	}
 
 	@Override
