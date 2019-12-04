@@ -43,8 +43,7 @@ public class TeamGetApi extends ApiComponentBase{
 	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "组id"),
 		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述"),
-		@Param(name = "isHandletask", type = ApiParamType.STRING, desc = "是否允许处理下级任务"),
-		@Param(name = "moduleList", type = ApiParamType.JSONARRAY, desc = "关联模块")})
+		@Param(name = "isHandletask", type = ApiParamType.STRING, desc = "是否允许处理下级任务")})
 	@Description(desc = "获取组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -56,13 +55,6 @@ public class TeamGetApi extends ApiComponentBase{
 			json.put("name", teamVo.getName());
 			json.put("description", teamVo.getDescription());
 			json.put("isHandletask", teamVo.getIsHandleChildtask());
-			if (teamVo.getModuleList() != null && teamVo.getModuleList().size() > 0) {
-				JSONArray jsonList = new JSONArray();
-				for (String module : teamVo.getModuleList()) {
-					jsonList.add(module);
-				}
-				json.put("moduleList", jsonList);
-			}
 		}
 		return json;
 	}

@@ -41,11 +41,7 @@ public interface TeamMapper {
 	
 	public int updateTeamLeftRightCode(@Param("uuid") String uuid, @Param("lft") Integer lft, @Param("rht") Integer rht);
 	
-	public int insertTeamModule(@Param("teamUuid") String teamUuid, @Param("module") String module);
-	
 	public int insertTeam(TeamVo teamVo);
-	
-	public int deleteTeamModuleByTeamId(String teamUuid);
 	
 	public int deleteTeam(String teamUuid);
 }

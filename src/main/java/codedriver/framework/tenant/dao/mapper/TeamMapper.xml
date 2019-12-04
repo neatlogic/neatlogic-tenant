@@ -30,15 +30,10 @@
 		SELECT t.uuid, t.name,
 		(SELECT t0.name FROM team t0 WHERE t0.uuid =t.parent_id) AS parentName
 		FROM team t
-		<if test="module != null">
-			JOIN team_module t1 ON t.uuid = t1.team_uuid AND t1.module_name = #{module}
-		</if>
-		<if test="componentId != null">
-			JOIN team_module t2 ON t.uuid = t2.team_uuid
-			JOIN workflow_component t3 ON t2.module_name = t3.module_name AND t3.id = #{componentId}
-		</if>
 		WHERE is_delete = 0
-		AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
+		<if test="name != null and name!=''">
+			AND lower(t.name) LIKE CONCAT ('%', lower(#{name}), '%')
+		</if>
 		ORDER BY LENGTH(t.name),t.name ASC
 		<if test="pageSize != null">
 			limit #{pageSize}
@@ -101,14 +96,10 @@
 		<result column="name" property="name" />
 		<result column="description" property="description" />
 		<result column="isHandleChildtask" property="isHandleChildtask" />
-		<collection property="moduleList" ofType="java.lang.String">
-			<id column="module" />
-		</collection>
 	</resultMap>
 
 	<select id="getTeamByUuid" parameterType="java.lang.String" resultMap="teamInfoMap">
-		SELECT uuid, NAME, a.description, b.module_name AS module,is_handle_childtask as isHandleChildtask FROM team a 
-		LEFT JOIN team_module b ON a.uuid = b.team_uuid
+		SELECT uuid, NAME, a.description,is_handle_childtask as isHandleChildtask FROM team a 
 		WHERE
 		a.uuid = #{value}
 	</select>	
@@ -118,11 +109,7 @@
 		(uuid,name,description, lft, rht, parent_id,is_handle_childtask, import_id)
 		values
 		(#{uuid},#{name},#{description}, #{lft}, #{rht}, #{parentId} ,#{isHandleChildtask}, #{importId})
-	</insert>
-	
-	<insert id="insertTeamModule">
-		INSERT INTO team_module (team_uuid, module_name ) VALUES ( #{teamUuid}, #{module})
-	</insert>
+	</insert>	
 	
 	<update id="updateTeamRightForInsert" parameterType="java.lang.Integer">
 		update team set rht = rht + 2 where rht &gt;= #{value}
@@ -140,10 +127,6 @@
 		where
 		uuid = #{uuid}
 	</update>
-	
-	<delete id="deleteTeamModuleByTeamId" parameterType="java.lang.String">
-		DELETE FROM team_module WHERE team_uuid = #{value}
-	</delete>
 	
 	<delete id="deleteTeam" parameterType="java.lang.String">
 		delete from team where uuid = #{value}
