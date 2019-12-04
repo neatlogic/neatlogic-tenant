@@ -26,12 +26,12 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "team/tree/search";
+		return "team/search/tree";
 	}
 
 	@Override
 	public String getName() {
-		return "查询组接口";
+		return "树形结构查询组接口";
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		@Param(name = "isParent", type = ApiParamType.BOOLEAN, desc = "是否是父级"),
 		@Param(name = "lft", type = ApiParamType.INTEGER, desc = "左编码"),
 		@Param(name = "rht", type = ApiParamType.INTEGER, desc = "右编码")})
-	@Description(desc = "查询组接口")
+	@Description(desc = "树形结构查询组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = new TeamVo();

@@ -28,7 +28,7 @@ public class TeamSearchJsonApi extends ApiComponentBase{
 	
 	@Override
 	public String getToken() {
-		return "team/searchByName";
+		return "team/search/name";
 	}
 
 	@Override
