@@ -16,4 +16,6 @@ public interface UserAccountService {
 	public UserVo getUserDetailByUserId(String userId);
 	
 	public int deleteUser(String userId);
+	
+	public int batchUpdateUser(Integer isActive,List<String> userIdList);
 }

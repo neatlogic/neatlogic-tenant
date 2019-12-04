@@ -31,6 +31,7 @@ public class UserAccountServiceImpl implements UserAccountService{
 		List<UserVo> userList = userAccountMapper.getUserList(userVo);
 		int rownum = userAccountMapper.getUserListCount(userVo);
 		int pageCount = PageUtil.getPageCount(rownum, userVo.getPageSize());
+		resultMap.put("totalCount", rownum);
 		resultMap.put("pageCount", pageCount);
 		resultMap.put("resultList", userList);
 		return resultMap;
@@ -95,6 +96,19 @@ public class UserAccountServiceImpl implements UserAccountService{
 		userAccountMapper.deleteUserRoleByUserId(userId);
 		userAccountMapper.deleteTeamUser(userId, null);
 		return 1;
+	}
+
+	@Override
+	public int batchUpdateUser(Integer isActive, List<String> userIdList) {
+		if(isActive==null) {
+			userAccountMapper.batchDeleteUser(userIdList);
+			userAccountMapper.batchDeleteUserRoleByUserIdList(userIdList);
+			userAccountMapper.batchDeleteTeamUserByUserIdList(userIdList);
+			userAccountMapper.batchDeleteUserInfoByUserIdList(userIdList);
+		}else {
+			userAccountMapper.batchUpdateUserStatus(isActive, userIdList);
+		}
+		return 0;
 	}
 	
 }

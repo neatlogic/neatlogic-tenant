@@ -42,7 +42,7 @@ public class UserSearchApi extends ApiComponentBase{
 	
 	@Input({ @Param(name = "userName", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询",isRequired=false),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数",isRequired=false),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10",isRequired=true)})
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10",isRequired=false)})
 	@Output({ @Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户信息list"),
 		@Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
@@ -58,10 +58,13 @@ public class UserSearchApi extends ApiComponentBase{
 		JSONObject json = new JSONObject();
 		UserVo userVo = new UserVo();
 		userVo.setUserName(jsonObj.getString("userName"));
-		userVo.setPageSize(jsonObj.getInteger("pageSize"));
+		if(jsonObj.containsKey("pageSize")) {
+			userVo.setPageSize(jsonObj.getInteger("pageSize"));
+		}
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		Map<String, Object> resultMap = userService.getUserList(userVo);
 		json.put("userList", resultMap.get("resultList"));
+		json.put("totalCount", resultMap.get("totalCount"));
 		json.put("pageCount", resultMap.get("pageCount"));
 		json.put("pageSize", userVo.getPageSize());
 		json.put("currentPage", userVo.getCurrentPage());
