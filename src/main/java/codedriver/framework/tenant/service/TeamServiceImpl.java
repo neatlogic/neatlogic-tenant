@@ -1,5 +1,6 @@
 package codedriver.framework.tenant.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,5 +88,78 @@ public class TeamServiceImpl implements TeamService{
 			}
 		}
 		return parentLft;
+	}
+	
+	@Override
+	public int moveTeam(String parentId, String teamUuiId, Integer lft, Integer rht, String targetTeamUuid, String moveType) {
+		TeamVo teamVo = teamMapper.selectTeamById(teamUuiId);
+		if (!teamVo.getLft().equals(lft) || !teamVo.getRht().equals(rht)) {// 位置发生变动，不允许更新
+			return 0;
+		}
+		TeamVo targetTeamVo = teamMapper.selectTeamById(targetTeamUuid);
+		List<TeamVo> teamList = teamMapper.getTeamsByLeftRight(teamVo);
+		List<String> teamIdList = new ArrayList<String>();
+		int diff = teamVo.getRht() - teamVo.getLft() + 1;
+		int min = 1, max = 1, teamDiff = 0;
+		if (teamVo.getLft() > targetTeamVo.getRht()) {// 原来在目标右边
+			if ("inner".equals(moveType)) {
+				min = targetTeamVo.getLft() + 1;
+				max = teamVo.getLft();
+				teamDiff = targetTeamVo.getLft() + 1 - teamVo.getLft();
+			} else if ("next".equals(moveType)) {
+				min = targetTeamVo.getRht() + 1;
+				max = teamVo.getRht();
+				teamDiff = targetTeamVo.getRht() + 1 - teamVo.getLft();
+			} else if ("prev".equals(moveType)) {
+				min = targetTeamVo.getLft();
+				max = teamVo.getRht();
+				teamDiff = targetTeamVo.getLft() - teamVo.getLft();
+			}
+		} else if (teamVo.getRht() < targetTeamVo.getLft()) {// 原来在目标左边
+			if ("inner".equals(moveType)) {
+				min = teamVo.getLft();
+				max = targetTeamVo.getLft();
+				teamDiff = targetTeamVo.getLft() - diff + 1 - teamVo.getLft();
+			} else if ("next".equals(moveType)) {
+				min = teamVo.getLft();
+				max = targetTeamVo.getRht();
+				teamDiff = targetTeamVo.getRht() - diff + 1 - teamVo.getLft();
+			} else if ("prev".equals(moveType)) {
+				min = teamVo.getLft();
+				max = targetTeamVo.getLft() - 1;
+				teamDiff = targetTeamVo.getLft() - diff - teamVo.getLft();
+			}
+		} else {// 原来是目标子树
+			if ("inner".equals(moveType)) {
+				min = targetTeamVo.getLft() + 1;
+				max = teamVo.getLft();
+				teamDiff = targetTeamVo.getLft() - teamVo.getLft() + 1;
+			} else if ("next".equals(moveType)) {
+				min = teamVo.getLft();
+				max = targetTeamVo.getRht();
+				teamDiff = targetTeamVo.getRht() - diff + 1 - teamVo.getLft();
+			} else if ("prev".equals(moveType)) {
+				min = targetTeamVo.getLft();
+				max = teamVo.getRht();
+				teamDiff = targetTeamVo.getLft() - teamVo.getLft();
+			}
+		}
+
+		for (TeamVo t : teamList) {
+			teamIdList.add(t.getUuid());
+		}
+
+		if (!parentId.equals(teamVo.getParentId())) {
+			teamMapper.updateTeamParentId(teamVo.getUuid(), parentId);
+		}
+
+		if (teamVo.getRht() < targetTeamVo.getLft() || (teamVo.getLft() > targetTeamVo.getLft() && teamVo.getRht() < targetTeamVo.getRht() && moveType.equals("next"))) {
+			diff = -diff;
+		}
+
+		teamMapper.updateTeamLeftByLeft(diff, min, max, teamIdList);
+		teamMapper.updateTeamRightByRight(diff, min, max, teamIdList);
+		teamMapper.updateTeamLeftRight(teamDiff, teamIdList);
+		return 1;
 	}
 }

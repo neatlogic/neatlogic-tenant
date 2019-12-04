@@ -21,5 +21,7 @@ public interface TeamService {
 	public void deleteTeam(String teamUuid);
 	
 	public Integer rebuildLeftRightCode(String parentId, Integer parentLft);
+	
+	public int moveTeam(String parentId, String teamUuid, Integer lft, Integer rht, String targetTeamUuid, String moveType);
 
 }

@@ -46,12 +46,7 @@
 		<foreach collection="list" item="item" index="index" separator=",">
 			(#{item.uuid}, #{item.roleName})
 		</foreach>
-	</insert>
-	
-	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
-		delete from team_role where role_name = #{roleName}
-	</delete>
-
+	</insert>	
 	
 	<select id="getTeamUserByUserIdTeamIds" resultType="codedriver.framework.dto.TeamUserVo">
 		SELECT
@@ -65,12 +60,6 @@
 			#{item}
 		</foreach>
 	</select>	
-
-	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamUserVo">
-		insert into
-		user_team(user_id,team_uuid,type)
-		values(#{userId},#{teamUuid},#{type})
-	</insert>
 	
 	<select id="selectTeamById" parameterType="java.lang.String" resultType="codedriver.framework.dto.TeamVo">
 		SELECT uuid, name, lft, rht, parent_id as parentId, is_handle_childtask AS isHandleChildtask FROM
@@ -104,11 +93,29 @@
 		a.uuid = #{value}
 	</select>	
 	
+	<select id="getTeamsByLeftRight" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+		SELECT uuid,
+		name,
+		description ,
+		time_id as timeId,
+		parent_id as
+		parentId,
+		lft,
+		rht from team where
+		lft &gt;= #{lft} and rht &lt;= #{rht}
+	</select>
+	
 	<insert id="insertTeam" parameterType="codedriver.framework.dto.TeamVo">
 		insert into team
 		(uuid,name,description, lft, rht, parent_id,is_handle_childtask, import_id)
 		values
 		(#{uuid},#{name},#{description}, #{lft}, #{rht}, #{parentId} ,#{isHandleChildtask}, #{importId})
+	</insert>
+	
+	<insert id="insertUserTeam" parameterType="codedriver.framework.dto.TeamUserVo">
+		insert into
+		user_team(user_id,team_uuid,type)
+		values(#{userId},#{teamUuid},#{type})
 	</insert>	
 	
 	<update id="updateTeamRightForInsert" parameterType="java.lang.Integer">
@@ -127,11 +134,7 @@
 		where
 		uuid = #{uuid}
 	</update>
-	
-	<delete id="deleteTeam" parameterType="java.lang.String">
-		delete from team where uuid = #{value}
-	</delete>
-	
+
 	<update id="updateTeam" parameterType="codedriver.framework.dto.TeamVo">
 		update team
 		set
@@ -150,5 +153,38 @@
 		UPDATE
 		team SET rht = rht - (#{rht} - #{lft} + 1) WHERE rht &gt; #{rht}
 	</update>
+	
+	<update id="updateTeamParentId">
+		UPDATE team set parent_id = #{parentId} WHERE uuid = #{uuid}
+	</update>
+	
+	<update id="updateTeamLeftByLeft">
+		UPDATE team set lft = lft + #{diff} WHERE lft &gt;= #{minLeft} and lft &lt;= #{maxLeft} and uuid not in
+		<foreach collection="teamUuidList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateTeamRightByRight">
+		UPDATE team set rht = rht + #{diff} WHERE rht &gt;= #{minRight} and rht &lt;= #{maxRight} and uuid not in
+		<foreach collection="teamUuidList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateTeamLeftRight">
+		UPDATE team set lft = lft + #{diff}, rht = rht + #{diff} WHERE uuid in
+		<foreach collection="teamUuidList" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	
+	<delete id="deleteTeam" parameterType="java.lang.String">
+		delete from team where uuid = #{value}
+	</delete>
+	
+	<delete id="deleteTeamRoleByRoleName" parameterType="java.lang.String">
+		delete from team_role where role_name = #{roleName}
+	</delete>
 	
 </mapper>
