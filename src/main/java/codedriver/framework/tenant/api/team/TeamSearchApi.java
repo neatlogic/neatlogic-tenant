@@ -43,9 +43,7 @@ public class TeamSearchApi extends ApiComponentBase{
 
 
 	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "组名,模糊查询",isRequired=false),
-		@Param(name = "limit", type = ApiParamType.STRING, desc = "返回数量",isRequired=false),
-		@Param(name = "module", type = ApiParamType.STRING, desc = "模块名",isRequired=false),
-		@Param(name = "componentId", type = ApiParamType.LONG, desc = "组件Id",isRequired=false)})
+		@Param(name = "limit", type = ApiParamType.STRING, desc = "返回数量",isRequired=false)})
 	@Output({@Param(name = "value", type = ApiParamType.STRING, desc = "组Id"),
 		@Param(name = "text", type = ApiParamType.STRING, desc = "显示名")})
 	@Description(desc = "根据条件查询组(组名模糊查询,根据模块查询,根据组件查询),返回{text,value}格式")
@@ -55,9 +53,6 @@ public class TeamSearchApi extends ApiComponentBase{
 		TeamVo teamVo = new TeamVo();
 		teamVo.setName(jsonObj.getString("name"));
 		teamVo.setPageSize(jsonObj.getInteger("limit"));
-		teamVo.setModule(jsonObj.getString("module"));
-		teamVo.setComponentId(jsonObj.getInteger("componentId"));
-
 
 		List<TeamVo> teamList = teamService.searchTeamByName(teamVo);
 		JSONArray jsonList = new JSONArray();

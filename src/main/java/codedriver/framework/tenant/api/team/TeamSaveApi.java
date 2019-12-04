@@ -47,8 +47,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "name", type = ApiParamType.STRING, desc = "组名",isRequired=true),
 		@Param(name = "parentId", type = ApiParamType.STRING, desc = "父级组id",isRequired=true),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述",isRequired=true),
-		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true),
-		@Param(name = "moduleList", type = ApiParamType.JSONARRAY, desc = "关联模块，多个逗号隔开",isRequired=false)
+		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)
 	})
 	@Output({})
 	@Description(desc = "保存组信息")
@@ -56,9 +55,6 @@ public class TeamSaveApi extends ApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {
 		});
-		// 保存组模块
-		List<String> list = JSONObject.parseArray(jsonObj.getString("moduleList"), String.class);
-		teamVo.setModuleList(list);
 		if (jsonObj.getString("uuid") == null) {
 			teamService.insertTeam(teamVo);
 		} else {
