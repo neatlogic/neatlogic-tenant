@@ -59,7 +59,7 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();
 			json.put("uuid", team.getUuid());
-			json.put("pId", team.getParentId());
+			json.put("parentId", team.getParentId());
 			json.put("name", team.getName());
 			json.put("open", true);
 			json.put("isParent", team.getChildCount() > 0);

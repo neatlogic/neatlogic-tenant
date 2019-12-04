@@ -40,6 +40,21 @@
 		</if>
 	</select>
 	
+	<select id="getTreePathByTeamUuid" parameterType="codedriver.framework.dto.TeamVo" resultType="codedriver.framework.dto.TeamVo">
+		SELECT DISTINCT
+		t.uuid,
+		t.lft
+		FROM
+		team t,team t2
+		WHERE
+		1=1
+		AND t2.uuid = #{uuid}
+		AND t2.lft
+		&gt;=t.lft
+		AND t2.rht &lt;=t.rht
+		ORDER BY t.lft ASC
+	</select>
+	
 	<insert id="insertTeamRole" parameterType="codedriver.framework.dto.TeamVo">
 		insert into team_role (team_uuid , role_name)
 		values
@@ -83,12 +98,13 @@
 	<resultMap type="codedriver.framework.dto.TeamVo" id="teamInfoMap">
 		<id column="uuid" property="uuid" />
 		<result column="name" property="name" />
+		<result column="parentId" property="parentId" />
 		<result column="description" property="description" />
 		<result column="isHandleChildtask" property="isHandleChildtask" />
 	</resultMap>
 
 	<select id="getTeamByUuid" parameterType="java.lang.String" resultMap="teamInfoMap">
-		SELECT uuid, NAME, a.description,is_handle_childtask as isHandleChildtask FROM team a 
+		SELECT uuid, NAME, a.description,parent_id as parentId,is_handle_childtask as isHandleChildtask FROM team a 
 		WHERE
 		a.uuid = #{value}
 	</select>	

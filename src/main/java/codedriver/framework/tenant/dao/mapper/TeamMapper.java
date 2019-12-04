@@ -23,6 +23,8 @@ public interface TeamMapper {
 	
 	public List<TeamVo> getTeamsByLeftRight(TeamVo teamVo);
 	
+	public List<TeamVo> getTreePathByTeamUuid(TeamVo teamVo);
+	
 	public int insertTeam(TeamVo teamVo);
 	
 	public int insertUserTeam(TeamUserVo teamUserVo);

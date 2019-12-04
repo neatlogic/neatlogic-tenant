@@ -14,6 +14,8 @@ public interface TeamService {
 	
 	public TeamVo getTeamByUuid(String teamUuid);
 	
+	public List<TeamVo> getTreePathByTeamUuid(TeamVo teamVo);
+	
 	public int insertTeam(TeamVo teamVo);
 	
 	public int updateTeam(TeamVo teamVo);

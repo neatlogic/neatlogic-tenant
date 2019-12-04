@@ -42,6 +42,11 @@ public class TeamServiceImpl implements TeamService{
 	public TeamVo getTeamByUuid(String teamUuid) {
 		return teamMapper.getTeamByUuid(teamUuid);
 	}
+	
+	@Override
+	public List<TeamVo> getTreePathByTeamUuid(TeamVo teamVo) {
+		return teamMapper.getTreePathByTeamUuid(teamVo);
+	}
 
 	@Override
 	public int insertTeam(TeamVo teamVo) {
