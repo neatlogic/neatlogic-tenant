@@ -35,5 +35,15 @@ public interface UserAccountMapper {
 	public int deleteUser(String userId);
 	
 	public int deleteUserInfo(String userId);
+	
+	public int batchDeleteUser(@Param("userIdList") List<String> userIdList);
+
+	public int batchUpdateUserStatus(@Param("isActive") Integer isActive,@Param("userIdList") List<String> userIdList);
+	
+	public int batchDeleteUserRoleByUserIdList(@Param("userIdList") List<String> userIdList);
+	
+	public int batchDeleteTeamUserByUserIdList(@Param("userIdList") List<String> userIdList);
+	
+	public int batchDeleteUserInfoByUserIdList(@Param("userIdList") List<String> userIdList);
 
 }

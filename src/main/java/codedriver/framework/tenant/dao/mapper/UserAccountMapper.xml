@@ -145,6 +145,15 @@
 		where user_id = #{userId}
 	</update>
 	
+	<update id="batchUpdateUserStatus">
+		update user
+		set is_active = #{isActive}
+		where user_id in
+		<foreach collection="userIdList" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	
 	<delete id="deleteTeamUser">
 		delete from
 		user_team
@@ -173,4 +182,41 @@
 		WHERE
 		user_id = #{value}
 	</delete>
+	
+	<delete id="batchDeleteUser" parameterType="java.util.List">
+		DELETE FROM
+		user
+		WHERE user_id in
+		<foreach collection="userIdList" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="batchDeleteTeamUserByUserIdList" parameterType="java.util.List">
+		delete from
+		user_team
+		where user_id in
+		<foreach collection="userIdList" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="batchDeleteUserRoleByUserIdList" parameterType="java.util.List">
+		delete from
+		user_role
+		where user_id in
+		<foreach collection="userIdList" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="batchDeleteUserInfoByUserIdList" parameterType="java.util.List">
+		delete from
+		user_info
+		where user_id in
+		<foreach collection="userIdList" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	
 </mapper>
