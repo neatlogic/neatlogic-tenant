@@ -31,6 +31,7 @@ public class UserAccountServiceImpl implements UserAccountService{
 		List<UserVo> userList = userAccountMapper.getUserList(userVo);
 		int rownum = userAccountMapper.getUserListCount(userVo);
 		int pageCount = PageUtil.getPageCount(rownum, userVo.getPageSize());
+		resultMap.put("totalCount", rownum);
 		resultMap.put("pageCount", pageCount);
 		resultMap.put("resultList", userList);
 		return resultMap;
