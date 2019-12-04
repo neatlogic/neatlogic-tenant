@@ -41,7 +41,7 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 
 	@Input({ @Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名称",isRequired=false),
 			@Param(name = "parentId", type = ApiParamType.STRING, desc = "父组Id",isRequired=false)})
-	@Output({@Param(name = "id", type = ApiParamType.STRING, desc = "组uuid"),
+	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "组uuid"),
 		@Param(name = "pId", type = ApiParamType.STRING, desc = "父组Id"),
 		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
 		@Param(name = "open", type = ApiParamType.BOOLEAN, desc = "是否打开"),
@@ -58,7 +58,7 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		JSONArray jsonList = new JSONArray();
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();
-			json.put("id", team.getUuid());
+			json.put("uuid", team.getUuid());
 			json.put("pId", team.getParentId());
 			json.put("name", team.getName());
 			json.put("open", true);
