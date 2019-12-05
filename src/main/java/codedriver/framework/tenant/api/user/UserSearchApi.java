@@ -1,6 +1,6 @@
 package codedriver.framework.tenant.api.user;
 
-import java.util.Map;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,10 +62,10 @@ public class UserSearchApi extends ApiComponentBase{
 			userVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
-		Map<String, Object> resultMap = userService.getUserList(userVo);
-		json.put("userList", resultMap.get("resultList"));
-		json.put("totalCount", resultMap.get("totalCount"));
-		json.put("pageCount", resultMap.get("pageCount"));
+		List<UserVo> userList = userService.getUserList(userVo);
+		json.put("userList", userList);
+		json.put("rownum", userVo.getRowNum());
+		json.put("pageCount", userVo.getPageCount());
 		json.put("pageSize", userVo.getPageSize());
 		json.put("currentPage", userVo.getCurrentPage());
 		return json;
