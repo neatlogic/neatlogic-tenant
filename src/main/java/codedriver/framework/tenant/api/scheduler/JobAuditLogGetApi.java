@@ -43,10 +43,14 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-	@Input({@Param(name="auditId",type=ApiParamType.LONG,isRequired=true,desc="定时作业执行记录id")})
+	@Input({
+		@Param(name="auditId",type=ApiParamType.LONG,isRequired=true,desc="定时作业执行记录id")
+		})
+	@Output({
+		@Param(name="Return",type=ApiParamType.STRING,isRequired=true,desc="日志内容")
+		})
 	@Description(desc="获取定时作业执行记录日志")
-	@Example(example="{\"auditId\":1}")
-	@Output({@Param(name="logContent",type=ApiParamType.STRING,isRequired=true,desc="日志内容")})
+	@Example(example="{\"auditId\":1}")	
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long auditId = jsonObj.getLong("auditId");
@@ -55,9 +59,7 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业执行记录：" + auditId + "不存在")));
 			throw new ApiRuntimeException(message);
 		}
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("logContent", jobAudit.getLogContent());
-		return resultObj;
+		return jobAudit.getLogContent();
 	}
 
 }
