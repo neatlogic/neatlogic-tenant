@@ -5,7 +5,7 @@ import java.util.Map;
 
 import codedriver.framework.dto.UserVo;
 
-public interface UserAccountService {
+public interface UserService {
 	
 	public Map<String, Object> getUserList(UserVo userVo);
 	

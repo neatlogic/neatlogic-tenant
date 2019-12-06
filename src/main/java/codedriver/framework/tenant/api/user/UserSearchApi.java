@@ -15,14 +15,14 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.tenant.service.UserAccountService;
+import codedriver.framework.tenant.service.UserService;
 
 @AuthAction(name="SYSTEM_USER_EDIT")
 @Service
 public class UserSearchApi extends ApiComponentBase{
 	
 	@Autowired
-	private UserAccountService userService;
+	private UserService userService;
 	
 	@Override
 	public String getToken() {

@@ -10,17 +10,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.tenant.dao.mapper.TeamMapper;
-import codedriver.framework.tenant.dao.mapper.UserAccountMapper;
 
 @Service
 @Transactional
-public class UserAccountServiceImpl implements UserAccountService{
+public class UserServiceImpl implements UserService{
 	
 	@Autowired
-	UserAccountMapper userAccountMapper;
+	UserMapper userMapper;
 	
 	@Autowired
 	TeamMapper teamMapper;
@@ -28,8 +28,8 @@ public class UserAccountServiceImpl implements UserAccountService{
 	@Override
 	public Map<String, Object> getUserList(UserVo userVo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		List<UserVo> userList = userAccountMapper.getUserList(userVo);
-		int rownum = userAccountMapper.getUserListCount(userVo);
+		List<UserVo> userList = userMapper.getUserList(userVo);
+		int rownum = userMapper.getUserListCount(userVo);
 		int pageCount = PageUtil.getPageCount(rownum, userVo.getPageSize());
 		resultMap.put("totalCount", rownum);
 		resultMap.put("pageCount", pageCount);
@@ -39,30 +39,30 @@ public class UserAccountServiceImpl implements UserAccountService{
 	
 	@Override	
 	public List<UserVo> getUserListByRole(UserVo userVo) {
-		return userAccountMapper.getUserListByRole(userVo);
+		return userMapper.getUserListByRole(userVo);
 	}
 
 	@Override
 	public UserVo getUserDetailByUserId(String userId) {
-		return userAccountMapper.getUserDetailByUserId(userId);
+		return userMapper.getUserDetailByUserId(userId);
 	}
 	
 	@Override
 	public int saveUser(UserVo userVo) {
 		String userId = userVo.getUserId();	
-		if (userAccountMapper.checkUserExists(userVo) == null) {
-			userAccountMapper.insertUser(userVo);
-			userAccountMapper.insertUserInfo(userVo);
+		if (userMapper.checkUserExists(userVo) == null) {
+			userMapper.insertUser(userVo);
+			userMapper.insertUserInfo(userVo);
 		}else {
-			userAccountMapper.updateUser(userVo);
-			userAccountMapper.updateUserInfo(userVo);
-			userAccountMapper.deleteUserRoleByUserId(userId);
-			userAccountMapper.deleteTeamUser(userId, null);
+			userMapper.updateUser(userVo);
+			userMapper.updateUserInfo(userVo);
+			userMapper.deleteUserRoleByUserId(userId);
+			userMapper.deleteTeamUser(userId, null);
 		}
 
 			if (userVo.getRoleList() != null && userVo.getRoleList().size() > 0) {
 				for (String roleName : userVo.getRoleList()) {
-					userAccountMapper.insertUserRole(userId, roleName);
+					userMapper.insertUserRole(userId, roleName);
 				}
 			}
 			List<TeamUserVo> teamUserNewList = new ArrayList<>();
@@ -91,22 +91,22 @@ public class UserAccountServiceImpl implements UserAccountService{
 	
 	@Override
 	public int deleteUser(String userId) {
-		userAccountMapper.deleteUser(userId);
-		userAccountMapper.deleteUserInfo(userId);
-		userAccountMapper.deleteUserRoleByUserId(userId);
-		userAccountMapper.deleteTeamUser(userId, null);
+		userMapper.deleteUserByUserId(userId);
+		userMapper.deleteUserInfo(userId);
+		userMapper.deleteUserRoleByUserId(userId);
+		userMapper.deleteTeamUser(userId, null);
 		return 1;
 	}
 
 	@Override
 	public int batchUpdateUser(Integer isActive, List<String> userIdList) {
 		if(isActive==null) {
-			userAccountMapper.batchDeleteUser(userIdList);
-			userAccountMapper.batchDeleteUserRoleByUserIdList(userIdList);
-			userAccountMapper.batchDeleteTeamUserByUserIdList(userIdList);
-			userAccountMapper.batchDeleteUserInfoByUserIdList(userIdList);
+			userMapper.batchDeleteUser(userIdList);
+			userMapper.batchDeleteUserRoleByUserIdList(userIdList);
+			userMapper.batchDeleteTeamUserByUserIdList(userIdList);
+			userMapper.batchDeleteUserInfoByUserIdList(userIdList);
 		}else {
-			userAccountMapper.batchUpdateUserStatus(isActive, userIdList);
+			userMapper.batchUpdateUserStatus(isActive, userIdList);
 		}
 		return 0;
 	}

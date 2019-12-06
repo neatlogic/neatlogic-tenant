@@ -15,13 +15,13 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.tenant.service.TeamService;
 
-@AuthAction(name="SYSTEM_TEAM_EDIT")
+@AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
-public class TeamGetApi extends ApiComponentBase{
+public class TeamGetApi extends ApiComponentBase {
 
 	@Autowired
 	private TeamService teamService;
-	
+
 	@Override
 	public String getToken() {
 		return "team/get";
@@ -31,33 +31,26 @@ public class TeamGetApi extends ApiComponentBase{
 	public String getName() {
 		return "获取组信息接口";
 	}
-	
+
 	@Override
 	public String getConfig() {
 		return null;
 	}
 
-
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=true)})
-	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "组id"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
-		@Param(name = "parentId", type = ApiParamType.STRING, desc = "组id"),
-		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述"),
-		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务")})
-	@Description(desc = "获取组信息")
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id", isRequired = true) })
+	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id"), @Param(name = "name", type = ApiParamType.STRING, desc = "组名"), @Param(name = "parentId", type = ApiParamType.STRING, desc = "组id"), @Param(name = "description", type = ApiParamType.STRING, desc = "组描述") })
+	@Description(desc = "获取组信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
 		String teamUuid = jsonObj.getString("uuid");
 		TeamVo teamVo = teamService.getTeamByUuid(teamUuid);
-		if(teamVo!=null) {
+		if (teamVo != null) {
 			json.put("uuid", teamVo.getUuid());
 			json.put("name", teamVo.getName());
-			json.put("parentId", teamVo.getParentId());
+			json.put("parentId", teamVo.getParentUuid());
 			json.put("description", teamVo.getDescription());
-			json.put("isHandleChildtask", teamVo.getIsHandleChildtask());
 		}
 		return json;
 	}
 }
-

@@ -1,4 +1,5 @@
 package codedriver.framework.tenant.api.team;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,13 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.tenant.service.TeamService;
 
-@AuthAction(name="SYSTEM_TEAM_EDIT")
+@AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
-public class TeamSearchForTreeApi extends ApiComponentBase{
+public class TeamSearchForTreeApi extends ApiComponentBase {
 
 	@Autowired
 	private TeamService teamService;
-	
+
 	@Override
 	public String getToken() {
 		return "team/search/tree";
@@ -39,27 +40,19 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "roleName", type = ApiParamType.STRING, desc = "角色名称",isRequired=false),
-			@Param(name = "parentId", type = ApiParamType.STRING, desc = "父组Id",isRequired=false)})
-	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "组uuid"),
-		@Param(name = "pId", type = ApiParamType.STRING, desc = "父组Id"),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组名"),
-		@Param(name = "open", type = ApiParamType.BOOLEAN, desc = "是否打开"),
-		@Param(name = "isParent", type = ApiParamType.BOOLEAN, desc = "是否是父级"),
-		@Param(name = "lft", type = ApiParamType.INTEGER, desc = "左编码"),
-		@Param(name = "rht", type = ApiParamType.INTEGER, desc = "右编码")})
+	@Input({ @Param(name = "parentId", type = ApiParamType.STRING, desc = "父组Id", isRequired = false) })
+	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组uuid"), @Param(name = "pId", type = ApiParamType.STRING, desc = "父组Id"), @Param(name = "name", type = ApiParamType.STRING, desc = "组名"), @Param(name = "open", type = ApiParamType.BOOLEAN, desc = "是否打开"), @Param(name = "isParent", type = ApiParamType.BOOLEAN, desc = "是否是父级"), @Param(name = "lft", type = ApiParamType.INTEGER, desc = "左编码"), @Param(name = "rht", type = ApiParamType.INTEGER, desc = "右编码") })
 	@Description(desc = "树形结构查询组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = new TeamVo();
-		teamVo.setRoleName(jsonObj.getString("roleName"));
-		teamVo.setParentId(jsonObj.getString("parentId"));
+		teamVo.setParentUuid(jsonObj.getString("parentId"));
 		List<TeamVo> teamList = teamService.selectTeamList(teamVo);
 		JSONArray jsonList = new JSONArray();
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();
 			json.put("uuid", team.getUuid());
-			json.put("parentId", team.getParentId());
+			json.put("parentId", team.getParentUuid());
 			json.put("name", team.getName());
 			json.put("open", true);
 			json.put("isParent", team.getChildCount() > 0);
@@ -70,4 +63,3 @@ public class TeamSearchForTreeApi extends ApiComponentBase{
 		return jsonList;
 	}
 }
-

@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
-import codedriver.framework.tenant.dao.mapper.TeamMapper;
 
 
 @Service
@@ -51,7 +51,7 @@ public class TeamServiceImpl implements TeamService{
 	@Override
 	public int insertTeam(TeamVo teamVo) {
 		int right = 2;
-		String parentId = teamVo.getParentId();
+		String parentId = teamVo.getParentUuid();
 		if (parentId != null) {
 			TeamVo parentTeam = teamMapper.selectTeamById(parentId);
 			right = parentTeam.getRht();
@@ -154,7 +154,7 @@ public class TeamServiceImpl implements TeamService{
 			teamIdList.add(t.getUuid());
 		}
 
-		if (!parentId.equals(teamVo.getParentId())) {
+		if (!parentId.equals(teamVo.getParentUuid())) {
 			teamMapper.updateTeamParentId(teamVo.getUuid(), parentId);
 		}
 

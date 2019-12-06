@@ -19,13 +19,13 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.tenant.service.TeamService;
 
-@AuthAction(name="SYSTEM_TEAM_EDIT")
+@AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
-public class TeamSearchApi extends ApiComponentBase{
+public class TeamSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private TeamService teamService;
-	
+
 	@Override
 	public String getToken() {
 		return "team/search";
@@ -35,21 +35,18 @@ public class TeamSearchApi extends ApiComponentBase{
 	public String getName() {
 		return "根据组名模糊查询组";
 	}
-	
+
 	@Override
 	public String getConfig() {
 		return null;
 	}
 
-
-	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "组名,模糊查询",isRequired=false),
-		@Param(name = "limit", type = ApiParamType.STRING, desc = "返回数量",isRequired=false)})
-	@Output({@Param(name = "value", type = ApiParamType.STRING, desc = "组Id"),
-		@Param(name = "text", type = ApiParamType.STRING, desc = "显示名")})
+	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "组名,模糊查询", isRequired = false), @Param(name = "limit", type = ApiParamType.STRING, desc = "返回数量", isRequired = false) })
+	@Output({ @Param(name = "value", type = ApiParamType.STRING, desc = "组Id"), @Param(name = "text", type = ApiParamType.STRING, desc = "显示名") })
 	@Description(desc = "根据条件查询组(组名模糊查询,根据模块查询,根据组件查询),返回{text,value}格式")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		
+
 		TeamVo teamVo = new TeamVo();
 		teamVo.setName(jsonObj.getString("name"));
 		teamVo.setPageSize(jsonObj.getInteger("limit"));
@@ -59,8 +56,7 @@ public class TeamSearchApi extends ApiComponentBase{
 		for (TeamVo team : teamList) {
 			JSONObject json = new JSONObject();
 			json.put("value", team.getUuid());
-			String parentName = StringUtils.isNotBlank(team.getParentName()) ? "(" + team.getParentName() + ")" : "";
-			json.put("text", team.getName() + parentName);
+			json.put("text", team.getName());
 			jsonList.add(json);
 		}
 		return jsonList;
