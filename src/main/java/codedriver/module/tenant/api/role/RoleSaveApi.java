@@ -10,7 +10,6 @@ import codedriver.framework.common.AuthAction;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
