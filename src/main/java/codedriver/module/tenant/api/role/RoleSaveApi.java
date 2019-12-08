@@ -15,13 +15,13 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
 
-@AuthAction(name="SYSTEM_ROLE_EDIT")
+@AuthAction(name = "SYSTEM_ROLE_EDIT")
 @Service
-public class RoleSaveApi extends ApiComponentBase{
+public class RoleSaveApi extends ApiComponentBase {
 
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Override
 	public String getToken() {
 		return "role/save";
@@ -29,7 +29,7 @@ public class RoleSaveApi extends ApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "保存角色信息接口";
+		return "角色信息保存接口";
 	}
 
 	@Override
@@ -37,10 +37,16 @@ public class RoleSaveApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "角色名称", isRequired=true),
-		@Param(name = "description", type = ApiParamType.STRING, desc = "角色描述", isRequired=true)})
-	@Output({})
-	@Description(desc = "角色保存接口")
+	@Input({
+			@Param(name = "name",
+					type = ApiParamType.STRING,
+					desc = "角色名称",
+					isRequired = true),
+			@Param(name = "description",
+					type = ApiParamType.STRING,
+					desc = "角色描述",
+					isRequired = true) })
+	@Description(desc = "角色信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		RoleVo roleVo = new RoleVo();

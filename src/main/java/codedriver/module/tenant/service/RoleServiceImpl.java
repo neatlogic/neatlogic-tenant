@@ -4,48 +4,45 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 
 @Service
-@Transactional
-public class RoleServiceImpl implements RoleService{
+public class RoleServiceImpl implements RoleService {
 
-	@Autowired 
+	@Autowired
 	RoleMapper roleMapper;
-		
-	
-	@Override
-	public RoleVo getRoleInfoByName(String name) {
-		return roleMapper.getRoleInfoByName(name);
-	}
+
+
 
 	@Override
-	public List<RoleVo> selectAllRole() {
-		return roleMapper.selectAllRole();
-	}	
-		
-	@Override
-	public List<RoleVo> getRoleByName(RoleVo roleVo) {
-		return roleMapper.getRoleByName(roleVo);
+	public List<RoleVo> searchRole(RoleVo roleVo){
+		if(roleVo.getNeedPage()) {
+			int rowNum = roleMapper.searchRoleCount(roleVo);
+			roleVo.setPageCount(PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
+			roleVo.setRowNum(rowNum);
+		}
+		return roleMapper.searchRole(roleVo);
 	}
-
 	@Override
 	public int saveRole(RoleVo roleVo) {
-		if (roleMapper.checkRoleNameExist(roleVo) > 0) {
+		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
 			roleMapper.updateRole(roleVo);
-		}else {
-			this.roleMapper.insertRole(roleVo);
+		} else {
+			roleMapper.insertRole(roleVo);
 		}
 		return 1;
 	}
 
 	@Override
-	public int deleteRole(String name) {
-		return roleMapper.deleteRole(name);
+	public int deleteRoleByRoleName(String name) {
+		roleMapper.deleteMenuRoleByRoleName(name);
+		roleMapper.deleteTeamRoleByRoleName(name);
+		roleMapper.deleteUserRoleByRoleName(name);
+		roleMapper.deleteRoleByRoleName(name);
+		return 1;
 	}
 
-	
 }

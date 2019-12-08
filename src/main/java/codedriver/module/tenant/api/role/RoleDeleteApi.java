@@ -14,13 +14,13 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
 
-@AuthAction(name="SYSTEM_ROLE_EDIT")
+@AuthAction(name = "SYSTEM_ROLE_EDIT")
 @Service
-public class RoleDeleteApi extends ApiComponentBase{
+public class RoleDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Override
 	public String getToken() {
 		return "role/delete";
@@ -28,7 +28,7 @@ public class RoleDeleteApi extends ApiComponentBase{
 
 	@Override
 	public String getName() {
-		return "删除角色接口";
+		return "角色删除接口";
 	}
 
 	@Override
@@ -36,13 +36,16 @@ public class RoleDeleteApi extends ApiComponentBase{
 		return null;
 	}
 
-	@Input({ @Param(name = "name", type = ApiParamType.STRING, desc = "角色名称",isRequired=true)})
-	@Output({})
+	@Input({
+			@Param(name = "name",
+					type = ApiParamType.STRING,
+					desc = "角色名称",
+					isRequired = true) })
 	@Description(desc = "角色删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String name = jsonObj.getString("name");
-		roleService.deleteRole(name);
+		roleService.deleteRoleByRoleName(name);
 		return null;
 	}
 }

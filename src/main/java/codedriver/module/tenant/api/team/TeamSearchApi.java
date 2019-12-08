@@ -67,7 +67,7 @@ public class TeamSearchApi extends ApiComponentBase {
 			@Param(name = "teamList",
 					type = ApiParamType.STRING,
 					explode = TeamVo[].class,
-					desc = "组Id"),
+					desc = "分组信息"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目"),
@@ -95,10 +95,12 @@ public class TeamSearchApi extends ApiComponentBase {
 		List<TeamVo> teamList = teamService.searchTeam(teamVo);
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("teamList", teamList);
-		returnObj.put("pageSize", teamVo.getPageSize());
-		returnObj.put("currentPage", teamVo.getCurrentPage());
-		returnObj.put("rowNum", teamVo.getRowNum());
-		returnObj.put("pageCount", teamVo.getPageCount());
+		if (teamVo.getNeedPage()) {
+			returnObj.put("pageSize", teamVo.getPageSize());
+			returnObj.put("currentPage", teamVo.getCurrentPage());
+			returnObj.put("rowNum", teamVo.getRowNum());
+			returnObj.put("pageCount", teamVo.getPageCount());
+		}
 		return returnObj;
 	}
 
