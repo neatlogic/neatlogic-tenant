@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.team;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,8 +102,4 @@ public class TeamSearchApi extends ApiComponentBase {
 		return returnObj;
 	}
 
-	public static void main(String[] a) {
-		System.out.println(TeamVo[].class.isArray());
-		System.out.println(TeamVo.class.isArray());
-	}
 }
