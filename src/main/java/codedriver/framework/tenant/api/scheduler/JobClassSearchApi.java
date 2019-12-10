@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -65,13 +64,8 @@ public class JobClassSearchApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JobClassVo jobClassVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobClassVo>() {});
-		TenantContext tenant = TenantContext.get();
-		tenant.setUseDefaultDatasource(false);
-		String tenantUuid = tenant.getTenantUuid();
-		jobClassVo.setTenantUuid(tenantUuid);
-		tenant.setUseDefaultDatasource(true);		
-		List<JobClassVo> jobClassList = schedulerService.searchJobClassList(jobClassVo);		
+		JobClassVo jobClassVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobClassVo>() {});		
+		List<JobClassVo> jobClassList = schedulerService.searchJobClassList(jobClassVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobClassList", jobClassList);
 		resultObj.put("currentPage",jobClassVo.getCurrentPage());

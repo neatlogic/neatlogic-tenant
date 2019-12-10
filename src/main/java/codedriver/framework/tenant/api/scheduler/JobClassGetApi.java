@@ -1,19 +1,20 @@
 package codedriver.framework.tenant.api.scheduler;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.AuthAction;
+import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
 import codedriver.framework.exception.core.IApiExceptionMessage;
@@ -26,15 +27,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobClassGetApi extends ApiComponentBase {
-	
-	@Autowired
-	private SchedulerMapper schedulerMapper;
 	
 	@Override
 	public String getToken() {
@@ -67,15 +64,19 @@ public class JobClassGetApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JobClassVo jobClassVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobClassVo>() {});
-		TenantContext tenant = TenantContext.get();
-		tenant.setUseDefaultDatasource(false);
-		String tenantUuid = tenant.getTenantUuid();
-		jobClassVo.setTenantUuid(tenantUuid);
-		tenant.setUseDefaultDatasource(true);
-		JobClassVo jobClass = schedulerMapper.getJobClassByClasspath(jobClassVo);
-		if(jobClass == null) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ jobClassVo.getClasspath() + " 不存在")));
+		String classpath = jsonObj.getString("classpath");
+		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
+		if(jobClass == null) {			
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
+			throw new ApiRuntimeException(message);
+		}
+		List<ModuleVo> activeModuleList = TenantContext.get().getActiveModuleList();
+		Set<String> moduleIdSet = new HashSet<>();
+		for(ModuleVo module : activeModuleList) {
+			moduleIdSet.add(module.getId());
+		}
+		if(!moduleIdSet.contains(jobClass.getModuleId())) {
+			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("无权限获取定时作业组件："+ classpath + " 信息")));
 			throw new ApiRuntimeException(message);
 		}
 		JSONArray inputList = new JSONArray();
