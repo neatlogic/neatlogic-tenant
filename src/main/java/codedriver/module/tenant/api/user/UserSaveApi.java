@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.AuthAction;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

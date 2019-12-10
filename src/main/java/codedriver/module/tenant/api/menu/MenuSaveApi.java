@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.AuthAction;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
 import codedriver.framework.exception.type.CustomExceptionMessage;
