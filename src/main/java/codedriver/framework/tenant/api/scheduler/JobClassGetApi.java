@@ -1,9 +1,6 @@
 package codedriver.framework.tenant.api.scheduler;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import org.springframework.stereotype.Service;
@@ -12,13 +9,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.AuthAction;
-import codedriver.framework.dto.ModuleVo;
-import codedriver.framework.exception.core.ApiRuntimeException;
-import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
-import codedriver.framework.exception.core.IApiExceptionMessage;
-import codedriver.framework.exception.type.CustomExceptionMessage;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -28,7 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
-import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
+import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobClassGetApi extends ApiComponentBase {
@@ -66,18 +57,8 @@ public class JobClassGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String classpath = jsonObj.getString("classpath");
 		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
-		if(jobClass == null) {			
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
-			throw new ApiRuntimeException(message);
-		}
-		List<ModuleVo> activeModuleList = TenantContext.get().getActiveModuleList();
-		Set<String> moduleIdSet = new HashSet<>();
-		for(ModuleVo module : activeModuleList) {
-			moduleIdSet.add(module.getId());
-		}
-		if(!moduleIdSet.contains(jobClass.getModuleId())) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("无权限获取定时作业组件："+ classpath + " 信息")));
-			throw new ApiRuntimeException(message);
+		if(jobClass == null) {
+			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
 		}
 		JSONArray inputList = new JSONArray();
 		IJob job = SchedulerManager.getInstance(jobClass.getClasspath());

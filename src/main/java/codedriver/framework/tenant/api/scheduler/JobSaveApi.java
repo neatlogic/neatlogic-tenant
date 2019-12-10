@@ -1,5 +1,7 @@
 package codedriver.framework.tenant.api.scheduler;
 
+import java.util.List;
+
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,11 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.AuthAction;
-import codedriver.framework.exception.core.ApiRuntimeException;
-import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
-import codedriver.framework.exception.core.IApiExceptionMessage;
-import codedriver.framework.exception.type.CustomExceptionMessage;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
@@ -22,15 +20,21 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.exception.SchedulerExceptionMessage;
+import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
+import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
+import codedriver.framework.scheduler.exception.ScheduleJobSingletonException;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobSaveApi extends ApiComponentBase {
 	@Autowired
 	private SchedulerService schedulerService;
+	@Autowired
+	private SchedulerMapper schedulerMapper;
 	@Autowired
 	private SchedulerManager schedulerManager;
 	@Override
@@ -72,27 +76,33 @@ public class JobSaveApi extends ApiComponentBase {
 		String classpath = jsonObj.getString("classpath");
 		IJob job = SchedulerManager.getInstance(classpath);
 		if(job == null) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("定时作业组件："+ classpath + " 不存在")));
-			throw new ApiRuntimeException(message);
+			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
 		}
 		String isActive = jsonObj.getString("isActive");
 		if(!JobVo.YES.equals(isActive) && !JobVo.NO.equals(isActive)) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("isActive参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
-			throw new ApiRuntimeException(message);
+			throw new ScheduleIllegalParameterException("isActive参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'");
 		}
 		String needAudit = jsonObj.getString("needAudit");
 		if(!JobVo.YES.equals(needAudit) && !JobVo.NO.equals(needAudit)) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'")));
-			throw new ApiRuntimeException(message);
+			throw new ScheduleIllegalParameterException("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'");
 		}	
 		String cron = jsonObj.getString("cron");
 		if(!CronExpression.isValidExpression(cron)) {
-			IApiExceptionMessage message = new FrameworkExceptionMessageBase(new SchedulerExceptionMessage(new CustomExceptionMessage("cron表达式参数格式不正确")));
-			throw new RuntimeException(message.toString());
+			throw new ScheduleIllegalParameterException("cron表达式参数格式不正确：" + cron);
 		}					
 		
 		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});
 		job.valid(jobVo.getPropList());
+		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
+		if(jobClass == null) {
+			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
+		}
+		if(JobClassVo.ONCE_TYPE.equals(jobClass.getType())) {
+			List<JobVo> jobList = schedulerMapper.getJobByClasspath(classpath);
+			if(jobList.size() > 0) {
+				throw new ScheduleJobSingletonException("定时作业组件："+ classpath + " 只能创建一个作业");
+			}
+		}
 		schedulerService.saveJob(jobVo);
 		if(JobVo.YES.equals(jobVo.getIsActive())) {
 			JobObject jobObject = JobObject.buildJobObject(jobVo, JobObject.FRAMEWORK);
