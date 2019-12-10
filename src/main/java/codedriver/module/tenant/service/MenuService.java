@@ -1,8 +1,8 @@
-package codedriver.framework.tenant.service;
+package codedriver.module.tenant.service;
 
 import java.util.List;
 
-import codedriver.framework.tenant.dto.MenuVo;
+import codedriver.module.tenant.dto.MenuVo;
 
 public interface MenuService {
 	public List<MenuVo> getMenuList(MenuVo vo);

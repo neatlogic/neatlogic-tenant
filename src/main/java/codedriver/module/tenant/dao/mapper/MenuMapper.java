@@ -1,11 +1,11 @@
-package codedriver.framework.tenant.dao.mapper;
+package codedriver.module.tenant.dao.mapper;
 
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import codedriver.framework.tenant.dto.MenuVo;
+import codedriver.module.tenant.dto.MenuVo;
 
 public interface MenuMapper {
 

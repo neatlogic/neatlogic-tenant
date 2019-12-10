@@ -1,24 +1,47 @@
-package codedriver.framework.tenant.dto;
+package codedriver.module.tenant.dto;
 
 import java.util.List;
 
-public class MenuVo {
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.restful.annotation.EntityField;
 
+public class MenuVo {
+	@EntityField(name = "菜单项id",
+			type = ApiParamType.LONG)
 	private Long id;
+	@EntityField(name = "菜单项名称",
+			type = ApiParamType.STRING)
 	private String name;
+	@EntityField(name = "父菜单项id",
+			type = ApiParamType.LONG)
 	private Long parentId;
+	@EntityField(name = "父菜单项名称",
+			type = ApiParamType.STRING)
 	private String parentName;
+	@EntityField(name = "菜单项图标",
+			type = ApiParamType.STRING)
 	private String icon;
+	@EntityField(name = "菜单项超链接",
+			type = ApiParamType.STRING)
 	private String url;
+	@EntityField(name = "排序",
+			type = ApiParamType.INTEGER)
 	private Integer sort;
+	@EntityField(name = "是否激活",
+			type = ApiParamType.INTEGER)
 	private int isActive;
-	private String module ; 
-	private String description ;
+	@EntityField(name = "所属模块",
+			type = ApiParamType.STRING)
+	private String module;
+	@EntityField(name = "描述",
+			type = ApiParamType.STRING)
+	private String description;
 	private int isAuto = 0;
 	private String openMode = "tab";
 	private List<RoleVo> roleList;
 	private List<String> roleNameList;
-	private List<MenuVo> childMenuList; 
+	private List<MenuVo> childMenuList;
 
 	public String getParentName() {
 		return parentName;
@@ -39,21 +62,21 @@ public class MenuVo {
 	public Long getId() {
 		return id;
 	}
-	
+
 	public MenuVo() {
-		
+
 	}
-	
-	public MenuVo(Long id ) {
-		this.id = id ; 
+
+	public MenuVo(Long id) {
+		this.id = id;
 	}
-	
-	public MenuVo(Long id,Long parentId,List<String> roleNameList) {
+
+	public MenuVo(Long id, Long parentId, List<String> roleNameList) {
 		this.id = id;
 		this.parentId = parentId;
 		this.roleNameList = roleNameList;
 	}
-	
+
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -154,6 +177,4 @@ public class MenuVo {
 		this.openMode = openMode;
 	}
 
-	
 }
-

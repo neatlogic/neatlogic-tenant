@@ -1,4 +1,4 @@
-package codedriver.framework.tenant.api.menu;
+package codedriver.module.tenant.api.menu;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,17 +6,14 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.AuthAction;
-import codedriver.framework.exception.MenuExceptionMessage;
-import codedriver.framework.exception.core.ApiRuntimeException;
-import codedriver.framework.exception.core.FrameworkExceptionMessageBase;
-import codedriver.framework.exception.type.CustomExceptionMessage;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.tenant.service.MenuService;
+import codedriver.module.tenant.exception.MenuDeleteException;
+import codedriver.module.tenant.service.MenuService;
 
 @Service
 @AuthAction(name="SYSTEM_MENU_EDIT")
@@ -49,7 +46,7 @@ public class MenuDeleteApi extends ApiComponentBase{
 		JSONObject jsonObject = new JSONObject();
 		int count = this.menuService.checkIsChildern(menuId);
 		if (count > 0) {
-			throw new ApiRuntimeException(new FrameworkExceptionMessageBase(new MenuExceptionMessage(new CustomExceptionMessage("当前菜单含有" + count + "个子菜单，请先移除。"))));
+			throw new MenuDeleteException("当前菜单含有" + count + "个子菜单，请先移除。");
 		} else {
 			this.menuService.deleteMenu(menuId);
 		}

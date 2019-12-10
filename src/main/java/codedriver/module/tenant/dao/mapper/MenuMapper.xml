@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="codedriver.framework.tenant.dao.mapper.MenuMapper">
-	<resultMap type="codedriver.framework.tenant.dto.MenuVo" id="menuByIdMap">
+<mapper namespace="codedriver.module.tenant.dao.mapper.MenuMapper">
+	<resultMap type="codedriver.module.tenant.dto.MenuVo" id="menuByIdMap">
 		<id column="id" property="id" />
 		<result column="name" property="name" />
 		<result column="icon" property="icon" />
@@ -14,10 +14,10 @@
 		<result column="module" property="module" />
 		<result column="openMode" property="openMode" />
 		<result column="isAuto" property="isAuto" />
-		<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+		<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
 			<id column="roleName" property="name" />
 		</collection>
-		<collection property="childMenuList" ofType="codedriver.framework.tenant.dto.MenuVo">
+		<collection property="childMenuList" ofType="codedriver.module.tenant.dto.MenuVo">
 			<id column="childId" property="id" />
 			<result column="childName" property="name" />
 			<result column="childIcon" property="icon" />
@@ -30,12 +30,12 @@
 			<result column="childModule" property="module" />
 			<result column="childIsAuto" property="isAuto" />
 			<result column="childOpenMode" property="openMode" />
-			<collection property="roleList" ofType="codedriver.framework.tenant.dto.RoleVo">
+			<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
 				<id column="childRoleName" property="name" />
 			</collection>
 		</collection>
 	</resultMap>
-	<select id="getMenuList" parameterType="codedriver.framework.tenant.dto.MenuVo" resultMap="menuByIdMap">
+	<select id="getMenuList" parameterType="codedriver.module.tenant.dto.MenuVo" resultMap="menuByIdMap">
 		SELECT
 		a.id,
 		a.name,
@@ -99,7 +99,7 @@
 		ORDER BY a.parent_id, a.sort
 	</select>
 
-	<select id="getParentIdMaxSort" parameterType="codedriver.framework.tenant.dto.MenuVo" resultType="java.lang.Integer">
+	<select id="getParentIdMaxSort" parameterType="codedriver.module.tenant.dto.MenuVo" resultType="java.lang.Integer">
 		SELECT IFNULL(MAX(sort)+ 1, 1) FROM menu WHERE parent_id = #{parentId}
 	</select>
 	
@@ -107,7 +107,7 @@
 		SELECT COUNT(1) FROM menu WHERE parent_id = #{value}
 	</select>
 	
-	<insert id="insertMenu" parameterType="codedriver.framework.tenant.dto.MenuVo">
+	<insert id="insertMenu" parameterType="codedriver.module.tenant.dto.MenuVo">
 		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
 			select LAST_INSERT_ID() as id
 		</selectKey>
@@ -150,7 +150,7 @@
 		)
 	</insert>
 	
-	<update id="updateMenu" parameterType="codedriver.framework.tenant.dto.MenuVo">
+	<update id="updateMenu" parameterType="codedriver.module.tenant.dto.MenuVo">
 		UPDATE menu
 		SET
 		NAME = #{name},
