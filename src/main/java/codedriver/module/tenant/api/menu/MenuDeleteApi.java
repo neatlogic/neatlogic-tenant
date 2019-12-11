@@ -12,7 +12,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.exception.MenuDeleteException;
+import codedriver.module.tenant.exception.menu.MenuDeleteException;
 import codedriver.module.tenant.service.MenuService;
 
 @Service

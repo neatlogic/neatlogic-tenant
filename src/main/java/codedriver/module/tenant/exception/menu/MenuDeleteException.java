@@ -1,4 +1,4 @@
-package codedriver.module.tenant.exception;
+package codedriver.module.tenant.exception.menu;
 
 import codedriver.framework.exception.core.ApiRuntimeException;
 

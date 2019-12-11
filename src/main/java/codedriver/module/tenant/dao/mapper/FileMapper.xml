@@ -10,5 +10,27 @@
 		`filetype_config`
 		WHERE name = #{value}
 	</select>
+
+	<insert id="insertFile" parameterType="codedriver.framework.file.dto.FileVo">
+		INSERT INTO `file` (
+		`uuid`,
+		`path`,
+		`name`,
+		`size`,
+		`user_id`,
+		`upload_time`,
+		`type`
+		)
+		VALUES
+		(
+		#{uuid},
+		#{path},
+		#{name},
+		#{size},
+		#{userId},
+		NOW(),
+		#{type}
+		)
+	</insert>
 </mapper>
 

@@ -15,7 +15,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.dto.MenuVo;
-import codedriver.module.tenant.exception.MenuSaveException;
+import codedriver.module.tenant.exception.menu.MenuSaveException;
 import codedriver.module.tenant.service.MenuService;
 
 @Service
@@ -97,7 +97,7 @@ public class MenuSaveApi extends ApiComponentBase {
 		menuVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MenuVo>() {
 		});
 		if (menuVo.getId() == menuVo.getParentId()) {
-			throw new MenuSaveException(" 菜单id不合法，不能与父菜单id相同");
+			throw new MenuSaveException("菜单id不合法，不能与父菜单id相同");
 		}
 		menuService.saveMenu(menuVo);
 		jsonObject.put("id", menuVo.getId());
