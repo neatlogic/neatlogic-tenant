@@ -5,7 +5,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
-import codedriver.framework.reminder.service.GlobalReminderService;
+import codedriver.module.tenant.service.reminder.GlobalReminderService;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;

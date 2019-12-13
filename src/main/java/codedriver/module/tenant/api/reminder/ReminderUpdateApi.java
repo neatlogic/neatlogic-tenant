@@ -2,9 +2,8 @@ package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.reminder.service.GlobalReminderService;
+import codedriver.module.tenant.service.reminder.GlobalReminderService;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.annotation.Input;
