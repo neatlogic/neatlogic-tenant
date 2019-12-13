@@ -2,6 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.module.tenant.dao.mapper.FileMapper">
 
+	<select id="getFileByUuid" parameterType="java.lang.String" resultType="codedriver.framework.file.dto.FileVo">
+		SELECT
+		`uuid`,
+		`path`,
+		`name`,
+		`size`,
+		`user_id` AS userId,
+		DATE_FORMAT( `upload_time`, '%Y-%m-%d %H:%i:%s' ) AS uploadTime,
+		`type`
+		FROM
+		`file`
+		WHERE `uuid` = #{value}
+	</select>
+
 	<select id="getFileTypeConfigByType" parameterType="java.lang.String" resultType="codedriver.framework.file.dto.FileTypeVo">
 		SELECT
 		`name`,

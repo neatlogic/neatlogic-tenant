@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +75,8 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口")
 	@Override
-	public Object myDoService(JSONObject paramObj, MultipartHttpServletRequest multipartRequest) throws Exception {
+	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
 		List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
@@ -188,7 +192,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				fileVo.setType(type);
 				fileMapper.insertFile(fileVo);
 				fileTypeHandler.afterUpload(fileVo, paramObj);
-				return fileVo;
+				return fileMapper.getFileByUuid(fileVo.getUuid());
 			} else {
 				throw new DirectoryCreateException(finalPath);
 			}
