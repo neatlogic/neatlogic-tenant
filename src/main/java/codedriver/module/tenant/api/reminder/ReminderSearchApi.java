@@ -42,7 +42,7 @@ public class ReminderSearchApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块ID", isRequired = true)})
+    @Input({ @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块ID")})
     @Output({@Param(explode = GlobalReminderVo.class),
              @Param(name = "reminderList", explode = GlobalReminderVo[].class, desc = "实时动态插件集合")})
     @Description(desc = "实时动态插件检索接口")
