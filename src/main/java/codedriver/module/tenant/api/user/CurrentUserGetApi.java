@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.user;
 
+import java.util.Random;
+
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,6 +35,8 @@ public class CurrentUserGetApi extends ApiComponentBase {
 	@Description(desc = "获取当前用户test接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		Random random = new Random();
+		Thread.sleep(random.nextInt(10000));
 		return UserContext.get();
 	}
 }
