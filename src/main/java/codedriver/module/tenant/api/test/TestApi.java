@@ -4,7 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -31,6 +32,9 @@ public class TestApi extends ApiComponentBase {
 	@Description(desc = "测试输出log接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String tenantUuid = TenantContext.get().getTenantUuid();
+		String userId = UserContext.get().getUserId();
+		String info = "租户:"+tenantUuid+"               用户:"+userId;
 		String result = "        var blog_address = \"https://blog.csdn.net/ttt111zzz\";\r\n" + 
 				"        var static_host = \"https://csdnimg.cn/release/phoenix/\";\r\n" + 
 				"        var currentUserName = \"baopu1400\";\r\n" + 
@@ -202,7 +206,7 @@ public class TestApi extends ApiComponentBase {
 				" 但是需要注意的是新服务器上的Gitlab的版本必须与创建备份时的Gitlab版本号相同. 比如新服务器安装的是最新的7.60版本的Gitlab, 那么迁移之前, 最好将老服务器的Gitlab 升级为7.60在进行备份.</span></div>\r\n" + 
 				"                                    </div>\r\n" + 
 				"                                    <div class=\"more-toolbox\">";
-		return result;
+		return info+result;
 	}
 
 }
