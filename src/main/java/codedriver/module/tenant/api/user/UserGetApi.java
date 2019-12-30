@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -18,6 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 public class UserGetApi extends ApiComponentBase {
+	private static final String USER_TYPE_ADMIN = "admin";
 
 	@Autowired
 	private UserMapper userMapper;
@@ -41,7 +43,12 @@ public class UserGetApi extends ApiComponentBase {
 			@Param(name = "userId",
 					type = ApiParamType.STRING,
 					desc = "用户Id",
-					isRequired = true) })
+					isRequired = false),
+			@Param(name = "getMode",
+				type = ApiParamType.ENUM,
+				rule = "admin,user",
+				isRequired = true,
+				desc = "查询方式，admin：在管理页面打开，user：点击个人头像信息")})
 	@Output({
 			@Param(name = "userId",
 					type = ApiParamType.STRING,
@@ -66,11 +73,17 @@ public class UserGetApi extends ApiComponentBase {
 					desc = "用户角色信息列表"),
 			@Param(name = "teamList",
 					type = ApiParamType.JSONARRAY,
-					desc = "用户所在组信息列表") })
+					desc = "用户所在组信息列表")})
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		UserVo userVo = userMapper.getUserByUserId(jsonObj.getString("userId"));
+		String userId = null;
+		if(USER_TYPE_ADMIN.equals(jsonObj.getString("getMode"))) {
+			userId = jsonObj.getString("userId");
+		}else {
+			userId = UserContext.get().getUserId();
+		}
+		UserVo userVo = userMapper.getUserByUserId(userId);
 		return userVo;
 	}
 }
