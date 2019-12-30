@@ -81,7 +81,7 @@ public class UserSaveApi extends ApiComponentBase {
 			@Param(name = "userInfo",
 				type = ApiParamType.STRING,
 				desc = "其他信息",
-				isRequired = true),
+				isRequired = false),
 			@Param(name = "saveMode",
 					type = ApiParamType.ENUM,
 					rule = "merge,replace",
