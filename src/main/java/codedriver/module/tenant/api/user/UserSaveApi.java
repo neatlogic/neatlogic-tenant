@@ -53,7 +53,7 @@ public class UserSaveApi extends ApiComponentBase {
 			@Param(name = "pinyin",
 				type = ApiParamType.STRING,
 				desc = "姓名拼音",
-				isRequired = true),
+				isRequired = false),
 			@Param(name = "password",
 					type = ApiParamType.STRING,
 					desc = "用户密码",
@@ -98,6 +98,6 @@ public class UserSaveApi extends ApiComponentBase {
 		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
 		userVo.setTeamUuidList(teamUuidList);
 		userService.saveUser(userVo);
-		return null;
+		return userVo.getUserId();
 	}
 }
