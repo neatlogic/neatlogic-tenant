@@ -58,7 +58,7 @@ public class JobClassGetApi extends ApiComponentBase {
 		String classpath = jsonObj.getString("classpath");
 		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
 		if(jobClass == null) {
-			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
+			throw new ScheduleJobClassNotFoundException(classpath);
 		}
 		JSONArray inputList = new JSONArray();
 		IJob job = SchedulerManager.getInstance(jobClass.getClasspath());

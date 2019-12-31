@@ -60,6 +60,7 @@ public class JobSearchApi extends ApiComponentBase {
 		@Param(name="jobList[0].uuid",type=ApiParamType.LONG,isRequired=true,desc="定时作业id"),
 		@Param(name="jobList[0].name",type=ApiParamType.STRING,isRequired=true,desc="定时作业名称"),
 		@Param(name="jobList[0].classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件类路径"),
+		@Param(name="jobList[0].jobClassName",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件名称"),
 		@Param(name="jobList[0].beginTime",type=ApiParamType.LONG,isRequired=false,desc="开始时间"),
 		@Param(name="jobList[0].endTime",type=ApiParamType.LONG,isRequired=false,desc="结束时间"),
 		@Param(name="jobList[0].cron",type=ApiParamType.STRING,isRequired=false,desc="cron表达式"),

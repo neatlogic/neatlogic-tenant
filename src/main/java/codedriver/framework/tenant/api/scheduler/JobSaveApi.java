@@ -60,8 +60,8 @@ public class JobSaveApi extends ApiComponentBase {
 		@Param(name="beginTime",type=ApiParamType.LONG,isRequired=false,desc="开始时间"),
 		@Param(name="endTime",type=ApiParamType.LONG,isRequired=false,desc="结束时间"),
 		@Param(name="cron",type=ApiParamType.STRING,isRequired=true,desc="corn表达式"),
-		@Param(name="isActive",type=ApiParamType.STRING,isRequired=true,desc="是否激活(no:禁用，yes：激活)"),
-		@Param(name="needAudit",type=ApiParamType.STRING,isRequired=true,desc="是否保存执行记录(no:不保存，yes:保存)"),
+		@Param(name="isActive",type=ApiParamType.ENUM,isRequired=true, rule = "yes,no", desc="是否激活(no:禁用，yes：激活)"),
+		@Param(name="needAudit",type=ApiParamType.ENUM,isRequired=true, rule = "yes,no",desc="是否保存执行记录(no:不保存，yes:保存)"),
 		@Param(name="propList",type=ApiParamType.JSONARRAY,isRequired=false,desc="属性列表"),
 		@Param(name="propList[0].name",type=ApiParamType.STRING,isRequired=false,desc="属性名"),
 		@Param(name="propList[0].value",type=ApiParamType.STRING,isRequired=false,desc="属性值")
@@ -76,15 +76,7 @@ public class JobSaveApi extends ApiComponentBase {
 		String classpath = jsonObj.getString("classpath");
 		IJob job = SchedulerManager.getInstance(classpath);
 		if(job == null) {
-			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
-		}
-		String isActive = jsonObj.getString("isActive");
-		if(!JobVo.YES.equals(isActive) && !JobVo.NO.equals(isActive)) {
-			throw new ScheduleIllegalParameterException("isActive参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'");
-		}
-		String needAudit = jsonObj.getString("needAudit");
-		if(!JobVo.YES.equals(needAudit) && !JobVo.NO.equals(needAudit)) {
-			throw new ScheduleIllegalParameterException("needAudit参数值必须是'" + JobVo.YES + "'或'" + JobVo.NO + "'");
+			throw new ScheduleJobClassNotFoundException(classpath);
 		}	
 		String cron = jsonObj.getString("cron");
 		if(!CronExpression.isValidExpression(cron)) {
@@ -95,12 +87,12 @@ public class JobSaveApi extends ApiComponentBase {
 		job.valid(jobVo.getPropList());
 		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
 		if(jobClass == null) {
-			throw new ScheduleJobClassNotFoundException("定时作业组件："+ classpath + " 不存在");
+			throw new ScheduleJobClassNotFoundException(classpath);
 		}
 		if(JobClassVo.ONCE_TYPE.equals(jobClass.getType())) {
 			List<JobVo> jobList = schedulerMapper.getJobByClasspath(classpath);
 			if(jobList.size() > 0) {
-				throw new ScheduleJobSingletonException("定时作业组件："+ classpath + " 只能创建一个作业");
+				throw new ScheduleJobSingletonException(classpath);
 			}
 		}
 		schedulerService.saveJob(jobVo);

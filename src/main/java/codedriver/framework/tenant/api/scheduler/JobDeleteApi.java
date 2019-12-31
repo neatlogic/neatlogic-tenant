@@ -51,7 +51,7 @@ public class JobDeleteApi extends ApiComponentBase {
 		String jobUuid = jsonObj.getString("jobUuid");
 		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
 		if(job == null) {
-			throw new ScheduleJobNotFoundException("定时作业："+ jobUuid + " 不存在");
+			throw new ScheduleJobNotFoundException(jobUuid);
 		}
 		schedulerManager.deleteJob(jobUuid);
 		schedulerMapper.deleteJobByUuid(jobUuid);				
