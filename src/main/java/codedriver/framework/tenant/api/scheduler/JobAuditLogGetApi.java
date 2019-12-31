@@ -16,6 +16,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
+import codedriver.framework.scheduler.exception.ScheduleJobAuditNotFoundException;
 import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
 @Service
 @Transactional
@@ -52,7 +53,7 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 		Long auditId = jsonObj.getLong("auditId");
 		JobAuditVo jobAudit = schedulerMapper.getJobAuditLogById(auditId);
 		if(jobAudit == null) {
-			throw new ScheduleJobClassNotFoundException("定时作业执行记录：" + auditId + "不存在");
+			throw new ScheduleJobAuditNotFoundException(auditId);
 		}
 		return jobAudit.getLogContent();
 	}
