@@ -59,7 +59,12 @@ public class TeamSearchApi extends ApiComponentBase {
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目",
-					isRequired = false) })
+					isRequired = false),
+			@Param(name = "needPage",
+				type = ApiParamType.BOOLEAN,
+				desc = "是否需要分页，默认true",
+				isRequired = false) 
+})
 	@Output({
 			@Param(name = "teamList",
 					type = ApiParamType.STRING,
