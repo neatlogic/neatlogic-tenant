@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dto.TeamVo;
@@ -57,10 +59,6 @@ public class TeamSearchApi extends ApiComponentBase {
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目",
-					isRequired = false),
-			@Param(name = "needPage",
-					type = ApiParamType.BOOLEAN,
-					desc = "是否需要分页，默认true",
 					isRequired = false) })
 	@Output({
 			@Param(name = "teamList",
@@ -82,15 +80,7 @@ public class TeamSearchApi extends ApiComponentBase {
 	@Description(desc = "分组查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-
-		TeamVo teamVo = new TeamVo(false);
-		teamVo.setUuid(jsonObj.getString("uuid"));
-		teamVo.setParentUuid(jsonObj.getString("parentUuid"));
-		teamVo.setKeyword(jsonObj.getString("keyword"));
-		teamVo.setPageSize(jsonObj.getInteger("pageSize"));
-		teamVo.setCurrentPage(jsonObj.getInteger("currentPage"));
-		teamVo.setNeedPage(jsonObj.getBoolean("needPage"));
-
+		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
 		List<TeamVo> teamList = teamService.searchTeam(teamVo);
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("teamList", teamList);
