@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
@@ -54,6 +55,16 @@ public class UserServiceImpl implements UserService {
 		userMapper.deleteUserTeamByUserId(userId);
 		userMapper.deleteUserByUserId(userId);
 		return 1;
+	}
+
+	@Override
+	public List<UserVo> searchUser(UserVo userVo) {
+		if (userVo.getNeedPage()) {
+			int rowNum = userMapper.searchUserCount(userVo);
+			userVo.setRowNum(rowNum);
+			userVo.setPageCount(PageUtil.getPageCount(rowNum, userVo.getPageSize()));
+		}
+		return userMapper.searchUser(userVo);
 	}
 
 }
