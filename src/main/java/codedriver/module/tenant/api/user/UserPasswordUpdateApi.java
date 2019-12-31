@@ -15,12 +15,11 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.exception.user.UserPasswordException;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 public class UserPasswordUpdateApi extends ApiComponentBase {
-	
-	private static final String USER_TYPE_ADMIN = "admin";
 	
 	@Autowired
 	private UserMapper userMapper;
@@ -48,24 +47,20 @@ public class UserPasswordUpdateApi extends ApiComponentBase {
 			@Param(name = "password",
 					type = ApiParamType.STRING,
 					desc = "用户密码",
-					isRequired = true),
-			@Param(name = "type",
-				type = ApiParamType.ENUM,
-				rule = "admin,user",
-				isRequired = true,
-				desc = "修改方式，admin：管理员修改，user：用户修改")})
+					isRequired = true)})
 	@Output({})
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = null;
+		String userId = jsonObj.getString("userId");
 		String password = jsonObj.getString("password");
-		if(USER_TYPE_ADMIN.equals(jsonObj.getString("type"))) {//管理员修改其他用户密码
-			userId = jsonObj.getString("userId");
-		}else {//用户自行修改密码
-			userId = UserContext.get().getUserId();
+		if(userId==null) {//管理员修改其他用户密码
+			if(UserContext.get().getUserId()==null) {
+				throw new UserPasswordException("当前用户未登录!");
+			}else {
+				userId = UserContext.get().getUserId();
+			}
 		}
-		
 		UserVo userVo = userMapper.getUserByUserId(userId);
 		userVo.setPassword(password);		
 		userMapper.updateUserPassword(userVo);

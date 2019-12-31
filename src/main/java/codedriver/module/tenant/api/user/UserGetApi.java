@@ -15,11 +15,11 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.exception.user.UserGetException;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 public class UserGetApi extends ApiComponentBase {
-	private static final String USER_TYPE_ADMIN = "admin";
 
 	@Autowired
 	private UserMapper userMapper;
@@ -43,12 +43,7 @@ public class UserGetApi extends ApiComponentBase {
 			@Param(name = "userId",
 					type = ApiParamType.STRING,
 					desc = "用户Id",
-					isRequired = false),
-			@Param(name = "getMode",
-				type = ApiParamType.ENUM,
-				rule = "admin,user",
-				isRequired = true,
-				desc = "查询方式，admin：在管理页面打开，user：点击个人头像信息")})
+					isRequired = false)})
 	@Output({
 			@Param(name = "userId",
 					type = ApiParamType.STRING,
@@ -77,11 +72,13 @@ public class UserGetApi extends ApiComponentBase {
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = null;
-		if(USER_TYPE_ADMIN.equals(jsonObj.getString("getMode"))) {
-			userId = jsonObj.getString("userId");
-		}else {
-			userId = UserContext.get().getUserId();
+		String userId = jsonObj.getString("userId");
+		if(userId==null) {
+			if(UserContext.get().getUserId()==null) {
+				throw new UserGetException("当前用户未登陆!");
+			}else {
+				userId = UserContext.get().getUserId();
+			}
 		}
 		UserVo userVo = userMapper.getUserByUserId(userId);
 		return userVo;
