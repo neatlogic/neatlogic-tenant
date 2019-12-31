@@ -53,7 +53,7 @@ public class UserSaveApi extends ApiComponentBase {
 			@Param(name = "password",
 					type = ApiParamType.STRING,
 					desc = "用户密码",
-					isRequired = true),
+					isRequired = false),
 			@Param(name = "email",
 					type = ApiParamType.STRING,
 					desc = "用户邮箱",
@@ -74,6 +74,10 @@ public class UserSaveApi extends ApiComponentBase {
 					type = ApiParamType.JSONARRAY,
 					desc = "角色名称",
 					isRequired = true),
+			@Param(name = "userInfo",
+				type = ApiParamType.STRING,
+				desc = "其他信息",
+				isRequired = false),
 			@Param(name = "saveMode",
 					type = ApiParamType.ENUM,
 					rule = "merge,replace",
@@ -94,6 +98,6 @@ public class UserSaveApi extends ApiComponentBase {
 		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
 		userVo.setTeamUuidList(teamUuidList);
 		userService.saveUser(userVo);
-		return null;
+		return userVo.getUserId();
 	}
 }
