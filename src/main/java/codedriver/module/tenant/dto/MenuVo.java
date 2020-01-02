@@ -30,7 +30,7 @@ public class MenuVo {
 	private Integer sort;
 	@EntityField(name = "是否激活",
 			type = ApiParamType.INTEGER)
-	private int isActive;
+	private int isActive = 0;
 	@EntityField(name = "所属模块",
 			type = ApiParamType.STRING)
 	private String module;
@@ -67,14 +67,15 @@ public class MenuVo {
 
 	}
 
-	public MenuVo(Long id) {
-		this.id = id;
+	public MenuVo(Long _id) {
+		this.id = _id;
 	}
 
-	public MenuVo(Long id, Long parentId, List<String> roleNameList) {
-		this.id = id;
-		this.parentId = parentId;
-		this.roleNameList = roleNameList;
+	public MenuVo(Long _id, Long _parentId, Integer _isActive,List<String> _roleNameList) {
+		this.id = _id;
+		this.parentId = _parentId;
+		this.roleNameList = _roleNameList;
+		this.isActive = _isActive;
 	}
 
 	public void setId(Long id) {

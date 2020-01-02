@@ -68,7 +68,7 @@
 		LEFT JOIN menu_role c ON a.id = c.menu_id
 		LEFT JOIN menu_role d ON b.id = d.menu_id
 
-		WHERE a.is_active = 1
+		WHERE a.is_active = #{isActive}
 		<choose>
 			<when test="parentId !=null">
 				AND a.parent_id = #{parentId}
