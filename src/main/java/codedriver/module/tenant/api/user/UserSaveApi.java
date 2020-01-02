@@ -91,12 +91,12 @@ public class UserSaveApi extends ApiComponentBase {
 		});
 
 		// 保存角色
-		List<String> roleList = JSON.parseArray(jsonObj.getString("roleList"), String.class);
-		userVo.setRoleNameList(roleList);
-
-		// 保存用户组
-		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-		userVo.setTeamUuidList(teamUuidList);
+//		List<String> roleList = JSON.parseArray(jsonObj.getString("roleList"), String.class);
+//		userVo.setRoleNameList(roleList);
+//
+//		// 保存用户组
+//		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+//		userVo.setTeamUuidList(teamUuidList);
 		userService.saveUser(userVo);
 		return userVo.getUserId();
 	}
