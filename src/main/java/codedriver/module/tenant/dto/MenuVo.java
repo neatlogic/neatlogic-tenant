@@ -75,7 +75,7 @@ public class MenuVo {
 		this.id = _id;
 		this.parentId = _parentId;
 		this.roleNameList = _roleNameList;
-		this.isActive = _isActive;
+		this.isActive = _isActive != null?_isActive:0;
 	}
 
 	public void setId(Long id) {
