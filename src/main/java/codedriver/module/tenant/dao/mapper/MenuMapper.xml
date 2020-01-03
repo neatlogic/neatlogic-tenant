@@ -79,7 +79,7 @@
 			</otherwise>
 		</choose>
 		<if test="isActive != null">
-			a.is_active = #{isActive}
+			and a.is_active = #{isActive}
 		</if>
 		<if test="module!=null and module != ''">
 			AND a.module = #{module}
