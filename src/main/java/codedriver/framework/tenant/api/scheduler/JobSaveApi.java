@@ -60,8 +60,8 @@ public class JobSaveApi extends ApiComponentBase {
 		@Param(name="beginTime",type=ApiParamType.LONG,isRequired=false,desc="开始时间"),
 		@Param(name="endTime",type=ApiParamType.LONG,isRequired=false,desc="结束时间"),
 		@Param(name="cron",type=ApiParamType.STRING,isRequired=true,desc="corn表达式"),
-		@Param(name="isActive",type=ApiParamType.ENUM,isRequired=true, rule = "yes,no", desc="是否激活(no:禁用，yes：激活)"),
-		@Param(name="needAudit",type=ApiParamType.ENUM,isRequired=true, rule = "yes,no",desc="是否保存执行记录(no:不保存，yes:保存)"),
+		@Param(name="isActive",type=ApiParamType.ENUM,isRequired=true, rule = "0,1", desc="是否激活(0:禁用，1：激活)"),
+		@Param(name="needAudit",type=ApiParamType.ENUM,isRequired=true, rule = "0,1",desc="是否保存执行记录(0:不保存，1:保存)"),
 		@Param(name="propList",type=ApiParamType.JSONARRAY,isRequired=false,desc="属性列表"),
 		@Param(name="propList[0].name",type=ApiParamType.STRING,isRequired=false,desc="属性名"),
 		@Param(name="propList[0].value",type=ApiParamType.STRING,isRequired=false,desc="属性值")
@@ -96,7 +96,7 @@ public class JobSaveApi extends ApiComponentBase {
 			}
 		}
 		schedulerService.saveJob(jobVo);
-		if(JobVo.YES.equals(jobVo.getIsActive())) {
+		if(jobVo.getIsActive().intValue() == 1) {
 			JobObject jobObject = JobObject.buildJobObject(jobVo, JobObject.FRAMEWORK);
 			schedulerManager.loadJob(jobObject);
 			schedulerManager.broadcastNewJob(jobObject);			
