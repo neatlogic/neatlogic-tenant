@@ -17,7 +17,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.exception.ScheduleJobAuditNotFoundException;
-import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
 @Service
 @Transactional
 @AuthAction(name="SYSTEM_JOB_EDIT")
