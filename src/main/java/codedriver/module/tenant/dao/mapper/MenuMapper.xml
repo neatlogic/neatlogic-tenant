@@ -68,7 +68,8 @@
 		LEFT JOIN menu_role c ON a.id = c.menu_id
 		LEFT JOIN menu_role d ON b.id = d.menu_id
 
-		WHERE a.is_active = #{isActive}
+		WHERE 
+		1=1 
 		<choose>
 			<when test="parentId !=null">
 				AND a.parent_id = #{parentId}
@@ -77,6 +78,9 @@
 				AND a.parent_id != 0		
 			</otherwise>
 		</choose>
+		<if test="isActive != null">
+			a.is_active = #{isActive}
+		</if>
 		<if test="module!=null and module != ''">
 			AND a.module = #{module}
 		</if>

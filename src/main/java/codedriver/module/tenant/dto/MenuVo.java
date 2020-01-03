@@ -30,7 +30,7 @@ public class MenuVo {
 	private Integer sort;
 	@EntityField(name = "是否激活",
 			type = ApiParamType.INTEGER)
-	private int isActive = 0;
+	private Integer isActive;
 	@EntityField(name = "所属模块",
 			type = ApiParamType.STRING)
 	private String module;

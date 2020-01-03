@@ -45,7 +45,7 @@ public class MenuSearchApi extends ApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, desc = "菜单id", isRequired = false), 
 		@Param(name = "parentId", type = ApiParamType.LONG, desc = "菜单父节点id", isRequired = false), 
 		@Param(name = "type", type = ApiParamType.INTEGER, desc = "默认0，0:返回全部菜单，1:根据角色返回", isRequired = false),
-		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否启用，默认0，0禁用，1启用。如果父节点不激活，则它所有子节点都不反回", isRequired = false)
+		@Param(name = "isAll", type = ApiParamType.INTEGER, desc = "是否返回所有菜单，默认1，0不启用的菜单不返回，如果父节点不激活，则它所有子节点都不反回；1返回所有菜单。", isRequired = true)
 		})
 	@Output({ 
 		@Param(name = "id", type = ApiParamType.LONG, desc = "菜单id"), 
@@ -66,12 +66,16 @@ public class MenuSearchApi extends ApiComponentBase {
 		JSONObject json = new JSONObject();
 		List<MenuVo> menuList = new ArrayList<MenuVo>();
 		List<String> roleNameList = new ArrayList<String>();
+		Integer isActive = null;
 		// 如果是根据角色返回对应菜单
 		if (jsonObj.containsKey("type") && jsonObj.getIntValue("type") == 1) {
 			UserContext userContext = UserContext.get();
 			roleNameList = userContext.getRoleNameList();
 		}
-		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"), jsonObj.getLong("parentId"), jsonObj.getInteger("isActive"),roleNameList));
+		if (jsonObj.getIntValue("isAll") == 0) {
+			isActive = 1;
+		}
+		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"), jsonObj.getLong("parentId"), isActive,roleNameList));
 		json.put("menuList", menuList);
 		return json;
 	}
