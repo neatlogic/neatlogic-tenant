@@ -72,7 +72,7 @@ public class MenuSearchApi extends ApiComponentBase {
 			UserContext userContext = UserContext.get();
 			roleNameList = userContext.getRoleNameList();
 		}
-		if (jsonObj.getIntValue("isAll") == 0) {
+		if (jsonObj.containsKey("isAll") &&jsonObj.getIntValue("isAll") == 0) {
 			isActive = 1;
 		}
 		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"), jsonObj.getLong("parentId"), isActive,roleNameList));
