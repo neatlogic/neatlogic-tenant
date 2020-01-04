@@ -46,7 +46,7 @@ public class JobSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=false,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=false,desc="页大小"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=false,desc="定时作业名称(支持模糊查询)"),
+		@Param(name="keyword",type=ApiParamType.STRING,isRequired=false,desc="定时作业名称(支持模糊查询)"),
 		@Param(name="classpath",type=ApiParamType.STRING,isRequired=false,desc="定时作业组件classpath")
 		})
 	@Description(desc="查询定时作业列表")
