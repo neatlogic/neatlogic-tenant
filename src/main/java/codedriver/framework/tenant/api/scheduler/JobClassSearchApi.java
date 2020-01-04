@@ -44,9 +44,9 @@ public class JobClassSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=false,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=false,desc="页大小"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=false,desc="定时作业组件名称(支持模糊查询)"),
-		@Param(name="moduleName",type=ApiParamType.STRING,isRequired=false,desc="模块名称"),
-		@Param(name="type",type=ApiParamType.STRING,isRequired=false,desc="类型(flow-流程级别，task-任务级别，once-只允许配一次)")
+		@Param(name="keyword",type=ApiParamType.STRING,isRequired=false,desc="定时作业组件名称(支持模糊查询)"),
+		@Param(name="moduleId",type=ApiParamType.STRING,isRequired=false,desc="模块id"),
+		@Param(name="type",type=ApiParamType.STRING,isRequired=false,desc="类型(flow-流程级，task-任务级，once-单例)")
 		})
 	@Description(desc="查询定时作业组件列表")
 	@Example(example="{\"name\":\"自动评分job\", \"moduleName\":\"flow\",\"type\":\"flow\"}")
