@@ -1,17 +1,9 @@
 package codedriver.module.tenant.api.test;
 
-import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
-import static com.techsure.multiattrsearch.query.QueryBuilder.not;
-
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsQuery;
-import com.techsure.multiattrsearch.query.QueryResult;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.config.Config;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -38,17 +30,17 @@ public class esSearchApi extends ApiComponentBase {
 	@Description(desc = "测试es查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		MultiAttrsQuery query = Config.pool.createQueryBuilder()
+		/*MultiAttrsQuery query = Config.pool.createQueryBuilder()
 		        // .select("not_exists", "title", "status")
 		        .from(TenantContext.get().getTenantUuid())
 		        // 只有 like 操作符会使用全文搜索
 		        .where(attr("title").like("你好")
 		                .and()
 		                .attr("tags").contains("主机")
-		                /*.or(	
+		                .or(	
 		                		attr("status").between(1, 4)
 		                		//.and(not(attr("enabled").eq(false)))
-		                	)*/
+		                	)
 		        )
 		        .orderBy("create_time", false)
 		        .limit(0, 20)
@@ -58,9 +50,9 @@ public class esSearchApi extends ApiComponentBase {
 
 		for (MultiAttrsObject el : result.getData()) {
 		    System.out.println(el.getId() + " => " + el.getString("title"));
-		}
+		}*/
 
-		return result.getData();
+		return 1 ;//result.getData();
 	}
 
 }
