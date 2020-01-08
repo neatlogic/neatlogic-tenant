@@ -54,20 +54,20 @@ public class JobSaveApi extends ApiComponentBase {
 
 	
 	@Input({
-		@Param(name="uuid",type=ApiParamType.STRING,isRequired=false,desc="定时作业uuid"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="定时作业名称"),
-		@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件类路径"),
-		@Param(name="beginTime",type=ApiParamType.LONG,isRequired=false,desc="开始时间"),
-		@Param(name="endTime",type=ApiParamType.LONG,isRequired=false,desc="结束时间"),
-		@Param(name="cron",type=ApiParamType.STRING,isRequired=true,desc="corn表达式"),
-		@Param(name="isActive",type=ApiParamType.ENUM,isRequired=true, rule = "0,1", desc="是否激活(0:禁用，1：激活)"),
-		@Param(name="needAudit",type=ApiParamType.ENUM,isRequired=true, rule = "0,1",desc="是否保存执行记录(0:不保存，1:保存)"),
-		@Param(name="propList",type=ApiParamType.JSONARRAY,isRequired=false,desc="属性列表"),
-		@Param(name="propList[0].name",type=ApiParamType.STRING,isRequired=false,desc="属性名"),
-		@Param(name="propList[0].value",type=ApiParamType.STRING,isRequired=false,desc="属性值")
+		@Param(name="uuid", type=ApiParamType.STRING, isRequired=false, desc="定时作业uuid"), 
+		@Param(name="name", type=ApiParamType.STRING, isRequired=true, desc="定时作业名称"), 
+		@Param(name="classpath", type=ApiParamType.STRING, isRequired=true, desc="定时作业组件类路径"), 
+		@Param(name="beginTime", type=ApiParamType.LONG, isRequired=false, desc="开始时间"), 
+		@Param(name="endTime", type=ApiParamType.LONG, isRequired=false, desc="结束时间"), 
+		@Param(name="cron", type=ApiParamType.STRING, isRequired=true, desc="corn表达式"), 
+		@Param(name="isActive", type=ApiParamType.ENUM, isRequired=true,  rule = "0,1",  desc="是否激活(0:禁用，1：激活)"), 
+		@Param(name="needAudit", type=ApiParamType.ENUM, isRequired=true,  rule = "0,1", desc="是否保存执行记录(0:不保存，1:保存)"), 
+		@Param(name="propList", type=ApiParamType.JSONARRAY, desc="属性列表, 是否必填由定时作业组件决定"), 
+		@Param(name="propList[0].name", type=ApiParamType.STRING, desc="属性名"), 
+		@Param(name="propList[0].value", type=ApiParamType.STRING, desc="属性值")
 		})
 	@Output({
-		@Param(name="uuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")
+		@Param(name="uuid", type=ApiParamType.STRING, isRequired=true, desc="定时作业uuid")
 	})
 	@Description(desc="保存定时作业信息")
 	@Example(example="{name:\"测试_1\", classpath:\"codedriver.framework.scheduler.core.TestJob\", triggerType:\"simple\", repeat:\"10\", interval:\"60\", isActive:\"no\", needAudit:\"no\", beginTime:1573530069000, propList:[{name:\"p_1\",value:\"1\"},{name:\"p_2\",value:\"2\"},{name:\"p_3\",value:\"3\"},{name:\"p_4\",value:\"4\"},{name:\"p_5\",value:\"5\"}]}")
