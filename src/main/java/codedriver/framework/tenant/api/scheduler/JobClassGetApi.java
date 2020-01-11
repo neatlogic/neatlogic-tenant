@@ -56,6 +56,7 @@ public class JobClassGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String classpath = jsonObj.getString("classpath");
+		//判断定时作业组件是否存在
 		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
 		if(jobClass == null) {
 			throw new ScheduleJobClassNotFoundException(classpath);
