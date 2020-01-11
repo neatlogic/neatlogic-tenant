@@ -61,11 +61,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
-		RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
-		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
 		List<UserVo> userList = userService.searchUser(userVo);
+		
+		RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
+		
+		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
 		List<TeamVo> teamList = teamService.searchTeam(teamVo);
+		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("userList", userList);
 		resultObj.put("roleList", roleList);
