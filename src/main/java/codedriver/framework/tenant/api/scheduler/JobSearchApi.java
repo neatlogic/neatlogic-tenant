@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -18,10 +17,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobVo;
+import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
-@Transactional
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobSearchApi extends ApiComponentBase {
 
@@ -78,7 +79,16 @@ public class JobSearchApi extends ApiComponentBase {
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});
+		//判断定时作业组件是否存在
+		if(jsonObj.containsKey("classpath")) {
+			String classpath = jsonObj.getString("classpath");
+			JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
+			if(jobClass == null) {
+				throw new ScheduleJobClassNotFoundException(classpath);
+			}
+		}
+		
+		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});	
 		List<JobVo> jobList = schedulerService.searchJobList(jobVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobList", jobList);
