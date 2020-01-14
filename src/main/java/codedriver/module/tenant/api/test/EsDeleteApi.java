@@ -14,8 +14,8 @@ public class EsDeleteApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String id = jsonObj.getString("id");
-        if (id == null) {
-            return null;
+        if (id == null || id.isEmpty()) {
+            return "";
         }
 
         objectPoolService.deleteTask(TenantContext.get().getTenantUuid(), id);

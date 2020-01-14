@@ -14,7 +14,7 @@ public class EsGetApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String id = jsonObj.getString("id");
-        if (id == null) {
+        if (id == null || id.isEmpty()) {
             return null;
         }
 

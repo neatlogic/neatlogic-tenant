@@ -18,7 +18,7 @@ public class EsUpdateApi extends ApiComponentBase {
             return null;
         }
         String title = jsonObj.getString("title");
-        if (title == null) {
+        if (title == null || title.isEmpty()) {
             return null;
         }
 
