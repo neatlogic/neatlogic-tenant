@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.test;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.query.QueryBuilder;
@@ -14,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
 
@@ -45,27 +47,14 @@ public class EsSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Integer status = jsonObj.getInteger("status");
-        JSONArray tmp = jsonObj.getJSONArray("tags");
-        List<String> tags = tmp == null || tmp.isEmpty() ? null : new ArrayList<>(tmp.size());
-        if (tags != null) {
-            for (Object el : tmp) {
-                if (!(el instanceof String)) {
-                	continue;
-                }
-                String str = (String)el;
-                if (StringUtils.isBlank(str)) {
-                	continue;
-				}
-				tags.add(str);
-			}
-        }
+        List<String> tags = Util.getList(jsonObj, "tags");
         String title = jsonObj.getString("title");
 
         QueryBuilder.ConditionBuilder cond = null;
         if (status != null) {
             cond = attr("status").eq(status);
         }
-        if (tags != null && !tags.isEmpty()) {
+        if (!tags.isEmpty()) {
             cond = cond == null ? attr("tags").containsAny(tags) : cond.and().attr("tags").containsAny(tags);
         }
         if (title != null && !StringUtils.isBlank(title)) {
