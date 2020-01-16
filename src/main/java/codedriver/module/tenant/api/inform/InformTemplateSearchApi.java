@@ -43,6 +43,7 @@ public class InformTemplateSearchApi extends ApiComponentBase {
 	@Input({
 		@Param(name="keyword",type=ApiParamType.STRING,isRequired=false,desc="模板名称模糊匹配"),
 		@Param(name="type",type=ApiParamType.STRING,isRequired=false,desc="类型"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=false,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=false,desc="页大小")
 		})
