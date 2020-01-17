@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.user;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -53,9 +52,9 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
 		})
 	@Output({
-		@Param(name="userList", explode=User[].class, desc="用户列表"),
-		@Param(name="roleList", explode=User[].class, desc="角色列表"),
-		@Param(name="teamList", explode=User[].class, desc="组织架构列表"),
+		@Param(name="userList", explode=UserVo[].class, desc="用户列表"),
+		@Param(name="roleList", explode=RoleVo[].class, desc="角色列表"),
+		@Param(name="teamList", explode=TeamVo[].class, desc="组织架构列表"),
 	})
 	@Description(desc = "用户角色及组织架构查询接口")
 	@Override
