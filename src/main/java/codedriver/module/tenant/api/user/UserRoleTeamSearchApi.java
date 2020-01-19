@@ -1,14 +1,11 @@
 package codedriver.module.tenant.api.user;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.javers.common.collections.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -78,7 +75,6 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		List<UserVo> userList = null;
 		List<RoleVo> roleList = null;
 		List<TeamVo> teamList = null;
-		JSONArray jsonArray = null;
 		if(jsonObj.containsKey("keyword")) {
 			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
 			userList = userService.searchUser(userVo);
