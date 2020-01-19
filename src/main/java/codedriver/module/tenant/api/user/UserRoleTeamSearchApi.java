@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.javers.common.collections.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -89,27 +90,15 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			teamList = teamService.searchTeam(teamVo);
 		}else {
 			if(jsonObj.containsKey("userIdList")) {
-				List<String> userIdList = new ArrayList<>();
-				jsonArray = jsonObj.getJSONArray("userIdList");
-				for(int i = 0; i < jsonArray.size(); i++) {
-					userIdList.add(jsonArray.getString(i));
-				}
+				List<String> userIdList = JSON.parseArray(jsonObj.getJSONArray("userIdList").toJSONString(), String.class);
 				userList = userMapper.getUserByUserIdList(userIdList);
 			}
 			if(jsonObj.containsKey("roleNameList")) {
-				List<String> roleNameList = new ArrayList<>();
-				jsonArray = jsonObj.getJSONArray("roleNameList");
-				for(int i = 0; i < jsonArray.size(); i++) {
-					roleNameList.add(jsonArray.getString(i));
-				}
+				List<String> roleNameList = JSON.parseArray(jsonObj.getJSONArray("roleNameList").toJSONString(), String.class);
 				roleList = roleMapper.getRoleByRoleNameList(roleNameList);
 			}
 			if(jsonObj.containsKey("teamUuidList")) {
-				List<String> teamUuidList = new ArrayList<>();
-				jsonArray = jsonObj.getJSONArray("teamUuidList");
-				for(int i = 0; i < jsonArray.size(); i++) {
-					teamUuidList.add(jsonArray.getString(i));
-				}
+				List<String> teamUuidList = JSON.parseArray(jsonObj.getJSONArray("teamUuidList").toJSONString(), String.class);
 				teamList = teamMapper.getTeamByUuidList(teamUuidList);
 			}
 		}
