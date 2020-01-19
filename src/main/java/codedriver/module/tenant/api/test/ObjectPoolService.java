@@ -39,7 +39,7 @@ public class ObjectPoolService {
     }
 
     public void saveTask(String tenantId, String taskId, JSONObject data) {
-        objectPool.checkout(tenantId);
+        objectPool.checkout(tenantId, null);
         MultiAttrsObjectPatch patch = objectPool.save(taskId);
         TaskSchema.inflateSavePatch(patch, data);
         try {
@@ -50,7 +50,7 @@ public class ObjectPoolService {
     }
 
     public void updateTaskTitle(String tenantId, String taskId, String newTitle) {
-        objectPool.checkout(tenantId);
+        objectPool.checkout(tenantId, null);
         MultiAttrsObjectPatch patch = objectPool.update(taskId);
         patch.set("title", newTitle);
         try {
@@ -61,7 +61,7 @@ public class ObjectPoolService {
     }
 
     public void deleteTask(String tenantId, String taskId) {
-        objectPool.checkout(tenantId);
+        objectPool.checkout(tenantId, null);
         try {
             objectPool.delete(taskId);
         } catch (Exception e) {
@@ -70,7 +70,7 @@ public class ObjectPoolService {
     }
 
     public TaskSchema getTask(String tenantId, String taskId) {
-        objectPool.checkout(tenantId);
+        objectPool.checkout(tenantId, null);
         try {
             MultiAttrsObject result = objectPool.get(taskId);
             if (result == null) {
