@@ -85,15 +85,15 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
 			teamList = teamService.searchTeam(teamVo);
 		}else {
-			if(jsonObj.containsKey("userIdList")) {
+			if(jsonObj.containsKey("userIdList") && !jsonObj.getJSONArray("userIdList").isEmpty()) {
 				List<String> userIdList = JSON.parseArray(jsonObj.getJSONArray("userIdList").toJSONString(), String.class);
 				userList = userMapper.getUserByUserIdList(userIdList);
 			}
-			if(jsonObj.containsKey("roleNameList")) {
+			if(jsonObj.containsKey("roleNameList") && !jsonObj.getJSONArray("roleNameList").isEmpty()) {
 				List<String> roleNameList = JSON.parseArray(jsonObj.getJSONArray("roleNameList").toJSONString(), String.class);
 				roleList = roleMapper.getRoleByRoleNameList(roleNameList);
 			}
-			if(jsonObj.containsKey("teamUuidList")) {
+			if(jsonObj.containsKey("teamUuidList") && !jsonObj.getJSONArray("teamUuidList").isEmpty()) {
 				List<String> teamUuidList = JSON.parseArray(jsonObj.getJSONArray("teamUuidList").toJSONString(), String.class);
 				teamList = teamMapper.getTeamByUuidList(teamUuidList);
 			}
