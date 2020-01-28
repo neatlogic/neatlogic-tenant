@@ -10,6 +10,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
@@ -31,6 +34,13 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Autowired
 	private TeamService teamService;
 	
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private RoleMapper roleMapper;
+	@Autowired
+	private TeamMapper teamMapper;
+	
 	@Override
 	public String getToken() {
 		return "user/role/team/search";
@@ -47,6 +57,9 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
+		@Param(name = "userIdList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用户id列表"),
+		@Param(name = "roleNameList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "角色名称列表"),
+		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "组uuid列表"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页", isRequired = false)
@@ -59,14 +72,33 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Description(desc = "用户角色及组织架构查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
-		List<UserVo> userList = userService.searchUser(userVo);
+		List<UserVo> userList = null;
+		List<RoleVo> roleList = null;
+		List<TeamVo> teamList = null;
+		if(jsonObj.containsKey("keyword")) {
+			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
+			userList = userService.searchUser(userVo);
+			
+			RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
+			roleList = roleService.searchRole(roleVo);
+			
+			TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
+			teamList = teamService.searchTeam(teamVo);
+		}else {
+			if(jsonObj.containsKey("userIdList") && !jsonObj.getJSONArray("userIdList").isEmpty()) {
+				List<String> userIdList = JSON.parseArray(jsonObj.getJSONArray("userIdList").toJSONString(), String.class);
+				userList = userMapper.getUserByUserIdList(userIdList);
+			}
+			if(jsonObj.containsKey("roleNameList") && !jsonObj.getJSONArray("roleNameList").isEmpty()) {
+				List<String> roleNameList = JSON.parseArray(jsonObj.getJSONArray("roleNameList").toJSONString(), String.class);
+				roleList = roleMapper.getRoleByRoleNameList(roleNameList);
+			}
+			if(jsonObj.containsKey("teamUuidList") && !jsonObj.getJSONArray("teamUuidList").isEmpty()) {
+				List<String> teamUuidList = JSON.parseArray(jsonObj.getJSONArray("teamUuidList").toJSONString(), String.class);
+				teamList = teamMapper.getTeamByUuidList(teamUuidList);
+			}
+		}
 		
-		RoleVo roleVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<RoleVo>() {});
-		List<RoleVo> roleList = roleService.searchRole(roleVo);
-		
-		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
-		List<TeamVo> teamList = teamService.searchTeam(teamVo);
 		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("userList", userList);
