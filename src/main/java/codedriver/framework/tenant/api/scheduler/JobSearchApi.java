@@ -20,7 +20,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
+import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import codedriver.framework.scheduler.service.SchedulerService;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
@@ -84,7 +84,7 @@ public class JobSearchApi extends ApiComponentBase {
 			String classpath = jsonObj.getString("classpath");
 			JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
 			if(jobClass == null) {
-				throw new ScheduleJobClassNotFoundException(classpath);
+				throw new ScheduleHandlerNotFoundException(classpath);
 			}
 		}
 		

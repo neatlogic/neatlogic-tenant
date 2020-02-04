@@ -19,7 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
-import codedriver.framework.scheduler.exception.ScheduleJobClassNotFoundException;
+import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobClassGetApi extends ApiComponentBase {
@@ -59,10 +59,10 @@ public class JobClassGetApi extends ApiComponentBase {
 		//判断定时作业组件是否存在
 		JobClassVo jobClass = SchedulerManager.getJobClassByClasspath(classpath);
 		if(jobClass == null) {
-			throw new ScheduleJobClassNotFoundException(classpath);
+			throw new ScheduleHandlerNotFoundException(classpath);
 		}
 		JSONArray inputList = new JSONArray();
-		IJob job = SchedulerManager.getInstance(jobClass.getClasspath());
+		IJob job = SchedulerManager.getHandler(jobClass.getClassName());
 		Map<String, codedriver.framework.scheduler.annotation.Param> paramMap = job.initProp();
 		for(Entry<String, codedriver.framework.scheduler.annotation.Param> entry : paramMap.entrySet()) {
 			codedriver.framework.scheduler.annotation.Param param = entry.getValue();

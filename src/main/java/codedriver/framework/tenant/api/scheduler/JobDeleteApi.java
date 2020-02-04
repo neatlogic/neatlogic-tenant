@@ -2,11 +2,11 @@ package codedriver.framework.tenant.api.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
@@ -14,20 +14,22 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobClassVo;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
+import codedriver.framework.scheduler.service.SchedulerService;
+
 @Service
-@Transactional
-@AuthAction(name="SYSTEM_JOB_EDIT")
+@AuthAction(name = "SYSTEM_JOB_EDIT")
 public class JobDeleteApi extends ApiComponentBase {
-	
+
 	@Autowired
 	private SchedulerManager schedulerManager;
-	
+
 	@Autowired
-	private SchedulerMapper schedulerMapper;
-	
+	private SchedulerService schedulerService;
+
 	@Override
 	public String getToken() {
 		return "job/delete";
@@ -43,18 +45,21 @@ public class JobDeleteApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name="jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")})
-	@Description(desc="删除定时作业")
-	@Example(example="{\"jobUuid\":1}")
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid") })
+	@Description(desc = "删除定时作业")
+	@Example(example = "{\"uuid\":\"xxxxxxx\"}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String jobUuid = jsonObj.getString("jobUuid");
-		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
-		if(job == null) {
+		String jobUuid = jsonObj.getString("uuid");
+		JobVo job = schedulerService.getJobBaseInfoByUuid(jobUuid);
+		if (job == null) {
 			throw new ScheduleJobNotFoundException(jobUuid);
 		}
-		schedulerManager.deleteJob(jobUuid);
-		schedulerMapper.deleteJobByUuid(jobUuid);				
+		String tenantUuid = TenantContext.get().getTenantUuid();
+		JobClassVo jobClassVo = schedulerManager.getJobClassByClasspath(job.getClassName());
+		JobObject jobObject = new JobObject.Builder(jobUuid, tenantUuid + JobObject.DELIMITER + jobClassVo.getModuleId(), job.getClassName(), tenantUuid).build();
+		schedulerManager.unloadJob(jobObject);
+		schedulerService.deleteJob(jobUuid);
 		return null;
 	}
 

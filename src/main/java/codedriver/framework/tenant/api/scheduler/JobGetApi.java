@@ -2,7 +2,6 @@ package codedriver.framework.tenant.api.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -18,7 +17,6 @@ import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @Service
-@Transactional
 @AuthAction(name="SYSTEM_JOB_EDIT")
 public class JobGetApi extends ApiComponentBase {
 	
