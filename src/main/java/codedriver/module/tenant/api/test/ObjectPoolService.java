@@ -21,7 +21,7 @@ public class ObjectPoolService {
 
     @PostConstruct
     public void init() {
-        Map<String, String> esClusters = Config.ES_CLUSTERS;
+       /* Map<String, String> esClusters = Config.ES_CLUSTERS;
         if (esClusters.isEmpty()) {
             throw new IllegalStateException("ES集群信息未配置，es.cluster.<cluster-name>=<ip:port>[,<ip:port>...]");
         }
@@ -35,7 +35,7 @@ public class ObjectPoolService {
             logger.warn("multiple clusters available, only cluster {} was used (picked randomly) for testing", cluster.getKey());
         }
 
-        objectPool = MultiAttrsSearch.getObjectPool(config);
+        objectPool = MultiAttrsSearch.getObjectPool(config);*/
     }
 
     public void saveTask(String tenantId, String taskId, JSONObject data) {

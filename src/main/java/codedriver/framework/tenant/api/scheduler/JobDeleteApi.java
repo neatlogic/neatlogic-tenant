@@ -56,8 +56,8 @@ public class JobDeleteApi extends ApiComponentBase {
 			throw new ScheduleJobNotFoundException(jobUuid);
 		}
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		IJob jobHandler = schedulerManager.getHandler(job.getClassName());
-		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), job.getClassName(), tenantUuid).build();
+		IJob jobHandler = SchedulerManager.getHandler(job.getClassName());
+		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
 		schedulerManager.unloadJob(jobObject);
 		schedulerService.deleteJob(jobUuid);
 		return null;
