@@ -14,21 +14,22 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
-import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
 import codedriver.framework.scheduler.service.SchedulerService;
 
 @Service
 @AuthAction(name = "SYSTEM_JOB_EDIT")
+@IsActive
 public class JobSaveApi extends ApiComponentBase {
 	@Autowired
 	private SchedulerService schedulerService;
@@ -52,17 +53,8 @@ public class JobSaveApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({
-			@Param(name = "uuid", type = ApiParamType.STRING, isRequired = false, desc = "定时作业uuid"),
-			@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "定时作业名称"),
-			@Param(name = "className", type = ApiParamType.STRING, isRequired = true, desc = "定时作业组件类名称"),
-			@Param(name = "beginTime", type = ApiParamType.LONG, isRequired = false, desc = "开始时间"),
-			@Param(name = "endTime", type = ApiParamType.LONG, isRequired = false, desc = "结束时间"),
-			@Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"),
-			@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1：激活)"),
-			@Param(name = "needAudit", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否保存执行记录(0:不保存，1:保存)"),
-			@Param(name = "propList", type = ApiParamType.JSONARRAY, desc = "属性列表, 是否必填由定时作业组件决定"),
-			@Param(name = "propList[0].name", type = ApiParamType.STRING, desc = "属性名"),
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = false, desc = "定时作业uuid"), @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "定时作业名称"), @Param(name = "className", type = ApiParamType.STRING, isRequired = true, desc = "定时作业组件类名称"), @Param(name = "beginTime", type = ApiParamType.LONG, isRequired = false, desc = "开始时间"), @Param(name = "endTime", type = ApiParamType.LONG, isRequired = false, desc = "结束时间"),
+			@Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"), @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1：激活)"), @Param(name = "needAudit", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否保存执行记录(0:不保存，1:保存)"), @Param(name = "propList", type = ApiParamType.JSONARRAY, desc = "属性列表, 是否必填由定时作业组件决定"), @Param(name = "propList[0].name", type = ApiParamType.STRING, desc = "属性名"),
 			@Param(name = "propList[0].value", type = ApiParamType.STRING, desc = "属性值") })
 	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid") })
 	@Description(desc = "保存定时作业信息")
@@ -82,13 +74,9 @@ public class JobSaveApi extends ApiComponentBase {
 		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {
 		});
 		jobHandler.valid(jobVo.getPropList());
-		JobClassVo jobClassVo = SchedulerManager.getJobClassByClasspath(className);
-		if (jobClassVo == null) {
-			throw new ScheduleHandlerNotFoundException(className);
-		}
 		schedulerService.saveJob(jobVo);
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), tenantUuid + JobObject.DELIMITER + jobClassVo.getModuleId(), jobVo.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
+		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobVo.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
 		if (jobVo.getIsActive().intValue() == 1) {
 			schedulerManager.loadJob(jobObject);
 		} else {

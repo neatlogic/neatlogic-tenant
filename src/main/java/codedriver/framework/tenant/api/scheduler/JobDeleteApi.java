@@ -13,8 +13,8 @@ import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
@@ -56,8 +56,8 @@ public class JobDeleteApi extends ApiComponentBase {
 			throw new ScheduleJobNotFoundException(jobUuid);
 		}
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		JobClassVo jobClassVo = schedulerManager.getJobClassByClasspath(job.getClassName());
-		JobObject jobObject = new JobObject.Builder(jobUuid, tenantUuid + JobObject.DELIMITER + jobClassVo.getModuleId(), job.getClassName(), tenantUuid).build();
+		IJob jobHandler = schedulerManager.getHandler(job.getClassName());
+		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), job.getClassName(), tenantUuid).build();
 		schedulerManager.unloadJob(jobObject);
 		schedulerService.deleteJob(jobUuid);
 		return null;
