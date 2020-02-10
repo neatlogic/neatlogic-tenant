@@ -19,7 +19,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
-import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
@@ -32,8 +31,6 @@ import codedriver.framework.scheduler.service.SchedulerService;
 public class JobSaveApi extends ApiComponentBase {
 	@Autowired
 	private SchedulerService schedulerService;
-	@Autowired
-	private SchedulerMapper schedulerMapper;
 	@Autowired
 	private SchedulerManager schedulerManager;
 
@@ -88,7 +85,7 @@ public class JobSaveApi extends ApiComponentBase {
 		}
 		schedulerService.saveJob(jobVo);
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), tenantUuid + JobObject.DELIMITER + jobClassVo.getModuleId(), jobVo.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
+		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
 		if (jobVo.getIsActive().intValue() == 1) {
 			schedulerManager.loadJob(jobObject);
 		} else {
