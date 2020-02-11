@@ -1,11 +1,15 @@
 package codedriver.module.tenant.api.user;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -72,9 +76,9 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	@Description(desc = "用户角色及组织架构查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<UserVo> userList = null;
-		List<RoleVo> roleList = null;
-		List<TeamVo> teamList = null;
+		List<UserVo> userList = new ArrayList<UserVo>();
+		List<RoleVo> roleList = new ArrayList<RoleVo>();
+		List<TeamVo> teamList = new ArrayList<TeamVo>();
 		if(jsonObj.containsKey("keyword")) {
 			UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
 			userList = userService.searchUser(userVo);
@@ -84,7 +88,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			
 			TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});		
 			teamList = teamService.searchTeam(teamVo);
-		}else {
+		}else {//回显
 			if(jsonObj.containsKey("userIdList") && !jsonObj.getJSONArray("userIdList").isEmpty()) {
 				List<String> userIdList = JSON.parseArray(jsonObj.getJSONArray("userIdList").toJSONString(), String.class);
 				userList = userMapper.getUserByUserIdList(userIdList);
@@ -100,11 +104,48 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		}
 		
 		
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("userList", userList);
-		resultObj.put("roleList", roleList);
-		resultObj.put("teamList", teamList);
-		return resultObj;
+		JSONArray resultArray = new JSONArray();
+		//用户
+		JSONObject userObj = new JSONObject();
+		userObj.put("value", "user");
+		userObj.put("text", "用户");
+		JSONArray userArray = new JSONArray();
+		for(UserVo user:userList) {
+			JSONObject userTmp = new JSONObject();
+			userTmp.put("value", "user#"+user.getUserId());
+			userTmp.put("text", user.getUserName());
+			userArray.add(userTmp);
+		}
+		userObj.put("dataList", userArray);
+		resultArray.add(userObj);
+		//分组
+		JSONObject teamObj = new JSONObject();
+		teamObj.put("value", "team");
+		teamObj.put("text", "分组");
+		JSONArray teamArray = new JSONArray();
+		for(TeamVo team:teamList) {
+			JSONObject teamTmp = new JSONObject();
+			teamTmp.put("value", "team#"+team.getUuid());
+			teamTmp.put("text", team.getName());
+			teamArray.add(teamTmp);
+		}
+		teamObj.put("dataList", teamArray);
+		resultArray.add(teamObj);
+		//角色
+		JSONObject roleObj = new JSONObject();
+		roleObj.put("value", "role");
+		roleObj.put("text", "角色");
+		JSONArray roleArray = new JSONArray();
+		for(RoleVo role:roleList) {
+			JSONObject roleTmp = new JSONObject();
+			roleTmp.put("value", "team#"+role.getName());
+			roleTmp.put("text", role.getDescription());
+			roleArray.add(roleTmp);
+		}
+		roleObj.put("dataList", roleArray);
+		resultArray.add(roleObj);
+		return resultArray;
 	}
+	
 
 }
