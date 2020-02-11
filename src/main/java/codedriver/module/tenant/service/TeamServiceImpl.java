@@ -39,11 +39,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public void saveTeam(TeamVo teamVo) {
-		if (StringUtils.isBlank(teamVo.getUuid())){
-			teamVo.setUuid(UuidUtil.getUuid());
-			teamMapper.insertTeam(teamVo);
-		}else {
-			teamMapper.updateTeamByUuid(teamVo);
-		}
+		teamMapper.deleteTeamByUuid(teamVo.getUuid());
+		teamMapper.insertTeam(teamVo);
 	}
 }
