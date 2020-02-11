@@ -7,6 +7,8 @@ import codedriver.framework.dto.TeamVo;
 public interface TeamService {
 	public List<TeamVo> searchTeam(TeamVo teamVo);
 
-	public int deteteTeam(String teamUuid);
+	public int deleteTeam(String teamUuid);
+
+	public void saveTeam(TeamVo teamVo);
 
 }

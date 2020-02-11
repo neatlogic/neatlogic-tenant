@@ -40,11 +40,11 @@ public class RoleSaveApi extends ApiComponentBase {
 			@Param(name = "name",
 					type = ApiParamType.STRING,
 					desc = "角色名称",
-					isRequired = true),
+					isRequired = true, xss = true),
 			@Param(name = "description",
 					type = ApiParamType.STRING,
 					desc = "角色描述",
-					isRequired = true) })
+					isRequired = true, xss = true) })
 	@Description(desc = "角色信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

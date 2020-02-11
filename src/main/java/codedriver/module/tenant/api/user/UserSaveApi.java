@@ -77,11 +77,11 @@ public class UserSaveApi extends ApiComponentBase {
 			@Param(name = "userInfo",
 				type = ApiParamType.STRING,
 				desc = "其他信息",
-				isRequired = false),
+				isRequired = false)/*,
 			@Param(name = "saveMode",
 					type = ApiParamType.ENUM,
 					rule = "merge,replace",
-					desc = "保存方式，merge：只更新提供的属性，replace：更新全部属性，不提供的置空") })
+					desc = "保存方式，merge：只更新提供的属性，replace：更新全部属性，不提供的置空")*/ })
 	@Output({})
 	@Description(desc = "保存用户接口")
 	@Override
