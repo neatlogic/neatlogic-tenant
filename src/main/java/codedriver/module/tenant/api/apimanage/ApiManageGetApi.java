@@ -47,13 +47,14 @@ public class ApiManageGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String token = jsonObj.getString("token");
 		ApiVo apiVo = ApiMapper.getApiByToken(token);
-		if(apiVo == null) {
-			apiVo = ApiComponentFactory.getApiByToken(token);
+		if(apiVo != null) {
+			return apiVo;
 		}
-		if(apiVo == null) {
-			throw new ApiNotFoundException("token为'" + token + "'的接口不存在");
+		apiVo = ApiComponentFactory.getApiByToken(token);
+		if(apiVo != null) {
+			return apiVo;
 		}
-		return apiVo;
+		throw new ApiNotFoundException("token为'" + token + "'的接口不存在");		
 	}
 
 }
