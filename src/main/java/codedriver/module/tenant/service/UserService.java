@@ -19,4 +19,8 @@ public interface UserService {
 
 	public int updateUserActive(UserVo userVo);
 
+	public UserVo getUserByUserId(String userId);
+
+	public void updateUserPassword(UserVo userVo);
+
 }

@@ -28,8 +28,12 @@ public class UserServiceImpl implements UserService {
 			userMapper.updateUser(userVo);
 			userMapper.deleteUserRoleByUserId(userId);
 			userMapper.deleteUserTeamByUserId(userId);
+			//更新密码
+			userMapper.updateUserPasswordActive(userId);
+			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
+			userMapper.deleteUserPasswordByLimit(userId, idList);
 		}
-
+		userMapper.insertUserPassword(userVo);
 		if (userVo.getRoleNameList() != null && userVo.getRoleNameList().size() > 0) {
 			for (String roleName : userVo.getRoleNameList()) {
 				userMapper.insertUserRole(userId, roleName);
@@ -68,5 +72,18 @@ public class UserServiceImpl implements UserService {
 	public int updateUserActive(UserVo userVo) {
 		userMapper.updateUserActive(userVo);
 		return 1;
+	}
+
+	@Override
+	public UserVo getUserByUserId(String userId) {
+		return userMapper.getUserByUserId(userId);
+	}
+
+	@Override
+	public void updateUserPassword(UserVo userVo) {
+		userMapper.updateUserPasswordActive(userVo.getUserId());
+		List<Long> idList = userMapper.getLimitUserPasswordIdList(userVo.getUserId());
+		userMapper.deleteUserPasswordByLimit(userVo.getUserId(), idList);
+		userMapper.insertUserPassword(userVo);
 	}
 }

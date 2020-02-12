@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.module.tenant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ import codedriver.module.tenant.exception.user.UserPasswordException;
 public class UserPasswordUpdateApi extends ApiComponentBase {
 	
 	@Autowired
-	private UserMapper userMapper;
+	private UserService userService;
 
 	@Override
 	public String getToken() {
@@ -61,9 +62,9 @@ public class UserPasswordUpdateApi extends ApiComponentBase {
 				userId = UserContext.get().getUserId();
 			}
 		}
-		UserVo userVo = userMapper.getUserByUserId(userId);
+		UserVo userVo = userService.getUserByUserId(userId);
 		userVo.setPassword(password);		
-		userMapper.updateUserPassword(userVo);
+		userService.updateUserPassword(userVo);
 		return userVo.getUserId();
 	}
 }
