@@ -48,6 +48,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
+		@Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块id"),
 		@Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="当前页码，默认值1"),
@@ -81,6 +82,9 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		//从内存中取出符合搜索条件的api、token数据
 		for(ApiVo api : ApiComponentFactory.getApiList()) {
 			if(apiVo.getIsActive() != null && !apiVo.getIsActive().equals(api.getIsActive())) {
+				continue;
+			}
+			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getHandler())) {
 				continue;
 			}
 			if(StringUtils.isNotBlank(handler) && !handler.equals(api.getHandler())) {
