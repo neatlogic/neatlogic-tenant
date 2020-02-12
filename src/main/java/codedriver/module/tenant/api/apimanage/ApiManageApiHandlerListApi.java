@@ -1,7 +1,9 @@
 package codedriver.module.tenant.api.apimanage;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -37,6 +39,7 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 	}
 	
 	@Input({
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口组件名模糊查询"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="当前页码，默认值1"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc="页大小，默认值10"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc="是否分页，默认值true")
@@ -54,7 +57,18 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() {});
 		
-		List<ApiHandlerVo> apiHandlerList = ApiComponentFactory.getApiHandlerList();
+		List<ApiHandlerVo> apiHandlerList = new ArrayList<>();
+		String keyword = jsonObj.getString("keyword");			
+		if(StringUtils.isNotBlank(keyword)) {
+			for(ApiHandlerVo apiHandlerVo : ApiComponentFactory.getApiHandlerList()) {
+				if(apiHandlerVo.getName().contains(keyword)) {
+					apiHandlerList.add(apiHandlerVo);
+				}
+			}
+		}else {
+			apiHandlerList = ApiComponentFactory.getApiHandlerList();
+		}
+		
 		apiHandlerList.sort((apiHandler1, apiHandler2) -> apiHandler1.getHandler().compareTo(apiHandler2.getHandler()));
 		
 		JSONObject resultObj = new JSONObject();
