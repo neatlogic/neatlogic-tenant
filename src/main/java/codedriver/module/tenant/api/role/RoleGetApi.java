@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.role;
 
+import codedriver.module.tenant.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 public class RoleGetApi extends ApiComponentBase {
 
 	@Autowired
-	private RoleMapper roleMapper;
+	private RoleService roleService;
 
 	@Override
 	public String getToken() {
@@ -44,6 +45,6 @@ public class RoleGetApi extends ApiComponentBase {
 	@Description(desc = "角色详细信息查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return roleMapper.getRoleByRoleName(jsonObj.getString("name"));
+		return roleService.getRoleByRoleName(jsonObj.getString("name"));
 	}
 }

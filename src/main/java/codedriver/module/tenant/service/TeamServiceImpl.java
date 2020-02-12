@@ -2,6 +2,8 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.module.tenant.util.UuidUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +30,24 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public int deteteTeam(String teamUuid) {
+	public TeamVo getTeamByUuid(String teamUuid) {
+		TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
+		int userCount = teamMapper.searchUserCountByTeamUuid(teamUuid);
+		teamVo.setUserCount(userCount);
+		return teamVo;
+	}
+
+	@Override
+	public int deleteTeam(String teamUuid) {
 		teamMapper.deleteUserTeamRoleByTeamUuid(teamUuid);
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
 		teamMapper.deleteTeamByUuid(teamUuid);
 		return 1;
+	}
+
+	@Override
+	public void saveTeam(TeamVo teamVo) {
+		teamMapper.deleteTeamByUuid(teamVo.getUuid());
+		teamMapper.insertTeam(teamVo);
 	}
 }

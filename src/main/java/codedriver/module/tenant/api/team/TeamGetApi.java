@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.team;
 
+import codedriver.module.tenant.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 public class TeamGetApi extends ApiComponentBase {
 
 	@Autowired
-	private TeamMapper teamMapper;
+	private TeamService teamService;
 
 	@Override
 	public String getToken() {
@@ -48,7 +49,7 @@ public class TeamGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) {
 		String teamUuid = jsonObj.getString("uuid");
-		TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
+		TeamVo teamVo = teamService.getTeamByUuid(teamUuid);
 		return teamVo;
 	}
 }

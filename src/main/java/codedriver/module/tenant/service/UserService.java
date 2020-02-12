@@ -17,4 +17,10 @@ public interface UserService {
 	@Transactional
 	public List<UserVo> searchUser(UserVo userVo);
 
+	public int updateUserActive(UserVo userVo);
+
+	public UserVo getUserByUserId(String userId);
+
+	public void updateUserPassword(UserVo userVo);
+
 }

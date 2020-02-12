@@ -42,10 +42,11 @@ public class TeamSaveApi extends ApiComponentBase{
 
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=false),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组名",isRequired=true),
-		@Param(name = "parentId", type = ApiParamType.STRING, desc = "父级组id",isRequired=true),
-		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述",isRequired=true),
-		@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)
+		@Param(name = "name", type = ApiParamType.STRING, desc = "组名",isRequired=true, xss=true),
+		@Param(name = "parentUuId", type = ApiParamType.STRING, desc = "父级组id",isRequired=true),
+		@Param(name = "description", type = ApiParamType.STRING, desc = "组描述",isRequired=true, xss=true),
+		@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = true)
+		/*@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)*/
 	})
 	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
 	@Description(desc = "保存组信息")
@@ -54,6 +55,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		JSONObject json = new JSONObject();
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {
 		});
+		teamService.saveTeam(teamVo);
 		json.put("uuid", teamVo.getUuid());
 		return json;
 	}
