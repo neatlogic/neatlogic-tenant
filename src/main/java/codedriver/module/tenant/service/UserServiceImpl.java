@@ -64,4 +64,9 @@ public class UserServiceImpl implements UserService {
 		return userMapper.searchUser(userVo);
 	}
 
+	@Override
+	public int updateUserActive(UserVo userVo) {
+		userMapper.updateUserActive(userVo);
+		return 1;
+	}
 }

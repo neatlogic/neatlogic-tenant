@@ -54,4 +54,12 @@ public class RoleServiceImpl implements RoleService {
 		roleMapper.insertRoleUser(userVo);
 		return 1;
 	}
+
+	@Override
+	public RoleVo getRoleByRoleName(String roleName) {
+		RoleVo roleVo = roleMapper.getRoleByRoleName(roleName);
+		int userCount = roleMapper.searchRoleUserCountByRoleName(roleName);
+		roleVo.setUserCount(userCount);
+		return roleVo;
+	}
 }

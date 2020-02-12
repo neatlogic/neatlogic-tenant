@@ -30,6 +30,14 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
+	public TeamVo getTeamByUuid(String teamUuid) {
+		TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
+		int userCount = teamMapper.searchUserCountByTeamUuid(teamUuid);
+		teamVo.setUserCount(userCount);
+		return teamVo;
+	}
+
+	@Override
 	public int deleteTeam(String teamUuid) {
 		teamMapper.deleteUserTeamRoleByTeamUuid(teamUuid);
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
