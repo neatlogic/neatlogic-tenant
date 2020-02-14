@@ -9,6 +9,8 @@ import codedriver.framework.dto.RoleVo;
 public interface RoleService {
 	public List<RoleVo> searchRole(RoleVo roleVo);
 
+	public int searchRoleCount(RoleVo roleVo);
+
 	@Transactional
 	public int saveRole(RoleVo roleVo);
 

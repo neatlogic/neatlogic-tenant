@@ -27,6 +27,13 @@ public class RoleServiceImpl implements RoleService {
 		}
 		return roleMapper.searchRole(roleVo);
 	}
+
+	@Override
+	public int searchRoleCount(RoleVo roleVo) {
+		roleVo.setNeedPage(false);
+		return roleMapper.searchRoleCount(roleVo);
+	}
+
 	@Override
 	public int saveRole(RoleVo roleVo) {
 		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
