@@ -50,10 +50,7 @@ public class UserSearchApi extends ApiComponentBase {
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页展示数量 默认10",
-					isRequired = false),
-			@Param(name = "needPage",
-					type = ApiParamType.BOOLEAN,
-					desc = "是否进行分页")})
+					isRequired = false)})
 	@Output({
 			@Param(name = "userList",
 					type = ApiParamType.JSONARRAY,
@@ -92,12 +89,10 @@ public class UserSearchApi extends ApiComponentBase {
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
 		json.put("userList", userList);
-		if(jsonObj.getBoolean("needPage")){
-			json.put("rowNum", userVo.getRowNum());
-			json.put("pageCount", userVo.getPageCount());
-			json.put("pageSize", userVo.getPageSize());
-			json.put("currentPage", userVo.getCurrentPage());
-		}
+		json.put("rowNum", userVo.getRowNum());
+		json.put("pageCount", userVo.getPageCount());
+		json.put("pageSize", userVo.getPageSize());
+		json.put("currentPage", userVo.getCurrentPage());
 		return json;
 	}
 }
