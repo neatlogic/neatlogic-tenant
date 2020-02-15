@@ -49,7 +49,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "接口token"),
 		@Param(name = "timeout", type = ApiParamType.INTEGER, desc = "请求时效"),
 		@Param(name = "qps", type = ApiParamType.INTEGER, desc = "每秒访问几次，大于0生效"),
-		@Param(name = "expire", type = ApiParamType.STRING, desc = "使用期限"),
+		@Param(name = "expire", type = ApiParamType.LONG, desc = "使用期限"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "json格式,配置信息"),
 		@Param(name = "username", type = ApiParamType.STRING, desc = "用户名称"),
 		@Param(name = "password", type = ApiParamType.STRING, desc = "密码"),
