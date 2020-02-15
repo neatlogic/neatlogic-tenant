@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.role;
 
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,15 +37,18 @@ public class RoleDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "name",
-					type = ApiParamType.STRING,
-					desc = "角色名称",
+			@Param(name = "nameList",
+					type = ApiParamType.JSONARRAY,
+					desc = "角色名称集合",
 					isRequired = true) })
 	@Description(desc = "角色删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String name = jsonObj.getString("name");
-		roleService.deleteRoleByRoleName(name);
+		JSONArray nameArray = jsonObj.getJSONArray("nameList");
+		for (int i = 0; i < nameArray.size(); i++) {
+			String name = nameArray.getString(i);
+			roleService.deleteRoleByRoleName(name);
+		}
 		return null;
 	}
 }

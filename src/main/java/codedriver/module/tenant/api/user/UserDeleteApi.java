@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +38,16 @@ public class UserDeleteApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userId", type = ApiParamType.STRING, desc = "用户Id",isRequired=true)})
+	@Input({ @Param(name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户Id集合",isRequired=true)})
 	@Output({})
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = jsonObj.getString("userId");
-		userService.deleteUser(userId);
+		JSONArray idArray = jsonObj.getJSONArray("userIdList");
+		for (int i = 0; i < idArray.size(); i++){
+			String userId = idArray.getString(i);
+			userService.deleteUser(userId);
+		}
 		return null;
 	}
 }
