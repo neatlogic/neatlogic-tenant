@@ -46,7 +46,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "处理器"),
 		@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否保存调用记录"),
 		@Param(name = "authtype", type = ApiParamType.STRING, isRequired = true, desc = "认证方式"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "接口token"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活"),
 		@Param(name = "timeout", type = ApiParamType.INTEGER, desc = "请求时效"),
 		@Param(name = "qps", type = ApiParamType.INTEGER, desc = "每秒访问几次，大于0生效"),
 		@Param(name = "expire", type = ApiParamType.LONG, desc = "使用期限"),
