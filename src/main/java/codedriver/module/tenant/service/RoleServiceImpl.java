@@ -22,11 +22,12 @@ public class RoleServiceImpl implements RoleService {
 	public List<RoleVo> searchRole(RoleVo roleVo){
 		if(roleVo.getNeedPage()) {
 			int rowNum = roleMapper.searchRoleCount(roleVo);
-			roleVo.setPageCount(PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
+ 			roleVo.setPageCount(PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
 			roleVo.setRowNum(rowNum);
 		}
 		return roleMapper.searchRole(roleVo);
 	}
+
 	@Override
 	public int saveRole(RoleVo roleVo) {
 		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {

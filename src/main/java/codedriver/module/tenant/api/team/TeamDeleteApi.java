@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.team;
 
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,15 +37,18 @@ public class TeamDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "uuid",
-					type = ApiParamType.STRING,
-					desc = "分组uuid",
+			@Param(name = "uuidList",
+					type = ApiParamType.JSONARRAY,
+					desc = "分组uuid集合",
 					isRequired = true) })
 	@Description(desc = "删除分组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String teamUuid = jsonObj.getString("uuid");
-		teamService.deleteTeam(teamUuid);
+		JSONArray uuidList = jsonObj.getJSONArray("uuidList");
+		for (int i = 0; i < uuidList.size(); i++){
+			String teamUuid = uuidList.getString(i);
+			teamService.deleteTeam(teamUuid);
+		}
 		return null;
 	}
 }

@@ -72,6 +72,9 @@ public class RoleSearchApi extends ApiComponentBase {
 		JSONObject returnObj = new JSONObject();
 		RoleVo roleVo = new RoleVo();
 		roleVo.setKeyword(jsonObj.getString("keyword"));
+		if (jsonObj.containsKey("currentPage")){
+			roleVo.setCurrentPage(jsonObj.getInteger("currentPage"));
+		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
 		returnObj.put("roleList", roleList);
 		if (roleVo.getNeedPage()) {
