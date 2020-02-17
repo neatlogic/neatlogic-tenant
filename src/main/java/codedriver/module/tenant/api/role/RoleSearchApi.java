@@ -41,6 +41,12 @@ public class RoleSearchApi extends ApiComponentBase {
 			@Param(name = "keyword",
 					type = ApiParamType.STRING,
 					desc = "关键字，匹配名称或说明"),
+			@Param(name = "authModule",
+					type = ApiParamType.STRING,
+					desc = "权限模块"),
+			@Param(name = "auth",
+					type = ApiParamType.STRING,
+					desc = "权限"),
 			@Param(name = "needPage",
 					type = ApiParamType.BOOLEAN,
 					desc = "是否需要分页，默认true"),
@@ -74,6 +80,12 @@ public class RoleSearchApi extends ApiComponentBase {
 		roleVo.setKeyword(jsonObj.getString("keyword"));
 		if (jsonObj.containsKey("currentPage")){
 			roleVo.setCurrentPage(jsonObj.getInteger("currentPage"));
+		}
+		if (jsonObj.containsKey("auth")){
+			roleVo.setAuth(jsonObj.getString("auth"));
+		}
+		if(jsonObj.containsKey("authModule")){
+			roleVo.setAuthModule(jsonObj.getString("authModule"));
 		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
 		returnObj.put("roleList", roleList);
