@@ -12,12 +12,14 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
+@IsActive
 @Service
 @Transactional
 public class ApiManageSaveApi extends ApiComponentBase {
@@ -46,10 +48,10 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "处理器"),
 		@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否保存调用记录"),
 		@Param(name = "authtype", type = ApiParamType.STRING, isRequired = true, desc = "认证方式"),
-		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "接口token"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活"),
 		@Param(name = "timeout", type = ApiParamType.INTEGER, desc = "请求时效"),
 		@Param(name = "qps", type = ApiParamType.INTEGER, desc = "每秒访问几次，大于0生效"),
-		@Param(name = "expire", type = ApiParamType.STRING, desc = "使用期限"),
+		@Param(name = "expire", type = ApiParamType.LONG, desc = "使用期限"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "json格式,配置信息"),
 		@Param(name = "username", type = ApiParamType.STRING, desc = "用户名称"),
 		@Param(name = "password", type = ApiParamType.STRING, desc = "密码"),

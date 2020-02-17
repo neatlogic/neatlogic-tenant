@@ -15,12 +15,14 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 @Service
+@IsActive
 public class ApiManageApiHandlerListApi extends ApiComponentBase {
 
 	@Override
@@ -40,6 +42,7 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口组件名模糊查询"),
+		@Param(name = "isPrivate", type = ApiParamType.BOOLEAN, desc = "是否是私有接口"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="当前页码，默认值1"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc="页大小，默认值10"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc="是否分页，默认值true")
@@ -58,15 +61,16 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() {});
 		
 		List<ApiHandlerVo> apiHandlerList = new ArrayList<>();
-		String keyword = jsonObj.getString("keyword");			
-		if(StringUtils.isNotBlank(keyword)) {
-			for(ApiHandlerVo apiHandlerVo : ApiComponentFactory.getApiHandlerList()) {
-				if(apiHandlerVo.getName().contains(keyword)) {
-					apiHandlerList.add(apiHandlerVo);
-				}
+		String keyword = jsonObj.getString("keyword");
+		Boolean isPrivate = jsonObj.getBoolean("isPrivate");
+		for(ApiHandlerVo apiHandlerVo : ApiComponentFactory.getApiHandlerList()) {
+			if(StringUtils.isNotBlank(keyword) && !apiHandlerVo.getName().contains(keyword)) {
+				continue;
 			}
-		}else {
-			apiHandlerList = ApiComponentFactory.getApiHandlerList();
+			if(isPrivate != null && apiHandlerVo.isPrivate() != isPrivate) {
+				continue;
+			}
+			apiHandlerList.add(apiHandlerVo);
 		}
 		
 		apiHandlerList.sort((apiHandler1, apiHandler2) -> apiHandler1.getHandler().compareTo(apiHandler2.getHandler()));
@@ -79,6 +83,8 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("pageSize", basePageVo.getPageSize());
 			resultObj.put("currentPage", basePageVo.getCurrentPage());
+			int endNum = basePageVo.getStartNum() + basePageVo.getPageSize();
+			endNum = endNum < rowNum ? endNum : rowNum;
 			apiHandlerList = apiHandlerList.subList(basePageVo.getStartNum(), basePageVo.getStartNum() + basePageVo.getPageSize());
 		}
 		

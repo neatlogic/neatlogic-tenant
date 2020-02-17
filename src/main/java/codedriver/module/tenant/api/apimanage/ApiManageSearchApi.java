@@ -18,6 +18,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -26,6 +27,7 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
 @Service
+@IsActive
 public class ApiManageSearchApi extends ApiComponentBase {
 
 	@Autowired
@@ -121,7 +123,9 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 			//取出当前页token
-			tokenList = tokenList.subList(apiVo.getStartNum(), apiVo.getStartNum() + apiVo.getPageSize());
+			int endNum = apiVo.getStartNum() + apiVo.getPageSize();
+			endNum = endNum < rowNum ? endNum : rowNum;
+			tokenList = tokenList.subList(apiVo.getStartNum(), endNum);
 			ramTokenList.retainAll(tokenList);
 			dbTokenList.retainAll(tokenList);
 		}
@@ -146,13 +150,16 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				apiMap.put(api.getToken(), api);
 			}
 		}
-		List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);
 		Map<String, Integer> visitTimesMap = new HashMap<>();
-		for(ApiVo api : visitTimesList) {
-			visitTimesMap.put(api.getToken(), api.getVisitTimes());
+		if(!tokenList.isEmpty()) {
+			List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);		
+			for(ApiVo api : visitTimesList) {
+				visitTimesMap.put(api.getToken(), api.getVisitTimes());
+			}
 		}
-		List<ApiVo> apiList = new ArrayList<>();
+		
 		//从map中按顺序取出api数据
+		List<ApiVo> apiList = new ArrayList<>();
 		for(String token : tokenList) {
 			ApiVo api = apiMap.get(token);
 			Integer visitTimes = visitTimesMap.get(token);
