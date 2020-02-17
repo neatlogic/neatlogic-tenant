@@ -15,12 +15,14 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 @Service
+@IsActive
 public class ApiManageApiHandlerListApi extends ApiComponentBase {
 
 	@Override

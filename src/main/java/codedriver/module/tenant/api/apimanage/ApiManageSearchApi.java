@@ -18,6 +18,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActive;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -26,6 +27,7 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
 @Service
+@IsActive
 public class ApiManageSearchApi extends ApiComponentBase {
 
 	@Autowired
