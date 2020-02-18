@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public int saveUser(UserVo userVo) {
 		String userId = userVo.getUserId();
-		if (userMapper.getUserByUserId(userId) == null) {
+		if (userId == null || ("").equals(userId)) {
 			userMapper.insertUser(userVo);
 		} else {
 			userMapper.updateUser(userVo);
