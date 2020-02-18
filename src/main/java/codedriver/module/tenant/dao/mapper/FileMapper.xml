@@ -5,7 +5,6 @@
 	<select id="getFileByUuid" parameterType="java.lang.String" resultType="codedriver.framework.file.dto.FileVo">
 		SELECT
 		`uuid`,
-		`path`,
 		`name`,
 		`size`,
 		`user_id` AS userId,
@@ -28,7 +27,6 @@
 	<insert id="insertFile" parameterType="codedriver.framework.file.dto.FileVo">
 		INSERT INTO `file` (
 		`uuid`,
-		`path`,
 		`name`,
 		`size`,
 		`user_id`,
@@ -38,7 +36,6 @@
 		VALUES
 		(
 		#{uuid},
-		#{path},
 		#{name},
 		#{size},
 		#{userId},
