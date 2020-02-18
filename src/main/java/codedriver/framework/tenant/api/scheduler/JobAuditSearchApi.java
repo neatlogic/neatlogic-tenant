@@ -13,7 +13,6 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -49,24 +48,17 @@ public class JobAuditSearchApi extends ApiComponentBase {
 		@Param(name="jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")
 		})
 	@Description(desc="查询定时作业执行记录列表")
-	@Example(example="{\"jobUuid\":1}")
 	@Output({
 		@Param(name="currentPage",type=ApiParamType.INTEGER,isRequired=true,desc="当前页码"),
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="jobAuditList",type=ApiParamType.JSONARRAY,isRequired=true,desc="执行记录列表"),
-		@Param(name="jobAuditList[0].id",type=ApiParamType.LONG,isRequired=true,desc="记录id"),
-		@Param(name="jobAuditList[0].jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid"),
-		@Param(name="jobAuditList[0].startTime",type=ApiParamType.LONG,isRequired=true,desc="开始时间"),
-		@Param(name="jobAuditList[0].endTime",type=ApiParamType.LONG,isRequired=true,desc="结束时间"),
-		@Param(name="jobAuditList[0].state",type=ApiParamType.STRING,isRequired=true,desc="执行状态(success:成功；error异常；processing:进行中)"),
-		@Param(name="jobAuditList[0].isLogEmpty",type=ApiParamType.INTEGER,isRequired=true,desc="日志是否为空")
+		@Param(name="jobAuditList",explode=JobAuditVo[].class,desc="执行记录列表")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JobAuditVo jobAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobAuditVo>() {});		
-		List<JobAuditVo> jobAuditList = schedulerService.searchJobAuditList(jobAuditVo);
+		List<JobAuditVo> jobAuditList = schedulerService.searchJobAudit(jobAuditVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("jobAuditList", jobAuditList);
 		resultObj.put("currentPage",jobAuditVo.getCurrentPage());

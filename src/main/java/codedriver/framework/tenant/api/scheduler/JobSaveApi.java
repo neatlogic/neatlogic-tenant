@@ -12,7 +12,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -52,7 +51,7 @@ public class JobSaveApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "uuid", type = ApiParamType.STRING, isRequired = false, desc = "定时作业uuid"),
 			@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "定时作业名称"),
-			@Param(name = "className", type = ApiParamType.STRING, isRequired = true, desc = "定时作业组件类名称"),
+			@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "定时作业组件"),
 			@Param(name = "beginTime", type = ApiParamType.LONG, isRequired = false, desc = "开始时间"),
 			@Param(name = "endTime", type = ApiParamType.LONG, isRequired = false, desc = "结束时间"),
 			@Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"),
@@ -63,13 +62,12 @@ public class JobSaveApi extends ApiComponentBase {
 			@Param(name = "propList[0].value", type = ApiParamType.STRING, desc = "属性值") })
 	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid") })
 	@Description(desc = "保存定时作业信息")
-	@Example(example = "{name:\"测试_1\", classpath:\"codedriver.framework.scheduler.core.TestJob\", triggerType:\"simple\", repeat:\"10\", interval:\"60\", isActive:\"no\", needAudit:\"no\", beginTime:1573530069000, propList:[{name:\"p_1\",value:\"1\"},{name:\"p_2\",value:\"2\"},{name:\"p_3\",value:\"3\"},{name:\"p_4\",value:\"4\"},{name:\"p_5\",value:\"5\"}]}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String className = jsonObj.getString("className");
-		IJob jobHandler = SchedulerManager.getHandler(className);
+		String handler = jsonObj.getString("handler");
+		IJob jobHandler = SchedulerManager.getHandler(handler);
 		if (jobHandler == null) {
-			throw new ScheduleHandlerNotFoundException(className);
+			throw new ScheduleHandlerNotFoundException(handler);
 		}
 		String cron = jsonObj.getString("cron");
 		if (!CronExpression.isValidExpression(cron)) {
@@ -79,9 +77,9 @@ public class JobSaveApi extends ApiComponentBase {
 		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {
 		});
 		jobHandler.valid(jobVo.getPropList());
-		JobClassVo jobClassVo = SchedulerManager.getJobClassByClasspath(className);
+		JobClassVo jobClassVo = SchedulerManager.getJobClassByClassName(handler);
 		if (jobClassVo == null) {
-			throw new ScheduleHandlerNotFoundException(className);
+			throw new ScheduleHandlerNotFoundException(handler);
 		}
 		schedulerService.saveJob(jobVo);
 		String tenantUuid = TenantContext.get().getTenantUuid();
