@@ -1,15 +1,17 @@
 package codedriver.module.tenant.api.file;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,9 +21,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.exception.user.NoTenantException;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dto.FileTypeVo;
@@ -32,6 +33,8 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.tenant.dao.mapper.FileMapper;
+import codedriver.module.tenant.exception.file.BelongNotFoundException;
+import codedriver.module.tenant.exception.file.DirectoryCreateException;
 import codedriver.module.tenant.exception.file.EmptyFileException;
 import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
 import codedriver.module.tenant.exception.file.FileTooLargeException;
@@ -39,11 +42,7 @@ import codedriver.module.tenant.exception.file.FileTypeConfigNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 import codedriver.module.tenant.exception.file.SavePathNotExistsException;
 
-@Service
-public class FileUploadApi extends BinaryStreamApiComponentBase {
-
-	@Autowired
-	private FileSystem fileSystem;
+public class FileUploadApi_bak extends BinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;
@@ -63,15 +62,19 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true), @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true) })
+	@Input({
+			@Param(name = "param",
+					type = ApiParamType.STRING,
+					desc = "附件参数名称",
+					isRequired = true),
+			@Param(name = "type",
+					type = ApiParamType.STRING,
+					desc = "附件类型",
+					isRequired = true) })
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String tenantUuid = TenantContext.get().getTenantUuid();
-		if (StringUtils.isBlank(tenantUuid)) {
-			throw new NoTenantException();
-		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
@@ -84,7 +87,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			}
 		}
 		if (fileTypeVo == null) {
-			throw new FileTypeHandlerNotFoundException(type);
+			throw new BelongNotFoundException("附件归属：" + type + "不存在");
 		}
 		FileTypeVo fileTypeConfigVo = fileMapper.getFileTypeConfigByType(fileTypeVo.getName());
 		if (fileTypeConfigVo == null) {
@@ -114,6 +117,10 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				whiteList = configObj.getJSONArray("whiteList");
 				blackList = configObj.getJSONArray("blackList");
 				maxSize = configObj.getLongValue("maxSize");
+				savePath = configObj.getString("savePath");
+			}
+			if (StringUtils.isBlank(savePath)) {
+				throw new SavePathNotExistsException(type);
 			}
 			if (whiteList != null && whiteList.size() > 0) {
 				for (int i = 0; i < whiteList.size(); i++) {
@@ -145,21 +152,49 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				throw new FileTypeHandlerNotFoundException(type);
 			}
 
-			FileVo fileVo = new FileVo();
-			fileVo.setName(oldFileName);
-			fileVo.setSize(size);
-			fileVo.setUserId(userId);
-			fileVo.setType(type);
+			if (!savePath.startsWith(File.separator)) {
+				if (Config.DATA_HOME.endsWith(File.separator)) {
+					savePath = Config.DATA_HOME + savePath;
+				} else {
+					savePath = Config.DATA_HOME + File.separator + savePath;
+				}
+			}
 
-			String finalPath = "/" + tenantUuid + "/" + type + "/" + fileVo.getUuid();
-			FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
-			IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-			fos.flush();
-			fos.close();
+			SimpleDateFormat dateformat = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
+			String filePath = dateformat.format(new Date());
+			String fileName = UUID.randomUUID() + "." + fileExt;
+			if (!savePath.endsWith(File.separator)) {
+				savePath = savePath + File.separator;
+			}
+			String finalPath = savePath + filePath;
+			File dir = new File(finalPath);
+			boolean flag = false;
 
-			fileMapper.insertFile(fileVo);
-			fileTypeHandler.afterUpload(fileVo, paramObj);
-			return fileMapper.getFileByUuid(fileVo.getUuid());
+			// if (dir.getAbsolutePath().startsWith(Config.DATA_HOME)) {
+			if ((!dir.isDirectory()) || (!dir.exists())) {
+				flag = dir.mkdirs();
+			} else {
+				flag = true;
+			}
+			// }
+			if (flag) {
+				File finalFile = new File(finalPath + File.separator + fileName);
+				FileOutputStream fos = new FileOutputStream(finalFile);
+				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
+				fos.flush();
+				fos.close();
+				FileVo fileVo = new FileVo();
+				fileVo.setName(oldFileName);
+				fileVo.setPath(finalFile.getAbsolutePath());
+				fileVo.setSize(size);
+				fileVo.setUserId(userId);
+				fileVo.setType(type);
+				fileMapper.insertFile(fileVo);
+				fileTypeHandler.afterUpload(fileVo, paramObj);
+				return fileMapper.getFileByUuid(fileVo.getUuid());
+			} else {
+				throw new DirectoryCreateException(finalPath);
+			}
 		}
 		return null;
 	}
