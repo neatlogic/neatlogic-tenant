@@ -38,9 +38,9 @@ public class UserAuthSaveApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "userId",
-            type = ApiParamType.STRING,
-            desc = "用户ID",
+            @Param(name = "userIdList",
+            type = ApiParamType.JSONARRAY,
+            desc = "用户ID集合",
             isRequired = true),
             @Param(name = "userAuthList",
             type = ApiParamType.JSONARRAY,
@@ -51,20 +51,23 @@ public class UserAuthSaveApi extends ApiComponentBase {
     @Description( desc = "用户权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        UserVo userVo = new UserVo();
-        userVo.setUserId(jsonObj.getString("userId"));
-        JSONArray userAuthArray = jsonObj.getJSONArray("userAuthList");
-        List<UserAuthVo> userAuthVoList = new ArrayList<>();
-        for (int i = 0; i < userAuthArray.size(); i++){
-            JSONObject userAuthObj = userAuthArray.getJSONObject(i);
-            UserAuthVo authVo = new UserAuthVo();
-            authVo.setAuth(userAuthObj.getString("auth"));
-            authVo.setAuthGroup(userAuthObj.getString("authGroup"));
-            authVo.setUserId(jsonObj.getString("userId"));
-            userAuthVoList.add(authVo);
+        JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+        for (int i = 0; i < userIdArray.size(); i++){
+            UserVo userVo = new UserVo();
+            userVo.setUserId(userIdArray.getString(i));
+            JSONArray userAuthArray = jsonObj.getJSONArray("userAuthList");
+            List<UserAuthVo> userAuthVoList = new ArrayList<>();
+            for (int j = 0; j < userAuthArray.size(); i++){
+                JSONObject userAuthObj = userAuthArray.getJSONObject(j);
+                UserAuthVo authVo = new UserAuthVo();
+                authVo.setAuth(userAuthObj.getString("auth"));
+                authVo.setAuthGroup(userAuthObj.getString("authGroup"));
+                authVo.setUserId(jsonObj.getString("userId"));
+                userAuthVoList.add(authVo);
+            }
+            userVo.setUserAuthList(userAuthVoList);
+            userService.saveUserAuth(userVo);
         }
-        userVo.setUserAuthList(userAuthVoList);
-        userService.saveUserAuth(userVo);
         return null;
     }
 }
