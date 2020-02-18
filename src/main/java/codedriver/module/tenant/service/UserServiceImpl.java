@@ -2,6 +2,7 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.framework.dto.UserAuthVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public int saveUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuthByUserId(userVo.getUserId());
+		if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
+			for (UserAuthVo authVo : userVo.getUserAuthList()){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 1;
+	}
+
+	@Override
 	public int deleteUser(String userId) {
 		userMapper.deleteUserRoleByUserId(userId);
 		userMapper.deleteUserTeamByUserId(userId);
@@ -66,6 +78,11 @@ public class UserServiceImpl implements UserService {
 			userVo.setPageCount(PageUtil.getPageCount(rowNum, userVo.getPageSize()));
 		}
 		return userMapper.searchUser(userVo);
+	}
+
+	@Override
+	public List<UserAuthVo> searchUserAuth(String userId) {
+		return userMapper.searchUserAuthByUserId(userId);
 	}
 
 	@Override

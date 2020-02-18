@@ -43,7 +43,7 @@ public class UserSearchApi extends ApiComponentBase {
 					desc = "关键字(用户id或名称),模糊查询",
 					isRequired = false,
 					xss = true),
-			@Param(name = "authModule",
+			@Param(name = "authGroup",
 					type = ApiParamType.STRING,
 					desc = "权限模块"),
 			@Param(name = "auth",
@@ -99,8 +99,8 @@ public class UserSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("auth")){
 			userVo.setAuth(jsonObj.getString("auth"));
 		}
-		if (jsonObj.containsKey("authModule")){
-			userVo.setAuthModule("authModule");
+		if (jsonObj.containsKey("authGroup")){
+			userVo.setAuthGroup("authGroup");
 		}
 		if(jsonObj.containsKey("teamUuid")){
 			userVo.setTeamUuid(json.getString("teamUuid"));
