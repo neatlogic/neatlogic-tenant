@@ -40,9 +40,9 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "roleName",
-                    type = ApiParamType.STRING,
-                    desc = "角色名称",
+            @Param(name = "roleNameList",
+                    type = ApiParamType.JSONARRAY,
+                    desc = "角色名称集合",
                     isRequired = true),
             @Param(name = "roleAuthList",
                     type = ApiParamType.JSONARRAY,
@@ -53,20 +53,24 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     @Description( desc = "角色权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        RoleVo roleVo = new RoleVo();
-        roleVo.setName(jsonObj.getString("roleName"));
-        JSONArray roleAuthArray = jsonObj.getJSONArray("roleAuthList");
-        List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
-        for (int i = 0; i < roleAuthArray.size(); i++){
-            JSONObject roleAuthObj = roleAuthArray.getJSONObject(i);
-            RoleAuthVo roleAuthVo = new RoleAuthVo();
-            roleAuthVo.setAuth(roleAuthObj.getString("auth"));
-            roleAuthVo.setAuthGroup(roleAuthObj.getString("authGroup"));
-            roleAuthVo.setRoleName(jsonObj.getString("roleName"));
-            roleAuthVoList.add(roleAuthVo);
+        JSONArray roleAuthList = jsonObj.getJSONArray("roleNameList");
+        for (int i = 0; i < roleAuthList.size() ; i++){
+            RoleVo roleVo = new RoleVo();
+            roleVo.setName(roleAuthList.getString(i));
+            JSONArray roleAuthArray = jsonObj.getJSONArray("roleAuthList");
+            List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
+            for (int j = 0; j < roleAuthArray.size(); j++){
+                JSONObject roleAuthObj = roleAuthArray.getJSONObject(j);
+                RoleAuthVo roleAuthVo = new RoleAuthVo();
+                roleAuthVo.setAuth(roleAuthObj.getString("auth"));
+                roleAuthVo.setAuthGroup(roleAuthObj.getString("authGroup"));
+                roleAuthVo.setRoleName(jsonObj.getString("roleName"));
+                roleAuthVoList.add(roleAuthVo);
+            }
+            roleVo.setRoleAuthList(roleAuthVoList);
+            roleService.saveRoleAuth(roleVo);
         }
-        roleVo.setRoleAuthList(roleAuthVoList);
-        roleService.saveRoleAuth(roleVo);
+
         return null;
     }
 }
