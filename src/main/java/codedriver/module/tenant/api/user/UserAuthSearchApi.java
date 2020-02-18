@@ -20,7 +20,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "user/auth/search ";
+        return "user/auth/search";
     }
 
     @Override
