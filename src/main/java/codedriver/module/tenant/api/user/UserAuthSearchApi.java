@@ -10,7 +10,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserAuthSearchApi extends ApiComponentBase {
 
     @Autowired
