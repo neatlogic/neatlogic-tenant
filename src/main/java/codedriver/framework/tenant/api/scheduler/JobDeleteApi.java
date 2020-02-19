@@ -9,7 +9,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -47,7 +46,6 @@ public class JobDeleteApi extends ApiComponentBase {
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid") })
 	@Description(desc = "删除定时作业")
-	@Example(example = "{\"uuid\":\"xxxxxxx\"}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String jobUuid = jsonObj.getString("uuid");
@@ -56,7 +54,7 @@ public class JobDeleteApi extends ApiComponentBase {
 			throw new ScheduleJobNotFoundException(jobUuid);
 		}
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		IJob jobHandler = SchedulerManager.getHandler(job.getClassName());
+		IJob jobHandler = SchedulerManager.getHandler(job.getHandler());
 		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
 		schedulerManager.unloadJob(jobObject);
 		schedulerService.deleteJob(jobUuid);
