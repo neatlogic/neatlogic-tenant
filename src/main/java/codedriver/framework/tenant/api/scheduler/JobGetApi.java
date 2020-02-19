@@ -8,12 +8,12 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @Service
@@ -38,34 +38,18 @@ public class JobGetApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name="jobUuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")})
+	@Input({@Param(name="uuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid")})
 	@Description(desc="获取定时作业信息")
-	@Example(example="{\"jobUuid\":1}")
 	@Output({
-		@Param(name="uuid",type=ApiParamType.STRING,isRequired=true,desc="定时作业uuid"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="定时作业名称"),
-		@Param(name="classpath",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件类路径"),
-		@Param(name="beginTime",type=ApiParamType.LONG,isRequired=false,desc="开始时间"),
-		@Param(name="endTime",type=ApiParamType.LONG,isRequired=false,desc="结束时间"),
-		@Param(name="cron",type=ApiParamType.STRING,isRequired=true,desc="corn表达式"),
-		@Param(name="isActive",type=ApiParamType.STRING,isRequired=true,desc="是否激活(no:禁用，yes：激活)"),
-		@Param(name="needAudit",type=ApiParamType.STRING,isRequired=true,desc="是否保存执行记录no:不保存，yes:保存"),
-		@Param(name="jobStatus.status",type=ApiParamType.STRING,isRequired=false,desc="running:运行中;stop:停止;not_loaded未加载"),
-		@Param(name="jobStatus.nextFireTime",type=ApiParamType.LONG,isRequired=false,desc="下一次被唤醒时间"),
-		@Param(name="jobStatus.lastFireTime",type=ApiParamType.LONG,isRequired=false,desc="最后一次被唤醒时间"),
-		@Param(name="jobStatus.lastFinishTime",type=ApiParamType.LONG,isRequired=false,desc="最后一次完成时间"),
-		@Param(name="jobStatus.execCount",type=ApiParamType.INTEGER,isRequired=false,desc="执行次数"),
-		@Param(name="propList",type=ApiParamType.JSONARRAY,isRequired=false,desc="属性列表"),
-		@Param(name="propList[0].id",type=ApiParamType.LONG,isRequired=true,desc="属性id"),
-		@Param(name="propList[0].name",type=ApiParamType.STRING,isRequired=true,desc="属性名"),
-		@Param(name="propList[0].value",type=ApiParamType.STRING,isRequired=true,desc="属性值")
+		@Param(name="Return",explode=JobVo.class,desc="定时作业信息"),
+		@Param(name="propList",explode=JobPropVo[].class,desc="属性列表")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String jobUuid = jsonObj.getString("jobUuid");
-		JobVo job = schedulerMapper.getJobByUuid(jobUuid);
+		String uuid = jsonObj.getString("uuid");
+		JobVo job = schedulerMapper.getJobByUuid(uuid);
 		if(job == null) {
-			throw new ScheduleJobNotFoundException(jobUuid);
+			throw new ScheduleJobNotFoundException(uuid);
 		}
 		return job;
 	}
