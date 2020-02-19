@@ -1,30 +1,31 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.UserService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserActiveUpdateApi extends ApiComponentBase {
+public class UserAuthSearchApi extends ApiComponentBase {
 
     @Autowired
     private UserService userService;
 
     @Override
     public String getToken() {
-        return "user/active";
+        return "user/auth/search";
     }
 
     @Override
     public String getName() {
-        return "用户有效性变更接口";
+        return "用户权限查询接口";
     }
 
     @Override
@@ -33,18 +34,17 @@ public class UserActiveUpdateApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户Id集合",isRequired = true),
-            @Param(name = "isActive", type = ApiParamType.STRING, desc = "有效性", isRequired = true)
+            @Param( name = "userId", type = ApiParamType.STRING, desc = "用户ID", isRequired = true)
     })
+    @Output({
+            @Param( name = "userAuthList", type = ApiParamType.JSONARRAY, explode = UserAuthVo[].class, desc = "用户权限集合")
+    })
+    @Description(desc = "用户权限查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray userIdList = jsonObj.getJSONArray("userIdList");
-        for (int i = 0; i < userIdList.size(); i++){
-            UserVo userVo = new UserVo();
-            userVo.setUserId(userIdList.getString(i));
-            userVo.setIsActive(jsonObj.getInteger("isActive"));
-            userService.updateUserActive(userVo);
-        }
-        return null;
+        JSONObject returnObj = new JSONObject();
+        String userId = jsonObj.getString("userId");
+        returnObj.put("userAuthList", userService.searchUserAuth(userId));
+        return returnObj;
     }
 }
