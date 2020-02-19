@@ -15,7 +15,7 @@ public interface RoleService {
 	@Transactional
 	public int saveRole(RoleVo roleVo);
 
-	public int saveRoleAuth(RoleVo roleVo);
+	public int saveRoleAuth(RoleVo roleVo, String action);
 
 	@Transactional
 	public int deleteRoleByRoleName(String name);

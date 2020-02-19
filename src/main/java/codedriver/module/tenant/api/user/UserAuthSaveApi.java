@@ -46,12 +46,17 @@ public class UserAuthSaveApi extends ApiComponentBase {
             type = ApiParamType.JSONARRAY,
             explode = UserAuthVo[].class,
             desc = "用户权限集合",
+            isRequired = true),
+            @Param(name = "action",
+            type = ApiParamType.STRING,
+            desc = "保存类型",
             isRequired = true)
     })
     @Description( desc = "用户权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+        String action = jsonObj.getString("action");
         for (int i = 0; i < userIdArray.size(); i++){
             UserVo userVo = new UserVo();
             userVo.setUserId(userIdArray.getString(i));
@@ -66,7 +71,7 @@ public class UserAuthSaveApi extends ApiComponentBase {
                 userAuthVoList.add(authVo);
             }
             userVo.setUserAuthList(userAuthVoList);
-            userService.saveUserAuth(userVo);
+            userService.saveUserAuth(userVo, action);
         }
         return null;
     }

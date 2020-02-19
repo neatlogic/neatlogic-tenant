@@ -48,12 +48,17 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                     type = ApiParamType.JSONARRAY,
                     explode = RoleAuthVo[].class,
                     desc = "角色权限集合",
+                    isRequired = true),
+            @Param(name = "action",
+                    type = ApiParamType.STRING,
+                    desc = "操作类型",
                     isRequired = true)
     })
     @Description( desc = "角色权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray roleAuthList = jsonObj.getJSONArray("roleNameList");
+        String action = jsonObj.getString("action");
         for (int i = 0; i < roleAuthList.size() ; i++){
             RoleVo roleVo = new RoleVo();
             roleVo.setName(roleAuthList.getString(i));
@@ -68,7 +73,7 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                 roleAuthVoList.add(roleAuthVo);
             }
             roleVo.setRoleAuthList(roleAuthVoList);
-            roleService.saveRoleAuth(roleVo);
+            roleService.saveRoleAuth(roleVo, action);
         }
 
         return null;
