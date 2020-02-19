@@ -47,7 +47,15 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public void saveTeam(TeamVo teamVo) {
-		teamMapper.deleteTeamByUuid(teamVo.getUuid());
+		if(teamVo.getUuid() != null){
+			teamMapper.updateTeamNameByUuid(teamVo);
+		}
+		if (teamVo.getParentUuid() == null){
+			teamVo.setParentUuid("0");
+		}
+		int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
+		teamVo.setSort(sort+1);
+
 		teamMapper.insertTeam(teamVo);
 	}
 }
