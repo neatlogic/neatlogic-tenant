@@ -43,6 +43,19 @@ public class UserSearchApi extends ApiComponentBase {
 					desc = "关键字(用户id或名称),模糊查询",
 					isRequired = false,
 					xss = true),
+			@Param(name = "authGroup",
+					type = ApiParamType.STRING,
+					desc = "权限模块"),
+			@Param(name = "auth",
+					type = ApiParamType.STRING,
+					desc = "权限"),
+			@Param(name = "teamUuid",
+					type = ApiParamType.STRING,
+					desc = "用户组uuid"
+			),
+			@Param(name = "roleName",
+					type = ApiParamType.STRING,
+					desc = "角色名称"),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页数",
@@ -85,6 +98,18 @@ public class UserSearchApi extends ApiComponentBase {
 		userVo.setKeyword(jsonObj.getString("keyword"));
 		if (jsonObj.containsKey("pageSize")) {
 			userVo.setPageSize(jsonObj.getInteger("pageSize"));
+		}
+		if (jsonObj.containsKey("auth")){
+			userVo.setAuth(jsonObj.getString("auth"));
+		}
+		if (jsonObj.containsKey("authGroup")){
+			userVo.setAuthGroup("authGroup");
+		}
+		if(jsonObj.containsKey("teamUuid")){
+			userVo.setTeamUuid(json.getString("teamUuid"));
+		}
+		if (jsonObj.containsKey("roleName")){
+			userVo.setRoleName(json.getString("roleName"));
 		}
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);

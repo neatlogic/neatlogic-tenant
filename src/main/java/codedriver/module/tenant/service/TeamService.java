@@ -3,6 +3,8 @@ package codedriver.module.tenant.service;
 import java.util.List;
 
 import codedriver.framework.dto.TeamVo;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 public interface TeamService {
 	public List<TeamVo> searchTeam(TeamVo teamVo);
@@ -12,5 +14,7 @@ public interface TeamService {
 	public int deleteTeam(String teamUuid);
 
 	public void saveTeam(TeamVo teamVo);
+
+	public JSONArray getTeamTree();
 
 }

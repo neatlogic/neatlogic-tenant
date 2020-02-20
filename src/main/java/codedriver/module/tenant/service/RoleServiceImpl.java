@@ -1,7 +1,10 @@
 package codedriver.module.tenant.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,10 @@ import codedriver.framework.dto.RoleVo;
 
 @Service
 public class RoleServiceImpl implements RoleService {
+
+	private static final String AUTH_DELETE = "delete";
+	private static final String AUTH_ADD = "add";
+	private static final String AUTH_COVER = "cover";
 
 	@Autowired
 	RoleMapper roleMapper;
@@ -29,6 +36,11 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
+	public List<RoleAuthVo> searchRoleAuth(String roleName) {
+		return roleMapper.searchRoleAuthByRoleName(roleName);
+	}
+
+	@Override
 	public int saveRole(RoleVo roleVo) {
 		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
 			roleMapper.updateRole(roleVo);
@@ -36,6 +48,33 @@ public class RoleServiceImpl implements RoleService {
 			roleMapper.insertRole(roleVo);
 		}
 		return 1;
+	}
+
+	@Override
+	public int saveRoleAuth(RoleVo roleVo, String action) {
+		if (AUTH_ADD.equals(action)){
+			List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
+			Set<String> authSet = new HashSet<>();
+			for (RoleAuthVo authVo : roleAuthVoList){
+				authSet.add(authVo.getAuth());
+			}
+			for (RoleAuthVo roleAuth : roleVo.getRoleAuthList()){
+				if (!authSet.contains(roleAuth.getAuth())){
+					roleMapper.insertRoleAuth(roleAuth);
+				}
+			}
+		}else if(AUTH_COVER.equals(action)){
+			roleMapper.deleteRoleAuthByRoleName(roleVo.getName());
+			List<RoleAuthVo> roleAuthVoList = roleVo.getRoleAuthList();
+			if (roleAuthVoList != null && roleAuthVoList.size() > 0){
+				for (RoleAuthVo roleAuthVo : roleAuthVoList){
+					roleMapper.insertRoleAuth(roleAuthVo);
+				}
+			}
+		}else if(AUTH_DELETE.equals(action)){
+			roleMapper.deleteRoleAuth(roleVo);
+		}
+		return 0;
 	}
 
 	@Override

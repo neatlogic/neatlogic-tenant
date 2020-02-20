@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Example;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -42,7 +41,6 @@ public class JobAuditLogGetApi extends ApiComponentBase {
 	@Input({ @Param(name = "auditId", type = ApiParamType.LONG, isRequired = true, desc = "定时作业执行记录id") })
 	@Output({ @Param(name = "Return", type = ApiParamType.STRING, isRequired = true, desc = "日志内容") })
 	@Description(desc = "获取定时作业执行记录日志")
-	@Example(example = "{\"auditId\":1}")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long auditId = jsonObj.getLong("auditId");

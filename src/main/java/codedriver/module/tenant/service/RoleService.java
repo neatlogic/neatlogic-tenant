@@ -2,6 +2,7 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.framework.dto.RoleAuthVo;
 import org.springframework.transaction.annotation.Transactional;
 
 import codedriver.framework.dto.RoleVo;
@@ -9,8 +10,12 @@ import codedriver.framework.dto.RoleVo;
 public interface RoleService {
 	public List<RoleVo> searchRole(RoleVo roleVo);
 
+	public List<RoleAuthVo> searchRoleAuth(String roleName);
+
 	@Transactional
 	public int saveRole(RoleVo roleVo);
+
+	public int saveRoleAuth(RoleVo roleVo, String action);
 
 	@Transactional
 	public int deleteRoleByRoleName(String name);
