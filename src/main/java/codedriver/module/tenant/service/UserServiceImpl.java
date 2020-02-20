@@ -16,10 +16,6 @@ import codedriver.framework.dto.UserVo;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private static final String AUTH_DELETE = "delete";
-	private static final String AUTH_ADD = "add";
-	private static final String AUTH_COVER = "cover";
-
 	@Autowired
 	UserMapper userMapper;
 
@@ -58,29 +54,35 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public int saveUserAuth(UserVo userVo, String action) {
-		if ((AUTH_ADD).equals(action)){
-			List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserId(userVo.getUserId());
-			Set<String> set = new HashSet<>();
-			for (UserAuthVo authVo : userAuthList){
-				set.add(authVo.getAuth());
-			}
-			for (UserAuthVo authVo : userVo.getUserAuthList()){
-				if (!set.contains(authVo.getAuth())){
-					userMapper.insertUserAuth(authVo);
-				}
-			}
-		}else if(AUTH_COVER.equals(action)){
-			userMapper.deleteUserAuthByUserId(userVo.getUserId());
-			if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
-				for (UserAuthVo authVo : userVo.getUserAuthList()){
-					userMapper.insertUserAuth(authVo);
-				}
-			}
-		}else if (AUTH_DELETE.equals(action)){
-			userMapper.deleteUserAuth(userVo);
+	public int addUserAuth(UserVo userVo) {
+		List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserId(userVo.getUserId());
+		Set<String> set = new HashSet<>();
+		for (UserAuthVo authVo : userAuthList){
+			set.add(authVo.getAuth());
 		}
-		return 1;
+		for (UserAuthVo authVo : userVo.getUserAuthList()){
+			if (!set.contains(authVo.getAuth())){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int coverUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuthByUserId(userVo.getUserId());
+		if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
+			for (UserAuthVo authVo : userVo.getUserAuthList()){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int deleteUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuth(userVo);
+		return 0;
 	}
 
 	@Override
