@@ -34,7 +34,9 @@ public class UserServiceImpl implements UserService {
 			//更新密码
 			userMapper.updateUserPasswordActive(userId);
 			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
-			userMapper.deleteUserPasswordByLimit(userId, idList);
+			if (idList != null && idList.size() > 0){
+				userMapper.deleteUserPasswordByLimit(userId, idList);
+			}
 		}
 		userMapper.insertUserPassword(userVo);
 		if (userVo.getRoleNameList() != null && userVo.getRoleNameList().size() > 0) {
