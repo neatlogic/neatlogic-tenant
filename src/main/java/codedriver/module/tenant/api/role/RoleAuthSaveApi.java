@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.UserAuthVo;
@@ -73,9 +74,16 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                 roleAuthVoList.add(roleAuthVo);
             }
             roleVo.setRoleAuthList(roleAuthVoList);
-            roleService.saveRoleAuth(roleVo, action);
+            if (AuthVo.AUTH_ADD.equals(action)){
+                roleService.addRoleAuth(roleVo);
+            }
+            if(AuthVo.AUTH_COVER.equals(action)){
+                roleService.coverRoleAuth(roleVo);
+            }
+            if(AuthVo.AUTH_DELETE.equals(action)){
+                roleService.deleteRoleAuth(roleVo);
+            }
         }
-
         return null;
     }
 }

@@ -51,29 +51,35 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public int saveRoleAuth(RoleVo roleVo, String action) {
-		if (AUTH_ADD.equals(action)){
-			List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
-			Set<String> authSet = new HashSet<>();
-			for (RoleAuthVo authVo : roleAuthVoList){
-				authSet.add(authVo.getAuth());
-			}
-			for (RoleAuthVo roleAuth : roleVo.getRoleAuthList()){
-				if (!authSet.contains(roleAuth.getAuth())){
-					roleMapper.insertRoleAuth(roleAuth);
-				}
-			}
-		}else if(AUTH_COVER.equals(action)){
-			roleMapper.deleteRoleAuthByRoleName(roleVo.getName());
-			List<RoleAuthVo> roleAuthVoList = roleVo.getRoleAuthList();
-			if (roleAuthVoList != null && roleAuthVoList.size() > 0){
-				for (RoleAuthVo roleAuthVo : roleAuthVoList){
-					roleMapper.insertRoleAuth(roleAuthVo);
-				}
-			}
-		}else if(AUTH_DELETE.equals(action)){
-			roleMapper.deleteRoleAuth(roleVo);
+	public int addRoleAuth(RoleVo roleVo) {
+		List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
+		Set<String> authSet = new HashSet<>();
+		for (RoleAuthVo authVo : roleAuthVoList){
+			authSet.add(authVo.getAuth());
 		}
+		for (RoleAuthVo roleAuth : roleVo.getRoleAuthList()){
+			if (!authSet.contains(roleAuth.getAuth())){
+				roleMapper.insertRoleAuth(roleAuth);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int coverRoleAuth(RoleVo roleVo) {
+		roleMapper.deleteRoleAuthByRoleName(roleVo.getName());
+		List<RoleAuthVo> roleAuthVoList = roleVo.getRoleAuthList();
+		if (roleAuthVoList != null && roleAuthVoList.size() > 0){
+			for (RoleAuthVo roleAuthVo : roleAuthVoList){
+				roleMapper.insertRoleAuth(roleAuthVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int deleteRoleAuth(RoleVo roleVo) {
+		roleMapper.deleteRoleAuth(roleVo);
 		return 0;
 	}
 
