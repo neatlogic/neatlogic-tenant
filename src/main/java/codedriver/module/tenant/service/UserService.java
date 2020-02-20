@@ -12,7 +12,7 @@ public interface UserService {
 	@Transactional
 	public int saveUser(UserVo userVo);
 
-	public int saveUserAuth(UserVo userVo);
+	public int saveUserAuth(UserVo userVo, String action);
 
 	@Transactional
 	public int deleteUser(String userId);

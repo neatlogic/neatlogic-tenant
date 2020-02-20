@@ -53,6 +53,9 @@ public class UserSearchApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "用户组uuid"
 			),
+			@Param(name = "roleName",
+					type = ApiParamType.STRING,
+					desc = "角色名称"),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页数",
@@ -104,6 +107,9 @@ public class UserSearchApi extends ApiComponentBase {
 		}
 		if(jsonObj.containsKey("teamUuid")){
 			userVo.setTeamUuid(json.getString("teamUuid"));
+		}
+		if (jsonObj.containsKey("roleName")){
+			userVo.setRoleName(json.getString("roleName"));
 		}
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
