@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -71,7 +72,15 @@ public class UserAuthSaveApi extends ApiComponentBase {
                 userAuthVoList.add(authVo);
             }
             userVo.setUserAuthList(userAuthVoList);
-            userService.saveUserAuth(userVo, action);
+            if (AuthVo.AUTH_ADD.equals(action)){
+                userService.addUserAuth(userVo);
+            }
+            if (AuthVo.AUTH_COVER.equals(action)){
+                userService.coverUserAuth(userVo);
+            }
+            if (AuthVo.AUTH_DELETE.equals(action)){
+                userService.deleteUserAuth(userVo);
+            }
         }
         return null;
     }

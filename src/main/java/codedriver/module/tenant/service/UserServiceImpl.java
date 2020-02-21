@@ -16,10 +16,6 @@ import codedriver.framework.dto.UserVo;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private static final String AUTH_DELETE = "delete";
-	private static final String AUTH_ADD = "add";
-	private static final String AUTH_COVER = "cover";
-
 	@Autowired
 	UserMapper userMapper;
 
@@ -29,7 +25,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public int saveUser(UserVo userVo) {
 		String userId = userVo.getUserId();
-		if (userId == null || ("").equals(userId)) {
+		if (userMapper.getUserByUserId(userId) == null){
 			userMapper.insertUser(userVo);
 		} else {
 			userMapper.updateUser(userVo);
@@ -38,7 +34,9 @@ public class UserServiceImpl implements UserService {
 			//更新密码
 			userMapper.updateUserPasswordActive(userId);
 			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
-			userMapper.deleteUserPasswordByLimit(userId, idList);
+			if (idList != null && idList.size() > 0){
+				userMapper.deleteUserPasswordByLimit(userId, idList);
+			}
 		}
 		userMapper.insertUserPassword(userVo);
 		if (userVo.getRoleNameList() != null && userVo.getRoleNameList().size() > 0) {
@@ -58,29 +56,35 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public int saveUserAuth(UserVo userVo, String action) {
-		if ((AUTH_ADD).equals(action)){
-			List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserId(userVo.getUserId());
-			Set<String> set = new HashSet<>();
-			for (UserAuthVo authVo : userAuthList){
-				set.add(authVo.getAuth());
-			}
-			for (UserAuthVo authVo : userVo.getUserAuthList()){
-				if (!set.contains(authVo.getAuth())){
-					userMapper.insertUserAuth(authVo);
-				}
-			}
-		}else if(AUTH_COVER.equals(action)){
-			userMapper.deleteUserAuthByUserId(userVo.getUserId());
-			if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
-				for (UserAuthVo authVo : userVo.getUserAuthList()){
-					userMapper.insertUserAuth(authVo);
-				}
-			}
-		}else if (AUTH_DELETE.equals(action)){
-			userMapper.deleteUserAuth(userVo);
+	public int addUserAuth(UserVo userVo) {
+		List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserId(userVo.getUserId());
+		Set<String> set = new HashSet<>();
+		for (UserAuthVo authVo : userAuthList){
+			set.add(authVo.getAuth());
 		}
-		return 1;
+		for (UserAuthVo authVo : userVo.getUserAuthList()){
+			if (!set.contains(authVo.getAuth())){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int coverUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuthByUserId(userVo.getUserId());
+		if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
+			for (UserAuthVo authVo : userVo.getUserAuthList()){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int deleteUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuth(userVo);
+		return 0;
 	}
 
 	@Override
