@@ -21,6 +21,7 @@ public class ObjectPoolService {
     private static final Logger logger = LoggerFactory.getLogger(ObjectPoolService.class);
 
     private static final String POOL_NAME = "test";
+    private static final String TEST_CONFIG = "test.properties";
 
     private MultiAttrsObjectPool objectPool;
     private ExecutorService executor;
@@ -46,8 +47,25 @@ public class ObjectPoolService {
 
         objectPool = MultiAttrsSearch.getObjectPool(config);
 
-        ThreadPoolExecutor tp = new ThreadPoolExecutor(5, 10, 5, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(1000));
+        String val;
+        val = Config.getProperty(TEST_CONFIG, "threadPool.corePoolSize");
+        int corePoolSize = 5;
+        if (val != null) {
+            corePoolSize = Integer.parseInt(val);
+        }
+        val = Config.getProperty(TEST_CONFIG, "threadPool.maxPoolSize");
+        int maxPoolSize = 10;
+        if (val != null) {
+            maxPoolSize = Integer.parseInt(val);
+        }
+        val = Config.getProperty(TEST_CONFIG, "threadPool.queueSize");
+        int queueSize = 1500;
+        if (val != null) {
+            queueSize = Integer.parseInt(val);
+        }
+
+        ThreadPoolExecutor tp = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 5, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueSize), new ThreadPoolExecutor.CallerRunsPolicy());
         tp.allowCoreThreadTimeOut(true);
 
         executor = tp;
