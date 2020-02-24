@@ -10,9 +10,10 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class TagSearchApi extends ApiComponentBase {
 
     @Autowired

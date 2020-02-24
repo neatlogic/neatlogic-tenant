@@ -43,6 +43,7 @@ public class TagDeleteApi extends ApiComponentBase {
         for (int i = 0; i < tagIdList.size(); i++){
             Long tagId = tagIdList.getLong(i);
             TagVo tag = new TagVo();
+            tag.setId(tagId);
             tagService.deleteTag(tag);
         }
         return null;
