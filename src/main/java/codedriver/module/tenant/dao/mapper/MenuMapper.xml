@@ -100,7 +100,7 @@
 			</foreach>
 			or d.role_name is null)
 		</if>
-		ORDER BY a.parent_id, a.sort
+		ORDER BY b.parent_id, b.sort
 	</select>
 
 	<select id="getParentIdMaxSort" parameterType="codedriver.module.tenant.dto.MenuVo" resultType="java.lang.Integer">
