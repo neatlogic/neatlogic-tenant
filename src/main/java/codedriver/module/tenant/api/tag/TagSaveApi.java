@@ -39,7 +39,6 @@ public class TagSaveApi extends ApiComponentBase {
     @Description( desc = "标签保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
         TagVo tag = new TagVo();
         if (jsonObj.containsKey("id")){
             tag.setId(jsonObj.getLong("id"));
@@ -48,7 +47,6 @@ public class TagSaveApi extends ApiComponentBase {
             tag.setName(jsonObj.getString("name"));
         }
         tagService.saveTag(tag);
-        returnObj.put("id", tag.getId());
-        return returnObj;
+        return null;
     }
 }
