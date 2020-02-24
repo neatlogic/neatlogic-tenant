@@ -49,6 +49,7 @@ public class EsSearchApi extends ApiComponentBase {
         Integer status = jsonObj.getInteger("status");
         List<String> tags = Util.getList(jsonObj, "tags");
         String title = jsonObj.getString("title");
+        String handler = jsonObj.getString("handler");
         Integer skip = jsonObj.getInteger("skip");
         Integer size = jsonObj.getInteger("size");
 
@@ -62,11 +63,14 @@ public class EsSearchApi extends ApiComponentBase {
         if (title != null && !StringUtils.isBlank(title)) {
             cond = cond == null ? attr("title").contains(title) : cond.and().attr("title").contains(title);
         }
+        if (handler != null && !StringUtils.isBlank(handler)) {
+            cond = cond == null ? attr("handler").eq(handler) : cond.and().attr("handler").eq(handler);
+        }
 
         QueryBuilder builder = objectPoolService.createQueryBuilder(TenantContext.get().getTenantUuid())
 //                 .select("title", "status", "created_at")
                 .orderBy("created_at", false)
-                .limit(skip == null ? 0 : skip, size == null ? 20 : size);
+                .limit(skip == null ? 0 : skip, size == null ? 100 : size);
         if (cond != null) {
             builder.where(cond);
         }

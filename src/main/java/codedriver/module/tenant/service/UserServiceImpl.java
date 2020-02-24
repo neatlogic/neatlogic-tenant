@@ -1,6 +1,8 @@
 package codedriver.module.tenant.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import codedriver.framework.dto.UserAuthVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public int saveUser(UserVo userVo) {
 		String userId = userVo.getUserId();
-		if (userId == null || ("").equals(userId)) {
+		if (userMapper.getUserByUserId(userId) == null){
 			userMapper.insertUser(userVo);
 		} else {
 			userMapper.updateUser(userVo);
@@ -32,7 +34,9 @@ public class UserServiceImpl implements UserService {
 			//更新密码
 			userMapper.updateUserPasswordActive(userId);
 			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
-			userMapper.deleteUserPasswordByLimit(userId, idList);
+			if (idList != null && idList.size() > 0){
+				userMapper.deleteUserPasswordByLimit(userId, idList);
+			}
 		}
 		userMapper.insertUserPassword(userVo);
 		if (userVo.getRoleNameList() != null && userVo.getRoleNameList().size() > 0) {
@@ -52,14 +56,35 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public int saveUserAuth(UserVo userVo) {
+	public int addUserAuth(UserVo userVo) {
+		List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserId(userVo.getUserId());
+		Set<String> set = new HashSet<>();
+		for (UserAuthVo authVo : userAuthList){
+			set.add(authVo.getAuth());
+		}
+		for (UserAuthVo authVo : userVo.getUserAuthList()){
+			if (!set.contains(authVo.getAuth())){
+				userMapper.insertUserAuth(authVo);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int coverUserAuth(UserVo userVo) {
 		userMapper.deleteUserAuthByUserId(userVo.getUserId());
 		if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
 			for (UserAuthVo authVo : userVo.getUserAuthList()){
 				userMapper.insertUserAuth(authVo);
 			}
 		}
-		return 1;
+		return 0;
+	}
+
+	@Override
+	public int deleteUserAuth(UserVo userVo) {
+		userMapper.deleteUserAuth(userVo);
+		return 0;
 	}
 
 	@Override

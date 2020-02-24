@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RolerUserSaveApi extends ApiComponentBase {
+public class RoleUserSaveApi extends ApiComponentBase {
 
     @Autowired
     private RoleService roleService;

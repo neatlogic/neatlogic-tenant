@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -46,12 +47,17 @@ public class UserAuthSaveApi extends ApiComponentBase {
             type = ApiParamType.JSONARRAY,
             explode = UserAuthVo[].class,
             desc = "用户权限集合",
+            isRequired = true),
+            @Param(name = "action",
+            type = ApiParamType.STRING,
+            desc = "保存类型",
             isRequired = true)
     })
     @Description( desc = "用户权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+        String action = jsonObj.getString("action");
         for (int i = 0; i < userIdArray.size(); i++){
             UserVo userVo = new UserVo();
             userVo.setUserId(userIdArray.getString(i));
@@ -66,7 +72,15 @@ public class UserAuthSaveApi extends ApiComponentBase {
                 userAuthVoList.add(authVo);
             }
             userVo.setUserAuthList(userAuthVoList);
-            userService.saveUserAuth(userVo);
+            if (AuthVo.AUTH_ADD.equals(action)){
+                userService.addUserAuth(userVo);
+            }
+            if (AuthVo.AUTH_COVER.equals(action)){
+                userService.coverUserAuth(userVo);
+            }
+            if (AuthVo.AUTH_DELETE.equals(action)){
+                userService.deleteUserAuth(userVo);
+            }
         }
         return null;
     }

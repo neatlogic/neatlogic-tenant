@@ -1,6 +1,8 @@
 package codedriver.module.tenant.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserVo;
@@ -13,6 +15,10 @@ import codedriver.framework.dto.RoleVo;
 
 @Service
 public class RoleServiceImpl implements RoleService {
+
+	private static final String AUTH_DELETE = "delete";
+	private static final String AUTH_ADD = "add";
+	private static final String AUTH_COVER = "cover";
 
 	@Autowired
 	RoleMapper roleMapper;
@@ -45,7 +51,22 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public int saveRoleAuth(RoleVo roleVo) {
+	public int addRoleAuth(RoleVo roleVo) {
+		List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
+		Set<String> authSet = new HashSet<>();
+		for (RoleAuthVo authVo : roleAuthVoList){
+			authSet.add(authVo.getAuth());
+		}
+		for (RoleAuthVo roleAuth : roleVo.getRoleAuthList()){
+			if (!authSet.contains(roleAuth.getAuth())){
+				roleMapper.insertRoleAuth(roleAuth);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int coverRoleAuth(RoleVo roleVo) {
 		roleMapper.deleteRoleAuthByRoleName(roleVo.getName());
 		List<RoleAuthVo> roleAuthVoList = roleVo.getRoleAuthList();
 		if (roleAuthVoList != null && roleAuthVoList.size() > 0){
@@ -53,6 +74,12 @@ public class RoleServiceImpl implements RoleService {
 				roleMapper.insertRoleAuth(roleAuthVo);
 			}
 		}
+		return 0;
+	}
+
+	@Override
+	public int deleteRoleAuth(RoleVo roleVo) {
+		roleMapper.deleteRoleAuth(roleVo);
 		return 0;
 	}
 

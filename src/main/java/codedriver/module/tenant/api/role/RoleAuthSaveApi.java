@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.UserAuthVo;
@@ -48,12 +49,17 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                     type = ApiParamType.JSONARRAY,
                     explode = RoleAuthVo[].class,
                     desc = "角色权限集合",
+                    isRequired = true),
+            @Param(name = "action",
+                    type = ApiParamType.STRING,
+                    desc = "操作类型",
                     isRequired = true)
     })
     @Description( desc = "角色权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray roleAuthList = jsonObj.getJSONArray("roleNameList");
+        String action = jsonObj.getString("action");
         for (int i = 0; i < roleAuthList.size() ; i++){
             RoleVo roleVo = new RoleVo();
             roleVo.setName(roleAuthList.getString(i));
@@ -68,9 +74,16 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                 roleAuthVoList.add(roleAuthVo);
             }
             roleVo.setRoleAuthList(roleAuthVoList);
-            roleService.saveRoleAuth(roleVo);
+            if (AuthVo.AUTH_ADD.equals(action)){
+                roleService.addRoleAuth(roleVo);
+            }
+            if(AuthVo.AUTH_COVER.equals(action)){
+                roleService.coverRoleAuth(roleVo);
+            }
+            if(AuthVo.AUTH_DELETE.equals(action)){
+                roleService.deleteRoleAuth(roleVo);
+            }
         }
-
         return null;
     }
 }

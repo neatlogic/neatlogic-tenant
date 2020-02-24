@@ -87,6 +87,9 @@ public class RoleSearchApi extends ApiComponentBase {
 		if(jsonObj.containsKey("authModule")){
 			roleVo.setAuthGroup(jsonObj.getString("authGroup"));
 		}
+		if (jsonObj.containsKey("needPage")){
+			roleVo.setNeedPage(jsonObj.getBoolean("needPage"));
+		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
 		returnObj.put("roleList", roleList);
 		if (roleVo.getNeedPage()) {
