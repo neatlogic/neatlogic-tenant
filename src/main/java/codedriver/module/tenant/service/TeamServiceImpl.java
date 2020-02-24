@@ -104,6 +104,7 @@ public class TeamServiceImpl implements TeamService {
 			teamObj.put("uuid", teamVo.getUuid());
 			teamObj.put("sort", teamVo.getSort());
 			teamObj.put("parentUuid", teamVo.getParentUuid());
+			teamObj.put("tagList", teamVo.getTagList());
 			if (map.containsKey(teamVo.getUuid())){
 				List<TeamVo> teams = map.get(teamVo.getUuid());
 				teamObj.put("children", buildData(teams, map));
