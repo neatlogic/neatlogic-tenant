@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.dto.TagVo;
 import codedriver.module.tenant.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -47,6 +48,7 @@ public class TeamServiceImpl implements TeamService {
 	public int deleteTeam(String teamUuid) {
 		teamMapper.deleteUserTeamRoleByTeamUuid(teamUuid);
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
+		teamMapper.deleteTeamTagByUuid(teamUuid);
 		teamMapper.deleteTeamByUuid(teamUuid);
 		return 1;
 	}
@@ -55,14 +57,23 @@ public class TeamServiceImpl implements TeamService {
 	public void saveTeam(TeamVo teamVo) {
 		if(teamVo.getUuid() != null){
 			teamMapper.updateTeamNameByUuid(teamVo);
+			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
+		}else {
+			if (teamVo.getParentUuid() == null){
+				teamVo.setParentUuid("0");
+			}
+			int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
+			teamVo.setSort(sort+1);
+			teamMapper.insertTeam(teamVo);
 		}
-		if (teamVo.getParentUuid() == null){
-			teamVo.setParentUuid("0");
-		}
-		int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
-		teamVo.setSort(sort+1);
 
-		teamMapper.insertTeam(teamVo);
+		if (teamVo.getTagList() != null && teamVo.getTagList().size() > 0){
+			for (TagVo tag : teamVo.getTagList()){
+				teamVo.setTagId(tag.getId());
+				teamMapper.insertTeamTag(teamVo);
+			}
+		}
+
 	}
 
 	@Override
@@ -93,6 +104,7 @@ public class TeamServiceImpl implements TeamService {
 			teamObj.put("uuid", teamVo.getUuid());
 			teamObj.put("sort", teamVo.getSort());
 			teamObj.put("parentUuid", teamVo.getParentUuid());
+			teamObj.put("tagList", teamVo.getTagList());
 			if (map.containsKey(teamVo.getUuid())){
 				List<TeamVo> teams = map.get(teamVo.getUuid());
 				teamObj.put("children", buildData(teams, map));
