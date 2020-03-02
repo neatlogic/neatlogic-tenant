@@ -40,7 +40,7 @@ public class RoleSearchApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "keyword",
 					type = ApiParamType.STRING,
-					desc = "关键字，匹配名称或说明"),
+					desc = "关键字，匹配名称或说明", xss = true),
 			@Param(name = "authGroup",
 					type = ApiParamType.STRING,
 					desc = "权限模块"),

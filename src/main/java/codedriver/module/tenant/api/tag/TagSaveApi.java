@@ -34,7 +34,7 @@ public class TagSaveApi extends ApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "标签id"),
-            @Param(name = "name", type = ApiParamType.STRING, desc = "标签名称",isRequired = true)
+            @Param(name = "name", type = ApiParamType.STRING, desc = "标签名称",isRequired = true, xss = true)
     })
     @Description( desc = "标签保存接口")
     @Override

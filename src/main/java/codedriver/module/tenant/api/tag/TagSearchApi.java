@@ -35,7 +35,7 @@ public class TagSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", desc = "标签名称", type = ApiParamType.STRING, isRequired = true)
+            @Param(name = "name", desc = "标签名称", type = ApiParamType.STRING, isRequired = true, xss = true)
     })
 
     @Output({
