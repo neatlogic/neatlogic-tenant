@@ -66,6 +66,9 @@ public class UserGetApi extends ApiComponentBase {
 			@Param(name = "roleList",
 					type = ApiParamType.JSONARRAY,
 					desc = "用户角色信息列表"),
+			@Param(name = "authList",
+					type = ApiParamType.JSONARRAY,
+					desc = "用户权限信息列表"),
 			@Param(name = "teamList",
 					type = ApiParamType.JSONARRAY,
 					desc = "用户所在组信息列表")})
@@ -81,6 +84,7 @@ public class UserGetApi extends ApiComponentBase {
 			}
 		}
 		UserVo userVo = userMapper.getUserByUserId(userId);
+		userVo.setUserAuthList(userMapper.searchUserAuthByUserId(userId));
 		return userVo;
 	}
 }
