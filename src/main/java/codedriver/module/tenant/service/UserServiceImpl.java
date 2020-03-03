@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.common.util.StringUtil;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,18 +30,22 @@ public class UserServiceImpl implements UserService {
 		String userId = userVo.getUserId();
 		if (userMapper.getUserByUserId(userId) == null){
 			userMapper.insertUser(userVo);
+			userMapper.insertUserPassword(userVo);
 		} else {
 			userMapper.updateUser(userVo);
 			userMapper.deleteUserRoleByUserId(userId);
 			userMapper.deleteUserTeamByUserId(userId);
 			//更新密码
-			userMapper.updateUserPasswordActive(userId);
-			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
-			if (idList != null && idList.size() > 0){
-				userMapper.deleteUserPasswordByLimit(userId, idList);
+			if (StringUtils.isNotBlank(userVo.getPassword())){
+				userMapper.updateUserPasswordActive(userId);
+				List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
+				if (idList != null && idList.size() > 0){
+					userMapper.deleteUserPasswordByLimit(userId, idList);
+				}
+				userMapper.insertUserPassword(userVo);
 			}
 		}
-		userMapper.insertUserPassword(userVo);
+
 		if (userVo.getRoleNameList() != null && userVo.getRoleNameList().size() > 0) {
 			for (String roleName : userVo.getRoleNameList()) {
 				userMapper.insertUserRole(userId, roleName);
