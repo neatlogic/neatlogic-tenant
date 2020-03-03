@@ -43,7 +43,8 @@ public class UserAuthSearchApi extends ApiComponentBase {
             @Param( name = "userId", type = ApiParamType.STRING, desc = "用户ID", isRequired = true)
     })
     @Output({
-            @Param( name = "userAuthList", type = ApiParamType.JSONARRAY, explode = UserAuthVo[].class, desc = "用户权限集合")
+            @Param( name = "userAuthList", type = ApiParamType.JSONARRAY, desc = "用户权限集合"),
+            @Param( name = "userRoleAuthList", type = ApiParamType.JSONARRAY, desc = "用户角色权限集合")
     })
     @Description(desc = "用户权限查询接口")
     @Override
