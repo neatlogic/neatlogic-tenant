@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<UserAuthVo> searchUserAuth(String userId) {
 		return userMapper.searchUserAuthByUserId(userId);
+	}
+
+	@Override
+	public List<RoleAuthVo> searchUserRoleAuth(String userId) {
+		return userMapper.searchUserRoleAuthByUserId(userId);
 	}
 
 	@Override
