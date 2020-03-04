@@ -69,7 +69,7 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                 RoleAuthVo roleAuthVo = new RoleAuthVo();
                 roleAuthVo.setAuth(roleAuthStr.split("#")[1]);
                 roleAuthVo.setAuthGroup(roleAuthStr.split("#")[0]);
-                roleAuthVo.setRoleName(jsonObj.getString("roleName"));
+                roleAuthVo.setRoleName(roleVo.getName());
                 roleAuthVoList.add(roleAuthVo);
             }
             roleVo.setRoleAuthList(roleAuthVoList);
