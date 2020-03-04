@@ -47,7 +47,6 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                     isRequired = true),
             @Param(name = "roleAuthList",
                     type = ApiParamType.JSONARRAY,
-                    explode = RoleAuthVo[].class,
                     desc = "角色权限集合",
                     isRequired = true),
             @Param(name = "action",
@@ -66,11 +65,11 @@ public class RoleAuthSaveApi extends ApiComponentBase {
             JSONArray roleAuthArray = jsonObj.getJSONArray("roleAuthList");
             List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
             for (int j = 0; j < roleAuthArray.size(); j++){
-                JSONObject roleAuthObj = roleAuthArray.getJSONObject(j);
+                String roleAuthStr = roleAuthArray.getString(j);
                 RoleAuthVo roleAuthVo = new RoleAuthVo();
-                roleAuthVo.setAuth(roleAuthObj.getString("auth"));
-                roleAuthVo.setAuthGroup(roleAuthObj.getString("authGroup"));
-                roleAuthVo.setRoleName(jsonObj.getString("roleName"));
+                roleAuthVo.setAuth(roleAuthStr.split("#")[1]);
+                roleAuthVo.setAuthGroup(roleAuthStr.split("#")[0]);
+                roleAuthVo.setRoleName(roleVo.getName());
                 roleAuthVoList.add(roleAuthVo);
             }
             roleVo.setRoleAuthList(roleAuthVoList);

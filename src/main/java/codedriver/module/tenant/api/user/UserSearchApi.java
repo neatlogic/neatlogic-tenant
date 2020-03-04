@@ -41,7 +41,7 @@ public class UserSearchApi extends ApiComponentBase {
 			@Param(name = "keyword",
 					type = ApiParamType.STRING,
 					desc = "关键字(用户id或名称),模糊查询",
-					isRequired = false,
+					isRequired = true,
 					xss = true),
 			@Param(name = "authGroup",
 					type = ApiParamType.STRING,
@@ -99,18 +99,10 @@ public class UserSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("pageSize")) {
 			userVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
-		if (jsonObj.containsKey("auth")){
-			userVo.setAuth(jsonObj.getString("auth"));
-		}
-		if (jsonObj.containsKey("authGroup")){
-			userVo.setAuthGroup("authGroup");
-		}
-		if(jsonObj.containsKey("teamUuid")){
-			userVo.setTeamUuid(json.getString("teamUuid"));
-		}
-		if (jsonObj.containsKey("roleName")){
-			userVo.setRoleName(json.getString("roleName"));
-		}
+		userVo.setAuth(jsonObj.getString("auth"));
+		userVo.setAuthGroup(jsonObj.getString("authGroup"));
+		userVo.setTeamUuid(json.getString("teamUuid"));
+		userVo.setRoleName(json.getString("roleName"));
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
 		json.put("userList", userList);

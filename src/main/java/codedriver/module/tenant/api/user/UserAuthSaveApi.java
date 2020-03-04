@@ -45,7 +45,6 @@ public class UserAuthSaveApi extends ApiComponentBase {
             isRequired = true),
             @Param(name = "userAuthList",
             type = ApiParamType.JSONARRAY,
-            explode = UserAuthVo[].class,
             desc = "用户权限集合",
             isRequired = true),
             @Param(name = "action",
@@ -63,12 +62,12 @@ public class UserAuthSaveApi extends ApiComponentBase {
             userVo.setUserId(userIdArray.getString(i));
             JSONArray userAuthArray = jsonObj.getJSONArray("userAuthList");
             List<UserAuthVo> userAuthVoList = new ArrayList<>();
-            for (int j = 0; j < userAuthArray.size(); i++){
-                JSONObject userAuthObj = userAuthArray.getJSONObject(j);
+            for (int j = 0; j < userAuthArray.size(); j++){
+                String userAuthStr = userAuthArray.getString(j);
                 UserAuthVo authVo = new UserAuthVo();
-                authVo.setAuth(userAuthObj.getString("auth"));
-                authVo.setAuthGroup(userAuthObj.getString("authGroup"));
-                authVo.setUserId(jsonObj.getString("userId"));
+                authVo.setAuth(userAuthStr.split("#")[1]);
+                authVo.setAuthGroup(userAuthStr.split("#")[0]);
+                authVo.setUserId(userVo.getUserId());
                 userAuthVoList.add(authVo);
             }
             userVo.setUserAuthList(userAuthVoList);
