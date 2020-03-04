@@ -56,7 +56,13 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String roleName = jsonObj.getString("roleName");
-        returnObj.put("roleAuthList",  roleService.searchRoleAuth(roleName));
+        List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleName);
+        if (roleAuthList != null && roleAuthList.size() > 0){
+            for (RoleAuthVo roleAuth : roleAuthList){
+                roleAuth.setAuth(roleAuth.getAuthGroup() + "#" + roleAuth.getAuth());
+            }
+        }
+        returnObj.put("roleAuthList", roleAuthList);
         return returnObj;
     }
 }
