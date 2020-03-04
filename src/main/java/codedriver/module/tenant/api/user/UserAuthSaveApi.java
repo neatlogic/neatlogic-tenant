@@ -62,7 +62,7 @@ public class UserAuthSaveApi extends ApiComponentBase {
             userVo.setUserId(userIdArray.getString(i));
             JSONArray userAuthArray = jsonObj.getJSONArray("userAuthList");
             List<UserAuthVo> userAuthVoList = new ArrayList<>();
-            for (int j = 0; j < userAuthArray.size(); i++){
+            for (int j = 0; j < userAuthArray.size(); j++){
                 String userAuthStr = userAuthArray.getString(j);
                 UserAuthVo authVo = new UserAuthVo();
                 authVo.setAuth(userAuthStr.split("#")[1]);
