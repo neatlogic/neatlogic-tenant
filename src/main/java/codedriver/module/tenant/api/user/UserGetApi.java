@@ -84,7 +84,7 @@ public class UserGetApi extends ApiComponentBase {
 			}
 		}
 		UserVo userVo = userMapper.getUserByUserId(userId);
-		userVo.setUserAuthList(userMapper.searchUserAuthByUserId(userId));
+		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserId(userId));
 		return userVo;
 	}
 }

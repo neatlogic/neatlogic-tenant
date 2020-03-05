@@ -41,7 +41,7 @@ public class UserSearchApi extends ApiComponentBase {
 			@Param(name = "keyword",
 					type = ApiParamType.STRING,
 					desc = "关键字(用户id或名称),模糊查询",
-					isRequired = false,
+					isRequired = true,
 					xss = true),
 			@Param(name = "authGroup",
 					type = ApiParamType.STRING,
@@ -63,7 +63,10 @@ public class UserSearchApi extends ApiComponentBase {
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页展示数量 默认10",
-					isRequired = false)})
+					isRequired = false),
+            @Param(name = "needPage",
+                    type = ApiParamType.BOOLEAN,
+                    desc = "是否分页")})
 	@Output({
 			@Param(name = "userList",
 					type = ApiParamType.JSONARRAY,
@@ -99,25 +102,22 @@ public class UserSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("pageSize")) {
 			userVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
-		if (jsonObj.containsKey("auth")){
-			userVo.setAuth(jsonObj.getString("auth"));
-		}
-		if (jsonObj.containsKey("authGroup")){
-			userVo.setAuthGroup("authGroup");
-		}
-		if(jsonObj.containsKey("teamUuid")){
-			userVo.setTeamUuid(json.getString("teamUuid"));
-		}
-		if (jsonObj.containsKey("roleName")){
-			userVo.setRoleName(json.getString("roleName"));
-		}
+		if (jsonObj.containsKey("needPage")){
+		    userVo.setNeedPage(jsonObj.getBoolean("needPage"));
+        }
+		userVo.setAuth(jsonObj.getString("auth"));
+		userVo.setAuthGroup(jsonObj.getString("authGroup"));
+		userVo.setTeamUuid(jsonObj.getString("teamUuid"));
+		userVo.setRoleName(jsonObj.getString("roleName"));
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
 		json.put("userList", userList);
-		json.put("rowNum", userVo.getRowNum());
-		json.put("pageCount", userVo.getPageCount());
-		json.put("pageSize", userVo.getPageSize());
-		json.put("currentPage", userVo.getCurrentPage());
+		if (userVo.getNeedPage()){
+            json.put("rowNum", userVo.getRowNum());
+            json.put("pageCount", userVo.getPageCount());
+            json.put("pageSize", userVo.getPageSize());
+            json.put("currentPage", userVo.getCurrentPage());
+        }
 		return json;
 	}
 }

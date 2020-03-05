@@ -2,6 +2,7 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,8 @@ public interface UserService {
 	public List<UserVo> searchUser(UserVo userVo);
 
 	public List<UserAuthVo> searchUserAuth(String userId);
+
+	public List<RoleAuthVo> searchUserRoleAuth(String userId);
 
 	public int updateUserActive(UserVo userVo);
 
