@@ -37,18 +37,15 @@ public class TeamDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "uuidList",
-					type = ApiParamType.JSONARRAY,
-					desc = "分组uuid集合",
+			@Param(name = "uuid",
+					type = ApiParamType.STRING,
+					desc = "分组uuid",
 					isRequired = true) })
 	@Description(desc = "删除分组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONArray uuidList = jsonObj.getJSONArray("uuidList");
-		for (int i = 0; i < uuidList.size(); i++){
-			String teamUuid = uuidList.getString(i);
-			teamService.deleteTeam(teamUuid);
-		}
+		String teamUuid = jsonObj.getString("uuid");
+		teamService.deleteTeam(teamUuid);
 		return null;
 	}
 }
