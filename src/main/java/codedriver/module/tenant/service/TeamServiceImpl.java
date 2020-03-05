@@ -46,11 +46,21 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public int deleteTeam(String teamUuid) {
+		iterativeDelete(teamUuid);
+		return 1;
+	}
+
+	public void iterativeDelete(String teamUuid){
 		teamMapper.deleteUserTeamRoleByTeamUuid(teamUuid);
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
 		teamMapper.deleteTeamTagByUuid(teamUuid);
 		teamMapper.deleteTeamByUuid(teamUuid);
-		return 1;
+		List<TeamVo> childTeamList = teamMapper.getTeamByParentUuid(teamUuid);
+		if (childTeamList != null && childTeamList.size() > 0){
+			for (TeamVo childTeam : childTeamList){
+				iterativeDelete(childTeam.getUuid());
+			}
+		}
 	}
 
 	@Override
@@ -63,7 +73,7 @@ public class TeamServiceImpl implements TeamService {
 				teamVo.setParentUuid("0");
 			}
 			int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
-			teamVo.setSort(sort+1);
+			teamVo.setSort(sort++);
 			teamMapper.insertTeam(teamVo);
 		}
 
