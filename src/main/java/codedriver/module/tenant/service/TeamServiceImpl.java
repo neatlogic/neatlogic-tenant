@@ -65,7 +65,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public void saveTeam(TeamVo teamVo) {
-		if(teamVo.getUuid() != null){
+		if(teamMapper.getTeamByUuid(teamVo.getUuid()) != null){
 			teamMapper.updateTeamNameByUuid(teamVo);
 			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
