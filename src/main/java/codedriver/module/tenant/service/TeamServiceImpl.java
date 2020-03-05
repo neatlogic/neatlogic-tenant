@@ -72,8 +72,11 @@ public class TeamServiceImpl implements TeamService {
 			if (teamVo.getParentUuid() == null){
 				teamVo.setParentUuid("0");
 			}
-			int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
-			sort++;
+			int sort = 0;
+			if (teamMapper.getTeamByParentUuid(teamVo.getParentUuid()) != null){
+				sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
+				sort++;
+			}
 			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);
 		}
