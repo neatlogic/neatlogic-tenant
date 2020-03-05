@@ -46,24 +46,39 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public int deleteTeam(String teamUuid) {
+		iterativeDelete(teamUuid);
+		return 1;
+	}
+
+	public void iterativeDelete(String teamUuid){
 		teamMapper.deleteUserTeamRoleByTeamUuid(teamUuid);
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
 		teamMapper.deleteTeamTagByUuid(teamUuid);
 		teamMapper.deleteTeamByUuid(teamUuid);
-		return 1;
+		List<TeamVo> childTeamList = teamMapper.getTeamByParentUuid(teamUuid);
+		if (childTeamList != null && childTeamList.size() > 0){
+			for (TeamVo childTeam : childTeamList){
+				iterativeDelete(childTeam.getUuid());
+			}
+		}
 	}
 
 	@Override
 	public void saveTeam(TeamVo teamVo) {
-		if(teamVo.getUuid() != null){
+		if(teamMapper.getTeamByUuid(teamVo.getUuid()) != null){
 			teamMapper.updateTeamNameByUuid(teamVo);
 			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
 			if (teamVo.getParentUuid() == null){
 				teamVo.setParentUuid("0");
 			}
-			int sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
-			teamVo.setSort(sort+1);
+			int sort = 0;
+			List<TeamVo> teamList = teamMapper.getTeamByParentUuid(teamVo.getParentUuid());
+			if (teamList != null && teamList.size() > 0){
+				sort = teamMapper.getMaxTeamSortByParentUuid(teamVo.getParentUuid());
+			}
+			sort++;
+			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);
 		}
 
