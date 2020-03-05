@@ -107,8 +107,8 @@ public class UserSearchApi extends ApiComponentBase {
         }
 		userVo.setAuth(jsonObj.getString("auth"));
 		userVo.setAuthGroup(jsonObj.getString("authGroup"));
-		userVo.setTeamUuid(json.getString("teamUuid"));
-		userVo.setRoleName(json.getString("roleName"));
+		userVo.setTeamUuid(jsonObj.getString("teamUuid"));
+		userVo.setRoleName(jsonObj.getString("roleName"));
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
 		json.put("userList", userList);
