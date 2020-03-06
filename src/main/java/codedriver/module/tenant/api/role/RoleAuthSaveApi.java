@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class RoleAuthSaveApi extends ApiComponentBase {
@@ -46,7 +47,7 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                     desc = "角色名称集合",
                     isRequired = true),
             @Param(name = "roleAuthList",
-                    type = ApiParamType.JSONARRAY,
+                    type = ApiParamType.JSONOBJECT,
                     desc = "角色权限集合",
                     isRequired = true),
             @Param(name = "action",
@@ -62,15 +63,19 @@ public class RoleAuthSaveApi extends ApiComponentBase {
         for (int i = 0; i < roleAuthList.size() ; i++){
             RoleVo roleVo = new RoleVo();
             roleVo.setName(roleAuthList.getString(i));
-            JSONArray roleAuthArray = jsonObj.getJSONArray("roleAuthList");
+
+            JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
             List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
-            for (int j = 0; j < roleAuthArray.size(); j++){
-                String roleAuthStr = roleAuthArray.getString(j);
-                RoleAuthVo roleAuthVo = new RoleAuthVo();
-                roleAuthVo.setAuth(roleAuthStr.split("#")[1]);
-                roleAuthVo.setAuthGroup(roleAuthStr.split("#")[0]);
-                roleAuthVo.setRoleName(roleVo.getName());
-                roleAuthVoList.add(roleAuthVo);
+            Set<String> keySet = roleAuthObj.keySet();
+            for (String key : keySet){
+                JSONArray roleAuthArray = roleAuthObj.getJSONArray(key);
+                for (int j = 0; j < roleAuthArray.size(); j++){
+                    RoleAuthVo roleAuthVo = new RoleAuthVo();
+                    roleAuthVo.setAuth(roleAuthArray.getString(j));
+                    roleAuthVo.setAuthGroup(key);
+                    roleAuthVo.setRoleName(roleVo.getName());
+                    roleAuthVoList.add(roleAuthVo);
+                }
             }
             roleVo.setRoleAuthList(roleAuthVoList);
             if (AuthVo.AUTH_ADD.equals(action)){
