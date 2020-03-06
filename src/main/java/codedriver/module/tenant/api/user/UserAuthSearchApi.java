@@ -43,8 +43,8 @@ public class UserAuthSearchApi extends ApiComponentBase {
             @Param( name = "userId", type = ApiParamType.STRING, desc = "用户ID", isRequired = true)
     })
     @Output({
-            @Param( name = "userAuthList", type = ApiParamType.JSONARRAY, desc = "用户权限集合"),
-            @Param( name = "userRoleAuthList", type = ApiParamType.JSONARRAY, desc = "用户角色权限集合")
+            @Param( name = "userAuthObj", type = ApiParamType.JSONARRAY, desc = "用户权限集合"),
+            @Param( name = "userRoleAuthObj", type = ApiParamType.JSONARRAY, desc = "用户角色权限集合")
     })
     @Description(desc = "用户权限查询接口")
     @Override
@@ -54,8 +54,9 @@ public class UserAuthSearchApi extends ApiComponentBase {
         List<UserAuthVo> userAuthList = userService.searchUserAuth(userId);
         List<RoleAuthVo> userRoleAuthList = userService.searchUserRoleAuth(userId);
 
-        JSONArray userRoleAuthArray = new JSONArray();
         Map<String, String> userRoleAuthMap = new HashMap<>();
+
+        JSONObject userRoleAuthObj = new JSONObject();
 
         if (userRoleAuthList != null && userRoleAuthList.size() > 0) {
             for (RoleAuthVo roleAuth : userRoleAuthList) {
@@ -65,15 +66,18 @@ public class UserAuthSearchApi extends ApiComponentBase {
                     }
                 }
                 userRoleAuthMap.put(roleAuth.getAuth(), roleAuth.getAuthGroup());
-                JSONObject userRoleAuthObj = new JSONObject();
-                userRoleAuthObj.put("auth", roleAuth.getAuth());
-                userRoleAuthObj.put("authGroup", roleAuth.getAuthGroup());
-
-                userRoleAuthArray.add(userRoleAuthObj);
+                if (userRoleAuthObj.containsKey(roleAuth.getAuthGroup())){
+                    JSONArray authArray = userRoleAuthObj.getJSONArray(roleAuth.getAuthGroup());
+                    authArray.add(roleAuth.getAuth());
+                }else {
+                    JSONArray authArray = new JSONArray();
+                    authArray.add(roleAuth.getAuth());
+                    userRoleAuthObj.put(roleAuth.getAuthGroup(), authArray);
+                }
             }
         }
 
-        JSONArray userAuthArray = new JSONArray();
+        JSONObject userAuthObj = new JSONObject();
         if (userAuthList != null && userAuthList.size() > 0) {
             for (UserAuthVo authVo : userAuthList) {
                 boolean sameAuth = userRoleAuthMap.containsKey(authVo.getAuth());
@@ -82,15 +86,19 @@ public class UserAuthSearchApi extends ApiComponentBase {
                     sameGroup = userRoleAuthMap.get(authVo.getAuth()).equals(authVo.getAuthGroup());
                 }
                 if (!sameAuth || !sameGroup) {
-                    JSONObject userAuthObj = new JSONObject();
-                    userAuthObj.put("auth", authVo.getAuth());
-                    userAuthObj.put("authGroup", authVo.getAuthGroup());
-                    userAuthArray.add(userAuthObj);
+                    if (userAuthObj.containsKey(authVo.getAuthGroup())){
+                        JSONArray authArray = userAuthObj.getJSONArray(authVo.getAuthGroup());
+                        authArray.add(authVo.getAuth());
+                    }else {
+                        JSONArray authArray = new JSONArray();
+                        authArray.add(authVo.getAuth());
+                        userAuthObj.put(authVo.getAuthGroup(), authArray);
+                    }
                 }
             }
         }
-        returnObj.put("userAuthList", userAuthArray);
-        returnObj.put("userRoleAuthList", userRoleAuthArray);
+        returnObj.put("userAuthObj", userAuthObj);
+        returnObj.put("userRoleAuthObj", userRoleAuthObj);
         return returnObj;
     }
 }
