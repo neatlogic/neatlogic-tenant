@@ -27,7 +27,7 @@ public class ObjectPoolService {
     private ExecutorService executor;
 
     public ObjectPoolService() {
-        if (!Config.ES_ENABLE) {
+        /*if (!Config.ES_ENABLE) {
             return;
         }
 
@@ -68,7 +68,7 @@ public class ObjectPoolService {
                 new ArrayBlockingQueue<>(queueSize), new ThreadPoolExecutor.CallerRunsPolicy());
         tp.allowCoreThreadTimeOut(true);
 
-        executor = tp;
+        executor = tp;*/
     }
 
     public void saveTask(String tenantId, String taskId, JSONObject data) {
