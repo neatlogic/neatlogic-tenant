@@ -83,7 +83,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
                 }
                 if (!sameAuth || !sameGroup) {
                     JSONObject userAuthObj = new JSONObject();
-                    userAuthObj.put("auth", authVo.getAuthGroup() + "#" + authVo.getAuth());
+                    userAuthObj.put("auth", authVo.getAuth());
                     userAuthObj.put("authGroup", authVo.getAuthGroup());
                     userAuthArray.add(userAuthObj);
                 }
