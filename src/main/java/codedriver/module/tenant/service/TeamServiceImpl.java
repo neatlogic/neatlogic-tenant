@@ -170,6 +170,7 @@ public class TeamServiceImpl implements TeamService {
 		team.setUuid(uuid);
 		team.setSort(targetTeam.getSort() + 1);
 		team.setParentUuid(targetTeam.getParentUuid());
+		teamMapper.updateTeamSortAndParentUuid(team);
 
 		if(teamList != null && teamList.size() > 0){
 			for (TeamVo teamVo : teamList){

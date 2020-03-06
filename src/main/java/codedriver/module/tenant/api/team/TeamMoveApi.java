@@ -28,7 +28,7 @@ public class TeamMoveApi extends ApiComponentBase {
 
     @Override
     public String getToken() {
-        return "team/move";
+        return "team/tree/move";
     }
 
     @Override
