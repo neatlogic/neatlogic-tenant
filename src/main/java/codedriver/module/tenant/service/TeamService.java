@@ -17,4 +17,12 @@ public interface TeamService {
 
 	public JSONArray getTeamTree();
 
+	public JSONArray getParentTeamTree(String uuid);
+
+	public void moveTargetTeamInner(String uuid, String targetUuid);
+
+	public void moveTargetTeamPrev(String uuid, String targetUuid);
+
+	public void moveTargetTeamNext(String uuid, String targetUuid);
+
 }

@@ -66,7 +66,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
                 }
                 userRoleAuthMap.put(roleAuth.getAuth(), roleAuth.getAuthGroup());
                 JSONObject userRoleAuthObj = new JSONObject();
-                userRoleAuthObj.put("auth", roleAuth.getAuthGroup() + "#" + roleAuth.getAuth());
+                userRoleAuthObj.put("auth", roleAuth.getAuth());
                 userRoleAuthObj.put("authGroup", roleAuth.getAuthGroup());
 
                 userRoleAuthArray.add(userRoleAuthObj);

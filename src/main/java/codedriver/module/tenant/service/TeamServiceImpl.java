@@ -23,6 +23,8 @@ import codedriver.framework.dto.TeamVo;
 @Transactional
 public class TeamServiceImpl implements TeamService {
 
+    private static final String DEFAULT_PARENTUUID = "0";
+
 	@Autowired
 	TeamMapper teamMapper;
 
@@ -70,7 +72,7 @@ public class TeamServiceImpl implements TeamService {
 			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
 			if (teamVo.getParentUuid() == null){
-				teamVo.setParentUuid("0");
+				teamVo.setParentUuid(DEFAULT_PARENTUUID);
 			}
 			int sort = 0;
 			List<TeamVo> teamList = teamMapper.getTeamByParentUuid(teamVo.getParentUuid());
@@ -104,7 +106,7 @@ public class TeamServiceImpl implements TeamService {
 				map.put(teamVo.getParentUuid(), teams);
 			}
 		}
-		List<TeamVo> startList = map.get("0");
+		List<TeamVo> startList = map.get(DEFAULT_PARENTUUID);
 		if (startList != null && startList.size() > 0){
 			return buildData(startList, map);
 		}
@@ -128,4 +130,70 @@ public class TeamServiceImpl implements TeamService {
 		}
 		return children;
 	}
+
+    @Override
+    public JSONArray getParentTeamTree(String uuid) {
+	    JSONArray returnArray = new JSONArray();
+	    returnArray.add(iterativeAssembly(uuid, null));
+        return returnArray;
+    }
+
+	@Override
+	public void moveTargetTeamInner(String uuid, String targetUuid) {
+		TeamVo teamVo = new TeamVo();
+		teamVo.setUuid(uuid);
+		teamVo.setParentUuid(targetUuid);
+		teamVo.setSort(1);
+		teamMapper.updateTeamSortAndParentUuid(teamVo);
+	}
+
+	@Override
+	public void moveTargetTeamPrev(String uuid, String targetUuid) {
+		TeamVo targetTeam = teamMapper.getTeamByUuid(targetUuid);
+		List<TeamVo> teamList = teamMapper.getTeamSortAfterTeamList(targetTeam.getParentUuid(), targetTeam.getSort());
+		TeamVo team = new TeamVo();
+		team.setUuid(uuid);
+		team.setSort(targetTeam.getSort());
+		team.setParentUuid(targetTeam.getParentUuid());
+		teamMapper.updateTeamSortAndParentUuid(team);
+		teamMapper.updateTeamSortAdd(targetUuid);
+		for (TeamVo teamVo : teamList){
+			teamMapper.updateTeamSortAdd(teamVo.getUuid());
+		}
+	}
+
+	@Override
+	public void moveTargetTeamNext(String uuid, String targetUuid) {
+		TeamVo targetTeam = teamMapper.getTeamByUuid(targetUuid);
+		List<TeamVo> teamList = teamMapper.getTeamSortAfterTeamList(targetTeam.getParentUuid(), targetTeam.getSort());
+		TeamVo team = new TeamVo();
+		team.setUuid(uuid);
+		team.setSort(targetTeam.getSort() + 1);
+		team.setParentUuid(targetTeam.getParentUuid());
+
+		if(teamList != null && teamList.size() > 0){
+			for (TeamVo teamVo : teamList){
+				teamMapper.updateTeamSortAdd(teamVo.getUuid());
+			}
+		}
+	}
+
+	public JSONObject iterativeAssembly(String uuid, JSONObject dataObj){
+        TeamVo teamVo = teamMapper.getTeamByUuid(uuid);
+        JSONObject teamObj = new JSONObject();
+        teamObj.put("name", teamVo.getName());
+        teamObj.put("uuid", teamVo.getUuid());
+        teamObj.put("sort", teamVo.getSort());
+        teamObj.put("parentUuid", teamVo.getParentUuid());
+        teamObj.put("tagList", teamVo.getTagList());
+        if (dataObj != null){
+            JSONArray childArray = new JSONArray();
+            childArray.add(dataObj);
+            teamObj.put("children", childArray);
+        }
+        if (!DEFAULT_PARENTUUID.equals(teamVo.getParentUuid())){
+         return iterativeAssembly(teamVo.getParentUuid(), teamObj);
+        }
+        return teamObj;
+    }
 }

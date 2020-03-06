@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserAuthSaveApi extends ApiComponentBase {
@@ -44,8 +46,8 @@ public class UserAuthSaveApi extends ApiComponentBase {
             desc = "用户ID集合",
             isRequired = true),
             @Param(name = "userAuthList",
-            type = ApiParamType.JSONARRAY,
-            desc = "用户权限集合",
+            type = ApiParamType.JSONOBJECT,
+            desc = "用户权限对象",
             isRequired = true),
             @Param(name = "action",
             type = ApiParamType.STRING,
@@ -60,15 +62,18 @@ public class UserAuthSaveApi extends ApiComponentBase {
         for (int i = 0; i < userIdArray.size(); i++){
             UserVo userVo = new UserVo();
             userVo.setUserId(userIdArray.getString(i));
-            JSONArray userAuthArray = jsonObj.getJSONArray("userAuthList");
+            JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");
             List<UserAuthVo> userAuthVoList = new ArrayList<>();
-            for (int j = 0; j < userAuthArray.size(); j++){
-                String userAuthStr = userAuthArray.getString(j);
-                UserAuthVo authVo = new UserAuthVo();
-                authVo.setAuth(userAuthStr.split("#")[1]);
-                authVo.setAuthGroup(userAuthStr.split("#")[0]);
-                authVo.setUserId(userVo.getUserId());
-                userAuthVoList.add(authVo);
+            Set<String> keySet = userAuthObj.keySet();
+            for (String key : keySet){
+                JSONArray authArray = userAuthObj.getJSONArray(key);
+                for (int j = 0; j < authArray.size(); j++){
+                    UserAuthVo authVo = new UserAuthVo();
+                    authVo.setAuth(authArray.getString(j));
+                    authVo.setAuthGroup(key);
+                    authVo.setUserId(userVo.getUserId());
+                    userAuthVoList.add(authVo);
+                }
             }
             userVo.setUserAuthList(userAuthVoList);
             if (AuthVo.AUTH_ADD.equals(action)){
