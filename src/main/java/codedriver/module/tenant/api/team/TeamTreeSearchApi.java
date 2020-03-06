@@ -1,33 +1,35 @@
-package codedriver.module.tenant.api.role;
+package codedriver.module.tenant.api.team;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
+import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * @program: codedriver
+ * @description:
+ * @create: 2020-03-05 18:49
+ **/
 @Service
-public class RoleAuthSearchApi extends ApiComponentBase {
+public class TeamTreeSearchApi extends ApiComponentBase {
 
     @Autowired
-    private RoleService roleService;
+    private TeamService teamService;
 
     @Override
     public String getToken() {
-        return "role/auth/search";
+        return "team/tree/search";
     }
 
     @Override
     public String getName() {
-        return "角色权限查询接口";
+        return "组织架构树检索接口";
     }
 
     @Override
@@ -36,28 +38,20 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(
-                    name = "roleName",
-                    type = ApiParamType.STRING,
-                    desc = "角色名称",
-                    isRequired = true
-            )
+            @Param( name = "uuid", isRequired = true, desc = "主键ID", xss = true, type = ApiParamType.STRING)
     })
     @Output({
             @Param(
-                    name = "roleAuthList",
+                    name = "children",
                     type = ApiParamType.JSONARRAY,
-                    explode = RoleAuthVo[].class,
-                    desc = "角色权限集合"
-            )
+                    desc = "用户组织架构集合")
     })
-    @Description(desc = "角色权限查询接口")
+    @Description(desc = "组织架构树检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        String uuid = jsonObj.getString("uuid");
         JSONObject returnObj = new JSONObject();
-        String roleName = jsonObj.getString("roleName");
-        List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleName);
-        returnObj.put("roleAuthList", roleAuthList);
+        returnObj.put("children", teamService.getParentTeamTree(uuid));
         return returnObj;
     }
 }

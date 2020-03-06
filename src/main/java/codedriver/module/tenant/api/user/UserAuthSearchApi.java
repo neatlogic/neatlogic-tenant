@@ -66,7 +66,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
                 }
                 userRoleAuthMap.put(roleAuth.getAuth(), roleAuth.getAuthGroup());
                 JSONObject userRoleAuthObj = new JSONObject();
-                userRoleAuthObj.put("auth", roleAuth.getAuthGroup() + "#" + roleAuth.getAuth());
+                userRoleAuthObj.put("auth", roleAuth.getAuth());
                 userRoleAuthObj.put("authGroup", roleAuth.getAuthGroup());
 
                 userRoleAuthArray.add(userRoleAuthObj);
@@ -83,7 +83,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
                 }
                 if (!sameAuth || !sameGroup) {
                     JSONObject userAuthObj = new JSONObject();
-                    userAuthObj.put("auth", authVo.getAuthGroup() + "#" + authVo.getAuth());
+                    userAuthObj.put("auth", authVo.getAuth());
                     userAuthObj.put("authGroup", authVo.getAuthGroup());
                     userAuthArray.add(userAuthObj);
                 }
