@@ -8,6 +8,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,9 +56,22 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
+        JSONObject roleAuthObj = new JSONObject();
         String roleName = jsonObj.getString("roleName");
         List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleName);
-        returnObj.put("roleAuthList", roleAuthList);
+        if (roleAuthList != null && roleAuthList.size() > 0){
+            for (RoleAuthVo authVo : roleAuthList){
+                if (roleAuthObj.containsKey(authVo.getAuthGroup())){
+                    JSONArray authArray = roleAuthObj.getJSONArray(authVo.getAuthGroup());
+                    authArray.add(authVo.getAuth());
+                }else {
+                    JSONArray authArray = new JSONArray();
+                    authArray.add(authVo.getAuth());
+                    roleAuthObj.put(authVo.getAuthGroup(), authArray);
+                }
+            }
+        }
+        returnObj.put("roleAuthList", roleAuthObj);
         return returnObj;
     }
 }
