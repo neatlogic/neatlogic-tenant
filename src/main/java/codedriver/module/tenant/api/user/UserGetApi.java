@@ -9,6 +9,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -84,7 +85,7 @@ public class UserGetApi extends ApiComponentBase {
 			}
 		}
 		UserVo userVo = userMapper.getUserByUserId(userId);
-		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserId(userId));
+		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId)));
 		return userVo;
 	}
 }
