@@ -91,49 +91,60 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				resultObj.put("index", dataList.size());
 			}
 			resultObj.put("isLimit", handler.isLimit());
+			resultObj.put("isMore", true);
 			resultArray.add(resultObj);
 			
 		}
 		//排序
 		resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("sort")));
-		
-		//总显示选项个数,默认18个
-		Integer total = jsonObj.getInteger("total");
-		if(total == null) {
-			total = 18;
-		}
-		//计算index位置
-		int i = 0;
-		int totalTmp = 0;
-		HashSet<String> set = new HashSet<>();
-		out : while(totalTmp < total-1) {
-			for(Object ob: resultArray) {
-				if( ((JSONObject)ob).getBoolean("isLimit")) {
-					JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
-					if(i < dataList.size()) {
-						int index = ((JSONObject)ob).getInteger("index");
-						((JSONObject)ob).put("index",++index);
-						dataList.get(i);
-						if(totalTmp < (total-1)) {
-							totalTmp++;
+		//如果是搜索模式
+		if(jsonObj.containsKey("keyword")) {
+			//总显示选项个数,默认18个
+			Integer total = jsonObj.getInteger("total");
+			if(total == null) {
+				total = 18;
+			}
+			//预留“更多”选项位置
+			total = total - groupCount;
+			//计算index位置
+			int i = 0;
+			int totalTmp = 0;
+			HashSet<String> set = new HashSet<>();
+			out : while(totalTmp < total) {
+				for(Object ob: resultArray) {
+					if( ((JSONObject)ob).getBoolean("isLimit")) {
+						JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
+						if(i < dataList.size()) {
+							int index = ((JSONObject)ob).getInteger("index");
+							((JSONObject)ob).put("index",++index);
+							//判断是否还有多余项
+							if(dataList.size() == index) {
+								((JSONObject)ob).put("isMore", false);
+								total++;
+							}
+							dataList.get(i);
+							if(totalTmp < (total-1)) {
+								totalTmp++;
+							}else {
+								break out;
+							}
+							
 						}else {
-							break out;
+							set.add(((JSONObject)ob).getString("value"));
 						}
-					}else {
-						set.add(((JSONObject)ob).getString("value"));
 					}
 				}
+				if(set.size() == groupCount) {
+					break out;
+				}
+				i++;
 			}
-			if(set.size() == groupCount) {
-				break out;
+			//则根据index删掉多余数据
+			for(Object ob: resultArray) {
+				JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
+				int index = ((JSONObject)ob).getInteger("index");
+				((JSONObject)ob).put("dataList", dataList.subList(0, (index==0?0:index)));
 			}
-			i++;
-		}
-		//根据index删掉多余数据
-		for(Object ob: resultArray) {
-			JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
-			int index = ((JSONObject)ob).getInteger("index");
-			((JSONObject)ob).put("dataList", dataList.subList(0, (index==0?0:index)));
 		}
 		return resultArray;
 	}
