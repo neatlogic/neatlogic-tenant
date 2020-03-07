@@ -54,13 +54,17 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<Object> groupList = jsonObj.getJSONArray("groupList");
 		List<Object> excludeList = jsonObj.getJSONArray("excludeList");
-		int groupCount = groupList.size();
+		int groupCount = 0;
 		JSONArray resultArray = new JSONArray();
 		Map<String, IGroupSearchHandler>  handlerMap = GroupSearchHandlerFactory.getComponentMap();
 		for (Map.Entry<String,IGroupSearchHandler> handlerEntry: handlerMap.entrySet()) {
 			IGroupSearchHandler handler = handlerEntry.getValue();
 			if(groupList != null && !groupList.contains(handler.getName())) {
 				continue;
+			}
+			//如果group存在不需要限制总数的类型
+			if(handler.isLimit()) {
+				groupCount++;
 			}
 			List<Object> dataList = null;
 			if(jsonObj.containsKey("keyword")) {
@@ -88,10 +92,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			}
 			resultObj.put("isLimit", handler.isLimit());
 			resultArray.add(resultObj);
-			//如果group存在不需要限制总数的类型
-			if(!handler.isLimit() && groupList.contains(handler.getName())) {
-				groupCount--;
-			}
+			
 		}
 		//排序
 		resultArray.sort(Comparator.comparing(obj -> ((JSONObject) obj).getInteger("sort")));
@@ -105,7 +106,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		int i = 0;
 		int totalTmp = 0;
 		HashSet<String> set = new HashSet<>();
-		out : while(totalTmp < total) {
+		out : while(totalTmp < total-1) {
 			for(Object ob: resultArray) {
 				if( ((JSONObject)ob).getBoolean("isLimit")) {
 					JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
