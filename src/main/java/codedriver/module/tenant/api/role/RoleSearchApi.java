@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.role;
 import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,9 +59,12 @@ public class RoleSearchApi extends ApiComponentBase {
 					type = ApiParamType.INTEGER,
 					desc = "当前页") })
 	@Output({
-			@Param(name = "roleList",
+			@Param(name = "tbodyList",
 					explode = RoleVo[].class,
-					desc = "角色列表"),
+					desc = "table数据列表"),
+			@Param(name = "theadList",
+					type = ApiParamType.JSONARRAY,
+					desc = "table头列表"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目"),
@@ -69,10 +73,7 @@ public class RoleSearchApi extends ApiComponentBase {
 					desc = "当前页"),
 			@Param(name = "rowNum",
 					type = ApiParamType.INTEGER,
-					desc = "返回条目总数"),
-			@Param(name = "pageCount",
-					type = ApiParamType.INTEGER,
-					desc = "页数") })
+					desc = "返回条目总数")})
 	@Description(desc = "角色查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -98,30 +99,24 @@ public class RoleSearchApi extends ApiComponentBase {
 			returnObj.put("rowNum", roleVo.getRowNum());
 		}
 		JSONArray theadList = new JSONArray();
-		JSONObject selectObj = new JSONObject();
-		selectObj.put("key", "selection");
-		theadList.add(selectObj);
-
-		JSONObject nameObj = new JSONObject();
-		nameObj.put("title", "角色名称");
-		nameObj.put("key", "name");
-		theadList.add(nameObj);
-
-		JSONObject desObj = new JSONObject();
-		desObj.put("title", "角色描述");
-		desObj.put("key", "description");
-		theadList.add(desObj);
-
-		JSONObject userCountObj = new JSONObject();
-		userCountObj.put("title", "用户数量");
-		userCountObj.put("key", "userCount");
-		theadList.add(userCountObj);
-
-		JSONObject actionObj = new JSONObject();
-		actionObj.put("key", "action");
-		theadList.add(actionObj);
+		packageData(theadList, "selection", "");
+		packageData(theadList, "name", "角色名称");
+		packageData(theadList, "description", "角色描述");
+		packageData(theadList, "userCount", "用户数量");
+		packageData(theadList, "action", "");
 		returnObj.put("theadList", theadList);
 		returnObj.put("tbodyList", roleList);
 		return returnObj;
+	}
+
+	public void packageData(JSONArray jsonArray, String key, String title){
+		JSONObject object = new JSONObject();
+		if (StringUtils.isNotBlank(key)){
+			object.put("key", key);
+		}
+		if (StringUtils.isNotBlank(title)){
+			object.put("title", title);
+		}
+		jsonArray.add(object);
 	}
 }
