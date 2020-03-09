@@ -62,9 +62,6 @@ public class RoleSearchApi extends ApiComponentBase {
 			@Param(name = "tbodyList",
 					explode = RoleVo[].class,
 					desc = "table数据列表"),
-			@Param(name = "theadList",
-					type = ApiParamType.JSONARRAY,
-					desc = "table头列表"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目"),
@@ -98,25 +95,7 @@ public class RoleSearchApi extends ApiComponentBase {
 			returnObj.put("currentPage", roleVo.getCurrentPage());
 			returnObj.put("rowNum", roleVo.getRowNum());
 		}
-		JSONArray theadList = new JSONArray();
-		packageData(theadList, "selection", "");
-		packageData(theadList, "name", "角色名称");
-		packageData(theadList, "description", "角色描述");
-		packageData(theadList, "userCount", "用户数量");
-		packageData(theadList, "action", "");
-		returnObj.put("theadList", theadList);
 		returnObj.put("tbodyList", roleList);
 		return returnObj;
-	}
-
-	public void packageData(JSONArray jsonArray, String key, String title){
-		JSONObject object = new JSONObject();
-		if (StringUtils.isNotBlank(key)){
-			object.put("key", key);
-		}
-		if (StringUtils.isNotBlank(title)){
-			object.put("title", title);
-		}
-		jsonArray.add(object);
 	}
 }

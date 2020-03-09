@@ -70,9 +70,6 @@ public class UserSearchApi extends ApiComponentBase {
                     type = ApiParamType.BOOLEAN,
                     desc = "是否分页")})
 	@Output({
-			@Param(name = "theadList",
-					type = ApiParamType.JSONARRAY,
-					desc = "table头列表"),
 			@Param(name = "tbodyList",
 					type = ApiParamType.JSONARRAY,
 					explode = UserVo[].class,
@@ -111,27 +108,6 @@ public class UserSearchApi extends ApiComponentBase {
             json.put("pageSize", userVo.getPageSize());
             json.put("currentPage", userVo.getCurrentPage());
         }
-		JSONArray theadList = new JSONArray();
-		packageData(theadList, "selection", "");
-		packageData(theadList, "userId", "用户ID");
-		packageData(theadList, "userName", "中文名");
-		packageData(theadList, "roleNameList", "角色");
-		packageData(theadList, "teamNameList", "用户组");
-		packageData(theadList, "phone", "电话");
-		packageData(theadList, "email", "邮箱");
-		packageData(theadList, "action", "");
-		json.put("theadList", theadList);
 		return json;
-	}
-
-	public void packageData(JSONArray jsonArray, String key, String title){
-		JSONObject object = new JSONObject();
-		if (StringUtils.isNotBlank(key)){
-			object.put("key", key);
-		}
-		if (StringUtils.isNotBlank(title)){
-			object.put("title", title);
-		}
-		jsonArray.add(object);
 	}
 }
