@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.user;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,9 +70,10 @@ public class UserSearchApi extends ApiComponentBase {
                     type = ApiParamType.BOOLEAN,
                     desc = "是否分页")})
 	@Output({
-			@Param(name = "userList",
+			@Param(name = "tbodyList",
 					type = ApiParamType.JSONARRAY,
-					desc = "用户信息list"),
+					explode = UserVo[].class,
+					desc = "table数据列表"),
 			@Param(name = "pageCount",
 					type = ApiParamType.INTEGER,
 					desc = "总页数"),
@@ -79,19 +82,7 @@ public class UserSearchApi extends ApiComponentBase {
 					desc = "当前页数"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
-					desc = "每页展示数量"),
-			@Param(name = "userId",
-					type = ApiParamType.STRING,
-					desc = "用户Id"),
-			@Param(name = "userName",
-					type = ApiParamType.STRING,
-					desc = "用户名"),
-			@Param(name = "email",
-					type = ApiParamType.STRING,
-					desc = "邮箱"),
-			@Param(name = "phone",
-					type = ApiParamType.STRING,
-					desc = "电话") })
+					desc = "每页展示数量")})
 	@Description(desc = "查询用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -111,10 +102,9 @@ public class UserSearchApi extends ApiComponentBase {
 		userVo.setRoleName(jsonObj.getString("roleName"));
 		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
-		json.put("userList", userList);
+		json.put("tbodyList", userList);
 		if (userVo.getNeedPage()){
             json.put("rowNum", userVo.getRowNum());
-            json.put("pageCount", userVo.getPageCount());
             json.put("pageSize", userVo.getPageSize());
             json.put("currentPage", userVo.getCurrentPage());
         }

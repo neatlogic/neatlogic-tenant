@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.role;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,9 +59,9 @@ public class RoleSearchApi extends ApiComponentBase {
 					type = ApiParamType.INTEGER,
 					desc = "当前页") })
 	@Output({
-			@Param(name = "roleList",
+			@Param(name = "tbodyList",
 					explode = RoleVo[].class,
-					desc = "角色列表"),
+					desc = "table数据列表"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
 					desc = "每页数据条目"),
@@ -68,10 +70,7 @@ public class RoleSearchApi extends ApiComponentBase {
 					desc = "当前页"),
 			@Param(name = "rowNum",
 					type = ApiParamType.INTEGER,
-					desc = "返回条目总数"),
-			@Param(name = "pageCount",
-					type = ApiParamType.INTEGER,
-					desc = "页数") })
+					desc = "返回条目总数")})
 	@Description(desc = "角色查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -91,13 +90,12 @@ public class RoleSearchApi extends ApiComponentBase {
 			roleVo.setNeedPage(jsonObj.getBoolean("needPage"));
 		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
-		returnObj.put("roleList", roleList);
 		if (roleVo.getNeedPage()) {
 			returnObj.put("pageSize", roleVo.getPageSize());
 			returnObj.put("currentPage", roleVo.getCurrentPage());
 			returnObj.put("rowNum", roleVo.getRowNum());
-			returnObj.put("pageCount", roleVo.getPageCount());
 		}
+		returnObj.put("tbodyList", roleList);
 		return returnObj;
 	}
 }
