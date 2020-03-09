@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.role;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -91,13 +92,36 @@ public class RoleSearchApi extends ApiComponentBase {
 			roleVo.setNeedPage(jsonObj.getBoolean("needPage"));
 		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
-		returnObj.put("roleList", roleList);
 		if (roleVo.getNeedPage()) {
 			returnObj.put("pageSize", roleVo.getPageSize());
 			returnObj.put("currentPage", roleVo.getCurrentPage());
 			returnObj.put("rowNum", roleVo.getRowNum());
-			returnObj.put("pageCount", roleVo.getPageCount());
 		}
+		JSONArray theadList = new JSONArray();
+		JSONObject selectObj = new JSONObject();
+		selectObj.put("key", "selection");
+		theadList.add(selectObj);
+
+		JSONObject nameObj = new JSONObject();
+		nameObj.put("title", "角色名称");
+		nameObj.put("key", "name");
+		theadList.add(nameObj);
+
+		JSONObject desObj = new JSONObject();
+		desObj.put("title", "角色描述");
+		desObj.put("key", "description");
+		theadList.add(desObj);
+
+		JSONObject userCountObj = new JSONObject();
+		userCountObj.put("title", "用户数量");
+		userCountObj.put("key", "userCount");
+		theadList.add(userCountObj);
+
+		JSONObject actionObj = new JSONObject();
+		actionObj.put("key", "action");
+		theadList.add(actionObj);
+		returnObj.put("theadList", theadList);
+		returnObj.put("tbodyList", roleList);
 		return returnObj;
 	}
 }
