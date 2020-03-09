@@ -96,11 +96,13 @@ public class UserSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("needPage")){
 		    userVo.setNeedPage(jsonObj.getBoolean("needPage"));
         }
+        if (jsonObj.containsKey("currentPage")){
+			userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
+		}
 		userVo.setAuth(jsonObj.getString("auth"));
 		userVo.setAuthGroup(jsonObj.getString("authGroup"));
 		userVo.setTeamUuid(jsonObj.getString("teamUuid"));
 		userVo.setRoleName(jsonObj.getString("roleName"));
-		userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
 		List<UserVo> userList = userService.searchUser(userVo);
 		json.put("tbodyList", userList);
 		if (userVo.getNeedPage()){
