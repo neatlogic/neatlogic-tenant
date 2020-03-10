@@ -89,6 +89,9 @@ public class RoleSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("needPage")){
 			roleVo.setNeedPage(jsonObj.getBoolean("needPage"));
 		}
+		if (jsonObj.containsKey("pageSize")){
+			roleVo.setPageSize(jsonObj.getInteger("pageSize"));
+		}
 		List<RoleVo> roleList = roleService.searchRole(roleVo);
 		if (roleVo.getNeedPage()) {
 			returnObj.put("pageSize", roleVo.getPageSize());
