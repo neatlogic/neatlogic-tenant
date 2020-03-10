@@ -2,6 +2,7 @@ package codedriver.module.tenant.service.reminder;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
@@ -10,6 +11,8 @@ import codedriver.framework.reminder.dto.GlobalReminderVo;
 import codedriver.framework.reminder.dto.ReminderMessageSearchVo;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMapper;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
+import codedriver.framework.reminder.dto.param.ReminderHistoryParamVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -112,6 +115,34 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
         List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getShowReminderMessageListByIdListAndUserId(searchVo);
         for (GlobalReminderMessageVo messageVo : messageVoList){
             packageData(messageVo);
+        }
+        return messageVoList;
+    }
+
+    @Override
+    public List<GlobalReminderMessageVo> getReminderHistoryMessageList(ReminderHistoryParamVo paramVo) {
+        List<GlobalReminderVo> reminderList = GlobalReminderFactory.getReminderVoList();
+        if (CollectionUtils.isNotEmpty(reminderList)){
+            List<String> pluginIdList = new ArrayList<>();
+            for (GlobalReminderVo reminder : reminderList){
+                if (reminder.getModuleId().equals(paramVo.getModuleId())){
+                    pluginIdList.add(reminder.getPluginId());
+                }
+            }
+            paramVo.setPluginIdList(pluginIdList);
+        }
+
+        if (paramVo.getNeedPage()){
+            int rowNum = reminderMessageMapper.getReminderHistoryMessageCount(paramVo);
+            paramVo.setRowNum(rowNum);
+            paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
+        }
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getReminderHistoryMessageList(paramVo);
+
+        if (CollectionUtils.isNotEmpty(messageVoList)){
+            for (GlobalReminderMessageVo messageVo : messageVoList){
+                packageData(messageVo);
+            }
         }
         return messageVoList;
     }

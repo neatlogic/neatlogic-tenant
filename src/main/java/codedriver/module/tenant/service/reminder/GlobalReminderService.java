@@ -4,6 +4,7 @@ import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.dto.GlobalReminderSubscribeVo;
 import codedriver.framework.reminder.dto.GlobalReminderVo;
+import codedriver.framework.reminder.dto.param.ReminderHistoryParamVo;
 
 import java.util.List;
 
@@ -29,6 +30,13 @@ public interface GlobalReminderService {
     * @return: java.util.List<com.techsure.balantflow.dto.globalreminder.GlobalReminderMessageVo>  
     */ 
     List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(String userId, Long messageId, Integer day);
+    
+    /** 
+    * @Description: 获取历史实时动态消息 
+    * @Param: [paramVo] 
+    * @return: java.util.List<codedriver.framework.reminder.dto.GlobalReminderMessageVo>  
+    */ 
+    List<GlobalReminderMessageVo> getReminderHistoryMessageList(ReminderHistoryParamVo paramVo);
 
     /** 
     * @Description: 获取参数天用户消息总和
