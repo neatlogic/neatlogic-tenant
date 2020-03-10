@@ -5,9 +5,12 @@ import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.dto.param.ReminderHistoryParamVo;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -44,25 +47,33 @@ public class ReminderHistoryApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "moduleId", desc = "模块ID", type = ApiParamType.STRING, isRequired = true),
-            @Param( name = "timerange", desc = "时间", type = ApiParamType.INTEGER),
-            @Param( name = "timeunit", desc = "时间单位", type = ApiParamType.STRING),
-            @Param( name = "starttime", desc = "起始时间", type = ApiParamType.STRING),
-            @Param( name = "endtime", desc = "结束时间", type = ApiParamType.STRING),
+            @Param( name = "moduleId", desc = "模块ID", type = ApiParamType.STRING),
+            @Param( name = "userId", desc = "用户ID", type = ApiParamType.STRING, isRequired = true),
+            @Param( name = "timeRange", desc = "时间", type = ApiParamType.INTEGER),
+            @Param( name = "timeUnit", desc = "时间单位", type = ApiParamType.STRING),
+            @Param( name = "startTime", desc = "起始时间", type = ApiParamType.STRING),
+            @Param( name = "endTime", desc = "结束时间", type = ApiParamType.STRING),
             @Param( name = "pageSize", desc = "每页条目数", type = ApiParamType.INTEGER),
             @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER)
     })
+    @Output({
+            @Param( name = "messageList", desc = "消息集合列表", type = ApiParamType.JSONARRAY),
+            @Param( name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
+            @Param( name = "rowNum", desc = "数目总数", type = ApiParamType.INTEGER),
+            @Param( name = "pageSize", desc = "最大条目", type = ApiParamType.INTEGER)
+    })
+    @Description( desc = "实时动态历史消息查看接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         ReminderHistoryParamVo paramVo = new ReminderHistoryParamVo();
-        String starTime = "";
-        String endTime = "";
-        if (jsonObj.containsKey("timerange")){
 
+        if (jsonObj.containsKey("timeRange")){
+            paramVo.setEndTime(TimeUtil.timeNow());
+            paramVo.setStartTime(TimeUtil.timeTransfer(jsonObj.getInteger("timeRange"), jsonObj.getString("timeUnit")));
         }else {
-            starTime = jsonObj.getString("startTime");
-            endTime = jsonObj.getString("endTime");
+           paramVo.setStartTime(jsonObj.getString("startTime"));
+           paramVo.setEndTime(jsonObj.getString("endTime"));
         }
         if (jsonObj.containsKey("pageSize")){
             paramVo.setPageSize(jsonObj.getInteger("pageSize"));
@@ -70,9 +81,9 @@ public class ReminderHistoryApi extends ApiComponentBase {
         if (jsonObj.containsKey("currentPage")){
             paramVo.setCurrentPage(jsonObj.getInteger("currentPage"));
         }
+
         paramVo.setModuleId(jsonObj.getString("moduleId"));
-        paramVo.setStartTime(starTime);
-        paramVo.setEndTime(endTime);
+        paramVo.setUserId(jsonObj.getString("userId"));
         List<GlobalReminderMessageVo> messageList = reminderService.getReminderHistoryMessageList(paramVo);
         JSONArray messageArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(messageList)){

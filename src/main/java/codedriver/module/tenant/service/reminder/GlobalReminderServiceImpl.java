@@ -121,12 +121,24 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
 
     @Override
     public List<GlobalReminderMessageVo> getReminderHistoryMessageList(ReminderHistoryParamVo paramVo) {
+        List<GlobalReminderVo> reminderList = GlobalReminderFactory.getReminderVoList();
+        if (CollectionUtils.isNotEmpty(reminderList)){
+            List<String> pluginIdList = new ArrayList<>();
+            for (GlobalReminderVo reminder : reminderList){
+                if (reminder.getModuleId().equals(paramVo.getModuleId())){
+                    pluginIdList.add(reminder.getPluginId());
+                }
+            }
+            paramVo.setPluginIdList(pluginIdList);
+        }
+
         if (paramVo.getNeedPage()){
-            int rowNum = 1;
+            int rowNum = reminderMessageMapper.getReminderHistoryMessageCount(paramVo);
             paramVo.setRowNum(rowNum);
             paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
         }
         List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getReminderHistoryMessageList(paramVo);
+
         if (CollectionUtils.isNotEmpty(messageVoList)){
             for (GlobalReminderMessageVo messageVo : messageVoList){
                 packageData(messageVo);
