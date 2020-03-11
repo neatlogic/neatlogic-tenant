@@ -57,6 +57,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 			dashboardVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
 		String userId = UserContext.get().getUserId(true);
+		dashboardVo.setFcu(userId);
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<DashboardVo> dashboardList = dashboardMapper.searchDashboard(dashboardVo);
