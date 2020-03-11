@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -18,11 +18,13 @@ import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.exception.user.NoUserException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@Service
+@Component
+@IsActived
 public class DashboardSearchApi extends ApiComponentBase {
 
 	@Autowired
