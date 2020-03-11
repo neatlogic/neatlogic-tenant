@@ -1,8 +1,5 @@
 package codedriver.module.tenant.api.dashboard;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,32 +11,27 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
-import codedriver.framework.exception.user.NoUserException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
-import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 
 @Service
-@IsActived
 @Transactional
-public class DashboardTopVisitApi extends ApiComponentBase {
+public class DashboardShareApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {
-		return "dashboard/topvisit";
+		return "dashboard/share";
 	}
 
 	@Override
 	public String getName() {
-		return "获取最常访问仪表板接口";
+		return "仪表板共享接口";
 	}
 
 	@Override
@@ -47,20 +39,17 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "limit", type = ApiParamType.INTEGER, desc = "返回数据条数，默认3条") })
-	@Output({ @Param(explode = DashboardVo[].class, desc = "仪表板列表") })
-	@Description(desc = "获取最常访问仪表板接口")
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid"), @Param(name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户id列表"), @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid列表"), @Param(name = "roleNameList", type = ApiParamType.JSONARRAY, desc = "角色名列表") })
+	@Description(desc = "仪表板共享接口，如果用户id列表，分组uuid列表和角色名列表都为空，则代表不再共享当前仪表板")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		DashboardVo dashboardVo = new DashboardVo();
+		String dashboardUuid = jsonObj.getString("uuid");
+		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
 		String userId = UserContext.get().getUserId(true);
-		dashboardVo.setFcu(userId);
-		dashboardVo.setType("all");
-		if (jsonObj.containsKey("limit")) {
-			dashboardVo.setPageSize(jsonObj.getInteger("limit"));
-		} else {
-			dashboardVo.setPageSize(3);
+		if (!dashboardVo.getFcu().equals(userId)) {
+			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.SHARE.getText());
 		}
-		return dashboardMapper.searchTopVisitDashboard(dashboardVo);
+//TODO 未完待续……
+		return null;
 	}
 }

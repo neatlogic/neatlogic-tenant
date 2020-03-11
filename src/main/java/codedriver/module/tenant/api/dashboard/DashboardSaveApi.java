@@ -48,7 +48,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid，为空代表新增"), @Param(name = "name", type = ApiParamType.STRING, desc = "仪表板名称", isRequired = true), @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活，1：激活，0：禁用", isRequired = true),
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid，为空代表新增"), @Param(name = "name", xss = true, type = ApiParamType.STRING, desc = "仪表板名称", isRequired = true), @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活，1：激活，0：禁用", isRequired = true),
 			@Param(name = "widgetList", type = ApiParamType.JSONARRAY, desc = "组件列表，范例：\"chartType\": \"barchart\"," + "\"h\": 4," + "\"handler\": \"codedriver.module.process.dashboard.handler.ProcessTaskDashboardHandler\"," + "\"i\": 0," + "\"name\": \"组件1\"," + "\"refreshInterval\": 3," + "\"uuid\": \"aaaa\"," + "\"w\": 5," + "\"x\": 0," + "\"y\": 0") })
 	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid") })
 	@Description(desc = "仪表板保存接口")
