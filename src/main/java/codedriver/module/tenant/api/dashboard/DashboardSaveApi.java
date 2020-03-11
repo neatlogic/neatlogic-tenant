@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,14 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
+import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.exception.user.NoUserException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
 import codedriver.module.tenant.exception.dashboard.DashboardNameExistsException;
 
 @Service
@@ -49,9 +56,29 @@ public class DashboardSaveApi extends ApiComponentBase {
 		if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
 			throw new DashboardNameExistsException(dashboardVo.getName());
 		}
-		if (dashboardMapper.getDashboardByUuid(dashboardVo.getUuid()) == null) {
+		String userId = UserContext.get().getUserId();
+		if (StringUtils.isBlank(userId)) {
+			throw new NoUserException();
+		}
+		DashboardVo oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
+
+		if (oldDashboardVo == null) {
+			dashboardVo.setFcu(userId);
 			dashboardMapper.insertDashboard(dashboardVo);
 		} else {
+			boolean hasRight = false;
+			if (oldDashboardVo.getFcu().equals(userId)) {
+				hasRight = true;
+			}
+			if (!hasRight) {
+				List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardVo.getUuid(), userId);
+				if (roleList.contains(DashboardRoleVo.ActionType.WRITE.getValue())) {
+					hasRight = true;
+				}
+			}
+			if (!hasRight) {
+				throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.WRITE.getText());
+			}
 			dashboardMapper.updateDashboard(dashboardVo);
 			dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardVo.getUuid());
 		}

@@ -1,9 +1,8 @@
 package codedriver.module.tenant.api.dashboard;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -12,29 +11,30 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
 import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 
 @Service
-public class DashboardGetApi extends ApiComponentBase {
+@Transactional
+@IsActived
+public class DashboardDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {
-		return "dashboard/get";
+		return "dashboard/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "获取仪表板信息接口";
+		return "仪表板删除接口";
 	}
 
 	@Override
@@ -43,8 +43,7 @@ public class DashboardGetApi extends ApiComponentBase {
 	}
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true) })
-	@Output({ @Param(explode = DashboardVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板详细信息") })
-	@Description(desc = "获取仪表板信息接口")
+	@Description(desc = "仪表板删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
@@ -58,16 +57,12 @@ public class DashboardGetApi extends ApiComponentBase {
 			hasRight = true;
 		}
 		if (!hasRight) {
-			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardVo.getUuid(), userId);
-			if (roleList.contains(DashboardRoleVo.ActionType.READ.getValue())) {
-				hasRight = true;
-			}
+			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.WRITE.getText());
 		}
-		if (!hasRight) {
-			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.READ.getText());
-		}
-		List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
-		dashboardVo.setWidgetList(dashboardWidgetList);
-		return dashboardVo;
+		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardDefaultUserByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardRoleByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardByUuid(dashboardUuid);
+		return null;
 	}
 }

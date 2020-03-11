@@ -14,7 +14,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActive;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -22,7 +22,7 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
 @Service
-@IsActive
+@IsActived
 public class ApiManageAuditListApi extends ApiComponentBase {
 
 	@Autowired
