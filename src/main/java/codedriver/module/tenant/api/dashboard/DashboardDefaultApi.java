@@ -3,7 +3,8 @@ package codedriver.module.tenant.api.dashboard;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -11,33 +12,31 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardRoleVo;
-import codedriver.framework.dashboard.dto.DashboardVisitCounterVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
 import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 
-@Component
+@Service
 @IsActived
-public class DashboardGetApi extends ApiComponentBase {
+@Transactional
+public class DashboardDefaultApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {
-		return "dashboard/get";
+		return "dashboard/default";
 	}
 
 	@Override
 	public String getName() {
-		return "获取仪表板信息接口";
+		return "修改默认仪表板接口";
 	}
 
 	@Override
@@ -46,8 +45,7 @@ public class DashboardGetApi extends ApiComponentBase {
 	}
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true) })
-	@Output({ @Param(explode = DashboardVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板详细信息") })
-	@Description(desc = "获取仪表板信息接口")
+	@Description(desc = "修改默认仪表板接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
@@ -61,7 +59,7 @@ public class DashboardGetApi extends ApiComponentBase {
 			hasRight = true;
 		}
 		if (!hasRight) {
-			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardVo.getUuid(), userId);
+			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardUuid, userId);
 			if (roleList.contains(DashboardRoleVo.ActionType.READ.getValue())) {
 				hasRight = true;
 			}
@@ -69,16 +67,8 @@ public class DashboardGetApi extends ApiComponentBase {
 		if (!hasRight) {
 			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.READ.getText());
 		}
-		List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
-		dashboardVo.setWidgetList(dashboardWidgetList);
-
-		// 更新计数器
-		DashboardVisitCounterVo counterVo = dashboardMapper.getDashboardVisitCounter(dashboardUuid, userId);
-		if (counterVo == null) {
-			dashboardMapper.insertDashboardVisitCounter(new DashboardVisitCounterVo(dashboardUuid, userId));
-		} else {
-			dashboardMapper.updateDashboardVisitCounter(counterVo);
-		}
-		return dashboardVo;
+		dashboardMapper.deleteDashboardDefaultUser(dashboardUuid, userId);
+		dashboardMapper.insertDashboardDefault(dashboardUuid,userId);
+		return null;
 	}
 }

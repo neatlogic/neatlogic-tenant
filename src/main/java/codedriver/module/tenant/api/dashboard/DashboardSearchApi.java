@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.dashboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,6 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
-import codedriver.framework.exception.user.NoUserException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -58,12 +56,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("pageSize")) {
 			dashboardVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
-		String userId = UserContext.get().getUserId();
-		if (StringUtils.isNotBlank(userId)) {
-			dashboardVo.setFcu(userId);
-		} else {
-			throw new NoUserException();
-		}
+		String userId = UserContext.get().getUserId(true);
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<DashboardVo> dashboardList = dashboardMapper.searchDashboard(dashboardVo);

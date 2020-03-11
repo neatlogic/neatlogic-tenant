@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,30 +14,32 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
+import codedriver.framework.exception.user.NoUserException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
 import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 
 @Service
-@Transactional
 @IsActived
-public class DashboardDeleteApi extends ApiComponentBase {
+@Transactional
+public class DashboardTopVisitApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {
-		return "dashboard/delete";
+		return "dashboard/topvisit";
 	}
 
 	@Override
 	public String getName() {
-		return "仪表板删除接口";
+		return "获取最常访问仪表板接口";
 	}
 
 	@Override
@@ -42,28 +47,19 @@ public class DashboardDeleteApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true) })
-	@Description(desc = "仪表板删除接口")
+	@Input({ @Param(name = "limit", type = ApiParamType.INTEGER, desc = "返回数据条数，默认3条") })
+	@Output({ @Param(explode = DashboardVo[].class, desc = "仪表板列表") })
+	@Description(desc = "获取最常访问仪表板接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String dashboardUuid = jsonObj.getString("uuid");
-		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
-		if (dashboardVo == null) {
-			throw new DashboardNotFoundException(dashboardUuid);
+		DashboardVo dashboardVo = new DashboardVo();
+		String userId = UserContext.get().getUserId(true);
+		dashboardVo.setFcu(userId);
+		if(jsonObj.containsKey("limit")) {
+			dashboardVo.setPageSize(jsonObj.getInteger("limit"));
+		}else {
+			dashboardVo.setPageSize(3);
 		}
-		String userId = UserContext.get().getUserId();
-		boolean hasRight = false;
-		if (dashboardVo.getFcu().equals(userId)) {
-			hasRight = true;
-		}
-		if (!hasRight) {
-			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.WRITE.getText());
-		}
-		dashboardMapper.deleteDashboardVisitCounterByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardDefaultUserByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardRoleByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardByUuid(dashboardUuid);
-		return null;
+		return dashboardMapper.searchTopVisitDashboard(dashboardVo);
 	}
 }
