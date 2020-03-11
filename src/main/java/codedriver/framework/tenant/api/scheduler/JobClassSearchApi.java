@@ -52,14 +52,14 @@ public class JobClassSearchApi extends ApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name="jobClassList",explode=JobClassVo[].class,isRequired=true,desc="定时作业组件列表")
+		@Param(name="tbodyList",explode=JobClassVo[].class,isRequired=true,desc="定时作业组件列表")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JobClassVo jobClassVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobClassVo>() {});		
 		List<JobClassVo> jobClassList = schedulerService.searchJobClassList(jobClassVo);
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("jobClassList", jobClassList);
+		resultObj.put("tbodyList", jobClassList);
 		resultObj.put("currentPage",jobClassVo.getCurrentPage());
 		resultObj.put("pageSize",jobClassVo.getPageSize());
 		resultObj.put("pageCount", jobClassVo.getPageCount());
