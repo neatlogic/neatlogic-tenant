@@ -53,7 +53,7 @@ public class ApiManageAuditListApi extends ApiComponentBase {
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
 		@Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
 		@Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-		@Param(name = "apiAuditList", explode = ApiAuditVo[].class, isRequired = true, desc = "接口调用记录列表")
+		@Param(name = "tbodyList", explode = ApiAuditVo[].class, isRequired = true, desc = "接口调用记录列表")
 	})
 	@Description(desc = "接口调用记录列表接口")
 	@Override
@@ -70,7 +70,7 @@ public class ApiManageAuditListApi extends ApiComponentBase {
 		List<ApiAuditVo> apiAuditList = ApiMapper.getApiAuditList(apiAuditVo);
 		
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("apiAuditList", apiAuditList);
+		resultObj.put("tbodyList", apiAuditList);
 		resultObj.put("rowNum", rowNum);
 		resultObj.put("pageCount", pageCount);
 		resultObj.put("currentPage", apiAuditVo.getCurrentPage());
