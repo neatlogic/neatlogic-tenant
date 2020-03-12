@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.dashboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,8 +62,14 @@ public class DashboardSearchApi extends ApiComponentBase {
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<DashboardVo> dashboardList = dashboardMapper.searchDashboard(dashboardVo);
+		String defaultDashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
 		// 补充权限数据
 		for (DashboardVo dashboard : dashboardList) {
+			if(StringUtils.isNotBlank(defaultDashboardUuid)) {
+				if(dashboard.getUuid().equals(defaultDashboardUuid)) {
+					dashboard.setIsDefault(1);
+				}
+			}
 			if (dashboard.getFcu().equals(userId)) {
 				// 自己创建的dashboard拥有所有权限
 				dashboard.setRoleList(new ArrayList<String>() {
