@@ -58,11 +58,11 @@ public class DashboardSaveApi extends ApiComponentBase {
 		if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
 			throw new DashboardNameExistsException(dashboardVo.getName());
 		}
-		String userId = UserContext.get().getUserId();
-		if (StringUtils.isBlank(userId)) {
-			throw new NoUserException();
+		String userId = UserContext.get().getUserId(true);
+		DashboardVo oldDashboardVo = null;
+		if (StringUtils.isNotBlank(dashboardVo.getUuid())) {
+			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
 		}
-		DashboardVo oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
 
 		if (oldDashboardVo == null) {
 			dashboardVo.setFcu(userId);
@@ -81,6 +81,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 			if (!hasRight) {
 				throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.WRITE.getText());
 			}
+			dashboardVo.setLcu(userId);
 			dashboardMapper.updateDashboard(dashboardVo);
 			dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardVo.getUuid());
 		}

@@ -57,7 +57,7 @@ public class DashboardDeleteApi extends ApiComponentBase {
 			hasRight = true;
 		}
 		if (!hasRight) {
-			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.WRITE.getText());
+			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.DELETE.getText());
 		}
 		dashboardMapper.deleteDashboardVisitCounterByDashboardUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
