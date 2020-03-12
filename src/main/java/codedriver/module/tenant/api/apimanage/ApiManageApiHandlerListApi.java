@@ -53,7 +53,7 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
 		@Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
 		@Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-		@Param(name = "apiHandlerList", explode = ApiHandlerVo[].class, isRequired = true, desc = "接口组件列表")
+		@Param(name = "tbodyList", explode = ApiHandlerVo[].class, isRequired = true, desc = "接口组件列表")
 	})
 	@Description(desc = "接口组件列表接口")
 	@Override
@@ -88,7 +88,7 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 			apiHandlerList = apiHandlerList.subList(basePageVo.getStartNum(), basePageVo.getStartNum() + basePageVo.getPageSize());
 		}
 		
-		resultObj.put("apiHandlerList", apiHandlerList);
+		resultObj.put("tbodyList", apiHandlerList);
 		
 		return resultObj;
 				
