@@ -63,7 +63,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
 		@Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
 		@Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-		@Param(name = "apiList", explode = ApiVo[].class, isRequired = true, desc = "接口配置信息列表")
+		@Param(name = "tbodyList", explode = ApiVo[].class, isRequired = true, desc = "接口配置信息列表")
 	})
 	@Description(desc = "接口配置信息列表接口")
 	@Override
@@ -168,7 +168,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			}
 			apiList.add(api);
 		}		
-		resultObj.put("apiList", apiList);
+		resultObj.put("tbodyList", apiList);
 		
 		return resultObj;
 	}
