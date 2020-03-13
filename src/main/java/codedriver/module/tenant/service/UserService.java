@@ -2,6 +2,7 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,5 +35,7 @@ public interface UserService {
 	public UserVo getUserByUserId(String userId);
 
 	public void updateUserPassword(UserVo userVo);
+
+	public List<AuthVo> getUserCountByAuth();
 
 }

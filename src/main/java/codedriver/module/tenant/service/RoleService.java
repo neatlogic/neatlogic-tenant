@@ -2,6 +2,7 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,4 +28,6 @@ public interface RoleService {
 	public int saveRoleUser(String roleName, String userId);
 
 	public RoleVo getRoleByRoleName(String roleName);
+
+	public List<AuthVo> getRoleCountByAuth();
 }
