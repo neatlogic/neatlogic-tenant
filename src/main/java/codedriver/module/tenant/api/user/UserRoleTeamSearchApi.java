@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -142,9 +143,14 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			//则根据index删掉多余数据
 			for(Object ob: resultArray) {
 				JSONArray dataList = ((JSONObject)ob).getJSONArray("dataList");
-				int index = ((JSONObject)ob).getInteger("index");
-				((JSONObject)ob).put("dataList", dataList.subList(0, (index==0?0:index)));
+				if(CollectionUtils.isEmpty(dataList)) {
+					((JSONObject)ob).put("isMore", false);
+				}else {
+					int index = ((JSONObject)ob).getInteger("index");
+					((JSONObject)ob).put("dataList", dataList.subList(0, (index==0?0:index)));
+				}
 			}
+			
 		}
 		return resultArray;
 	}
