@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.file.core.IFileTypeHandler;
+import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,10 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.UserService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
@@ -81,7 +88,11 @@ public class UserSaveApi extends ApiComponentBase {
 				type = ApiParamType.STRING,
 				desc = "其他信息",
 				isRequired = false,
-				xss = true)/*,
+				xss = true),
+			@Param(name = "userAuthList",
+				type = ApiParamType.JSONARRAY,
+				desc = "权限列表"
+			)/*,
 			@Param(name = "saveMode",
 					type = ApiParamType.ENUM,
 					rule = "merge,replace",
@@ -91,16 +102,46 @@ public class UserSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserVo userVo = new UserVo();
-		userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {
-		});
+		userVo.setUserId(jsonObj.getString("userId"));
+		userVo.setUserName(jsonObj.getString("userName"));
+		userVo.setPassword(jsonObj.getString("password"));
+		userVo.setEmail(jsonObj.getString("email"));
+		userVo.setPhone(jsonObj.getString("phone"));
+		userVo.setIsActive(jsonObj.getInteger("isActive"));
+		List<String> teamUuidList = new ArrayList<>();
+		if (jsonObj.containsKey("teamUuidList")){
+			JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
+			for (int i = 0; i < teamUuidArray.size(); i++){
+				teamUuidList.add(teamUuidArray.getString(i));
+			}
+		}
+		userVo.setTeamUuidList(teamUuidList);
 
-		// 保存角色
-//		List<String> roleList = JSON.parseArray(jsonObj.getString("roleList"), String.class);
-//		userVo.setRoleNameList(roleList);
-//
-//		// 保存用户组
-//		List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-//		userVo.setTeamUuidList(teamUuidList);
+		List<String> roleNameList = new ArrayList<>();
+		if (jsonObj.containsKey("roleNameList")){
+			JSONArray roleNameArray = jsonObj.getJSONArray("roleNameList");
+			for (int i = 0; i < roleNameArray.size(); i++){
+				roleNameList.add(roleNameArray.getString(i));
+			}
+		}
+		userVo.setRoleNameList(roleNameList);
+		userVo.setUserInfo(jsonObj.getString("userInfo"));
+		List<UserAuthVo> userAuthVoList = new ArrayList<>();
+		if (jsonObj.containsKey("userAuthList")){
+			JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");
+			Set<String> keySet = userAuthObj.keySet();
+			for (String key : keySet){
+				JSONArray authArray = userAuthObj.getJSONArray(key);
+				for (int j = 0; j < authArray.size(); j++){
+					UserAuthVo authVo = new UserAuthVo();
+					authVo.setAuth(authArray.getString(j));
+					authVo.setAuthGroup(key);
+					authVo.setUserId(userVo.getUserId());
+					userAuthVoList.add(authVo);
+				}
+			}
+		}
+		userVo.setUserAuthList(userAuthVoList);
 		userService.saveUser(userVo);
 		return userVo.getUserId();
 	}
