@@ -7,6 +7,7 @@ import java.util.Set;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,19 @@ public class RoleServiceImpl implements RoleService {
 			roleMapper.updateRole(roleVo);
 		} else {
 			roleMapper.insertRole(roleVo);
+			if (CollectionUtils.isNotEmpty(roleVo.getUserIdList())){
+				for (String userId : roleVo.getUserIdList()){
+					UserVo userVo = new UserVo();
+					userVo.setUserId(userId);
+					userVo.setRoleName(roleVo.getName());
+					roleMapper.insertRoleUser(userVo);
+				}
+			}
+			if (CollectionUtils.isNotEmpty(roleVo.getRoleAuthList())){
+				for (RoleAuthVo authVo : roleVo.getRoleAuthList()){
+					roleMapper.insertRoleAuth(authVo);
+				}
+			}
 		}
 		return 1;
 	}
