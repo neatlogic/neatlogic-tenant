@@ -56,7 +56,7 @@ public class RoleSaveApi extends ApiComponentBase {
 					desc = "用户ID集合"),
 			@Param( name= "roleAuthList",
 					desc = "角色权限集合",
-					type = ApiParamType.JSONARRAY)})
+					type = ApiParamType.JSONOBJECT)})
 	@Description(desc = "角色信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {

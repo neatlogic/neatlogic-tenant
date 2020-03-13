@@ -90,7 +90,7 @@ public class UserSaveApi extends ApiComponentBase {
 				isRequired = false,
 				xss = true),
 			@Param(name = "userAuthList",
-				type = ApiParamType.JSONARRAY,
+				type = ApiParamType.JSONOBJECT,
 				desc = "权限列表"
 			)/*,
 			@Param(name = "saveMode",
