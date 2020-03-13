@@ -50,16 +50,20 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "name", type = ApiParamType.STRING, desc = "组名",isRequired=true, xss=true),
 		@Param(name = "parentUuId", type = ApiParamType.STRING, desc = "父级组id"),
 		@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = false),
-		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合")
+		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
+			@Param( name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户ID集合")
 		/*@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)*/
 	})
 	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
 	@Description(desc = "保存组信息")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject json = new JSONObject();
-		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {
-		});
+		JSONObject returnObj = new JSONObject();
+		TeamVo teamVo = new TeamVo();
+		teamVo.setUuid(jsonObj.getString("uuid"));
+		teamVo.setName(jsonObj.getString("name"));
+		teamVo.setParentUuid(jsonObj.getString("parentUuid"));
+		teamVo.setSort(jsonObj.getInteger("sort"));
 		if (jsonObj.containsKey("tagIdList")){
 			List<TagVo> tagList = new ArrayList<>();
 			JSONArray tagIdList = jsonObj.getJSONArray("tagIdList");
@@ -71,9 +75,17 @@ public class TeamSaveApi extends ApiComponentBase{
 			}
 			teamVo.setTagList(tagList);
 		}
+		if (jsonObj.containsKey("userIdList")){
+			List<String> userIdList = new ArrayList<>();
+			JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+			for (int i = 0; i < userIdArray.size(); i++){
+				userIdList.add(userIdArray.getString(i));
+			}
+			teamVo.setUserIdList(userIdList);
+		}
 		teamService.saveTeam(teamVo);
 
-		json.put("uuid", teamVo.getUuid());
-		return json;
+		returnObj.put("uuid", teamVo.getUuid());
+		return returnObj;
 	}
 }

@@ -10,6 +10,7 @@ import codedriver.module.tenant.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,11 @@ public class TeamServiceImpl implements TeamService {
 			sort++;
 			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);
+			if (CollectionUtils.isNotEmpty(teamVo.getUserIdList())){
+				for (String userId : teamVo.getUserIdList()){
+					teamMapper.insertTeamUser(teamVo.getUuid(), userId);
+				}
+			}
 		}
 
 		if (teamVo.getTagList() != null && teamVo.getTagList().size() > 0){
