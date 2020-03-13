@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
@@ -48,7 +49,6 @@ public class ReminderHistoryApi extends ApiComponentBase {
 
     @Input({
             @Param( name = "moduleId", desc = "模块ID", type = ApiParamType.STRING),
-            @Param( name = "userId", desc = "用户ID", type = ApiParamType.STRING, isRequired = true),
             @Param( name = "timeRange", desc = "时间", type = ApiParamType.INTEGER),
             @Param( name = "timeUnit", desc = "时间单位", type = ApiParamType.STRING),
             @Param( name = "startTime", desc = "起始时间", type = ApiParamType.STRING),
@@ -83,7 +83,7 @@ public class ReminderHistoryApi extends ApiComponentBase {
         }
 
         paramVo.setModuleId(jsonObj.getString("moduleId"));
-        paramVo.setUserId(jsonObj.getString("userId"));
+        paramVo.setUserId(UserContext.get().getUserId(true));
         List<GlobalReminderMessageVo> messageList = reminderService.getReminderHistoryMessageList(paramVo);
         JSONArray messageArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(messageList)){

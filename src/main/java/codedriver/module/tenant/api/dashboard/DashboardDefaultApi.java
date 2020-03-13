@@ -59,7 +59,7 @@ public class DashboardDefaultApi extends ApiComponentBase {
 			hasRight = true;
 		}
 		if (!hasRight) {
-			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardUuid, userId);
+			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboardUuid, userId);
 			if (roleList.contains(DashboardRoleVo.ActionType.READ.getValue())) {
 				hasRight = true;
 			}
