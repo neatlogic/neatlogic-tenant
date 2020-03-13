@@ -83,6 +83,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 			} else {
 				dashboard.setRoleList(dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboard.getUuid(), userId));
 			}
+			dashboard.setWidgetList(dashboardMapper.getDashboardWidgetByDashboardUuid(dashboard.getUuid()));
 		}
 
 		JSONObject returnObj = new JSONObject();
