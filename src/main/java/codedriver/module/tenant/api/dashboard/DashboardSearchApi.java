@@ -81,7 +81,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 					}
 				});
 			} else {
-				dashboard.setRoleList(dashboardMapper.getDashboardRoleByDashboardUuid(dashboard.getUuid(), userId));
+				dashboard.setRoleList(dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboard.getUuid(), userId));
 			}
 		}
 

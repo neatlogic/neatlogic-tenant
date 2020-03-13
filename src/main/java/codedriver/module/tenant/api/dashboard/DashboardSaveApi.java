@@ -73,7 +73,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 				hasRight = true;
 			}
 			if (!hasRight) {
-				List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuid(dashboardVo.getUuid(), userId);
+				List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboardVo.getUuid(), userId);
 				if (roleList.contains(DashboardRoleVo.ActionType.WRITE.getValue())) {
 					hasRight = true;
 				}
