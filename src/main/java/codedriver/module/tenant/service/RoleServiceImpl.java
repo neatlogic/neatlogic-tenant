@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,5 +108,10 @@ public class RoleServiceImpl implements RoleService {
 		int userCount = roleMapper.searchRoleUserCountByRoleName(roleName);
 		roleVo.setUserCount(userCount);
 		return roleVo;
+	}
+
+	@Override
+	public List<AuthVo> getRoleCountByAuth() {
+		return roleMapper.getRoleCountByAuth();
 	}
 }

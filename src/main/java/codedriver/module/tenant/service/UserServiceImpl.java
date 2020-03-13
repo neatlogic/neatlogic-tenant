@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import codedriver.framework.common.util.StringUtil;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import org.apache.commons.lang3.StringUtils;
@@ -139,5 +140,10 @@ public class UserServiceImpl implements UserService {
 		List<Long> idList = userMapper.getLimitUserPasswordIdList(userVo.getUserId());
 		userMapper.deleteUserPasswordByLimit(userVo.getUserId(), idList);
 		userMapper.insertUserPassword(userVo);
+	}
+
+	@Override
+	public List<AuthVo> getUserCountByAuth() {
+		return userMapper.getUserCountByAuth();
 	}
 }
