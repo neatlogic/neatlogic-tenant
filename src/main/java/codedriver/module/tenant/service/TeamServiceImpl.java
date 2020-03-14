@@ -10,6 +10,7 @@ import codedriver.module.tenant.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.org.apache.regexp.internal.RE;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,11 @@ public class TeamServiceImpl implements TeamService {
 			sort++;
 			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);
+			if (CollectionUtils.isNotEmpty(teamVo.getUserIdList())){
+				for (String userId : teamVo.getUserIdList()){
+					teamMapper.insertTeamUser(teamVo.getUuid(), userId);
+				}
+			}
 		}
 
 		if (teamVo.getTagList() != null && teamVo.getTagList().size() > 0){
@@ -127,6 +133,7 @@ public class TeamServiceImpl implements TeamService {
 			teamObj.put("sort", teamVo.getSort());
 			teamObj.put("parentUuid", teamVo.getParentUuid());
 			teamObj.put("tagList", teamVo.getTagList());
+			teamObj.put("userCount", teamVo.getUserCount());
 			if (map.containsKey(teamVo.getUuid())){
 				List<TeamVo> teams = map.get(teamVo.getUuid());
 				teamObj.put("children", buildData(teams, map));
@@ -192,6 +199,7 @@ public class TeamServiceImpl implements TeamService {
         teamObj.put("sort", teamVo.getSort());
         teamObj.put("parentUuid", teamVo.getParentUuid());
         teamObj.put("tagList", teamVo.getTagList());
+        teamObj.put("userCount", teamVo.getUserCount());
         if (dataObj != null){
             JSONArray childArray = new JSONArray();
             childArray.add(dataObj);

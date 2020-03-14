@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import codedriver.framework.common.util.StringUtil;
+import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,11 @@ public class UserServiceImpl implements UserService {
 		if (userMapper.getUserByUserId(userId) == null){
 			userMapper.insertUser(userVo);
 			userMapper.insertUserPassword(userVo);
+			if (CollectionUtils.isNotEmpty(userVo.getUserAuthList())){
+				for (UserAuthVo userAuthVo : userVo.getUserAuthList()){
+					userMapper.insertUserAuth(userAuthVo);
+				}
+			}
 		} else {
 			userMapper.updateUser(userVo);
 			userMapper.deleteUserRoleByUserId(userId);
@@ -139,5 +146,10 @@ public class UserServiceImpl implements UserService {
 		List<Long> idList = userMapper.getLimitUserPasswordIdList(userVo.getUserId());
 		userMapper.deleteUserPasswordByLimit(userVo.getUserId(), idList);
 		userMapper.insertUserPassword(userVo);
+	}
+
+	@Override
+	public List<AuthVo> getUserCountByAuth() {
+		return userMapper.getUserCountByAuth();
 	}
 }
