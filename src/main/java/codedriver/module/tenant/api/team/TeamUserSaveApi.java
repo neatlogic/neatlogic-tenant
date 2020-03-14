@@ -11,6 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @program: codedriver
  * @description:
@@ -39,15 +42,19 @@ public class TeamUserSaveApi extends ApiComponentBase {
 
     @Input({
             @Param( name = "teamUuid", isRequired = true, desc = "分组uuid", type = ApiParamType.STRING),
-            @Param( name = "userIdList", isRequired = true, desc = "用户Id集合", type = ApiParamType.JSONARRAY)
+            @Param( name = "userIdList", desc = "用户Id集合", type = ApiParamType.JSONARRAY)
     })
     @Description( desc = "分组用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
-        for (int i = 0 ; i < userIdArray.size(); i++){
-            teamService.saveTeamUser(userIdArray.getString(i), jsonObj.getString("teamUuid"));
+        List<String> userIdList = new ArrayList<>();
+        if (jsonObj.containsKey("userIdList")){
+            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+            for (int i = 0 ; i < userIdArray.size(); i++){
+                userIdList.add(userIdArray.getString(i));
+            }
         }
+        teamService.saveTeamUser(userIdList, jsonObj.getString("teamUuid"));
         return null;
     }
 }

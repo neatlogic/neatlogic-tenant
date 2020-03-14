@@ -6,9 +6,13 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class RoleUserSaveApi extends ApiComponentBase {
@@ -36,17 +40,22 @@ public class RoleUserSaveApi extends ApiComponentBase {
                     type = ApiParamType.STRING,
                     desc = "角色名称",
                     isRequired = true),
-            @Param(name = "userId",
-                    type = ApiParamType.STRING,
-                    desc = "用户ID",
-                    isRequired = true
+            @Param(name = "userIdList",
+                    type = ApiParamType.JSONARRAY,
+                    desc = "用户ID集合"
             )})
     @Description(desc = "角色用户添加接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String roleName = jsonObj.getString("roleName");
-        String userId = jsonObj.getString("userId");
-        roleService.saveRoleUser(roleName, userId);
+        List<String> userIdList = new ArrayList<>();
+        if (jsonObj.containsKey("userIdList")){
+            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+            for (int i = 0; i < userIdArray.size(); i++){
+                userIdList.add(userIdArray.getString(i));
+            }
+        }
+        roleService.saveRoleUser(roleName, userIdList);
         return "";
     }
 }
