@@ -57,7 +57,11 @@ public class DashboardSearchApi extends ApiComponentBase {
 		if (jsonObj.containsKey("pageSize")) {
 			dashboardVo.setPageSize(jsonObj.getInteger("pageSize"));
 		}
+		if(jsonObj.containsKey("keyword")) {
+			dashboardVo.setKeyword(jsonObj.getString("keyword"));
+		}
 		String userId = UserContext.get().getUserId(true);
+		
 		dashboardVo.setFcu(userId);
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
@@ -83,6 +87,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 			} else {
 				dashboard.setRoleList(dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboard.getUuid(), userId));
 			}
+			dashboard.setWidgetList(dashboardMapper.getDashboardWidgetByDashboardUuid(dashboard.getUuid()));
 		}
 
 		JSONObject returnObj = new JSONObject();
