@@ -42,17 +42,18 @@ public class RoleUserSaveApi extends ApiComponentBase {
                     isRequired = true),
             @Param(name = "userIdList",
                     type = ApiParamType.JSONARRAY,
-                    desc = "用户ID集合",
-                    isRequired = true
+                    desc = "用户ID集合"
             )})
     @Description(desc = "角色用户添加接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
         String roleName = jsonObj.getString("roleName");
         List<String> userIdList = new ArrayList<>();
-        for (int i = 0; i < userIdArray.size(); i++){
-            userIdList.add(userIdArray.getString(i));
+        if (jsonObj.containsKey("userIdList")){
+            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+            for (int i = 0; i < userIdArray.size(); i++){
+                userIdList.add(userIdArray.getString(i));
+            }
         }
         roleService.saveRoleUser(roleName, userIdList);
         return "";
