@@ -100,8 +100,14 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public void saveTeamUser(String userId, String teamUuid) {
-		teamMapper.insertTeamUser(teamUuid, userId);
+	public void saveTeamUser(List<String> userIdList, String teamUuid) {
+		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
+		if (CollectionUtils.isNotEmpty(userIdList)){
+			for (String userId: userIdList){
+				teamMapper.insertTeamUser(teamUuid, userId);
+			}
+		}
+
 	}
 
 	@Override

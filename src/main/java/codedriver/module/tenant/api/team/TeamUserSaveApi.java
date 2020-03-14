@@ -11,6 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @program: codedriver
  * @description:
@@ -45,9 +48,11 @@ public class TeamUserSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+        List<String> userIdList = new ArrayList<>();
         for (int i = 0 ; i < userIdArray.size(); i++){
-            teamService.saveTeamUser(userIdArray.getString(i), jsonObj.getString("teamUuid"));
+            userIdList.add(userIdArray.getString(i));
         }
+        teamService.saveTeamUser(userIdList, jsonObj.getString("teamUuid"));
         return null;
     }
 }

@@ -108,11 +108,16 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public int saveRoleUser(String roleName, String userId) {
-		UserVo userVo = new UserVo();
-		userVo.setUserId(userId);
-		userVo.setRoleName(roleName);
-		roleMapper.insertRoleUser(userVo);
+	public int saveRoleUser(String roleName, List<String> userIdList) {
+		roleMapper.deleteUserRoleByRoleName(roleName);
+		if (CollectionUtils.isNotEmpty(userIdList)){
+			for (String userId : userIdList){
+				UserVo userVo = new UserVo();
+				userVo.setUserId(userId);
+				userVo.setRoleName(roleName);
+				roleMapper.insertRoleUser(userVo);
+			}
+		}
 		return 1;
 	}
 
