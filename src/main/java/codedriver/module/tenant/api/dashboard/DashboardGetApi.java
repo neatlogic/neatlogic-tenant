@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +60,18 @@ public class DashboardGetApi extends ApiComponentBase {
 		boolean hasRight = false;
 		if (dashboardVo.getFcu().equals(userId)) {
 			hasRight = true;
+			dashboardVo.setRoleList(new ArrayList<String>() {
+				{
+					this.add(DashboardRoleVo.ActionType.READ.getValue());
+					this.add(DashboardRoleVo.ActionType.WRITE.getValue());
+					this.add(DashboardRoleVo.ActionType.SHARE.getValue());
+					this.add(DashboardRoleVo.ActionType.DELETE.getValue());
+				}
+			});
 		}
 		if (!hasRight) {
 			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboardVo.getUuid(), userId);
+			dashboardVo.setRoleList(roleList);
 			if (roleList.contains(DashboardRoleVo.ActionType.READ.getValue())) {
 				hasRight = true;
 			}
