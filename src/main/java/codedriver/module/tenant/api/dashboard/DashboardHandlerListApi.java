@@ -9,11 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dashboard.core.DashboardHandlerFactory;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardHandlerVo;
-import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
@@ -43,17 +41,17 @@ public class DashboardHandlerListApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Output({ @Param(explode = DashboardVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板详细信息") })
+	@Output({ @Param(name = "Type", explode = DashboardHandlerVo[].class, desc = "仪表板组件信息，key：分类，value：组件列表") })
 	@Description(desc = "仪表板组件列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<DashboardHandlerVo> dashboardHandlerList = DashboardHandlerFactory.getDashboardHandlerList();
 		JSONObject returnObj = new JSONObject();
 		for (DashboardHandlerVo handlerVo : dashboardHandlerList) {
-			if(returnObj.containsKey(handlerVo.getType())) {
+			if (returnObj.containsKey(handlerVo.getType())) {
 				returnObj.getJSONArray(handlerVo.getType()).add(handlerVo);
-			}else {
-				JSONArray objList= new JSONArray();
+			} else {
+				JSONArray objList = new JSONArray();
 				objList.add(handlerVo);
 				returnObj.put(handlerVo.getType(), handlerVo);
 			}
