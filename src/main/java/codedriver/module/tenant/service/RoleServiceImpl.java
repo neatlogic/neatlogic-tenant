@@ -133,4 +133,14 @@ public class RoleServiceImpl implements RoleService {
 	public List<AuthVo> getRoleCountByAuth() {
 		return roleMapper.getRoleCountByAuth();
 	}
+
+	@Override
+	public void saveAuthRole(List<RoleAuthVo> roleAuthList, String auth) {
+		roleMapper.deleteRoleAuthByAuth(auth);
+		if (roleAuthList.size() > 0){
+			for (RoleAuthVo roleAuthVo : roleAuthList){
+				roleMapper.insertRoleAuth(roleAuthVo);
+			}
+		}
+	}
 }

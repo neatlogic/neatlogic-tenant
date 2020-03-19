@@ -152,4 +152,15 @@ public class UserServiceImpl implements UserService {
 	public List<AuthVo> getUserCountByAuth() {
 		return userMapper.getUserCountByAuth();
 	}
+
+	@Override
+	public void saveUserAuth(List<UserAuthVo> userAuthList, String auth) {
+		userMapper.deleteUserAuthByAuth(auth);
+		if (userAuthList.size() > 0){
+			for (UserAuthVo userAuth : userAuthList){
+				userMapper.insertUserAuth(userAuth);
+			}
+		}
+
+	}
 }

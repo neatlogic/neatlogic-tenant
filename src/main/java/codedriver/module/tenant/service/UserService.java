@@ -38,4 +38,6 @@ public interface UserService {
 
 	public List<AuthVo> getUserCountByAuth();
 
+	public void saveUserAuth(List<UserAuthVo> userAuthList, String auth);
+
 }

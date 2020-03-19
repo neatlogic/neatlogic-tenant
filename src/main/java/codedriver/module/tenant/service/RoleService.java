@@ -30,4 +30,6 @@ public interface RoleService {
 	public RoleVo getRoleByRoleName(String roleName);
 
 	public List<AuthVo> getRoleCountByAuth();
+
+	public void saveAuthRole(List<RoleAuthVo> roleAuthList, String auth);
 }
