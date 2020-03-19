@@ -68,7 +68,7 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		if (!hasRight) {
 			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.READ.getText());
 		}
-		dashboardMapper.deleteDashboardDefaultUser(dashboardUuid, userId);
+		dashboardMapper.deleteDashboardDefaultUserByUserId(userId);
 		if (isDefault == 1) {
 			dashboardMapper.insertDashboardDefault(dashboardUuid, userId);
 		}
