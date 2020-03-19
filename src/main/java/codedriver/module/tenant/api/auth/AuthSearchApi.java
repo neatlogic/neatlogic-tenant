@@ -97,6 +97,7 @@ public class AuthSearchApi extends ApiComponentBase {
                         AuthVo authVo = new AuthVo();
                         authVo.setName(authBase.getAuthName());
                         authVo.setDisplayName(authBase.getAuthDisplayName());
+                        authVo.setDescription(authBase.getAuthIntroduction());
                         if (roleAuthMap.containsKey(authVo.getName())){
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
                         }
