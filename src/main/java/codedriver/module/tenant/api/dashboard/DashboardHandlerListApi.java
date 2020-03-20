@@ -53,7 +53,7 @@ public class DashboardHandlerListApi extends ApiComponentBase {
 			} else {
 				JSONArray objList = new JSONArray();
 				objList.add(handlerVo);
-				returnObj.put(handlerVo.getType(), handlerVo);
+				returnObj.put(handlerVo.getType(), objList);
 			}
 		}
 		return returnObj;
