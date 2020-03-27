@@ -72,7 +72,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 			if (fileTypeHandler != null) {
 				if (fileTypeHandler.valid(UserContext.get().getUserId(), paramObj)) {
 					ServletOutputStream os = null;
-					FSDataInputStream in = fileSystem.open(new Path("/" + tenantUuid + "/" + fileVo.getType() + "/" + fileVo.getUuid()));
+					FSDataInputStream in = fileSystem.open(new Path("/" + tenantUuid + "/upload/" + fileVo.getType() + "/" + fileVo.getUuid()));
 					String fileNameEncode = "";
 					Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
 					if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {

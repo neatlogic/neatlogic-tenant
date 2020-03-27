@@ -37,7 +37,6 @@ import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
 import codedriver.module.tenant.exception.file.FileTooLargeException;
 import codedriver.module.tenant.exception.file.FileTypeConfigNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
-import codedriver.module.tenant.exception.file.SavePathNotExistsException;
 
 @Service
 public class FileUploadApi extends BinaryStreamApiComponentBase {
@@ -151,7 +150,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setUserId(userId);
 			fileVo.setType(type);
 
-			String finalPath = "/" + tenantUuid + "/" + type + "/" + fileVo.getUuid();
+			String finalPath = "/" + tenantUuid + "/upload/" + type + "/" + fileVo.getUuid();
 			FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
 			IOUtils.copyLarge(multipartFile.getInputStream(), fos);
 			fos.flush();
