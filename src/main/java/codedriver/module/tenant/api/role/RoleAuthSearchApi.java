@@ -38,9 +38,9 @@ public class RoleAuthSearchApi extends ApiComponentBase {
 
     @Input({
             @Param(
-                    name = "roleName",
-                    type = ApiParamType.STRING,
-                    desc = "角色名称",
+                    name = "roleNameList",
+                    type = ApiParamType.JSONARRAY,
+                    desc = "角色名称集合",
                     isRequired = true
             )
     })
@@ -57,17 +57,21 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         JSONObject roleAuthObj = new JSONObject();
-        String roleName = jsonObj.getString("roleName");
-        List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleName);
-        if (roleAuthList != null && roleAuthList.size() > 0){
-            for (RoleAuthVo authVo : roleAuthList){
-                if (roleAuthObj.containsKey(authVo.getAuthGroup())){
-                    JSONArray authArray = roleAuthObj.getJSONArray(authVo.getAuthGroup());
-                    authArray.add(authVo.getAuth());
-                }else {
-                    JSONArray authArray = new JSONArray();
-                    authArray.add(authVo.getAuth());
-                    roleAuthObj.put(authVo.getAuthGroup(), authArray);
+        JSONArray roleNameArray = jsonObj.getJSONArray("roleNameList");
+        for (int i = 0 ; i < roleNameArray.size(); i++){
+            List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleNameArray.getString(i));
+            if (roleAuthList != null && roleAuthList.size() > 0){
+                for (RoleAuthVo authVo : roleAuthList){
+                    if (roleAuthObj.containsKey(authVo.getAuthGroup())){
+                        JSONArray authArray = roleAuthObj.getJSONArray(authVo.getAuthGroup());
+                        if (!authArray.contains(authVo.getAuth())){
+                            authArray.add(authVo.getAuth());
+                        }
+                    }else {
+                        JSONArray authArray = new JSONArray();
+                        authArray.add(authVo.getAuth());
+                        roleAuthObj.put(authVo.getAuthGroup(), authArray);
+                    }
                 }
             }
         }
