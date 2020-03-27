@@ -60,7 +60,6 @@ public class UserSaveApi extends ApiComponentBase {
 			@Param(name = "password",
 					type = ApiParamType.STRING,
 					desc = "用户密码",
-					isRequired = true,
 					xss = true),
 			@Param(name = "email",
 					type = ApiParamType.STRING,
