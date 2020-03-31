@@ -29,6 +29,7 @@ import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
@@ -39,6 +40,7 @@ import codedriver.module.tenant.exception.file.FileTypeConfigNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
+@IsActived
 public class FileUploadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
@@ -92,14 +94,10 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 
 		MultipartFile multipartFile = multipartRequest.getFile(paramName);
 
-		JSONObject jsonObj = new JSONObject();
 		if (multipartFile != null && multipartFile.getName() != null) {
 			String userId = UserContext.get().getUserId();
 			boolean isAllowed = false;
 			Long maxSize = 0L;
-			String savePath = "";
-			String typeName = "";
-			String forwardUrl = null;
 			String oldFileName = multipartFile.getOriginalFilename();
 			Long size = multipartFile.getSize();
 			String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
