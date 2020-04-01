@@ -1,17 +1,18 @@
 package codedriver.module.tenant.api.user;
 
-import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.file.core.IFileTypeHandler;
-import com.alibaba.fastjson.JSONArray;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -19,10 +20,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.UserService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
