@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -25,7 +26,7 @@ import java.util.List;
 public class TeamGetListApi extends ApiComponentBase {
 
     @Autowired
-    private TeamService teamService;
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -55,9 +56,8 @@ public class TeamGetListApi extends ApiComponentBase {
         JSONArray teamIdArray = jsonObj.getJSONArray("teamIdList");
         List<TeamVo> teamList = new ArrayList<>();
         for (int i = 0; i < teamIdArray.size(); i++){
-            String teamId = teamIdArray.getString(i);
-            TeamVo teamVo = teamService.getTeamByUuid(teamId);
-            teamList.add(teamVo);
+            TeamVo team = teamMapper.getTeamByUuid(teamIdArray.getString(i));
+            teamList.add(team);
         }
         returnObj.put("teamList", teamList);
         return returnObj;

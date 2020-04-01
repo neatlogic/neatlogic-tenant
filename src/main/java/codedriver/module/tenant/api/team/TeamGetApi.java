@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.module.tenant.service.TeamService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +40,10 @@ public class TeamGetApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "uuid",
 					type = ApiParamType.STRING,
-					desc = "分组uuid",
-					isRequired = true) })
+					desc = "分组uuid"),
+			@Param( name = "name",
+					type = ApiParamType.STRING,
+					desc = "分组名称")})
 	@Output({
 			@Param(name = "teamVo",
 					explode = TeamVo.class,
@@ -48,8 +51,10 @@ public class TeamGetApi extends ApiComponentBase {
 	@Description(desc = "获取组信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) {
-		String teamUuid = jsonObj.getString("uuid");
-		TeamVo teamVo = teamService.getTeamByUuid(teamUuid);
+		TeamVo teamVo = new TeamVo();
+		teamVo.setName(jsonObj.getString("name"));
+		teamVo.setUuid(jsonObj.getString("uuid"));
+		teamVo = teamService.getTeam(teamVo);
 		return teamVo;
 	}
 }
