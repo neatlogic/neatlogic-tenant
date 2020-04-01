@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import codedriver.framework.dto.TagVo;
+import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.module.tenant.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -40,10 +41,15 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public TeamVo getTeamByUuid(String teamUuid) {
-		TeamVo teamVo = teamMapper.getTeamByUuid(teamUuid);
-		int userCount = teamMapper.searchUserCountByTeamUuid(teamUuid);
-		teamVo.setUserCount(userCount);
+	public TeamVo getTeam(TeamVo team) {
+		TeamVo teamVo = teamMapper.getTeam(team);
+		if (StringUtils.isNotBlank(team.getUuid())){
+			int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
+			teamVo.setUserCount(userCount);
+			List<String> pathNameList = new ArrayList<>();
+			getTeamPath(teamVo, pathNameList);
+			teamVo.setPathNameList(pathNameList);
+		}
 		return teamVo;
 	}
 
@@ -64,6 +70,14 @@ public class TeamServiceImpl implements TeamService {
 				iterativeDelete(childTeam.getUuid());
 			}
 		}
+	}
+
+	public void getTeamPath(TeamVo teamVo, List<String> pathNameList){
+		if (!teamVo.getParentUuid().equals("0")){
+			TeamVo parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			getTeamPath(parentTeam, pathNameList);
+		}
+		pathNameList.add(teamVo.getName());
 	}
 
 	@Override

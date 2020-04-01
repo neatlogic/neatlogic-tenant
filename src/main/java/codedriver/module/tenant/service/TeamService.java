@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 public interface TeamService {
 	public List<TeamVo> searchTeam(TeamVo teamVo);
 
-	public TeamVo getTeamByUuid(String teamUuid);
+	public TeamVo getTeam(TeamVo team);
 
 	public int deleteTeam(String teamUuid);
 
