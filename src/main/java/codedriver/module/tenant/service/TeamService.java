@@ -17,7 +17,7 @@ public interface TeamService {
 
 	public void saveTeamUser(List<String> userIdList, String teamUuid);
 
-	public JSONArray getTeamTree();
+	public JSONObject getTeamTree(TeamVo teamVo);
 
 	public JSONArray getParentTeamTree(String uuid);
 

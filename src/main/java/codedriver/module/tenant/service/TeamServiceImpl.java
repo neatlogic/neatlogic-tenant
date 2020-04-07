@@ -125,7 +125,8 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public JSONArray getTeamTree() {
+	public JSONObject getTeamTree(TeamVo paramVo) {
+		JSONObject returnObj = new JSONObject();
 		List<TeamVo> teamList = teamMapper.getTeamTree();
 		Map<String, List<TeamVo>> map = new HashMap<>();
 		for (TeamVo teamVo : teamList){
@@ -139,7 +140,27 @@ public class TeamServiceImpl implements TeamService {
 		}
 		List<TeamVo> startList = map.get(DEFAULT_PARENTUUID);
 		if (startList != null && startList.size() > 0){
-			return buildData(startList, map);
+			//这里分页
+			List<TeamVo> filterTeamList = new ArrayList<>();
+			if (paramVo.getNeedPage()){
+				int pageSize = paramVo.getPageSize();
+				int rowNum = startList.size();
+				int currentPage = paramVo.getCurrentPage();
+				returnObj.put("rowNum", rowNum);
+				returnObj.put("currentPage", paramVo.getCurrentPage());
+				returnObj.put("pageCount", rowNum % pageSize == 0 ? rowNum / pageSize : (rowNum / pageSize) + 1);
+				returnObj.put("pageSize", pageSize);
+				int start = pageSize * (currentPage - 1);
+				for (int i = start; i < startList.size(); i++){
+					filterTeamList.add(startList.get(i));
+					if (filterTeamList.size() == pageSize){
+						break;
+					}
+				}
+			}else {
+				filterTeamList = startList;
+			}
+			returnObj.put("children", buildData(filterTeamList, map));
 		}
 		return null;
 	}

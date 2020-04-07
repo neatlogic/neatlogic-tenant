@@ -70,7 +70,10 @@ public class RoleSearchApi extends ApiComponentBase {
 					desc = "当前页"),
 			@Param(name = "rowNum",
 					type = ApiParamType.INTEGER,
-					desc = "返回条目总数")})
+					desc = "返回条目总数"),
+			@Param(name = "pageCount",
+					type = ApiParamType.INTEGER,
+					desc = "总页数")})
 	@Description(desc = "角色查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
