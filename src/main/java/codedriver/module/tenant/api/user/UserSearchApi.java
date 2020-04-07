@@ -110,6 +110,7 @@ public class UserSearchApi extends ApiComponentBase {
             json.put("rowNum", userVo.getRowNum());
             json.put("pageSize", userVo.getPageSize());
             json.put("currentPage", userVo.getCurrentPage());
+            json.put("pageCount", userVo.getPageCount());
         }
 		return json;
 	}

@@ -100,6 +100,7 @@ public class RoleSearchApi extends ApiComponentBase {
 			returnObj.put("pageSize", roleVo.getPageSize());
 			returnObj.put("currentPage", roleVo.getCurrentPage());
 			returnObj.put("rowNum", roleVo.getRowNum());
+			returnObj.put("pageCount", roleVo.getPageCount());
 		}
 		returnObj.put("tbodyList", roleList);
 		return returnObj;
