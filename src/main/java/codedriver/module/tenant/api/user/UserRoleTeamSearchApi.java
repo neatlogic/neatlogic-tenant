@@ -85,7 +85,9 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			}
 			JSONObject resultObj = handler.repack(dataList);
 			//显示额外选项 includeList
-			resultObj = handler.include(resultObj,includeList.stream().map(object -> object.toString()).collect(Collectors.toList()));
+			if(jsonObj.containsKey("keyword")) {
+				resultObj = handler.include(resultObj,includeList.stream().map(object -> object.toString()).collect(Collectors.toList()));
+			}
 			//过滤 excludeList
 			dataList = resultObj.getJSONArray("dataList");
 			if(excludeList != null &&!excludeList.isEmpty()) {
