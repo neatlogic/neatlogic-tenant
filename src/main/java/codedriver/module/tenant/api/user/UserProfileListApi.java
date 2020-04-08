@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,13 +51,19 @@ public class UserProfileListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserIdAndModuleId(UserContext.get().getUserId(),null);
-		Map<String,String> myUserProfileMap = new HashMap<String,String>();
+		Map<String,String> myUserProfileOperateMap = new HashMap<String,String>();
 		for(UserProfileVo myUserProfileVo : myUserProfileList) {
 			if(StringUtils.isNotBlank(myUserProfileVo.getConfig())){
 				JSONArray tmpArray = JSONArray.parseArray(myUserProfileVo.getConfig());
 				for(Object tmp : tmpArray) {
 					JSONObject tmpJson = (JSONObject)tmp;
-					myUserProfileMap.put(tmpJson.getString("value"), tmpJson.getString("text"));
+					JSONArray operateArray = tmpJson.getJSONArray("userProfileOperateList");
+					if(CollectionUtils.isNotEmpty(operateArray)) {
+						for(Object operateObj:operateArray) {
+							JSONObject operateJson = (JSONObject)operateObj;
+							myUserProfileOperateMap.put(operateJson.getString("value"),operateJson.getString("text"));
+						}
+					}
 				}
 				
 			}
@@ -70,9 +77,20 @@ public class UserProfileListApi extends ApiComponentBase {
 			JSONArray configObjArray = JSONArray.parseArray(config);
 			for(Object configObj :configObjArray) {
 				JSONObject configJson = (JSONObject)configObj;
-				if(myUserProfileMap.containsKey(configJson.getString("value"))) {
-					configJson.put("checked", 1);
+				configJson.put("checked", 1);
+				JSONArray operateArray = configJson.getJSONArray("userProfileOperateList");
+				if(CollectionUtils.isNotEmpty(operateArray)) {
+					for(Object operateObj:operateArray) {
+						JSONObject operateJson = (JSONObject)operateObj;
+						if(myUserProfileOperateMap.containsKey(operateJson.getString("value"))) {
+							operateJson.put("checked", 1);
+							configJson.put("checked", 0);
+						}else {
+							operateJson.put("checked", 0);
+						}
+					}
 				}
+				
 			}
 			usrProfileVo.setConfig(configObjArray.toJSONString());
 			userProfileList.add(usrProfileVo);

@@ -15,6 +15,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserProfileVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -45,8 +46,9 @@ public class UserProfileSaveApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name="moduleId",type=ApiParamType.STRING,isRequired=true,desc="模块id"),
-		@Param(name="checked",type=ApiParamType.INTEGER,isRequired=true,desc="是否勾选，1：勾选，0：不勾选"),
-		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="操作个性化选项名")
+		@Param(name="checked",type=ApiParamType.INTEGER,isRequired=true,desc="操作个性化选项勾选，1：勾选，0：不勾选"),
+		@Param(name="name",type=ApiParamType.STRING,isRequired=true,desc="操作个性化选项名"),
+		@Param(name="operate",type=ApiParamType.STRING,desc="具体操作个性化选项名，checked = 0时，必填。")
 	})
 	@Output({})
 	@Description(desc = "用户个性化保存接口")
@@ -54,16 +56,24 @@ public class UserProfileSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String moduleId = jsonObj.getString("moduleId");
 		String name = jsonObj.getString("name");
+		String operate = jsonObj.getString("operate");
 		String userId =UserContext.get().getUserId();
 		Integer checked = jsonObj.getInteger("checked");
 		if(!UserProfileFactory.getUserProfileMap().containsKey(moduleId)) {
 			throw new UserProfileModuleNotFoundException(moduleId);
+		}
+		if(checked == 0&&StringUtils.isBlank(operate)) {
+			throw new ParamIrregularException("参数“operate”不符合格式要求");
 		}
 		//找出对用的json
 		String config = UserProfileFactory.getUserProfileMap().get(moduleId).getConfig();
 		JSONArray configArray = JSONObject.parseArray(config);
 		List<Object> list = configArray.stream().filter(o->((JSONObject)o).containsValue(name)).collect(Collectors.toList());
 		if(CollectionUtils.isNotEmpty(list)) {
+			JSONObject profileJson = (JSONObject)list.get(0);
+			JSONArray operateList = profileJson.getJSONArray("userProfileOperateList");
+			List<Object> operateTmpList =  operateList.stream().filter(o->((JSONObject)o).containsValue(operate)).collect(Collectors.toList());
+			profileJson.put("userProfileOperateList", operateTmpList);
 			List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserIdAndModuleId(userId,moduleId);
 			if(CollectionUtils.isNotEmpty(myUserProfileList)) {//存在用户记录 update
 				UserProfileVo userProfileVo = myUserProfileList.get(0);
@@ -73,15 +83,15 @@ public class UserProfileSaveApi extends ApiComponentBase {
 					List<Object> myList = myConfigArray.stream().filter(o->((JSONObject)o).containsValue(name)).collect(Collectors.toList());
 					if(CollectionUtils.isEmpty(myList)) {
 						if(checked == 1) {
-							myConfigArray.add(list.get(0));
-						}else {
 							//do nothing
+						}else {
+							myConfigArray.add(list.get(0));
 						}
 					}else {
 						if(checked == 0) {
-							myConfigArray.remove(list.get(0));
+							((JSONObject)myList.get(0)).put("userProfileOperateList", operateTmpList);
 						}else {
-							//do nothing
+							myConfigArray.remove(list.get(0));
 						}
 					}
 					if(CollectionUtils.isNotEmpty(myConfigArray)) {
@@ -93,7 +103,7 @@ public class UserProfileSaveApi extends ApiComponentBase {
 					//do nothing
 				}
 			}else {//不存在用户记录 insert
-				if(checked == 1) {
+				if(checked == 0) {
 					UserProfileVo userProfileVo = new UserProfileVo();
 					JSONArray myConfigArray = new JSONArray();
 					myConfigArray.add(list.get(0));

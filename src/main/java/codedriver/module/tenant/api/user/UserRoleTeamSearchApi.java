@@ -42,7 +42,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
 		@Param(name = "valueList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于回显的参数列表"),
 		@Param(name = "excludeList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于过滤回显参数"),
-		@Param(name = "includeList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于需要回显参数，‘当前登录人：user#loginuser’"),
+		@Param(name = "includeList", type = ApiParamType.JSONARRAY,  isRequired = false, desc = "用于需要回显参数，‘当前登录人：user#{loginuser}’"),
 		@Param(name = "groupList", type = ApiParamType.JSONARRAY,  isRequired = true, desc = "限制接口返回类型，['processUserType','user','team','role']"),
 		@Param(name = "total", type = ApiParamType.INTEGER, desc = "共展示数量 默认18", isRequired = false)
 		})
@@ -85,7 +85,9 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 			}
 			JSONObject resultObj = handler.repack(dataList);
 			//显示额外选项 includeList
-			resultObj = handler.include(resultObj,includeList.stream().map(object -> object.toString()).collect(Collectors.toList()));
+			if(jsonObj.containsKey("keyword")) {
+				resultObj = handler.include(resultObj,includeList.stream().map(object -> object.toString()).collect(Collectors.toList()));
+			}
 			//过滤 excludeList
 			dataList = resultObj.getJSONArray("dataList");
 			if(excludeList != null &&!excludeList.isEmpty()) {
