@@ -34,12 +34,13 @@ public class TeamTreeApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
+    @Input({ @Param( name = "uuid", desc = "teamUuid", type = ApiParamType.STRING),
+             @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
              @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
              @Param( name = "pageSize", desc = "每页最大数", type = ApiParamType.INTEGER)})
     @Output({
            @Param(
-                   name = "children",
+                   name = "tbodyList",
                    type = ApiParamType.JSONARRAY,
                    desc = "用户组织架构集合"),
            @Param( explode = BasePageVo.class)
@@ -47,12 +48,22 @@ public class TeamTreeApi extends ApiComponentBase {
     @Description(desc = "用户组织架构树获取接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        JSONObject returnObj = new JSONObject();
         TeamVo teamVo = new TeamVo();
         if (jsonObj.containsKey("needPage")){
             teamVo.setNeedPage(jsonObj.getBoolean("needPage"));
         }
+        teamVo.setParentUuid(jsonObj.getString("uuid"));
         teamVo.setCurrentPage(jsonObj.getInteger("currentPage"));
         teamVo.setPageSize(jsonObj.getInteger("pageSize"));
-        return teamService.getTeamTree(teamVo);
+
+        returnObj.put("tbodyList", teamService.getTeamTree(teamVo));
+        if (teamVo.getNeedPage()){
+            returnObj.put("currentPage", teamVo.getCurrentPage());
+            returnObj.put("pageCount", teamVo.getPageCount());
+            returnObj.put("pageSize", teamVo.getPageSize());
+            returnObj.put("rowNum", teamVo.getRowNum());
+        }
+        return returnObj;
     }
 }

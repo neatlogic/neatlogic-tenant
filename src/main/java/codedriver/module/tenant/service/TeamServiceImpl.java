@@ -125,63 +125,16 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public JSONObject getTeamTree(TeamVo paramVo) {
-		JSONObject returnObj = new JSONObject();
-		List<TeamVo> teamList = teamMapper.getTeamTree();
-		Map<String, List<TeamVo>> map = new HashMap<>();
-		for (TeamVo teamVo : teamList){
-			if(map.containsKey(teamVo.getParentUuid())){
-				map.get(teamVo.getParentUuid()).add(teamVo);
-			}else {
-				List<TeamVo> teams = new ArrayList<>();
-				teams.add(teamVo);
-				map.put(teamVo.getParentUuid(), teams);
-			}
+	public List<TeamVo> getTeamTree(TeamVo paramVo) {
+		if (StringUtils.isBlank(paramVo.getUuid())){
+			paramVo.setParentUuid(DEFAULT_PARENTUUID);
 		}
-		List<TeamVo> startList = map.get(DEFAULT_PARENTUUID);
-		if (startList != null && startList.size() > 0){
-			//这里分页
-			List<TeamVo> filterTeamList = new ArrayList<>();
-			if (paramVo.getNeedPage()){
-				int pageSize = paramVo.getPageSize();
-				int rowNum = startList.size();
-				int currentPage = paramVo.getCurrentPage();
-				returnObj.put("rowNum", rowNum);
-				returnObj.put("currentPage", paramVo.getCurrentPage());
-				returnObj.put("pageCount", rowNum % pageSize == 0 ? rowNum / pageSize : (rowNum / pageSize) + 1);
-				returnObj.put("pageSize", pageSize);
-				int start = pageSize * (currentPage - 1);
-				for (int i = start; i < startList.size(); i++){
-					filterTeamList.add(startList.get(i));
-					if (filterTeamList.size() == pageSize){
-						break;
-					}
-				}
-			}else {
-				filterTeamList = startList;
-			}
-			returnObj.put("children", buildData(filterTeamList, map));
+		if (paramVo.getNeedPage()){
+			int rowNum = teamMapper.searchTeamCount(paramVo);
+			paramVo.setRowNum(rowNum);
+			paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
 		}
-		return null;
-	}
-
-	public JSONArray buildData(List<TeamVo> startList, Map<String, List<TeamVo>> map){
-		JSONArray children = new JSONArray();
-		for (TeamVo teamVo: startList){
-			JSONObject teamObj = new JSONObject();
-			teamObj.put("name", teamVo.getName());
-			teamObj.put("uuid", teamVo.getUuid());
-			teamObj.put("sort", teamVo.getSort());
-			teamObj.put("parentUuid", teamVo.getParentUuid());
-			teamObj.put("tagList", teamVo.getTagList());
-			teamObj.put("userCount", teamVo.getUserCount());
-			if (map.containsKey(teamVo.getUuid())){
-				List<TeamVo> teams = map.get(teamVo.getUuid());
-				teamObj.put("children", buildData(teams, map));
-			}
-			children.add(teamObj);
-		}
-		return children;
+		return teamMapper.searchTeam(paramVo);
 	}
 
     @Override
