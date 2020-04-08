@@ -126,7 +126,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public List<TeamVo> getTeamTree(TeamVo paramVo) {
-		if (StringUtils.isBlank(paramVo.getUuid())){
+		if (StringUtils.isBlank(paramVo.getParentUuid())){
 			paramVo.setParentUuid(DEFAULT_PARENTUUID);
 		}
 		if (paramVo.getNeedPage()){
