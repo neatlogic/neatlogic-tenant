@@ -68,7 +68,7 @@ public class UserProfileListApi extends ApiComponentBase {
 					if(CollectionUtils.isNotEmpty(operateArray)) {
 						for(Object operateObj:operateArray) {
 							JSONObject operateJson = (JSONObject)operateObj;
-							myUserProfileOperateMap.put(operateJson.getString("value"),operateJson.getString("text"));
+							myUserProfileOperateMap.put(myUserProfileVo.getModuleId()+tmpJson.getString("value")+operateJson.getString("value"),operateJson.getString("text"));
 						}
 					}
 				}
@@ -97,7 +97,7 @@ public class UserProfileListApi extends ApiComponentBase {
 				if(CollectionUtils.isNotEmpty(operateArray)) {
 					for(Object operateObj:operateArray) {
 						JSONObject operateJson = (JSONObject)operateObj;
-						if(myUserProfileOperateMap.containsKey(operateJson.getString("value"))) {
+						if(myUserProfileOperateMap.containsKey(usrProfileVo.getModuleId()+configJson.getString("value")+operateJson.getString("value"))) {
 							operateJson.put("checked", 1);
 							configJson.put("checked", 0);
 						}else {
