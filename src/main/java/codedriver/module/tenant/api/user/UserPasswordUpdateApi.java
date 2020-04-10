@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.user;
 
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,21 +11,21 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.exception.user.UserPasswordException;
-import codedriver.module.tenant.service.UserService;
+import codedriver.module.tenant.exception.user.UserCurrentPasswordException;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 public class UserPasswordUpdateApi extends ApiComponentBase {
 	
 	@Autowired
-	private UserService userService;
+	UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -40,30 +43,38 @@ public class UserPasswordUpdateApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "userId",
-					type = ApiParamType.STRING,
-					desc = "用户Id",
-					isRequired = false),
 			@Param(name = "password",
 					type = ApiParamType.STRING,
-					desc = "用户密码",
-					isRequired = true)})
+					desc = "用户新密码",
+					isRequired = true),
+			@Param(name = "oldPassword",
+			type = ApiParamType.STRING,
+			desc = "用户当前密码",
+			isRequired = true)
+			
+	})
 	@Output({})
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = jsonObj.getString("userId");
 		String password = jsonObj.getString("password");
-		if(userId==null) {//管理员修改其他用户密码
-			if(UserContext.get().getUserId()==null) {
-				throw new UserPasswordException("当前用户未登录!");
-			}else {
-				userId = UserContext.get().getUserId();
+		String oldPassword = jsonObj.getString("oldPassword");
+		String userId = UserContext.get().getUserId();
+		UserVo oldUserVo = new UserVo();
+		oldUserVo.setUserId(userId);
+		oldUserVo.setPassword(oldPassword);
+		UserVo userVo = userMapper.getUserByUserIdAndPassword(oldUserVo);
+		if(userVo != null) {
+			userVo.setPassword(password);		
+			userMapper.updateUserPasswordActive(userId);
+			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
+			if (idList != null && idList.size() > 0){
+				userMapper.deleteUserPasswordByLimit(userId, idList);
 			}
+			userMapper.insertUserPassword(userVo);
+		}else {
+			throw new UserCurrentPasswordException();
 		}
-		UserVo userVo = userService.getUserByUserId(userId);
-		userVo.setPassword(password);		
-		userService.updateUserPassword(userVo);
-		return userVo.getUserId();
+		return null;
 	}
 }
