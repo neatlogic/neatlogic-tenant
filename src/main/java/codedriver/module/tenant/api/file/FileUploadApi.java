@@ -36,7 +36,6 @@ import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.tenant.exception.file.EmptyFileException;
 import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
 import codedriver.module.tenant.exception.file.FileTooLargeException;
-import codedriver.module.tenant.exception.file.FileTypeConfigNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
@@ -88,53 +87,56 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			throw new FileTypeHandlerNotFoundException(type);
 		}
 		FileTypeVo fileTypeConfigVo = fileMapper.getFileTypeConfigByType(fileTypeVo.getName());
-		if (fileTypeConfigVo == null) {
-			throw new FileTypeConfigNotFoundException(type);
-		}
+		// if (fileTypeConfigVo == null) {
+		// throw new FileTypeConfigNotFoundException(type);
+		// }
 
 		MultipartFile multipartFile = multipartRequest.getFile(paramName);
 
 		if (multipartFile != null && multipartFile.getName() != null) {
 			String userId = UserContext.get().getUserId();
-			boolean isAllowed = false;
-			Long maxSize = 0L;
 			String oldFileName = multipartFile.getOriginalFilename();
 			Long size = multipartFile.getSize();
-			String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
-			JSONObject configObj = fileTypeConfigVo.getConfigObj();
-			JSONArray whiteList = new JSONArray();
-			JSONArray blackList = new JSONArray();
-			if (size == 0) {
-				throw new EmptyFileException();
-			}
-			if (configObj != null) {
-				whiteList = configObj.getJSONArray("whiteList");
-				blackList = configObj.getJSONArray("blackList");
-				maxSize = configObj.getLongValue("maxSize");
-			}
-			if (whiteList != null && whiteList.size() > 0) {
-				for (int i = 0; i < whiteList.size(); i++) {
-					if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
-						isAllowed = true;
-						break;
-					}
+			// 如果配置为空代表不受任何限制
+			if (fileTypeConfigVo != null) {
+				boolean isAllowed = false;
+				Long maxSize = 0L;
+				String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+				JSONObject configObj = fileTypeConfigVo.getConfigObj();
+				JSONArray whiteList = new JSONArray();
+				JSONArray blackList = new JSONArray();
+				if (size == 0) {
+					throw new EmptyFileException();
 				}
-			} else if (blackList != null && blackList.size() > 0) {
-				isAllowed = true;
-				for (int i = 0; i < blackList.size(); i++) {
-					if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
-						isAllowed = false;
-						break;
-					}
+				if (configObj != null) {
+					whiteList = configObj.getJSONArray("whiteList");
+					blackList = configObj.getJSONArray("blackList");
+					maxSize = configObj.getLongValue("maxSize");
 				}
-			} else {
-				isAllowed = true;
-			}
-			if (!isAllowed) {
-				throw new FileExtNotAllowedException(fileExt);
-			}
-			if (maxSize != null && maxSize > 0 && size > maxSize) {
-				throw new FileTooLargeException(size, maxSize);
+				if (whiteList != null && whiteList.size() > 0) {
+					for (int i = 0; i < whiteList.size(); i++) {
+						if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
+							isAllowed = true;
+							break;
+						}
+					}
+				} else if (blackList != null && blackList.size() > 0) {
+					isAllowed = true;
+					for (int i = 0; i < blackList.size(); i++) {
+						if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
+							isAllowed = false;
+							break;
+						}
+					}
+				} else {
+					isAllowed = true;
+				}
+				if (!isAllowed) {
+					throw new FileExtNotAllowedException(fileExt);
+				}
+				if (maxSize != null && maxSize > 0 && size > maxSize) {
+					throw new FileTooLargeException(size, maxSize);
+				}
 			}
 
 			IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(type);

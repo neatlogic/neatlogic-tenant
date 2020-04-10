@@ -80,18 +80,24 @@ public class UserProfileSaveApi extends ApiComponentBase {
 				String myConfig = userProfileVo.getConfig();
 				if(StringUtils.isNotBlank(myConfig)) {
 					JSONArray myConfigArray = JSONArray.parseArray(myConfig);
-					List<Object> myList = myConfigArray.stream().filter(o->((JSONObject)o).containsValue(name)).collect(Collectors.toList());
-					if(CollectionUtils.isEmpty(myList)) {
+					java.util.ListIterator<Object> myConfigIterator =  myConfigArray.listIterator();
+					Boolean isExist = false;
+					while(myConfigIterator.hasNext()) {
+						JSONObject myConfigJson = (JSONObject)myConfigIterator.next();
+						if(myConfigJson.getString("value").equals(name)) {
+							isExist = true;
+							if(checked == 0) {
+								myConfigJson.put("userProfileOperateList", operateTmpList);
+							}else {
+								myConfigIterator.remove();
+							}
+						}
+					}
+					if(!isExist) {
 						if(checked == 1) {
 							//do nothing
 						}else {
 							myConfigArray.add(list.get(0));
-						}
-					}else {
-						if(checked == 0) {
-							((JSONObject)myList.get(0)).put("userProfileOperateList", operateTmpList);
-						}else {
-							myConfigArray.remove(list.get(0));
 						}
 					}
 					if(CollectionUtils.isNotEmpty(myConfigArray)) {
