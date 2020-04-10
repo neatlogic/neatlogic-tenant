@@ -136,6 +136,8 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 						}else {
 							set.add(((JSONObject)ob).getString("value"));
 						}
+					}else {
+						((JSONObject)ob).put("isMore", false);
 					}
 				}
 				if(set.size() == groupCount) {
