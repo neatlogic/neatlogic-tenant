@@ -90,7 +90,7 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 				fileMapper.insertFile(fileVo);
 
 				returnObj.put("uploaded", true);
-				returnObj.put("url", fileVo.getUuid());
+				returnObj.put("url", "api/binary/image/download?uuid=" + fileVo.getUuid());
 			} else {
 				returnObj.put("uploaded", false);
 				returnObj.put("error", "请选择图片文件");
