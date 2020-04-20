@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.user;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,8 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -65,21 +68,21 @@ public class UserGetApi extends ApiComponentBase {
 					type = ApiParamType.INTEGER,
 					desc = "是否激活(1:激活;0:未激活)"),
 			@Param(name = "roleList",
-					type = ApiParamType.JSONARRAY,
+					explode = RoleVo[].class,
 					desc = "用户角色信息列表"),
-			@Param(name = "authList",
-					type = ApiParamType.JSONARRAY,
+			@Param(name = "userAuthList",
+					explode = UserAuthVo[].class,
 					desc = "用户权限信息列表"),
 			@Param(name = "teamList",
-					type = ApiParamType.JSONARRAY,
+					explode = TeamVo[].class,
 					desc = "用户所在组信息列表")})
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String userId = jsonObj.getString("userId");
 		if(userId==null) {
-			if(UserContext.get().getUserId()==null) {
-				throw new UserGetException("当前用户未登陆!");
+			if(StringUtils.isBlank(UserContext.get().getUserId())) {
+				throw new UserGetException("当前用户未登录!");
 			}else {
 				userId = UserContext.get().getUserId();
 			}
