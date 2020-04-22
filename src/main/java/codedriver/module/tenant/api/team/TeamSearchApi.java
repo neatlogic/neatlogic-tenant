@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -71,18 +72,8 @@ public class TeamSearchApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					explode = TeamVo[].class,
 					desc = "分组信息"),
-			@Param(name = "pageSize",
-					type = ApiParamType.INTEGER,
-					desc = "每页数据条目"),
-			@Param(name = "currentPage",
-					type = ApiParamType.INTEGER,
-					desc = "当前页"),
-			@Param(name = "rowNum",
-					type = ApiParamType.INTEGER,
-					desc = "返回条目总数"),
-			@Param(name = "pageCount",
-					type = ApiParamType.INTEGER,
-					desc = "页数") })
+			@Param(explode=BasePageVo.class)
+			})
 	@Description(desc = "分组查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
