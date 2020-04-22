@@ -69,9 +69,11 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				groupCount++;
 			}
 			List<Object> dataList = null;
+			Boolean isMore = true;
 			if(jsonObj.containsKey("keyword")) {
 				dataList = handler.search(jsonObj);
 			}else {
+				isMore = false;
 				if(jsonObj.containsKey("valueList") && !jsonObj.getJSONArray("valueList").isEmpty()) {
 					dataList = handler.reload(jsonObj);
 				}else {
@@ -95,7 +97,7 @@ public class UserRoleTeamSearchApi extends ApiComponentBase {
 				resultObj.put("index", dataList.size());
 			}
 			resultObj.put("isLimit", handler.isLimit());
-			resultObj.put("isMore", true);
+			resultObj.put("isMore", isMore);
 			resultArray.add(resultObj);
 			
 		}

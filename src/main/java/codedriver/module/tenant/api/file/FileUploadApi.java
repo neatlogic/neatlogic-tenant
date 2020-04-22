@@ -149,6 +149,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setSize(size);
 			fileVo.setUserId(userId);
 			fileVo.setType(type);
+			fileVo.setContentType(multipartFile.getContentType());
 
 			String finalPath = "/" + tenantUuid + "/upload/" + type + "/" + fileVo.getUuid();
 			FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
