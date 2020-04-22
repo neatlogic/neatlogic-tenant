@@ -123,42 +123,16 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public JSONArray getTeamTree() {
-		List<TeamVo> teamList = teamMapper.getTeamTree();
-		Map<String, List<TeamVo>> map = new HashMap<>();
-		for (TeamVo teamVo : teamList){
-			if(map.containsKey(teamVo.getParentUuid())){
-				map.get(teamVo.getParentUuid()).add(teamVo);
-			}else {
-				List<TeamVo> teams = new ArrayList<>();
-				teams.add(teamVo);
-				map.put(teamVo.getParentUuid(), teams);
-			}
+	public List<TeamVo> getTeamTree(TeamVo paramVo) {
+		if (StringUtils.isBlank(paramVo.getParentUuid())){
+			paramVo.setParentUuid(DEFAULT_PARENTUUID);
 		}
-		List<TeamVo> startList = map.get(DEFAULT_PARENTUUID);
-		if (startList != null && startList.size() > 0){
-			return buildData(startList, map);
+		if (paramVo.getNeedPage()){
+			int rowNum = teamMapper.searchTeamCount(paramVo);
+			paramVo.setRowNum(rowNum);
+			paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
 		}
-		return null;
-	}
-
-	public JSONArray buildData(List<TeamVo> startList, Map<String, List<TeamVo>> map){
-		JSONArray children = new JSONArray();
-		for (TeamVo teamVo: startList){
-			JSONObject teamObj = new JSONObject();
-			teamObj.put("name", teamVo.getName());
-			teamObj.put("uuid", teamVo.getUuid());
-			teamObj.put("sort", teamVo.getSort());
-			teamObj.put("parentUuid", teamVo.getParentUuid());
-			teamObj.put("tagList", teamVo.getTagList());
-			teamObj.put("userCount", teamVo.getUserCount());
-			if (map.containsKey(teamVo.getUuid())){
-				List<TeamVo> teams = map.get(teamVo.getUuid());
-				teamObj.put("children", buildData(teams, map));
-			}
-			children.add(teamObj);
-		}
-		return children;
+		return teamMapper.searchTeam(paramVo);
 	}
 
     @Override

@@ -80,7 +80,10 @@ public class UserSearchApi extends ApiComponentBase {
 					desc = "当前页数"),
 			@Param(name = "pageSize",
 					type = ApiParamType.INTEGER,
-					desc = "每页展示数量")})
+					desc = "每页展示数量"),
+			@Param(name = "rowNum",
+					type = ApiParamType.INTEGER,
+			 		desc = "总条目数")})
 	@Description(desc = "查询用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -107,6 +110,7 @@ public class UserSearchApi extends ApiComponentBase {
             json.put("rowNum", userVo.getRowNum());
             json.put("pageSize", userVo.getPageSize());
             json.put("currentPage", userVo.getCurrentPage());
+            json.put("pageCount", userVo.getPageCount());
         }
 		return json;
 	}
