@@ -4,10 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import codedriver.framework.common.util.StringUtil;
-import codedriver.framework.dto.AuthVo;
-import codedriver.framework.dto.RoleAuthVo;
-import codedriver.framework.dto.UserAuthVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +12,9 @@ import org.springframework.stereotype.Service;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.AuthVo;
+import codedriver.framework.dto.RoleAuthVo;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 
 @Service

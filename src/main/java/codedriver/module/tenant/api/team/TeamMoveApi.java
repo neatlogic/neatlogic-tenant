@@ -1,15 +1,21 @@
 package codedriver.module.tenant.api.team;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.TeamService;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @program: codedriver
@@ -19,12 +25,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TeamMoveApi extends ApiComponentBase {
 
-    private static final String TEAM_INNER = "inner";
-    private static final String TEAM_NEXT = "next";
-    private static final String TEAM_PREV = "prev";
-
     @Autowired
-    private TeamService teamService;
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -42,8 +44,8 @@ public class TeamMoveApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "uuid", type = ApiParamType.STRING, desc = "组uuid", isRequired = true),
-             @Param( name = "moveType", type = ApiParamType.STRING, desc = "移动类型", isRequired = true),
-             @Param( name = "targetUuid", type = ApiParamType.STRING, desc = "目标uuid", isRequired = true)})
+             @Param( name = "parentUuid", type = ApiParamType.STRING, desc = "父uuid", isRequired = true),
+             @Param( name = "sort", type = ApiParamType.INTEGER, desc = "sort", isRequired = true)})
     @Output({
 
     })
@@ -51,17 +53,20 @@ public class TeamMoveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        String moveType = jsonObj.getString("moveType");
-        String targetUuid = jsonObj.getString("targetUuid");
-        if (TEAM_INNER.equals(moveType)){
-            teamService.moveTargetTeamInner(uuid, targetUuid);
+        TeamVo team = teamMapper.getTeamByUuid(uuid);
+        if(team == null) {
+        	throw new TeamNotFoundException(uuid);
         }
-        if (TEAM_PREV.equals(moveType)){
-            teamService.moveTargetTeamPrev(uuid, targetUuid);
-        }
-        if (TEAM_NEXT.equals(moveType)){
-            teamService.moveTargetTeamNext(uuid, targetUuid);
-        }
+        String parentUuid = jsonObj.getString("parentUuid");
+        Integer sort = jsonObj.getInteger("sort");
+        List<TeamVo> teamList = teamMapper.getTeamSortAfterTeamList(parentUuid, sort);
+		team.setUuid(uuid);
+		team.setSort(sort);
+		team.setParentUuid(parentUuid);
+		teamMapper.updateTeamSortAndParentUuid(team);
+		for (TeamVo teamVo : teamList){
+			teamMapper.updateTeamSortAdd(teamVo.getUuid());
+		}
         return null;
     }
 }

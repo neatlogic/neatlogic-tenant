@@ -4,23 +4,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import codedriver.framework.dto.AuthVo;
-import codedriver.framework.dto.RoleAuthVo;
-import codedriver.framework.dto.UserVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dto.AuthVo;
+import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.UserVo;
 
 @Service
 public class RoleServiceImpl implements RoleService {
-
-	private static final String AUTH_DELETE = "delete";
-	private static final String AUTH_ADD = "add";
-	private static final String AUTH_COVER = "cover";
 
 	@Autowired
 	RoleMapper roleMapper;
