@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.team;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,21 +53,41 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String uuid = jsonObj.getString("uuid");
+    	String uuid = jsonObj.getString("uuid");
+        String parentUuid = jsonObj.getString("parentUuid");
+        Integer targetSort = jsonObj.getInteger("sort");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
+        List<TeamVo> teamAddList = null;
+        List<TeamVo> teamDescList = null;
         if(team == null) {
         	throw new TeamNotFoundException(uuid);
         }
-        String parentUuid = jsonObj.getString("parentUuid");
-        Integer sort = jsonObj.getInteger("sort");
-        List<TeamVo> teamList = teamMapper.getTeamSortAfterTeamList(parentUuid, sort);
-		team.setUuid(uuid);
-		team.setSort(sort);
-		team.setParentUuid(parentUuid);
-		teamMapper.updateTeamSortAndParentUuid(team);
-		for (TeamVo teamVo : teamList){
-			teamMapper.updateTeamSortAdd(teamVo.getUuid());
-		}
+        int sort = team.getSort();
+        if(team.getParentUuid().equals(parentUuid)) {
+        	if(sort == targetSort) {
+        		return null;
+        	}else if(sort > targetSort) {
+        		teamAddList = teamMapper.getTeamSortUpTeamList(parentUuid, sort,targetSort);
+        	}else {
+        		teamDescList = teamMapper.getTeamSortDownTeamList(parentUuid, sort,targetSort);
+        	}
+        }else {
+        	teamAddList = teamMapper.getTeamSortAfterTeamList(parentUuid, targetSort);
+        	teamDescList = teamMapper.getTeamSortAfterTeamList(team.getParentUuid(), sort+1);
+        }
+        team.setSort(targetSort);
+ 		team.setParentUuid(parentUuid);
+ 		teamMapper.updateTeamSortAndParentUuid(team);
+ 		if(CollectionUtils.isNotEmpty(teamAddList)) {
+	 		for (TeamVo teamTmp : teamAddList){
+	 			teamMapper.updateTeamSortAdd(teamTmp.getUuid());
+	 		}
+ 		}
+ 		if(CollectionUtils.isNotEmpty(teamDescList)) {
+ 			for (TeamVo teamTmp : teamDescList){
+     			teamMapper.updateTeamSortDec(teamTmp.getUuid());
+     		}
+ 		}
         return null;
     }
 }
