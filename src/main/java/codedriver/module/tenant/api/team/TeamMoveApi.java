@@ -45,7 +45,7 @@ public class TeamMoveApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "uuid", type = ApiParamType.STRING, desc = "组uuid", isRequired = true),
-             @Param( name = "parentUuid", type = ApiParamType.STRING, desc = "父uuid", isRequired = true,minLength = 0),
+             @Param( name = "parentUuid", type = ApiParamType.STRING, desc = "父uuid", isRequired = true,minLength = 1),
              @Param( name = "sort", type = ApiParamType.INTEGER, desc = "sort", isRequired = true)})
     @Output({
 
