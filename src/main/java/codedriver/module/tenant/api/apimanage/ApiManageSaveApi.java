@@ -44,7 +44,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 	
 	@Input({
 		@Param(name = "token", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d/]+$", isRequired = true, desc = "token"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", length = 50, isRequired = true, desc = "名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", maxLength = 50, isRequired = true, desc = "名称"),
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "处理器"),
 		@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否保存调用记录"),
 		@Param(name = "authtype", type = ApiParamType.STRING, isRequired = true, desc = "认证方式"),
