@@ -45,7 +45,7 @@ public class TeamSaveApi extends ApiComponentBase{
 
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=false),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组名",isRequired=true, xss=true),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",isRequired=true, xss=true),
 		@Param(name = "parentUuId", type = ApiParamType.STRING, desc = "父级组id"),
 		@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = false),
 		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
