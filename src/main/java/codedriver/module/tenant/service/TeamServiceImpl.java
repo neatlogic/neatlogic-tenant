@@ -1,24 +1,20 @@
 package codedriver.module.tenant.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import codedriver.framework.dto.TagVo;
-import codedriver.framework.file.core.IFileTypeHandler;
-import codedriver.module.tenant.util.UuidUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.TagVo;
 import codedriver.framework.dto.TeamVo;
 
 @Service
@@ -125,42 +121,16 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public JSONArray getTeamTree() {
-		List<TeamVo> teamList = teamMapper.getTeamTree();
-		Map<String, List<TeamVo>> map = new HashMap<>();
-		for (TeamVo teamVo : teamList){
-			if(map.containsKey(teamVo.getParentUuid())){
-				map.get(teamVo.getParentUuid()).add(teamVo);
-			}else {
-				List<TeamVo> teams = new ArrayList<>();
-				teams.add(teamVo);
-				map.put(teamVo.getParentUuid(), teams);
-			}
+	public List<TeamVo> getTeamTree(TeamVo paramVo) {
+		if (StringUtils.isBlank(paramVo.getParentUuid())){
+			paramVo.setParentUuid(DEFAULT_PARENTUUID);
 		}
-		List<TeamVo> startList = map.get(DEFAULT_PARENTUUID);
-		if (startList != null && startList.size() > 0){
-			return buildData(startList, map);
+		if (paramVo.getNeedPage()){
+			int rowNum = teamMapper.searchTeamCount(paramVo);
+			paramVo.setRowNum(rowNum);
+			paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
 		}
-		return null;
-	}
-
-	public JSONArray buildData(List<TeamVo> startList, Map<String, List<TeamVo>> map){
-		JSONArray children = new JSONArray();
-		for (TeamVo teamVo: startList){
-			JSONObject teamObj = new JSONObject();
-			teamObj.put("name", teamVo.getName());
-			teamObj.put("uuid", teamVo.getUuid());
-			teamObj.put("sort", teamVo.getSort());
-			teamObj.put("parentUuid", teamVo.getParentUuid());
-			teamObj.put("tagList", teamVo.getTagList());
-			teamObj.put("userCount", teamVo.getUserCount());
-			if (map.containsKey(teamVo.getUuid())){
-				List<TeamVo> teams = map.get(teamVo.getUuid());
-				teamObj.put("children", buildData(teams, map));
-			}
-			children.add(teamObj);
-		}
-		return children;
+		return teamMapper.searchTeam(paramVo);
 	}
 
     @Override

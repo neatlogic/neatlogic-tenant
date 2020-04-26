@@ -2,9 +2,9 @@ package codedriver.module.tenant.service;
 
 import java.util.List;
 
-import codedriver.framework.dto.TeamVo;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
 	public List<TeamVo> searchTeam(TeamVo teamVo);
@@ -17,7 +17,7 @@ public interface TeamService {
 
 	public void saveTeamUser(List<String> userIdList, String teamUuid);
 
-	public JSONArray getTeamTree();
+	public List<TeamVo> getTeamTree(TeamVo teamVo);
 
 	public JSONArray getParentTeamTree(String uuid);
 

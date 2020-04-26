@@ -1,15 +1,22 @@
 package codedriver.module.tenant.api.team;
 
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.TeamService;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @program: codedriver
@@ -19,12 +26,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TeamMoveApi extends ApiComponentBase {
 
-    private static final String TEAM_INNER = "inner";
-    private static final String TEAM_NEXT = "next";
-    private static final String TEAM_PREV = "prev";
-
     @Autowired
-    private TeamService teamService;
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -42,26 +45,49 @@ public class TeamMoveApi extends ApiComponentBase {
     }
 
     @Input({ @Param( name = "uuid", type = ApiParamType.STRING, desc = "组uuid", isRequired = true),
-             @Param( name = "moveType", type = ApiParamType.STRING, desc = "移动类型", isRequired = true),
-             @Param( name = "targetUuid", type = ApiParamType.STRING, desc = "目标uuid", isRequired = true)})
+             @Param( name = "parentUuid", type = ApiParamType.STRING, desc = "父uuid", isRequired = true,minLength = 1),
+             @Param( name = "sort", type = ApiParamType.INTEGER, desc = "sort", isRequired = true)})
     @Output({
 
     })
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String uuid = jsonObj.getString("uuid");
-        String moveType = jsonObj.getString("moveType");
-        String targetUuid = jsonObj.getString("targetUuid");
-        if (TEAM_INNER.equals(moveType)){
-            teamService.moveTargetTeamInner(uuid, targetUuid);
+    	String uuid = jsonObj.getString("uuid");
+        String parentUuid = jsonObj.getString("parentUuid");
+        Integer targetSort = jsonObj.getInteger("sort");
+        TeamVo team = teamMapper.getTeamByUuid(uuid);
+        List<TeamVo> teamAddList = null;
+        List<TeamVo> teamDescList = null;
+        if(team == null) {
+        	throw new TeamNotFoundException(uuid);
         }
-        if (TEAM_PREV.equals(moveType)){
-            teamService.moveTargetTeamPrev(uuid, targetUuid);
+        int sort = team.getSort();
+        if(team.getParentUuid().equals(parentUuid)) {
+        	if(sort == targetSort) {
+        		return null;
+        	}else if(sort > targetSort) {
+        		teamAddList = teamMapper.getTeamSortUpTeamList(parentUuid, sort,targetSort);
+        	}else {
+        		teamDescList = teamMapper.getTeamSortDownTeamList(parentUuid, sort,targetSort);
+        	}
+        }else {
+        	teamAddList = teamMapper.getTeamSortAfterTeamList(parentUuid, targetSort);
+        	teamDescList = teamMapper.getTeamSortAfterTeamList(team.getParentUuid(), sort+1);
         }
-        if (TEAM_NEXT.equals(moveType)){
-            teamService.moveTargetTeamNext(uuid, targetUuid);
-        }
+        team.setSort(targetSort);
+ 		team.setParentUuid(parentUuid);
+ 		teamMapper.updateTeamSortAndParentUuid(team);
+ 		if(CollectionUtils.isNotEmpty(teamAddList)) {
+	 		for (TeamVo teamTmp : teamAddList){
+	 			teamMapper.updateTeamSortAdd(teamTmp.getUuid());
+	 		}
+ 		}
+ 		if(CollectionUtils.isNotEmpty(teamDescList)) {
+ 			for (TeamVo teamTmp : teamDescList){
+     			teamMapper.updateTeamSortDec(teamTmp.getUuid());
+     		}
+ 		}
         return null;
     }
 }
