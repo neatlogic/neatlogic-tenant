@@ -5,11 +5,10 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
-import codedriver.framework.integration.dto.IntegrationVo;
+import codedriver.framework.integration.dto.IntegrationHandlerVo;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -17,19 +16,16 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-public class IntegrationGetApi extends ApiComponentBase {
-
-	@Autowired
-	private IntegrationMapper integrationMapper;
+public class IntegrationHandlerListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "integration/get";
+		return "integration/handler/list";
 	}
 
 	@Override
 	public String getName() {
-		return "获取集成设置信息接口";
+		return "集成信息处理组件列表接口";
 	}
 
 	@Override
@@ -37,12 +33,10 @@ public class IntegrationGetApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "集成配置uuid", isRequired = true) })
-	@Output({ @Param(explode = IntegrationVo.class) })
-	@Description(desc = "获取集成设置信息接口")
+	@Output({ @Param(name = "Return", explode = IntegrationHandlerVo[].class, desc = "信息处理组件列表") })
+	@Description(desc = "集成信息处理组件列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
-		return integrationVo;
+		return IntegrationHandlerFactory.getHandlerList();
 	}
 }
