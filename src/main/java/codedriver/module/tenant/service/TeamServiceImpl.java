@@ -190,6 +190,7 @@ public class TeamServiceImpl implements TeamService {
         teamObj.put("parentUuid", teamVo.getParentUuid());
         teamObj.put("tagList", teamVo.getTagList());
         teamObj.put("userCount", teamVo.getUserCount());
+        teamObj.put("childCount", teamVo.getChildCount());
         if (dataObj != null){
             JSONArray childArray = new JSONArray();
             childArray.add(dataObj);
