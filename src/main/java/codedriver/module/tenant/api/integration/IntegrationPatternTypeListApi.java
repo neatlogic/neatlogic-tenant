@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.integration.dto.PatternVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
@@ -37,7 +36,7 @@ public class IntegrationPatternTypeListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray returnList = new JSONArray();
-		for (PatternVo.Type type : PatternVo.Type.values()) {
+		for (ApiParamType type : ApiParamType.values()) {
 			JSONObject j = new JSONObject();
 			j.put("value", type.getValue());
 			j.put("text", type.getText());
