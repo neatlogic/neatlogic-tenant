@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,9 +11,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.label.DASHBOARD_MODIFY;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
-import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -26,6 +31,9 @@ public class DashboardDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
+	
+	@Autowired
+	UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -51,18 +59,23 @@ public class DashboardDeleteApi extends ApiComponentBase {
 		if (dashboardVo == null) {
 			throw new DashboardNotFoundException(dashboardUuid);
 		}
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
 		String userId = UserContext.get().getUserId();
 		boolean hasRight = false;
-		if (dashboardVo.getFcu().equals(userId)) {
+		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userId)) {
 			hasRight = true;
 		}
+		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
+				&& CollectionUtils.isEmpty(userAuthList)) {
+				hasRight = true;
+		}
 		if (!hasRight) {
-			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.DELETE.getText());
+			throw new DashboardAuthenticationException("编辑");
 		}
 		dashboardMapper.deleteDashboardVisitCounterByDashboardUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardDefaultUserByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardRoleByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardOwnerByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardAuthorityByUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardByUuid(dashboardUuid);
 		return null;
 	}

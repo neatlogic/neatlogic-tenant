@@ -48,7 +48,6 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 		DashboardVo dashboardVo = new DashboardVo();
 		String userId = UserContext.get().getUserId(true);
 		dashboardVo.setFcu(userId);
-		dashboardVo.setType("all");
 		if (jsonObj.containsKey("limit")) {
 			dashboardVo.setPageSize(jsonObj.getInteger("limit"));
 		} else {

@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.dashboard;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,9 +11,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.label.DASHBOARD_MODIFY;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
-import codedriver.framework.dashboard.dto.DashboardRoleVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -28,6 +31,8 @@ public class DashboardDefaultApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
+	@Autowired
+	UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -55,22 +60,21 @@ public class DashboardDefaultApi extends ApiComponentBase {
 			throw new DashboardNotFoundException(dashboardUuid);
 		}
 		String userId = UserContext.get().getUserId(true);
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
 		boolean hasRight = false;
-		if (dashboardVo.getFcu().equals(userId)) {
+		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userId)) {
 			hasRight = true;
 		}
-		if (!hasRight) {
-			List<String> roleList = dashboardMapper.getDashboardRoleByDashboardUuidAndUserId(dashboardUuid, userId);
-			if (roleList.contains(DashboardRoleVo.ActionType.READ.getValue())) {
+		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
+				&& CollectionUtils.isEmpty(userAuthList)) {
 				hasRight = true;
-			}
 		}
 		if (!hasRight) {
-			throw new DashboardAuthenticationException(DashboardRoleVo.ActionType.READ.getText());
+			throw new DashboardAuthenticationException("编辑");
 		}
-		dashboardMapper.deleteDashboardDefaultUserByUserId(userId);
+		dashboardMapper.deleteDashboardOwnerByUserId(userId);
 		if (isDefault == 1) {
-			dashboardMapper.insertDashboardDefault(dashboardUuid, userId);
+			dashboardMapper.insertDashboardOwner(dashboardUuid, userId);
 		}
 		return null;
 	}
