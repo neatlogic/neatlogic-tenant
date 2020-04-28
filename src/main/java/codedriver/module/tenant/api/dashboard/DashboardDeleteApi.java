@@ -74,7 +74,7 @@ public class DashboardDeleteApi extends ApiComponentBase {
 		}
 		dashboardMapper.deleteDashboardVisitCounterByDashboardUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
-		dashboardMapper.deleteDashboardOwnerByDashboardUuid(dashboardUuid);
+		dashboardMapper.deleteDashboardDefaultByDashboardUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardAuthorityByUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardByUuid(dashboardUuid);
 		return null;

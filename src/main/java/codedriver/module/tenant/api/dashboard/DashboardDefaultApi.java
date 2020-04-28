@@ -49,11 +49,16 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true), @Param(name = "isDefault", type = ApiParamType.ENUM, rule = "1,0", desc = "是否设为默认，1或0", isRequired = true) })
+	@Input({ 
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true), 
+		@Param(name="type", type = ApiParamType.STRING, desc="默认类型，system|custom 默认custom"),
+		@Param(name = "isDefault", type = ApiParamType.ENUM, rule = "1,0", desc = "是否设为默认，1或0", isRequired = true) 
+	})
 	@Description(desc = "修改默认仪表板接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
+		String type = jsonObj.getString("type");
 		int isDefault = jsonObj.getIntValue("isDefault");
 		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
 		if (dashboardVo == null) {
@@ -72,9 +77,9 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		if (!hasRight) {
 			throw new DashboardAuthenticationException("编辑");
 		}
-		dashboardMapper.deleteDashboardOwnerByUserId(userId);
+		dashboardMapper.deleteDashboardDefaultByUserId(userId);
 		if (isDefault == 1) {
-			dashboardMapper.insertDashboardOwner(dashboardUuid, userId);
+			dashboardMapper.insertDashboardDefault(dashboardUuid, userId,type);
 		}
 		return null;
 	}

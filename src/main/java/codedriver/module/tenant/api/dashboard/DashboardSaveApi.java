@@ -67,17 +67,18 @@ public class DashboardSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		DashboardVo dashboardVo = JSONObject.toJavaObject(jsonObj, DashboardVo.class);
+		String uuid = jsonObj.getString("uuid");
 		if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
 			throw new DashboardNameExistsException(dashboardVo.getName());
 		}
 		String type = StringUtils.isBlank(jsonObj.getString("type"))?DashboardVo.DashBoardType.CUSTOM.getValue():jsonObj.getString("type");
 		dashboardVo.setType(type);
 		String userId = UserContext.get().getUserId(true);
-		DashboardVo oldDashboardVo = null;
-		if (StringUtils.isNotBlank(dashboardVo.getUuid())) {
+		DashboardVo oldDashboardVo = new DashboardVo();
+		if (StringUtils.isNotBlank(uuid)) {
 			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
 		}
-		if(oldDashboardVo != null&&DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())||DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
+		if(StringUtils.isNotBlank(uuid)&&DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())||DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
 			//判断是否有管理员权限
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 				throw new DashboardAuthenticationException("管理");
@@ -105,11 +106,11 @@ public class DashboardSaveApi extends ApiComponentBase {
 				dashboardMapper.insertDashboardAuthority(authorityVo,dashboardVo.getUuid());
 			}
 		}else {
-			if(StringUtils.isBlank(oldDashboardVo.getOwner())) {
-				dashboardMapper.insertDashboardOwner(userId, oldDashboardVo.getUuid());
+			if(StringUtils.isBlank(oldDashboardVo.getFcu())) {
+				dashboardMapper.insertDashboardDefault(userId, oldDashboardVo.getUuid(),null);
 			}
 		}
-		if(oldDashboardVo == null) {
+		if(StringUtils.isBlank(uuid)) {
 			dashboardVo.setFcu(userId);
 			dashboardMapper.insertDashboard(dashboardVo);
 		}else {

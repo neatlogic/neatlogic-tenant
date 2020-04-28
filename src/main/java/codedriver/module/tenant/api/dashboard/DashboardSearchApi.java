@@ -101,7 +101,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 				dashboard.setIsCanEdit(1);
 				dashboard.setIsCanRole(1);
 			}else {
-				if(UserContext.get().getUserId().equalsIgnoreCase(dashboard.getOwner())) {
+				if(UserContext.get().getUserId().equalsIgnoreCase(dashboard.getFcu())) {
 					dashboard.setIsCanEdit(1);
 				}else {
 					dashboard.setIsCanEdit(0);
