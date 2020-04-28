@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.dashboard;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,9 @@ public class DashboardDefaultApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
 		String type = jsonObj.getString("type");
+		if(StringUtils.isBlank(type)) {
+			type = "custom";
+		}
 		int isDefault = jsonObj.getIntValue("isDefault");
 		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
 		if (dashboardVo == null) {
