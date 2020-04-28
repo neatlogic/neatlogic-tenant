@@ -57,6 +57,7 @@ public class DashboardGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
 		DashboardVo dashboardVo = new DashboardVo();
+		dashboardVo.setUuid(dashboardUuid);
 		String userId = UserContext.get().getUserId(true);
 		dashboardVo.setFcu(userId);
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
