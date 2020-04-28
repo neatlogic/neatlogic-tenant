@@ -61,7 +61,7 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		String dashboardUuid = jsonObj.getString("uuid");
 		String type = jsonObj.getString("type");
 		if(StringUtils.isBlank(type)) {
-			type = "custom";
+			type = DashboardVo.DashBoardType.CUSTOM.getValue();
 		}
 		int isDefault = jsonObj.getIntValue("isDefault");
 		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
