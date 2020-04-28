@@ -13,6 +13,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.label.DASHBOARD_MODIFY;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardVo;
@@ -33,6 +34,9 @@ public class DashboardSearchApi extends ApiComponentBase {
 	
 	@Autowired
 	UserMapper userMapper;
+	
+	@Autowired
+	TeamMapper teamMapper;
 
 	@Override
 	public String getToken() {
@@ -74,8 +78,11 @@ public class DashboardSearchApi extends ApiComponentBase {
 			dashboardVo.setKeyword(jsonObj.getString("keyword"));
 		}
 		String userId = UserContext.get().getUserId(true);
-		
 		dashboardVo.setFcu(userId);
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
+		dashboardVo.setUserId(userId);
+		dashboardVo.setTeamUuidList(teamUuidList);
+		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<String> dashboardUuidList = dashboardMapper.searchAuthorizedDashboardUuid(dashboardVo);
