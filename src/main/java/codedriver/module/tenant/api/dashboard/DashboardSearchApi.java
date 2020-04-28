@@ -86,7 +86,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<String> dashboardUuidList = dashboardMapper.searchAuthorizedDashboardUuid(dashboardVo);
-		List<DashboardVo> dashboardList = dashboardMapper.getDashboardByUuidList(dashboardUuidList);
+		List<DashboardVo> dashboardList = dashboardMapper.getDashboardListByUuidList(dashboardUuidList);
 		String defaultDashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
 		// 补充权限数据
@@ -97,16 +97,21 @@ public class DashboardSearchApi extends ApiComponentBase {
 				}
 			}
 			if(dashboard.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
-					&& CollectionUtils.isEmpty(userAuthList)) {
+					&& CollectionUtils.isNotEmpty(userAuthList)) {
 				dashboard.setIsCanEdit(1);
 				dashboard.setIsCanRole(1);
 			}else {
 				if(UserContext.get().getUserId().equalsIgnoreCase(dashboard.getFcu())) {
 					dashboard.setIsCanEdit(1);
+					if(CollectionUtils.isNotEmpty(userAuthList)) {
+						dashboard.setIsCanRole(1);
+					}else {
+						dashboard.setIsCanRole(0);
+					}
 				}else {
 					dashboard.setIsCanEdit(0);
+					dashboard.setIsCanRole(0);
 				}
-				dashboard.setIsCanRole(0);
 			}
 			dashboard.setWidgetList(dashboardMapper.getDashboardWidgetByDashboardUuid(dashboard.getUuid()));
 		}

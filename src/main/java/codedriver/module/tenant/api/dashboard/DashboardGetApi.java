@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardVo;
@@ -30,6 +32,9 @@ public class DashboardGetApi extends ApiComponentBase {
 	@Autowired
 	UserMapper userMapper;
 
+	@Autowired
+	TeamMapper teamMapper;
+
 	@Override
 	public String getToken() {
 		return "dashboard/get";
@@ -51,7 +56,14 @@ public class DashboardGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String dashboardUuid = jsonObj.getString("uuid");
-		DashboardVo dashboardVo = dashboardMapper.getAuthorizedDashboardByUuid(dashboardUuid);
+		DashboardVo dashboardVo = new DashboardVo();
+		String userId = UserContext.get().getUserId(true);
+		dashboardVo.setFcu(userId);
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
+		dashboardVo.setUserId(userId);
+		dashboardVo.setTeamUuidList(teamUuidList);
+		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo = dashboardMapper.getAuthorizedDashboardByUuid(dashboardVo);
 		if (dashboardVo == null) {
 			throw new DashboardNotFoundException(dashboardUuid);
 		}
