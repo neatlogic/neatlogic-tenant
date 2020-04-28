@@ -66,11 +66,11 @@ public class DashboardDeleteApi extends ApiComponentBase {
 			hasRight = true;
 		}
 		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
-				&& CollectionUtils.isEmpty(userAuthList)) {
+				&& CollectionUtils.isNotEmpty(userAuthList)) {
 				hasRight = true;
 		}
 		if (!hasRight) {
-			throw new DashboardAuthenticationException("编辑");
+			throw new DashboardAuthenticationException("管理");
 		}
 		dashboardMapper.deleteDashboardVisitCounterByDashboardUuid(dashboardUuid);
 		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardUuid);
