@@ -107,7 +107,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 			}
 		}else {
 			if(StringUtils.isBlank(oldDashboardVo.getFcu())) {
-				dashboardMapper.insertDashboardDefault(userId, oldDashboardVo.getUuid(),type);
+				dashboardMapper.insertDashboardDefault(oldDashboardVo.getUuid(),userId,type);
 			}
 		}
 		if(StringUtils.isBlank(uuid)) {
