@@ -68,6 +68,9 @@ public class DashboardSaveApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		DashboardVo dashboardVo = JSONObject.toJavaObject(jsonObj, DashboardVo.class);
 		String uuid = jsonObj.getString("uuid");
+		if((StringUtils.isBlank(uuid)&&StringUtils.isBlank(dashboardVo.getName()))) {
+			throw new DashboardParamException("name");
+		}
 		String type = StringUtils.isBlank(jsonObj.getString("type"))?DashboardVo.DashBoardType.CUSTOM.getValue():jsonObj.getString("type");
 		dashboardVo.setType(type);
 		String userId = UserContext.get().getUserId(true);
@@ -76,7 +79,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
 		}
 		if((StringUtils.isNotBlank(dashboardVo.getName())&&!dashboardVo.getName().equals(oldDashboardVo.getName()))||StringUtils.isBlank(uuid)) {
-			if (StringUtils.isNotBlank(dashboardVo.getName())||dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
+			if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
 				throw new DashboardNameExistsException(dashboardVo.getName());
 			}
 		}
