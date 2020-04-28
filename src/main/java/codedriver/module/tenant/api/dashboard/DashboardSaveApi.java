@@ -120,8 +120,14 @@ public class DashboardSaveApi extends ApiComponentBase {
 			dashboardMapper.insertDashboard(dashboardVo);
 		}else {
 			dashboardVo.setLcu(userId);
-			dashboardMapper.updateDashboard(dashboardVo);
-			dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardVo.getUuid());
+			if(StringUtils.isNotBlank(dashboardVo.getName())) {
+				oldDashboardVo.setName(dashboardVo.getName());
+			}
+			if(StringUtils.isNotBlank(dashboardVo.getType())) {
+				oldDashboardVo.setType(dashboardVo.getType());
+			}
+			dashboardMapper.updateDashboard(oldDashboardVo);
+			dashboardMapper.deleteDashboardWidgetByDashboardUuid(oldDashboardVo.getUuid());
 		}
 		if (dashboardVo.getWidgetList() != null && dashboardVo.getWidgetList().size() > 0) {
 			for (DashboardWidgetVo widgetVo : dashboardVo.getWidgetList()) {
