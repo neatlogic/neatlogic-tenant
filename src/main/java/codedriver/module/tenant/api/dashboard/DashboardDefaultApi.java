@@ -71,17 +71,23 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		String userId = UserContext.get().getUserId(true);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
 		boolean hasRight = false;
-		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userId)) {
+		if (type.equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userId)) {
 			hasRight = true;
 		}
 		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
-				&& CollectionUtils.isEmpty(userAuthList)) {
-				hasRight = true;
+				&& CollectionUtils.isNotEmpty(userAuthList)) {
+			hasRight = true;
+		}
+		if(!hasRight&&type.equals(DashboardVo.DashBoardType.SYSTEM.getValue())&& CollectionUtils.isNotEmpty(userAuthList)) {
+			hasRight = true;
 		}
 		if (!hasRight) {
 			throw new DashboardAuthenticationException("编辑");
 		}
-		dashboardMapper.deleteDashboardDefaultByUserId(userId);
+		
+		if(dashboardVo.getDefaultType().equals(type)||isDefault == 0) {
+			dashboardMapper.deleteDashboardDefaultByUserId(userId);
+		}
 		if (isDefault == 1) {
 			dashboardMapper.insertDashboardDefault(dashboardUuid, userId,type);
 		}
