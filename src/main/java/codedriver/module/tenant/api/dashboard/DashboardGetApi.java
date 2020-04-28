@@ -12,6 +12,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
+import codedriver.framework.dashboard.dto.DashboardVisitCounterVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.restful.annotation.Description;
@@ -70,6 +71,13 @@ public class DashboardGetApi extends ApiComponentBase {
 		}
 		List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
 		dashboardVo.setWidgetList(dashboardWidgetList);
+		// 更新计数器
+		DashboardVisitCounterVo counterVo = dashboardMapper.getDashboardVisitCounter(dashboardUuid, userId);
+		if (counterVo == null) {
+			dashboardMapper.insertDashboardVisitCounter(new DashboardVisitCounterVo(dashboardUuid, userId));
+		} else {
+			dashboardMapper.updateDashboardVisitCounter(counterVo);
+		}
 		return dashboardVo;
 	}
 }
