@@ -66,7 +66,7 @@ public class FileDownloadApi_bak extends BinaryStreamApiComponentBase {
 					InputStream in = null;
 					in = new FileInputStream(fileVo.getPath());
 					String fileNameEncode = "";
-					Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
+					Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 					if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 						fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
 					} else {
