@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.restful.annotation.Description;
@@ -24,6 +27,9 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
+	
+	@Autowired
+	TeamMapper teamMapper;
 
 	@Override
 	public String getToken() {
@@ -48,12 +54,15 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 		DashboardVo dashboardVo = new DashboardVo();
 		String userId = UserContext.get().getUserId(true);
 		dashboardVo.setFcu(userId);
-		dashboardVo.setType("all");
 		if (jsonObj.containsKey("limit")) {
 			dashboardVo.setPageSize(jsonObj.getInteger("limit"));
 		} else {
 			dashboardVo.setPageSize(3);
 		}
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
+		dashboardVo.setUserId(userId);
+		dashboardVo.setTeamUuidList(teamUuidList);
+		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
 		return dashboardMapper.searchTopVisitDashboard(dashboardVo);
 	}
 }

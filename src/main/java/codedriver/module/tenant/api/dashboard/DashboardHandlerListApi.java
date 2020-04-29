@@ -2,15 +2,12 @@ package codedriver.module.tenant.api.dashboard;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dashboard.core.DashboardHandlerFactory;
-import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardHandlerVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.IsActived;
@@ -20,11 +17,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-@Transactional
 public class DashboardHandlerListApi extends ApiComponentBase {
-
-	@Autowired
-	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {
