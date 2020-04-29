@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.dashboard;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,12 +11,14 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.label.DASHBOARD_MODIFY;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardVisitCounterVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -70,7 +74,32 @@ public class DashboardGetApi extends ApiComponentBase {
 			throw new DashboardNotFoundException(dashboardUuid);
 		}
 		List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
+		String defaultDashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
 		dashboardVo.setWidgetList(dashboardWidgetList);
+		// 补充权限数据
+		if (StringUtils.isNotBlank(defaultDashboardUuid)) {
+			if (dashboardVo.getUuid().equals(defaultDashboardUuid)) {
+				dashboardVo.setIsDefault(1);
+			}
+		}
+		if(dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
+				&& CollectionUtils.isNotEmpty(userAuthList)) {
+			dashboardVo.setIsCanEdit(1);
+			dashboardVo.setIsCanRole(1);
+		}else {
+			if(UserContext.get().getUserId().equalsIgnoreCase(dashboardVo.getFcu())) {
+				dashboardVo.setIsCanEdit(1);
+				if(CollectionUtils.isNotEmpty(userAuthList)) {
+					dashboardVo.setIsCanRole(1);
+				}else {
+					dashboardVo.setIsCanRole(0);
+				}
+			}else {
+				dashboardVo.setIsCanEdit(0);
+				dashboardVo.setIsCanRole(0);
+			}
+		}
 		// 更新计数器
 		DashboardVisitCounterVo counterVo = dashboardMapper.getDashboardVisitCounter(dashboardUuid, userId);
 		if (counterVo == null) {
