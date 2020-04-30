@@ -41,7 +41,6 @@ public class IntegrationTransformTest extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String content = jsonObj.getString("content");
 		String template = jsonObj.getString("template");
-		JSONObject paramObj = new JSONObject();
 		Object object = null;
 		try {
 			object = JSONObject.parseObject(content);
@@ -55,8 +54,7 @@ public class IntegrationTransformTest extends ApiComponentBase {
 		if (object == null) {
 			throw new ParamFormatInvalidException();
 		}
-		paramObj.put("DATA", object);
 
-		return FreemarkerUtil.transform(paramObj, template);
+		return FreemarkerUtil.transform(object, template);
 	}
 }
