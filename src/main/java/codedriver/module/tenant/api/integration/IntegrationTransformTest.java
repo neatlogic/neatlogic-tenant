@@ -19,7 +19,6 @@ import codedriver.framework.util.FreemarkerUtil;
 @IsActived
 public class IntegrationTransformTest extends ApiComponentBase {
 
-
 	@Override
 	public String getToken() {
 		return "integration/transformtest";
@@ -57,7 +56,7 @@ public class IntegrationTransformTest extends ApiComponentBase {
 			throw new ParamFormatInvalidException();
 		}
 		paramObj.put("DATA", object);
-		String transformedContent = FreemarkerUtil.transform(paramObj, template);
-		return transformedContent;
+
+		return FreemarkerUtil.transform(paramObj, template);
 	}
 }
