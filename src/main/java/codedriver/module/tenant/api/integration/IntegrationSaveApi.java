@@ -37,8 +37,8 @@ public class IntegrationSaveApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid，为空代表新增"), @Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true, xss = true), @Param(name = "url", type = ApiParamType.REGEX, desc = "目标地址", isRequired = true, rule = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]\r\n" + ""), @Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true, xss = true),
-			@Param(name = "handler", type = ApiParamType.STRING, desc = "组件", isRequired = true, xss = true), @Param(name = "config", type = ApiParamType.STRING, desc = "配置，json格式", isRequired = true) })
+	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid，为空代表新增"), @Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true, xss = true), @Param(name = "url", type = ApiParamType.REGEX, desc = "目标地址", isRequired = true, rule = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]\r\n" + ""), @Param(name = "handler", type = ApiParamType.STRING, desc = "组件", isRequired = true, xss = true),
+			@Param(name = "config", type = ApiParamType.STRING, desc = "配置，json格式", isRequired = true) })
 	@Description(desc = "集成配置保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
