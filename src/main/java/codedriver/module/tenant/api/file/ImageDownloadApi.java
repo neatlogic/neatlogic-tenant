@@ -68,7 +68,7 @@ public class ImageDownloadApi extends BinaryStreamApiComponentBase {
 			ServletOutputStream os = null;
 			FSDataInputStream in = fileSystem.open(new Path("/" + tenantUuid + "/images/" + fileVo.getUuid()));
 			String fileNameEncode = "";
-			Boolean flag = request.getHeader("User-Agent").indexOf("like Gecko") > 0;
+			Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 			if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 				fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
 			} else {
