@@ -41,7 +41,11 @@ public class TeamGetApi extends ApiComponentBase {
 					desc = "分组uuid"),
 			@Param( name = "name",
 					type = ApiParamType.STRING,
-					desc = "分组名称")})
+					desc = "分组名称"),
+			@Param( name = "isEdit",
+					type = ApiParamType.INTEGER,
+					desc = "是否edit,0 为添加下级分组，1为编辑,")
+		})
 	@Output({
 			@Param(name = "teamVo",
 					explode = TeamVo.class,
@@ -52,7 +56,7 @@ public class TeamGetApi extends ApiComponentBase {
 		TeamVo teamVo = new TeamVo();
 		teamVo.setName(jsonObj.getString("name"));
 		teamVo.setUuid(jsonObj.getString("uuid"));
-		teamVo = teamService.getTeam(teamVo);
+		teamVo = teamService.getTeam(teamVo,jsonObj.getInteger("isEdit"));
 		return teamVo;
 	}
 }

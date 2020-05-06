@@ -37,13 +37,19 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public TeamVo getTeam(TeamVo team) {
+	public TeamVo getTeam(TeamVo team,Integer isEdit) {
 		TeamVo teamVo = teamMapper.getTeam(team);
 		if (StringUtils.isNotBlank(team.getUuid())){
 			int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
 			teamVo.setUserCount(userCount);
+			TeamVo parentTeam = null;
 			List<String> pathNameList = new ArrayList<>();
-			TeamVo parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			if(isEdit == 1) {
+				parentTeam = teamVo;
+			}else {
+				parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			}
+			
 			getTeamPath(parentTeam, pathNameList);
 			teamVo.setPathNameList(pathNameList);
 		}

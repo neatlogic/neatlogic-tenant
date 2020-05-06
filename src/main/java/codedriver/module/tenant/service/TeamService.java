@@ -9,7 +9,7 @@ import codedriver.framework.dto.TeamVo;
 public interface TeamService {
 	public List<TeamVo> searchTeam(TeamVo teamVo);
 
-	public TeamVo getTeam(TeamVo team);
+	public TeamVo getTeam(TeamVo team,Integer isEdit);
 
 	public int deleteTeam(String teamUuid);
 
