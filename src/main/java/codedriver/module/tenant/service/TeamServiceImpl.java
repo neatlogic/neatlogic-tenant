@@ -43,7 +43,8 @@ public class TeamServiceImpl implements TeamService {
 			int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
 			teamVo.setUserCount(userCount);
 			List<String> pathNameList = new ArrayList<>();
-			getTeamPath(teamVo, pathNameList);
+			TeamVo parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			getTeamPath(parentTeam, pathNameList);
 			teamVo.setPathNameList(pathNameList);
 		}
 		return teamVo;
