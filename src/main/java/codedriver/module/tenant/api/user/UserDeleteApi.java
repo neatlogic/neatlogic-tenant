@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -46,6 +47,7 @@ public class UserDeleteApi extends ApiComponentBase{
 		JSONArray idArray = jsonObj.getJSONArray("userIdList");
 		for (int i = 0; i < idArray.size(); i++){
 			String userId = idArray.getString(i);
+			userService.deleteUserAuth(new UserVo(userId,null));
 			userService.deleteUser(userId);
 		}
 		return null;
