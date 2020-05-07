@@ -45,12 +45,13 @@ public class TeamServiceImpl implements TeamService {
 			TeamVo parentTeam = null;
 			List<String> pathNameList = new ArrayList<>();
 			if(isEdit == 1) {
-				parentTeam = teamVo;
-			}else {
 				parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			}else {
+				parentTeam = teamVo;
 			}
-			
-			getTeamPath(parentTeam, pathNameList);
+			if (!parentTeam.getUuid().equals("0")){
+				getTeamPath(parentTeam, pathNameList);
+			}
 			teamVo.setPathNameList(pathNameList);
 		}
 		return teamVo;

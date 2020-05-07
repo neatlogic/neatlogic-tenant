@@ -38,13 +38,15 @@ public class TeamGetApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "uuid",
 					type = ApiParamType.STRING,
-					desc = "分组uuid"),
+					desc = "分组uuid",
+					isRequired = true),
 			@Param( name = "name",
 					type = ApiParamType.STRING,
 					desc = "分组名称"),
 			@Param( name = "isEdit",
 					type = ApiParamType.INTEGER,
-					desc = "是否edit,0 为添加下级分组，1为编辑,")
+					desc = "是否edit,0 为添加下级分组，1为编辑,",
+					isRequired = true)
 		})
 	@Output({
 			@Param(name = "teamVo",
