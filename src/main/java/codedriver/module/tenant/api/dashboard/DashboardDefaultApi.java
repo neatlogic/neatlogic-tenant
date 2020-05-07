@@ -85,9 +85,7 @@ public class DashboardDefaultApi extends ApiComponentBase {
 			throw new DashboardAuthenticationException("编辑");
 		}
 		
-		if(dashboardVo.getDefaultType().equals(type)||isDefault == 0) {
-			dashboardMapper.deleteDashboardDefaultByUserId(userId);
-		}
+		dashboardMapper.deleteDashboardDefaultByUserId(userId,type);
 		if (isDefault == 1) {
 			dashboardMapper.insertDashboardDefault(dashboardUuid, userId,type);
 		}

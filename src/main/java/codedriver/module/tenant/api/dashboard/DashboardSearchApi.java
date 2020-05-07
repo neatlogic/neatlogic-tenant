@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -86,7 +87,10 @@ public class DashboardSearchApi extends ApiComponentBase {
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<String> dashboardUuidList = dashboardMapper.searchAuthorizedDashboardUuid(dashboardVo);
-		List<DashboardVo> dashboardList = dashboardMapper.getDashboardListByUuidList(dashboardUuidList);
+		List<DashboardVo> dashboardList = new ArrayList<DashboardVo>();
+		if(CollectionUtils.isNotEmpty(dashboardUuidList)) {
+			dashboardList = dashboardMapper.getDashboardListByUuidList(dashboardUuidList);
+		}
 		String defaultDashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
 		// 补充权限数据
