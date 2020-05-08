@@ -56,6 +56,7 @@ public class AuthRoleSearchApi extends ApiComponentBase {
         roleVo.setNeedPage(false);
         List<RoleVo> roleList = roleService.searchRole(roleVo);
         returnObj.put("roleList", roleList);
+        returnObj.put("roleCount", roleList.size());
         return returnObj;
     }
 }

@@ -77,6 +77,7 @@ public class AuthUserSearchApi extends ApiComponentBase {
         }
         returnObj.put("roleUserList", roleUserList);
         returnObj.put("userList", userList);
+        returnObj.put("userCount", roleUserList.size()+userList.size());
         return returnObj;
     }
 }
