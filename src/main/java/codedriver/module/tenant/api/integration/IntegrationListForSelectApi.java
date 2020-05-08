@@ -42,7 +42,7 @@ public class IntegrationListForSelectApi extends ApiComponentBase {
 	
 	@Input({ 
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"), 
-        @Param( name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
+        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量") 
 	})
 	@Output({  
