@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.dashboard;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +14,7 @@ import codedriver.framework.auth.label.DASHBOARD_MODIFY;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
+import codedriver.framework.dashboard.dto.DashboardDefaultVo;
 import codedriver.framework.dashboard.dto.DashboardVisitCounterVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
@@ -75,12 +75,14 @@ public class DashboardGetApi extends ApiComponentBase {
 		}
 		List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
-		String defaultDashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
+		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
 		dashboardVo.setWidgetList(dashboardWidgetList);
 		// 补充权限数据
-		if (StringUtils.isNotBlank(defaultDashboardUuid)) {
-			if (dashboardVo.getUuid().equals(defaultDashboardUuid)) {
-				dashboardVo.setIsDefault(1);
+		if (CollectionUtils.isNotEmpty(dashboardDefaultList)) {
+			if(dashboardDefaultList.stream().anyMatch(d->(d.getDashboardUuid().equals(dashboardUuid) && d.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())))){
+				dashboardVo.setIsSystemDefault(1);
+			}else if(dashboardDefaultList.stream().anyMatch(d->(d.getDashboardUuid().equals(dashboardUuid) && d.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())))){
+				dashboardVo.setIsCustomDefault(1);
 			}
 		}
 		if(dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
