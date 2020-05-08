@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.dashboard;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
+import codedriver.framework.dashboard.dto.DashboardDefaultVo;
 import codedriver.framework.dashboard.dto.DashboardVisitCounterVo;
 import codedriver.framework.dashboard.dto.DashboardVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
@@ -53,7 +55,17 @@ public class DashboardGetDefaultApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String userId = UserContext.get().getUserId(true);
-		String dashboardUuid = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
+		String dashboardUuid = null;
+		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
+		if (CollectionUtils.isNotEmpty(dashboardDefaultList)) {
+			for(DashboardDefaultVo dashboardDefaultVo:dashboardDefaultList) {
+				if(dashboardDefaultVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())) {
+					dashboardUuid = dashboardDefaultVo.getDashboardUuid();
+				}else if(dashboardDefaultVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())&&StringUtils.isBlank(dashboardUuid)) {
+					dashboardUuid = dashboardDefaultVo.getDashboardUuid();
+				}
+			}
+		}
 		if (StringUtils.isNotBlank(dashboardUuid)) {
 			DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
 			if (dashboardVo == null) {
