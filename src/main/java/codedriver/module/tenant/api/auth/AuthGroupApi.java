@@ -1,20 +1,22 @@
 package codedriver.module.tenant.api.auth;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
-import codedriver.framework.common.constvalue.ModuleEnum;
+import codedriver.framework.module.ModuleEnumFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @program: codedriver
@@ -52,7 +54,7 @@ public class AuthGroupApi extends ApiComponentBase {
         for (String group : groupSet){
             JSONObject groupObj = new JSONObject();
             groupObj.put("value", group);
-            groupObj.put("text", ModuleEnum.getText(group));
+            groupObj.put("text", ModuleEnumFactory.getModuleEnumMap().get(group).getText());
             groupArray.add(groupObj);
         }
         returnObj.put("groupList", groupArray);

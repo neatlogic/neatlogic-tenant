@@ -26,7 +26,7 @@ public class DashboardHandlerListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "仪表板组件列表接口";
+		return "仪表板数据源列表接口";
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class DashboardHandlerListApi extends ApiComponentBase {
 	}
 
 	@Output({ @Param(name = "Type", explode = DashboardHandlerVo[].class, desc = "仪表板组件信息，key：分类，value：组件列表") })
-	@Description(desc = "仪表板组件列表接口")
+	@Description(desc = "仪表板数据源列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<DashboardHandlerVo> dashboardHandlerList = DashboardHandlerFactory.getDashboardHandlerList();
