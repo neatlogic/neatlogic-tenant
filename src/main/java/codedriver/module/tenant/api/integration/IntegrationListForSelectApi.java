@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.integration;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +54,13 @@ public class IntegrationListForSelectApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
-		List<ValueTextVo> valueTextList = integrationMapper.searchActiveIntegrationForSelect(integrationVo);
+		List<ValueTextVo> valueTextList = new ArrayList<>();
+		List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
+		for(IntegrationVo integration : integrationList) {
+			if(Objects.equals(integration.getIsActive(), 1)) {
+				valueTextList.add(new ValueTextVo(integration.getUuid(), integration.getName()));
+			}
+		}
 		return valueTextList;
 	}
 
