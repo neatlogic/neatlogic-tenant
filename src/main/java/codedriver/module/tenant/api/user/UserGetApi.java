@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
@@ -89,6 +93,17 @@ public class UserGetApi extends ApiComponentBase {
 		}
 		UserVo userVo = userMapper.getUserByUserId(userId);
 		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId)));
-		return userVo;
+		JSONObject resultJson = (JSONObject) JSONObject.toJSON(userVo);
+		List<String> teamUuidList = new ArrayList<String>();
+		for(String teamUuid : userVo.getTeamUuidList()) {
+			teamUuidList.add(GroupSearch.TEAM.getValuePlugin()+teamUuid);
+		}
+		List<String> roleNameList = new ArrayList<String>();
+		for(String roleName : userVo.getRoleNameList()) {
+			roleNameList.add(GroupSearch.ROLE.getValuePlugin()+roleName);
+		}
+		resultJson.put("teamUuidList", teamUuidList);
+		resultJson.put("roleNameList", roleNameList);
+		return resultJson;
 	}
 }

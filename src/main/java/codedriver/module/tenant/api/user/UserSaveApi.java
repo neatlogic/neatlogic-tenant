@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
@@ -108,7 +110,7 @@ public class UserSaveApi extends ApiComponentBase {
 		if (jsonObj.containsKey("teamUuidList")){
 			JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
 			for (int i = 0; i < teamUuidArray.size(); i++){
-				teamUuidList.add(teamUuidArray.getString(i));
+				teamUuidList.add(teamUuidArray.getString(i).replaceAll(GroupSearch.TEAM.getValuePlugin(), StringUtils.EMPTY));
 			}
 		}
 		userVo.setTeamUuidList(teamUuidList);
@@ -117,7 +119,7 @@ public class UserSaveApi extends ApiComponentBase {
 		if (jsonObj.containsKey("roleNameList")){
 			JSONArray roleNameArray = jsonObj.getJSONArray("roleNameList");
 			for (int i = 0; i < roleNameArray.size(); i++){
-				roleNameList.add(roleNameArray.getString(i));
+				roleNameList.add(roleNameArray.getString(i).replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 			}
 		}
 		userVo.setRoleNameList(roleNameList);
