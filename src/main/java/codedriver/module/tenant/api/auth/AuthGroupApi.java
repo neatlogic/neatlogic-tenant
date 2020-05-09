@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
-import codedriver.framework.module.ModuleEnumFactory;
+import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -54,7 +54,7 @@ public class AuthGroupApi extends ApiComponentBase {
         for (String group : groupSet){
             JSONObject groupObj = new JSONObject();
             groupObj.put("value", group);
-            groupObj.put("text", ModuleEnumFactory.getModuleEnumMap().get(group).getText());
+            groupObj.put("text", ModuleUtil.getModuleGroup(group).getGroupName());
             groupArray.add(groupObj);
         }
         returnObj.put("groupList", groupArray);
