@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,16 +95,20 @@ public class UserGetApi extends ApiComponentBase {
 		UserVo userVo = userMapper.getUserByUserId(userId);
 		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId)));
 		JSONObject resultJson = (JSONObject) JSONObject.toJSON(userVo);
-		List<String> teamUuidList = new ArrayList<String>();
-		for(String teamUuid : userVo.getTeamUuidList()) {
-			teamUuidList.add(GroupSearch.TEAM.getValuePlugin()+teamUuid);
+		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
+			List<String> teamUuidList = new ArrayList<String>();
+			for(String teamUuid : userVo.getTeamUuidList()) {
+				teamUuidList.add(GroupSearch.TEAM.getValuePlugin()+teamUuid);
+			}
+			resultJson.put("teamUuidList", teamUuidList);
 		}
-		List<String> roleNameList = new ArrayList<String>();
-		for(String roleName : userVo.getRoleNameList()) {
-			roleNameList.add(GroupSearch.ROLE.getValuePlugin()+roleName);
+		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
+			List<String> roleNameList = new ArrayList<String>();
+			for(String roleName : userVo.getRoleNameList()) {
+				roleNameList.add(GroupSearch.ROLE.getValuePlugin()+roleName);
+			}
+			resultJson.put("roleNameList", roleNameList);
 		}
-		resultJson.put("teamUuidList", teamUuidList);
-		resultJson.put("roleNameList", roleNameList);
 		return resultJson;
 	}
 }
