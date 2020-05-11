@@ -27,6 +27,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.auth.label.DASHBOARD_MODIFY;
 import codedriver.module.tenant.exception.dashboard.DashboardAuthenticationException;
 import codedriver.module.tenant.exception.dashboard.DashboardNameExistsException;
+import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 import codedriver.module.tenant.exception.dashboard.DashboardParamException;
 
 @Service
@@ -77,6 +78,9 @@ public class DashboardSaveApi extends ApiComponentBase {
 		DashboardVo oldDashboardVo = new DashboardVo();
 		if (StringUtils.isNotBlank(uuid)) {
 			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
+			if(oldDashboardVo == null) {
+				throw new DashboardNotFoundException(uuid);
+			}
 		}
 		if((StringUtils.isNotBlank(dashboardVo.getName())&&!dashboardVo.getName().equals(oldDashboardVo.getName()))||StringUtils.isBlank(uuid)) {
 			if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
@@ -88,7 +92,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
 				throw new DashboardAuthenticationException("管理");
 			}
-			if(oldDashboardVo != null) {
+			if(StringUtils.isNotBlank(uuid)&&oldDashboardVo != null) {
 				dashboardMapper.deleteDashboardAuthorityByUuid(oldDashboardVo.getUuid());
 			}
 		}
