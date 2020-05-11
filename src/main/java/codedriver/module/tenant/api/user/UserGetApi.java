@@ -102,7 +102,7 @@ public class UserGetApi extends ApiComponentBase {
 			}
 			resultJson.put("teamUuidList", teamUuidList);
 		}
-		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
+		if(CollectionUtils.isNotEmpty(userVo.getRoleNameList())) {
 			List<String> roleNameList = new ArrayList<String>();
 			for(String roleName : userVo.getRoleNameList()) {
 				roleNameList.add(GroupSearch.ROLE.getValuePlugin()+roleName);
