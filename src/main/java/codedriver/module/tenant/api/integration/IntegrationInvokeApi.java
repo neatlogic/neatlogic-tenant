@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.integration.core.TestInvoker;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationInvokeVo;
@@ -43,6 +44,7 @@ public class IntegrationInvokeApi extends ApiComponentBase {
 	@Description(desc = "集成设置引用接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		System.out.println(Config.ES_ENABLE());
 		String integrationUuid = jsonObj.getString("uuid");
 		String key = jsonObj.getString("key");
 		IntegrationInvokeVo integrationInvokeVo = new IntegrationInvokeVo(integrationUuid, new TestInvoker(key));
