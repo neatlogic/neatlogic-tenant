@@ -47,9 +47,11 @@ public class IntegrationSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
+		//integrationVo.setNeedPage(false);
 		List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
 		if (integrationList.size() > 0) {
 			int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
+			integrationVo.setRowNum(rowNum);
 			integrationVo.setPageCount(PageUtil.getPageCount(rowNum, integrationVo.getPageSize()));
 		}
 		JSONObject returnObj = new JSONObject();
