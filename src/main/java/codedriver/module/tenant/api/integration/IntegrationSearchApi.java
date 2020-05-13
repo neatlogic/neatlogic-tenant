@@ -50,6 +50,7 @@ public class IntegrationSearchApi extends ApiComponentBase {
 		List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
 		if (integrationList.size() > 0) {
 			int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
+			integrationVo.setRowNum(rowNum);
 			integrationVo.setPageCount(PageUtil.getPageCount(rowNum, integrationVo.getPageSize()));
 		}
 		JSONObject returnObj = new JSONObject();
