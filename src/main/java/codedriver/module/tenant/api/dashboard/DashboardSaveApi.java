@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.dashboard;
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,12 @@ public class DashboardSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		DashboardVo dashboardVo = JSONObject.toJavaObject(jsonObj, DashboardVo.class);
+		List<DashboardWidgetVo> dashboardWidgetList = dashboardVo.getWidgetList();
+		for(DashboardWidgetVo widget : dashboardWidgetList) {
+			if(StringUtils.isBlank(widget.getChartConfig())) {
+				throw new DashboardParamException("widgetList.chartConfig");
+			}
+		}
 		String uuid = jsonObj.getString("uuid");
 		if((StringUtils.isBlank(uuid)&&StringUtils.isBlank(dashboardVo.getName()))) {
 			throw new DashboardParamException("name");
