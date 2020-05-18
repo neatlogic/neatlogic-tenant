@@ -93,7 +93,7 @@ public class UserSaveApi extends ApiComponentBase {
 					type = ApiParamType.JSONARRAY,
 					desc = "组织uuid",
 					isRequired = false),
-			@Param(name = "roleNameList",
+			@Param(name = "roleUuidList",
 					type = ApiParamType.JSONARRAY,
 					desc = "角色名称",
 					isRequired = false),
@@ -168,10 +168,10 @@ public class UserSaveApi extends ApiComponentBase {
 			}
 		}
 		
-		List<String> roleNameList = JSON.parseArray(jsonObj.getString("roleNameList"), String.class);
-		if(CollectionUtils.isNotEmpty(roleNameList)) {
-			for(String roleName : roleNameList) {
-				userMapper.insertUserRole(userVo.getUuid(), roleName);
+		List<String> roleUuidList = JSON.parseArray(jsonObj.getString("roleUuidList"), String.class);
+		if(CollectionUtils.isNotEmpty(roleUuidList)) {
+			for(String roleUuid : roleUuidList) {
+				userMapper.insertUserRole(userVo.getUuid(), roleUuid);
 			}
 		}
 		

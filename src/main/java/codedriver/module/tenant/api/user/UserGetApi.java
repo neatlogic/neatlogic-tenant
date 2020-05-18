@@ -68,34 +68,18 @@ public class UserGetApi extends ApiComponentBase {
 		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
 			List<String> teamUuidList = new ArrayList<>();
 			for(String teamUuid : userVo.getTeamUuidList()) {
-				teamUuid = GroupSearch.TEAM.getValuePlugin() + teamUuid;
+				teamUuidList.add(GroupSearch.TEAM.getValuePlugin() + teamUuid);
 			}
 			userVo.setTeamUuidList(teamUuidList);
 		}
-		if(CollectionUtils.isNotEmpty(userVo.getRoleNameList())) {
-			List<String> roleNameList = new ArrayList<>();
-			for(String roleName : userVo.getRoleNameList()) {
-				roleName = GroupSearch.ROLE.getValuePlugin() + roleName;
+		if(CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
+			List<String> roleUuidList = new ArrayList<>();
+			for(String roleName : userVo.getRoleUuidList()) {
+				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleName);
 			}
-			userVo.setRoleNameList(roleNameList);
+			userVo.setRoleUuidList(roleUuidList);
 		}
 		
 		return userVo;
-//		JSONObject resultJson = (JSONObject) JSONObject.toJSON(userVo);
-//		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
-//			List<String> teamUuidList = new ArrayList<String>();
-//			for(String teamUuid : userVo.getTeamUuidList()) {
-//				teamUuidList.add(GroupSearch.TEAM.getValuePlugin()+teamUuid);
-//			}
-//			resultJson.put("teamUuidList", teamUuidList);
-//		}
-//		if(CollectionUtils.isNotEmpty(userVo.getRoleNameList())) {
-//			List<String> roleNameList = new ArrayList<String>();
-//			for(String roleName : userVo.getRoleNameList()) {
-//				roleNameList.add(GroupSearch.ROLE.getValuePlugin()+roleName);
-//			}
-//			resultJson.put("roleNameList", roleNameList);
-//		}
-//		return resultJson;
 	}
 }

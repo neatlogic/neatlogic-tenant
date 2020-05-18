@@ -54,9 +54,9 @@ public class UserSearchApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "用户组uuid"
 			),
-			@Param(name = "roleName",
+			@Param(name = "roleUuid",
 					type = ApiParamType.STRING,
-					desc = "角色名称"),
+					desc = "角色uuid"),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页数",
@@ -88,31 +88,6 @@ public class UserSearchApi extends ApiComponentBase {
 	@Description(desc = "查询用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-//		JSONObject json = new JSONObject();
-//		UserVo userVo = new UserVo();
-//		userVo.setKeyword(jsonObj.getString("keyword"));
-//		if (jsonObj.containsKey("pageSize")) {
-//			userVo.setPageSize(jsonObj.getInteger("pageSize"));
-//		}
-//		if (jsonObj.containsKey("needPage")){
-//		    userVo.setNeedPage(jsonObj.getBoolean("needPage"));
-//        }
-//        if (jsonObj.containsKey("currentPage")){
-//			userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
-//		}
-//		userVo.setAuth(jsonObj.getString("auth"));
-//		userVo.setAuthGroup(jsonObj.getString("authGroup"));
-//		userVo.setTeamUuid(jsonObj.getString("teamUuid"));
-//		userVo.setRoleName(jsonObj.getString("roleName"));
-//		List<UserVo> userList = userService.searchUser(userVo);
-//		json.put("tbodyList", userList);
-//		if (userVo.getNeedPage()){
-//            json.put("rowNum", userVo.getRowNum());
-//            json.put("pageSize", userVo.getPageSize());
-//            json.put("currentPage", userVo.getCurrentPage());
-//            json.put("pageCount", userVo.getPageCount());
-//        }
-//		return json;
 		
 		JSONObject resultObj = new JSONObject();
 		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
