@@ -97,7 +97,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 		}
 		if(StringUtils.isNotBlank(uuid)&&DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())||DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
 			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))&&CollectionUtils.isEmpty(roleMapper.getRoleByRoleNameList(UserContext.get().getRoleNameList()))) {
+			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))) {
 				throw new DashboardAuthenticationException("管理");
 			}
 			if(StringUtils.isNotBlank(uuid)&&oldDashboardVo != null) {
