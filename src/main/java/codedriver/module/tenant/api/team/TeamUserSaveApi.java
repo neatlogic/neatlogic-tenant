@@ -49,9 +49,9 @@ public class TeamUserSaveApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<String> userUuidList = new ArrayList<>();
         if (jsonObj.containsKey("userUuidList")){
-            JSONArray userIdArray = jsonObj.getJSONArray("userUuidList");
-            for (int i = 0 ; i < userIdArray.size(); i++){
-            	userUuidList.add(userIdArray.getString(i));
+            JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+            for (int i = 0 ; i < userUuidArray.size(); i++){
+            	userUuidList.add(userUuidArray.getString(i));
             }
         }
         teamService.saveTeamUser(userUuidList, jsonObj.getString("teamUuid"));

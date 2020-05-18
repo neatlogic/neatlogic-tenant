@@ -75,9 +75,9 @@ public class TeamSaveApi extends ApiComponentBase{
 		}
 		if (jsonObj.containsKey("userUuidList")){
 			List<String> userUuidList = new ArrayList<>();
-			JSONArray userIdArray = jsonObj.getJSONArray("userUuidList");
-			for (int i = 0; i < userIdArray.size(); i++){
-				userUuidList.add(userIdArray.getString(i));
+			JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+			for (int i = 0; i < userUuidArray.size(); i++){
+				userUuidList.add(userUuidArray.getString(i));
 			}
 			teamVo.setUserUuidList(userUuidList);
 		}
