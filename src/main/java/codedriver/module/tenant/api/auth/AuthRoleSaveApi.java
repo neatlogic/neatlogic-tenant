@@ -49,7 +49,7 @@ public class AuthRoleSaveApi extends ApiComponentBase {
     @Description(desc = "权限角色保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<RoleAuthVo> roleAuthVoList = new ArrayList();
+        List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
         if (jsonObj.containsKey("roleNameList")){
             JSONArray roleNameArray = jsonObj.getJSONArray("roleNameList");
             for (int i = 0 ; i < roleNameArray.size(); i++){

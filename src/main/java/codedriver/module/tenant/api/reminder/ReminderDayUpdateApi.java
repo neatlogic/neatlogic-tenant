@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -42,8 +41,7 @@ public class ReminderDayUpdateApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         int day = jsonObj.getInteger("day");
-        String userId = UserContext.get().getUserId();
-        reminderService.updateDayMessageActive(userId, day);
+        reminderService.updateDayMessageActive(day);
         return new JSONObject();
     }
 }

@@ -58,17 +58,19 @@ public class UserPasswordUpdateApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String password = jsonObj.getString("password");
 		String oldPassword = jsonObj.getString("oldPassword");
-		String userId = UserContext.get().getUserId();
+		String userUuid = UserContext.get().getUserUuid(true);
+		UserVo user = userMapper.getUserBaseInfoByUuid(userUuid);
 		UserVo oldUserVo = new UserVo();
-		oldUserVo.setUserId(userId);
+		oldUserVo.setUuid(userUuid);
+		oldUserVo.setUserId(user.getUserId());
 		oldUserVo.setPassword(oldPassword);
 		UserVo userVo = userMapper.getUserByUserIdAndPassword(oldUserVo);
 		if(userVo != null) {
 			userVo.setPassword(password);		
-			userMapper.updateUserPasswordActive(userId);
-			List<Long> idList = userMapper.getLimitUserPasswordIdList(userId);
+			userMapper.updateUserPasswordActive(userUuid);
+			List<Long> idList = userMapper.getLimitUserPasswordIdList(userUuid);
 			if (idList != null && idList.size() > 0){
-				userMapper.deleteUserPasswordByLimit(userId, idList);
+				userMapper.deleteUserPasswordByLimit(userUuid, idList);
 			}
 			userMapper.insertUserPassword(userVo);
 		}else {

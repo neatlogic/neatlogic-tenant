@@ -62,7 +62,7 @@ public class AuthUserSearchApi extends ApiComponentBase {
         Set<String> roleUserSet = new HashSet<>();
         if (CollectionUtils.isNotEmpty(roleUserList)){
             for (UserVo user : roleUserList){
-                roleUserSet.add(user.getUserId());
+                roleUserSet.add(user.getUuid());
             }
         }
         List<UserVo> userList = userMapper.searchUserByAuth(auth);
@@ -70,14 +70,14 @@ public class AuthUserSearchApi extends ApiComponentBase {
             Iterator<UserVo> iterator = userList.iterator();
             while (iterator.hasNext()){
                 UserVo userVo = iterator.next();
-                if (roleUserSet.contains(userVo.getUserId())){
+                if (roleUserSet.contains(userVo.getUuid())){
                     iterator.remove();
                 }
             }
         }
         returnObj.put("roleUserList", roleUserList);
         returnObj.put("userList", userList);
-        returnObj.put("userCount", roleUserList.size()+userList.size());
+        returnObj.put("userCount", roleUserList.size() + userList.size());
         return returnObj;
     }
 }

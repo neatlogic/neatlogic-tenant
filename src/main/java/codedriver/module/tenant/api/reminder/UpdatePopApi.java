@@ -2,7 +2,7 @@ package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -18,9 +18,8 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class UpdatePopApi extends ApiComponentBase {
-
     @Autowired
-    private GlobalReminderService reminderService;
+    private GlobalReminderMessageMapper reminderMessageMapper;
 
     @Override
     public String getToken() {
@@ -45,7 +44,7 @@ public class UpdatePopApi extends ApiComponentBase {
         if (idStr != null && !("").equals(idStr)){
             String[] idArray = idStr.split(",");
             for (String id : idArray){
-                reminderService.updateMessageKeepStatus(UserContext.get().getUserId(), Long.parseLong(id));
+                reminderMessageMapper.updateMessageKeepStatus(UserContext.get().getUserUuid(true), Long.parseLong(id));
             }
         }
         return new JSONObject();

@@ -46,7 +46,7 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
             }else {
                 reminderMapper.deleteReminderSubscribe(reminderSubscribeVo);
                 //取消订阅，移除该控件所有消息的有效性
-                reminderMessageMapper.updateMessageActiveByReminderId(reminderSubscribeVo.getUserId(), reminderSubscribeVo.getPluginId());
+                reminderMessageMapper.updateMessageActiveByReminderId(reminderSubscribeVo.getUserUuid(), reminderSubscribeVo.getPluginId());
             }
         }else {
             reminderMapper.insertReminderSubscribe(reminderSubscribeVo);
@@ -68,7 +68,7 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
                 }
             }
         }
-            List<GlobalReminderSubscribeVo> reminderSubList = reminderMapper.getReminderSubscribeListByUserId(UserContext.get().getUserId());
+            List<GlobalReminderSubscribeVo> reminderSubList = reminderMapper.getReminderSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
             Map<String, GlobalReminderSubscribeVo> subscribeMap = new HashMap<>();
             for (GlobalReminderSubscribeVo subscribeVo : reminderSubList) {
                 subscribeMap.put(subscribeVo.getPluginId(), subscribeVo);
@@ -100,7 +100,7 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
     }
 
     @Override
-    public List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(String userId, Long messageId, Integer day) {
+    public List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(Long messageId, Integer day) {
         Map<String, String> timeMap = getTimeMap(day);
         ReminderMessageSearchVo searchVo = new ReminderMessageSearchVo();
         if (messageId != null && messageId != 0L){
@@ -111,8 +111,8 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
         }
         searchVo.setStartTime(timeMap.get("startTime"));
         searchVo.setEndTime(timeMap.get("endTime"));
-        searchVo.setUserId(userId);
-        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getShowReminderMessageListByIdListAndUserId(searchVo);
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getShowReminderMessageListByIdListAndUserUuid(searchVo);
         for (GlobalReminderMessageVo messageVo : messageVoList){
             packageData(messageVo);
         }
@@ -148,53 +148,53 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
     }
 
     @Override
-    public int getReminderMessageCountByDay(int day, String userId) {
+    public int getReminderMessageCountByDay(int day) {
         Map<String, String> timeMap = getTimeMap(day);
         ReminderMessageSearchVo searchVo = new ReminderMessageSearchVo();
-        searchVo.setUserId(userId);
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         searchVo.setStartTime(timeMap.get("startTime"));
         searchVo.setEndTime(timeMap.get("endTime"));
         return reminderMessageMapper.getReminderMessageCountByDay(searchVo);
     }
 
     @Override
-    public List<GlobalReminderMessageVo> getScheduleMessageList(String userId) {
-        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getScheduleMessageList(userId);
+    public List<GlobalReminderMessageVo> getScheduleMessageList() {
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getScheduleMessageList(UserContext.get().getUserUuid(true));
         for (GlobalReminderMessageVo messageVo : messageVoList){
             packageData(messageVo);
         }
         return messageVoList;
     }
 
-    @Override
-    public void updateMessageActive(Long messageId, String userId) {
-        reminderMessageMapper.updateMessageActiveById(messageId, userId);
-    }
+//    @Override
+//    public void updateMessageActive(Long messageId, String userId) {
+//        reminderMessageMapper.updateMessageActiveById(messageId, userId);
+//    }
+
+//    @Override
+//    public void updateAllMessageActive(String userId) {
+//        reminderMessageMapper.updateAllMessageActive(userId);
+//    }
 
     @Override
-    public void updateAllMessageActive(String userId) {
-        reminderMessageMapper.updateAllMessageActive(userId);
-    }
-
-    @Override
-    public void updateDayMessageActive(String userId, int day) {
+    public void updateDayMessageActive(int day) {
         Map<String, String> timeMap = getTimeMap(day);
         ReminderMessageSearchVo searchVo = new ReminderMessageSearchVo();
-        searchVo.setUserId(userId);
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         searchVo.setStartTime(timeMap.get("startTime"));
         searchVo.setEndTime(timeMap.get("endTime"));
         reminderMessageMapper.updateDayMessageActive(searchVo);
     }
 
-    @Override
-    public int getReminderMessageCount(String userId) {
-        return reminderMessageMapper.getReminderMessageCount(userId);
-    }
+//    @Override
+//    public int getReminderMessageCount(String userId) {
+//        return reminderMessageMapper.getReminderMessageCount(userId);
+//    }
 
-    @Override
-    public void updateMessageKeepStatus(String userId, Long messageId) {
-        reminderMessageMapper.updateMessageKeepStatus(userId, messageId);
-    }
+//    @Override
+//    public void updateMessageKeepStatus(String userId, Long messageId) {
+//        reminderMessageMapper.updateMessageKeepStatus(userId, messageId);
+//    }
 
     public Map<String, String> getTimeMap(int day){
         Map<String, String> timeMap = new HashMap<>();

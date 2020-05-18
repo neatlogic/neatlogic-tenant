@@ -1,27 +1,33 @@
 package codedriver.module.tenant.api.user;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.UserService;
 
 @AuthAction(name="SYSTEM_USER_EDIT")
 @Service
+@Transactional
 public class UserDeleteApi extends ApiComponentBase{
 	
 	@Autowired
-	private UserService userService;
+	private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -39,17 +45,32 @@ public class UserDeleteApi extends ApiComponentBase{
 	}
 	
 	
-	@Input({ @Param(name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户Id集合",isRequired=true)})
+	@Input({ @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合",isRequired=true)})
 	@Output({})
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONArray idArray = jsonObj.getJSONArray("userIdList");
-		for (int i = 0; i < idArray.size(); i++){
-			String userId = idArray.getString(i);
-			userService.deleteUserAuth(new UserVo(userId,null));
-			userService.deleteUser(userId);
-		}
+//		JSONArray uuidArray = jsonObj.getJSONArray("userUuidList");
+//		for (int i = 0; i < uuidArray.size(); i++){
+//			String userUuid = uuidArray.getString(i);
+//			UserVo userVo = new UserVo();
+//			userVo.setUuid(userUuid);
+//			userMapper.deleteUserAuth(userVo);
+//			userMapper.deleteUserRoleByUserUuid(userUuid);
+//			userMapper.deleteUserTeamByUserUuid(userUuid);
+//			userMapper.deleteUserByUuid(userUuid);
+//		}
+		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+    	if(CollectionUtils.isNotEmpty(userUuidList)) {
+			UserVo userVo = new UserVo();
+    		for(String userUuid : userUuidList) {
+    			userVo.setUuid(userUuid);
+    			userMapper.deleteUserAuth(userVo);
+    			userMapper.deleteUserRoleByUserUuid(userUuid);
+    			userMapper.deleteUserTeamByUserUuid(userUuid);
+    			userMapper.deleteUserByUuid(userUuid);
+    		}
+    	}
 		return null;
 	}
 }

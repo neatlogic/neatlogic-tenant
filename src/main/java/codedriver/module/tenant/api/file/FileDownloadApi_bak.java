@@ -61,7 +61,7 @@ public class FileDownloadApi_bak extends BinaryStreamApiComponentBase {
 		if (fileVo != null) {
 			IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
 			if (fileTypeHandler != null) {
-				if (fileTypeHandler.valid(UserContext.get().getUserId(), paramObj)) {
+				if (fileTypeHandler.valid(UserContext.get().getUserUuid(), paramObj)) {
 					ServletOutputStream os = null;
 					InputStream in = null;
 					in = new FileInputStream(fileVo.getPath());

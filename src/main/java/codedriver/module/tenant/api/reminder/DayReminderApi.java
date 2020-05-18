@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
@@ -76,8 +75,7 @@ public class DayReminderApi extends ApiComponentBase {
         int day = jsonObj.getInteger("day");
         int messageCount = jsonObj.getInteger("messageCount");
         JSONObject returnJson = new JSONObject();
-        String userId = UserContext.get().getUserId();
-        List<GlobalReminderMessageVo> messageList = reminderService.getDayReminderMessageVoListByUserId(userId, messageId, day);
+        List<GlobalReminderMessageVo> messageList = reminderService.getDayReminderMessageVoListByUserId(messageId, day);
         JSONArray messageArray = new JSONArray();
         for (GlobalReminderMessageVo messageVo : messageList){
             IGlobalReminder reminder = GlobalReminderFactory.getReminder(messageVo.getReminderVo().getPluginId());
@@ -92,7 +90,7 @@ public class DayReminderApi extends ApiComponentBase {
         returnJson.put("lastMessageId", lastMessageId);
         returnJson.put("showDay", getShowDay(day));
         returnJson.put("day", day);
-        returnJson.put("allMessageCount", reminderService.getReminderMessageCountByDay(day, userId));
+        returnJson.put("allMessageCount", reminderService.getReminderMessageCountByDay(day));
         return returnJson;
     }
 

@@ -53,8 +53,7 @@ public class CounterListInfoApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        String userId = UserContext.get().getUserId();
-        List<GlobalCounterVo> counterVoList = counterService.getSubscribeCounterListByUserId(userId);
+        List<GlobalCounterVo> counterVoList = counterService.getSubscribeCounterListByUserUuid(UserContext.get().getUserUuid(true));
         JSONArray dataArray = new JSONArray();
         if (counterVoList != null && counterVoList.size() > 0){
             for (GlobalCounterVo counter : counterVoList){

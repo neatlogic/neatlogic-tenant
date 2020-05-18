@@ -1,18 +1,20 @@
 package codedriver.module.tenant.api.auth;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.UserService;
-import com.alibaba.fastjson.JSONArray;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +27,7 @@ public class AuthUserSaveApi extends ApiComponentBase {
 
 
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -45,24 +47,37 @@ public class AuthUserSaveApi extends ApiComponentBase {
     @Input({
             @Param( name = "auth", desc = "权限", type = ApiParamType.STRING, isRequired = true),
             @Param( name = "authGroup", desc = "权限组", type = ApiParamType.STRING, isRequired = true),
-            @Param( name = "userIdList", desc = "用户ID集合", type = ApiParamType.JSONARRAY)
+            @Param( name = "userUuidList", desc = "用户uuid集合", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "权限用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<UserAuthVo> userAuthList = new ArrayList<>();
-        if (jsonObj.containsKey("userIdList")){
-            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
-            for (int i = 0; i < userIdArray.size(); i++){
-                String userId = userIdArray.getString(i);
-                UserAuthVo userAuthVo = new UserAuthVo();
-                userAuthVo.setAuthGroup(jsonObj.getString("authGroup"));
-                userAuthVo.setAuth(jsonObj.getString("auth"));
-                userAuthVo.setUserId(userId);
-                userAuthList.add(userAuthVo);
+        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+        if(CollectionUtils.isNotEmpty(userUuidList)) {
+        	String authGroup = jsonObj.getString("authGroup");
+        	String auth = jsonObj.getString("auth");
+            userMapper.deleteUserAuthByAuth(auth);
+        	for(String userUuid : userUuidList) {
+        		UserAuthVo userAuthVo = new UserAuthVo();
+                userAuthVo.setAuthGroup(authGroup);
+                userAuthVo.setAuth(auth);
+                userAuthVo.setUserUuid(userUuid);
+                userMapper.insertUserAuth(userAuthVo);
             }
         }
-        userService.saveUserAuth(userAuthList, jsonObj.getString("auth"));
+
+//        if (jsonObj.containsKey("userUuidList")){
+//            JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+//            for (int i = 0; i < userUuidArray.size(); i++){
+//                String userUuid = userUuidArray.getString(i);
+//                UserAuthVo userAuthVo = new UserAuthVo();
+//                userAuthVo.setAuthGroup(jsonObj.getString("authGroup"));
+//                userAuthVo.setAuth(jsonObj.getString("auth"));
+//                userAuthVo.setUserUuid(userUuid);
+//                userAuthList.add(userAuthVo);
+//            }
+//        }
+//        userService.saveUserAuth(userAuthList, jsonObj.getString("auth"));
         return null;
     }
 }

@@ -1,24 +1,29 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
-import com.alibaba.fastjson.JSONArray;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class RoleUserSaveApi extends ApiComponentBase {
 
     @Autowired
-    private RoleService roleService;
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -40,22 +45,24 @@ public class RoleUserSaveApi extends ApiComponentBase {
                     type = ApiParamType.STRING,
                     desc = "角色名称",
                     isRequired = true),
-            @Param(name = "userIdList",
+            @Param(name = "userUuidList",
                     type = ApiParamType.JSONARRAY,
-                    desc = "用户ID集合"
+                    desc = "用户Uuid集合"
             )})
     @Description(desc = "角色用户添加接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String roleName = jsonObj.getString("roleName");
-        List<String> userIdList = new ArrayList<>();
-        if (jsonObj.containsKey("userIdList")){
-            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
-            for (int i = 0; i < userIdArray.size(); i++){
-                userIdList.add(userIdArray.getString(i));
-            }
-        }
-        roleService.saveRoleUser(roleName, userIdList);
-        return "";
+        roleMapper.deleteUserRoleByRoleName(roleName);
+		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+		if (CollectionUtils.isNotEmpty(userUuidList)){
+			UserVo userVo = new UserVo();
+			userVo.setRoleName(roleName);
+			for (String userUuid : userUuidList){
+				userVo.setUuid(userUuid);
+				roleMapper.insertRoleUser(userVo);
+			}
+		}
+        return null;
     }
 }

@@ -29,7 +29,7 @@ public interface GlobalReminderService {
     * @Param: [userId, messageId, day] 
     * @return: java.util.List<com.techsure.balantflow.dto.globalreminder.GlobalReminderMessageVo>  
     */ 
-    List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(String userId, Long messageId, Integer day);
+    List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(Long messageId, Integer day);
     
     /** 
     * @Description: 获取历史实时动态消息 
@@ -43,49 +43,48 @@ public interface GlobalReminderService {
     * @Param: [day, userId] 
     * @return: int  
     */ 
-    int getReminderMessageCountByDay(int day, String userId);
+    int getReminderMessageCountByDay(int day);
 
     /** 
     * @Description: 定时获取消息集合 
-    * @Param: [userId] 
     * @return: java.util.List<com.techsure.balantflow.dto.globalreminder.GlobalReminderMessageVo>  
     */ 
-    List<GlobalReminderMessageVo> getScheduleMessageList(String userId);
+    List<GlobalReminderMessageVo> getScheduleMessageList();
 
     /** 
     * @Description: 重置用户单条消息有效性 
     * @Param: [messageId, userId] 
     * @return: void  
     */ 
-    void updateMessageActive(Long messageId, String userId);
+//    void updateMessageActive(Long messageId, String userId);
 
     /** 
     * @Description: 重置用户所有消息有效性 
     * @Param: [userId] 
     * @return: void  
     */ 
-    void updateAllMessageActive(String userId);
+//    void updateAllMessageActive(String userId);
 
     /** 
     * @Description: 重置用户当天消息有效性 
     * @Param: [userId, day] 
     * @return: void  
     */ 
-    void updateDayMessageActive(String userId, int day);
+    void updateDayMessageActive(int day);
 
     /** 
     * @Description: 获取用户实时动态消息总数 
     * @Param: [userId] 
     * @return: int  
     */ 
-    int getReminderMessageCount(String userId);
+//    int getReminderMessageCount(String userId);
 
     /** 
     * @Description: 重置弹窗悬浮状态
     * @Param: [userId, messageId] 
     * @return: void  
     */ 
-    void updateMessageKeepStatus(String userId, Long messageId);
+//    void updateMessageKeepStatus(String userId, Long messageId);
 
     /** 
     * @Description: 订阅设置开关 

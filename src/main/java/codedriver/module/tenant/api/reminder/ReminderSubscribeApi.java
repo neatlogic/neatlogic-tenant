@@ -55,7 +55,7 @@ public class ReminderSubscribeApi extends ApiComponentBase {
         String pluginId = jsonObj.getString("pluginId");
         JSONObject paramObj = jsonObj.getJSONObject("param");
         int isActive = jsonObj.getInteger("isActive");
-        reminderSubscribe.setUserId(UserContext.get().getUserId());
+        reminderSubscribe.setUserUuid(UserContext.get().getUserUuid(true));
         reminderSubscribe.setPluginId(pluginId);
         reminderSubscribe.setId(id);
         reminderSubscribe.setParam(paramObj.toJSONString());

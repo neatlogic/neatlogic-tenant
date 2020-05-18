@@ -94,7 +94,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		MultipartFile multipartFile = multipartRequest.getFile(paramName);
 
 		if (multipartFile != null && multipartFile.getName() != null) {
-			String userId = UserContext.get().getUserId();
+			String userUuid = UserContext.get().getUserUuid(true);
 			String oldFileName = multipartFile.getOriginalFilename();
 			Long size = multipartFile.getSize();
 			// 如果配置为空代表不受任何限制
@@ -147,7 +147,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			FileVo fileVo = new FileVo();
 			fileVo.setName(oldFileName);
 			fileVo.setSize(size);
-			fileVo.setUserId(userId);
+			fileVo.setUserUuid(userUuid);
 			fileVo.setType(type);
 			fileVo.setContentType(multipartFile.getContentType());
 

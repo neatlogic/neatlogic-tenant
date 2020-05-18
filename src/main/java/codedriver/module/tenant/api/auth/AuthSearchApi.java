@@ -17,6 +17,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthGroupVo;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.restful.annotation.Description;
@@ -25,7 +26,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.RoleService;
-import codedriver.module.tenant.service.UserService;
 
 @Service
 public class AuthSearchApi extends ApiComponentBase {
@@ -34,7 +34,7 @@ public class AuthSearchApi extends ApiComponentBase {
     private RoleService roleService;
 
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -72,7 +72,7 @@ public class AuthSearchApi extends ApiComponentBase {
                 roleAuthMap.put(roleAuth.getName(), roleAuth.getRoleCount());
             }
         }
-        List<AuthVo> userAuthList = userService.getUserCountByAuth();
+        List<AuthVo> userAuthList = userMapper.getUserCountByAuth();
         Map<String, Integer> userAuthMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(userAuthList)){
             for (AuthVo userAuth : userAuthList){

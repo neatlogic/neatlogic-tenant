@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,6 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.UserVo;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -38,28 +36,28 @@ public class RoleServiceImpl implements RoleService {
 		return roleMapper.searchRoleAuthByRoleName(roleName);
 	}
 
-	@Override
-	public int saveRole(RoleVo roleVo) {
-		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
-			roleMapper.updateRole(roleVo);
-		} else {
-			roleMapper.insertRole(roleVo);
-			if (CollectionUtils.isNotEmpty(roleVo.getUserIdList())){
-				for (String userId : roleVo.getUserIdList()){
-					UserVo userVo = new UserVo();
-					userVo.setUserId(userId);
-					userVo.setRoleName(roleVo.getName());
-					roleMapper.insertRoleUser(userVo);
-				}
-			}
-			if (CollectionUtils.isNotEmpty(roleVo.getRoleAuthList())){
-				for (RoleAuthVo authVo : roleVo.getRoleAuthList()){
-					roleMapper.insertRoleAuth(authVo);
-				}
-			}
-		}
-		return 1;
-	}
+//	@Override
+//	public int saveRole(RoleVo roleVo) {
+//		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
+//			roleMapper.updateRole(roleVo);
+//		} else {
+//			roleMapper.insertRole(roleVo);
+//			if (CollectionUtils.isNotEmpty(roleVo.getUserIdList())){
+//				for (String userId : roleVo.getUserIdList()){
+//					UserVo userVo = new UserVo();
+//					userVo.setUserId(userId);
+//					userVo.setRoleName(roleVo.getName());
+//					roleMapper.insertRoleUser(userVo);
+//				}
+//			}
+//			if (CollectionUtils.isNotEmpty(roleVo.getRoleAuthList())){
+//				for (RoleAuthVo authVo : roleVo.getRoleAuthList()){
+//					roleMapper.insertRoleAuth(authVo);
+//				}
+//			}
+//		}
+//		return 1;
+//	}
 
 	@Override
 	public int addRoleAuth(RoleVo roleVo) {
@@ -103,19 +101,19 @@ public class RoleServiceImpl implements RoleService {
 		return 1;
 	}
 
-	@Override
-	public int saveRoleUser(String roleName, List<String> userIdList) {
-		roleMapper.deleteUserRoleByRoleName(roleName);
-		if (CollectionUtils.isNotEmpty(userIdList)){
-			for (String userId : userIdList){
-				UserVo userVo = new UserVo();
-				userVo.setUserId(userId);
-				userVo.setRoleName(roleName);
-				roleMapper.insertRoleUser(userVo);
-			}
-		}
-		return 1;
-	}
+//	@Override
+//	public int saveRoleUser(String roleName, List<String> userIdList) {
+//		roleMapper.deleteUserRoleByRoleName(roleName);
+//		if (CollectionUtils.isNotEmpty(userIdList)){
+//			for (String userId : userIdList){
+//				UserVo userVo = new UserVo();
+//				userVo.setUserId(userId);
+//				userVo.setRoleName(roleName);
+//				roleMapper.insertRoleUser(userVo);
+//			}
+//		}
+//		return 1;
+//	}
 
 	@Override
 	public RoleVo getRoleByRoleName(String roleName) {

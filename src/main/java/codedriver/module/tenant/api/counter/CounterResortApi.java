@@ -42,7 +42,7 @@ public class CounterResortApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String sortIdStr = jsonObj.getString("sortPluginIdStr");
-        counterService.updateCounterUserSort(UserContext.get().getUserId(), sortIdStr);
+        counterService.updateCounterUserSort(UserContext.get().getUserUuid(true), sortIdStr);
         return new JSONObject();
     }
 }

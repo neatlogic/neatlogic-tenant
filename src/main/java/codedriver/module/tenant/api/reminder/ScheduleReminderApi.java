@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.core.GlobalReminderFactory;
 import codedriver.framework.reminder.core.IGlobalReminder;
@@ -62,7 +61,7 @@ public class ScheduleReminderApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<GlobalReminderMessageVo> messageVos = reminderService.getScheduleMessageList(UserContext.get().getUserId());
+        List<GlobalReminderMessageVo> messageVos = reminderService.getScheduleMessageList();
         Collections.sort(messageVos);
         JSONArray messageArray = new JSONArray();
         for (GlobalReminderMessageVo messageVo : messageVos){

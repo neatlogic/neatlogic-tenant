@@ -59,10 +59,10 @@ public class DashboardDeleteApi extends ApiComponentBase {
 		if (dashboardVo == null) {
 			throw new DashboardNotFoundException(dashboardUuid);
 		}
-		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
-		String userId = UserContext.get().getUserId();
+		String userUuid = UserContext.get().getUserUuid(true);
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName()));
 		boolean hasRight = false;
-		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userId)) {
+		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userUuid)) {
 			hasRight = true;
 		}
 		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())

@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.reminder.dto.GlobalReminderVo;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 import codedriver.framework.restful.annotation.Description;
@@ -51,7 +50,7 @@ public class ReminderSearchApi extends ApiComponentBase {
         GlobalReminderVo reminderVo = new GlobalReminderVo();
         reminderVo.setModuleId(jsonObj.getString("moduleId"));
         JSONObject returnJson = new JSONObject();
-        reminderVo.setUserId(UserContext.get().getUserId());
+//        reminderVo.setUserId(UserContext.get().getUserId());
         List<GlobalReminderVo> reminderVoList = reminderService.searchReminder(reminderVo);
         Collections.sort(reminderVoList);
         returnJson.put("reminderList", reminderVoList);
