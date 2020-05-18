@@ -74,8 +74,8 @@ public class UserGetApi extends ApiComponentBase {
 		}
 		if(CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
 			List<String> roleUuidList = new ArrayList<>();
-			for(String roleName : userVo.getRoleUuidList()) {
-				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleName);
+			for(String roleUuid : userVo.getRoleUuidList()) {
+				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
 			}
 			userVo.setRoleUuidList(roleUuidList);
 		}
