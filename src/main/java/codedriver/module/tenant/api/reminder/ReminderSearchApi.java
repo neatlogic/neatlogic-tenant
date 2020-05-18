@@ -50,7 +50,6 @@ public class ReminderSearchApi extends ApiComponentBase {
         GlobalReminderVo reminderVo = new GlobalReminderVo();
         reminderVo.setModuleId(jsonObj.getString("moduleId"));
         JSONObject returnJson = new JSONObject();
-//        reminderVo.setUserId(UserContext.get().getUserId());
         List<GlobalReminderVo> reminderVoList = reminderService.searchReminder(reminderVo);
         Collections.sort(reminderVoList);
         returnJson.put("reminderList", reminderVoList);

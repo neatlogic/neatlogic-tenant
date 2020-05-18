@@ -43,13 +43,6 @@ public class UserActiveUpdateApi extends ApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//        JSONArray userIdList = jsonObj.getJSONArray("userIdList");
-//        for (int i = 0; i < userIdList.size(); i++){
-//            UserVo userVo = new UserVo();
-//            userVo.setUserId(userIdList.getString(i));
-//            userVo.setIsActive(jsonObj.getInteger("isActive"));
-//            userService.updateUserActive(userVo);
-//        }
         Integer isActive = jsonObj.getInteger("isActive");
     	List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
     	if(CollectionUtils.isNotEmpty(userUuidList)) {

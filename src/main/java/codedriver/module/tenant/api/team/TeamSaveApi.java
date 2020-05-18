@@ -49,7 +49,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "parentUuId", type = ApiParamType.STRING, desc = "父级组id"),
 		@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = false),
 		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
-			@Param( name = "userIdList", type = ApiParamType.JSONARRAY, desc = "用户ID集合")
+			@Param( name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")
 		/*@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)*/
 	})
 	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
@@ -73,13 +73,13 @@ public class TeamSaveApi extends ApiComponentBase{
 			}
 			teamVo.setTagList(tagList);
 		}
-		if (jsonObj.containsKey("userIdList")){
-			List<String> userIdList = new ArrayList<>();
-			JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+		if (jsonObj.containsKey("userUuidList")){
+			List<String> userUuidList = new ArrayList<>();
+			JSONArray userIdArray = jsonObj.getJSONArray("userUuidList");
 			for (int i = 0; i < userIdArray.size(); i++){
-				userIdList.add(userIdArray.getString(i));
+				userUuidList.add(userIdArray.getString(i));
 			}
-			teamVo.setUserIdList(userIdList);
+			teamVo.setUserUuidList(userUuidList);
 		}
 		teamService.saveTeam(teamVo);
 

@@ -36,29 +36,6 @@ public class RoleServiceImpl implements RoleService {
 		return roleMapper.searchRoleAuthByRoleName(roleName);
 	}
 
-//	@Override
-//	public int saveRole(RoleVo roleVo) {
-//		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
-//			roleMapper.updateRole(roleVo);
-//		} else {
-//			roleMapper.insertRole(roleVo);
-//			if (CollectionUtils.isNotEmpty(roleVo.getUserIdList())){
-//				for (String userId : roleVo.getUserIdList()){
-//					UserVo userVo = new UserVo();
-//					userVo.setUserId(userId);
-//					userVo.setRoleName(roleVo.getName());
-//					roleMapper.insertRoleUser(userVo);
-//				}
-//			}
-//			if (CollectionUtils.isNotEmpty(roleVo.getRoleAuthList())){
-//				for (RoleAuthVo authVo : roleVo.getRoleAuthList()){
-//					roleMapper.insertRoleAuth(authVo);
-//				}
-//			}
-//		}
-//		return 1;
-//	}
-
 	@Override
 	public int addRoleAuth(RoleVo roleVo) {
 		List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
@@ -100,20 +77,6 @@ public class RoleServiceImpl implements RoleService {
 		roleMapper.deleteRoleByRoleName(name);
 		return 1;
 	}
-
-//	@Override
-//	public int saveRoleUser(String roleName, List<String> userIdList) {
-//		roleMapper.deleteUserRoleByRoleName(roleName);
-//		if (CollectionUtils.isNotEmpty(userIdList)){
-//			for (String userId : userIdList){
-//				UserVo userVo = new UserVo();
-//				userVo.setUserId(userId);
-//				userVo.setRoleName(roleName);
-//				roleMapper.insertRoleUser(userVo);
-//			}
-//		}
-//		return 1;
-//	}
 
 	@Override
 	public RoleVo getRoleByRoleName(String roleName) {

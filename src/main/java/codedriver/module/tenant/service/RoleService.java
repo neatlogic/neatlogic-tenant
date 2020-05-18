@@ -13,9 +13,6 @@ public interface RoleService {
 
 	public List<RoleAuthVo> searchRoleAuth(String roleName);
 
-//	@Transactional
-//	public int saveRole(RoleVo roleVo);
-
 	public int addRoleAuth(RoleVo roleVo);
 
 	public int coverRoleAuth(RoleVo roleVo);
@@ -24,8 +21,6 @@ public interface RoleService {
 
 	@Transactional
 	public int deleteRoleByRoleName(String name);
-
-//	public int saveRoleUser(String roleName, List<String> userIdList);
 
 	public RoleVo getRoleByRoleName(String roleName);
 

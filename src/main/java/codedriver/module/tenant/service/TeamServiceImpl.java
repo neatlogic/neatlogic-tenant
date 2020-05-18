@@ -101,9 +101,9 @@ public class TeamServiceImpl implements TeamService {
 			sort++;
 			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);
-			if (CollectionUtils.isNotEmpty(teamVo.getUserIdList())){
-				for (String userId : teamVo.getUserIdList()){
-					teamMapper.insertTeamUser(teamVo.getUuid(), userId);
+			if (CollectionUtils.isNotEmpty(teamVo.getUserUuidList())){
+				for (String userUuid : teamVo.getUserUuidList()){
+					teamMapper.insertTeamUser(teamVo.getUuid(), userUuid);
 				}
 			}
 		}
@@ -118,11 +118,11 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
-	public void saveTeamUser(List<String> userIdList, String teamUuid) {
+	public void saveTeamUser(List<String> userUuidList, String teamUuid) {
 		teamMapper.deleteUserTeamByTeamUuid(teamUuid);
-		if (CollectionUtils.isNotEmpty(userIdList)){
-			for (String userId: userIdList){
-				teamMapper.insertTeamUser(teamUuid, userId);
+		if (CollectionUtils.isNotEmpty(userUuidList)){
+			for (String userUuid: userUuidList){
+				teamMapper.insertTeamUser(teamUuid, userUuid);
 			}
 		}
 

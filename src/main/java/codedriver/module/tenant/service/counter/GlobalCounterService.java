@@ -23,7 +23,7 @@ public interface GlobalCounterService {
 
     /** 
     * @Description: 获取订阅的消息统计集合
-    * @Param: [userId] 
+    * @Param: [userUuid] 
     * @return: java.util.List<com.techsure.balantflow.dto.globalcounter.GlobalCounterVo>  
     */ 
     List<GlobalCounterVo> getSubscribeCounterListByUserUuid(String userUuid);

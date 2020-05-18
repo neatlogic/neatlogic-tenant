@@ -75,7 +75,7 @@ public class DayReminderApi extends ApiComponentBase {
         int day = jsonObj.getInteger("day");
         int messageCount = jsonObj.getInteger("messageCount");
         JSONObject returnJson = new JSONObject();
-        List<GlobalReminderMessageVo> messageList = reminderService.getDayReminderMessageVoListByUserId(messageId, day);
+        List<GlobalReminderMessageVo> messageList = reminderService.getDayReminderMessageVoList(messageId, day);
         JSONArray messageArray = new JSONArray();
         for (GlobalReminderMessageVo messageVo : messageList){
             IGlobalReminder reminder = GlobalReminderFactory.getReminder(messageVo.getReminderVo().getPluginId());

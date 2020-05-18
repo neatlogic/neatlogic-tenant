@@ -42,19 +42,19 @@ public class TeamUserSaveApi extends ApiComponentBase {
 
     @Input({
             @Param( name = "teamUuid", isRequired = true, desc = "分组uuid", type = ApiParamType.STRING),
-            @Param( name = "userIdList", desc = "用户Id集合", type = ApiParamType.JSONARRAY)
+            @Param( name = "userUuidList", desc = "用户Uuid集合", type = ApiParamType.JSONARRAY)
     })
     @Description( desc = "分组用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<String> userIdList = new ArrayList<>();
-        if (jsonObj.containsKey("userIdList")){
-            JSONArray userIdArray = jsonObj.getJSONArray("userIdList");
+        List<String> userUuidList = new ArrayList<>();
+        if (jsonObj.containsKey("userUuidList")){
+            JSONArray userIdArray = jsonObj.getJSONArray("userUuidList");
             for (int i = 0 ; i < userIdArray.size(); i++){
-                userIdList.add(userIdArray.getString(i));
+            	userUuidList.add(userIdArray.getString(i));
             }
         }
-        teamService.saveTeamUser(userIdList, jsonObj.getString("teamUuid"));
+        teamService.saveTeamUser(userUuidList, jsonObj.getString("teamUuid"));
         return null;
     }
 }

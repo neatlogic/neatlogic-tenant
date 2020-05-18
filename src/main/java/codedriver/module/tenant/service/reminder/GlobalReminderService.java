@@ -26,10 +26,10 @@ public interface GlobalReminderService {
 
     /** 
     * @Description: 获取更多实时动态消息
-    * @Param: [userId, messageId, day] 
+    * @Param: [messageId, day] 
     * @return: java.util.List<com.techsure.balantflow.dto.globalreminder.GlobalReminderMessageVo>  
     */ 
-    List<GlobalReminderMessageVo> getDayReminderMessageVoListByUserId(Long messageId, Integer day);
+    List<GlobalReminderMessageVo> getDayReminderMessageVoList(Long messageId, Integer day);
     
     /** 
     * @Description: 获取历史实时动态消息 
@@ -40,7 +40,7 @@ public interface GlobalReminderService {
 
     /** 
     * @Description: 获取参数天用户消息总和
-    * @Param: [day, userId] 
+    * @Param: [day] 
     * @return: int  
     */ 
     int getReminderMessageCountByDay(int day);
@@ -52,39 +52,11 @@ public interface GlobalReminderService {
     List<GlobalReminderMessageVo> getScheduleMessageList();
 
     /** 
-    * @Description: 重置用户单条消息有效性 
-    * @Param: [messageId, userId] 
-    * @return: void  
-    */ 
-//    void updateMessageActive(Long messageId, String userId);
-
-    /** 
-    * @Description: 重置用户所有消息有效性 
-    * @Param: [userId] 
-    * @return: void  
-    */ 
-//    void updateAllMessageActive(String userId);
-
-    /** 
     * @Description: 重置用户当天消息有效性 
-    * @Param: [userId, day] 
+    * @Param: [day] 
     * @return: void  
     */ 
     void updateDayMessageActive(int day);
-
-    /** 
-    * @Description: 获取用户实时动态消息总数 
-    * @Param: [userId] 
-    * @return: int  
-    */ 
-//    int getReminderMessageCount(String userId);
-
-    /** 
-    * @Description: 重置弹窗悬浮状态
-    * @Param: [userId, messageId] 
-    * @return: void  
-    */ 
-//    void updateMessageKeepStatus(String userId, Long messageId);
 
     /** 
     * @Description: 订阅设置开关 
