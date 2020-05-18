@@ -69,19 +69,19 @@ public class RoleServiceImpl implements RoleService {
 		return 0;
 	}
 
-	@Override
-	public int deleteRoleByRoleName(String name) {
-		roleMapper.deleteMenuRoleByRoleName(name);
-		roleMapper.deleteTeamRoleByRoleName(name);
-		roleMapper.deleteUserRoleByRoleName(name);
-		roleMapper.deleteRoleByRoleName(name);
-		return 1;
-	}
+//	@Override
+//	public int deleteRoleByRoleName(String name) {
+//		roleMapper.deleteMenuRoleByRoleName(name);
+//		roleMapper.deleteTeamRoleByRoleName(name);
+//		roleMapper.deleteUserRoleByRoleName(name);
+//		roleMapper.deleteRoleByRoleName(name);
+//		return 1;
+//	}
 
 	@Override
-	public RoleVo getRoleByRoleName(String roleName) {
-		RoleVo roleVo = roleMapper.getRoleByRoleName(roleName);
-		int userCount = roleMapper.searchRoleUserCountByRoleName(roleName);
+	public RoleVo getRoleByUuid(String uuid) {
+		RoleVo roleVo = roleMapper.getRoleByUuid(uuid);
+		int userCount = roleMapper.searchRoleUserCountByRoleUuid(uuid);
 		roleVo.setUserCount(userCount);
 		return roleVo;
 	}
@@ -91,13 +91,13 @@ public class RoleServiceImpl implements RoleService {
 		return roleMapper.getRoleCountByAuth();
 	}
 
-	@Override
-	public void saveAuthRole(List<RoleAuthVo> roleAuthList, String auth) {
-		roleMapper.deleteRoleAuthByAuth(auth);
-		if (roleAuthList.size() > 0){
-			for (RoleAuthVo roleAuthVo : roleAuthList){
-				roleMapper.insertRoleAuth(roleAuthVo);
-			}
-		}
-	}
+//	@Override
+//	public void saveAuthRole(List<RoleAuthVo> roleAuthList, String auth) {
+//		roleMapper.deleteRoleAuthByAuth(auth);
+//		if (roleAuthList.size() > 0){
+//			for (RoleAuthVo roleAuthVo : roleAuthList){
+//				roleMapper.insertRoleAuth(roleAuthVo);
+//			}
+//		}
+//	}
 }

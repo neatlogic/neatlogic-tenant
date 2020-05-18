@@ -16,15 +16,15 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.dao.mapper.MenuMapper;
 import codedriver.module.tenant.dto.MenuVo;
-import codedriver.module.tenant.service.MenuService;
 
 @Service
 @AuthAction(name = "SYSTEM_MENU_EDIT")
 public class MenuSearchApi extends ApiComponentBase {
-
+	
 	@Autowired
-	private MenuService menuService;
+	private MenuMapper menuMapper;
 
 	@Override
 	public String getToken() {
@@ -64,18 +64,17 @@ public class MenuSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject json = new JSONObject();
-		List<MenuVo> menuList = new ArrayList<MenuVo>();
-		List<String> roleNameList = new ArrayList<String>();
+		List<String> roleUuidList = new ArrayList<String>();
 		Integer isActive = null;
 		// 如果是根据角色返回对应菜单
 		if (jsonObj.containsKey("type") && jsonObj.getIntValue("type") == 0) {
 			UserContext userContext = UserContext.get();
-			roleNameList = userContext.getRoleNameList();
+			roleUuidList = userContext.getRoleUuidList();
 		}
 		if (jsonObj.containsKey("isAll") &&jsonObj.getIntValue("isAll") == 0) {
 			isActive = 1;
 		}
-		menuList = menuService.getMenuList(new MenuVo(jsonObj.getLong("id"), jsonObj.getLong("parentId"), isActive,roleNameList));
+		List<MenuVo> menuList = menuMapper.getMenuList(new MenuVo(jsonObj.getLong("id"), jsonObj.getLong("parentId"), isActive, roleUuidList));
 		json.put("menuList", menuList);
 		return json;
 	}

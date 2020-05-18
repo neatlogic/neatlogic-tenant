@@ -16,7 +16,7 @@ public interface MenuMapper {
 	
 	/*INSERT BLOCK*/
 	int insertMenu(MenuVo menuVo);
-	int insertMenuRole(@Param("menuId")Long menuId, @Param("roleName")String roleName);
+	int insertMenuRole(@Param("menuId")Long menuId, @Param("roleUuid")String roleUuid);
 	
 	/*UPDATE BLOCK*/
 	int updateMenu(MenuVo menuVo);

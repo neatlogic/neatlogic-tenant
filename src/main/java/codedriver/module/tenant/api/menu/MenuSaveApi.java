@@ -81,9 +81,9 @@ public class MenuSaveApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "目录对应的图标class",
 					isRequired = true),
-			@Param(name = "roleNameList",
+			@Param(name = "roleUuidList",
 					type = ApiParamType.JSONARRAY,
-					desc = "角色",
+					desc = "角色uuid",
 					isRequired = false) })
 	@Output({
 			@Param(name = "id",

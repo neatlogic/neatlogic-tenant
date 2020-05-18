@@ -83,7 +83,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
 		dashboardVo.setUserUuid(userUuid);
 		dashboardVo.setTeamUuidList(teamUuidList);
-		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo.setRoleUuidList(UserContext.get().getRoleUuidList());
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<String> dashboardUuidList = dashboardMapper.searchAuthorizedDashboardUuid(dashboardVo);

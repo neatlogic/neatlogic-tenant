@@ -36,14 +36,14 @@ public class RoleGetApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "name",
+			@Param(name = "uuid",
 					type = ApiParamType.STRING,
-					desc = "角色名称",
+					desc = "角色uuid",
 					isRequired = true) })
 	@Output({ @Param(explode = RoleVo.class) })
 	@Description(desc = "角色详细信息查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return roleService.getRoleByRoleName(jsonObj.getString("name"));
+		return roleService.getRoleByUuid(jsonObj.getString("uuid"));
 	}
 }

@@ -1,7 +1,5 @@
 package codedriver.module.tenant.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +12,6 @@ import codedriver.module.tenant.dto.MenuVo;
 public class MenuServiceImpl implements MenuService {
 	@Autowired
 	private MenuMapper menuMapper;
-
-	@Override
-	public List<MenuVo> getMenuList(MenuVo vo) {
-		List<MenuVo> menuList = menuMapper.getMenuList(vo);
-		return menuList;
-	}
 	
 	@Override
 	public int checkIsChildern(Long menuId) {
@@ -35,9 +27,9 @@ public class MenuServiceImpl implements MenuService {
 			menuMapper.deleteMenuRoleByMenuId(menuVo.getId());
 			menuMapper.updateMenu(menuVo);
 		}
-		if (menuVo.getRoleNameList() != null) {
-			for (String roleName : menuVo.getRoleNameList()) {
-				this.menuMapper.insertMenuRole(menuVo.getId(), roleName);
+		if (menuVo.getRoleUuidList() != null) {
+			for (String roleUuid : menuVo.getRoleUuidList()) {
+				this.menuMapper.insertMenuRole(menuVo.getId(), roleUuid);
 			}
 		}
 		return 1;

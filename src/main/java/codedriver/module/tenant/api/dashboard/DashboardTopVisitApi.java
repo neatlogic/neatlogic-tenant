@@ -62,7 +62,7 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
 		dashboardVo.setUserUuid(userUuid);
 		dashboardVo.setTeamUuidList(teamUuidList);
-		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo.setRoleUuidList(UserContext.get().getRoleUuidList());
 		return dashboardMapper.searchTopVisitDashboard(dashboardVo);
 	}
 }

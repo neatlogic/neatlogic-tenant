@@ -68,7 +68,7 @@ public class DashboardGetApi extends ApiComponentBase {
 		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
 		dashboardVo.setUserUuid(userUuid);
 		dashboardVo.setTeamUuidList(teamUuidList);
-		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo.setRoleUuidList(UserContext.get().getRoleUuidList());
 		dashboardVo = dashboardMapper.getAuthorizedDashboardByUuid(dashboardVo);
 		if (dashboardVo == null) {
 			throw new DashboardNotFoundException(dashboardUuid);
