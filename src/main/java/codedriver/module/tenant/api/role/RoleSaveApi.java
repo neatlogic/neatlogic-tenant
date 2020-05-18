@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONArray;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -50,6 +52,9 @@ public class RoleSaveApi extends ApiComponentBase {
 	}
 
 	@Input({
+			@Param(name = "uuid",
+					type = ApiParamType.STRING,
+					desc = "角色uuid"),
 			@Param(name = "name",
 					type = ApiParamType.STRING,
 					desc = "角色名称",
@@ -69,15 +74,19 @@ public class RoleSaveApi extends ApiComponentBase {
 		RoleVo roleVo = new RoleVo();
 		roleVo.setName(jsonObj.getString("name"));
 		roleVo.setDescription(jsonObj.getString("description"));
-
-		if (roleMapper.getRoleByRoleName(roleVo.getName()) != null) {
+		String uuid = jsonObj.getString("uuid");		
+		if (StringUtils.isNotBlank(uuid)) {
+			if(roleMapper.checkRoleIsExists(uuid) > 0) {
+				throw new RoleNotFoundException(uuid);
+			}
+			roleVo.setUuid(uuid);
 			roleMapper.updateRole(roleVo);
 		} else {
 			roleMapper.insertRole(roleVo);
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 			if (CollectionUtils.isNotEmpty(userUuidList)){
 				UserVo userVo = new UserVo();
-				userVo.setRoleName(roleVo.getName());
+				userVo.setRoleUuid(roleVo.getUuid());
 				for (String userUuid : userUuidList){
 					userVo.setUuid(userUuid);
 					roleMapper.insertRoleUser(userVo);
@@ -87,7 +96,7 @@ public class RoleSaveApi extends ApiComponentBase {
 			JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
 			if (MapUtils.isNotEmpty(roleAuthObj)){
 				RoleAuthVo roleAuthVo = new RoleAuthVo();
-				roleAuthVo.setRoleName(roleVo.getName());
+				roleAuthVo.setRoleUuid(roleVo.getUuid());
 				Set<String> keySet = roleAuthObj.keySet();
 				for (String key : keySet){
 					roleAuthVo.setAuthGroup(key);

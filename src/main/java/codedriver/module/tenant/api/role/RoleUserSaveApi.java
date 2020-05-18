@@ -41,9 +41,9 @@ public class RoleUserSaveApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "roleName",
+            @Param(name = "roleUuid",
                     type = ApiParamType.STRING,
-                    desc = "角色名称",
+                    desc = "角色uuid",
                     isRequired = true),
             @Param(name = "userUuidList",
                     type = ApiParamType.JSONARRAY,
@@ -52,12 +52,12 @@ public class RoleUserSaveApi extends ApiComponentBase {
     @Description(desc = "角色用户添加接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String roleName = jsonObj.getString("roleName");
-        roleMapper.deleteUserRoleByRoleName(roleName);
+        String roleUuid = jsonObj.getString("roleUuid");
+        roleMapper.deleteUserRoleByRoleUuid(roleUuid);
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
 			UserVo userVo = new UserVo();
-			userVo.setRoleName(roleName);
+			userVo.setRoleUuid(roleUuid);
 			for (String userUuid : userUuidList){
 				userVo.setUuid(userUuid);
 				roleMapper.insertRoleUser(userVo);

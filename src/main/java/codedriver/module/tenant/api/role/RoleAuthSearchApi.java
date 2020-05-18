@@ -1,13 +1,13 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.List;
 public class RoleAuthSearchApi extends ApiComponentBase {
 
     @Autowired
-    private RoleService roleService;
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -38,9 +38,9 @@ public class RoleAuthSearchApi extends ApiComponentBase {
 
     @Input({
             @Param(
-                    name = "roleNameList",
+                    name = "roleUuidList",
                     type = ApiParamType.JSONARRAY,
-                    desc = "角色名称集合",
+                    desc = "角色uuid集合",
                     isRequired = true
             )
     })
@@ -57,9 +57,9 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         JSONObject roleAuthObj = new JSONObject();
-        JSONArray roleNameArray = jsonObj.getJSONArray("roleNameList");
-        for (int i = 0 ; i < roleNameArray.size(); i++){
-            List<RoleAuthVo> roleAuthList = roleService.searchRoleAuth(roleNameArray.getString(i));
+        JSONArray roleUuidArray = jsonObj.getJSONArray("roleUuidList");
+        for (int i = 0 ; i < roleUuidArray.size(); i++){
+            List<RoleAuthVo> roleAuthList = roleMapper.searchRoleAuthByRoleUuid(roleUuidArray.getString(i));
             if (roleAuthList != null && roleAuthList.size() > 0){
                 for (RoleAuthVo authVo : roleAuthList){
                     if (roleAuthObj.containsKey(authVo.getAuthGroup())){

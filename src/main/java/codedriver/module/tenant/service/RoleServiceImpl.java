@@ -31,14 +31,14 @@ public class RoleServiceImpl implements RoleService {
 		return roleMapper.searchRole(roleVo);
 	}
 
-	@Override
-	public List<RoleAuthVo> searchRoleAuth(String roleName) {
-		return roleMapper.searchRoleAuthByRoleName(roleName);
-	}
+//	@Override
+//	public List<RoleAuthVo> searchRoleAuth(String roleName) {
+//		return roleMapper.searchRoleAuthByRoleName(roleName);
+//	}
 
 	@Override
 	public int addRoleAuth(RoleVo roleVo) {
-		List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleName(roleVo.getName());
+		List<RoleAuthVo> roleAuthVoList = roleMapper.searchRoleAuthByRoleUuid(roleVo.getUuid());
 		Set<String> authSet = new HashSet<>();
 		for (RoleAuthVo authVo : roleAuthVoList){
 			authSet.add(authVo.getAuth());
@@ -53,7 +53,7 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public int coverRoleAuth(RoleVo roleVo) {
-		roleMapper.deleteRoleAuthByRoleName(roleVo.getName());
+		roleMapper.deleteRoleAuthByRoleUuid(roleVo.getUuid());
 		List<RoleAuthVo> roleAuthVoList = roleVo.getRoleAuthList();
 		if (roleAuthVoList != null && roleAuthVoList.size() > 0){
 			for (RoleAuthVo roleAuthVo : roleAuthVoList){

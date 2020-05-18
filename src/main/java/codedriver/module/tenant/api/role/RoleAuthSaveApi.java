@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
@@ -24,6 +25,9 @@ public class RoleAuthSaveApi extends ApiComponentBase {
 
     @Autowired
     private RoleService roleService;
+    
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -41,9 +45,9 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "roleNameList",
+            @Param(name = "roleUuidList",
                     type = ApiParamType.JSONARRAY,
-                    desc = "角色名称集合",
+                    desc = "角色Uuid集合",
                     isRequired = true),
             @Param(name = "roleAuthList",
                     type = ApiParamType.JSONOBJECT,
@@ -57,12 +61,11 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     @Description( desc = "角色权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray roleAuthList = jsonObj.getJSONArray("roleNameList");
+        JSONArray roleUuidList = jsonObj.getJSONArray("roleUuidList");
         String action = jsonObj.getString("action");
-        for (int i = 0; i < roleAuthList.size() ; i++){
-            RoleVo roleVo = new RoleVo();
-            roleVo.setName(roleAuthList.getString(i));
-
+        RoleVo roleVo = new RoleVo();
+        for (int i = 0; i < roleUuidList.size() ; i++){
+            roleVo.setUuid(roleUuidList.getString(i));
             JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
             List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
             Set<String> keySet = roleAuthObj.keySet();
@@ -72,7 +75,7 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                     RoleAuthVo roleAuthVo = new RoleAuthVo();
                     roleAuthVo.setAuth(roleAuthArray.getString(j));
                     roleAuthVo.setAuthGroup(key);
-                    roleAuthVo.setRoleName(roleVo.getName());
+                    roleAuthVo.setRoleUuid(roleVo.getUuid());
                     roleAuthVoList.add(roleAuthVo);
                 }
             }
@@ -84,7 +87,7 @@ public class RoleAuthSaveApi extends ApiComponentBase {
                 roleService.coverRoleAuth(roleVo);
             }
             if(AuthVo.AUTH_DELETE.equals(action)){
-                roleService.deleteRoleAuth(roleVo);
+                roleMapper.deleteRoleAuth(roleVo);
             }
         }
         return null;

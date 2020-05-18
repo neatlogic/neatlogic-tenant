@@ -11,7 +11,7 @@ import codedriver.framework.dto.RoleVo;
 public interface RoleService {
 	public List<RoleVo> searchRole(RoleVo roleVo);
 
-	public List<RoleAuthVo> searchRoleAuth(String roleName);
+//	public List<RoleAuthVo> searchRoleAuth(String roleName);
 
 	public int addRoleAuth(RoleVo roleVo);
 
