@@ -1,17 +1,19 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.TeamService;
-import com.alibaba.fastjson.JSONArray;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,7 +25,7 @@ import java.util.List;
 public class TeamUserSaveApi extends ApiComponentBase {
 
     @Autowired
-    private TeamService teamService;
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -47,14 +49,14 @@ public class TeamUserSaveApi extends ApiComponentBase {
     @Description( desc = "分组用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<String> userUuidList = new ArrayList<>();
-        if (jsonObj.containsKey("userUuidList")){
-            JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
-            for (int i = 0 ; i < userUuidArray.size(); i++){
-            	userUuidList.add(userUuidArray.getString(i));
-            }
-        }
-        teamService.saveTeamUser(userUuidList, jsonObj.getString("teamUuid"));
+    	String teamUuid = jsonObj.getString("teamUuid");
+        teamMapper.deleteUserTeamByTeamUuid(teamUuid);
+        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+		if (CollectionUtils.isNotEmpty(userUuidList)){
+			for (String userUuid: userUuidList){
+				teamMapper.insertTeamUser(teamUuid, userUuid);
+			}
+		}
         return null;
     }
 }

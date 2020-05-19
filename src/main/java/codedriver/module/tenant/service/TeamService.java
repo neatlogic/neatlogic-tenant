@@ -7,15 +7,6 @@ import com.alibaba.fastjson.JSONArray;
 import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
-	public List<TeamVo> searchTeam(TeamVo teamVo);
-
-	public TeamVo getTeam(TeamVo team,Integer isEdit);
-
-	public int deleteTeam(String teamUuid);
-
-	public void saveTeam(TeamVo teamVo);
-
-	public void saveTeamUser(List<String> userUuidList, String teamUuid);
 
 	public List<TeamVo> getTeamTree(TeamVo teamVo);
 
