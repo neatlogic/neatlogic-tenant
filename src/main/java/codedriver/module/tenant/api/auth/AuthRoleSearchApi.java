@@ -1,13 +1,13 @@
 package codedriver.module.tenant.api.auth;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.List;
 public class AuthRoleSearchApi extends ApiComponentBase {
 
     @Autowired
-    private RoleService roleService;
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -54,7 +54,7 @@ public class AuthRoleSearchApi extends ApiComponentBase {
         RoleVo roleVo = new RoleVo();
         roleVo.setAuth(auth);
         roleVo.setNeedPage(false);
-        List<RoleVo> roleList = roleService.searchRole(roleVo);
+        List<RoleVo> roleList = roleMapper.searchRole(roleVo);
         returnObj.put("roleList", roleList);
         returnObj.put("roleCount", roleList.size());
         return returnObj;
