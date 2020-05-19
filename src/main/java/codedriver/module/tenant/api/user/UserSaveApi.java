@@ -171,7 +171,7 @@ public class UserSaveApi extends ApiComponentBase {
 		List<String> roleUuidList = JSON.parseArray(jsonObj.getString("roleUuidList"), String.class);
 		if(CollectionUtils.isNotEmpty(roleUuidList)) {
 			for(String roleUuid : roleUuidList) {
-				userMapper.insertUserRole(userVo.getUuid(), roleUuid);
+				userMapper.insertUserRole(userVo.getUuid(), roleUuid.replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
 			}
 		}
 		

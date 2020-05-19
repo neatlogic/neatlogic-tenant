@@ -1,13 +1,13 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -28,7 +28,7 @@ import java.util.List;
 public class RoleGetListApi extends ApiComponentBase {
 
     @Autowired
-    private RoleService roleService;
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -59,7 +59,9 @@ public class RoleGetListApi extends ApiComponentBase {
         if (CollectionUtils.isNotEmpty(roleUuidList)){
             List<RoleVo> roleList = new ArrayList<>();
         	for (String roleUuid : roleUuidList){
-        		RoleVo roleVo = roleService.getRoleByUuid(roleUuid);
+        		RoleVo roleVo = roleMapper.getRoleByUuid(roleUuid);
+        		int userCount = roleMapper.searchRoleUserCountByRoleUuid(roleUuid);
+        		roleVo.setUserCount(userCount);
                 roleList.add(roleVo);
         	}
         	returnObj.put("roleList", roleList);
