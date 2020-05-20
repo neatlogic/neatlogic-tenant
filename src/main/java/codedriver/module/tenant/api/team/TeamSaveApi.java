@@ -14,8 +14,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -30,6 +32,9 @@ public class TeamSaveApi extends ApiComponentBase{
 
 	@Autowired
 	private TeamMapper teamMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
@@ -89,6 +94,9 @@ public class TeamSaveApi extends ApiComponentBase{
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 			if (CollectionUtils.isNotEmpty(userUuidList)){
 				for (String userUuid : userUuidList){
+					if(userMapper.checkUserIsExists(userUuid) == 0) {
+						throw new UserNotFoundException(userUuid);
+					}
 					teamMapper.insertTeamUser(teamVo.getUuid(), userUuid);
 				}
 			}

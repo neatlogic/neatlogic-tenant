@@ -3,17 +3,25 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleAuthVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class RoleAuthSearchApi extends ApiComponentBase {
@@ -56,22 +64,21 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        JSONObject roleAuthObj = new JSONObject();
-        JSONArray roleUuidArray = jsonObj.getJSONArray("roleUuidList");
-        for (int i = 0 ; i < roleUuidArray.size(); i++){
-            List<RoleAuthVo> roleAuthList = roleMapper.searchRoleAuthByRoleUuid(roleUuidArray.getString(i));
-            if (roleAuthList != null && roleAuthList.size() > 0){
+        Map<String, Set<String>> roleAuthObj = new HashMap<>();
+        List<String> roleUuidList = JSON.parseArray(jsonObj.getString("roleUuidList"), String.class);
+        for (String roleUuid : roleUuidList){
+        	if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
+        		throw new RoleNotFoundException(roleUuid);
+        	}
+            List<RoleAuthVo> roleAuthList = roleMapper.searchRoleAuthByRoleUuid(roleUuid);
+            if (CollectionUtils.isNotEmpty(roleAuthList)){
                 for (RoleAuthVo authVo : roleAuthList){
-                    if (roleAuthObj.containsKey(authVo.getAuthGroup())){
-                        JSONArray authArray = roleAuthObj.getJSONArray(authVo.getAuthGroup());
-                        if (!authArray.contains(authVo.getAuth())){
-                            authArray.add(authVo.getAuth());
-                        }
-                    }else {
-                        JSONArray authArray = new JSONArray();
-                        authArray.add(authVo.getAuth());
-                        roleAuthObj.put(authVo.getAuthGroup(), authArray);
+                	Set<String> authList = roleAuthObj.get(authVo.getAuthGroup());               	
+                    if (authList == null){
+                    	authList = new HashSet<>();
+                    	roleAuthObj.put(authVo.getAuthGroup(), authList);
                     }
+                    authList.add(authVo.getAuth());
                 }
             }
         }

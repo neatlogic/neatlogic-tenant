@@ -76,7 +76,7 @@ public class RoleSaveApi extends ApiComponentBase {
 		roleVo.setDescription(jsonObj.getString("description"));
 		String uuid = jsonObj.getString("uuid");		
 		if (StringUtils.isNotBlank(uuid)) {
-			if(roleMapper.checkRoleIsExists(uuid) > 0) {
+			if(roleMapper.checkRoleIsExists(uuid) == 0) {
 				throw new RoleNotFoundException(uuid);
 			}
 			roleVo.setUuid(uuid);

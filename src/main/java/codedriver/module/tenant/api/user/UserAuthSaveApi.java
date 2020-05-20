@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -16,6 +17,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -59,11 +61,15 @@ public class UserAuthSaveApi extends ApiComponentBase {
     @Description( desc = "用户权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+    	List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+//        JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
         String action = jsonObj.getString("action");
-        for (int i = 0; i < userUuidArray.size(); i++){
+        for (String userUuid : userUuidList){
+        	if(userMapper.checkUserIsExists(userUuid) == 0) {
+        		throw new UserNotFoundException(userUuid);
+        	}
             UserVo userVo = new UserVo();
-            userVo.setUuid(userUuidArray.getString(i));
+            userVo.setUuid(userUuid);
             JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");
             List<UserAuthVo> userAuthVoList = new ArrayList<>();
             Set<String> keySet = userAuthObj.keySet();

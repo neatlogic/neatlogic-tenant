@@ -2,6 +2,9 @@ package codedriver.module.tenant.api.team;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.exception.team.TeamNotFoundException;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -26,6 +29,9 @@ public class TeamUserSaveApi extends ApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -50,10 +56,16 @@ public class TeamUserSaveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String teamUuid = jsonObj.getString("teamUuid");
+    	if(teamMapper.checkTeamIsExists(teamUuid) == 0) {
+			throw new TeamNotFoundException(teamUuid);
+		}
         teamMapper.deleteUserTeamByTeamUuid(teamUuid);
         List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
 			for (String userUuid: userUuidList){
+				if(userMapper.checkUserIsExists(userUuid) == 0) {
+					throw new UserNotFoundException(userUuid);
+				}
 				teamMapper.insertTeamUser(teamUuid, userUuid);
 			}
 		}

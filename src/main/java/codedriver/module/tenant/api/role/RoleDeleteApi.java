@@ -1,6 +1,9 @@
 package codedriver.module.tenant.api.role;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +49,8 @@ public class RoleDeleteApi extends ApiComponentBase {
 	@Description(desc = "角色删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONArray uuidList = jsonObj.getJSONArray("uuidList");
-		for (int i = 0; i < uuidList.size(); i++) {
-			String uuid = uuidList.getString(i);
+		List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
+		for (String uuid : uuidList) {
 			roleMapper.deleteMenuRoleByRoleUuid(uuid);
 			roleMapper.deleteTeamRoleByRoleUuid(uuid);
 			roleMapper.deleteUserRoleByRoleUuid(uuid);

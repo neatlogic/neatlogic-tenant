@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -60,6 +61,9 @@ public class RoleGetListApi extends ApiComponentBase {
             List<RoleVo> roleList = new ArrayList<>();
         	for (String roleUuid : roleUuidList){
         		RoleVo roleVo = roleMapper.getRoleByUuid(roleUuid);
+        		if(roleVo == null) {
+        			throw new RoleNotFoundException(roleUuid);
+        		}
         		int userCount = roleMapper.searchRoleUserCountByRoleUuid(roleUuid);
         		roleVo.setUserCount(userCount);
                 roleList.add(roleVo);

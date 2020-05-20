@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.auth;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -58,6 +59,9 @@ public class AuthUserSaveApi extends ApiComponentBase {
         	String auth = jsonObj.getString("auth");
             userMapper.deleteUserAuthByAuth(auth);
         	for(String userUuid : userUuidList) {
+        		if(userMapper.checkUserIsExists(userUuid) == 0) {
+        			throw new UserNotFoundException(userUuid);
+        		}
         		UserAuthVo userAuthVo = new UserAuthVo();
                 userAuthVo.setAuthGroup(authGroup);
                 userAuthVo.setAuth(auth);
@@ -66,18 +70,6 @@ public class AuthUserSaveApi extends ApiComponentBase {
             }
         }
 
-//        if (jsonObj.containsKey("userUuidList")){
-//            JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
-//            for (int i = 0; i < userUuidArray.size(); i++){
-//                String userUuid = userUuidArray.getString(i);
-//                UserAuthVo userAuthVo = new UserAuthVo();
-//                userAuthVo.setAuthGroup(jsonObj.getString("authGroup"));
-//                userAuthVo.setAuth(jsonObj.getString("auth"));
-//                userAuthVo.setUserUuid(userUuid);
-//                userAuthList.add(userAuthVo);
-//            }
-//        }
-//        userService.saveUserAuth(userAuthList, jsonObj.getString("auth"));
         return null;
     }
 }

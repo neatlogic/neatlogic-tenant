@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.auth;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleAuthVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -61,6 +62,9 @@ public class AuthRoleSaveApi extends ApiComponentBase {
             roleAuthVo.setAuth(auth);
             roleAuthVo.setAuthGroup(authGroup);
             for (String roleUuid : roleUuidList){
+            	if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
+            		throw new RoleNotFoundException(roleUuid);
+            	}
                 roleAuthVo.setRoleUuid(roleUuid);
                 roleMapper.insertRoleAuth(roleAuthVo);
             }

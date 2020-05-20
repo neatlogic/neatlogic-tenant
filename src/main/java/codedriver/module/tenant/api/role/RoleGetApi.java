@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -46,6 +47,9 @@ public class RoleGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
 		RoleVo roleVo = roleMapper.getRoleByUuid(uuid);
+		if(roleVo == null) {
+			throw new RoleNotFoundException(uuid);
+		}
 		int userCount = roleMapper.searchRoleUserCountByRoleUuid(uuid);
 		roleVo.setUserCount(userCount);
 		return roleVo;

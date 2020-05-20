@@ -5,6 +5,7 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -65,6 +66,9 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     	if(CollectionUtils.isNotEmpty(roleUuidList)) {
     		String action = jsonObj.getString("action");
             for (String roleUuid : roleUuidList){
+            	if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
+            		throw new RoleNotFoundException(roleUuid);
+            	}
                 JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
                 List<RoleAuthVo> roleAuthList = new ArrayList<>();
                 Set<String> keySet = roleAuthObj.keySet();
