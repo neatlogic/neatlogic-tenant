@@ -54,15 +54,15 @@ public class TeamMoveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String uuid = jsonObj.getString("uuid");
-        String parentUuid = jsonObj.getString("parentUuid");
-        Integer targetSort = jsonObj.getInteger("sort");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
-        List<TeamVo> teamAddList = null;
-        List<TeamVo> teamDescList = null;
         if(team == null) {
         	throw new TeamNotFoundException(uuid);
         }
         int sort = team.getSort();
+        List<TeamVo> teamAddList = null;
+        List<TeamVo> teamDescList = null;
+        Integer targetSort = jsonObj.getInteger("sort");
+        String parentUuid = jsonObj.getString("parentUuid");
         if(team.getParentUuid().equals(parentUuid)) {
         	if(sort == targetSort) {
         		return null;

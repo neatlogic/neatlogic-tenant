@@ -3,11 +3,13 @@ package codedriver.module.tenant.api.user;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,11 +52,13 @@ public class UserGetListApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        JSONArray idArray = jsonObj.getJSONArray("userUuidList");
+        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
         List<UserVo> userList = new ArrayList<>();
-        for (int i = 0; i < idArray.size(); i++){
-            UserVo userVo = userMapper.getUserByUuid(idArray.getString(i));
-            if (userVo != null){
+        for (String userUuid : userUuidList){
+            UserVo userVo = userMapper.getUserByUuid(userUuid);
+            if(userVo == null) {
+    			throw new UserNotFoundException(userUuid);
+    		}else {
                 userList.add(userVo);
             }
         }

@@ -17,6 +17,7 @@ import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -55,8 +56,8 @@ public class UserGetApi extends ApiComponentBase {
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userUuid = jsonObj.getString("userUuid");
-		if(userUuid == null) {
+		String userUuid = jsonObj.getString("userUuid");		
+		if(StringUtils.isBlank(userUuid)) {
 			if(StringUtils.isBlank(UserContext.get().getUserUuid())) {
 				throw new UserGetException("当前用户未登录!");
 			}else {
@@ -64,6 +65,9 @@ public class UserGetApi extends ApiComponentBase {
 			}
 		}
 		UserVo userVo = userMapper.getUserByUuid(userUuid);
+		if(userVo == null) {
+			throw new UserNotFoundException(userUuid);
+		}
 		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
 		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
 			List<String> teamUuidList = new ArrayList<>();

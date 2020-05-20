@@ -53,7 +53,7 @@ public class UserPasswordUpdateApi extends ApiComponentBase {
 			
 	})
 	@Output({})
-	@Description(desc = "保存用户接口")
+	@Description(desc = "修改用户密码接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String password = jsonObj.getString("password");

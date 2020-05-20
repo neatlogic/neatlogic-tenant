@@ -50,16 +50,6 @@ public class UserDeleteApi extends ApiComponentBase{
 	@Description(desc = "删除用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-//		JSONArray uuidArray = jsonObj.getJSONArray("userUuidList");
-//		for (int i = 0; i < uuidArray.size(); i++){
-//			String userUuid = uuidArray.getString(i);
-//			UserVo userVo = new UserVo();
-//			userVo.setUuid(userUuid);
-//			userMapper.deleteUserAuth(userVo);
-//			userMapper.deleteUserRoleByUserUuid(userUuid);
-//			userMapper.deleteUserTeamByUserUuid(userUuid);
-//			userMapper.deleteUserByUuid(userUuid);
-//		}
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
     	if(CollectionUtils.isNotEmpty(userUuidList)) {
 			UserVo userVo = new UserVo();

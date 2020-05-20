@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.user;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -39,7 +40,7 @@ public class UserActiveUpdateApi extends ApiComponentBase {
 
     @Input({
             @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合",isRequired = true),
-            @Param(name = "isActive", type = ApiParamType.STRING, desc = "有效性", isRequired = true)
+            @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "有效性", isRequired = true)
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -49,6 +50,9 @@ public class UserActiveUpdateApi extends ApiComponentBase {
 			UserVo userVo = new UserVo();
             userVo.setIsActive(isActive);
     		for(String userUuid : userUuidList) {
+    			if(userMapper.checkUserIsExists(userUuid) == 0) {
+    				throw new UserNotFoundException(userUuid);
+    			}
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
     		}

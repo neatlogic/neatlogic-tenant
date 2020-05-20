@@ -3,15 +3,17 @@ package codedriver.module.tenant.api.team;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
+import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -54,13 +56,18 @@ public class TeamGetListApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        JSONArray teamIdArray = jsonObj.getJSONArray("teamIdList");
-        List<TeamVo> teamList = new ArrayList<>();
-        for (int i = 0; i < teamIdArray.size(); i++){
-            TeamVo team = teamMapper.getTeamByUuid(teamIdArray.getString(i));
-            teamList.add(team);
+        List<String> teamUuiddList = JSON.parseArray(jsonObj.getString("teamIdList"), String.class);
+        if(CollectionUtils.isNotEmpty(teamUuiddList)) {
+            List<TeamVo> teamList = new ArrayList<>();
+        	for(String teamUuid : teamUuiddList) {
+        		TeamVo team = teamMapper.getTeamByUuid(teamUuid);
+        		if(team == null) {
+        			throw new TeamNotFoundException(teamUuid);
+        		}
+                teamList.add(team);
+        	}
+            returnObj.put("teamList", teamList);
         }
-        returnObj.put("teamList", teamList);
         return returnObj;
     }
 }

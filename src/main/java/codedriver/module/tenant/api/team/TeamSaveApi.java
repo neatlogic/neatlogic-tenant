@@ -66,7 +66,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		teamVo.setSort(jsonObj.getInteger("sort"));
 
 		if(StringUtils.isNotBlank(uuid)){
-			if(teamMapper.getTeamByUuid(uuid) == null) {
+			if(teamMapper.checkTeamIsExists(uuid) == 0) {
 				throw new TeamNotFoundException(uuid);
 			}
 			teamVo.setUuid(uuid);
@@ -75,7 +75,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		}else {
 			String parentUuid = jsonObj.getString("parentUuid");
 			if (StringUtils.isNotBlank(parentUuid)){
-				if(teamMapper.getTeamByUuid(parentUuid) == null) {
+				if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
 					throw new TeamNotFoundException(parentUuid);
 				}
 			}else {
