@@ -13,7 +13,6 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardVo;
-import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -28,7 +27,7 @@ import codedriver.module.tenant.exception.dashboard.DashboardNotFoundException;
 @Service
 @Transactional
 @IsActived
-public class DashboardWidgetSaveApi extends ApiComponentBase {
+public class DashboardWidgetDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private DashboardMapper dashboardMapper;
@@ -39,12 +38,12 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "dashboard/widget/save";
+		return "dashboard/widget/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "保存仪表板组件接口";
+		return "删除仪表板组件接口";
 	}
 
 	@Override
@@ -54,29 +53,18 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "dashboardUuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true),
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid", isRequired = true),
-		@Param(name = "name", type = ApiParamType.STRING, desc = "组件名称", isRequired = true),
-		@Param(name = "refreshInterval", type = ApiParamType.INTEGER, desc = "组件定时刷新间隔，单位：秒，为0代表不定时刷新", isRequired = true),
-		@Param(name = "handler", type = ApiParamType.STRING, desc = "组件处理类", isRequired = true),
-		@Param(name = "chartType", type = ApiParamType.STRING, desc = "组件图表类型", isRequired = true),
-		@Param(name = "conditionConfig", type = ApiParamType.STRING, desc = "数据过滤", isRequired = true),
-		@Param(name = "chartConfig", type = ApiParamType.STRING, desc = "显示格式", isRequired = true),
-		@Param(name = "x", type = ApiParamType.INTEGER, desc = "x坐标", isRequired = true),
-		@Param(name = "y", type = ApiParamType.INTEGER, desc = "y坐标", isRequired = true),
-		@Param(name = "i", type = ApiParamType.INTEGER, desc = "索引", isRequired = true),
-		@Param(name = "w", type = ApiParamType.INTEGER, desc = "宽度", isRequired = true),
-		@Param(name = "h", type = ApiParamType.INTEGER, desc = "高度", isRequired = true),
-		
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "组件uuid", isRequired = true)
 		})
-	@Output({ @Param(explode = DashboardWidgetVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板组件详细信息") })
-	@Description(desc = "保存仪表板组件接口")
+	@Output({})
+	@Description(desc = "删除仪表板组件接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String userId = UserContext.get().getUserId(true);
-		DashboardWidgetVo dashboardWidgetVo = JSONObject.toJavaObject(jsonObj, DashboardWidgetVo.class);
-		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardWidgetVo.getDashboardUuid());
+		String dashboardUuid = jsonObj.getString("dashboardUuid");
+		String uuid = jsonObj.getString("uuid");
+		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardUuid);
 		if(dashboardVo == null) {
-			throw new DashboardNotFoundException(dashboardWidgetVo.getDashboardUuid());
+			throw new DashboardNotFoundException(uuid);
 		}
 		if(DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
 			//判断是否有管理员权限
@@ -87,8 +75,7 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 			throw new DashboardAuthenticationException("修改");
 		}
 		
-		dashboardMapper.deleteDashboardWidgetByUuid(dashboardWidgetVo.getDashboardUuid(),dashboardWidgetVo.getUuid());
-		dashboardMapper.insertDashboardWidget(dashboardWidgetVo);
+		dashboardMapper.deleteDashboardWidgetByUuid(dashboardUuid,uuid);
 		return null;
 	}
 }
