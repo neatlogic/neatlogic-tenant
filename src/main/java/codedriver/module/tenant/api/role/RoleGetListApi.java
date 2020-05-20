@@ -50,7 +50,7 @@ public class RoleGetListApi extends ApiComponentBase {
             @Param( name = "roleUuidList", desc = "角色uuid集合", type = ApiParamType.JSONARRAY, isRequired = true)
     })
     @Output({
-            @Param( name = "roleList", desc = "角色集合", type = ApiParamType.JSONARRAY, explode = RoleVo[].class)
+            @Param( name = "roleList", desc = "角色集合", explode = RoleVo[].class)
     })
     @Description(desc = "批量获取角色信息接口")
     @Override

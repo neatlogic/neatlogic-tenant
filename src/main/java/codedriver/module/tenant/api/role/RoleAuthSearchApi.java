@@ -55,7 +55,6 @@ public class RoleAuthSearchApi extends ApiComponentBase {
     @Output({
             @Param(
                     name = "roleAuthList",
-                    type = ApiParamType.JSONARRAY,
                     explode = RoleAuthVo[].class,
                     desc = "角色权限集合"
             )
