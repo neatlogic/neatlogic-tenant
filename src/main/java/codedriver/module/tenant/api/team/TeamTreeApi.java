@@ -41,7 +41,7 @@ public class TeamTreeApi extends ApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "uuid", desc = "teamUuid，这里指父级uuid", type = ApiParamType.STRING),
+    @Input({ @Param( name = "parentUuid", desc = "teamUuid，这里指父级uuid", type = ApiParamType.STRING),
              @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
              @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
              @Param( name = "pageSize", desc = "每页最大数", type = ApiParamType.INTEGER)
@@ -62,7 +62,7 @@ public class TeamTreeApi extends ApiComponentBase {
         }
         teamVo.setCurrentPage(jsonObj.getInteger("currentPage"));
         teamVo.setPageSize(jsonObj.getInteger("pageSize"));
-        String parentUuid = jsonObj.getString("uuid");
+        String parentUuid = jsonObj.getString("parentUuid");
         if (StringUtils.isNotBlank(parentUuid)){
         	if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
         		throw new TeamNotFoundException(parentUuid);

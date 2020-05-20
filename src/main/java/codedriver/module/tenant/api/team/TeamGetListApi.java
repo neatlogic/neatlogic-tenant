@@ -47,7 +47,7 @@ public class TeamGetListApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "teamIdList", desc = "用户组ID集合", type = ApiParamType.JSONARRAY, isRequired = true)
+            @Param( name = "teamUuidList", desc = "用户组Uuid集合", type = ApiParamType.JSONARRAY, isRequired = true)
     })
     @Output({
             @Param( name = "teamList", desc = "用户组集合", explode = TeamVo[].class)
@@ -56,7 +56,7 @@ public class TeamGetListApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<String> teamUuiddList = JSON.parseArray(jsonObj.getString("teamIdList"), String.class);
+        List<String> teamUuiddList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
         if(CollectionUtils.isNotEmpty(teamUuiddList)) {
             List<TeamVo> teamList = new ArrayList<>();
         	for(String teamUuid : teamUuiddList) {
