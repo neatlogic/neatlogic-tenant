@@ -22,6 +22,7 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -68,9 +69,13 @@ public class RoleSaveApi extends ApiComponentBase {
 			@Param( name= "roleAuthList",
 					desc = "角色权限集合",
 					type = ApiParamType.JSONOBJECT)})
+	@Output({
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid")
+	})
 	@Description(desc = "角色信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		JSONObject resultObj = new JSONObject();
 		RoleVo roleVo = new RoleVo();
 		roleVo.setName(jsonObj.getString("name"));
 		roleVo.setDescription(jsonObj.getString("description"));
@@ -108,6 +113,7 @@ public class RoleSaveApi extends ApiComponentBase {
 				}
 			}
 		}
-		return null;
+		resultObj.put("uuid", roleVo.getUuid());
+		return resultObj;
 	}
 }

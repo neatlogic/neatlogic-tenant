@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
  * @create: 2020-03-07 17:39
  **/
 @Service
+@Transactional
 public class TeamUserSaveApi extends ApiComponentBase {
 
     @Autowired

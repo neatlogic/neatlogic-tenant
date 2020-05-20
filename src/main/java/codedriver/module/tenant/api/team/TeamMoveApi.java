@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -24,6 +25,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2020-03-05 18:20
  **/
 @Service
+@Transactional
 public class TeamMoveApi extends ApiComponentBase {
 
     @Autowired

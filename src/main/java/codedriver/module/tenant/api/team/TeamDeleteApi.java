@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -18,6 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
+@Transactional
 public class TeamDeleteApi extends ApiComponentBase {
 
 	@Autowired
