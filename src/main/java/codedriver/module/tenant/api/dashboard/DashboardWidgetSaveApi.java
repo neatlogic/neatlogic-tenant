@@ -87,7 +87,7 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 			throw new DashboardAuthenticationException("修改");
 		}
 		
-		dashboardMapper.deleteDashboardWidgetByUuid(dashboardWidgetVo.getUuid());
+		dashboardMapper.deleteDashboardWidgetByUuid(dashboardWidgetVo.getDashboardUuid(),dashboardWidgetVo.getUuid());
 		dashboardMapper.insertDashboardWidget(dashboardWidgetVo);
 		return null;
 	}
