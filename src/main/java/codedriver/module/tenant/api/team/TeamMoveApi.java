@@ -18,6 +18,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.service.TeamService;
 
 /**
  * @program: codedriver
@@ -30,6 +31,9 @@ public class TeamMoveApi extends ApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
+    
+    @Autowired
+    private TeamService teamService;
 
     @Override
     public String getToken() {
@@ -55,22 +59,26 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+		if(!teamService.checkLeftRightCodeIsExists()) {
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		}
     	String uuid = jsonObj.getString("uuid");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
         if(team == null) {
         	throw new TeamNotFoundException(uuid);
         }
-        int sort = team.getSort();
+        Integer sort = team.getSort();
         List<TeamVo> teamAddList = null;
         List<TeamVo> teamDescList = null;
-        Integer targetSort = jsonObj.getInteger("sort");
+        int targetSort = jsonObj.getIntValue("sort");
         String parentUuid = jsonObj.getString("parentUuid");
-        if(team.getParentUuid().equals(parentUuid)) {
+        if(parentUuid.equals(team.getParentUuid())) {
         	if(sort == targetSort) {
         		return null;
-        	}else if(sort > targetSort) {
+        	}else if(sort > targetSort) {//向上移动
         		teamAddList = teamMapper.getTeamSortUpTeamList(parentUuid, sort,targetSort);
-        	}else {
+        	}else {//向下移动
         		teamDescList = teamMapper.getTeamSortDownTeamList(parentUuid, sort,targetSort);
         	}
         }else {

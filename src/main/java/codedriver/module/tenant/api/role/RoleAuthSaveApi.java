@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Transactional
 public class RoleAuthSaveApi extends ApiComponentBase {
     
     @Autowired

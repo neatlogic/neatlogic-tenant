@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -21,6 +22,7 @@ import codedriver.module.tenant.exception.user.UserCurrentPasswordException;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
+@Transactional
 public class UserPasswordUpdateApi extends ApiComponentBase {
 	
 	@Autowired

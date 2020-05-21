@@ -68,7 +68,7 @@ public class TeamTreeApi extends ApiComponentBase {
         		throw new TeamNotFoundException(parentUuid);
         	}
 		}else {
-			parentUuid = TeamVo.DEFAULT_PARENTUUID;
+			parentUuid = TeamVo.ROOT_UUID;
 		}
     	teamVo.setParentUuid(parentUuid);
 		if (teamVo.getNeedPage()){

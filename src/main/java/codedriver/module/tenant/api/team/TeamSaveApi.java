@@ -23,6 +23,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.service.TeamService;
 
 
 @AuthAction(name="SYSTEM_TEAM_EDIT")
@@ -35,6 +36,9 @@ public class TeamSaveApi extends ApiComponentBase{
     
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired
+    private TeamService teamService;
 	
 	@Override
 	public String getToken() {
@@ -68,7 +72,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		String uuid = jsonObj.getString("uuid");
 		TeamVo teamVo = new TeamVo();
 		teamVo.setName(jsonObj.getString("name"));
-		teamVo.setSort(jsonObj.getInteger("sort"));
+//		teamVo.setSort(jsonObj.getInteger("sort"));
 
 		if(StringUtils.isNotBlank(uuid)){
 			if(teamMapper.checkTeamIsExists(uuid) == 0) {
@@ -78,16 +82,32 @@ public class TeamSaveApi extends ApiComponentBase{
 			teamMapper.updateTeamNameByUuid(teamVo);
 			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
+			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+			if(!teamService.checkLeftRightCodeIsExists()) {
+				teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+			}
 			String parentUuid = jsonObj.getString("parentUuid");
-			if (StringUtils.isNotBlank(parentUuid)){
-				if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
-					throw new TeamNotFoundException(parentUuid);
-				}
-			}else {
-				parentUuid = TeamVo.DEFAULT_PARENTUUID;
+			if (StringUtils.isBlank(parentUuid)){
+				parentUuid = TeamVo.ROOT_UUID;
+			}
+			TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			if(parentTeam == null) {
+				throw new TeamNotFoundException(parentUuid);
 			}
 			teamVo.setParentUuid(parentUuid);
 			int sort = teamMapper.getMaxTeamSortByParentUuid(parentUuid);
+			if(sort == 0) {//该节点是父节点的第一个子节点
+				int lft = parentTeam.getRht() + 1;
+				teamVo.setLft(lft);
+				teamVo.setRht(lft + 1);
+			}else {//找出前面的兄弟节点
+				TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, sort);
+				int lft = prevTeam.getRht() + 1;
+				teamVo.setLft(lft);
+				teamVo.setRht(lft + 1);
+			}
+			teamMapper.batchUpdateTeamLeftCode(teamVo.getLft(), 2);
+			teamMapper.batchUpdateTeamRightCode(teamVo.getLft(), 2);
 			sort++;
 			teamVo.setSort(sort);
 			teamMapper.insertTeam(teamVo);

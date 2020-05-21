@@ -75,7 +75,7 @@ public class TeamTreeSearchApi extends ApiComponentBase {
             childArray.add(dataObj);
             teamObj.put("children", childArray);
         }
-        if (!TeamVo.DEFAULT_PARENTUUID.equals(teamVo.getParentUuid())){
+        if (!TeamVo.ROOT_UUID.equals(teamVo.getParentUuid())){
          return iterativeAssembly(teamVo.getParentUuid(), teamObj);
         }
         return teamObj;
