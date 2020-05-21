@@ -59,10 +59,9 @@ public class TeamMoveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
 		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
-//		if(!teamService.checkLeftRightCodeIsExists()) {
-//			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
-//		}
-		teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		if(!teamService.checkLeftRightCodeIsExists()) {
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		}
     	String uuid = jsonObj.getString("uuid");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
         if(team == null) {
