@@ -58,10 +58,11 @@ public class TeamDeleteApi extends ApiComponentBase {
 		if(team == null) {
 			throw new TeamNotFoundException(uuid);
 		}
-		int count = teamMapper.getTeamCountByLeftRightCode(team.getLft(), team.getRht());
+		//计算被删除块右边的节点移动步长
+ 		int step = team.getRht() - team.getLft() + 1;
 		teamMapper.deleteTeamByLeftRightCode(team.getLft(), team.getRht());
-		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -2 * count);
-		teamMapper.batchUpdateTeamRightCode(team.getLft(), -2 * count);
+		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
+		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
 //		iterativeDelete(uuid);
 		return null;
 	}
