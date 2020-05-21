@@ -78,12 +78,12 @@ public class DashboardSearchApi extends ApiComponentBase {
 		if(jsonObj.containsKey("keyword")) {
 			dashboardVo.setKeyword(jsonObj.getString("keyword"));
 		}
-		String userId = UserContext.get().getUserId(true);
-		dashboardVo.setFcu(userId);
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
-		dashboardVo.setUserId(userId);
+		String userUuid = UserContext.get().getUserUuid(true);
+		dashboardVo.setFcu(userUuid);
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+		dashboardVo.setUserUuid(userUuid);
 		dashboardVo.setTeamUuidList(teamUuidList);
-		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo.setRoleUuidList(UserContext.get().getRoleUuidList());
 		int rowNum = dashboardMapper.searchDashboardCount(dashboardVo);
 		int pageCount = PageUtil.getPageCount(rowNum, dashboardVo.getPageSize());
 		List<String> dashboardUuidList = dashboardMapper.searchAuthorizedDashboardUuid(dashboardVo);
@@ -91,8 +91,8 @@ public class DashboardSearchApi extends ApiComponentBase {
 		if(CollectionUtils.isNotEmpty(dashboardUuidList)) {
 			dashboardList = dashboardMapper.getDashboardListByUuidList(dashboardUuidList);
 		}
-		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
-		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserId(),DASHBOARD_MODIFY.class.getSimpleName()));
+		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserUuid(userUuid);
+		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName()));
 		// 补充权限数据
 		for (DashboardVo dashboard : dashboardList) {
 			if (CollectionUtils.isNotEmpty(dashboardDefaultList)) {
@@ -107,7 +107,7 @@ public class DashboardSearchApi extends ApiComponentBase {
 				dashboard.setIsCanEdit(1);
 				dashboard.setIsCanRole(1);
 			}else {
-				if(UserContext.get().getUserId().equalsIgnoreCase(dashboard.getFcu())) {
+				if(userUuid.equalsIgnoreCase(dashboard.getFcu())) {
 					dashboard.setIsCanEdit(1);
 					if(CollectionUtils.isNotEmpty(userAuthList)) {
 						dashboard.setIsCanRole(1);

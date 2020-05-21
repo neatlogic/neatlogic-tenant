@@ -2,7 +2,7 @@ package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class UserReminderCountApi extends ApiComponentBase {
 
     @Autowired
-    private GlobalReminderService reminderService;
+    private GlobalReminderMessageMapper reminderMessageMapper;
 
     @Override
     public String getToken() {
@@ -42,7 +42,7 @@ public class UserReminderCountApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        returnObj.put("messageCount", reminderService.getReminderMessageCount(UserContext.get().getUserId()));
+        returnObj.put("messageCount", reminderMessageMapper.getReminderMessageCount(UserContext.get().getUserUuid()));
         return returnObj;
     }
 }

@@ -1,26 +1,27 @@
 package codedriver.module.tenant.api.user;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.UserService;
 
 @Service
 public class UserSearchApi extends ApiComponentBase {
 
 	@Autowired
-	private UserService userService;
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -53,9 +54,9 @@ public class UserSearchApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "用户组uuid"
 			),
-			@Param(name = "roleName",
+			@Param(name = "roleUuid",
 					type = ApiParamType.STRING,
-					desc = "角色名称"),
+					desc = "角色uuid"),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页数",
@@ -87,31 +88,17 @@ public class UserSearchApi extends ApiComponentBase {
 	@Description(desc = "查询用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		System.out.println(jsonObj.toJSONString());
-		JSONObject json = new JSONObject();
-		UserVo userVo = new UserVo();
-		userVo.setKeyword(jsonObj.getString("keyword"));
-		if (jsonObj.containsKey("pageSize")) {
-			userVo.setPageSize(jsonObj.getInteger("pageSize"));
+		
+		JSONObject resultObj = new JSONObject();
+		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
+		if (userVo.getNeedPage()) {
+			int rowNum = userMapper.searchUserCount(userVo);
+			resultObj.put("rowNum", rowNum);
+			resultObj.put("pageSize", userVo.getPageSize());
+			resultObj.put("currentPage", userVo.getCurrentPage());
+			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, userVo.getPageSize()));
 		}
-		if (jsonObj.containsKey("needPage")){
-		    userVo.setNeedPage(jsonObj.getBoolean("needPage"));
-        }
-        if (jsonObj.containsKey("currentPage")){
-			userVo.setCurrentPage(jsonObj.getInteger("currentPage"));
-		}
-		userVo.setAuth(jsonObj.getString("auth"));
-		userVo.setAuthGroup(jsonObj.getString("authGroup"));
-		userVo.setTeamUuid(jsonObj.getString("teamUuid"));
-		userVo.setRoleName(jsonObj.getString("roleName"));
-		List<UserVo> userList = userService.searchUser(userVo);
-		json.put("tbodyList", userList);
-		if (userVo.getNeedPage()){
-            json.put("rowNum", userVo.getRowNum());
-            json.put("pageSize", userVo.getPageSize());
-            json.put("currentPage", userVo.getCurrentPage());
-            json.put("pageCount", userVo.getPageCount());
-        }
-		return json;
+		resultObj.put("tbodyList", userMapper.searchUser(userVo));
+		return resultObj;
 	}
 }

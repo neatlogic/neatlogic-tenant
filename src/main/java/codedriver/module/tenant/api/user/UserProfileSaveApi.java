@@ -7,6 +7,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -25,6 +26,7 @@ import codedriver.framework.userprofile.UserProfileFactory;
 import codedriver.module.tenant.exception.user.UserProfileModuleNotFoundException;
 
 @Service
+@Transactional
 public class UserProfileSaveApi extends ApiComponentBase {
 	@Autowired
 	UserMapper userMapper;
@@ -57,7 +59,7 @@ public class UserProfileSaveApi extends ApiComponentBase {
 		String moduleId = jsonObj.getString("moduleId");
 		String name = jsonObj.getString("name");
 		String operate = jsonObj.getString("operate");
-		String userId =UserContext.get().getUserId();
+		String userUuid =UserContext.get().getUserUuid(true);
 		Integer checked = jsonObj.getInteger("checked");
 		if(!UserProfileFactory.getUserProfileMap().containsKey(moduleId)) {
 			throw new UserProfileModuleNotFoundException(moduleId);
@@ -74,7 +76,7 @@ public class UserProfileSaveApi extends ApiComponentBase {
 			JSONArray operateList = profileJson.getJSONArray("userProfileOperateList");
 			List<Object> operateTmpList =  operateList.stream().filter(o->((JSONObject)o).containsValue(operate)).collect(Collectors.toList());
 			profileJson.put("userProfileOperateList", operateTmpList);
-			List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserIdAndModuleId(userId,moduleId);
+			List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserUuidAndModuleId(userUuid, moduleId);
 			if(CollectionUtils.isNotEmpty(myUserProfileList)) {//存在用户记录 update
 				UserProfileVo userProfileVo = myUserProfileList.get(0);
 				String myConfig = userProfileVo.getConfig();
@@ -101,9 +103,9 @@ public class UserProfileSaveApi extends ApiComponentBase {
 						}
 					}
 					if(CollectionUtils.isNotEmpty(myConfigArray)) {
-						userMapper.updateUserProfileByUserIdAndModuleId(userId, moduleId, myConfigArray.toJSONString());
+						userMapper.updateUserProfileByUserUuidAndModuleId(userUuid, moduleId, myConfigArray.toJSONString());
 					}else {//config 为空，则删除用户记录
-						userMapper.deleteUserProfileByUserIdAndModuleId(userId, moduleId);
+						userMapper.deleteUserProfileByUserUuidAndModuleId(userUuid, moduleId);
 					}
 				}else {
 					//do nothing
@@ -114,7 +116,7 @@ public class UserProfileSaveApi extends ApiComponentBase {
 					JSONArray myConfigArray = new JSONArray();
 					myConfigArray.add(list.get(0));
 					userProfileVo.setModuleId(moduleId);
-					userProfileVo.setUserId(userId);
+					userProfileVo.setUserUuid(userUuid);
 					userProfileVo.setConfig(myConfigArray.toJSONString());
 					userMapper.insertUserProfile(userProfileVo);
 				}else {

@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.counter;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.counter.dto.GlobalCounterVo;
 import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;
@@ -52,12 +51,10 @@ public class CounterSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         GlobalCounterVo counter = new GlobalCounterVo();
         JSONObject returnJson = new JSONObject();
-        String userId = UserContext.get().getUserId();
         if(jsonObj.containsKey("moduleId")){
             String moduleId = jsonObj.getString("moduleId");
             counter.setModuleId(moduleId);
         }
-        counter.setUserId(userId);
         List<GlobalCounterVo> counterList = counterService.searchCounterVo(counter);
         if (counterList != null && counterList.size() > 0){
             for (int i = 0; i < counterList.size(); i++){

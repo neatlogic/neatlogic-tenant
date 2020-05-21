@@ -54,9 +54,9 @@ public class DashboardGetDefaultApi extends ApiComponentBase {
 	@Description(desc = "获取默认仪表板接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = UserContext.get().getUserId(true);
+		String userUuid = UserContext.get().getUserUuid(true);
 		String dashboardUuid = null;
-		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserId(userId);
+		List<DashboardDefaultVo> dashboardDefaultList = dashboardMapper.getDefaultDashboardUuidByUserUuid(userUuid);
 		if (CollectionUtils.isNotEmpty(dashboardDefaultList)) {
 			for(DashboardDefaultVo dashboardDefaultVo:dashboardDefaultList) {
 				if(dashboardDefaultVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())) {
@@ -74,9 +74,9 @@ public class DashboardGetDefaultApi extends ApiComponentBase {
 			List<DashboardWidgetVo> dashboardWidgetList = dashboardMapper.getDashboardWidgetByDashboardUuid(dashboardUuid);
 			dashboardVo.setWidgetList(dashboardWidgetList);
 			// 更新计数器
-			DashboardVisitCounterVo counterVo = dashboardMapper.getDashboardVisitCounter(dashboardUuid, userId);
+			DashboardVisitCounterVo counterVo = dashboardMapper.getDashboardVisitCounter(dashboardUuid, userUuid);
 			if (counterVo == null) {
-				dashboardMapper.insertDashboardVisitCounter(new DashboardVisitCounterVo(dashboardUuid, userId));
+				dashboardMapper.insertDashboardVisitCounter(new DashboardVisitCounterVo(dashboardUuid, userUuid));
 			} else {
 				dashboardMapper.updateDashboardVisitCounter(counterVo);
 			}

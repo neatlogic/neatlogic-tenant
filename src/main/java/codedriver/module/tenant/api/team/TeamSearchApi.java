@@ -11,19 +11,20 @@ import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.TeamService;
 
 @Service
 public class TeamSearchApi extends ApiComponentBase {
 
 	@Autowired
-	private TeamService teamService;
+	private TeamMapper teamMapper;
 
 	@Override
 	public String getToken() {
@@ -78,15 +79,16 @@ public class TeamSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
-		List<TeamVo> teamList = teamService.searchTeam(teamVo);
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("teamList", teamList);
 		if (teamVo.getNeedPage()) {
+			int rowNum = teamMapper.searchTeamCount(teamVo);
 			returnObj.put("pageSize", teamVo.getPageSize());
 			returnObj.put("currentPage", teamVo.getCurrentPage());
-			returnObj.put("rowNum", teamVo.getRowNum());
-			returnObj.put("pageCount", teamVo.getPageCount());
+			returnObj.put("rowNum", rowNum);
+			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, teamVo.getPageSize()));
 		}
+		List<TeamVo> teamList = teamMapper.searchTeam(teamVo);
+		returnObj.put("teamList", teamList);
 		return returnObj;
 	}
 

@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class ReminderAllUpdateApi extends ApiComponentBase {
 
     @Autowired
-    private GlobalReminderService reminderService;
+    private GlobalReminderMessageMapper reminderMessageMapper;
 
     @Override
     public String getToken() {
@@ -37,8 +37,7 @@ public class ReminderAllUpdateApi extends ApiComponentBase {
     @Description(desc = "重置所有消息有效性接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String userId = UserContext.get().getUserId();
-        reminderService.updateAllMessageActive(userId);
-        return new JSONObject();
+        reminderMessageMapper.updateAllMessageActive(UserContext.get().getUserUuid());
+        return null;
     }
 }

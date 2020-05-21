@@ -15,7 +15,7 @@
 		<result column="openMode" property="openMode" />
 		<result column="isAuto" property="isAuto" />
 		<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
-			<id column="roleName" property="name" />
+			<id column="roleUuid" property="uuid" />
 		</collection>
 		<collection property="childMenuList" ofType="codedriver.module.tenant.dto.MenuVo">
 			<id column="childId" property="id" />
@@ -31,7 +31,7 @@
 			<result column="childIsAuto" property="isAuto" />
 			<result column="childOpenMode" property="openMode" />
 			<collection property="roleList" ofType="codedriver.framework.dto.RoleVo">
-				<id column="childRoleName" property="name" />
+				<id column="childRoleUuid" property="uuid" />
 			</collection>
 		</collection>
 	</resultMap>
@@ -45,7 +45,7 @@
 		a.url,
 		a.sort,
 		a.is_active as isActive,
-		c.role_name as roleName, 
+		c.role_uuid as roleUuid, 
 		a.description,
 		a.module,
 		a.is_auto AS isAuto,
@@ -57,7 +57,7 @@
 		b.url AS childUrl,
 		b.sort AS childSort,
 		b.is_active AS childIsActive,
-		d.role_name AS childRoleName,
+		d.role_uuid AS childRoleUuid,
 		b.description AS childDescription,
 		b.module AS childModule,
 		b.open_mode AS childOpenMode,
@@ -87,18 +87,18 @@
 		<if test="id!=null and id != ''">
 			AND a.id = #{id}
 		</if>
-		<if test="roleNameList != null and roleNameList.size() > 0 ">
-			AND (c.role_name IN
-			<foreach collection="roleNameList" item="item" open="(" separator="," close=")">
+		<if test="roleUuidList != null and roleUuidList.size() > 0 ">
+			AND (c.role_uuid IN
+			<foreach collection="roleUuidList" item="item" open="(" separator="," close=")">
 				#{item}
 			</foreach>
-			or c.role_name is null)
+			or c.role_uuid is null)
 			
-			AND (d.role_name IN
-			<foreach collection="roleNameList" item="item" open="(" separator="," close=")">
+			AND (d.role_uuid IN
+			<foreach collection="roleUuidList" item="item" open="(" separator="," close=")">
 				#{item}
 			</foreach>
-			or d.role_name is null)
+			or d.role_uuid is null)
 		</if>
 		ORDER BY b.parent_id, b.sort
 	</select>
@@ -146,11 +146,11 @@
 	<insert id="insertMenuRole">
 		REPLACE INTO menu_role
 		(menu_id,
-		role_name
+		role_uuid
 		)
 		VALUES
 		(#{menuId},
-		#{roleName}
+		#{roleUuid}
 		)
 	</insert>
 	

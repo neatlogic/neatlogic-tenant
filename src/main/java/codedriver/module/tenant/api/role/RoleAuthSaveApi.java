@@ -1,30 +1,36 @@
 package codedriver.module.tenant.api.role;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Service
+@Transactional
 public class RoleAuthSaveApi extends ApiComponentBase {
-
-
+    
     @Autowired
-    private RoleService roleService;
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -42,9 +48,9 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param(name = "roleNameList",
+            @Param(name = "roleUuidList",
                     type = ApiParamType.JSONARRAY,
-                    desc = "角色名称集合",
+                    desc = "角色Uuid集合",
                     isRequired = true),
             @Param(name = "roleAuthList",
                     type = ApiParamType.JSONOBJECT,
@@ -58,36 +64,52 @@ public class RoleAuthSaveApi extends ApiComponentBase {
     @Description( desc = "角色权限保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray roleAuthList = jsonObj.getJSONArray("roleNameList");
-        String action = jsonObj.getString("action");
-        for (int i = 0; i < roleAuthList.size() ; i++){
-            RoleVo roleVo = new RoleVo();
-            roleVo.setName(roleAuthList.getString(i));
+    	List<String> roleUuidList = JSON.parseArray(jsonObj.getString("roleUuidList"), String.class);
+    	if(CollectionUtils.isNotEmpty(roleUuidList)) {
+    		String action = jsonObj.getString("action");
+            for (String roleUuid : roleUuidList){
+            	if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
+            		throw new RoleNotFoundException(roleUuid);
+            	}
+                JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
+                List<RoleAuthVo> roleAuthList = new ArrayList<>();
+                Set<String> keySet = roleAuthObj.keySet();
+                for (String key : keySet){
+                    JSONArray roleAuthArray = roleAuthObj.getJSONArray(key);
+                    for (int j = 0; j < roleAuthArray.size(); j++){
+                        RoleAuthVo roleAuthVo = new RoleAuthVo();
+                        roleAuthVo.setAuth(roleAuthArray.getString(j));
+                        roleAuthVo.setAuthGroup(key);
+                        roleAuthVo.setRoleUuid(roleUuid);
+                        roleAuthList.add(roleAuthVo);
+                    }
+                }
 
-            JSONObject roleAuthObj = jsonObj.getJSONObject("roleAuthList");
-            List<RoleAuthVo> roleAuthVoList = new ArrayList<>();
-            Set<String> keySet = roleAuthObj.keySet();
-            for (String key : keySet){
-                JSONArray roleAuthArray = roleAuthObj.getJSONArray(key);
-                for (int j = 0; j < roleAuthArray.size(); j++){
-                    RoleAuthVo roleAuthVo = new RoleAuthVo();
-                    roleAuthVo.setAuth(roleAuthArray.getString(j));
-                    roleAuthVo.setAuthGroup(key);
-                    roleAuthVo.setRoleName(roleVo.getName());
-                    roleAuthVoList.add(roleAuthVo);
+                if (AuthVo.AUTH_ADD.equals(action)){
+                    List<RoleAuthVo> oldRoleAuthVoList = roleMapper.searchRoleAuthByRoleUuid(roleUuid);
+            		Set<String> authSet = new HashSet<>();
+            		for (RoleAuthVo authVo : oldRoleAuthVoList){
+            			authSet.add(authVo.getAuth());
+            		}
+            		for (RoleAuthVo roleAuth : roleAuthList){
+            			if (!authSet.contains(roleAuth.getAuth())){
+            				roleMapper.insertRoleAuth(roleAuth);
+            			}
+            		}
+                }else if(AuthVo.AUTH_COVER.equals(action)){
+                    roleMapper.deleteRoleAuthByRoleUuid(roleUuid);
+        			for (RoleAuthVo roleAuthVo : roleAuthList){
+        				roleMapper.insertRoleAuth(roleAuthVo);
+        			}
+                }else if(AuthVo.AUTH_DELETE.equals(action)){
+                	RoleVo roleVo = new RoleVo();
+                	roleVo.setUuid(roleUuid);
+                	roleVo.setRoleAuthList(roleAuthList);
+                    roleMapper.deleteRoleAuth(roleVo);
                 }
             }
-            roleVo.setRoleAuthList(roleAuthVoList);
-            if (AuthVo.AUTH_ADD.equals(action)){
-                roleService.addRoleAuth(roleVo);
-            }
-            if(AuthVo.AUTH_COVER.equals(action)){
-                roleService.coverRoleAuth(roleVo);
-            }
-            if(AuthVo.AUTH_DELETE.equals(action)){
-                roleService.deleteRoleAuth(roleVo);
-            }
-        }
+    	}
+        
         return null;
     }
 }

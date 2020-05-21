@@ -23,10 +23,10 @@ public interface GlobalCounterService {
 
     /** 
     * @Description: 获取订阅的消息统计集合
-    * @Param: [userId] 
+    * @Param: [userUuid] 
     * @return: java.util.List<com.techsure.balantflow.dto.globalcounter.GlobalCounterVo>  
     */ 
-    List<GlobalCounterVo> getSubscribeCounterListByUserId(String userId);
+    List<GlobalCounterVo> getSubscribeCounterListByUserUuid(String userUuid);
 
     /** 
     * @Description: 消息统计消息订阅
@@ -37,8 +37,8 @@ public interface GlobalCounterService {
 
     /** 
     * @Description: 重排序
-    * @Param: [userId, afterSort] 
+    * @Param: [userUuid, afterSort] 
     * @return: void  
     */ 
-    void updateCounterUserSort(String userId, String sortPluginIdStr);
+    void updateCounterUserSort(String userUuid, String sortPluginIdStr);
 }

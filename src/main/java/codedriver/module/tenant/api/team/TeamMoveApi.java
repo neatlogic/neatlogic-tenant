@@ -1,10 +1,8 @@
 package codedriver.module.tenant.api.team;
 
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -17,6 +15,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.service.TeamService;
 
 /**
  * @program: codedriver
@@ -24,10 +23,14 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2020-03-05 18:20
  **/
 @Service
+@Transactional
 public class TeamMoveApi extends ApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
+    
+    @Autowired
+    private TeamService teamService;
 
     @Override
     public String getToken() {
@@ -53,41 +56,61 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+		if(!teamService.checkLeftRightCodeIsExists()) {
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		}
     	String uuid = jsonObj.getString("uuid");
-        String parentUuid = jsonObj.getString("parentUuid");
-        Integer targetSort = jsonObj.getInteger("sort");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
-        List<TeamVo> teamAddList = null;
-        List<TeamVo> teamDescList = null;
         if(team == null) {
         	throw new TeamNotFoundException(uuid);
         }
-        int sort = team.getSort();
-        if(team.getParentUuid().equals(parentUuid)) {
-        	if(sort == targetSort) {
+        String parentUuid = jsonObj.getString("parentUuid");
+        if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
+        	throw new TeamNotFoundException(parentUuid);
+        }
+        Integer oldSort = team.getSort();
+        int newSort = jsonObj.getIntValue("sort");
+        if(parentUuid.equals(team.getParentUuid())) {
+        	if(oldSort == newSort) {
         		return null;
-        	}else if(sort > targetSort) {
-        		teamAddList = teamMapper.getTeamSortUpTeamList(parentUuid, sort,targetSort);
-        	}else {
-        		teamDescList = teamMapper.getTeamSortDownTeamList(parentUuid, sort,targetSort);
+        	}else if(oldSort > newSort) {//向上移动, 移动前后两个位置兄弟节点序号加一
+        		teamMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
+        	}else {//向下移动, 移动前后两个位置兄弟节点序号减一
+        		teamMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
         	}
         }else {
-        	teamAddList = teamMapper.getTeamSortAfterTeamList(parentUuid, targetSort);
-        	teamDescList = teamMapper.getTeamSortAfterTeamList(team.getParentUuid(), sort+1);
+        	//旧位置，被移动组后面的兄弟节点序号减一
+        	teamMapper.updateSortDecrement(team.getParentUuid(), oldSort + 1, null);
+			//新位置，被移动组后面的兄弟节点序号加一
+        	teamMapper.updateSortIncrement(parentUuid, newSort, null);
         }
-        team.setSort(targetSort);
+        team.setSort(newSort);
  		team.setParentUuid(parentUuid);
  		teamMapper.updateTeamSortAndParentUuid(team);
- 		if(CollectionUtils.isNotEmpty(teamAddList)) {
-	 		for (TeamVo teamTmp : teamAddList){
-	 			teamMapper.updateTeamSortAdd(teamTmp.getUuid());
-	 		}
+ 		//获取被移动块中的节点数量
+ 		int count = teamMapper.getTeamCountByLeftRightCode(team.getLft(), team.getRht());
+ 		//将被移动块中的所有节点的左右编码值设置到<=0
+ 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
+
+ 		//更新旧位置右边的左右编码值
+		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -2 * count);
+		teamMapper.batchUpdateTeamRightCode(team.getLft(), -2 * count);
+		//找出被移动块移动后左编码值
+		int lft = 0;
+		if(newSort == 1) {
+			TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			lft = parentTeam.getLft() + 1;
+ 		}else {
+ 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, newSort - 1);
+ 			lft = prevTeam.getRht() + 1;
  		}
- 		if(CollectionUtils.isNotEmpty(teamDescList)) {
- 			for (TeamVo teamTmp : teamDescList){
-     			teamMapper.updateTeamSortDec(teamTmp.getUuid());
-     		}
- 		}
+		//更新新位置右边的左右编码值
+		teamMapper.batchUpdateTeamLeftCode(lft, 2 * count);
+		teamMapper.batchUpdateTeamRightCode(lft, 2 * count);
+		
+		//更新被移动块中节点的左右编码值
+		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft() - team.getRht(), team.getRht() - team.getRht(), lft - team.getLft() + team.getRht());
         return null;
     }
 }

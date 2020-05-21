@@ -43,13 +43,13 @@ public class GlobalCounterServiceImpl implements GlobalCounterService {
                 }
             }
         }
-        List<GlobalCounterUserSortVo> userCountSortList = counterMapper.getCounterSortListByUserId(UserContext.get().getUserId());
+        List<GlobalCounterUserSortVo> userCountSortList = counterMapper.getCounterSortListByUserUuid(UserContext.get().getUserUuid(true));
         Map<String, GlobalCounterUserSortVo> counterSortMap = new HashMap<>();
         for (GlobalCounterUserSortVo gus : userCountSortList){
             counterSortMap.put(gus.getPluginId(), gus);
         }
 
-        List<GlobalCounterSubscribeVo> countSubList = counterMapper.getCounterSubscribeByUserId(UserContext.get().getUserId());
+        List<GlobalCounterSubscribeVo> countSubList = counterMapper.getCounterSubscribeByUserUuid(UserContext.get().getUserUuid(true));
         Map<String, GlobalCounterSubscribeVo> subscribeMap = new HashMap<>();
         for (GlobalCounterSubscribeVo subscribeVo : countSubList){
             subscribeMap.put(subscribeVo.getPluginId(), subscribeVo);
@@ -84,8 +84,8 @@ public class GlobalCounterServiceImpl implements GlobalCounterService {
     }
 
     @Override
-    public List<GlobalCounterVo> getSubscribeCounterListByUserId(String userId) {
-        List<GlobalCounterVo> subCounterVoList = counterMapper.getSubscribeCounterListByUserId(userId);
+    public List<GlobalCounterVo> getSubscribeCounterListByUserUuid(String userUuid) {
+        List<GlobalCounterVo> subCounterVoList = counterMapper.getSubscribeCounterListByUserUuid(userUuid);
         List<GlobalCounterVo> counterVoList = GlobalCounterFactory.getCounterVoList();
         for (GlobalCounterVo subCounterVo : subCounterVoList){
             for (GlobalCounterVo counterVo : counterVoList){
@@ -116,15 +116,15 @@ public class GlobalCounterServiceImpl implements GlobalCounterService {
     }
 
     @Override
-    public void updateCounterUserSort(String userId, String sortPluginIdStr) {
+    public void updateCounterUserSort(String userUuid, String sortPluginIdStr) {
         if (!StringUtils.isBlank(sortPluginIdStr)){
-            counterMapper.deleteCounterUserSortByUserId(userId);
+            counterMapper.deleteCounterUserSortByUserUuid(userUuid);
             String[] pluginIdArray = sortPluginIdStr.split(",");
             for (int i = 0; i < pluginIdArray.length; i++){
                 GlobalCounterUserSortVo userSortVo = new GlobalCounterUserSortVo();
                 userSortVo.setPluginId(pluginIdArray[i]);
                 userSortVo.setSort(i);
-                userSortVo.setUserId(userId);
+                userSortVo.setUserUuid(userUuid);
                 counterMapper.insertCounterUserSort(userSortVo);
             }
         }

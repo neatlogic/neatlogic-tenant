@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.dashboard;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -8,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dashboard.core.DashboardHandlerFactory;
 import codedriver.framework.dashboard.core.IDashboardHandler;
-import codedriver.framework.dashboard.dao.mapper.DashboardMapper;
 import codedriver.framework.dashboard.dto.DashboardShowConfigVo;
 import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.exception.dashboard.DashboardHandlerNotFoundException;
@@ -18,14 +16,10 @@ import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.exception.dashboard.DashboardWidgetNotFoundException;
 
 @Component
 @IsActived
 public class DashboardWidgetShowConfigGetApi extends ApiComponentBase {
-
-	@Autowired
-	private DashboardMapper dashboardMapper;
 
 	@Override
 	public String getToken() {

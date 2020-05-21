@@ -17,6 +17,8 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthGroupVo;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.restful.annotation.Description;
@@ -24,17 +26,15 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
-import codedriver.module.tenant.service.UserService;
 
 @Service
 public class AuthSearchApi extends ApiComponentBase {
-
+    
     @Autowired
-    private RoleService roleService;
-
+	private RoleMapper roleMapper;
+    
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -65,14 +65,14 @@ public class AuthSearchApi extends ApiComponentBase {
         String groupName = jsonObj.getString("groupName");
         String keyword = jsonObj.getString("keyword");
         List<AuthGroupVo> authGroupVoList = new ArrayList<>();
-        List<AuthVo> roleAuthList = roleService.getRoleCountByAuth();
+        List<AuthVo> roleAuthList = roleMapper.getRoleCountByAuth();
         Map<String, Integer> roleAuthMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(roleAuthList)){
             for (AuthVo roleAuth : roleAuthList){
                 roleAuthMap.put(roleAuth.getName(), roleAuth.getRoleCount());
             }
         }
-        List<AuthVo> userAuthList = userService.getUserCountByAuth();
+        List<AuthVo> userAuthList = userMapper.getUserCountByAuth();
         Map<String, Integer> userAuthMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(userAuthList)){
             for (AuthVo userAuth : userAuthList){

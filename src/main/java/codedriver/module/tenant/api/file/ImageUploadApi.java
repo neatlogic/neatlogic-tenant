@@ -70,14 +70,14 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
 			if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
-				String userId = UserContext.get().getUserId();
+				String userUuid = UserContext.get().getUserUuid(true);
 				String oldFileName = multipartFile.getOriginalFilename();
 				Long size = multipartFile.getSize();
 
 				FileVo fileVo = new FileVo();
 				fileVo.setName(oldFileName);
 				fileVo.setSize(size);
-				fileVo.setUserId(userId);
+				fileVo.setUserUuid(userUuid);
 				fileVo.setType("image");
 				fileVo.setContentType(multipartFile.getContentType());
 

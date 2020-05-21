@@ -52,17 +52,17 @@ public class DashboardTopVisitApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		DashboardVo dashboardVo = new DashboardVo();
-		String userId = UserContext.get().getUserId(true);
-		dashboardVo.setFcu(userId);
+		String userUuid = UserContext.get().getUserUuid(true);
+		dashboardVo.setFcu(userUuid);
 		if (jsonObj.containsKey("limit")) {
 			dashboardVo.setPageSize(jsonObj.getInteger("limit"));
 		} else {
 			dashboardVo.setPageSize(3);
 		}
-		List<String> teamUuidList = teamMapper.getTeamUuidListByUserId(userId);
-		dashboardVo.setUserId(userId);
+		List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+		dashboardVo.setUserUuid(userUuid);
 		dashboardVo.setTeamUuidList(teamUuidList);
-		dashboardVo.setRoleNameList(UserContext.get().getRoleNameList());
+		dashboardVo.setRoleUuidList(UserContext.get().getRoleUuidList());
 		return dashboardMapper.searchTopVisitDashboard(dashboardVo);
 	}
 }

@@ -83,7 +83,7 @@ public class ReminderHistoryApi extends ApiComponentBase {
         }
 
         paramVo.setModuleId(jsonObj.getString("moduleId"));
-        paramVo.setUserId(UserContext.get().getUserId(true));
+        paramVo.setUserUuid(UserContext.get().getUserUuid(true));
         List<GlobalReminderMessageVo> messageList = reminderService.getReminderHistoryMessageList(paramVo);
         JSONArray messageArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(messageList)){

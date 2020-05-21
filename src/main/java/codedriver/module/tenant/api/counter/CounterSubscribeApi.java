@@ -53,7 +53,7 @@ public class CounterSubscribeApi extends ApiComponentBase {
         GlobalCounterSubscribeVo counterSubscribeVo = new GlobalCounterSubscribeVo();
         counterSubscribeVo.setId(id);
         counterSubscribeVo.setPluginId(counterId);
-        counterSubscribeVo.setUserId(UserContext.get().getUserId());
+        counterSubscribeVo.setUserUuid(UserContext.get().getUserUuid(true));
         JSONObject returnJson = new JSONObject();
         counterService.updateCounterSubscribe(counterSubscribeVo);
         returnJson.put("id", counterSubscribeVo.getId());

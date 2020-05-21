@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
@@ -8,7 +9,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,9 @@ import java.util.Map;
 
 @Service
 public class UserAuthSearchApi extends ApiComponentBase {
-
+    
     @Autowired
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -40,7 +40,7 @@ public class UserAuthSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "userId", type = ApiParamType.STRING, desc = "用户ID", isRequired = true)
+            @Param( name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = true)
     })
     @Output({
             @Param( name = "userAuthObj", type = ApiParamType.JSONARRAY, desc = "用户权限集合"),
@@ -50,9 +50,9 @@ public class UserAuthSearchApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        String userId = jsonObj.getString("userId");
-        List<UserAuthVo> userAuthList = userService.searchUserAuth(userId);
-        List<RoleAuthVo> userRoleAuthList = userService.searchUserRoleAuth(userId);
+        String userUuid = jsonObj.getString("userUuid");
+        List<UserAuthVo> userAuthList = userMapper.searchUserAuthByUserUuid(userUuid);
+        List<RoleAuthVo> userRoleAuthList = userMapper.searchUserRoleAuthByUserUuid(userUuid);
 
         Map<String, String> userRoleAuthMap = new HashMap<>();
 

@@ -57,7 +57,7 @@ public class UserProfileListApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String moduleId = jsonObj.getString("moduleId");
 		String name = jsonObj.getString("name");
-		List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserIdAndModuleId(UserContext.get().getUserId(),moduleId);
+		List<UserProfileVo> myUserProfileList = userMapper.getUserProfileByUserUuidAndModuleId(UserContext.get().getUserUuid(), moduleId);
 		Map<String,String> myUserProfileOperateMap = new HashMap<String,String>();
 		for(UserProfileVo myUserProfileVo : myUserProfileList) {
 			if(StringUtils.isNotBlank(myUserProfileVo.getConfig())){

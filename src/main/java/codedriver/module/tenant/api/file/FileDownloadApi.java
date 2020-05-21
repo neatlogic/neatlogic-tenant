@@ -72,7 +72,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 		if (fileVo != null) {
 			IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
 			if (fileTypeHandler != null) {
-				if (fileTypeHandler.valid(UserContext.get().getUserId(), paramObj)) {
+				if (fileTypeHandler.valid(UserContext.get().getUserUuid(), paramObj)) {
 					ServletOutputStream os = null;
 					FSDataInputStream in = fileSystem.open(new Path("/" + tenantUuid + "/upload/" + fileVo.getType() + "/" + fileVo.getUuid()));
 					String fileNameEncode = "";

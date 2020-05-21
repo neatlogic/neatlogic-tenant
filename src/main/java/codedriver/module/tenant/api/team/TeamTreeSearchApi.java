@@ -1,12 +1,15 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.TeamService;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,7 @@ import org.springframework.stereotype.Service;
 public class TeamTreeSearchApi extends ApiComponentBase {
 
     @Autowired
-    private TeamService teamService;
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -51,7 +54,30 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
         JSONObject returnObj = new JSONObject();
-        returnObj.put("children", teamService.getParentTeamTree(uuid));
+        JSONArray returnArray = new JSONArray();
+	    returnArray.add(iterativeAssembly(uuid, null));
+        returnObj.put("children", returnArray);
         return returnObj;
+    }
+    
+    public JSONObject iterativeAssembly(String uuid, JSONObject dataObj){
+        TeamVo teamVo = teamMapper.getTeamByUuid(uuid);
+        JSONObject teamObj = new JSONObject();
+        teamObj.put("name", teamVo.getName());
+        teamObj.put("uuid", teamVo.getUuid());
+        teamObj.put("sort", teamVo.getSort());
+        teamObj.put("parentUuid", teamVo.getParentUuid());
+        teamObj.put("tagList", teamVo.getTagList());
+        teamObj.put("userCount", teamVo.getUserCount());
+        teamObj.put("childCount", teamVo.getChildCount());
+        if (dataObj != null){
+            JSONArray childArray = new JSONArray();
+            childArray.add(dataObj);
+            teamObj.put("children", childArray);
+        }
+        if (!TeamVo.ROOT_UUID.equals(teamVo.getParentUuid())){
+         return iterativeAssembly(teamVo.getParentUuid(), teamObj);
+        }
+        return teamObj;
     }
 }

@@ -2,27 +2,27 @@ package codedriver.module.tenant.api.role;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.service.RoleService;
 
 @Service
 public class RoleSearchApi extends ApiComponentBase {
 
 	@Autowired
-	private RoleService roleService;
+	private RoleMapper roleMapper;
 
 	@Override
 	public String getToken() {
@@ -78,30 +78,15 @@ public class RoleSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject returnObj = new JSONObject();
-		RoleVo roleVo = new RoleVo();
-		roleVo.setKeyword(jsonObj.getString("keyword"));
-		if (jsonObj.containsKey("currentPage")){
-			roleVo.setCurrentPage(jsonObj.getInteger("currentPage"));
-		}
-		if (jsonObj.containsKey("auth")){
-			roleVo.setAuth(jsonObj.getString("auth"));
-		}
-		if(jsonObj.containsKey("authModule")){
-			roleVo.setAuthGroup(jsonObj.getString("authGroup"));
-		}
-		if (jsonObj.containsKey("needPage")){
-			roleVo.setNeedPage(jsonObj.getBoolean("needPage"));
-		}
-		if (jsonObj.containsKey("pageSize")){
-			roleVo.setPageSize(jsonObj.getInteger("pageSize"));
-		}
-		List<RoleVo> roleList = roleService.searchRole(roleVo);
-		if (roleVo.getNeedPage()) {
+		RoleVo roleVo = JSON.toJavaObject(jsonObj, RoleVo.class);
+		if(roleVo.getNeedPage()) {
+			int rowNum = roleMapper.searchRoleCount(roleVo);
 			returnObj.put("pageSize", roleVo.getPageSize());
 			returnObj.put("currentPage", roleVo.getCurrentPage());
-			returnObj.put("rowNum", roleVo.getRowNum());
-			returnObj.put("pageCount", roleVo.getPageCount());
+			returnObj.put("rowNum", rowNum);
+			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
 		}
+		List<RoleVo> roleList =  roleMapper.searchRole(roleVo);
 		returnObj.put("tbodyList", roleList);
 		return returnObj;
 	}

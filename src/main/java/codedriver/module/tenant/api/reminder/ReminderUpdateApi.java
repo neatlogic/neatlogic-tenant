@@ -2,7 +2,7 @@ package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class ReminderUpdateApi extends ApiComponentBase {
 
     @Autowired
-    private GlobalReminderService reminderService;
+    private GlobalReminderMessageMapper reminderMessageMapper;
 
     @Override
     public String getToken() {
@@ -41,7 +41,7 @@ public class ReminderUpdateApi extends ApiComponentBase {
     @Description(desc = "重置消息有效性接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        reminderService.updateMessageActive(jsonObj.getLong("id"), UserContext.get().getUserId());
-        return new JSONObject();
+        reminderMessageMapper.updateMessageActiveById(jsonObj.getLong("id"), UserContext.get().getUserUuid(true));
+        return null;
     }
 }

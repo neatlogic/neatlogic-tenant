@@ -72,7 +72,7 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 	@Description(desc = "保存仪表板组件接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userId = UserContext.get().getUserId(true);
+		String userUuid = UserContext.get().getUserUuid(true);
 		DashboardWidgetVo dashboardWidgetVo = JSONObject.toJavaObject(jsonObj, DashboardWidgetVo.class);
 		DashboardVo dashboardVo = dashboardMapper.getDashboardByUuid(dashboardWidgetVo.getDashboardUuid());
 		if(dashboardVo == null) {
@@ -80,10 +80,10 @@ public class DashboardWidgetSaveApi extends ApiComponentBase {
 		}
 		if(DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
 			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))) {
+			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,DASHBOARD_MODIFY.class.getSimpleName())))) {
 				throw new DashboardAuthenticationException("管理");
 			}
-		}else if(!dashboardVo.getFcu().equalsIgnoreCase(userId)) {
+		}else if(!dashboardVo.getFcu().equalsIgnoreCase(userUuid)) {
 			throw new DashboardAuthenticationException("修改");
 		}
 		

@@ -82,7 +82,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 		}
 		String type = StringUtils.isBlank(jsonObj.getString("type"))?DashboardVo.DashBoardType.CUSTOM.getValue():jsonObj.getString("type");
 		dashboardVo.setType(type);
-		String userId = UserContext.get().getUserId(true);
+		String userUuid = UserContext.get().getUserUuid(true);
 		DashboardVo oldDashboardVo = new DashboardVo();
 		if (StringUtils.isNotBlank(uuid)) {
 			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
@@ -97,7 +97,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 		}
 		if(StringUtils.isNotBlank(uuid)&&DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())||DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
 			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userId,DASHBOARD_MODIFY.class.getSimpleName())))) {
+			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName())))) {
 				throw new DashboardAuthenticationException("管理");
 			}
 			if(StringUtils.isNotBlank(uuid)&&oldDashboardVo != null) {
@@ -124,14 +124,14 @@ public class DashboardSaveApi extends ApiComponentBase {
 			}
 		}else {
 			if(StringUtils.isBlank(oldDashboardVo.getFcu())) {
-				dashboardMapper.insertDashboardDefault(oldDashboardVo.getUuid(),userId,type);
+				dashboardMapper.insertDashboardDefault(oldDashboardVo.getUuid(), userUuid, type);
 			}
 		}
 		if(StringUtils.isBlank(uuid)) {
-			dashboardVo.setFcu(userId);
+			dashboardVo.setFcu(userUuid);
 			dashboardMapper.insertDashboard(dashboardVo);
 		}else {
-			dashboardVo.setLcu(userId);
+			dashboardVo.setLcu(userUuid);
 			if(StringUtils.isNotBlank(dashboardVo.getName())) {
 				oldDashboardVo.setName(dashboardVo.getName());
 			}
