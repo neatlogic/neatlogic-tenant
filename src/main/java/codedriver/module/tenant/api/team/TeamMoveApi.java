@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -15,6 +16,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.exception.team.TeamMoveException;
 import codedriver.module.tenant.service.TeamService;
 
 /**
@@ -49,7 +51,7 @@ public class TeamMoveApi extends ApiComponentBase {
 
     @Input({ @Param( name = "uuid", type = ApiParamType.STRING, desc = "组uuid", isRequired = true),
              @Param( name = "parentUuid", type = ApiParamType.STRING, desc = "父uuid", isRequired = true,minLength = 1),
-             @Param( name = "sort", type = ApiParamType.INTEGER, desc = "sort", isRequired = true)})
+             @Param( name = "sort", type = ApiParamType.INTEGER, desc = "sort(目标父级的位置，从0开始)", isRequired = true)})
     @Output({
 
     })
@@ -69,8 +71,15 @@ public class TeamMoveApi extends ApiComponentBase {
         if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
         	throw new TeamNotFoundException(parentUuid);
         }
+        if(Objects.equal(uuid, parentUuid)) {
+        	throw new TeamMoveException("移动后的父节点不可以是当前节点");
+        }
+        //判断移动后的父节点是否在当前节点的后代节点中
+        if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
+        	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
+        }
         Integer oldSort = team.getSort();
-        int newSort = jsonObj.getIntValue("sort");
+        int newSort = jsonObj.getIntValue("sort") + 1;
         if(parentUuid.equals(team.getParentUuid())) {
         	if(oldSort == newSort) {
         		return null;
@@ -88,14 +97,14 @@ public class TeamMoveApi extends ApiComponentBase {
         team.setSort(newSort);
  		team.setParentUuid(parentUuid);
  		teamMapper.updateTeamSortAndParentUuid(team);
- 		//获取被移动块中的节点数量
- 		int count = teamMapper.getTeamCountByLeftRightCode(team.getLft(), team.getRht());
+ 		
  		//将被移动块中的所有节点的左右编码值设置到<=0
  		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
-
+ 		//计算被移动块右边的节点移动步长
+ 		int step = team.getRht() - team.getLft() + 1;
  		//更新旧位置右边的左右编码值
-		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -2 * count);
-		teamMapper.batchUpdateTeamRightCode(team.getLft(), -2 * count);
+		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
+		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
 		//找出被移动块移动后左编码值
 		int lft = 0;
 		if(newSort == 1) {
@@ -106,8 +115,8 @@ public class TeamMoveApi extends ApiComponentBase {
  			lft = prevTeam.getRht() + 1;
  		}
 		//更新新位置右边的左右编码值
-		teamMapper.batchUpdateTeamLeftCode(lft, 2 * count);
-		teamMapper.batchUpdateTeamRightCode(lft, 2 * count);
+		teamMapper.batchUpdateTeamLeftCode(lft, step);
+		teamMapper.batchUpdateTeamRightCode(lft, step);
 		
 		//更新被移动块中节点的左右编码值
 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft() - team.getRht(), team.getRht() - team.getRht(), lft - team.getLft() + team.getRht());
