@@ -65,7 +65,7 @@ public class TeamTreeSearchApi extends ApiComponentBase {
         JSONObject teamObj = new JSONObject();
         teamObj.put("name", teamVo.getName());
         teamObj.put("uuid", teamVo.getUuid());
-        teamObj.put("sort", teamVo.getSort());
+//        teamObj.put("sort", teamVo.getSort());
         teamObj.put("parentUuid", teamVo.getParentUuid());
         teamObj.put("tagList", teamVo.getTagList());
         teamObj.put("userCount", teamVo.getUserCount());

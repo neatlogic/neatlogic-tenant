@@ -68,36 +68,35 @@ public class TeamMoveApi extends ApiComponentBase {
         	throw new TeamNotFoundException(uuid);
         }
         String parentUuid = jsonObj.getString("parentUuid");
-        if(teamMapper.checkTeamIsExists(parentUuid) == 0) {
+		TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+        if(parentTeam == null) {
         	throw new TeamNotFoundException(parentUuid);
         }
         if(Objects.equal(uuid, parentUuid)) {
         	throw new TeamMoveException("移动后的父节点不可以是当前节点");
         }
-        //判断移动后的父节点是否在当前节点的后代节点中
-        if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
-        	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
-        }
-        Integer oldSort = team.getSort();
-        int newSort = jsonObj.getIntValue("sort") + 1;
+        //找出被移动块移动后左编码值     	
+		int lft = 0;
+ 		int sort = jsonObj.getIntValue("sort");
+		if(sort == 0) {
+			lft = parentTeam.getLft() + 1;
+ 		}else {
+ 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, sort - 1);
+ 			lft = prevTeam.getRht() + 1;
+ 		}
         if(parentUuid.equals(team.getParentUuid())) {
-        	if(oldSort == newSort) {
+        	if(Objects.equal(team.getLft(), lft)) {
         		return null;
-        	}else if(oldSort > newSort) {//向上移动, 移动前后两个位置兄弟节点序号加一
-        		teamMapper.updateSortIncrement(parentUuid, newSort, oldSort - 1);
-        	}else {//向下移动, 移动前后两个位置兄弟节点序号减一
-        		teamMapper.updateSortDecrement(parentUuid, oldSort + 1, newSort);
         	}
         }else {
-        	//旧位置，被移动组后面的兄弟节点序号减一
-        	teamMapper.updateSortDecrement(team.getParentUuid(), oldSort + 1, null);
-			//新位置，被移动组后面的兄弟节点序号加一
-        	teamMapper.updateSortIncrement(parentUuid, newSort, null);
+        	//判断移动后的父节点是否在当前节点的后代节点中
+            if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
+            	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
+            }
+     		team.setParentUuid(parentUuid);
+     		teamMapper.updateTeamParentUuidByUuid(team);
         }
-        team.setSort(newSort);
- 		team.setParentUuid(parentUuid);
- 		teamMapper.updateTeamSortAndParentUuid(team);
- 		
+
  		//将被移动块中的所有节点的左右编码值设置到<=0
  		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
  		//计算被移动块右边的节点移动步长
@@ -105,15 +104,7 @@ public class TeamMoveApi extends ApiComponentBase {
  		//更新旧位置右边的左右编码值
 		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
 		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
-		//找出被移动块移动后左编码值
-		int lft = 0;
-		if(newSort == 1) {
-			TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
-			lft = parentTeam.getLft() + 1;
- 		}else {
- 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, newSort - 1);
- 			lft = prevTeam.getRht() + 1;
- 		}
+		
 		//更新新位置右边的左右编码值
 		teamMapper.batchUpdateTeamLeftCode(lft, step);
 		teamMapper.batchUpdateTeamRightCode(lft, step);
