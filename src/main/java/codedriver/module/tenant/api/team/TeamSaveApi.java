@@ -59,7 +59,7 @@ public class TeamSaveApi extends ApiComponentBase{
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id",isRequired=false),
 		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",isRequired=true, xss=true),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
-		@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = false),
+		//@Param(name = "sort", type = ApiParamType.INTEGER, desc = "排序", isRequired = false),
 		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
 			@Param( name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")
 		/*@Param(name = "isHandleChildtask", type = ApiParamType.STRING, desc = "是否允许处理下级任务",isRequired=true)*/
@@ -95,21 +95,12 @@ public class TeamSaveApi extends ApiComponentBase{
 				throw new TeamNotFoundException(parentUuid);
 			}
 			teamVo.setParentUuid(parentUuid);
-			int sort = teamMapper.getMaxTeamSortByParentUuid(parentUuid);
-			if(sort == 0) {//该节点是父节点的第一个子节点
-				int lft = parentTeam.getRht() + 1;
-				teamVo.setLft(lft);
-				teamVo.setRht(lft + 1);
-			}else {//找出前面的兄弟节点
-				TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, sort);
-				int lft = prevTeam.getRht() + 1;
-				teamVo.setLft(lft);
-				teamVo.setRht(lft + 1);
-			}
+			teamVo.setLft(parentTeam.getRht());
+			teamVo.setRht(teamVo.getLft() + 1);
+			//更新插入位置右边的左右编码值
 			teamMapper.batchUpdateTeamLeftCode(teamVo.getLft(), 2);
 			teamMapper.batchUpdateTeamRightCode(teamVo.getLft(), 2);
-			sort++;
-			teamVo.setSort(sort);
+
 			teamMapper.insertTeam(teamVo);
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 			if (CollectionUtils.isNotEmpty(userUuidList)){
