@@ -88,6 +88,7 @@ public class DashboardWidgetDataGetApi extends ApiComponentBase {
 		chartDataJson.put("theadList", dataJson.get("theadList"));
 		chartDataJson.put("columnList", dataJson.get("columnList"));
 		chartDataJson.put("dataList", dataJson.get("dataList"));
+		chartDataJson.put("total", dataJson.get("total"));
 		return chartDataJson;
 	}
 }
