@@ -78,7 +78,7 @@ public class TeamMoveApi extends ApiComponentBase {
         //找出被移动块移动后左编码值     	
 		int lft = 0;
  		int sort = jsonObj.getIntValue("sort");
-		if(sort == 0) {
+		if(sort == 0) {//移动到首位
 			lft = parentTeam.getLft() + 1;
  		}else {
  			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, sort - 1);
@@ -86,7 +86,7 @@ public class TeamMoveApi extends ApiComponentBase {
  		}
         if(parentUuid.equals(team.getParentUuid())) {
         	if(Objects.equal(team.getLft(), lft)) {
-        		return null;
+        		return null;//没有移动
         	}
         }else {
         	//判断移动后的父节点是否在当前节点的后代节点中
@@ -97,7 +97,7 @@ public class TeamMoveApi extends ApiComponentBase {
      		teamMapper.updateTeamParentUuidByUuid(team);
         }
 
- 		//将被移动块中的所有节点的左右编码值设置到<=0
+ 		//将被移动块中的所有节点的左右编码值设置为<=0
  		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
  		//计算被移动块右边的节点移动步长
  		int step = team.getRht() - team.getLft() + 1;
