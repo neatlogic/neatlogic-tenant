@@ -74,7 +74,7 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userUuid)) {
 			hasRight = true;
 		}
-		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())&& CollectionUtils.isNotEmpty(userAuthList)) {
+		if (!hasRight&&(type.equals(DashboardVo.DashBoardType.SYSTEM.getValue())||dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue()))&& CollectionUtils.isNotEmpty(userAuthList)) {
 			hasRight = true;
 		}
 		if (!hasRight) {
