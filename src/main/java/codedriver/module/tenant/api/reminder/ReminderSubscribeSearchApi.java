@@ -21,19 +21,19 @@ import java.util.List;
  * @create: 2019-12-10 11:35
  **/
 @Service
-public class ReminderSearchApi extends ApiComponentBase {
+public class ReminderSubscribeSearchApi extends ApiComponentBase {
 
     @Autowired
     private GlobalReminderService reminderService;
 
     @Override
     public String getToken() {
-        return "globalReminder/search";
+        return "globalReminder/subscribe/search";
     }
 
     @Override
     public String getName() {
-        return "实时动态插件检索接口";
+        return "获取订阅设置通知列表接口";
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ReminderSearchApi extends ApiComponentBase {
     @Input({ @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块ID")})
     @Output({@Param(explode = GlobalReminderVo.class),
              @Param(name = "reminderList", explode = GlobalReminderVo[].class, desc = "实时动态插件集合")})
-    @Description(desc = "实时动态插件检索接口")
+    @Description(desc = "获取订阅设置通知列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         GlobalReminderVo reminderVo = new GlobalReminderVo();
