@@ -1,19 +1,30 @@
 package codedriver.module.tenant.api.reminder;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.reminder.dto.GlobalReminderVo;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.dto.ModuleVo;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMapper;
+import codedriver.framework.reminder.dto.GlobalReminderSubscribeVo;
+import codedriver.framework.reminder.dto.GlobalReminderHandlerVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @program: codedriver
@@ -22,9 +33,9 @@ import java.util.List;
  **/
 @Service
 public class ReminderSubscribeSearchApi extends ApiComponentBase {
-
+   
     @Autowired
-    private GlobalReminderService reminderService;
+    private GlobalReminderMapper reminderMapper;
 
     @Override
     public String getToken() {
@@ -42,17 +53,41 @@ public class ReminderSubscribeSearchApi extends ApiComponentBase {
     }
 
     @Input({ @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块ID")})
-    @Output({@Param(explode = GlobalReminderVo.class),
-             @Param(name = "reminderList", explode = GlobalReminderVo[].class, desc = "实时动态插件集合")})
+    @Output({@Param(explode = GlobalReminderHandlerVo.class),
+             @Param(name = "reminderList", explode = GlobalReminderHandlerVo[].class, desc = "实时动态插件集合")})
     @Description(desc = "获取订阅设置通知列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        GlobalReminderVo reminderVo = new GlobalReminderVo();
+        GlobalReminderHandlerVo reminderVo = new GlobalReminderHandlerVo();
         reminderVo.setModuleId(jsonObj.getString("moduleId"));
         JSONObject returnJson = new JSONObject();
-        List<GlobalReminderVo> reminderVoList = reminderService.searchReminder(reminderVo);
+        boolean moduleId = StringUtils.isNotBlank(reminderVo.getModuleId());
+        List<GlobalReminderHandlerVo> activeReminderList = new ArrayList<>();
+        List<GlobalReminderHandlerVo> reminderVoList = GlobalReminderHandlerFactory.getReminderVoList();
+        Map<String, ModuleVo> moduleVoMap = TenantContext.get().getActiveModuleMap();
+        for (GlobalReminderHandlerVo c : reminderVoList) {
+            if (moduleVoMap.containsKey(c.getModuleId())) {
+                c.setModuleName(moduleVoMap.get(c.getModuleId()).getName());
+                c.setModuleName(moduleVoMap.get(c.getModuleId()).getDescription());
+                if (!moduleId || (moduleId && c.getModuleId().equals(reminderVo.getModuleId()))) {
+                    activeReminderList.add(c);
+                }
+            }
+        }
+        List<GlobalReminderSubscribeVo> reminderSubList = reminderMapper.getReminderSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        Map<String, GlobalReminderSubscribeVo> subscribeMap = new HashMap<>();
+        for (GlobalReminderSubscribeVo subscribeVo : reminderSubList) {
+            subscribeMap.put(subscribeVo.getHandler(), subscribeVo);
+        }
+
+
+        for (GlobalReminderHandlerVo reminder : activeReminderList) {
+            if (subscribeMap.containsKey(reminder.getHandler())) {
+                reminder.setReminderSubscribeVo(subscribeMap.get(reminder.getHandler()));
+            }
+        }
         Collections.sort(reminderVoList);
-        returnJson.put("reminderList", reminderVoList);
+        returnJson.put("tbodyList", reminderVoList);
         return returnJson;
     }
 }
