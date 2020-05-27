@@ -22,46 +22,34 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-public class IntegrationListForSelectApi extends ApiComponentBase {
+public class IntegrationListApi extends ApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;
 
 	@Override
 	public String getToken() {
-		return "integration/list/forselect";
+		return "integration/list";
 	}
 
 	@Override
 	public String getName() {
-		return "集成设置数据列表接口（搜索下拉框专用）";
+		return "集成设置数据列表接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-	
-	@Input({ 
-		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"), 
-        @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量") 
-	})
-	@Output({  
-		@Param(name = "integrationList", explode = IntegrationVo[].class, desc = "集成设置列表") 
-	})
-	@Description(desc = "集成设置数据列表接口（搜索下拉框专用）")
+
+	@Output({ @Param(explode = IntegrationVo[].class, desc = "集成设置列表") })
+	@Description(desc = "集成设置数据列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
-		List<ValueTextVo> valueTextList = new ArrayList<>();
-		List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
-		for(IntegrationVo integration : integrationList) {
-			if(Objects.equals(integration.getIsActive(), 1)) {
-				valueTextList.add(new ValueTextVo(integration.getUuid(), integration.getName()));
-			}
-		}
-		return valueTextList;
+		IntegrationVo integrationVo = new IntegrationVo();
+		integrationVo.setNeedPage(false);
+		integrationVo.setIsActive(null);
+		return integrationMapper.searchIntegration(integrationVo);
 	}
 
 }

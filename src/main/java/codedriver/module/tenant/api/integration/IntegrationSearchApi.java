@@ -41,7 +41,9 @@ public class IntegrationSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"), @Param(name = "handler", type = ApiParamType.STRING, desc = "组件"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量") })
+	@Input({ @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"), @Param(name = "handler", type = ApiParamType.STRING, desc = "组件"), 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), 
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量") })
 	@Output({ @Param(explode = BasePageVo.class), @Param(name = "integrationList", explode = IntegrationVo[].class, desc = "集成设置列表") })
 	@Description(desc = "集成设置查询接口")
 	@Override

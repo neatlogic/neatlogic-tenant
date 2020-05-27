@@ -15,6 +15,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.exception.integration.IntegrationUrlIllegalException;
 
 @Service
 @IsActived
@@ -50,9 +51,11 @@ public class IntegrationSaveApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
+		if(integrationVo.getUrl().contains("integration/run/")) {
+			throw new IntegrationUrlIllegalException(integrationVo.getUrl());
+		}
 		if (StringUtils.isNotBlank(jsonObj.getString("uuid"))) {
 			integrationMapper.updateIntegration(integrationVo);
-
 		} else {
 			integrationMapper.insertIntegration(integrationVo);
 		}

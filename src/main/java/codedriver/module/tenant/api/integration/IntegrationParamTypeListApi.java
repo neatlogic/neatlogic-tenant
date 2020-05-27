@@ -14,11 +14,11 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-public class IntegrationPatternTypeListApi extends ApiComponentBase {
+public class IntegrationParamTypeListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "integration/patterntype/list";
+		return "integration/paramtype/list";
 	}
 
 	@Override
