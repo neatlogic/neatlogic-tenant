@@ -114,12 +114,12 @@ public class ReminderHistoryApi extends ApiComponentBase {
      * @return: java.util.List<codedriver.framework.reminder.dto.GlobalReminderMessageVo>  
      */ 
     public List<GlobalReminderMessageVo> getReminderHistoryMessageList(ReminderHistoryParamVo paramVo) {
-        List<GlobalReminderHandlerVo> reminderList = GlobalReminderHandlerFactory.getReminderVoList();
-        if (CollectionUtils.isNotEmpty(reminderList)){
+        List<GlobalReminderHandlerVo> reminderHandlerList = GlobalReminderHandlerFactory.getReminderHandlerList();
+        if (CollectionUtils.isNotEmpty(reminderHandlerList)){
             List<String> handlerList = new ArrayList<>();
-            for (GlobalReminderHandlerVo reminder : reminderList){
-                if (reminder.getModuleId().equals(paramVo.getModuleId())){
-                	handlerList.add(reminder.getHandler());
+            for (GlobalReminderHandlerVo reminderHandler : reminderHandlerList){
+                if (reminderHandler.getModuleId().equals(paramVo.getModuleId())){
+                	handlerList.add(reminderHandler.getHandler());
                 }
             }
             paramVo.setHandlerList(handlerList);

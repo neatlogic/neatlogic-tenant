@@ -44,7 +44,7 @@ public class GlobalReminderServiceImpl implements GlobalReminderService {
 
 	@Override
     public void packageData(GlobalReminderMessageVo messageVo){
-        GlobalReminderHandlerVo reminderVo = GlobalReminderHandlerFactory.getReminderVoMap().get(messageVo.getHandler());
+        GlobalReminderHandlerVo reminderVo = GlobalReminderHandlerFactory.getReminderHandlerMap().get(messageVo.getHandler());
         ModuleVo moduleVo = TenantContext.get().getActiveModuleMap().get(reminderVo.getModuleId());
         reminderVo.setModuleDesc(moduleVo.getDescription());
         reminderVo.setModuleName(moduleVo.getName());
