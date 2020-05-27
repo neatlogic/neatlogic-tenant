@@ -1,9 +1,22 @@
 package codedriver.module.tenant.api.reminder;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.IGlobalReminder;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.core.IGlobalReminderHandler;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
+import codedriver.framework.reminder.dto.GlobalReminderHandlerVo;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.dto.param.ReminderHistoryParamVo;
 import codedriver.framework.restful.annotation.Description;
@@ -13,13 +26,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @program: codedriver
@@ -29,8 +35,11 @@ import java.util.List;
 @Service
 public class ReminderHistoryApi extends ApiComponentBase {
 
-    @Autowired
-    private GlobalReminderService reminderService;
+	@Autowired
+	private GlobalReminderService reminderService;
+	
+	@Autowired
+	private GlobalReminderMessageMapper reminderMessageMapper;
 
     @Override
     public String getToken() {
@@ -84,11 +93,11 @@ public class ReminderHistoryApi extends ApiComponentBase {
 
         paramVo.setModuleId(jsonObj.getString("moduleId"));
         paramVo.setUserUuid(UserContext.get().getUserUuid(true));
-        List<GlobalReminderMessageVo> messageList = reminderService.getReminderHistoryMessageList(paramVo);
+        List<GlobalReminderMessageVo> messageList = getReminderHistoryMessageList(paramVo);
         JSONArray messageArray = new JSONArray();
         if (CollectionUtils.isNotEmpty(messageList)){
             for (GlobalReminderMessageVo messageVo : messageList){
-                IGlobalReminder reminder = GlobalReminderFactory.getReminder(messageVo.getReminderVo().getPluginId());
+                IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(messageVo.getReminderVo().getHandler());
                 messageArray.add(reminder.packData(messageVo));
             }
         }
@@ -97,5 +106,37 @@ public class ReminderHistoryApi extends ApiComponentBase {
         returnObj.put("rowNum", paramVo.getRowNum());
         returnObj.put("pageSize", paramVo.getPageSize());
         return returnObj;
+    }
+    
+    /** 
+     * @Description: 获取历史实时动态消息 
+     * @Param: [paramVo] 
+     * @return: java.util.List<codedriver.framework.reminder.dto.GlobalReminderMessageVo>  
+     */ 
+    public List<GlobalReminderMessageVo> getReminderHistoryMessageList(ReminderHistoryParamVo paramVo) {
+        List<GlobalReminderHandlerVo> reminderHandlerList = GlobalReminderHandlerFactory.getReminderHandlerList();
+        if (CollectionUtils.isNotEmpty(reminderHandlerList)){
+            List<String> handlerList = new ArrayList<>();
+            for (GlobalReminderHandlerVo reminderHandler : reminderHandlerList){
+                if (reminderHandler.getModuleId().equals(paramVo.getModuleId())){
+                	handlerList.add(reminderHandler.getHandler());
+                }
+            }
+            paramVo.setHandlerList(handlerList);
+        }
+
+        if (paramVo.getNeedPage()){
+            int rowNum = reminderMessageMapper.getReminderHistoryMessageCount(paramVo);
+            paramVo.setRowNum(rowNum);
+            paramVo.setPageCount(PageUtil.getPageCount(rowNum, paramVo.getPageSize()));
+        }
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getReminderHistoryMessageList(paramVo);
+
+        if (CollectionUtils.isNotEmpty(messageVoList)){
+            for (GlobalReminderMessageVo messageVo : messageVoList){
+            	reminderService.packageData(messageVo);
+            }
+        }
+        return messageVoList;
     }
 }

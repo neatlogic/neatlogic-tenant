@@ -71,18 +71,14 @@ public class DashboardDefaultApi extends ApiComponentBase {
 		String userUuid = UserContext.get().getUserUuid(true);
 		List<UserAuthVo> userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid,DASHBOARD_MODIFY.class.getSimpleName()));
 		boolean hasRight = false;
-		if (type.equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userUuid)) {
+		if (dashboardVo.getType().equals(DashboardVo.DashBoardType.CUSTOM.getValue())&&dashboardVo.getFcu().equals(userUuid)) {
 			hasRight = true;
 		}
-		if (!hasRight&&dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue())
-				&& CollectionUtils.isNotEmpty(userAuthList)) {
-			hasRight = true;
-		}
-		if(!hasRight&&type.equals(DashboardVo.DashBoardType.SYSTEM.getValue())&& CollectionUtils.isNotEmpty(userAuthList)) {
+		if (!hasRight&&(type.equals(DashboardVo.DashBoardType.SYSTEM.getValue())||dashboardVo.getType().equals(DashboardVo.DashBoardType.SYSTEM.getValue()))&& CollectionUtils.isNotEmpty(userAuthList)) {
 			hasRight = true;
 		}
 		if (!hasRight) {
-			throw new DashboardAuthenticationException("编辑");
+			throw new DashboardAuthenticationException("修改");
 		}
 		
 		dashboardMapper.deleteDashboardDefaultByUserUuid(userUuid, type);

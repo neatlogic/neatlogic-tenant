@@ -1,21 +1,27 @@
 package codedriver.module.tenant.api.reminder;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.core.IGlobalReminderHandler;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
-import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.IGlobalReminder;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
+import codedriver.framework.reminder.dto.ReminderMessageSearchVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
+import codedriver.module.tenant.service.reminder.GlobalReminderService;
 
 /**
  * @program: codedriver
@@ -25,8 +31,11 @@ import java.util.List;
 @Service
 public class DayReminderApi extends ApiComponentBase {
 
-    @Autowired
-    private GlobalReminderService reminderService;
+	@Autowired
+	private GlobalReminderMessageMapper reminderMessageMapper;
+	
+	@Autowired
+	private GlobalReminderService reminderService;
 
     @Override
     public String getToken() {
@@ -75,22 +84,27 @@ public class DayReminderApi extends ApiComponentBase {
         int day = jsonObj.getInteger("day");
         int messageCount = jsonObj.getInteger("messageCount");
         JSONObject returnJson = new JSONObject();
-        List<GlobalReminderMessageVo> messageList = reminderService.getDayReminderMessageVoList(messageId, day);
+        List<GlobalReminderMessageVo> messageList = getDayReminderMessageVoList(messageId, day);
         JSONArray messageArray = new JSONArray();
         for (GlobalReminderMessageVo messageVo : messageList){
-            IGlobalReminder reminder = GlobalReminderFactory.getReminder(messageVo.getReminderVo().getPluginId());
+            IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(messageVo.getReminderVo().getHandler());
             messageArray.add(reminder.packData(messageVo));
         }
         Long lastMessageId = 0L;
         if (messageList != null && messageList.size() > 0){
             lastMessageId = messageList.get(messageList.size() - 1).getId();
         }
+        Map<String, String> timeMap = reminderService.getTimeMap(day);
+        ReminderMessageSearchVo searchVo = new ReminderMessageSearchVo();
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        searchVo.setStartTime(timeMap.get("startTime"));
+        searchVo.setEndTime(timeMap.get("endTime"));
         returnJson.put("messageArray", messageArray);
         returnJson.put("messageCount", messageList.size() + messageCount);
         returnJson.put("lastMessageId", lastMessageId);
         returnJson.put("showDay", getShowDay(day));
         returnJson.put("day", day);
-        returnJson.put("allMessageCount", reminderService.getReminderMessageCountByDay(day));
+        returnJson.put("allMessageCount", reminderMessageMapper.getReminderMessageCountByDay(searchVo));
         return returnJson;
     }
 
@@ -100,4 +114,29 @@ public class DayReminderApi extends ApiComponentBase {
         }
         return day + "天前";
     }
+    
+    /** 
+     * @Description: 获取更多实时动态消息
+     * @Param: [messageId, day] 
+     * @return: java.util.List<com.techsure.balantflow.dto.globalreminder.GlobalReminderMessageVo>  
+     */ 
+    public List<GlobalReminderMessageVo> getDayReminderMessageVoList(Long messageId, Integer day) {
+        Map<String, String> timeMap = reminderService.getTimeMap(day);
+        ReminderMessageSearchVo searchVo = new ReminderMessageSearchVo();
+        if (messageId != null && messageId != 0L){
+            searchVo.setMessageCount(ReminderMessageSearchVo.DEFAULT_ADD_COUNT);
+            searchVo.setMessageId(messageId);
+        }else {
+            searchVo.setMessageCount(ReminderMessageSearchVo.DEFAULT_SHOW_COUNT);
+        }
+        searchVo.setStartTime(timeMap.get("startTime"));
+        searchVo.setEndTime(timeMap.get("endTime"));
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getShowReminderMessageListByIdListAndUserUuid(searchVo);
+        for (GlobalReminderMessageVo messageVo : messageVoList){
+        	reminderService.packageData(messageVo);
+        }
+        return messageVoList;
+    }
+    
 }

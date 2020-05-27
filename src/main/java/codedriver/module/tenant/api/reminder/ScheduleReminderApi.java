@@ -1,21 +1,25 @@
 package codedriver.module.tenant.api.reminder;
 
-import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
-import codedriver.framework.reminder.core.GlobalReminderFactory;
-import codedriver.framework.reminder.core.IGlobalReminder;
-import codedriver.module.tenant.service.reminder.GlobalReminderService;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.annotation.Param;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
+import codedriver.framework.reminder.core.IGlobalReminderHandler;
+import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
+import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.service.reminder.GlobalReminderService;
 
 /**
  * @program: codedriver
@@ -25,9 +29,12 @@ import java.util.List;
 @Service
 public class ScheduleReminderApi extends ApiComponentBase {
 
-    @Autowired
-    private GlobalReminderService reminderService;
-
+	@Autowired
+	private GlobalReminderService reminderService;
+	
+	@Autowired
+    private GlobalReminderMessageMapper reminderMessageMapper;
+	
     @Override
     public String getToken() {
         return "globalReminder/scheduleDayMessage";
@@ -61,14 +68,18 @@ public class ScheduleReminderApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<GlobalReminderMessageVo> messageVos = reminderService.getScheduleMessageList();
-        Collections.sort(messageVos);
+        List<GlobalReminderMessageVo> messageVoList = reminderMessageMapper.getScheduleMessageList(UserContext.get().getUserUuid(true));
+        for (GlobalReminderMessageVo messageVo : messageVoList){
+        	reminderService.packageData(messageVo);
+        }
+        Collections.sort(messageVoList);
         JSONArray messageArray = new JSONArray();
-        for (GlobalReminderMessageVo messageVo : messageVos){
-            IGlobalReminder reminder = GlobalReminderFactory.getReminder(messageVo.getReminderVo().getPluginId());
+        for (GlobalReminderMessageVo messageVo : messageVoList){
+            IGlobalReminderHandler reminder = GlobalReminderHandlerFactory.getReminder(messageVo.getReminderVo().getHandler());
             messageArray.add(reminder.packData(messageVo));
         }
         returnObj.put("scheduleMessageList", messageArray);
         return returnObj;
     }
+    
 }

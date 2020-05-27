@@ -52,7 +52,7 @@ public class DashboardSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "仪表板保存接口";
+		return "仪表板修改保存接口";
 	}
 
 	@Override
@@ -61,92 +61,86 @@ public class DashboardSaveApi extends ApiComponentBase {
 	}
 
 	@Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid，为空代表新增"), 
-			@Param(name = "name", xss = true, type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "仪表板名称"),
-			@Param(name="type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
-			@Param(name="valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填", isRequired = false),
+			@Param(name = "name", xss = true, type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "仪表板名称", isRequired = true),
+			@Param(name = "type", type = ApiParamType.STRING, desc="分类类型，system|custom 默认custom"),
+			@Param(name = "valueList", type = ApiParamType.JSONARRAY, desc="授权列表，如果是system,则必填"),
 			@Param(name = "widgetList", type = ApiParamType.JSONARRAY, desc = "组件列表，范例：\"chartType\": \"barchart\"," + "\"h\": 4," + "\"handler\": \"codedriver.module.process.dashboard.handler.ProcessTaskDashboardHandler\"," + "\"i\": 0," + "\"name\": \"组件1\"," + "\"refreshInterval\": 3," + "\"uuid\": \"aaaa\"," + "\"w\": 5," + "\"x\": 0," + "\"y\": 0") })
-	@Output({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid") })
-	@Description(desc = "仪表板保存接口")
+	@Output({  })
+	@Description(desc = "仪表板修改保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		DashboardVo dashboardVo = JSONObject.toJavaObject(jsonObj, DashboardVo.class);
-		List<DashboardWidgetVo> dashboardWidgetList = dashboardVo.getWidgetList();
-		for(DashboardWidgetVo widget : dashboardWidgetList) {
-			if(StringUtils.isBlank(widget.getChartConfig())) {
-				throw new DashboardParamException("widgetList.chartConfig");
-			}
-		}
-		String uuid = jsonObj.getString("uuid");
-		if((StringUtils.isBlank(uuid)&&StringUtils.isBlank(dashboardVo.getName()))) {
-			throw new DashboardParamException("name");
-		}
-		String type = StringUtils.isBlank(jsonObj.getString("type"))?DashboardVo.DashBoardType.CUSTOM.getValue():jsonObj.getString("type");
-		dashboardVo.setType(type);
 		String userUuid = UserContext.get().getUserUuid(true);
-		DashboardVo oldDashboardVo = new DashboardVo();
-		if (StringUtils.isNotBlank(uuid)) {
-			oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
-			if(oldDashboardVo == null) {
-				throw new DashboardNotFoundException(uuid);
-			}
+		if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
+			throw new DashboardNameExistsException(dashboardVo.getName());
 		}
-		if((StringUtils.isNotBlank(dashboardVo.getName())&&!dashboardVo.getName().equals(oldDashboardVo.getName()))||StringUtils.isBlank(uuid)) {
-			if (dashboardMapper.checkDashboardNameIsExists(dashboardVo) > 0) {
-				throw new DashboardNameExistsException(dashboardVo.getName());
-			}
-		}
-		if(StringUtils.isNotBlank(uuid)&&DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())||DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
-			//判断是否有管理员权限
-			if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName())))) {
-				throw new DashboardAuthenticationException("管理");
-			}
-			if(StringUtils.isNotBlank(uuid)&&oldDashboardVo != null) {
-				dashboardMapper.deleteDashboardAuthorityByUuid(oldDashboardVo.getUuid());
-			}
-		}
-		if(type.equals(DashboardVo.DashBoardType.SYSTEM.getValue())) {
-			if(CollectionUtils.isEmpty(dashboardVo.getValueList())) {
-				throw new DashboardParamException("valueList");
-			}
-			//更新角色
-			for(String value:dashboardVo.getValueList()) {
-				AuthorityVo authorityVo = new AuthorityVo();
-				if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
-					authorityVo.setType(GroupSearch.ROLE.getValue());
-					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
-				}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
-					authorityVo.setType(GroupSearch.USER.getValue());
-					authorityVo.setUuid(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
-				}else {
+		if(StringUtils.isBlank(jsonObj.getString("uuid"))) {
+			if(DashboardVo.DashBoardType.SYSTEM.getValue().equals(dashboardVo.getType())) {
+				//判断是否有管理员权限
+				if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName())))) {
+					throw new DashboardAuthenticationException("管理");
+				}
+				if(CollectionUtils.isEmpty(dashboardVo.getValueList())) {
 					throw new DashboardParamException("valueList");
 				}
-				dashboardMapper.insertDashboardAuthority(authorityVo,dashboardVo.getUuid());
+				//更新角色
+				for(String value:dashboardVo.getValueList()) {
+					AuthorityVo authorityVo = new AuthorityVo();
+					if(value.toString().startsWith(GroupSearch.ROLE.getValuePlugin())) {
+						authorityVo.setType(GroupSearch.ROLE.getValue());
+						authorityVo.setUuid(value.toString().replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
+					}else if(value.toString().startsWith(GroupSearch.USER.getValuePlugin())) {
+						authorityVo.setType(GroupSearch.USER.getValue());
+						authorityVo.setUuid(value.toString().replaceAll(GroupSearch.USER.getValuePlugin(), StringUtils.EMPTY));
+					}else {
+						throw new DashboardParamException("valueList");
+					}
+					dashboardMapper.insertDashboardAuthority(authorityVo,dashboardVo.getUuid());
+				}
 			}
-		}else {
-			if(StringUtils.isBlank(oldDashboardVo.getFcu())) {
-				dashboardMapper.insertDashboardDefault(oldDashboardVo.getUuid(), userUuid, type);
-			}
-		}
-		if(StringUtils.isBlank(uuid)) {
 			dashboardVo.setFcu(userUuid);
 			dashboardMapper.insertDashboard(dashboardVo);
+			updateWidgetList(dashboardVo);
+			return dashboardVo.getUuid();
 		}else {
-			dashboardVo.setLcu(userUuid);
-			if(StringUtils.isNotBlank(dashboardVo.getName())) {
-				oldDashboardVo.setName(dashboardVo.getName());
+			DashboardVo oldDashboardVo = dashboardMapper.getDashboardByUuid(dashboardVo.getUuid());
+			if(oldDashboardVo == null) {
+				throw new DashboardNotFoundException(dashboardVo.getUuid());
 			}
-			if(StringUtils.isNotBlank(dashboardVo.getType())) {
-				oldDashboardVo.setType(dashboardVo.getType());
+			if(DashboardVo.DashBoardType.SYSTEM.getValue().equals(oldDashboardVo.getType())) {
+				//判断是否有管理员权限
+				if(CollectionUtils.isEmpty(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid, DASHBOARD_MODIFY.class.getSimpleName())))) {
+					throw new DashboardAuthenticationException("管理");
+				}
+			}else if(!oldDashboardVo.getFcu().equals(userUuid)){
+				throw new DashboardAuthenticationException("修改");
 			}
+			//修改dashboard
+			oldDashboardVo.setName(dashboardVo.getName());
+			oldDashboardVo.setLcu(userUuid);
+			oldDashboardVo.setWidgetList(dashboardVo.getWidgetList());
 			dashboardMapper.updateDashboard(oldDashboardVo);
-			dashboardMapper.deleteDashboardWidgetByDashboardUuid(oldDashboardVo.getUuid());
+			//更新组件配置
+			updateWidgetList(oldDashboardVo);
+			return null;
 		}
-		if (dashboardVo.getWidgetList() != null && dashboardVo.getWidgetList().size() > 0) {
-			for (DashboardWidgetVo widgetVo : dashboardVo.getWidgetList()) {
+	}
+	
+	/**
+	 * 更新组件配置
+	 * @param dashboardVo
+	 */
+	private void updateWidgetList(DashboardVo dashboardVo) {
+		dashboardMapper.deleteDashboardWidgetByDashboardUuid(dashboardVo.getUuid());
+		List<DashboardWidgetVo> dashboardWidgetList = dashboardVo.getWidgetList();
+		if(CollectionUtils.isNotEmpty(dashboardWidgetList)) {
+			for(DashboardWidgetVo widgetVo : dashboardWidgetList) {
+				if(StringUtils.isBlank(widgetVo.getChartConfig())) {
+					throw new DashboardParamException("widgetList.chartConfig");
+				}
 				widgetVo.setDashboardUuid(dashboardVo.getUuid());
 				dashboardMapper.insertDashboardWidget(widgetVo);
 			}
 		}
-		return dashboardVo.getUuid();
 	}
 }
