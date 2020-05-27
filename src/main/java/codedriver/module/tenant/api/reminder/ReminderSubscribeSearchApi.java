@@ -79,9 +79,9 @@ public class ReminderSubscribeSearchApi extends ApiComponentBase {
         for (GlobalReminderSubscribeVo subscribeVo : reminderSubscribeList) {
             subscribeMap.put(subscribeVo.getHandler(), subscribeVo);
         }
-        for (GlobalReminderHandlerVo reminder : activeReminderList) {
-            if (subscribeMap.containsKey(reminder.getHandler())) {
-                reminder.setReminderSubscribeVo(subscribeMap.get(reminder.getHandler()));
+        for (GlobalReminderHandlerVo handler : activeReminderList) {
+            if (subscribeMap.containsKey(handler.getHandler())) {
+            	handler.setReminderSubscribeVo(subscribeMap.get(handler.getHandler()));
             }
         }
         Collections.sort(reminderHandlerList);
