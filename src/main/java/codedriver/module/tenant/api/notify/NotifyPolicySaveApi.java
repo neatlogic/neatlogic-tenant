@@ -11,7 +11,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -52,7 +56,12 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 	}
 	
 	@Override
-	public Object myDoTest(JSONObject jsonObj) {		
+	public Object myDoTest(JSONObject jsonObj) {
+		String policyHandler = jsonObj.getString("policyHandler");
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
+		}
 		String uuid = jsonObj.getString("uuid");
 		String name = jsonObj.getString("name");
 		if(StringUtils.isNotBlank(uuid)) {
@@ -61,8 +70,12 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				throw new NotifyPolicyNotFoundException(uuid);
 			}
 			notifyPolicyVo.setName(name);
+			notifyPolicyVo.setLcd(new Date());
+			notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
+			notifyPolicyVo.setLcuName(UserContext.get().getUserName());
 			return notifyPolicyVo;
 		}else {
+			
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo();
 			notifyPolicyVo.setName(name);
 			notifyPolicyVo.setFcd(new Date());
@@ -70,15 +83,12 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			notifyPolicyVo.setFcuName(UserContext.get().getUserName());
 			JSONObject configObj = new JSONObject();
 			JSONArray triggerList = new JSONArray();
-//			for (NotifyTriggerType notifyTriggerType : NotifyTriggerType.values()) {
-//				if(NotifyTriggerType.TIMEOUT == notifyTriggerType) {
-//					continue;
-//				}
-//				JSONObject triggerObj = new JSONObject();
-//				triggerObj.put("trigger", notifyTriggerType.getTrigger());
-//				triggerObj.put("triggerName", notifyTriggerType.getText());
-//				triggerObj.put("handlerList", new JSONArray());
-//			}
+			for (ValueTextVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
+				JSONObject triggerObj = new JSONObject();
+				triggerObj.put("trigger", notifyTrigger.getValue());
+				triggerObj.put("triggerName", notifyTrigger.getText());
+				triggerObj.put("handlerList", new JSONArray());
+			}
 			configObj.put("triggerList", triggerList);
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			NotifyPolicyVo.notifyPolicyMap.put(notifyPolicyVo.getUuid(), notifyPolicyVo);

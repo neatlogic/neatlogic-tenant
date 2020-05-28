@@ -8,6 +8,7 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -44,12 +45,12 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String policyHandler = jsonObj.getString("policyHandler");
-		INotifyPolicyHandler handler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
-		if(handler == null) {
-			
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
 		}
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("notifyTriggerList", handler.getNotifyTriggerList());
+		resultObj.put("notifyTriggerList", notifyPolicyHandler.getNotifyTriggerList());
 		return resultObj;
 	}
 

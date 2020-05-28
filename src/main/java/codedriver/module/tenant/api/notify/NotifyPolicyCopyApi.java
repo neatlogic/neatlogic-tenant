@@ -57,6 +57,7 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 		}
 		NotifyPolicyVo newNotifyPolicy = new NotifyPolicyVo();
 		newNotifyPolicy.setName(jsonObj.getString("name"));
+		newNotifyPolicy.setPolicyHandler(notifyPolicyVo.getPolicyHandler());
 		newNotifyPolicy.setConfig(notifyPolicyVo.getConfig());
 		newNotifyPolicy.setFcd(new Date());
 		newNotifyPolicy.setFcu(UserContext.get().getUserUuid(true));

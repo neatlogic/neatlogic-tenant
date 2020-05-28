@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,7 +10,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -35,8 +43,7 @@ public class NotifyPolicyHandlerCleanApi  extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
-		@Param(name = "trigger", type = ApiParamType.ENUM, isRequired = true, desc = "通知动作类型",
-				rule = "active,assign,start,transfer,urge,succeed,back,retreat,hang,abort,recover,failed,createsubtask,editsubtask,abortsubtask,redosubtask,completesubtask")
+		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型")
 	})
 	@Output({})
 	@Description(desc = "通知策略清空触发动作配置项接口")
@@ -52,7 +59,16 @@ public class NotifyPolicyHandlerCleanApi  extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(uuid);
 		}
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getPolicyHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getPolicyHandler());
+		}
+		List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+		List<String> notifyTriggerValueList = notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
 		String trigger = jsonObj.getString("trigger");
+		if(!notifyTriggerValueList.contains(trigger)) {
+			throw new ParamIrregularException("参数trigger不符合格式要求");
+		}
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		JSONArray triggerList = configObj.getJSONArray("triggerList");
 		for(int i = 0; i < triggerList.size(); i++) {

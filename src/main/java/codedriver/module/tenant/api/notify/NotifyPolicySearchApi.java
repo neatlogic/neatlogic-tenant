@@ -13,7 +13,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -56,19 +59,28 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
+		String policyHandler = jsonObj.getString("policyHandler");
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
+		}
 		JSONObject resultObj = new JSONObject();
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
 		List<NotifyPolicyVo> tbodyList = new ArrayList<>();
 
 		for(Entry<String, NotifyPolicyVo> entry : NotifyPolicyVo.notifyPolicyMap.entrySet()) {
 			NotifyPolicyVo notifyPolicy = entry.getValue();
-			if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
-				if(notifyPolicy.getName().equalsIgnoreCase(basePageVo.getKeyword())) {
+			if(policyHandler.equals(notifyPolicy.getPolicyHandler())) {
+				if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
+					String keyword = basePageVo.getKeyword().toLowerCase();
+					String name = notifyPolicy.getName().toLowerCase();
+					if(name.contains(keyword)) {
+						tbodyList.add(notifyPolicy);
+					}
+				}else {
 					tbodyList.add(notifyPolicy);
 				}
-			}else {
-				tbodyList.add(notifyPolicy);
-			}
+			}			
 		}
 
 		tbodyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
