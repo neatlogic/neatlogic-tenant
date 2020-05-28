@@ -24,7 +24,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
-public class NotifyPolicyHandlerSaveApi  extends ApiComponentBase {
+public class NotifyPolicyHandlerSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
