@@ -63,31 +63,29 @@ public class ReminderSubscribeSearchApi extends ApiComponentBase {
         JSONObject returnJson = new JSONObject();
         boolean moduleId = StringUtils.isNotBlank(reminderVo.getModuleId());
         List<GlobalReminderHandlerVo> activeReminderList = new ArrayList<>();
-        List<GlobalReminderHandlerVo> reminderVoList = GlobalReminderHandlerFactory.getReminderVoList();
+        List<GlobalReminderHandlerVo> reminderHandlerList = GlobalReminderHandlerFactory.getReminderHandlerList();
         Map<String, ModuleVo> moduleVoMap = TenantContext.get().getActiveModuleMap();
-        for (GlobalReminderHandlerVo c : reminderVoList) {
-            if (moduleVoMap.containsKey(c.getModuleId())) {
-                c.setModuleName(moduleVoMap.get(c.getModuleId()).getName());
-                c.setModuleName(moduleVoMap.get(c.getModuleId()).getDescription());
-                if (!moduleId || (moduleId && c.getModuleId().equals(reminderVo.getModuleId()))) {
-                    activeReminderList.add(c);
+        for (GlobalReminderHandlerVo handler : reminderHandlerList) {
+            if (moduleVoMap.containsKey(handler.getModuleId())) {
+                handler.setModuleName(moduleVoMap.get(handler.getModuleId()).getName());
+                handler.setModuleName(moduleVoMap.get(handler.getModuleId()).getDescription());
+                if (!moduleId || (moduleId && handler.getModuleId().equals(reminderVo.getModuleId()))) {
+                    activeReminderList.add(handler);
                 }
             }
         }
-        List<GlobalReminderSubscribeVo> reminderSubList = reminderMapper.getReminderSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        List<GlobalReminderSubscribeVo> reminderSubscribeList = reminderMapper.getReminderSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         Map<String, GlobalReminderSubscribeVo> subscribeMap = new HashMap<>();
-        for (GlobalReminderSubscribeVo subscribeVo : reminderSubList) {
+        for (GlobalReminderSubscribeVo subscribeVo : reminderSubscribeList) {
             subscribeMap.put(subscribeVo.getHandler(), subscribeVo);
         }
-
-
-        for (GlobalReminderHandlerVo reminder : activeReminderList) {
-            if (subscribeMap.containsKey(reminder.getHandler())) {
-                reminder.setReminderSubscribeVo(subscribeMap.get(reminder.getHandler()));
+        for (GlobalReminderHandlerVo handler : activeReminderList) {
+            if (subscribeMap.containsKey(handler.getHandler())) {
+            	handler.setReminderSubscribeVo(subscribeMap.get(handler.getHandler()));
             }
         }
-        Collections.sort(reminderVoList);
-        returnJson.put("tbodyList", reminderVoList);
+        Collections.sort(reminderHandlerList);
+        returnJson.put("tbodyList", reminderHandlerList);
         return returnJson;
     }
 }
