@@ -17,7 +17,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/get";
+		return "notify/policy/get";
 	}
 
 	@Override

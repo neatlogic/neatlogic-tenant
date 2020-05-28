@@ -20,7 +20,7 @@ public class NotifyPolicyHandlerSaveApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/handler/save";
+		return "notify/policy/handler/save";
 	}
 
 	@Override

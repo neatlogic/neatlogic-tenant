@@ -20,7 +20,7 @@ public class NotifyPolicyHandlerCleanApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/handler/clean";
+		return "notify/policy/handler/clean";
 	}
 
 	@Override

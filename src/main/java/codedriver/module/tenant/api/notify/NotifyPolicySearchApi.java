@@ -24,7 +24,7 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/search";
+		return "notify/policy/search";
 	}
 
 	@Override
@@ -41,7 +41,8 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字搜索"),
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
+		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
 		@Param(explode=BasePageVo.class),

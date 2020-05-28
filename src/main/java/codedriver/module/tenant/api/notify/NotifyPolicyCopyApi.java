@@ -22,7 +22,7 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/copy";
+		return "notify/policy/copy";
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class NotifyPolicyDeleteApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/delete";
+		return "notify/policy/delete";
 	}
 
 	@Override

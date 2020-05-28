@@ -24,7 +24,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "process/notify/policy/save";
+		return "notify/policy/save";
 	}
 
 	@Override
@@ -40,6 +40,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "策略uuid"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "策略名"),
+		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
 		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
