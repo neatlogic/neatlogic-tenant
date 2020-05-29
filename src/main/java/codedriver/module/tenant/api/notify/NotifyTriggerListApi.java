@@ -22,7 +22,7 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/trigger/list/new";
+		return "notify/trigger/list";
 	}
 
 	@Override

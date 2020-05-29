@@ -18,7 +18,7 @@ public class NotifyHandlerListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/handler/list/new";
+		return "notify/handler/list";
 	}
 
 	@Override

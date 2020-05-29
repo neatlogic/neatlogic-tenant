@@ -10,10 +10,12 @@ import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
+@IsActived
 public class NotifyPolicyHandlerVariableTypeListApi extends ApiComponentBase {
 
 	@Override
