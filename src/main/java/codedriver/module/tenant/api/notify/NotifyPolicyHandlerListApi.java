@@ -31,9 +31,9 @@ public class NotifyPolicyHandlerListApi extends ApiComponentBase {
 	}
 	
 	@Output({
-		@Param(name = "policyHandlerList", explode = ValueTextVo[].class, desc = "通知插件列表")
+		@Param(name = "policyHandlerList", explode = ValueTextVo[].class, desc = "通知策略分类列表")
 	})
-	@Description(desc = "通知插件列表接口")
+	@Description(desc = "通知策略分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
