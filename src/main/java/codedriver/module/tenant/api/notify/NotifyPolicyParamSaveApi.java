@@ -1,13 +1,20 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
+import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -36,6 +43,9 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "变量描述"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "配置信息"),
 	})
+	@Output({
+		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
+	})
 	@Description(desc = "通知策略变量保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -43,4 +53,41 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		return null;
 	}
 
+
+	@Override
+	public Object myDoTest(JSONObject jsonObj) {
+		String policyUuid = jsonObj.getString("policyUuid");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(policyUuid);
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(policyUuid);
+		}
+		String name = jsonObj.getString("uuid");
+		String type = jsonObj.getString("type");
+		String description = jsonObj.getString("description");
+		String config = jsonObj.getString("config");
+		boolean isNew = true;
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getString("paramList"), NotifyPolicyParamVo.class);
+		for(NotifyPolicyParamVo notifyPolicyParamVo : paramList) {
+			if(name.equals(notifyPolicyParamVo.getName())) {
+				notifyPolicyParamVo.setType(type);
+				notifyPolicyParamVo.setDescription(description);
+				notifyPolicyParamVo.setConfig(config);
+				isNew = false;
+			}
+		}
+		if(isNew) {
+			NotifyPolicyParamVo notifyPolicyParamVo = new NotifyPolicyParamVo();
+			notifyPolicyParamVo.setName(name);
+			notifyPolicyParamVo.setType(type);
+			notifyPolicyParamVo.setDescription(description);
+			notifyPolicyParamVo.setConfig(config);
+			paramList.set(0, notifyPolicyParamVo);
+		}
+		configObj.put("paramList", paramList);
+		notifyPolicyVo.setConfig(configObj.toJSONString());
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("paramList", paramList);
+		return resultObj;
+	}
 }

@@ -49,7 +49,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
 		}
 		JSONObject resultObj = new JSONObject();
-		resultObj.put("variableTypeList", notifyPolicyHandler.getVariableTypeList());
+		resultObj.put("variableTypeList", notifyPolicyHandler.getParamTypeList());
 		return resultObj;	
 	}
 

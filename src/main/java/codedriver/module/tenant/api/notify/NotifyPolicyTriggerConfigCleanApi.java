@@ -42,7 +42,7 @@ public class NotifyPolicyTriggerConfigCleanApi  extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
+		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型")
 	})
 	@Output({})
@@ -54,10 +54,10 @@ public class NotifyPolicyTriggerConfigCleanApi  extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		String uuid = jsonObj.getString("uuid");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(uuid);
+		String policyUuid = jsonObj.getString("policyUuid");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(policyUuid);
 		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(uuid);
+			throw new NotifyPolicyNotFoundException(policyUuid);
 		}
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getPolicyHandler());
 		if(notifyPolicyHandler == null) {
@@ -74,7 +74,7 @@ public class NotifyPolicyTriggerConfigCleanApi  extends ApiComponentBase {
 		for(int i = 0; i < triggerList.size(); i++) {
 			JSONObject triggerObj = triggerList.getJSONObject(i);
 			if(trigger.equals(triggerObj.getString("trigger"))) {
-				triggerObj.put("handlerList", new JSONArray());
+				triggerObj.put("notifyList", new JSONArray());
 			}
 		}
 		notifyPolicyVo.setConfig(configObj.toJSONString());

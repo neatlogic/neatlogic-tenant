@@ -18,6 +18,7 @@ import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundExceptio
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -42,6 +43,9 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "模板uuid")
+	})
+	@Output({
+		@Param(name = "templateList", explode = NotifyTemplateVo[].class, desc = "通知模板列表")
 	})
 	@Description(desc = "通知模板删除接口")
 	@Override
@@ -73,7 +77,9 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		}
 		configObj.put("templateList", templateList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
-		return null;
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("templateList", templateList);
+		return resultObj;
 	}
 
 }

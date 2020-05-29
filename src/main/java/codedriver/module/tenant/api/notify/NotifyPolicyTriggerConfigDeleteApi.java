@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
+		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型"),
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "通知触发配置uuid")
 	})
@@ -55,10 +56,11 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		String uuid = jsonObj.getString("uuid");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(uuid);
+		JSONObject resultObj = new JSONObject();
+		String policyUuid = jsonObj.getString("policyUuid");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(policyUuid);
 		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(uuid);
+			throw new NotifyPolicyNotFoundException(policyUuid);
 		}
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getPolicyHandler());
 		if(notifyPolicyHandler == null) {
@@ -70,17 +72,26 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 		if(!notifyTriggerValueList.contains(trigger)) {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
-		JSONArray handlerList = jsonObj.getJSONArray("handlerList");
+		String uuid = jsonObj.getString("uuid");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		JSONArray triggerList = configObj.getJSONArray("triggerList");
 		for(int i = 0; i < triggerList.size(); i++) {
 			JSONObject triggerObj = triggerList.getJSONObject(i);
 			if(trigger.equals(triggerObj.getString("trigger"))) {
-				triggerObj.put("handlerList", handlerList);
+				JSONArray notifyList = triggerObj.getJSONArray("notifyList");
+				Iterator<Object> iterator = notifyList.iterator();
+				while(iterator.hasNext()) {
+					JSONObject notifyObj = (JSONObject) iterator.next();
+					if(uuid.equals(notifyObj.getString("uuid"))) {
+						iterator.remove();
+					}
+				}
+				triggerObj.put("notifyList", notifyList);
+				resultObj.put("notifyList", notifyList);
 			}
 		}
 		notifyPolicyVo.setConfig(configObj.toJSONString());
-		return null;
+		return resultObj;
 	}
 
 }
