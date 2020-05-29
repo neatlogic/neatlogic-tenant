@@ -88,6 +88,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				triggerObj.put("trigger", notifyTrigger.getValue());
 				triggerObj.put("triggerName", notifyTrigger.getText());
 				triggerObj.put("handlerList", new JSONArray());
+				triggerList.add(triggerObj);
 			}
 			configObj.put("triggerList", triggerList);
 			notifyPolicyVo.setConfig(configObj.toJSONString());
