@@ -55,9 +55,9 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(uuid);
 		}
-		NotifyPolicyVo newNotifyPolicy = new NotifyPolicyVo();
-		newNotifyPolicy.setName(jsonObj.getString("name"));
-		newNotifyPolicy.setPolicyHandler(notifyPolicyVo.getPolicyHandler());
+		NotifyPolicyVo newNotifyPolicy = new NotifyPolicyVo(jsonObj.getString("name"), notifyPolicyVo.getPolicyHandler());
+//		newNotifyPolicy.setName(jsonObj.getString("name"));
+//		newNotifyPolicy.setPolicyHandler(notifyPolicyVo.getPolicyHandler());
 		newNotifyPolicy.setConfig(notifyPolicyVo.getConfig());
 		newNotifyPolicy.setFcd(new Date());
 		newNotifyPolicy.setFcu(UserContext.get().getUserUuid(true));

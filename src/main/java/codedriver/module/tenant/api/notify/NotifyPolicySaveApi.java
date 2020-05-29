@@ -76,8 +76,9 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			return notifyPolicyVo;
 		}else {
 			
-			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo();
-			notifyPolicyVo.setName(name);
+			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, policyHandler);
+//			notifyPolicyVo.setPolicyHandler(policyHandler);
+//			notifyPolicyVo.setName(name);
 			notifyPolicyVo.setFcd(new Date());
 			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
 			notifyPolicyVo.setFcuName(UserContext.get().getUserName());
