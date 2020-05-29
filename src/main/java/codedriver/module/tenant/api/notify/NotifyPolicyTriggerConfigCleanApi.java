@@ -24,16 +24,16 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
-public class NotifyPolicyHandlerCleanApi  extends ApiComponentBase {
+public class NotifyPolicyTriggerConfigCleanApi  extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/handler/clean";
+		return "notify/policy/trigger/config/clean";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略清空触发动作配置项接口";
+		return "通知策略触发动作配置项清空接口";
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class NotifyPolicyHandlerCleanApi  extends ApiComponentBase {
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型")
 	})
 	@Output({})
-	@Description(desc = "通知策略清空触发动作配置项接口")
+	@Description(desc = "通知策略触发动作配置项清空接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;

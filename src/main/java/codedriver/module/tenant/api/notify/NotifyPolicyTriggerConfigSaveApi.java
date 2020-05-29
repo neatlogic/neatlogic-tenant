@@ -24,16 +24,16 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
-public class NotifyPolicyHandlerSaveApi extends ApiComponentBase {
+public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/handler/save";
+		return "notify/policy/tigger/config/save";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略保存触发动作配置项接口";
+		return "通知策略触发动作配置保存接口";
 	}
 
 	@Override
@@ -44,10 +44,12 @@ public class NotifyPolicyHandlerSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型"),
-		@Param(name = "handlerList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "动作配置项信息")	
+		@Param(name = "uuid", type = ApiParamType.STRING, desc = "通知触发配置uuid"),
+		@Param(name = "actionList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "动作列表信息"),
+		@Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "条件配置信息")
 	})
 	@Output({})
-	@Description(desc = "通知策略保存触发动作配置项接口")
+	@Description(desc = "通知策略触发动作配置保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;

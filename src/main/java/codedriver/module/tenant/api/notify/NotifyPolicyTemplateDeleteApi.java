@@ -43,7 +43,7 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
 		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "模板uuid")
 	})
-	@Description(desc = "通知策略信息获取接口")
+	@Description(desc = "通知模板删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		return null;
