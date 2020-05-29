@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.integration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -55,6 +56,10 @@ public class IntegrationTransformTest extends ApiComponentBase {
 			throw new ParamFormatInvalidException();
 		}
 
-		return FreemarkerUtil.transform(object, template);
+		String returnStr = FreemarkerUtil.transform(object, template);
+		if (StringUtils.isBlank(returnStr)) {
+			returnStr = "没有任何内容";
+		}
+		return returnStr;
 	}
 }

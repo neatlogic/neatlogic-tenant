@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.integration.core.TestInvoker;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

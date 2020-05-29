@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.integration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -9,7 +8,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.integration.core.TestInvoker;
-import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationInvokeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -22,8 +20,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @AuthAction(name = "INTEGRATION_EDIT")
 public class IntegrationInvokeApi extends ApiComponentBase {
 
-	@Autowired
-	private IntegrationMapper integrationMapper;
 
 	@Override
 	public String getToken() {
