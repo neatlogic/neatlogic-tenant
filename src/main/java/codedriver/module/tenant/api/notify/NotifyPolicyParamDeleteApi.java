@@ -58,9 +58,9 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyUuid);
 		}
-		String name = jsonObj.getString("uuid");
+		String name = jsonObj.getString("name");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getString("paramList"), NotifyPolicyParamVo.class);
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
 			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();

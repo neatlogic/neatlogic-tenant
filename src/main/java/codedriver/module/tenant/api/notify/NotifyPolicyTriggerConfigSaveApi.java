@@ -30,7 +30,7 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/tigger/config/save";
+		return "notify/policy/trigger/config/save";
 	}
 
 	@Override

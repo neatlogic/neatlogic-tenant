@@ -29,7 +29,7 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/tigger/config/delete";
+		return "notify/policy/trigger/config/delete";
 	}
 
 	@Override

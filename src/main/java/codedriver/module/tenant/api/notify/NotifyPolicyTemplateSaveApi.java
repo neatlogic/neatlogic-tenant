@@ -72,7 +72,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		String title = jsonObj.getString("title");
 		String content = jsonObj.getString("content");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getString("templateList"), NotifyTemplateVo.class);
+		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		if(StringUtils.isNotBlank(uuid)) {
 			boolean isExists = false;
 			for(NotifyTemplateVo notifyTemplateVo : templateList) {

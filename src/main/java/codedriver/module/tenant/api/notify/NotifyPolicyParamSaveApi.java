@@ -61,13 +61,13 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyUuid);
 		}
-		String name = jsonObj.getString("uuid");
+		String name = jsonObj.getString("name");
 		String type = jsonObj.getString("type");
 		String description = jsonObj.getString("description");
 		String config = jsonObj.getString("config");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getString("paramList"), NotifyPolicyParamVo.class);
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		for(NotifyPolicyParamVo notifyPolicyParamVo : paramList) {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setType(type);
@@ -82,7 +82,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setType(type);
 			notifyPolicyParamVo.setDescription(description);
 			notifyPolicyParamVo.setConfig(config);
-			paramList.set(0, notifyPolicyParamVo);
+			paramList.add(0, notifyPolicyParamVo);
 		}
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());

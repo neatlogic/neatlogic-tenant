@@ -67,7 +67,7 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		
 		String uuid = jsonObj.getString("uuid");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getString("templateList"), NotifyTemplateVo.class);
+		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
 		while(iterator.hasNext()) {
 			NotifyTemplateVo notifyTemplateVo = iterator.next();
