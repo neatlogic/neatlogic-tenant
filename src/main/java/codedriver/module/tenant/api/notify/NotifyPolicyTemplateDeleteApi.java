@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.notify;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +12,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
@@ -25,6 +28,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Transactional
 public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 
+	@Autowired
+	private NotifyMapper notifyMapper;
+	
 	@Override
 	public String getToken() {
 		return "notify/policy/template/delete";
@@ -41,8 +47,8 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "模板uuid")
+		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id")
 	})
 	@Output({
 		@Param(name = "templateList", explode = NotifyTemplateVo[].class, desc = "通知模板列表")
@@ -50,28 +56,53 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 	@Description(desc = "通知模板删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return null;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		String policyUuid = jsonObj.getString("policyUuid");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(policyUuid);
+		Long policyId = jsonObj.getLong("policyId");
+		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
 		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyUuid);
+			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getPolicyHandler());
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getPolicyHandler());
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		
-		String uuid = jsonObj.getString("uuid");
+		Long id = jsonObj.getLong("id");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
 		while(iterator.hasNext()) {
 			NotifyTemplateVo notifyTemplateVo = iterator.next();
-			if(uuid.equals(notifyTemplateVo.getUuid())) {
+			if(id.equals(notifyTemplateVo.getId())) {
+				iterator.remove();
+			}
+		}
+		configObj.put("templateList", templateList);
+		notifyPolicyVo.setConfig(configObj.toJSONString());
+		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("templateList", templateList);
+		return resultObj;
+	}
+	
+	@Override
+	public Object myDoTest(JSONObject jsonObj) {
+		Long policyId = jsonObj.getLong("policyId");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(policyId.toString());
+		}
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		
+		Long id = jsonObj.getLong("id");
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
+		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
+		while(iterator.hasNext()) {
+			NotifyTemplateVo notifyTemplateVo = iterator.next();
+			if(id.equals(notifyTemplateVo.getId())) {
 				iterator.remove();
 			}
 		}

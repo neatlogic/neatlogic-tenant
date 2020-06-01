@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.notify;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +11,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.notify.core.NotifyPolicyFactory;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -21,6 +24,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
+	
+	@Autowired
+	private NotifyMapper notifyMapper;
 
 	@Override
 	public String getToken() {
@@ -38,7 +44,7 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
+		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
 	})
 	@Output({
@@ -47,16 +53,35 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 	@Description(desc = "通知策略参数删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Long policyId = jsonObj.getLong("policyId");
+		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(policyId.toString());
+		}
+		String name = jsonObj.getString("name");
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
+		while(iterator.hasNext()) {
+			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();
+			if(name.equals(notifyPolicyParamVo.getName())) {
+				iterator.remove();
+			}
+		}
+		configObj.put("paramList", paramList);
+		notifyPolicyVo.setConfig(configObj.toJSONString());
+		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("paramList", paramList);
+		return resultObj;
 	}
 
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		String policyUuid = jsonObj.getString("policyUuid");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(policyUuid);
+		Long policyId = jsonObj.getLong("policyId");
+		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
 		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyUuid);
+			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
 		String name = jsonObj.getString("name");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();

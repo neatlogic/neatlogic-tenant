@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
@@ -14,7 +15,9 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -24,6 +27,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 public class NotifyPolicySearchApi  extends ApiComponentBase {
+	
+	@Autowired
+	private NotifyMapper notifyMapper;
 
 	@Override
 	public String getToken() {
@@ -45,7 +51,7 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
-		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
 	})
 	@Output({
 		@Param(explode=BasePageVo.class),
@@ -54,23 +60,37 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 	@Description(desc = "通知策略管理列表搜索接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return null;
+		JSONObject resultObj = new JSONObject();
+		NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(jsonObj, NotifyPolicyVo.class);
+		List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
+		for(NotifyPolicyVo notifyPolicy : tbodyList) {
+			//TODO 获取被引用数据 notifyPolicy.setReferenceCount(referenceCount);
+		}
+		resultObj.put("tbodyList", tbodyList);
+		if(notifyPolicyVo.getNeedPage()) {
+			int rowNum = notifyMapper.getNotifyPolicyCount(notifyPolicyVo);
+			resultObj.put("currentPage", notifyPolicyVo.getCurrentPage());
+			resultObj.put("pageSize", notifyPolicyVo.getPageSize());
+			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyVo.getPageSize()));
+			resultObj.put("rowNum", rowNum);
+		}
+		return resultObj;
 	}
 	
 	@Override
 	public Object myDoTest(JSONObject jsonObj) {
-		String policyHandler = jsonObj.getString("policyHandler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		String handler = jsonObj.getString("handler");
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
 		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
+			throw new NotifyPolicyHandlerNotFoundException(handler);
 		}
 		JSONObject resultObj = new JSONObject();
 		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
 		List<NotifyPolicyVo> tbodyList = new ArrayList<>();
 
-		for(Entry<String, NotifyPolicyVo> entry : NotifyPolicyVo.notifyPolicyMap.entrySet()) {
+		for(Entry<Long, NotifyPolicyVo> entry : NotifyPolicyFactory.notifyPolicyMap.entrySet()) {
 			NotifyPolicyVo notifyPolicy = entry.getValue();
-			if(policyHandler.equals(notifyPolicy.getPolicyHandler())) {
+			if(handler.equals(notifyPolicy.getHandler())) {
 				if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
 					String keyword = basePageVo.getKeyword().toLowerCase();
 					String name = notifyPolicy.getName().toLowerCase();

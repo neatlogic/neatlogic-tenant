@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dto.NotifyPolicyParamTypeVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -38,7 +38,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
-		@Param(name = "paramTypeList", explode = ValueTextVo[].class, desc = "参数类型列表") 
+		@Param(name = "paramTypeList", explode = NotifyPolicyParamTypeVo[].class, desc = "参数类型列表") 
 	})
 	@Description(desc = "通知策略参数类型列表接口")
 	@Override
