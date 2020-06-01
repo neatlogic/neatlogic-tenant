@@ -29,7 +29,7 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "通知策略变量删除接口";
+		return "通知策略参数删除接口";
 	}
 
 	@Override
@@ -39,12 +39,12 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "变量名")
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
 	})
-	@Description(desc = "通知策略变量删除接口")
+	@Description(desc = "通知策略参数删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO Auto-generated method stub

@@ -1,11 +1,18 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -49,6 +56,15 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(uuid);
 		}
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getPolicyHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getPolicyHandler());
+		}
+		paramList.addAll(notifyPolicyHandler.getSystemParamList());
+		configObj.put("paramList", paramList);
+		notifyPolicyVo.setConfig(configObj.toJSONString());
 		return notifyPolicyVo;
 	}
 

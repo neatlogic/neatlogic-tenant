@@ -28,7 +28,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "通知策略变量保存接口";
+		return "通知策略参数保存接口";
 	}
 
 	@Override
@@ -38,15 +38,15 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyUuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "变量名"),
-		@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "变量类型"),
-		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "变量描述"),
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
+		@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
+		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "参数描述"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "配置信息"),
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
 	})
-	@Description(desc = "通知策略变量保存接口")
+	@Description(desc = "通知策略参数保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO Auto-generated method stub
