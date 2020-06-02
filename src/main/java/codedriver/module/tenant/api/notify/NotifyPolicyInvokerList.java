@@ -14,6 +14,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -58,6 +59,10 @@ public class NotifyPolicyInvokerList extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
 		NotifyPolicyInvokerVo notifyPolicyInvokerVo = JSON.toJavaObject(jsonObj, NotifyPolicyInvokerVo.class); 
+		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(notifyPolicyInvokerVo.getPolicyId());
+		if(notifyPolicyVo == null) {
+			throw new NotifyPolicyNotFoundException(notifyPolicyInvokerVo.getPolicyId().toString());
+		}
 		List<NotifyPolicyInvokerVo> notifyPolicyInvokerList = notifyMapper.getNotifyPolicyInvokerList(notifyPolicyInvokerVo);
 		resultObj.put("notifyPolicyInvokerList", notifyPolicyInvokerList);
 		if(notifyPolicyInvokerVo.getNeedPage()) {
@@ -65,9 +70,9 @@ public class NotifyPolicyInvokerList extends ApiComponentBase {
 			List<Long> policyIdList = new ArrayList<>();
 			policyIdList.add(notifyPolicyInvokerVo.getPolicyId());
 			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
-			for(NotifyPolicyVo notifyPolicyVo : notifyPolicyInvokerCountList) {
-				if(notifyPolicyInvokerVo.getPolicyId().equals(notifyPolicyVo.getId())) {
-					rowNum = notifyPolicyVo.getInvokerCount();
+			for(NotifyPolicyVo notifyPolicy : notifyPolicyInvokerCountList) {
+				if(notifyPolicyInvokerVo.getPolicyId().equals(notifyPolicy.getId())) {
+					rowNum = notifyPolicy.getInvokerCount();
 				}
 			}
 			resultObj.put("currentPage", notifyPolicyInvokerVo.getCurrentPage());
