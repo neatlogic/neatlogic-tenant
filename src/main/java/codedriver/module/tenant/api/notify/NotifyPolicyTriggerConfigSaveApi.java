@@ -55,7 +55,9 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 		@Param(name = "actionList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "动作列表信息"),
 		@Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "条件配置信息")
 	})
-	@Output({})
+	@Output({
+		@Param(name = "notifyList", type = ApiParamType.JSONARRAY, desc = "通知触发配置列表")
+	})
 	@Description(desc = "通知策略触发动作配置保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
