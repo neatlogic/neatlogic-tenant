@@ -46,8 +46,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
 		@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
-		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "参数描述"),
-		@Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "配置信息"),
+		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
@@ -63,7 +62,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		String name = jsonObj.getString("name");
 		String type = jsonObj.getString("type");
 		String description = jsonObj.getString("description");
-		String config = jsonObj.getString("config");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
@@ -71,7 +69,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setType(type);
 				notifyPolicyParamVo.setDescription(description);
-				notifyPolicyParamVo.setConfig(config);
 				isNew = false;
 			}
 		}
@@ -80,7 +77,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setName(name);
 			notifyPolicyParamVo.setType(type);
 			notifyPolicyParamVo.setDescription(description);
-			notifyPolicyParamVo.setConfig(config);
 			paramList.add(0, notifyPolicyParamVo);
 		}
 		configObj.put("paramList", paramList);
@@ -102,7 +98,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		String name = jsonObj.getString("name");
 		String type = jsonObj.getString("type");
 		String description = jsonObj.getString("description");
-		String config = jsonObj.getString("config");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
@@ -110,7 +105,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setType(type);
 				notifyPolicyParamVo.setDescription(description);
-				notifyPolicyParamVo.setConfig(config);
 				isNew = false;
 			}
 		}
@@ -119,7 +113,6 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setName(name);
 			notifyPolicyParamVo.setType(type);
 			notifyPolicyParamVo.setDescription(description);
-			notifyPolicyParamVo.setConfig(config);
 			paramList.add(0, notifyPolicyParamVo);
 		}
 		configObj.put("paramList", paramList);

@@ -1,9 +1,13 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,9 +67,18 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(jsonObj, NotifyPolicyVo.class);
 		List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
-		for(NotifyPolicyVo notifyPolicy : tbodyList) {
-			//TODO 获取被引用数据 notifyPolicy.setReferenceCount(referenceCount);
+		if(CollectionUtils.isNotEmpty(tbodyList)) {
+			List<Long> policyIdList = tbodyList.stream().map(NotifyPolicyVo::getId).collect(Collectors.toList());
+			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
+			Map<Long, Integer> notifyPolicyInvokerCountMap = new HashMap<>();
+			for(NotifyPolicyVo notifyPolicy : notifyPolicyInvokerCountList) {
+				notifyPolicyInvokerCountMap.put(notifyPolicy.getId(), notifyPolicy.getInvokerCount());
+			}
+			for(NotifyPolicyVo notifyPolicy : tbodyList) {
+				notifyPolicy.setInvokerCount(notifyPolicyInvokerCountMap.get(notifyPolicy.getId()));
+			}
 		}
+		
 		resultObj.put("tbodyList", tbodyList);
 		if(notifyPolicyVo.getNeedPage()) {
 			int rowNum = notifyMapper.getNotifyPolicyCount(notifyPolicyVo);
