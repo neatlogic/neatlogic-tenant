@@ -35,7 +35,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
 		@Param(name = "paramTypeList", explode = NotifyPolicyParamTypeVo[].class, desc = "参数类型列表") 
