@@ -1,11 +1,19 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
+import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -14,6 +22,9 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 public class NotifyPolicyInvokerList extends ApiComponentBase {
 
+	@Autowired
+	private NotifyMapper notifyMapper;
+	
 	@Override
 	public String getToken() {
 		return "notify/policy/invoker/list";
@@ -45,8 +56,26 @@ public class NotifyPolicyInvokerList extends ApiComponentBase {
 	@Description(desc = "通知策略引用列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		JSONObject resultObj = new JSONObject();
+		NotifyPolicyInvokerVo notifyPolicyInvokerVo = JSON.toJavaObject(jsonObj, NotifyPolicyInvokerVo.class); 
+		List<NotifyPolicyInvokerVo> notifyPolicyInvokerList = notifyMapper.getNotifyPolicyInvokerList(notifyPolicyInvokerVo);
+		resultObj.put("notifyPolicyInvokerList", notifyPolicyInvokerList);
+		if(notifyPolicyInvokerVo.getNeedPage()) {
+			int rowNum = 0;
+			List<Long> policyIdList = new ArrayList<>();
+			policyIdList.add(notifyPolicyInvokerVo.getPolicyId());
+			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
+			for(NotifyPolicyVo notifyPolicyVo : notifyPolicyInvokerCountList) {
+				if(notifyPolicyInvokerVo.getPolicyId().equals(notifyPolicyVo.getId())) {
+					rowNum = notifyPolicyVo.getInvokerCount();
+				}
+			}
+			resultObj.put("currentPage", notifyPolicyInvokerVo.getCurrentPage());
+			resultObj.put("pageSize", notifyPolicyInvokerVo.getPageSize());
+			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyInvokerVo.getPageSize()));
+			resultObj.put("rowNum", rowNum);
+		}
+		return resultObj;
 	}
 
 }
