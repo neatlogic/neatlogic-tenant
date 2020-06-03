@@ -61,11 +61,7 @@ public class IntegrationHelpApi extends ApiComponentBase {
 			if (configObj.getJSONObject("param") != null && configObj.getJSONObject("param").getJSONArray("paramList") != null) {
 				for (int i = 0; i < configObj.getJSONObject("param").getJSONArray("paramList").size(); i++) {
 					JSONObject paramObj = configObj.getJSONObject("param").getJSONArray("paramList").getJSONObject(i);
-					PatternVo patternVo = new PatternVo();
-					patternVo.setName(paramObj.getString("name"));
-					patternVo.setType(paramObj.getString("type"));
-					patternVo.setIsRequired(paramObj.getInteger("isRequired"));
-					patternVo.setDescription(paramObj.getString("description"));
+					PatternVo patternVo = JSONObject.toJavaObject(paramObj, PatternVo.class);
 					patternList.add(patternVo);
 				}
 			}
