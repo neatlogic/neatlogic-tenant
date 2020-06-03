@@ -77,7 +77,9 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 				notifyPolicyInvokerCountMap.put(notifyPolicy.getId(), notifyPolicy.getInvokerCount());
 			}
 			for(NotifyPolicyVo notifyPolicy : tbodyList) {
-				notifyPolicy.setInvokerCount(notifyPolicyInvokerCountMap.get(notifyPolicy.getId()));
+				Integer invokerCount = notifyPolicyInvokerCountMap.get(notifyPolicy.getId());
+				invokerCount = invokerCount == null ? 0 : invokerCount;
+				notifyPolicy.setInvokerCount(invokerCount);
 			}
 		}
 		
