@@ -51,7 +51,8 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, desc = "模板id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "模板名称"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "模板标题"),
-		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "模板内容")
+		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "模板内容"),
+		@Param(name = "notifyHandler", type = ApiParamType.STRING, desc = "通知处理器")
 	})
 	@Output({
 		@Param(name = "templateList", explode = NotifyTemplateVo[].class, desc = "通知模板列表")
@@ -72,6 +73,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		String name = jsonObj.getString("name");
 		String title = jsonObj.getString("title");
 		String content = jsonObj.getString("content");
+		String notifyHandler = jsonObj.getString("notifyHandler");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		if(id != null) {
@@ -81,6 +83,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 					notifyTemplateVo.setName(name);
 					notifyTemplateVo.setTitle(title);
 					notifyTemplateVo.setContent(content);
+					notifyTemplateVo.setNotifyHandler(notifyHandler);
 					isExists = true;
 				}
 			}
@@ -92,6 +95,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 			notifyTemplateVo.setName(name);
 			notifyTemplateVo.setTitle(title);
 			notifyTemplateVo.setContent(content);
+			notifyTemplateVo.setNotifyHandler(notifyHandler);
 			templateList.add(notifyTemplateVo);
 		}
 		configObj.put("templateList", templateList);
@@ -118,6 +122,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		String name = jsonObj.getString("name");
 		String title = jsonObj.getString("title");
 		String content = jsonObj.getString("content");
+		String notifyHandler = jsonObj.getString("notifyHandler");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		if(id != null) {
@@ -127,6 +132,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 					notifyTemplateVo.setName(name);
 					notifyTemplateVo.setTitle(title);
 					notifyTemplateVo.setContent(content);
+					notifyTemplateVo.setNotifyHandler(notifyHandler);
 					isExists = true;
 				}
 			}
@@ -138,6 +144,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 			notifyTemplateVo.setName(name);
 			notifyTemplateVo.setTitle(title);
 			notifyTemplateVo.setContent(content);
+			notifyTemplateVo.setNotifyHandler(notifyHandler);
 			templateList.add(notifyTemplateVo);
 		}
 		configObj.put("templateList", templateList);
