@@ -48,7 +48,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 	}
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id"),
+		@Param(name = "id", type = ApiParamType.LONG, desc = "模板id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "模板名称"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "模板标题"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "模板内容")
