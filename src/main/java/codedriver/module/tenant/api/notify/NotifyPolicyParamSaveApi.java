@@ -10,8 +10,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.ExpressionVo;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -47,7 +51,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
-		@Param(name = "basicType", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
+		@Param(name = "basicType", type = ApiParamType.ENUM, rule = "string,array,date", isRequired = true, desc = "参数类型"),
 		@Param(name = "handlerName", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
@@ -61,8 +65,9 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String handler = jsonObj.getString("handler");
 		String basicType = jsonObj.getString("basicType");
+		BasicType basicTypeEnum = BasicType.getBasicType(basicType);
+		String handler = jsonObj.getString("handler");
 		String handlerName = jsonObj.getString("handlerName");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
@@ -71,6 +76,12 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			if(handler.equals(notifyPolicyParamVo.getHandler())) {
 				notifyPolicyParamVo.setBasicType(basicType);
 				notifyPolicyParamVo.setHandlerName(handlerName);
+				notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
+				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
+				notifyPolicyParamVo.getExpressionList().clear();
+				for(Expression expression : basicTypeEnum.getExpressionList()) {
+					notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression));
+				}
 				isNew = false;
 			}
 		}
@@ -79,6 +90,13 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setHandler(handler);
 			notifyPolicyParamVo.setBasicType(basicType);
 			notifyPolicyParamVo.setHandlerName(handlerName);
+			notifyPolicyParamVo.setHandlerType(FormHandlerType.INPUT.toString());
+			//notifyPolicyParamVo.setType(type);
+			notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
+			notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
+			for(Expression expression : basicTypeEnum.getExpressionList()) {
+				notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression));
+			}
 			paramList.add(notifyPolicyParamVo);
 		}
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
