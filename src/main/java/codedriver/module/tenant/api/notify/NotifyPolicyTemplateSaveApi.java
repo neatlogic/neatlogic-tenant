@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.notify.constvalue.NotifyPolicyActionType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -84,6 +87,9 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 					notifyTemplateVo.setTitle(title);
 					notifyTemplateVo.setContent(content);
 					notifyTemplateVo.setNotifyHandler(notifyHandler);
+					notifyTemplateVo.setAction(NotifyPolicyActionType.UPDATE.getValue());
+					notifyTemplateVo.setActionTime(new Date());
+					notifyTemplateVo.setActionUser(UserContext.get().getUserName());
 					isExists = true;
 				}
 			}
@@ -96,6 +102,9 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 			notifyTemplateVo.setTitle(title);
 			notifyTemplateVo.setContent(content);
 			notifyTemplateVo.setNotifyHandler(notifyHandler);
+			notifyTemplateVo.setAction(NotifyPolicyActionType.CREATE.getValue());
+			notifyTemplateVo.setActionTime(new Date());
+			notifyTemplateVo.setActionUser(UserContext.get().getUserName());
 			templateList.add(notifyTemplateVo);
 		}
 		configObj.put("templateList", templateList);
