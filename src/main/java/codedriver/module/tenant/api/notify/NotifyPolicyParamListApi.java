@@ -49,7 +49,7 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊匹配"),
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "source", type = ApiParamType.ENUM, rule = "system,custom", desc = "参数来源")
+		//@Param(name = "source", type = ApiParamType.ENUM, rule = "system,custom", desc = "参数来源")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
@@ -64,41 +64,56 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
 		String keyword = jsonObj.getString("keyword");
-		String source = jsonObj.getString("source");
-		if(!"system".equals(source)) {
-			JSONObject configObj = notifyPolicyVo.getConfigObj();
-			List<NotifyPolicyParamVo> customParamList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-			if(CollectionUtils.isNotEmpty(customParamList)) {
-				for(NotifyPolicyParamVo notifyPolicyParamVo : customParamList) {
-					if(StringUtils.isNotBlank(keyword)) {
-						if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
-								&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-							continue;
-						}
+		JSONObject configObj = notifyPolicyVo.getConfigObj();
+		List<NotifyPolicyParamVo> customParamList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		if(CollectionUtils.isNotEmpty(customParamList)) {
+			for(NotifyPolicyParamVo notifyPolicyParamVo : customParamList) {
+				if(StringUtils.isNotBlank(keyword)) {
+					if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
+							&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+						continue;
 					}
-					paramList.add(notifyPolicyParamVo);
 				}
+				paramList.add(notifyPolicyParamVo);
 			}
 		}
-		if(!"custom".equals(source)) {
-			INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-			if(notifyPolicyHandler == null) {
-				throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-			}
-			List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-			if(CollectionUtils.isNotEmpty(systemParamList)) {
-				for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
-					if(StringUtils.isNotBlank(keyword)) {
-						if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
-								&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-							continue;
-						}
-					}
-					paramList.add(notifyPolicyParamVo);
-				}
-			}
-		}
-		return paramList;
+//		String source = jsonObj.getString("source");
+//		if(!"system".equals(source)) {
+//			JSONObject configObj = notifyPolicyVo.getConfigObj();
+//			List<NotifyPolicyParamVo> customParamList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+//			if(CollectionUtils.isNotEmpty(customParamList)) {
+//				for(NotifyPolicyParamVo notifyPolicyParamVo : customParamList) {
+//					if(StringUtils.isNotBlank(keyword)) {
+//						if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
+//								&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+//							continue;
+//						}
+//					}
+//					paramList.add(notifyPolicyParamVo);
+//				}
+//			}
+//		}
+//		if(!"custom".equals(source)) {
+//			INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+//			if(notifyPolicyHandler == null) {
+//				throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+//			}
+//			List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+//			if(CollectionUtils.isNotEmpty(systemParamList)) {
+//				for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
+//					if(StringUtils.isNotBlank(keyword)) {
+//						if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
+//								&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+//							continue;
+//						}
+//					}
+//					paramList.add(notifyPolicyParamVo);
+//				}
+//			}
+//		}
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("paramList", paramList);
+		return resultObj;
 	}
 
 	@Override

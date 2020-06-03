@@ -89,7 +89,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				triggerList.add(triggerObj);
 			}
 			configObj.put("triggerList", triggerList);
-			configObj.put("paramList", new JSONArray());
+			configObj.put("paramList", notifyPolicyHandler.getSystemParamList());
 			configObj.put("templateList", new JSONArray());
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			notifyMapper.insertNotifyPolicy(notifyPolicyVo);
@@ -119,8 +119,6 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 		}else {
 			
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
-//			notifyPolicyVo.setPolicyHandler(policyHandler);
-//			notifyPolicyVo.setName(name);
 			notifyPolicyVo.setFcd(new Date());
 			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
 			notifyPolicyVo.setFcuName(UserContext.get().getUserName());
@@ -133,8 +131,8 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				triggerObj.put("notifyList", new JSONArray());
 				triggerList.add(triggerObj);
 			}
-			configObj.put("triggerList", triggerList);
-			configObj.put("paramList", new JSONArray());
+			configObj.put("triggerList", triggerList);			
+			configObj.put("paramList", notifyPolicyHandler.getSystemParamList());
 			configObj.put("templateList", new JSONArray());
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			NotifyPolicyFactory.notifyPolicyMap.put(notifyPolicyVo.getId(), notifyPolicyVo);
