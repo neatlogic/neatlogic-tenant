@@ -22,12 +22,14 @@ import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundExceptio
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.SnowflakeUtil;
 @Service
 @Transactional
+@IsActived
 public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 
 	@Autowired

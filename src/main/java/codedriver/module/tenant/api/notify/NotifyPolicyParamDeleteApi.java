@@ -18,11 +18,13 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
+@IsActived
 public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 	
 	@Autowired

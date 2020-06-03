@@ -103,7 +103,7 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 
 		for(Entry<Long, NotifyPolicyVo> entry : NotifyPolicyFactory.notifyPolicyMap.entrySet()) {
 			NotifyPolicyVo notifyPolicy = entry.getValue();
-			
+//			notifyMapper.insertNotifyPolicy(notifyPolicy);
 			if(handler.equals(notifyPolicy.getHandler())) {
 				if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
 					String keyword = basePageVo.getKeyword().toLowerCase();
