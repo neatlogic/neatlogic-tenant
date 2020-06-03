@@ -74,14 +74,14 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 		String keyword = jsonObj.getString("keyword");
 		for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
 			if(StringUtils.isNotBlank(keyword)) {
-				if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
-						&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+				if(!notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase()) 
+						&& !notifyPolicyParamVo.getHandlerName().toLowerCase().contains(keyword.toLowerCase())) {
 					continue;
 				}
 			}
 			paramList.add(notifyPolicyParamVo);
 		}
-		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+//		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
 		return resultObj;
@@ -106,14 +106,14 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 		String keyword = jsonObj.getString("keyword");
 		for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
 			if(StringUtils.isNotBlank(keyword)) {
-				if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
-						&& !notifyPolicyParamVo.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+				if(!notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase()) 
+						&& !notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase())) {
 					continue;
 				}
 			}
 			paramList.add(notifyPolicyParamVo);
 		}
-		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+//		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
 		return resultObj;

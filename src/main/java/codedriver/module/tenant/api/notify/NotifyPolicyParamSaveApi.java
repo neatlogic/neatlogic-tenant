@@ -46,9 +46,9 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
-		@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
-		@Param(name = "description", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
+		@Param(name = "basicType", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
+		@Param(name = "handlerName", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
@@ -61,26 +61,27 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String name = jsonObj.getString("name");
-		String type = jsonObj.getString("type");
-		String description = jsonObj.getString("description");
+		String handler = jsonObj.getString("handler");
+		String basicType = jsonObj.getString("basicType");
+		String handlerName = jsonObj.getString("handlerName");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		for(NotifyPolicyParamVo notifyPolicyParamVo : paramList) {
-			if(name.equals(notifyPolicyParamVo.getName())) {
-				notifyPolicyParamVo.setType(type);
-				notifyPolicyParamVo.setDescription(description);
+			if(handler.equals(notifyPolicyParamVo.getHandler())) {
+				notifyPolicyParamVo.setBasicType(basicType);
+				notifyPolicyParamVo.setHandlerName(handlerName);
 				isNew = false;
 			}
 		}
 		if(isNew) {
 			NotifyPolicyParamVo notifyPolicyParamVo = new NotifyPolicyParamVo();
-			notifyPolicyParamVo.setName(name);
-			notifyPolicyParamVo.setType(type);
-			notifyPolicyParamVo.setDescription(description);
-			paramList.add(0, notifyPolicyParamVo);
+			notifyPolicyParamVo.setHandler(handler);
+			notifyPolicyParamVo.setBasicType(basicType);
+			notifyPolicyParamVo.setHandlerName(handlerName);
+			paramList.add(notifyPolicyParamVo);
 		}
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
@@ -97,26 +98,27 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String name = jsonObj.getString("name");
-		String type = jsonObj.getString("type");
-		String description = jsonObj.getString("description");
+		String handler = jsonObj.getString("handler");
+		String basicType = jsonObj.getString("basicType");
+		String handlerName = jsonObj.getString("handlerName");
 		boolean isNew = true;
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		for(NotifyPolicyParamVo notifyPolicyParamVo : paramList) {
-			if(name.equals(notifyPolicyParamVo.getName())) {
-				notifyPolicyParamVo.setType(type);
-				notifyPolicyParamVo.setDescription(description);
+			if(handler.equals(notifyPolicyParamVo.getHandler())) {
+				notifyPolicyParamVo.setBasicType(basicType);
+				notifyPolicyParamVo.setHandlerName(handlerName);
 				isNew = false;
 			}
 		}
 		if(isNew) {
 			NotifyPolicyParamVo notifyPolicyParamVo = new NotifyPolicyParamVo();
-			notifyPolicyParamVo.setName(name);
-			notifyPolicyParamVo.setType(type);
-			notifyPolicyParamVo.setDescription(description);
-			paramList.add(0, notifyPolicyParamVo);
+			notifyPolicyParamVo.setHandler(handler);
+			notifyPolicyParamVo.setBasicType(basicType);
+			notifyPolicyParamVo.setHandlerName(handlerName);
+			paramList.add(notifyPolicyParamVo);
 		}
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		JSONObject resultObj = new JSONObject();

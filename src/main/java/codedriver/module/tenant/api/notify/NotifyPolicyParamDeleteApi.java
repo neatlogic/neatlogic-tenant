@@ -47,7 +47,7 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
@@ -60,13 +60,13 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String name = jsonObj.getString("name");
+		String handler = jsonObj.getString("handler");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
 			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();
-			if(name.equals(notifyPolicyParamVo.getName())) {
+			if(handler.equals(notifyPolicyParamVo.getHandler())) {
 				iterator.remove();
 			}
 		}
@@ -85,13 +85,13 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String name = jsonObj.getString("name");
+		String handler = jsonObj.getString("handler");
 		JSONObject configObj = notifyPolicyVo.getConfigObj();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
 			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();
-			if(name.equals(notifyPolicyParamVo.getName())) {
+			if(handler.equals(notifyPolicyParamVo.getHandler())) {
 				iterator.remove();
 			}
 		}

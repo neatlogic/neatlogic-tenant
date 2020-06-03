@@ -66,7 +66,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
-		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		return notifyPolicyVo;
@@ -86,7 +86,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
-		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		return notifyPolicyVo;
