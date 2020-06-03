@@ -103,6 +103,7 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 
 		for(Entry<Long, NotifyPolicyVo> entry : NotifyPolicyFactory.notifyPolicyMap.entrySet()) {
 			NotifyPolicyVo notifyPolicy = entry.getValue();
+			
 			if(handler.equals(notifyPolicy.getHandler())) {
 				if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
 					String keyword = basePageVo.getKeyword().toLowerCase();
@@ -115,7 +116,6 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 				}
 			}			
 		}
-
 		tbodyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
 		
 		if(basePageVo.getNeedPage()) {
