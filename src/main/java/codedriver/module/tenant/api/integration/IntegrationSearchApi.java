@@ -55,6 +55,7 @@ public class IntegrationSearchApi extends ApiComponentBase {
 			integrationVo.setRowNum(rowNum);
 			integrationVo.setPageCount(PageUtil.getPageCount(rowNum, integrationVo.getPageSize()));
 		}
+		
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("pageSize", integrationVo.getPageSize());
 		returnObj.put("currentPage", integrationVo.getCurrentPage());
