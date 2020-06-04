@@ -21,7 +21,6 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -51,9 +50,6 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id")
 	})
-	@Output({
-		@Param(name = "templateList", explode = NotifyTemplateVo[].class, desc = "通知模板列表")
-	})
 	@Description(desc = "通知模板删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -80,9 +76,7 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		config.put("templateList", templateList);
 		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("templateList", templateList);
-		return resultObj;
+		return null;
 	}
 
 }

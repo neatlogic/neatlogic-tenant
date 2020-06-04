@@ -56,7 +56,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
 	})
 	@Output({
-		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
+		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
 	})
 	@Description(desc = "通知策略信息保存接口")
 	@Override

@@ -57,7 +57,7 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 		@Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "条件配置信息")
 	})
 	@Output({
-		@Param(name = "notifyList", type = ApiParamType.JSONARRAY, desc = "通知触发配置列表")
+		@Param(name = "id", type = ApiParamType.LONG, desc = "通知触发配置id")
 	})
 	@Description(desc = "通知策略触发动作配置保存接口")
 	@Override
@@ -100,15 +100,17 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 					if(!isExists) {
 						//TODO 抛异常
 					}
+					resultObj.put("id", id);
 				}else {
 					JSONObject notifyObj = new JSONObject();
-					notifyObj.put("id", SnowflakeUtil.uniqueLong());
+					id = SnowflakeUtil.uniqueLong();
+					notifyObj.put("id", id);
 					notifyObj.put("actionList", actionList);
 					notifyObj.put("conditionConfig", conditionConfig);
 					notifyList.add(notifyObj);
+					resultObj.put("id", id);
 				}
 				triggerObj.put("notifyList", notifyList);
-				resultObj.put("notifyList", notifyList);
 			}
 		}
 		notifyPolicyVo.setConfig(config.toJSONString());

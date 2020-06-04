@@ -48,7 +48,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "策略id")
 	})
 	@Output({
-		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
+		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
 	})
 	@Description(desc = "通知策略信息获取接口")
 	@Override

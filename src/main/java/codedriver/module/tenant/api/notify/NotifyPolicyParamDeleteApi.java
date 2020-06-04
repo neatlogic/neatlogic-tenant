@@ -11,17 +11,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -51,9 +47,6 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
 	})
-	@Output({
-		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
-	})
 	@Description(desc = "通知策略参数删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -74,18 +67,8 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		}
 		config.put("paramList", paramList);
 		notifyPolicyVo.setConfig(config.toJSONString());
-		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-		paramList.addAll(systemParamList);
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("paramList", paramList);
-		return resultObj;
+		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);		
+		return null;
 	}
 
 }

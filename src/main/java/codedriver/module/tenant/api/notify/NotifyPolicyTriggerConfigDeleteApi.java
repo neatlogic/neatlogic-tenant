@@ -23,7 +23,6 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
-import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -54,13 +53,9 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型"),
 		@Param(name = "id", type = ApiParamType.LONG, desc = "通知触发配置id")
 	})
-	@Output({
-		@Param(name = "notifyList", type = ApiParamType.JSONARRAY, desc = "通知触发配置列表")
-	})
 	@Description(desc = "通知策略触发动作配置删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject resultObj = new JSONObject();
 		Long policyId = jsonObj.getLong("policyId");
 		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
 		if(notifyPolicyVo == null) {
@@ -91,12 +86,11 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 					}
 				}
 				triggerObj.put("notifyList", notifyList);
-				resultObj.put("notifyList", notifyList);
 			}
 		}
 		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		return resultObj;
+		return null;
 	}
 
 }
