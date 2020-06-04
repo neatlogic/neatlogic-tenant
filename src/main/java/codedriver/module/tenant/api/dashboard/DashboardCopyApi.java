@@ -51,7 +51,7 @@ public class DashboardCopyApi extends ApiComponentBase {
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true) ,
 		@Param(name = "name", type = ApiParamType.STRING, desc = "复制仪表板name", isRequired = true) 
 		})
-	@Output({ @Param(explode = DashboardWidgetVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板组件详细信息") })
+	@Output({  })
 	@Description(desc = "复制仪表板组件接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
