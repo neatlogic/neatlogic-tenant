@@ -13,11 +13,14 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.constvalue.BasicType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyFactory;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.ExpressionVo;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -80,7 +83,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 				notifyPolicyParamVo.getExpressionList().clear();
 				for(Expression expression : basicTypeEnum.getExpressionList()) {
-					notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression));
+					notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 				}
 				isNew = false;
 			}
@@ -95,15 +98,22 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
 			notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 			for(Expression expression : basicTypeEnum.getExpressionList()) {
-				notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression));
+				notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 			}
 			paramList.add(notifyPolicyParamVo);
 		}
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		JSONObject resultObj = new JSONObject();
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+		paramList.addAll(systemParamList);
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		resultObj.put("paramList", paramList);
 		return resultObj;
 	}
@@ -136,10 +146,17 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setHandlerName(handlerName);
 			paramList.add(notifyPolicyParamVo);
 		}
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		JSONObject resultObj = new JSONObject();
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+		paramList.addAll(systemParamList);
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		resultObj.put("paramList", paramList);
 		return resultObj;
 	}

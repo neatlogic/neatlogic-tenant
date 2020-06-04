@@ -1,11 +1,13 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -16,6 +18,7 @@ import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
@@ -77,6 +80,12 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				throw new NotifyPolicyNameRepeatException(name);
 			}
 			notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
+			JSONObject configObj = notifyPolicyVo.getConfigObj();
+			List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+			paramList.addAll(notifyPolicyHandler.getSystemParamList());
+			paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+			configObj.put("paramList", paramList);
+			notifyPolicyVo.setConfig(configObj.toJSONString());
 			return notifyPolicyVo;
 		}else {
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
@@ -95,6 +104,10 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			configObj.put("templateList", new JSONArray());
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			notifyMapper.insertNotifyPolicy(notifyPolicyVo);
+			List<NotifyPolicyParamVo> paramList = notifyPolicyHandler.getSystemParamList();
+			paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+			configObj.put("paramList", paramList);
+			notifyPolicyVo.setConfig(configObj.toJSONString());
 			return notifyPolicyVo;
 		}
 	}

@@ -81,7 +81,7 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 			}
 			paramList.add(notifyPolicyParamVo);
 		}
-//		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
 		return resultObj;

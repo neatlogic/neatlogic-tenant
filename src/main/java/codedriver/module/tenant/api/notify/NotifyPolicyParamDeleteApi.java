@@ -11,10 +11,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyFactory;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -73,6 +76,14 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
+		
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+		paramList.addAll(systemParamList);
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
 		return resultObj;
@@ -97,6 +108,13 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		}
 		configObj.put("paramList", paramList);
 		notifyPolicyVo.setConfig(configObj.toJSONString());
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+		paramList.addAll(systemParamList);
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
 		return resultObj;
