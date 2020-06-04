@@ -51,7 +51,7 @@ public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型"),
-		@Param(name = "id", type = ApiParamType.LONG, desc = "通知触发配置id")
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "通知触发配置id")
 	})
 	@Description(desc = "通知策略触发动作配置删除接口")
 	@Override
