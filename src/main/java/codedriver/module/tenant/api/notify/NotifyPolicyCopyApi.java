@@ -1,24 +1,36 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.Date;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
+@IsActived
 public class NotifyPolicyCopyApi extends ApiComponentBase {
+	
+	@Autowired
+	private NotifyMapper notifyMapper;
 
 	@Override
 	public String getToken() {
@@ -36,8 +48,8 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "策略uuid"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "策略名"),
+		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$", isRequired = true, desc = "策略名"),
 	})
 	@Output({
 		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
@@ -45,25 +57,29 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 	@Description(desc = "通知策略复制接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return null;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		String uuid = jsonObj.getString("uuid");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyVo.notifyPolicyMap.get(uuid);
+		Long id = jsonObj.getLong("id");
+		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
 		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(uuid);
+			throw new NotifyPolicyNotFoundException(id.toString());
 		}
-		NotifyPolicyVo newNotifyPolicy = new NotifyPolicyVo(jsonObj.getString("name"), notifyPolicyVo.getPolicyHandler());
-//		newNotifyPolicy.setName(jsonObj.getString("name"));
-//		newNotifyPolicy.setPolicyHandler(notifyPolicyVo.getPolicyHandler());
-		newNotifyPolicy.setConfig(notifyPolicyVo.getConfig());
-		newNotifyPolicy.setFcd(new Date());
-		newNotifyPolicy.setFcu(UserContext.get().getUserUuid(true));
-		newNotifyPolicy.setFcuName(UserContext.get().getUserName());
-		NotifyPolicyVo.notifyPolicyMap.put(newNotifyPolicy.getUuid(), newNotifyPolicy);
-		return newNotifyPolicy;
+		String name = jsonObj.getString("name");
+		notifyPolicyVo.setName(name);
+		notifyPolicyVo.setId(null);
+		if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+			throw new NotifyPolicyNameRepeatException(name);
+		}
+		notifyMapper.insertNotifyPolicy(notifyPolicyVo);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		}
+		paramList.addAll(notifyPolicyHandler.getSystemParamList());
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+		config.put("paramList", paramList);
+		notifyPolicyVo.setConfig(config.toJSONString());
+		return notifyPolicyVo;
 	}
 
 }

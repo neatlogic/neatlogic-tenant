@@ -26,7 +26,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "通知策略变量类型列表接口";
+		return "通知策略参数类型列表接口";
 	}
 
 	@Override
@@ -35,18 +35,18 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
-		@Param(name = "paramTypeList", explode = ValueTextVo[].class, desc = "通知触发点列表") 
+		@Param(name = "paramTypeList", explode = ValueTextVo[].class, desc = "参数类型列表") 
 	})
-	@Description(desc = "通知策略变量类型列表接口")
+	@Description(desc = "通知策略参数类型列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String policyHandler = jsonObj.getString("policyHandler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		String handler = jsonObj.getString("handler");
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
 		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
+			throw new NotifyPolicyHandlerNotFoundException(handler);
 		}
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramTypeList", notifyPolicyHandler.getParamTypeList());

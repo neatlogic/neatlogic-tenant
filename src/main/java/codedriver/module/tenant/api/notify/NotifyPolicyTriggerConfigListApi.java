@@ -25,23 +25,22 @@ import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.util.SnowflakeUtil;
 @Service
 @Transactional
 @IsActived
-public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
+public class NotifyPolicyTriggerConfigListApi  extends ApiComponentBase {
 
 	@Autowired
 	private NotifyMapper notifyMapper;
 
 	@Override
 	public String getToken() {
-		return "notify/policy/trigger/config/save";
+		return "notify/policy/trigger/config/list";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略触发动作配置保存接口";
+		return "通知策略触发动作配置列表接口";
 	}
 
 	@Override
@@ -51,18 +50,14 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型"),
-		@Param(name = "id", type = ApiParamType.LONG, desc = "通知触发配置id"),
-		@Param(name = "actionList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "动作列表信息"),
-		@Param(name = "conditionConfig", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "条件配置信息")
+		@Param(name = "trigger", type = ApiParamType.STRING, isRequired = true, desc = "通知触发类型")
 	})
 	@Output({
 		@Param(name = "notifyList", type = ApiParamType.JSONARRAY, desc = "通知触发配置列表")
 	})
-	@Description(desc = "通知策略触发动作配置保存接口")
+	@Description(desc = "通知策略触发动作配置列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		JSONObject resultObj = new JSONObject();
 		Long policyId = jsonObj.getLong("policyId");
 		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
 		if(notifyPolicyVo == null) {
@@ -78,41 +73,17 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 		if(!notifyTriggerValueList.contains(trigger)) {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
-		Long id = jsonObj.getLong("id");
-		JSONArray actionList = jsonObj.getJSONArray("actionList");
-		JSONObject conditionConfig = jsonObj.getJSONObject("conditionConfig");
+		JSONObject resultObj = new JSONObject();
+		resultObj.put("authorityConfig",notifyPolicyHandler.getAuthorityConfig());
+		resultObj.put("notifyList", new JSONArray());
 		JSONObject config = notifyPolicyVo.getConfig();
 		JSONArray triggerList = config.getJSONArray("triggerList");
 		for(int i = 0; i < triggerList.size(); i++) {
 			JSONObject triggerObj = triggerList.getJSONObject(i);
 			if(trigger.equals(triggerObj.getString("trigger"))) {
-				JSONArray notifyList = triggerObj.getJSONArray("notifyList");
-				if(id != null) {
-					boolean isExists = false;
-					for(int j = 0; j < notifyList.size(); j++) {
-						JSONObject notifyObj = notifyList.getJSONObject(j);
-						if(id.equals(notifyObj.getLong("id"))) {
-							notifyObj.put("actionList", actionList);
-							notifyObj.put("conditionConfig", conditionConfig);
-							isExists = true;
-						}
-					}
-					if(!isExists) {
-						//TODO 抛异常
-					}
-				}else {
-					JSONObject notifyObj = new JSONObject();
-					notifyObj.put("id", SnowflakeUtil.uniqueLong());
-					notifyObj.put("actionList", actionList);
-					notifyObj.put("conditionConfig", conditionConfig);
-					notifyList.add(notifyObj);
-				}
-				triggerObj.put("notifyList", notifyList);
-				resultObj.put("notifyList", notifyList);
+				resultObj.put("notifyList", triggerObj.getJSONArray("notifyList"));
 			}
 		}
-		notifyPolicyVo.setConfig(config.toJSONString());
-		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultObj;
 	}
 

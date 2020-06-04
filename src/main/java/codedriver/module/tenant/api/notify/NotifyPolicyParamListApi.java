@@ -1,11 +1,11 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -25,63 +25,61 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
-@Transactional
 @IsActived
-public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
+public class NotifyPolicyParamListApi extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
 
 	@Override
 	public String getToken() {
-		return "notify/policy/param/delete";
+		return "notify/policy/param/list";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略参数删除接口";
+		return "通知策略参数列表接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
+	
 	@Input({
-		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
+		@Param(name = "keyword", type = ApiParamType.STRING, desc = "模糊匹配"),
+		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id")
 	})
 	@Output({
 		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
 	})
-	@Description(desc = "通知策略参数删除接口")
+	@Description(desc = "通知策略参数列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		List<NotifyPolicyParamVo> paramList = new ArrayList<>();
 		Long policyId = jsonObj.getLong("policyId");
 		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String handler = jsonObj.getString("handler");
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
-		while(iterator.hasNext()) {
-			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();
-			if(handler.equals(notifyPolicyParamVo.getHandler())) {
-				iterator.remove();
-			}
-		}
-		config.put("paramList", paramList);
-		notifyPolicyVo.setConfig(config.toJSONString());
-		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-		paramList.addAll(systemParamList);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyPolicyParamVo> customParamList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		systemParamList.addAll(customParamList);
+		String keyword = jsonObj.getString("keyword");
+		for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
+			if(StringUtils.isNotBlank(keyword)) {
+				if(!notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase()) 
+						&& !notifyPolicyParamVo.getHandlerName().toLowerCase().contains(keyword.toLowerCase())) {
+					continue;
+				}
+			}
+			paramList.add(notifyPolicyParamVo);
+		}
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("paramList", paramList);
