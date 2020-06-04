@@ -1,30 +1,22 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
-import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -92,52 +84,6 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyVo.getPageSize()));
 			resultObj.put("rowNum", rowNum);
 		}
-		return resultObj;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		String handler = jsonObj.getString("handler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(handler);
-		}
-		JSONObject resultObj = new JSONObject();
-		BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
-		List<NotifyPolicyVo> tbodyList = new ArrayList<>();
-
-		for(Entry<Long, NotifyPolicyVo> entry : NotifyPolicyFactory.notifyPolicyMap.entrySet()) {
-			NotifyPolicyVo notifyPolicy = entry.getValue();
-//			notifyMapper.insertNotifyPolicy(notifyPolicy);
-			if(handler.equals(notifyPolicy.getHandler())) {
-				if(StringUtils.isNoneBlank(basePageVo.getKeyword())) {
-					String keyword = basePageVo.getKeyword().toLowerCase();
-					String name = notifyPolicy.getName().toLowerCase();
-					if(name.contains(keyword)) {
-						tbodyList.add(notifyPolicy);
-					}
-				}else {
-					tbodyList.add(notifyPolicy);
-				}
-			}			
-		}
-		tbodyList.sort((e1, e2) -> -e1.getActionTime().compareTo(e2.getActionTime()));
-		
-		if(basePageVo.getNeedPage()) {
-			int rowNum = tbodyList.size();
-			resultObj.put("currentPage", basePageVo.getCurrentPage());
-			resultObj.put("pageSize", basePageVo.getPageSize());
-			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, basePageVo.getPageSize()));
-			resultObj.put("rowNum", rowNum);
-			if(rowNum > 0) {
-				int fromIndex = basePageVo.getStartNum();
-				fromIndex = fromIndex >= rowNum ? rowNum - 1 : fromIndex;
-				int toIndex = fromIndex + basePageVo.getPageSize();
-				toIndex = toIndex > rowNum ? rowNum : toIndex;
-				tbodyList = tbodyList.subList(fromIndex, toIndex);
-			}		
-		}
-		resultObj.put("tbodyList", tbodyList);
 		return resultObj;
 	}
 

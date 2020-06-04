@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
@@ -80,12 +78,12 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 				throw new NotifyPolicyNameRepeatException(name);
 			}
 			notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-			JSONObject configObj = notifyPolicyVo.getConfigObj();
-			List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+			JSONObject config = notifyPolicyVo.getConfig();
+			List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 			paramList.addAll(notifyPolicyHandler.getSystemParamList());
 			paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
-			configObj.put("paramList", paramList);
-			notifyPolicyVo.setConfig(configObj.toJSONString());
+			config.put("paramList", paramList);
+			notifyPolicyVo.setConfig(config.toJSONString());
 			return notifyPolicyVo;
 		}else {
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
@@ -108,49 +106,6 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 			configObj.put("paramList", paramList);
 			notifyPolicyVo.setConfig(configObj.toJSONString());
-			return notifyPolicyVo;
-		}
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		String handler = jsonObj.getString("handler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(handler);
-		}
-		Long id = jsonObj.getLong("id");
-		String name = jsonObj.getString("name");
-		if(id != null) {
-			NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(id);
-			if(notifyPolicyVo == null) {
-				throw new NotifyPolicyNotFoundException(id.toString());
-			}
-			notifyPolicyVo.setName(name);
-			notifyPolicyVo.setLcd(new Date());
-			notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
-			notifyPolicyVo.setLcuName(UserContext.get().getUserName());
-			return notifyPolicyVo;
-		}else {
-			
-			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
-			notifyPolicyVo.setFcd(new Date());
-			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
-			notifyPolicyVo.setFcuName(UserContext.get().getUserName());
-			JSONObject configObj = new JSONObject();
-			JSONArray triggerList = new JSONArray();
-			for (ValueTextVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
-				JSONObject triggerObj = new JSONObject();
-				triggerObj.put("trigger", notifyTrigger.getValue());
-				triggerObj.put("triggerName", notifyTrigger.getText());
-				triggerObj.put("notifyList", new JSONArray());
-				triggerList.add(triggerObj);
-			}
-			configObj.put("triggerList", triggerList);			
-			configObj.put("paramList", new JSONArray());
-			configObj.put("templateList", new JSONArray());
-			notifyPolicyVo.setConfig(configObj.toJSONString());
-			NotifyPolicyFactory.notifyPolicyMap.put(notifyPolicyVo.getId(), notifyPolicyVo);
 			return notifyPolicyVo;
 		}
 	}

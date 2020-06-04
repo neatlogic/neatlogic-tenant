@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
@@ -68,8 +67,8 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> customParamList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyPolicyParamVo> customParamList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		systemParamList.addAll(customParamList);
 		String keyword = jsonObj.getString("keyword");
 		for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
@@ -87,35 +86,4 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 		return resultObj;
 	}
 
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		List<NotifyPolicyParamVo> paramList = new ArrayList<>();
-		Long policyId = jsonObj.getLong("policyId");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyId.toString());
-		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> customParamList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-		systemParamList.addAll(customParamList);
-		String keyword = jsonObj.getString("keyword");
-		for(NotifyPolicyParamVo notifyPolicyParamVo : systemParamList) {
-			if(StringUtils.isNotBlank(keyword)) {
-				if(!notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase()) 
-						&& !notifyPolicyParamVo.getHandler().toLowerCase().contains(keyword.toLowerCase())) {
-					continue;
-				}
-			}
-			paramList.add(notifyPolicyParamVo);
-		}
-//		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("paramList", paramList);
-		return resultObj;
-	}
 }

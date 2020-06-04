@@ -10,7 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
@@ -59,36 +58,16 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(id.toString());
 		}
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
-		configObj.put("paramList", paramList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
-		return notifyPolicyVo;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long id = jsonObj.getLong("id");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(id);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(id.toString());
-		}
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(configObj.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		paramList.addAll(notifyPolicyHandler.getSystemParamList());
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
-		configObj.put("paramList", paramList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
+		config.put("paramList", paramList);
+		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}
 

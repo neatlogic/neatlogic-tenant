@@ -13,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
@@ -75,8 +74,8 @@ public class NotifyPolicyTemplateListApi extends ApiComponentBase {
 		List<NotifyTemplateVo> templateList = new ArrayList<>();
 		String keyword = jsonObj.getString("keyword");
 		keyword = keyword.toLowerCase();
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		for(NotifyTemplateVo notifyTemplateVo : JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class)) {
+		JSONObject config = notifyPolicyVo.getConfig();
+		for(NotifyTemplateVo notifyTemplateVo : JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class)) {
 			if(StringUtils.isNotBlank(notifyHandler) && !notifyHandler.equals(notifyTemplateVo.getNotifyHandler())) {
 				continue;
 			}
@@ -91,37 +90,4 @@ public class NotifyPolicyTemplateListApi extends ApiComponentBase {
 		return resultObj;
 	}
 
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long policyId = jsonObj.getLong("policyId");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyId.toString());
-		}
-		
-		String notifyHandler = jsonObj.getString("notifyHandler");
-		if(StringUtils.isNotBlank(notifyHandler)) {
-			INotifyHandler handler = NotifyHandlerFactory.getHandler(notifyHandler);
-			if(handler == null) {
-				throw new NotifyHandlerNotFoundException(notifyHandler);
-			}
-		}		
-
-		List<NotifyTemplateVo> templateList = new ArrayList<>();
-		String keyword = jsonObj.getString("keyword");
-		keyword = keyword.toLowerCase();
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		for(NotifyTemplateVo notifyTemplateVo : JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class)) {
-			if(StringUtils.isNotBlank(notifyHandler) && !notifyHandler.equals(notifyTemplateVo.getNotifyHandler())) {
-				continue;
-			}
-			if(StringUtils.isNotBlank(keyword) && !notifyTemplateVo.getName().toLowerCase().contains(keyword)) {
-				continue;
-			}
-			templateList.add(notifyTemplateVo);
-		}
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("templateList", templateList);
-		return resultObj;
-	}
 }

@@ -1,18 +1,21 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -66,23 +69,17 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 			throw new NotifyPolicyNameRepeatException(name);
 		}
 		notifyMapper.insertNotifyPolicy(notifyPolicyVo);
-		return notifyPolicyVo;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long id = jsonObj.getLong("id");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(id);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(id.toString());
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+		if(notifyPolicyHandler == null) {
+			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
-		NotifyPolicyVo newNotifyPolicy = new NotifyPolicyVo(jsonObj.getString("name"), notifyPolicyVo.getHandler());
-		newNotifyPolicy.setConfig(notifyPolicyVo.getConfig());
-		newNotifyPolicy.setFcd(new Date());
-		newNotifyPolicy.setFcu(UserContext.get().getUserUuid(true));
-		newNotifyPolicy.setFcuName(UserContext.get().getUserName());
-		NotifyPolicyFactory.notifyPolicyMap.put(newNotifyPolicy.getId(), newNotifyPolicy);
-		return newNotifyPolicy;
+		paramList.addAll(notifyPolicyHandler.getSystemParamList());
+		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+		config.put("paramList", paramList);
+		notifyPolicyVo.setConfig(config.toJSONString());
+		return notifyPolicyVo;
 	}
 
 }

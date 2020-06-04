@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -69,8 +68,8 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		}
 		
 		Long id = jsonObj.getLong("id");
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
 		while(iterator.hasNext()) {
 			NotifyTemplateVo notifyTemplateVo = iterator.next();
@@ -78,38 +77,9 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 				iterator.remove();
 			}
 		}
-		configObj.put("templateList", templateList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
+		config.put("templateList", templateList);
+		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("templateList", templateList);
-		return resultObj;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long policyId = jsonObj.getLong("policyId");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyId.toString());
-		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		
-		Long id = jsonObj.getLong("id");
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
-		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
-		while(iterator.hasNext()) {
-			NotifyTemplateVo notifyTemplateVo = iterator.next();
-			if(id.equals(notifyTemplateVo.getId())) {
-				iterator.remove();
-			}
-		}
-		configObj.put("templateList", templateList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("templateList", templateList);
 		return resultObj;

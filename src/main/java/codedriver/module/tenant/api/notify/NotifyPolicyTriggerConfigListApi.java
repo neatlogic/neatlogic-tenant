@@ -14,7 +14,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -75,39 +74,10 @@ public class NotifyPolicyTriggerConfigListApi  extends ApiComponentBase {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
 		JSONObject resultObj = new JSONObject();
+		resultObj.put("authorityConfig",notifyPolicyHandler.getAuthorityConfig());
 		resultObj.put("notifyList", new JSONArray());
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		JSONArray triggerList = configObj.getJSONArray("triggerList");
-		for(int i = 0; i < triggerList.size(); i++) {
-			JSONObject triggerObj = triggerList.getJSONObject(i);
-			if(trigger.equals(triggerObj.getString("trigger"))) {
-				resultObj.put("notifyList", triggerObj.getJSONArray("notifyList"));
-			}
-		}
-		return resultObj;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long policyId = jsonObj.getLong("policyId");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyId.toString());
-		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-		List<String> notifyTriggerValueList = notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
-		String trigger = jsonObj.getString("trigger");
-		if(!notifyTriggerValueList.contains(trigger)) {
-			throw new ParamIrregularException("参数trigger不符合格式要求");
-		}
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("notifyList", new JSONArray());
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		JSONArray triggerList = configObj.getJSONArray("triggerList");
+		JSONObject config = notifyPolicyVo.getConfig();
+		JSONArray triggerList = config.getJSONArray("triggerList");
 		for(int i = 0; i < triggerList.size(); i++) {
 			JSONObject triggerObj = triggerList.getJSONObject(i);
 			if(trigger.equals(triggerObj.getString("trigger"))) {

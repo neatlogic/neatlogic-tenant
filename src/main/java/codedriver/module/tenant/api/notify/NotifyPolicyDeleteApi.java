@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -47,13 +46,7 @@ public class NotifyPolicyDeleteApi  extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
 		notifyMapper.deleteNotifyPolicyById(id);
-		return null;
-	}
-	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long id = jsonObj.getLong("id");
-		NotifyPolicyFactory.notifyPolicyMap.remove(id);
+		//TODO linbq判断是否被引用
 		return null;
 	}
 

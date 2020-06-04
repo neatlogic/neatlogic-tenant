@@ -14,7 +14,6 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.notify.constvalue.NotifyPolicyActionType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -77,8 +76,8 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		String title = jsonObj.getString("title");
 		String content = jsonObj.getString("content");
 		String notifyHandler = jsonObj.getString("notifyHandler");
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		if(id != null) {
 			boolean isExists = false;
 			for(NotifyTemplateVo notifyTemplateVo : templateList) {
@@ -107,59 +106,12 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 			notifyTemplateVo.setActionUser(UserContext.get().getUserName());
 			templateList.add(notifyTemplateVo);
 		}
-		configObj.put("templateList", templateList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
+		config.put("templateList", templateList);
+		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("templateList", templateList);
 		return resultObj;
 	}
 	
-	@Override
-	public Object myDoTest(JSONObject jsonObj) {
-		Long policyId = jsonObj.getLong("policyId");
-		NotifyPolicyVo notifyPolicyVo = NotifyPolicyFactory.notifyPolicyMap.get(policyId);
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(policyId.toString());
-		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		
-		Long id = jsonObj.getLong("id");
-		String name = jsonObj.getString("name");
-		String title = jsonObj.getString("title");
-		String content = jsonObj.getString("content");
-		String notifyHandler = jsonObj.getString("notifyHandler");
-		JSONObject configObj = notifyPolicyVo.getConfigObj();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(configObj.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
-		if(id != null) {
-			boolean isExists = false;
-			for(NotifyTemplateVo notifyTemplateVo : templateList) {
-				if(id.equals(notifyTemplateVo.getId())) {
-					notifyTemplateVo.setName(name);
-					notifyTemplateVo.setTitle(title);
-					notifyTemplateVo.setContent(content);
-					notifyTemplateVo.setNotifyHandler(notifyHandler);
-					isExists = true;
-				}
-			}
-			if(!isExists) {
-				throw new NotifyTemplateNotFoundException(id.toString());
-			}
-		}else {
-			NotifyTemplateVo notifyTemplateVo = new NotifyTemplateVo();
-			notifyTemplateVo.setName(name);
-			notifyTemplateVo.setTitle(title);
-			notifyTemplateVo.setContent(content);
-			notifyTemplateVo.setNotifyHandler(notifyHandler);
-			templateList.add(notifyTemplateVo);
-		}
-		configObj.put("templateList", templateList);
-		notifyPolicyVo.setConfig(configObj.toJSONString());
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("templateList", templateList);
-		return resultObj;
-	}
 }
