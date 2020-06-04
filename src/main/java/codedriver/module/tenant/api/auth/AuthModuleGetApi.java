@@ -24,7 +24,6 @@ import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -62,8 +61,11 @@ public class AuthModuleGetApi extends ApiComponentBase {
     })
 
     @Output({
-            @Param( name = "userList", desc = "用户列表", type = ApiParamType.JSONARRAY, explode = UserVo[].class),
-            @Param( name = "roleUserList", desc = "角色用户列表", type = ApiParamType.JSONARRAY, explode = UserVo[].class)
+            @Param( explode = ModuleGroupVo.class),
+            @Param( name = "authList[].authDisplayName", desc = "权限名", type = ApiParamType.STRING),
+            @Param( name = "authList[].authGroup", desc = "模块名", type = ApiParamType.STRING),
+            @Param( name = "authList[].authIntroduction", desc = "权限介绍", type = ApiParamType.STRING),
+            @Param( name = "authList[].authName", desc = "权限", type = ApiParamType.STRING),
     })
 
     @Description(desc = "根据用户获取模块以及对应的权限列表")
