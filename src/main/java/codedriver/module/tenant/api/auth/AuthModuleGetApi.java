@@ -63,7 +63,7 @@ public class AuthModuleGetApi extends ApiComponentBase {
     @Output({
             @Param( explode = ModuleGroupVo.class),
             @Param( name = "authList[].authDisplayName", desc = "权限名", type = ApiParamType.STRING),
-            @Param( name = "authList[].authGroup", desc = "模块名", type = ApiParamType.STRING),
+            @Param( name = "authList[].authGroup", desc = "模块分组", type = ApiParamType.STRING),
             @Param( name = "authList[].authIntroduction", desc = "权限介绍", type = ApiParamType.STRING),
             @Param( name = "authList[].authName", desc = "权限", type = ApiParamType.STRING),
     })
