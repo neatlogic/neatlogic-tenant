@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -28,6 +30,9 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -67,6 +72,9 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		config.put("paramList", paramList);
+		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
+		List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
+		config.put("userList", userList);
 		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}
