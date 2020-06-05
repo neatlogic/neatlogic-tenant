@@ -51,7 +51,7 @@ public class DashboardCopyApi extends ApiComponentBase {
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "仪表板uuid", isRequired = true) ,
 		@Param(name = "name", type = ApiParamType.STRING, desc = "复制仪表板name", isRequired = true) 
 		})
-	@Output({  })
+	@Output({ @Param(explode=DashboardVo.class) })
 	@Description(desc = "复制仪表板组件接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -64,9 +64,12 @@ public class DashboardCopyApi extends ApiComponentBase {
 		//修改dashboard
 		oldDashboardVo.setName(dashboardVo.getName());
 		oldDashboardVo.setFcu(UserContext.get().getUserUuid());
+		oldDashboardVo.setFcd(null);
+		oldDashboardVo.setLcu(null);
+		oldDashboardVo.setLcd(null);
 		updateWidgetList(oldDashboardVo);
 		dashboardMapper.insertDashboard(oldDashboardVo);
-		return null;
+		return oldDashboardVo;
 		
 	}
 	/**
