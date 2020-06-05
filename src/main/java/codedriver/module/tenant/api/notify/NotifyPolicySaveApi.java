@@ -100,6 +100,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			configObj.put("triggerList", triggerList);
 			configObj.put("paramList", new JSONArray());
 			configObj.put("templateList", new JSONArray());
+			configObj.put("adminUserUuidList", new JSONArray());
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			notifyMapper.insertNotifyPolicy(notifyPolicyVo);
 			List<NotifyPolicyParamVo> paramList = notifyPolicyHandler.getSystemParamList();
