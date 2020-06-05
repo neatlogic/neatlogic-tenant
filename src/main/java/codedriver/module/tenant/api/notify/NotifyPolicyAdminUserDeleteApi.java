@@ -1,11 +1,16 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -20,6 +25,9 @@ public class NotifyPolicyAdminUserDeleteApi extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -48,6 +56,16 @@ public class NotifyPolicyAdminUserDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
+		String userUuid = jsonObj.getString("userUuid");
+		if(userMapper.checkUserIsExists(userUuid) == 0) {
+			throw new UserNotFoundException(userUuid);
+		}
+		JSONObject config = notifyPolicyVo.getConfig();
+		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
+		adminUserUuidList.remove(userUuid);
+		config.put("adminUserUuidList", adminUserUuidList);
+		notifyPolicyVo.setConfig(config.toJSONString());
+		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return null;
 	}
 
