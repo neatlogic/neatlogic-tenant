@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -68,22 +69,23 @@ public class UserGetApi extends ApiComponentBase {
 		if(userVo == null) {
 			throw new UserNotFoundException(userUuid);
 		}
-		userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
-		if(CollectionUtils.isNotEmpty(userVo.getTeamUuidList())) {
+		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);//防止修改cache vo
+		userJson.put("userAuthList", userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
+		if(CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
 			List<String> teamUuidList = new ArrayList<>();
-			for(String teamUuid : userVo.getTeamUuidList()) {
+			for(Object teamUuid : userJson.getJSONArray("teamUuidList")) {
 				teamUuidList.add(GroupSearch.TEAM.getValuePlugin() + teamUuid);
 			}
-			userVo.setTeamUuidList(teamUuidList);
+			userJson.put("teamUuidList", teamUuidList);
 		}
-		if(CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
+		if(CollectionUtils.isNotEmpty(userJson.getJSONArray("roleUuidList"))) {
 			List<String> roleUuidList = new ArrayList<>();
-			for(String roleUuid : userVo.getRoleUuidList()) {
+			for(Object roleUuid : userJson.getJSONArray("roleUuidList")) {
 				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
 			}
-			userVo.setRoleUuidList(roleUuidList);
+			userJson.put("roleUuidList", roleUuidList);
 		}
 		
-		return userVo;
+		return userJson;
 	}
 }
