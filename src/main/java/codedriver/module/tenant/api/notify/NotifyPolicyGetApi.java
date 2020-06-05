@@ -2,10 +2,12 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
@@ -73,8 +75,12 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		config.put("paramList", paramList);
 		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
-		List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
-		config.put("userList", userList);
+		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
+			List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
+			config.put("userList", userList);
+		}else {
+			config.put("userList", new JSONArray());
+		}
 		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}
