@@ -92,18 +92,19 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	moduleGroupJson.put("groupName", moduleGroup.getGroupName());
         	moduleGroupJson.put("groupSort", moduleGroup.getGroupSort());
         	moduleGroupJson.put("description", ModuleUtil.getModuleGroup(moduleGroup.getGroup()).getGroupDescription());
+        	List<AuthBase> authBaseList = new ArrayList<AuthBase>();
         	Iterator<AuthBase> authIterator = entry.getValue().iterator();
         	while(authIterator.hasNext()) {
         		AuthBase tmpAuth = authIterator.next();
-        		if(!authSet.contains(tmpAuth.getAuthName())) {
-        			authIterator.remove();
+        		if(authSet.contains(tmpAuth.getAuthName())) {
+        			authBaseList.add(tmpAuth);
         		}
         		if(tmpAuth.getAuthName().equals(DASHBOARD_MODIFY.class.getSimpleName())) {
         			dashboardAuthlist.add(JSON.toJSON(tmpAuth));
         		}
         	}
         	
-        	moduleGroupJson.put("authList", entry.getValue());
+        	moduleGroupJson.put("authList", authBaseList);
         	
         	retrunArray.add(moduleGroupJson);
         }
