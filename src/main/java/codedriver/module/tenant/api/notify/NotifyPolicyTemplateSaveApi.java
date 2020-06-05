@@ -20,6 +20,7 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import codedriver.framework.notify.exception.NotifyTemplateNameRepeatException;
 import codedriver.framework.notify.exception.NotifyTemplateNotFoundException;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -51,7 +52,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "id", type = ApiParamType.LONG, desc = "模板id"),
-		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "模板名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$", isRequired = true, desc = "模板名称"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "模板标题"),
 		@Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "模板内容"),
 		@Param(name = "notifyHandler", type = ApiParamType.STRING, desc = "通知处理器")
@@ -79,6 +80,11 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 		NotifyTemplateVo resultTemplateVo = null;
 		JSONObject config = notifyPolicyVo.getConfig();
 		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
+		for(NotifyTemplateVo notifyTemplateVo : templateList) {
+			if(name.equals(notifyTemplateVo.getName()) && !notifyTemplateVo.getId().equals(id)) {
+				throw new NotifyTemplateNameRepeatException(name);
+			}
+		}
 		if(id != null) {
 			boolean isExists = false;
 			for(NotifyTemplateVo notifyTemplateVo : templateList) {

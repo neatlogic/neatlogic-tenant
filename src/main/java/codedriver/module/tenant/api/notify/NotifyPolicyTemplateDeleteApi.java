@@ -18,6 +18,7 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import codedriver.framework.notify.exception.NotifyTemplateReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -65,6 +66,11 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		
 		Long id = jsonObj.getLong("id");
 		JSONObject config = notifyPolicyVo.getConfig();
+		//判断模板是否被引用
+		String triggerListStr = config.getString("triggerList");
+		if(triggerListStr.contains(id.toString())) {
+			throw new NotifyTemplateReferencedCannotBeDeletedException(id.toString());
+		}
 		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
 		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
 		while(iterator.hasNext()) {
