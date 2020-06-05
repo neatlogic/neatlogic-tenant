@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,15 +67,7 @@ public class NotifyPolicyInvokerList extends ApiComponentBase {
 		List<NotifyPolicyInvokerVo> notifyPolicyInvokerList = notifyMapper.getNotifyPolicyInvokerList(notifyPolicyInvokerVo);
 		resultObj.put("notifyPolicyInvokerList", notifyPolicyInvokerList);
 		if(notifyPolicyInvokerVo.getNeedPage()) {
-			int rowNum = 0;
-			List<Long> policyIdList = new ArrayList<>();
-			policyIdList.add(notifyPolicyInvokerVo.getPolicyId());
-			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
-			for(NotifyPolicyVo notifyPolicy : notifyPolicyInvokerCountList) {
-				if(notifyPolicyInvokerVo.getPolicyId().equals(notifyPolicy.getId())) {
-					rowNum = notifyPolicy.getInvokerCount();
-				}
-			}
+			int rowNum = notifyMapper.getNotifyPolicyInvokerCountByPolicyId(notifyPolicyInvokerVo.getPolicyId());
 			resultObj.put("currentPage", notifyPolicyInvokerVo.getCurrentPage());
 			resultObj.put("pageSize", notifyPolicyInvokerVo.getPageSize());
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyInvokerVo.getPageSize()));
