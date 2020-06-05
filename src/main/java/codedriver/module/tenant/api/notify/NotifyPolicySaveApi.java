@@ -87,6 +87,9 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			return notifyPolicyVo;
 		}else {
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
+			if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+				throw new NotifyPolicyNameRepeatException(name);
+			}
 			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
 			JSONObject configObj = new JSONObject();
 			JSONArray triggerList = new JSONArray();

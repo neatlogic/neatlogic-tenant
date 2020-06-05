@@ -62,7 +62,7 @@ public class NotifyPolicySearchApi  extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(jsonObj, NotifyPolicyVo.class);
 		List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
-		if(CollectionUtils.isNotEmpty(tbodyList)) {
+		if(CollectionUtils.isNotEmpty(tbodyList)) {			
 			List<Long> policyIdList = tbodyList.stream().map(NotifyPolicyVo::getId).collect(Collectors.toList());
 			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
 			Map<Long, Integer> notifyPolicyInvokerCountMap = new HashMap<>();
