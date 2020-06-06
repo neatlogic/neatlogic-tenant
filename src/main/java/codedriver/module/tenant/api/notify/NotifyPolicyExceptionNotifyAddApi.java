@@ -28,7 +28,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @IsActived
-public class NotifyPolicyAdminUserAddApi extends ApiComponentBase {
+public class NotifyPolicyExceptionNotifyAddApi extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
@@ -38,12 +38,12 @@ public class NotifyPolicyAdminUserAddApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/adminuser/add";
+		return "notify/policy/exceptionnotify/add";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略管理员添加接口";
+		return "通知策略异常通知添加接口";
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class NotifyPolicyAdminUserAddApi extends ApiComponentBase {
 	@Output({
 		@Param(name = "userList", explode = UserVo[].class, desc = "用户信息列表")
 	})
-	@Description(desc = "通知策略管理员添加接口")
+	@Description(desc = "通知策略异常通知添加接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();

@@ -23,7 +23,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @IsActived
-public class NotifyPolicyAdminUserDeleteApi extends ApiComponentBase {
+public class NotifyPolicyExceptionNotifyDeleteApi extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
@@ -33,12 +33,12 @@ public class NotifyPolicyAdminUserDeleteApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/adminuser/delete";
+		return "notify/policy/exceptionnotify/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "通知策略管理员删除接口";
+		return "通知策略异常通知删除接口";
 	}
 
 	@Override
