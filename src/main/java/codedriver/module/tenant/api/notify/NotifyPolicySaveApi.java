@@ -56,7 +56,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
 	})
 	@Output({
-		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
+		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
 	})
 	@Description(desc = "通知策略信息保存接口")
 	@Override
@@ -87,6 +87,9 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			return notifyPolicyVo;
 		}else {
 			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
+			if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+				throw new NotifyPolicyNameRepeatException(name);
+			}
 			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
 			JSONObject configObj = new JSONObject();
 			JSONArray triggerList = new JSONArray();
@@ -100,6 +103,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			configObj.put("triggerList", triggerList);
 			configObj.put("paramList", new JSONArray());
 			configObj.put("templateList", new JSONArray());
+			configObj.put("adminUserUuidList", new JSONArray());
 			notifyPolicyVo.setConfig(configObj.toJSONString());
 			notifyMapper.insertNotifyPolicy(notifyPolicyVo);
 			List<NotifyPolicyParamVo> paramList = notifyPolicyHandler.getSystemParamList();

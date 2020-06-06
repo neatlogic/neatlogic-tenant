@@ -2,13 +2,17 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -28,6 +32,9 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;
+	
+	@Autowired
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -48,7 +55,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "策略id")
 	})
 	@Output({
-		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
+		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
 	})
 	@Description(desc = "通知策略信息获取接口")
 	@Override
@@ -67,6 +74,13 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
 		config.put("paramList", paramList);
+		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
+		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
+			List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
+			config.put("userList", userList);
+		}else {
+			config.put("userList", new JSONArray());
+		}
 		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}

@@ -13,13 +13,10 @@ import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.common.constvalue.BasicType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.ExpressionVo;
 import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -57,7 +54,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		@Param(name = "handlerName", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
-		@Param(name = "paramList", explode = NotifyPolicyParamVo[].class, desc = "参数列表")
+		@Param(explode = NotifyPolicyParamVo.class, desc = "参数信息")
 	})
 	@Description(desc = "通知策略参数保存接口")
 	@Override
@@ -71,6 +68,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		BasicType basicTypeEnum = BasicType.getBasicType(basicType);
 		String handler = jsonObj.getString("handler");
 		String handlerName = jsonObj.getString("handlerName");
+		NotifyPolicyParamVo resultParamVo = null;
 		boolean isNew = true;
 		JSONObject config = notifyPolicyVo.getConfig();
 		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
@@ -85,6 +83,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 					notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 				}
 				isNew = false;
+				resultParamVo = notifyPolicyParamVo;
 			}
 		}
 		if(isNew) {
@@ -100,21 +99,13 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 				notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
 			}
 			paramList.add(notifyPolicyParamVo);
+			resultParamVo = notifyPolicyParamVo;
 		}
 
 		config.put("paramList", paramList);
 		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-		JSONObject resultObj = new JSONObject();
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
-		}
-		List<NotifyPolicyParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
-		paramList.addAll(systemParamList);
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
-		resultObj.put("paramList", paramList);
-		return resultObj;
+		return resultParamVo;
 	}
 
 }

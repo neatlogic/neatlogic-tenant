@@ -36,10 +36,10 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "policyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
+		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
-		@Param(name = "notifyTriggerList", explode = ValueTextVo[].class, desc = "通知触发点列表") 
+		@Param(explode = ValueTextVo[].class, desc = "通知触发点列表") 
 	})
 	@Description(desc = "通知触发点列表接口")
 	@Override
@@ -49,9 +49,7 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
 		}
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("notifyTriggerList", notifyPolicyHandler.getNotifyTriggerList());
-		return resultObj;
+		return notifyPolicyHandler.getNotifyTriggerList();
 	}
 
 }

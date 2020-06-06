@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.exception.NotifyPolicyReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -45,8 +46,10 @@ public class NotifyPolicyDeleteApi  extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
+		if(notifyMapper.getNotifyPolicyInvokerCountByPolicyId(id) > 0) {
+			throw new NotifyPolicyReferencedCannotBeDeletedException(id.toString());
+		}
 		notifyMapper.deleteNotifyPolicyById(id);
-		//TODO linbq判断是否被引用
 		return null;
 	}
 

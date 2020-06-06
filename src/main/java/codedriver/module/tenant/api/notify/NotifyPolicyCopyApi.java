@@ -52,7 +52,7 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$", isRequired = true, desc = "策略名"),
 	})
 	@Output({
-		@Param(name = "notifyPolicy", explode = NotifyPolicyVo.class, desc = "策略信息")
+		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
 	})
 	@Description(desc = "通知策略复制接口")
 	@Override

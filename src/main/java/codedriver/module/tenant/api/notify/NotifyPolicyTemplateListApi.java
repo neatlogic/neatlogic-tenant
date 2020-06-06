@@ -73,7 +73,9 @@ public class NotifyPolicyTemplateListApi extends ApiComponentBase {
 
 		List<NotifyTemplateVo> templateList = new ArrayList<>();
 		String keyword = jsonObj.getString("keyword");
-		keyword = keyword.toLowerCase();
+		if(StringUtils.isNotBlank(keyword)) {
+			keyword = keyword.toLowerCase();
+		}
 		JSONObject config = notifyPolicyVo.getConfig();
 		for(NotifyTemplateVo notifyTemplateVo : JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class)) {
 			if(StringUtils.isNotBlank(notifyHandler) && !notifyHandler.equals(notifyTemplateVo.getNotifyHandler())) {

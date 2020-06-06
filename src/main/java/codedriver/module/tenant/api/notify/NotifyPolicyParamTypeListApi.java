@@ -38,7 +38,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略类型")
 	})
 	@Output({
-		@Param(name = "paramTypeList", explode = ValueTextVo[].class, desc = "参数类型列表") 
+		@Param(explode = ValueTextVo[].class, desc = "参数类型列表") 
 	})
 	@Description(desc = "通知策略参数类型列表接口")
 	@Override
@@ -48,9 +48,7 @@ public class NotifyPolicyParamTypeListApi extends ApiComponentBase {
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(handler);
 		}
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("paramTypeList", notifyPolicyHandler.getParamTypeList());
-		return resultObj;	
+		return notifyPolicyHandler.getParamTypeList();	
 	}
 
 }

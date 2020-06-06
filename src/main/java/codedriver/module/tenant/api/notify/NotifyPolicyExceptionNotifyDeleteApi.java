@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +10,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.dto.NotifyTemplateVo;
-import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
-import codedriver.framework.notify.exception.NotifyTemplateReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -27,31 +23,34 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @IsActived
-public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
-
+public class NotifyPolicyExceptionNotifyDeleteApi extends ApiComponentBase {
+	
 	@Autowired
 	private NotifyMapper notifyMapper;
 	
+	@Autowired
+	private UserMapper userMapper;
+
 	@Override
 	public String getToken() {
-		return "notify/policy/template/delete";
+		return "notify/policy/exceptionnotify/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "通知模板删除接口";
+		return "通知策略异常通知删除接口";
 	}
 
 	@Override
 	public String getConfig() {
 		return null;
 	}
-
+	
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id")
+		@Param(name = "userUuid", type = ApiParamType.STRING, isRequired = true, desc = "用户uuid")
 	})
-	@Description(desc = "通知模板删除接口")
+	@Description(desc = "通知策略管理员删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long policyId = jsonObj.getLong("policyId");
@@ -59,27 +58,14 @@ public class NotifyPolicyTemplateDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+		String userUuid = jsonObj.getString("userUuid");
+		if(userMapper.checkUserIsExists(userUuid) == 0) {
+			throw new UserNotFoundException(userUuid);
 		}
-		
-		Long id = jsonObj.getLong("id");
 		JSONObject config = notifyPolicyVo.getConfig();
-		//判断模板是否被引用
-		String triggerListStr = config.getString("triggerList");
-		if(triggerListStr.contains(id.toString())) {
-			throw new NotifyTemplateReferencedCannotBeDeletedException(id.toString());
-		}
-		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
-		Iterator<NotifyTemplateVo> iterator = templateList.iterator();
-		while(iterator.hasNext()) {
-			NotifyTemplateVo notifyTemplateVo = iterator.next();
-			if(id.equals(notifyTemplateVo.getId())) {
-				iterator.remove();
-			}
-		}
-		config.put("templateList", templateList);
+		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
+		adminUserUuidList.remove(userUuid);
+		config.put("adminUserUuidList", adminUserUuidList);
 		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return null;
