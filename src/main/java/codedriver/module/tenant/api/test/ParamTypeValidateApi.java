@@ -12,7 +12,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-@Service
 @AuthAction(name="SCHEDULE_JOB_MODIFY")
 public class ParamTypeValidateApi extends ApiComponentBase {
 

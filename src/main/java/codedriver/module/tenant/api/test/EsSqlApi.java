@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
 public class EsSqlApi extends ApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(EsSearchApi.class);
 

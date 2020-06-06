@@ -16,7 +16,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
-@Service
 public class ObjectPoolService {
     private static final Logger logger = LoggerFactory.getLogger(ObjectPoolService.class);
 

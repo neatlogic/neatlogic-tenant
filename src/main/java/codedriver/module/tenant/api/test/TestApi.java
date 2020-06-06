@@ -17,7 +17,6 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Transactional
-@Service
 public class TestApi extends ApiComponentBase {
 
 	@Autowired

@@ -21,7 +21,6 @@ import java.util.Map;
 import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
 
 
-@Service
 public class EsSearchApi extends ApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(EsSearchApi.class);
 

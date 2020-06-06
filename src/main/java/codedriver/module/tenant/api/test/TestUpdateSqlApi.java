@@ -11,7 +11,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.dao.mapper.TestMapper;
 
 @Transactional
-@Service
 public class TestUpdateSqlApi extends ApiComponentBase {
 
 	@Autowired
