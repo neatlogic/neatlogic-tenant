@@ -35,7 +35,7 @@ public class NotifyPolicySystemParamListApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "通知策略参数列表接口";
+		return "通知策略系统参数列表接口";
 	}
 
 	@Override
