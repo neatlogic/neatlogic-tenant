@@ -30,7 +30,7 @@ public class NotifyPolicySystemParamListApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "notify/policy/param/list";
+		return "notify/policy/systemparam/list";
 	}
 
 	@Override
