@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.dashboard.dto.DashboardWidgetVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -40,7 +39,7 @@ public class IconListApi extends ApiComponentBase {
 	}
 
 	@Input({ @Param(name = "type", type = ApiParamType.JSONARRAY, desc = "图标分类。action:操作类,caution:警示类,chart:表单类,common:通用类,file:文件类型,logo:LOGO类,orientation:排版方向类,status:状态类,terminology:专用类", isRequired = true) })
-	@Output({ @Param(explode = DashboardWidgetVo.class, type = ApiParamType.JSONOBJECT, desc = "仪表板组件详细信息") })
+	@Output({ @Param(type = ApiParamType.STRING, desc = "图标列表") })
 	@Description(desc = "图标列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
