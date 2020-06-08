@@ -12,7 +12,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -29,7 +28,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.auth.label.DASHBOARD_MODIFY;
 
 /**
  * @program: codedriver
@@ -99,9 +97,9 @@ public class AuthModuleGetApi extends ApiComponentBase {
         		if(authSet.contains(tmpAuth.getAuthName())) {
         			authBaseList.add(tmpAuth);
         		}
-        		if(tmpAuth.getAuthName().equals(DASHBOARD_MODIFY.class.getSimpleName())) {
-        			dashboardAuthlist.add(JSON.toJSON(tmpAuth));
-        		}
+        		//if(tmpAuth.getAuthName().equals(DASHBOARD_MODIFY.class.getSimpleName())) {
+        		//	dashboardAuthlist.add(JSON.toJSON(tmpAuth));
+        		//}
         	}
         	
         	moduleGroupJson.put("authList", authBaseList);
@@ -109,13 +107,13 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	retrunArray.add(moduleGroupJson);
         }
         //补充dashboard
-    	JSONObject moduleGroupJson = new JSONObject();
+    	/*JSONObject moduleGroupJson = new JSONObject();
     	moduleGroupJson.put("group", "dashboard");
     	moduleGroupJson.put("groupName", "仪表板");
     	moduleGroupJson.put("groupSort", 0);
     	moduleGroupJson.put("description", "图形化编辑页面，轻松实现数据可视化交互");
     	moduleGroupJson.put("authList", dashboardAuthlist);
-    	retrunArray.add(moduleGroupJson);
+    	retrunArray.add(moduleGroupJson);*/
     	retrunArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("groupSort")));
         return retrunArray;
     }
