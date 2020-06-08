@@ -78,42 +78,31 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	authGroupSet.add(userAuth.getAuthGroup());
         	authSet.add(userAuth.getAuth());
         }
-        List<Object> dashboardAuthlist = new ArrayList<Object>();
         Map<String, List<AuthBase>>  authModuleMap = AuthFactory.getAuthGroupMap();
-        for(Entry<String, List<AuthBase>> entry : authModuleMap.entrySet()) {
-        	if(!authGroupSet.contains(entry.getKey())) {
-        		continue;
-        	}
-        	ModuleGroupVo moduleGroup = ModuleUtil.getModuleGroup(entry.getKey());
+        Set<Entry<String, ModuleGroupVo>> moduleGroupEntrySet =  ModuleUtil.getModuleGroupMap().entrySet();
+        for(Entry<String, ModuleGroupVo> moduleGroupEntry : moduleGroupEntrySet) {
+        	ModuleGroupVo moduleGroupVo = moduleGroupEntry.getValue();
         	JSONObject moduleGroupJson = new JSONObject();
-        	moduleGroupJson.put("group", moduleGroup.getGroup());
-        	moduleGroupJson.put("groupName", moduleGroup.getGroupName());
-        	moduleGroupJson.put("groupSort", moduleGroup.getGroupSort());
-        	moduleGroupJson.put("description", ModuleUtil.getModuleGroup(moduleGroup.getGroup()).getGroupDescription());
-        	List<AuthBase> authBaseList = new ArrayList<AuthBase>();
-        	Iterator<AuthBase> authIterator = entry.getValue().iterator();
-        	while(authIterator.hasNext()) {
-        		AuthBase tmpAuth = authIterator.next();
-        		if(authSet.contains(tmpAuth.getAuthName())) {
-        			authBaseList.add(tmpAuth);
-        		}
-        		//if(tmpAuth.getAuthName().equals(DASHBOARD_MODIFY.class.getSimpleName())) {
-        		//	dashboardAuthlist.add(JSON.toJSON(tmpAuth));
-        		//}
-        	}
-        	
-        	moduleGroupJson.put("authList", authBaseList);
-        	
+        	moduleGroupJson.put("group", moduleGroupVo.getGroup());
+        	moduleGroupJson.put("groupName", moduleGroupVo.getGroupName());
+        	moduleGroupJson.put("groupSort", moduleGroupVo.getGroupSort());
+        	moduleGroupJson.put("description", ModuleUtil.getModuleGroup(moduleGroupVo.getGroup()).getGroupDescription());
         	retrunArray.add(moduleGroupJson);
+			/*
+			 * if(!authGroupSet.contains(entry.getKey())) { continue; }
+			 */
+        	List<AuthBase> authBaseList = new ArrayList<AuthBase>();
+        	if(authModuleMap.containsKey(moduleGroupVo.getGroup())) {
+        		Iterator<AuthBase> authIterator = authModuleMap.get(moduleGroupVo.getGroup()).iterator();
+	        	while(authIterator.hasNext()) {
+	        		AuthBase tmpAuth = authIterator.next();
+	        		if(authSet.contains(tmpAuth.getAuthName())) {
+	        			authBaseList.add(tmpAuth);
+	        		}
+	        	}
+        	}
+        	moduleGroupJson.put("authList", authBaseList);
         }
-        //补充dashboard
-    	/*JSONObject moduleGroupJson = new JSONObject();
-    	moduleGroupJson.put("group", "dashboard");
-    	moduleGroupJson.put("groupName", "仪表板");
-    	moduleGroupJson.put("groupSort", 0);
-    	moduleGroupJson.put("description", "图形化编辑页面，轻松实现数据可视化交互");
-    	moduleGroupJson.put("authList", dashboardAuthlist);
-    	retrunArray.add(moduleGroupJson);*/
     	retrunArray.sort(Comparator.comparing(obj-> ((JSONObject) obj).getInteger("groupSort")));
         return retrunArray;
     }
