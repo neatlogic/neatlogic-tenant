@@ -77,6 +77,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
 				throw new NotifyPolicyNameRepeatException(name);
 			}
+			notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
 			notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 			JSONObject config = notifyPolicyVo.getConfig();
 			List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
