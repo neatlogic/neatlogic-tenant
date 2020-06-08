@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.integration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,19 +25,19 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-public class IntegrationHelpApi extends ApiComponentBase {
+public class IntegrationParamListApi extends ApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;
 
 	@Override
 	public String getToken() {
-		return "integration/help";
+		return "integration/param/list";
 	}
 
 	@Override
 	public String getName() {
-		return "获取集成设置参数说明接口";
+		return "获取集成设置参数列表接口";
 	}
 
 	@Override
@@ -44,30 +45,47 @@ public class IntegrationHelpApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "集成配置uuid", isRequired = true) })
+	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "集成配置uuid", isRequired = true), @Param(name = "mode", type = ApiParamType.ENUM, rule = "input,output", desc = "参数模式，input或output") })
 	@Output({ @Param(explode = PatternVo[].class) })
-	@Description(desc = "获取集成设置参数说明接口")
+	@Description(desc = "获取集成设置参数列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		String mode = jsonObj.getString("mode");
 		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
 		JSONObject configObj = integrationVo.getConfig();
 		IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
 		if (handler == null) {
 			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 		}
-
+		List<PatternVo> patternList = new ArrayList<>();
 		if (handler.hasPattern().equals(0)) {
-			List<PatternVo> patternList = new ArrayList<>();
 			if (configObj.getJSONObject("param") != null && configObj.getJSONObject("param").getJSONArray("paramList") != null) {
 				for (int i = 0; i < configObj.getJSONObject("param").getJSONArray("paramList").size(); i++) {
 					JSONObject paramObj = configObj.getJSONObject("param").getJSONArray("paramList").getJSONObject(i);
 					PatternVo patternVo = JSONObject.toJavaObject(paramObj, PatternVo.class);
-					patternList.add(patternVo);
+					if (StringUtils.isBlank(mode) || mode.equals(patternVo.getMode())) {
+						patternList.add(patternVo);
+					}
 				}
 			}
-			return patternList;
 		} else {
-			return handler.getInputPattern();
+			if (StringUtils.isBlank(mode)) {
+				if (handler.getInputPattern() != null) {
+					patternList.addAll(handler.getInputPattern());
+				}
+				if (handler.getOutputPattern() != null) {
+					patternList.addAll(handler.getOutputPattern());
+				}
+			} else if (mode.equals("input")) {
+				if (handler.getInputPattern() != null) {
+					patternList.addAll(handler.getInputPattern());
+				}
+			} else if (mode.equals("output")) {
+				if (handler.getOutputPattern() != null) {
+					patternList.addAll(handler.getOutputPattern());
+				}
+			}
 		}
+		return patternList;
 	}
 }
