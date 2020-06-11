@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
@@ -36,9 +37,9 @@ public class IntegrationParamTypeListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONArray returnList = new JSONArray();
-		for (ApiParamType type : ApiParamType.values()) {
+		for (ParamType type : ParamType.values()) {
 			JSONObject j = new JSONObject();
-			j.put("value", type.getValue());
+			j.put("value", type.getName());
 			j.put("text", type.getText());
 			returnList.add(j);
 		}
