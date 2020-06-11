@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;

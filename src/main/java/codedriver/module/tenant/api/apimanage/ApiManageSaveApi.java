@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

@@ -1,6 +1,6 @@
 package codedriver.module.tenant.api.tag;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

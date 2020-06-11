@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyHandler;

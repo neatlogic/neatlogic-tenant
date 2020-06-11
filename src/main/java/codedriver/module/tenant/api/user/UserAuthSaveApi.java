@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.UserAuthVo;

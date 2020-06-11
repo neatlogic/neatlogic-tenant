@@ -1,6 +1,6 @@
 package codedriver.module.tenant.api.team;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.annotation.Description;

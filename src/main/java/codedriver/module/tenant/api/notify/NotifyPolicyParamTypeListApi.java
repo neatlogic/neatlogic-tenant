@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;

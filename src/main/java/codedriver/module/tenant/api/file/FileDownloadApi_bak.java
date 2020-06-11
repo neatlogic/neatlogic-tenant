@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;

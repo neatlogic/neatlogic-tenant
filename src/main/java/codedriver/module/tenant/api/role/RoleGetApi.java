@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;

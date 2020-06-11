@@ -14,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.UserVo;

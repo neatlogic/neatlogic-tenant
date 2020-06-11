@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;

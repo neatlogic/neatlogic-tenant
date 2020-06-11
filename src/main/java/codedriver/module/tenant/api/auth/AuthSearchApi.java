@@ -12,10 +12,10 @@ import org.springframework.util.CollectionUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;

@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
-import codedriver.framework.common.constvalue.BasicType;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -65,7 +65,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
 		String basicType = jsonObj.getString("basicType");
-		BasicType basicTypeEnum = BasicType.getBasicType(basicType);
+		ParamType basicTypeEnum = ParamType.getParamType(basicType);
 		String handler = jsonObj.getString("handler");
 		String handlerName = jsonObj.getString("handlerName");
 		NotifyPolicyParamVo resultParamVo = null;

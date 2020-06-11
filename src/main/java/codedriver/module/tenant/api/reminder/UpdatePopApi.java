@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.reminder;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;

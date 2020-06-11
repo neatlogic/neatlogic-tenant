@@ -1,6 +1,6 @@
 package codedriver.module.tenant.api.role;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;

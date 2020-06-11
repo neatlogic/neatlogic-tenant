@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.counter;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.dto.GlobalCounterVo;
 import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.restful.annotation.Description;

@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.apiparam.core.ApiParamType;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.integration.core.TestInvoker;
 import codedriver.framework.integration.dto.IntegrationInvokeVo;
 import codedriver.framework.restful.annotation.Description;
