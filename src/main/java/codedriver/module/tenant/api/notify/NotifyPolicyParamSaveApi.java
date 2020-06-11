@@ -92,7 +92,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			notifyPolicyParamVo.setBasicType(basicType);
 			notifyPolicyParamVo.setHandlerName(handlerName);
 			notifyPolicyParamVo.setHandlerType(FormHandlerType.INPUT.toString());
-			//notifyPolicyParamVo.setType(type);
+			notifyPolicyParamVo.setType("custom");
 			notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
 			notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 			for(Expression expression : basicTypeEnum.getExpressionList()) {
