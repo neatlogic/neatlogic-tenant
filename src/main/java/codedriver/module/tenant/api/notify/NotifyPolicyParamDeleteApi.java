@@ -11,8 +11,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -45,7 +45,7 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名")
 	})
 	@Description(desc = "通知策略参数删除接口")
 	@Override
@@ -55,13 +55,13 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String handler = jsonObj.getString("handler");
+		String name = jsonObj.getString("name");
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-		Iterator<NotifyPolicyParamVo> iterator = paramList.iterator();
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		Iterator<ConditionParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
-			NotifyPolicyParamVo notifyPolicyParamVo = iterator.next();
-			if(handler.equals(notifyPolicyParamVo.getHandler())) {
+			ConditionParamVo notifyPolicyParamVo = iterator.next();
+			if(name.equals(notifyPolicyParamVo.getName())) {
 				iterator.remove();
 			}
 		}

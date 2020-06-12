@@ -11,11 +11,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
+import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.ExpressionVo;
-import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -49,12 +49,12 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
-		@Param(name = "basicType", type = ApiParamType.ENUM, rule = "string,array,date", isRequired = true, desc = "参数类型"),
-		@Param(name = "handlerName", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
+		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
+		@Param(name = "paramType", type = ApiParamType.ENUM, rule = "string,array,date", isRequired = true, desc = "参数类型"),
+		@Param(name = "label", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
-		@Param(explode = NotifyPolicyParamVo.class, desc = "参数信息")
+		@Param(explode = ConditionParamVo.class, desc = "参数信息")
 	})
 	@Description(desc = "通知策略参数保存接口")
 	@Override
@@ -64,19 +64,19 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
-		String basicType = jsonObj.getString("basicType");
-		ParamType basicTypeEnum = ParamType.getParamType(basicType);
-		String handler = jsonObj.getString("handler");
-		String handlerName = jsonObj.getString("handlerName");
-		NotifyPolicyParamVo resultParamVo = null;
+		String paramType = jsonObj.getString("paramType");
+		ParamType basicTypeEnum = ParamType.getParamType(paramType);
+		String name = jsonObj.getString("name");
+		String label = jsonObj.getString("label");
+		ConditionParamVo resultParamVo = null;
 		boolean isNew = true;
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
-		for(NotifyPolicyParamVo notifyPolicyParamVo : paramList) {
-			if(handler.equals(notifyPolicyParamVo.getHandler())) {
-				notifyPolicyParamVo.setBasicType(basicType);
-				notifyPolicyParamVo.setHandlerName(handlerName);
-				notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		for(ConditionParamVo notifyPolicyParamVo : paramList) {
+			if(name.equals(notifyPolicyParamVo.getName())) {
+				notifyPolicyParamVo.setParamType(paramType);
+				notifyPolicyParamVo.setLabel(label);
+				notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 				notifyPolicyParamVo.getExpressionList().clear();
 				for(Expression expression : basicTypeEnum.getExpressionList()) {
@@ -87,13 +87,13 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			}
 		}
 		if(isNew) {
-			NotifyPolicyParamVo notifyPolicyParamVo = new NotifyPolicyParamVo();
-			notifyPolicyParamVo.setHandler(handler);
-			notifyPolicyParamVo.setBasicType(basicType);
-			notifyPolicyParamVo.setHandlerName(handlerName);
-			notifyPolicyParamVo.setHandlerType(FormHandlerType.INPUT.toString());
+			ConditionParamVo notifyPolicyParamVo = new ConditionParamVo();
+			notifyPolicyParamVo.setName(name);
+			notifyPolicyParamVo.setParamType(paramType);
+			notifyPolicyParamVo.setLabel(label);
+			notifyPolicyParamVo.setController(FormHandlerType.INPUT.toString());
 			notifyPolicyParamVo.setType("custom");
-			notifyPolicyParamVo.setBasicTypeName(basicTypeEnum.getText());
+			notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 			notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 			for(Expression expression : basicTypeEnum.getExpressionList()) {
 				notifyPolicyParamVo.getExpressionList().add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
