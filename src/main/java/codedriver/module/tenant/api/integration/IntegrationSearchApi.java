@@ -2,12 +2,15 @@ package codedriver.module.tenant.api.integration;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -55,7 +58,24 @@ public class IntegrationSearchApi extends ApiComponentBase {
 			integrationVo.setRowNum(rowNum);
 			integrationVo.setPageCount(PageUtil.getPageCount(rowNum, integrationVo.getPageSize()));
 		}
-		
+		//补充类型对应表达式信息
+		if(CollectionUtils.isNotEmpty(integrationList)) {
+			for(IntegrationVo inte : integrationList) {
+				JSONObject paramJson = inte.getConfig().getJSONObject("param");
+				if(paramJson != null) {
+					JSONArray paramList = paramJson.getJSONArray("paramList");
+					if(CollectionUtils.isNotEmpty(paramList)) {
+						for(Object paramObj:paramList) {
+							JSONObject param = (JSONObject)paramObj;
+							ParamType pt = ParamType.getParamType(param.getString("type"));
+							if(pt != null) {
+								param.put("expresstionList", pt.getExpressionJSONArray());
+							}
+						}
+					}
+				}
+			}
+		}
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("pageSize", integrationVo.getPageSize());
 		returnObj.put("currentPage", integrationVo.getCurrentPage());
