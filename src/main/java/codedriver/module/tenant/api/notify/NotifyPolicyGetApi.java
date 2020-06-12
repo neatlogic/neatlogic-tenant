@@ -12,11 +12,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.notify.dto.NotifyPolicyParamVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -66,13 +66,13 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 			throw new NotifyPolicyNotFoundException(id.toString());
 		}
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<NotifyPolicyParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), NotifyPolicyParamVo.class);
+		List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
-		paramList.sort((e1, e2) -> e1.getHandler().compareToIgnoreCase(e2.getHandler()));
+		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 		config.put("paramList", paramList);
 		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
 		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
