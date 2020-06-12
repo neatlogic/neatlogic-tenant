@@ -51,7 +51,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
 		@Param(name = "paramType", type = ApiParamType.ENUM, rule = "string,array,date", isRequired = true, desc = "参数类型"),
-		@Param(name = "displayName", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
+		@Param(name = "label", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
 		@Param(explode = ConditionParamVo.class, desc = "参数信息")
@@ -67,7 +67,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		String paramType = jsonObj.getString("paramType");
 		ParamType basicTypeEnum = ParamType.getParamType(paramType);
 		String name = jsonObj.getString("name");
-		String displayName = jsonObj.getString("displayName");
+		String label = jsonObj.getString("label");
 		ConditionParamVo resultParamVo = null;
 		boolean isNew = true;
 		JSONObject config = notifyPolicyVo.getConfig();
@@ -75,7 +75,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		for(ConditionParamVo notifyPolicyParamVo : paramList) {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setParamType(paramType);
-				notifyPolicyParamVo.setDisplayName(displayName);
+				notifyPolicyParamVo.setLabel(label);
 				notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 				notifyPolicyParamVo.getExpressionList().clear();
@@ -90,7 +90,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			ConditionParamVo notifyPolicyParamVo = new ConditionParamVo();
 			notifyPolicyParamVo.setName(name);
 			notifyPolicyParamVo.setParamType(paramType);
-			notifyPolicyParamVo.setDisplayName(displayName);
+			notifyPolicyParamVo.setLabel(label);
 			notifyPolicyParamVo.setController(FormHandlerType.INPUT.toString());
 			notifyPolicyParamVo.setType("custom");
 			notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());

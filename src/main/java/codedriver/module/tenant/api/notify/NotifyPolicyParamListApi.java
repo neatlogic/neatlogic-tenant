@@ -74,7 +74,7 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 		for(ConditionParamVo notifyPolicyParamVo : systemParamList) {
 			if(StringUtils.isNotBlank(keyword)) {
 				if(!notifyPolicyParamVo.getName().toLowerCase().contains(keyword.toLowerCase()) 
-						&& !notifyPolicyParamVo.getDisplayName().toLowerCase().contains(keyword.toLowerCase())) {
+						&& !notifyPolicyParamVo.getLabel().toLowerCase().contains(keyword.toLowerCase())) {
 					continue;
 				}
 			}
