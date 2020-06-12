@@ -71,7 +71,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		ConditionParamVo resultParamVo = null;
 		boolean isNew = true;
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		for(ConditionParamVo notifyPolicyParamVo : paramList) {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setParamType(paramType);

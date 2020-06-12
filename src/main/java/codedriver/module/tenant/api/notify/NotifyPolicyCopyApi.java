@@ -70,7 +70,7 @@ public class NotifyPolicyCopyApi extends ApiComponentBase {
 		}
 		notifyMapper.insertNotifyPolicy(notifyPolicyVo);
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());

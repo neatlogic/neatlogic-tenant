@@ -66,7 +66,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 			throw new NotifyPolicyNotFoundException(id.toString());
 		}
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
@@ -74,7 +74,7 @@ public class NotifyPolicyGetApi  extends ApiComponentBase {
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 		config.put("paramList", paramList);
-		List<String> adminUserUuidList = JSON.parseArray(config.getJSONArray("adminUserUuidList").toJSONString(), String.class);
+		List<String> adminUserUuidList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("adminUserUuidList")), String.class);
 		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
 			List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
 			config.put("userList", userList);

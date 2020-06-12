@@ -68,7 +68,7 @@ public class NotifyPolicyParamListApi extends ApiComponentBase {
 		}
 		List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> customParamList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+		List<ConditionParamVo> customParamList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		systemParamList.addAll(customParamList);
 		String keyword = jsonObj.getString("keyword");
 		for(ConditionParamVo notifyPolicyParamVo : systemParamList) {

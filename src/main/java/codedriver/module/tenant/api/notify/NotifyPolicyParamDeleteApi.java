@@ -57,7 +57,7 @@ public class NotifyPolicyParamDeleteApi extends ApiComponentBase {
 		}
 		String name = jsonObj.getString("name");
 		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		Iterator<ConditionParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
 			ConditionParamVo notifyPolicyParamVo = iterator.next();

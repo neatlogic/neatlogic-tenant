@@ -80,7 +80,7 @@ public class NotifyPolicySaveApi  extends ApiComponentBase {
 			notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
 			notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 			JSONObject config = notifyPolicyVo.getConfig();
-			List<ConditionParamVo> paramList = JSON.parseArray(config.getJSONArray("paramList").toJSONString(), ConditionParamVo.class);
+			List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 			paramList.addAll(notifyPolicyHandler.getSystemParamList());
 			paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 			config.put("paramList", paramList);
