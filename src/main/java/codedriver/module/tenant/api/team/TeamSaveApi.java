@@ -15,6 +15,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
@@ -108,7 +109,7 @@ public class TeamSaveApi extends ApiComponentBase{
 					if(userMapper.checkUserIsExists(userUuid) == 0) {
 						throw new UserNotFoundException(userUuid);
 					}
-					teamMapper.insertTeamUser(teamVo.getUuid(), userUuid);
+					teamMapper.insertTeamUser(new TeamUserVo(teamVo.getUuid(), userUuid));
 				}
 			}
 		}
