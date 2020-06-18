@@ -44,10 +44,10 @@ public class NotifyTriggerListApi extends ApiComponentBase {
 	@Description(desc = "通知触发点列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String policyHandler = jsonObj.getString("policyHandler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(policyHandler);
+		String handler = jsonObj.getString("handler");
+		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
 		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(policyHandler);
+			throw new NotifyPolicyHandlerNotFoundException(handler);
 		}
 		return notifyPolicyHandler.getNotifyTriggerList();
 	}
