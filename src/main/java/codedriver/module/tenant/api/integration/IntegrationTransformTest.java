@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.integration.ParamFormatInvalidException;
+import codedriver.framework.exception.util.FreemarkerTransformException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
@@ -39,7 +40,7 @@ public class IntegrationTransformTest extends ApiComponentBase {
 	@Output({ @Param(name = "Return", type = ApiParamType.STRING, desc = "返回结果") })
 	@Description(desc = "集成设置参数转换测试接口")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
+	public Object myDoService(JSONObject jsonObj) {
 		String content = jsonObj.getString("content");
 		String template = jsonObj.getString("template");
 		Object object = null;
@@ -55,8 +56,12 @@ public class IntegrationTransformTest extends ApiComponentBase {
 		if (object == null) {
 			throw new ParamFormatInvalidException();
 		}
-
-		String returnStr = FreemarkerUtil.transform(object, template);
+		String returnStr = "";
+		try {
+			returnStr = FreemarkerUtil.transform(object, template);
+		} catch (FreemarkerTransformException e) {
+			returnStr = e.getMessage();
+		}
 		if (StringUtils.isBlank(returnStr)) {
 			returnStr = "没有任何内容";
 		}
