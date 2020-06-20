@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
@@ -79,9 +79,8 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	authSet.add(userAuth.getAuth());
         }
         Map<String, List<AuthBase>>  authModuleMap = AuthFactory.getAuthGroupMap();
-        Set<Entry<String, ModuleGroupVo>> moduleGroupEntrySet =  ModuleUtil.getModuleGroupMap().entrySet();
-        for(Entry<String, ModuleGroupVo> moduleGroupEntry : moduleGroupEntrySet) {
-        	ModuleGroupVo moduleGroupVo = moduleGroupEntry.getValue();
+        List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
+        for(ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
         	JSONObject moduleGroupJson = new JSONObject();
         	moduleGroupJson.put("group", moduleGroupVo.getGroup());
         	moduleGroupJson.put("groupName", moduleGroupVo.getGroupName());
