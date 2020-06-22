@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -50,7 +51,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 	@Input({
 		@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
 		@Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
-		@Param(name = "paramType", type = ApiParamType.ENUM, rule = "string,array,date", isRequired = true, desc = "参数类型"),
+		@Param(name = "paramType", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
 		@Param(name = "label", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
 	})
 	@Output({
@@ -66,6 +67,9 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		}
 		String paramType = jsonObj.getString("paramType");
 		ParamType basicTypeEnum = ParamType.getParamType(paramType);
+		if(basicTypeEnum == null) {
+			throw new ParamIrregularException("参数”paramType“不符合格式要求");
+		}
 		String name = jsonObj.getString("name");
 		String label = jsonObj.getString("label");
 		ConditionParamVo resultParamVo = null;
