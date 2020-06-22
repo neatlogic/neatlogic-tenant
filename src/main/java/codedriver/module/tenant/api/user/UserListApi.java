@@ -19,19 +19,19 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
-public class UserUuidListApi extends ApiComponentBase {
+public class UserListApi extends ApiComponentBase {
 
 	@Autowired
 	private UserMapper userMapper;
 	
 	@Override
 	public String getToken() {
-		return "user/uuidlist";
+		return "user/list";
 	}
 
 	@Override
 	public String getName() {
-		return "用户uuid列表获取接口";
+		return "用户列表获取接口";
 	}
 
 	@Override
@@ -43,15 +43,17 @@ public class UserUuidListApi extends ApiComponentBase {
 		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "用户组uuid集合")
 	})
 	@Output({
-		@Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")
+		@Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户集合")
 	})
-	@Description(desc = "用户uuid列表获取接口")
+	@Description(desc = "用户列表获取接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> teamUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("teamUuidList")), String.class);
 		if(CollectionUtils.isNotEmpty(teamUuidList)) {
 			List<String> userUuidList = userMapper.getUserUuidListByteamUuidList(teamUuidList);
-			return userUuidList;
+			if(CollectionUtils.isNotEmpty(userUuidList)) {
+				return userMapper.getUserListByUserUuidList(userUuidList);
+			}
 		}
 		return new ArrayList<>();
 	}
