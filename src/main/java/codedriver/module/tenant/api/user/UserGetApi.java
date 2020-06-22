@@ -48,44 +48,36 @@ public class UserGetApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({
-		@Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = false)
-	})
-	@Output({
-		@Param(name = "Return", explode = UserVo.class, desc = "用户详情")
-	})
+	@Input({ @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = false) })
+	@Output({ @Param(name = "Return", explode = UserVo.class, desc = "用户详情") })
 	@Description(desc = "根据用户Id查询用户详情")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userUuid = jsonObj.getString("userUuid");		
-		if(StringUtils.isBlank(userUuid)) {
-			if(StringUtils.isBlank(UserContext.get().getUserUuid())) {
-				throw new UserGetException("当前用户未登录!");
-			}else {
-				userUuid = UserContext.get().getUserUuid();
-			}
+		String userUuid = jsonObj.getString("userUuid");
+		if (StringUtils.isBlank(userUuid)) {
+			userUuid = UserContext.get().getUserUuid(true);
 		}
 		UserVo userVo = userMapper.getUserByUuid(userUuid);
-		if(userVo == null) {
+		if (userVo == null) {
 			throw new UserNotFoundException(userUuid);
 		}
-		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);//防止修改cache vo
+		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);// 防止修改cache vo
 		userJson.put("userAuthList", userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
-		if(CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
+		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
 			List<String> teamUuidList = new ArrayList<>();
-			for(Object teamUuid : userJson.getJSONArray("teamUuidList")) {
+			for (Object teamUuid : userJson.getJSONArray("teamUuidList")) {
 				teamUuidList.add(GroupSearch.TEAM.getValuePlugin() + teamUuid);
 			}
 			userJson.put("teamUuidList", teamUuidList);
 		}
-		if(CollectionUtils.isNotEmpty(userJson.getJSONArray("roleUuidList"))) {
+		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("roleUuidList"))) {
 			List<String> roleUuidList = new ArrayList<>();
-			for(Object roleUuid : userJson.getJSONArray("roleUuidList")) {
+			for (Object roleUuid : userJson.getJSONArray("roleUuidList")) {
 				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
 			}
 			userJson.put("roleUuidList", roleUuidList);
 		}
-		
+
 		return userJson;
 	}
 }
