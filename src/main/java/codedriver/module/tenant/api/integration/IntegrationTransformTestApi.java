@@ -19,7 +19,7 @@ import codedriver.framework.util.FreemarkerUtil;
 
 @Service
 @IsActived
-public class IntegrationTransformTest extends ApiComponentBase {
+public class IntegrationTransformTestApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
