@@ -1,7 +1,8 @@
-package codedriver.framework.tenant.api.scheduler;
+package codedriver.module.tenant.api.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -14,20 +15,21 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
-import codedriver.framework.scheduler.service.SchedulerService;
 
 @Service
 @AuthAction(name = "SYSTEM_JOB_EDIT")
+@Transactional
 public class JobDeleteApi extends ApiComponentBase {
 
 	@Autowired
 	private SchedulerManager schedulerManager;
 
 	@Autowired
-	private SchedulerService schedulerService;
+	private SchedulerMapper schedulerMapper;
 
 	@Override
 	public String getToken() {
@@ -49,7 +51,7 @@ public class JobDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String jobUuid = jsonObj.getString("uuid");
-		JobVo job = schedulerService.getJobBaseInfoByUuid(jobUuid);
+		JobVo job = schedulerMapper.getJobBaseInfoByUuid(jobUuid);
 		if (job == null) {
 			throw new ScheduleJobNotFoundException(jobUuid);
 		}
@@ -57,7 +59,9 @@ public class JobDeleteApi extends ApiComponentBase {
 		IJob jobHandler = SchedulerManager.getHandler(job.getHandler());
 		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
 		schedulerManager.unloadJob(jobObject);
-		schedulerService.deleteJob(jobUuid);
+		schedulerMapper.deleteJobAuditByJobUuid(jobUuid);
+		schedulerMapper.deleteJobPropByJobUuid(jobUuid);
+		schedulerMapper.deleteJobByUuid(jobUuid);
 		return null;
 	}
 

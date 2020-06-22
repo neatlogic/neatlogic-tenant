@@ -18,6 +18,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 
 @Service
 @IsActived
@@ -56,7 +57,7 @@ public class IntegrationRunApi extends ApiComponentBase {
 			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 		}
 
-		IntegrationResultVo resultVo = handler.sendRequest(integrationVo);
+		IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.API);
 		return resultVo;
 	}
 }
