@@ -18,7 +18,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -26,6 +25,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -90,11 +90,9 @@ public class RoleSaveApi extends ApiComponentBase {
 			roleMapper.insertRole(roleVo);
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 			if (CollectionUtils.isNotEmpty(userUuidList)){
-				UserVo userVo = new UserVo();
-				userVo.setRoleUuid(roleVo.getUuid());
-				for (String userUuid : userUuidList){
-					userVo.setUuid(userUuid);
-					roleMapper.insertRoleUser(userVo);
+				Set<String> userUuidSet = new HashSet<>();
+				for (String userUuid : userUuidSet){
+					roleMapper.insertRoleUser(userUuid, roleVo.getUuid());
 				}
 			}
 
