@@ -5,32 +5,31 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @IsActived
-@AuthAction(name = "INTEGRATION_EDIT")
-public class IntegrationToggleActive extends ApiComponentBase {
+public class IntegrationAuditDetailGetApi extends ApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;
 
 	@Override
 	public String getToken() {
-		return "integration/toggleactive";
+		return "integration/audit/detail/get";
 	}
 
 	@Override
 	public String getName() {
-		return "修改集成配置激活接口";
+		return "获取审计内容接口";
 	}
 
 	@Override
@@ -38,13 +37,11 @@ public class IntegrationToggleActive extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid", isRequired = true), 
-		@Param(name = "isActive", type = ApiParamType.INTEGER, desc = "0禁用，1激活") })
-	@Description(desc = "修改集成配置激活接口")
+	@Input({ @Param(name = "hash", type = ApiParamType.STRING, desc = "内容uuid", isRequired = true) })
+	@Output({ @Param(type = ApiParamType.STRING) })
+	@Description(desc = "获取审计内容接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
-		integrationMapper.updateIntegrationActive(integrationVo);
-		return null;
+		return integrationMapper.getIntegrationAuditDetailByHash(jsonObj.getString("hash"));
 	}
 }
