@@ -17,6 +17,7 @@ import codedriver.framework.exception.team.TeamUserTitleNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
@@ -49,6 +50,9 @@ public class TeamUserTitleUpdateApi extends ApiComponentBase {
 		@Param(name = "userUuid", type = ApiParamType.STRING, isRequired = true, desc = "用户uuid"),
 		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "头衔")
 	})
+	@Output({
+		@Param(name="Return", explode = TeamUserVo.class, desc = "组用户头衔信息")
+	})
 	@Description(desc = "组用户头衔更新接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -63,7 +67,7 @@ public class TeamUserTitleUpdateApi extends ApiComponentBase {
 			throw new TeamUserTitleNotFoundException(teamUserVo.getTitle());
 		}
 		teamMapper.updateTeamUserTitle(teamUserVo);
-		return null;
+		return teamUserVo;
 	}
 
 }
