@@ -1,8 +1,9 @@
-package codedriver.framework.tenant.api.scheduler;
+package codedriver.module.tenant.api.scheduler;
 
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -18,18 +19,21 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.dto.JobObject;
+import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import codedriver.framework.scheduler.service.SchedulerService;
+import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
+import codedriver.framework.scheduler.exception.ScheduleJobNameRepeatException;
 
 @Service
 @AuthAction(name = "SYSTEM_JOB_EDIT")
+@Transactional
 public class JobSaveApi extends ApiComponentBase {
 	@Autowired
-	private SchedulerService schedulerService;
+	private SchedulerMapper schedulerMapper;
 	@Autowired
 	private SchedulerManager schedulerManager;
 
@@ -81,7 +85,7 @@ public class JobSaveApi extends ApiComponentBase {
 		if (jobClassVo == null) {
 			throw new ScheduleHandlerNotFoundException(handler);
 		}
-		schedulerService.saveJob(jobVo);
+		saveJob(jobVo);
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
 		if (jobVo.getIsActive().intValue() == 1) {
@@ -93,6 +97,27 @@ public class JobSaveApi extends ApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("uuid", jobVo.getUuid());
 		return resultObj;
+	}
+	
+	private int saveJob(JobVo job) {
+		String uuid = job.getUuid();
+		if (schedulerMapper.checkJobNameIsExists(job) > 0) {
+			throw new ScheduleJobNameRepeatException(job.getName());
+		}
+		JobVo oldJobVo = schedulerMapper.getJobBaseInfoByUuid(uuid);
+		if (oldJobVo == null) {
+			schedulerMapper.insertJob(job);
+		} else {
+			schedulerMapper.deleteJobPropByJobUuid(uuid);
+			schedulerMapper.updateJob(job);
+		}
+		if (job.getPropList() != null && job.getPropList().size() > 0) {
+			for (JobPropVo jobProp : job.getPropList()) {
+				jobProp.setJobUuid(uuid);
+				schedulerMapper.insertJobProp(jobProp);
+			}
+		}
+		return 1;
 	}
 
 }

@@ -1,4 +1,4 @@
-package codedriver.framework.tenant.api.scheduler;
+package codedriver.module.tenant.api.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

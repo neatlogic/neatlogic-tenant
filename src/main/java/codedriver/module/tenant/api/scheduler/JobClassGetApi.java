@@ -1,4 +1,4 @@
-package codedriver.framework.tenant.api.scheduler;
+package codedriver.module.tenant.api.scheduler;
 
 import java.util.Map;
 import java.util.Map.Entry;
