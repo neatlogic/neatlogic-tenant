@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -60,7 +61,7 @@ public class RoleUserSaveApi extends ApiComponentBase {
         if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
-        roleMapper.deleteUserRoleByRoleUuid(roleUuid);
+        roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
 			userUuidList = userMapper.checkUserUuidListIsExists(userUuidList);

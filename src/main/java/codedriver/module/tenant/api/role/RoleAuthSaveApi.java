@@ -4,7 +4,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
-import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -102,10 +101,11 @@ public class RoleAuthSaveApi extends ApiComponentBase {
         				roleMapper.insertRoleAuth(roleAuthVo);
         			}
                 }else if(AuthVo.AUTH_DELETE.equals(action)){
-                	RoleVo roleVo = new RoleVo();
-                	roleVo.setUuid(roleUuid);
-                	roleVo.setRoleAuthList(roleAuthList);
-                    roleMapper.deleteRoleAuth(roleVo);
+                	if(CollectionUtils.isEmpty(roleAuthList)) {
+                    	for (RoleAuthVo roleAuth : roleAuthList){
+                            roleMapper.deleteRoleAuth(roleAuth);
+                    	}
+                	}
                 }
             }
     	}

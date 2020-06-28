@@ -56,7 +56,7 @@ public class AuthRoleSaveApi extends ApiComponentBase {
     	roleMapper.deleteRoleAuthByAuth(auth);
     	String authGroup = jsonObj.getString("authGroup");
 
-        List<String> roleUuidList = JSON.parseArray(jsonObj.getString("roleUuidList"), String.class);
+        List<String> roleUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("roleUuidList")), String.class);
         if (CollectionUtils.isNotEmpty(roleUuidList)){
             RoleAuthVo roleAuthVo = new RoleAuthVo();
             roleAuthVo.setAuth(auth);
