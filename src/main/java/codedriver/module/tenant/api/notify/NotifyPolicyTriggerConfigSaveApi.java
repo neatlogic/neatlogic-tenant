@@ -92,7 +92,6 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 		}
 
 		JSONObject config = notifyPolicyVo.getConfig();
-		System.out.println(config.toJSONString());
 		JSONArray actionList = jsonObj.getJSONArray("actionList");
 		if(CollectionUtils.isNotEmpty(actionList)) {
 			Map<Long, NotifyTemplateVo> templateMap = new HashMap<>();
@@ -153,7 +152,6 @@ public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
 			}
 		}
 		notifyPolicyVo.setConfig(config.toJSONString());
-		System.out.println(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultObj;
 	}
