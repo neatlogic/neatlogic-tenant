@@ -74,7 +74,7 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	authSet.add(userAuth.getAuth());
         }
         //****获取用户默认模块首页开始****
-        UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(),"defaultModule");
+        UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(),"defaultModulePage");
         String data = userDataVo.getData();
         JSONObject dataJson = JSONObject.parseObject(data);
         JSONArray defaultModulePageList = dataJson.getJSONArray("defaultModulePageList");
