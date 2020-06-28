@@ -24,7 +24,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.module.tenant.exception.user.UserGetException;
 
 @AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
