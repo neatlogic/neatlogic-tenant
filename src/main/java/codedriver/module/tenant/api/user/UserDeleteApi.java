@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -52,10 +52,8 @@ public class UserDeleteApi extends ApiComponentBase{
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
     	if(CollectionUtils.isNotEmpty(userUuidList)) {
-			UserVo userVo = new UserVo();
     		for(String userUuid : userUuidList) {
-    			userVo.setUuid(userUuid);
-    			userMapper.deleteUserAuth(userVo);
+    			userMapper.deleteUserAuth(new UserAuthVo(userUuid));
     			userMapper.deleteUserRoleByUserUuid(userUuid);
     			userMapper.deleteUserTeamByUserUuid(userUuid);
     			userMapper.deleteUserByUuid(userUuid);
