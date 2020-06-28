@@ -81,7 +81,7 @@ public class TeamMoveApi extends ApiComponentBase {
 		if(sort == 0) {//移动到首位
 			lft = parentTeam.getLft() + 1;
  		}else {
- 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndSort(parentUuid, sort - 1);
+ 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndStartNum(parentUuid, sort - 1);
  			lft = prevTeam.getRht() + 1;
  		}
         if(parentUuid.equals(team.getParentUuid())) {

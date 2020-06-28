@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.team;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -68,7 +69,7 @@ public class TeamUserSaveApi extends ApiComponentBase {
 				if(userMapper.checkUserIsExists(userUuid) == 0) {
 					throw new UserNotFoundException(userUuid);
 				}
-				teamMapper.insertTeamUser(teamUuid, userUuid);
+				teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid));
 			}
 		}
         return null;
