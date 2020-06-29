@@ -41,15 +41,21 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口组件名模糊查询"), @Param(name = "isPrivate", type = ApiParamType.BOOLEAN, desc = "是否是私有接口"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"), @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")
-
+	@Input({
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口组件名模糊查询"), 
+		@Param(name = "isPrivate", type = ApiParamType.BOOLEAN, desc = "是否是私有接口"), 
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"), 
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"), 
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")
 	})
-	@Output({ @Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = ApiHandlerVo[].class, isRequired = true, desc = "接口组件列表") })
+	@Output({ 
+		@Param(explode = BasePageVo.class), 
+		@Param(name = "tbodyList", explode = ApiHandlerVo[].class, isRequired = true, desc = "接口组件列表") 
+	})
 	@Description(desc = "接口组件列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() {
-		});
+		BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() { });
 
 		List<ApiHandlerVo> apiHandlerList = new ArrayList<>();
 		String keyword = jsonObj.getString("keyword");
@@ -74,9 +80,14 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("pageSize", basePageVo.getPageSize());
 			resultObj.put("currentPage", basePageVo.getCurrentPage());
-			int endNum = basePageVo.getStartNum() + basePageVo.getPageSize();
-			endNum = endNum < rowNum ? endNum : rowNum;
-			apiHandlerList = apiHandlerList.subList(basePageVo.getStartNum(), basePageVo.getStartNum() + basePageVo.getPageSize());
+			int fromIndex = basePageVo.getStartNum();
+			if(fromIndex < rowNum) {
+				int toIndex = fromIndex + basePageVo.getPageSize();
+				toIndex = toIndex > rowNum ? rowNum : toIndex;
+				apiHandlerList = apiHandlerList.subList(basePageVo.getStartNum(), toIndex);
+			}else {
+				apiHandlerList = new ArrayList<>();
+			}
 		}
 
 		resultObj.put("tbodyList", apiHandlerList);

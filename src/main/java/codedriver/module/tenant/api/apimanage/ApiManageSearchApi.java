@@ -123,9 +123,14 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			resultObj.put("pageCount", pageCount);
 			resultObj.put("rowNum", rowNum);
 			//取出当前页token
-			int endNum = apiVo.getStartNum() + apiVo.getPageSize();
-			endNum = endNum < rowNum ? endNum : rowNum;
-			tokenList = tokenList.subList(apiVo.getStartNum(), endNum);
+			int fromIndex = apiVo.getStartNum();
+			if(fromIndex < rowNum) {
+				int toIndex = fromIndex + apiVo.getPageSize();
+				toIndex = toIndex > rowNum ? rowNum : toIndex;
+				tokenList = tokenList.subList(fromIndex, toIndex);
+			}else {
+				tokenList = new ArrayList<>();
+			}			
 			ramTokenList.retainAll(tokenList);
 			dbTokenList.retainAll(tokenList);
 		}
