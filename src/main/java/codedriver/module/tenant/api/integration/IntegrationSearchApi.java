@@ -72,6 +72,9 @@ public class IntegrationSearchApi extends ApiComponentBase {
 							JSONObject param = (JSONObject)paramObj;
 							ParamType pt = ParamType.getParamType(param.getString("type"));
 							if(pt != null) {
+								//增加参数回显模版-赖文韬-202006291121
+								String freemarkerTemplate = pt.getFreemarkerTemplate(param.getString("name"));
+								param.put("freemarkerTemplate",freemarkerTemplate);
 								param.put("expresstionList", pt.getExpressionJSONArray());
 							}
 						}
