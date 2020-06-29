@@ -1,13 +1,8 @@
 package codedriver.module.tenant.api.auth;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import codedriver.framework.dto.UserDataVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,10 +73,38 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	authGroupSet.add(userAuth.getAuthGroup());
         	authSet.add(userAuth.getAuth());
         }
+        //****获取用户默认模块首页开始****
+        HashMap<String,Map<String,String>> OuterMap = new HashMap<>(16);
+        UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(),"defaultModulePage");
+        if(userDataVo != null) {
+	        String data = userDataVo.getData();
+	        JSONObject dataJson = JSONObject.parseObject(data);
+	        JSONArray defaultModulePageList = dataJson.getJSONArray("defaultModulePageList");
+	        for(int i = 0;i < defaultModulePageList.size();i++){
+	            JSONObject o = defaultModulePageList.getJSONObject(i);
+	            String group = o.getString("group");
+	            String isDefault = o.getString("isDefault");
+	            String defaultPage = o.getString("defaultPage");
+	            Map<String,String> innerMap = new HashMap<>(2);
+	            innerMap.put("isDefault",isDefault);
+	            innerMap.put("defaultPage",defaultPage);
+	            OuterMap.put(group,innerMap);
+	        }
+        }
+        //****获取用户默认模块首页结束****
         Map<String, List<AuthBase>>  authModuleMap = AuthFactory.getAuthGroupMap();
         List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
         for(ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
         	JSONObject moduleGroupJson = new JSONObject();
+        	//把用户默认模块首页配置放入moduleGroupJson中
+            Map<String,String> map = OuterMap.get(moduleGroupVo.getGroupName());
+        	if(map != null){
+                moduleGroupJson.put("isDefault", map.get("isDefault"));
+                moduleGroupJson.put("defaultPage", map.get("defaultPage"));
+            }else{
+                moduleGroupJson.put("isDefault", 0);
+                moduleGroupJson.put("defaultPage", "");
+            }
         	moduleGroupJson.put("group", moduleGroupVo.getGroup());
         	moduleGroupJson.put("groupName", moduleGroupVo.getGroupName());
         	moduleGroupJson.put("groupSort", moduleGroupVo.getGroupSort());
