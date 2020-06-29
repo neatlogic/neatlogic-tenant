@@ -42,19 +42,16 @@ public class UserDataSaveApi extends ApiComponentBase {
 	@Description(desc = "保存用户数据接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		UserDataVo userDataVoVo = new UserDataVo();
+		UserDataVo userDataVo = new UserDataVo();
 		String userUuid = UserContext.get().getUserUuid(true);
-
-		userDataVoVo.setUserUuid(userUuid);
-		userDataVoVo.setData(jsonObj.toJSONString());
 		String type = jsonObj.getString("type");
-		userDataVoVo.setType(type);
+		userDataVo.setUserUuid(userUuid);
+		userDataVo.setData(jsonObj.toJSONString());
+		userDataVo.setType(type);
 
-		UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(userUuid,type);
-		if(userDataVo == null){
-			userMapper.insertUserData(userDataVoVo);
+		if(userMapper.getUserDataByUserUuidAndType(userUuid,type) == null){
+			userMapper.insertUserData(userDataVo);
 		}else{
-			userDataVo.setData(jsonObj.toJSONString());
 			userMapper.updateUserData(userDataVo);
 		}
 		return null;
