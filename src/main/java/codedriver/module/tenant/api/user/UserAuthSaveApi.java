@@ -92,22 +92,22 @@ public class UserAuthSaveApi extends ApiComponentBase {
         		for (UserAuthVo authVo : userAuthList){
         			set.add(authVo.getAuth());
         		}
-        		for (UserAuthVo authVo : userVo.getUserAuthList()){
+        		for (UserAuthVo authVo : userAuthVoList){
         			if (!set.contains(authVo.getAuth())){
         				userMapper.insertUserAuth(authVo);
         			}
         		}
             }
             if (AuthVo.AUTH_COVER.equals(action)){
-                userMapper.deleteUserAuthByUserUuid(userVo.getUuid());
-        		if (userVo.getUserAuthList() != null && userVo.getUserAuthList().size() > 0){
-        			for (UserAuthVo authVo : userVo.getUserAuthList()){
-        				userMapper.insertUserAuth(authVo);
-        			}
-        		}
+                userMapper.deleteUserAuth(new UserAuthVo(userVo.getUuid()));
+    			for (UserAuthVo authVo : userAuthVoList){
+    				userMapper.insertUserAuth(authVo);
+    			}
             }
             if (AuthVo.AUTH_DELETE.equals(action)){
-            	userMapper.deleteUserAuth(userVo);
+            	for (UserAuthVo authVo : userAuthVoList){
+            		userMapper.deleteUserAuth(authVo);
+            	}
             }
         }
         return null;

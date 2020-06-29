@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.role;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -16,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -26,6 +26,9 @@ public class RoleUserSaveApi extends ApiComponentBase {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -58,11 +61,11 @@ public class RoleUserSaveApi extends ApiComponentBase {
         if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
-        roleMapper.deleteUserRoleByRoleUuid(roleUuid);
+        roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
-			Set<String> userUuidSet = new HashSet<>(userUuidList);
-			for (String userUuid : userUuidSet){
+			userUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
+			for (String userUuid : userUuidList){
 				roleMapper.insertRoleUser(userUuid, roleUuid);
 			}
 		}

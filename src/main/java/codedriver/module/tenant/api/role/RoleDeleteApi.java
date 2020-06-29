@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -53,7 +54,7 @@ public class RoleDeleteApi extends ApiComponentBase {
 		for (String uuid : uuidList) {
 			roleMapper.deleteMenuRoleByRoleUuid(uuid);
 			roleMapper.deleteTeamRoleByRoleUuid(uuid);
-			roleMapper.deleteUserRoleByRoleUuid(uuid);
+			roleMapper.deleteRoleUser(new RoleUserVo(uuid));
 			roleMapper.deleteRoleByUuid(uuid);
 		}
 		return null;

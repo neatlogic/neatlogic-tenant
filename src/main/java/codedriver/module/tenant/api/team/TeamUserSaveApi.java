@@ -5,7 +5,6 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -19,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: codedriver
@@ -62,14 +63,18 @@ public class TeamUserSaveApi extends ApiComponentBase {
     	if(teamMapper.checkTeamIsExists(teamUuid) == 0) {
 			throw new TeamNotFoundException(teamUuid);
 		}
-        teamMapper.deleteUserTeamByTeamUuid(teamUuid);
-        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+    	Map<String, String> teamUserTitleMap = new HashMap<>();
+		List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(teamUuid);
+		for(TeamUserVo teamUserVo : teamUserList) {
+			teamUserTitleMap.put(teamUserVo.getUserUuid(), teamUserVo.getTitle());
+		}
+        teamMapper.deleteTeamUser(new TeamUserVo(teamUuid));
+        List<String> userUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("userUuidList")), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
+			userUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
 			for (String userUuid: userUuidList){
-				if(userMapper.checkUserIsExists(userUuid) == 0) {
-					throw new UserNotFoundException(userUuid);
-				}
-				teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid));
+				String title = teamUserTitleMap.get(userUuid);
+				teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid, title));
 			}
 		}
         return null;

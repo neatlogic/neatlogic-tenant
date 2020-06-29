@@ -57,7 +57,7 @@ public class AuthUserSaveApi extends ApiComponentBase {
         if(CollectionUtils.isNotEmpty(userUuidList)) {
         	String authGroup = jsonObj.getString("authGroup");
         	String auth = jsonObj.getString("auth");
-            userMapper.deleteUserAuthByAuth(auth);
+            userMapper.deleteUserAuth(new UserAuthVo(null, auth));
         	for(String userUuid : userUuidList) {
         		if(userMapper.checkUserIsExists(userUuid) == 0) {
         			throw new UserNotFoundException(userUuid);

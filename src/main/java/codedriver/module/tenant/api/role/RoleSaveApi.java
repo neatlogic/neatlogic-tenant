@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -25,7 +26,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +36,9 @@ public class RoleSaveApi extends ApiComponentBase {
 
 	@Autowired
 	RoleMapper roleMapper;
+	
+	@Autowired
+	UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -90,8 +93,8 @@ public class RoleSaveApi extends ApiComponentBase {
 			roleMapper.insertRole(roleVo);
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 			if (CollectionUtils.isNotEmpty(userUuidList)){
-				Set<String> userUuidSet = new HashSet<>();
-				for (String userUuid : userUuidSet){
+				userUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
+				for (String userUuid : userUuidList){
 					roleMapper.insertRoleUser(userUuid, roleVo.getUuid());
 				}
 			}
