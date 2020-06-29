@@ -74,20 +74,22 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	authSet.add(userAuth.getAuth());
         }
         //****获取用户默认模块首页开始****
-        UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(),"defaultModulePage");
-        String data = userDataVo.getData();
-        JSONObject dataJson = JSONObject.parseObject(data);
-        JSONArray defaultModulePageList = dataJson.getJSONArray("defaultModulePageList");
         HashMap<String,Map<String,String>> OuterMap = new HashMap<>(16);
-        for(int i = 0;i < defaultModulePageList.size();i++){
-            JSONObject o = defaultModulePageList.getJSONObject(i);
-            String group = o.getString("group");
-            String isDefault = o.getString("isDefault");
-            String defaultPage = o.getString("defaultPage");
-            HashMap<String,String> innerMap = new HashMap<>(2);
-            innerMap.put("isDefault",isDefault);
-            innerMap.put("defaultPage",defaultPage);
-            OuterMap.put(group,innerMap);
+        UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(),"defaultModulePage");
+        if(userDataVo != null) {
+	        String data = userDataVo.getData();
+	        JSONObject dataJson = JSONObject.parseObject(data);
+	        JSONArray defaultModulePageList = dataJson.getJSONArray("defaultModulePageList");
+	        for(int i = 0;i < defaultModulePageList.size();i++){
+	            JSONObject o = defaultModulePageList.getJSONObject(i);
+	            String group = o.getString("group");
+	            String isDefault = o.getString("isDefault");
+	            String defaultPage = o.getString("defaultPage");
+	            Map<String,String> innerMap = new HashMap<>(2);
+	            innerMap.put("isDefault",isDefault);
+	            innerMap.put("defaultPage",defaultPage);
+	            OuterMap.put(group,innerMap);
+	        }
         }
         //****获取用户默认模块首页结束****
         Map<String, List<AuthBase>>  authModuleMap = AuthFactory.getAuthGroupMap();
@@ -95,13 +97,13 @@ public class AuthModuleGetApi extends ApiComponentBase {
         for(ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
         	JSONObject moduleGroupJson = new JSONObject();
         	//把用户默认模块首页配置放入moduleGroupJson中
-            Map map = OuterMap.get(moduleGroupVo.getGroupName());
+            Map<String,String> map = OuterMap.get(moduleGroupVo.getGroupName());
         	if(map != null){
                 moduleGroupJson.put("isDefault", map.get("isDefault"));
                 moduleGroupJson.put("defaultPage", map.get("defaultPage"));
             }else{
                 moduleGroupJson.put("isDefault", 0);
-                moduleGroupJson.put("defaultPage", "null");
+                moduleGroupJson.put("defaultPage", "");
             }
         	moduleGroupJson.put("group", moduleGroupVo.getGroup());
         	moduleGroupJson.put("groupName", moduleGroupVo.getGroupName());
