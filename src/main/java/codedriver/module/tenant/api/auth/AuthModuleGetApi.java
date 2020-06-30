@@ -99,10 +99,10 @@ public class AuthModuleGetApi extends ApiComponentBase {
         	//把用户默认模块首页配置放入moduleGroupJson中
             Map<String,String> map = OuterMap.get(moduleGroupVo.getGroup());
         	if(map != null){
-                moduleGroupJson.put("isDefault", map.get("isDefault"));
+                moduleGroupJson.put("isDefault", Integer.valueOf(map.get("isDefault")));
                 moduleGroupJson.put("defaultPage", map.get("defaultPage"));
             }else{
-                moduleGroupJson.put("isDefault", 0);
+                moduleGroupJson.put("isDefault", Integer.valueOf(0));
                 moduleGroupJson.put("defaultPage", "");
             }
         	moduleGroupJson.put("group", moduleGroupVo.getGroup());
