@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.file;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -9,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
@@ -59,12 +62,12 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "附件uuid", isRequired = true) })
+	@Input({ @Param(name = "id", type = ApiParamType.LONG, desc = "附件id", isRequired = true) })
 	@Description(desc = "附件下载接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String uuid = paramObj.getString("uuid");
-		FileVo fileVo = fileMapper.getFileByUuid(uuid);
+		Long id = paramObj.getLong("id");
+		FileVo fileVo = fileMapper.getFileById(id);
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		if (StringUtils.isBlank(tenantUuid)) {
 			throw new NoTenantException();
@@ -74,29 +77,39 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 			if (fileTypeHandler != null) {
 				if (fileTypeHandler.valid(UserContext.get().getUserUuid(), paramObj)) {
 					ServletOutputStream os = null;
-					FSDataInputStream in = fileSystem.open(new Path("/" + tenantUuid + "/upload/" + fileVo.getType() + "/" + fileVo.getUuid()));
-					String fileNameEncode = "";
-					Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-					if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-						fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
-					} else {
-						fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-					}
-
-					if (StringUtils.isBlank(fileVo.getContentType())) {
-						response.setContentType("aplication/x-msdownload");
-					} else {
-						response.setContentType(fileVo.getContentType());
-					}
-					response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-					os = response.getOutputStream();
-					IOUtils.copyLarge(in, os);
-					if (os != null) {
-						os.flush();
-						os.close();
+					InputStream in = null;
+					if (fileVo.getPath().startsWith("hdfs:")) {
+						in = fileSystem.open(new Path(fileVo.getPath().substring(5)));
+					} else if (fileVo.getPath().startsWith("file:")) {
+						File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
+						if (file.exists() && file.isFile()) {
+							in = new FileInputStream(file);
+						}
 					}
 					if (in != null) {
-						in.close();
+						String fileNameEncode = "";
+						Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+						if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+							fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
+						} else {
+							fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+						}
+
+						if (StringUtils.isBlank(fileVo.getContentType())) {
+							response.setContentType("aplication/x-msdownload");
+						} else {
+							response.setContentType(fileVo.getContentType());
+						}
+						response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+						os = response.getOutputStream();
+						IOUtils.copyLarge(in, os);
+						if (os != null) {
+							os.flush();
+							os.close();
+						}
+						if (in != null) {
+							in.close();
+						}
 					}
 				} else {
 					throw new FileAccessDeniedException(fileVo.getName());
@@ -105,7 +118,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 				throw new FileTypeHandlerNotFoundException(fileVo.getType());
 			}
 		} else {
-			throw new FileNotFoundException(uuid);
+			throw new FileNotFoundException(id);
 		}
 		return null;
 	}

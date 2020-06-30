@@ -1,5 +1,11 @@
 package codedriver.module.tenant.api.file;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.ConnectException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,6 +23,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
@@ -81,16 +88,34 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 				fileVo.setType("image");
 				fileVo.setContentType(multipartFile.getContentType());
 
-				String finalPath = "/" + tenantUuid + "/images/" + fileVo.getUuid();
-				FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
-				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-				fos.flush();
-				fos.close();
+				try {
+					fileSystem.getStatus();
+					String finalPath = "/" + tenantUuid + "/images/" + fileVo.getId();
+					FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
+					IOUtils.copyLarge(multipartFile.getInputStream(), fos);
+					fos.flush();
+					fos.close();
+					fileVo.setPath("hdfs:" + finalPath);
+				} catch (ConnectException ex) {
+					// 如果hadoop不存在，改为本地模式
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
+					String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
+					String finalPath = Config.DATA_HOME() + filePath;
+					File file = new File(finalPath);
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdirs();
+					}
+					FileOutputStream fos = new FileOutputStream(file);
+					IOUtils.copyLarge(multipartFile.getInputStream(), fos);
+					fos.flush();
+					fos.close();
+					fileVo.setPath("file:" + filePath);
+				}
 
 				fileMapper.insertFile(fileVo);
 
 				returnObj.put("uploaded", true);
-				returnObj.put("url", "api/binary/image/download?uuid=" + fileVo.getUuid());
+				returnObj.put("url", "api/binary/image/download?id=" + fileVo.getId());
 			} else {
 				returnObj.put("uploaded", false);
 				returnObj.put("error", "请选择图片文件");

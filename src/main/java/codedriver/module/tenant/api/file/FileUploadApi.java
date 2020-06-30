@@ -1,5 +1,11 @@
 package codedriver.module.tenant.api.file;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.ConnectException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FsStatus;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +27,9 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
@@ -150,17 +159,38 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setUserUuid(userUuid);
 			fileVo.setType(type);
 			fileVo.setContentType(multipartFile.getContentType());
-
-			String finalPath = "/" + tenantUuid + "/upload/" + type + "/" + fileVo.getUuid();
-			FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
-			IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-			fos.flush();
-			fos.close();
+			try {
+				FsStatus fsStatus = fileSystem.getStatus();
+				String finalPath = "/" + tenantUuid + "/upload/" + type + "/" + fileVo.getId();
+				FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
+				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
+				fos.flush();
+				fos.close();
+				fileVo.setPath("hdfs:" + finalPath);
+			} catch (ConnectException ex) {
+				// 如果hadoop不存在，改为本地模式
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
+				String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
+				String finalPath = Config.DATA_HOME() + filePath;
+				File file = new File(finalPath);
+				if (!file.getParentFile().exists()) {
+					file.getParentFile().mkdirs();
+				}
+				FileOutputStream fos = new FileOutputStream(file);
+				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
+				fos.flush();
+				fos.close();
+				fileVo.setPath("file:" + filePath);
+			}
 
 			fileMapper.insertFile(fileVo);
 			fileTypeHandler.afterUpload(fileVo, paramObj);
-			return fileMapper.getFileByUuid(fileVo.getUuid());
+			return fileMapper.getFileById(fileVo.getId());
 		}
 		return null;
+	}
+
+	public static void main(String[] arg) {
+		System.out.println(RC4Util.decrypt(Config.RC4KEY, "1375737719d3"));
 	}
 }
