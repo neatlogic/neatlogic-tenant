@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.auth;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -58,10 +57,9 @@ public class AuthUserSaveApi extends ApiComponentBase {
         	String authGroup = jsonObj.getString("authGroup");
         	String auth = jsonObj.getString("auth");
             userMapper.deleteUserAuth(new UserAuthVo(null, auth));
+            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
+			userUuidList.retainAll(existUserUuidList);
         	for(String userUuid : userUuidList) {
-        		if(userMapper.checkUserIsExists(userUuid) == 0) {
-        			throw new UserNotFoundException(userUuid);
-        		}
         		UserAuthVo userAuthVo = new UserAuthVo();
                 userAuthVo.setAuthGroup(authGroup);
                 userAuthVo.setAuth(auth);
