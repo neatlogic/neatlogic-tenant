@@ -49,20 +49,25 @@ public class TeamDeleteApi extends ApiComponentBase {
 	@Description(desc = "删除分组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+//		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
 		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");
 		TeamVo team = teamMapper.getTeamByUuid(uuid);
 		if(team == null) {
 			throw new TeamNotFoundException(uuid);
 		}
-		teamMapper.deleteTeamByLeftRightCode(team.getLft(), team.getRht());
+//		teamMapper.deleteTeamByLeftRightCode(team.getLft(), team.getRht());
+		teamService.recursiveDeleteTeam(team.getUuid());
+		//删除完毕后立即重建左右编码
+		if(!teamService.checkLeftRightCodeIsExists()) {
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
+		}
 		//计算被删除块右边的节点移动步长
- 		int step = team.getRht() - team.getLft() + 1;
-		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
-		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
+// 		int step = team.getRht() - team.getLft() + 1;
+//		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
+//		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
 		return null;
 	}
 	

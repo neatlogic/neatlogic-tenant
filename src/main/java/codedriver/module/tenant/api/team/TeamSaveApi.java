@@ -88,15 +88,21 @@ public class TeamSaveApi extends ApiComponentBase{
 			teamMapper.updateTeamNameByUuid(teamVo);
 			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
-			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+//			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
 			if(!teamService.checkLeftRightCodeIsExists()) {
-				teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+				teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
 			}
 			String parentUuid = jsonObj.getString("parentUuid");
 			if (StringUtils.isBlank(parentUuid)){
 				parentUuid = TeamVo.ROOT_UUID;
 			}
-			TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			TeamVo parentTeam;
+			if("0".equals(parentUuid)){
+				parentTeam = teamService.buildRootTeam();
+			}else{
+				parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			}
+
 			if(parentTeam == null) {
 				throw new TeamNotFoundException(parentUuid);
 			}

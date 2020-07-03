@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.team;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.module.tenant.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,9 @@ public class TeamGetApi extends ApiComponentBase {
 
 	@Autowired
 	private TeamMapper teamMapper;
+
+	@Autowired
+	private TeamService teamService;
 
 	@Override
 	public String getToken() {
@@ -70,7 +74,11 @@ public class TeamGetApi extends ApiComponentBase {
 		List<String> pathNameList = new ArrayList<>();
 		int isEdit = jsonObj.getIntValue("isEdit");
 		if(isEdit == 1) {
-			parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			if("0".equals(teamVo.getParentUuid())){
+				parentTeam = teamService.buildRootTeam();
+			}else{
+				parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+			}
 		}else {
 			parentTeam = teamVo;
 		}
