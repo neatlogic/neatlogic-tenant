@@ -5,26 +5,28 @@ import java.io.FileInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Transactional
+@Component
 public class TestApi extends ApiComponentBase {
 
 	@Autowired
-	private FileSystem fileSystem;
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
-		return "test";
+		return "/haha/test";
 	}
 
 	@Override
@@ -40,17 +42,11 @@ public class TestApi extends ApiComponentBase {
 	@Description(desc = "测试输出log接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		System.out.println(fileSystem.mkdirs(new Path("/codedriver/")));
-		File file = new File("/Users/chenqiwei/Downloads/031001900111_88033198.jpg");
-		FileInputStream reader = new FileInputStream(file);
-		String fileName = file.getName();
-		// 上传时默认当前目录，后面自动拼接文件的目录
-		Path newPath = new Path("/codedriver22222/" + fileName);
-		// 打开一个输出流
-		FSDataOutputStream outputStream = fileSystem.create(newPath);
-		IOUtils.copy(reader, outputStream);
-		outputStream.close();
-		return "OK";
+		UserVo userVo = new UserVo();
+		userVo.setUuid("20dea39b97cf11ea94ff005056c00001");
+		userVo.setIsActive(1);
+		userMapper.updateUserActive(userVo);
+		return null;
 	}
 
 }
