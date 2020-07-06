@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.integration;
 
-import org.apache.commons.lang3.StringUtils;
+import java.io.StringWriter;
+
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -8,14 +9,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.integration.ParamFormatInvalidException;
-import codedriver.framework.exception.util.FreemarkerTransformException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.util.FreemarkerUtil;
+import codedriver.framework.util.JavascriptUtil;
 
 @Service
 @IsActived
@@ -56,15 +56,17 @@ public class IntegrationTransformTestApi extends ApiComponentBase {
 		if (object == null) {
 			throw new ParamFormatInvalidException();
 		}
-		String returnStr = "";
+		JSONObject returnObj = new JSONObject();
+		String returnStr = null;
 		try {
-			returnStr = FreemarkerUtil.transform(object, template);
-		} catch (FreemarkerTransformException e) {
-			returnStr = e.getMessage();
+			StringWriter sw = new StringWriter();
+			returnStr = JavascriptUtil.transform(object, template, sw);
+			returnObj.put("result", returnStr);
+			returnObj.put("output", sw.toString());
+		} catch (Exception e) {
+			returnObj.put("error", e.getMessage());
 		}
-		if (StringUtils.isBlank(returnStr)) {
-			returnStr = "没有任何内容";
-		}
-		return returnStr;
+
+		return returnObj;
 	}
 }
