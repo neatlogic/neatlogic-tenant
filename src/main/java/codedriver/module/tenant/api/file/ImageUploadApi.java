@@ -28,13 +28,11 @@ import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 
 @Service
-@IsActived
 public class ImageUploadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
