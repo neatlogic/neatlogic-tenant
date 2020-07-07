@@ -12,13 +12,11 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 
 @Service
-@IsActived
 public class IntegrationTestApi extends ApiComponentBase {
 
 	@Override

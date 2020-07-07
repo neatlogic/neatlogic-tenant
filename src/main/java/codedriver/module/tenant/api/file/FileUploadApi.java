@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.ConnectException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +37,6 @@ import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
@@ -48,7 +46,6 @@ import codedriver.module.tenant.exception.file.FileTooLargeException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
-@IsActived
 public class FileUploadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired

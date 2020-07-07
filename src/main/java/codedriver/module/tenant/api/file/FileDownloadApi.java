@@ -30,7 +30,6 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.tenant.exception.file.FileAccessDeniedException;
@@ -38,7 +37,6 @@ import codedriver.module.tenant.exception.file.FileNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
-@IsActived
 public class FileDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
