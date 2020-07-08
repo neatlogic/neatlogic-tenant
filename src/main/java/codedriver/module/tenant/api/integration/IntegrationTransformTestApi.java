@@ -11,14 +11,12 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.integration.ParamFormatInvalidException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.JavascriptUtil;
 
 @Service
-@IsActived
 public class IntegrationTransformTestApi extends ApiComponentBase {
 
 	@Override

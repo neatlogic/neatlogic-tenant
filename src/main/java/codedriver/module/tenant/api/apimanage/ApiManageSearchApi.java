@@ -3,7 +3,10 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ComponentNotFoundException;
-import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.core.IApiComponent;
@@ -22,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Service
-@IsActived
 public class ApiManageSearchApi extends ApiComponentBase {
 
 	@Autowired
@@ -215,6 +217,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			apiList.add(api);
 		}
 		resultObj.put("tbodyList", apiList);
+		
 		return resultObj;
 	}
 

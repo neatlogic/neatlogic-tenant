@@ -11,12 +11,10 @@ import codedriver.framework.integration.core.TestInvoker;
 import codedriver.framework.integration.dto.IntegrationInvokeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
-@IsActived
 @AuthAction(name = "INTEGRATION_EDIT")
 public class IntegrationInvokeApi extends ApiComponentBase {
 
