@@ -10,24 +10,22 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
+import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.exception.type.ParamIrregularException;
-import codedriver.framework.common.constvalue.Expression;
-import codedriver.framework.common.constvalue.FormHandlerType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.ExpressionVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
-@IsActived
 public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 	
 	@Autowired
