@@ -40,7 +40,7 @@ public class TeamServiceImpl implements TeamService {
 //			throw new TeamNotFoundException(TeamVo.ROOT_UUID);
 //		}
 		int count = 0;
-		count = teamMapper.getTeamCount();
+		count = teamMapper.getTeamCountOnLock();
 		TeamVo vo = teamMapper.getMaxRhtCode();
 		Integer maxRhtCode;
 		if(vo != null && vo.getRht() != null){
@@ -57,7 +57,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public TeamVo buildRootTeam() {
-		int count = teamMapper.getTeamCount();
+		int count = teamMapper.getTeamCountOnLock();
 		TeamVo rootTeam = new TeamVo();
 		rootTeam.setUuid("0");
 		rootTeam.setName("root");

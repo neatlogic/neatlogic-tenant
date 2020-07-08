@@ -1,7 +1,9 @@
 package codedriver.module.tenant.api.team;
 
+import codedriver.framework.transaction.util.TransactionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
@@ -34,6 +36,9 @@ public class TeamMoveApi extends ApiComponentBase {
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private TransactionUtil transactionUtil;
+
     @Override
     public String getToken() {
         return "team/tree/move";
@@ -58,7 +63,7 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+        TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
 		}
@@ -119,6 +124,7 @@ public class TeamMoveApi extends ApiComponentBase {
 		
 		//更新被移动块中节点的左右编码值
 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft() - team.getRht(), team.getRht() - team.getRht(), lft - team.getLft() + team.getRht());
+        transactionUtil.commitTx(transactionStatus);
         return null;
     }
 }
