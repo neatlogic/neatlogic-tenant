@@ -4,7 +4,6 @@ import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.IsActived;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
@@ -26,7 +25,6 @@ import java.util.*;
  */
 
 @Service
-@IsActived
 public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Autowired

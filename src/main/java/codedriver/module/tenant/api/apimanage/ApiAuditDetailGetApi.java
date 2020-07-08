@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@IsActived
 public class ApiAuditDetailGetApi extends ApiComponentBase {
 
 	@Autowired
