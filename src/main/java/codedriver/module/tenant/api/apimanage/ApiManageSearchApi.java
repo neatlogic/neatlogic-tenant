@@ -216,6 +216,24 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			}
 			apiList.add(api);
 		}
+
+		/**
+		 * 根据token获取每个API的访问次数，并保存在ApiVo的count字段中
+		 */
+		List<String> apiTokenList = new ArrayList<>();
+		apiList.stream().forEach(vo -> apiTokenList.add(vo.getToken()));
+		List<ApiVo> apiCountList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
+		if(!apiCountList.isEmpty()){
+			apiList.stream().forEach(api -> {
+				for(ApiVo vo : apiCountList){
+					if(api.getToken().equals(vo.getToken())){
+						api.setCount(vo.getCount());
+						break;
+					}
+				}
+			});
+		}
+
 		resultObj.put("tbodyList", apiList);
 		
 		return resultObj;
