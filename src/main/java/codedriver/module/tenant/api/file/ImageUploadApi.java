@@ -89,7 +89,7 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId(); 
 					fileVo.setPath("minio:" + finalPath);
-					minioManager.saveObject("codedriver", finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
+					minioManager.saveObject(Config.MINIO_BUCKET, finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
 				} catch (Exception ex) {
 					//如果minio异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
