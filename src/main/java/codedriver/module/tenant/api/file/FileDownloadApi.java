@@ -28,6 +28,7 @@ import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -44,6 +45,9 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileSystem fileSystem;
+	
+	@Autowired
+	private MinioManager minioManager;
 
 	@Override
 	public String getToken() {
@@ -83,6 +87,8 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 						if (file.exists() && file.isFile()) {
 							in = new FileInputStream(file);
 						}
+					}else if(fileVo.getPath().startsWith("minio:")) {
+						in = minioManager.getObject("codedriver",fileVo.getPath().replaceAll("minio:", ""));
 					}
 					if (in != null) {
 						String fileNameEncode = "";

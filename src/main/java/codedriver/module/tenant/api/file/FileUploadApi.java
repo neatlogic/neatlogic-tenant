@@ -12,10 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FsStatus;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +31,7 @@ import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -48,8 +45,11 @@ import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 @Service
 public class FileUploadApi extends BinaryStreamApiComponentBase {
 
+//	@Autowired
+//	private FileSystem fileSystem;
+	
 	@Autowired
-	private FileSystem fileSystem;
+	private MinioManager minioManager;
 
 	@Autowired
 	private FileMapper fileMapper;
@@ -157,13 +157,17 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setType(type);
 			fileVo.setContentType(multipartFile.getContentType());
 			try {
-				FsStatus fsStatus = fileSystem.getStatus();
-				String finalPath = "/" + tenantUuid + "/upload/" + type + "/" + fileVo.getId();
-				FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
-				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-				fos.flush();
-				fos.close();
-				fileVo.setPath("hdfs:" + finalPath);
+				/*//TODO 废弃Hadoop
+				 * FsStatus fsStatus = fileSystem.getStatus(); String finalPath = "/" +
+				 * tenantUuid + "/upload/" + type + "/" + fileVo.getId(); FSDataOutputStream fos
+				 * = fileSystem.create(new Path(finalPath));
+				 * IOUtils.copyLarge(multipartFile.getInputStream(), fos); fos.flush();
+				 * fos.close(); fileVo.setPath("hdfs:" + finalPath);
+				 */
+				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId(); 
+				fileVo.setPath("minio:" + finalPath);
+				minioManager.saveObject("codedriver", finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
 			} catch (ConnectException ex) {
 				// 如果hadoop不存在，改为本地模式
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
