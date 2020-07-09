@@ -2,7 +2,6 @@ package codedriver.module.tenant.api.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -11,9 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +25,7 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -34,9 +33,9 @@ import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 
 @Service
 public class ImageUploadApi extends BinaryStreamApiComponentBase {
-
+	static Logger logger = LoggerFactory.getLogger(ImageUploadApi.class);
 	@Autowired
-	private FileSystem fileSystem;
+	private MinioManager minioManager;
 
 	@Autowired
 	private FileMapper fileMapper;
@@ -87,15 +86,13 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 				fileVo.setContentType(multipartFile.getContentType());
 
 				try {
-					fileSystem.getStatus();
-					String finalPath = "/" + tenantUuid + "/images/" + fileVo.getId();
-					FSDataOutputStream fos = fileSystem.create(new Path(finalPath));
-					IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-					fos.flush();
-					fos.close();
-					fileVo.setPath("hdfs:" + finalPath);
-				} catch (ConnectException ex) {
-					// 如果hadoop不存在，改为本地模式
+					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId(); 
+					fileVo.setPath("minio:" + finalPath);
+					minioManager.saveObject("codedriver", finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
+				} catch (Exception ex) {
+					//如果minio异常，则上传到本地
+					logger.error(ex.getMessage(),ex);
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
 					String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
 					String finalPath = Config.DATA_HOME() + filePath;

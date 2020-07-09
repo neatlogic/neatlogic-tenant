@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,9 +40,6 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;
-
-	@Autowired
-	private FileSystem fileSystem;
 	
 	@Autowired
 	private MinioManager minioManager;
@@ -80,9 +75,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 				if (fileTypeHandler.valid(UserContext.get().getUserUuid(), paramObj)) {
 					ServletOutputStream os = null;
 					InputStream in = null;
-					if (fileVo.getPath().startsWith("hdfs:")) {
-						in = fileSystem.open(new Path(fileVo.getPath().substring(5)));
-					} else if (fileVo.getPath().startsWith("file:")) {
+					if (fileVo.getPath().startsWith("file:")) {
 						File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
 						if (file.exists() && file.isFile()) {
 							in = new FileInputStream(file);

@@ -2,7 +2,6 @@ package codedriver.module.tenant.api.file;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +45,7 @@ import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
 public class FileUploadApi extends BinaryStreamApiComponentBase {
-
+	static Logger logger = LoggerFactory.getLogger(FileUploadApi.class);
 //	@Autowired
 //	private FileSystem fileSystem;
 	
@@ -168,8 +169,9 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId(); 
 				fileVo.setPath("minio:" + finalPath);
 				minioManager.saveObject("codedriver", finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
-			} catch (ConnectException ex) {
-				// 如果hadoop不存在，改为本地模式
+			} catch (Exception ex) {
+				//如果minio异常，则上传到本地
+				logger.error(ex.getMessage(),ex);
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
 				String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
 				String finalPath = Config.DATA_HOME() + filePath;
