@@ -72,7 +72,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			moduleJson.put("moduleId",vo.getId());
 			moduleJson.put("moduleName",vo.getName());
 			//多个token的第一个单词相同，用Set可以去重
-			Set<Func> funcSet = new HashSet<>(16);
+			Set<String> funcSet = new HashSet<>(16);
 			for(ApiVo apiVo : apiList){
 				String moduleId = apiVo.getModuleId();
 				if(vo.getId().equals(moduleId)){
@@ -84,9 +84,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 					}else{
 						funcId = token.substring(0,token.indexOf("/"));
 					}
-					Func func = new Func();
-					func.setFuncId(funcId);
-					funcSet.add(func);
+					funcSet.add(funcId);
 				}
 			}
 			moduleJson.put("funcList",funcSet);
@@ -94,33 +92,4 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		}
 		return menuJsonArray;
 	}
-
-	class Func{
-		private String funcId;
-
-		public String getFuncId() {
-			return funcId;
-		}
-
-		public void setFuncId(String funcId) {
-			this.funcId = funcId;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			Func func = (Func) o;
-			return Objects.equals(funcId, func.funcId);
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((funcId == null) ? 0 : funcId.hashCode());
-			return result;
-		}
-	}
-
 }
