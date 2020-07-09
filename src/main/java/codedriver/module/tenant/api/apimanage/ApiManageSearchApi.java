@@ -198,36 +198,36 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			}
 			apiMap.put(api.getToken(), api);
 		}
-		Map<String, Integer> visitTimesMap = new HashMap<>();
-		if(!tokenList.isEmpty()) {
-			List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);		
-			for(ApiVo api : visitTimesList) {
-				visitTimesMap.put(api.getToken(), api.getVisitTimes());
-			}
-		}
-		
+//		Map<String, Integer> visitTimesMap = new HashMap<>();
+//		if(!tokenList.isEmpty()) {
+//			List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);
+//			for(ApiVo api : visitTimesList) {
+//				visitTimesMap.put(api.getToken(), api.getVisitTimes());
+//			}
+//		}
+
 		//从map中按顺序取出api数据
 		List<ApiVo> apiList = new ArrayList<>();
 		for(String token : tokenList) {
 			ApiVo api = apiMap.get(token);
-			Integer visitTimes = visitTimesMap.get(token);
-			if(visitTimes != null) {
-				api.setVisitTimes(visitTimes);
-			}
+//			Integer visitTimes = visitTimesMap.get(token);
+//			if(visitTimes != null) {
+//				api.setVisitTimes(visitTimes);
+//			}
 			apiList.add(api);
 		}
 
 		/**
-		 * 根据token获取每个API的访问次数，并保存在ApiVo的count字段中
+		 * 根据token获取每个API的访问次数，并保存在ApiVo的visitTimes字段中
 		 */
 		List<String> apiTokenList = new ArrayList<>();
 		apiList.stream().forEach(vo -> apiTokenList.add(vo.getToken()));
-		List<ApiVo> apiCountList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
-		if(!apiCountList.isEmpty()){
+		List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
+		if(!apiVisitTimesList.isEmpty()){
 			apiList.stream().forEach(api -> {
-				for(ApiVo vo : apiCountList){
+				for(ApiVo vo : apiVisitTimesList){
 					if(api.getToken().equals(vo.getToken())){
-						api.setCount(vo.getCount());
+						api.setVisitTimes(vo.getVisitTimes());
 						break;
 					}
 				}
