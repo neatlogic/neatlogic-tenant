@@ -119,6 +119,9 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		for(ApiVo api : dbAllApiList) {
 			String voHandler = api.getHandler().toString();
 			ApiHandlerVo apiHandlerVo = apiHandlerMap.get(voHandler);
+			if(apiHandlerVo == null) {
+				continue;
+			}
 			//根据handler字段从ApiComponentFactory的apiHandlerMap中取出ApiHandlerVo的moduleId
 			api.setModuleId(apiHandlerVo.getModuleId());
 			IApiComponent iApiComponent = componentMap.get(voHandler);
