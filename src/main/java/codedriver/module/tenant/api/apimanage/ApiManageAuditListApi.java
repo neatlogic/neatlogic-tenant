@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -57,10 +58,11 @@ public class ApiManageAuditListApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
-		
-		ApiVo api = ApiMapper.getApiByToken(apiAuditVo.getToken());
-		if(api == null) {
-			throw new ApiNotFoundException("token为'" + apiAuditVo.getToken() + "'的接口不存在");
+		if(ApiComponentFactory.getApiByToken(apiAuditVo.getToken()) == null){
+			ApiVo api = ApiMapper.getApiByToken(apiAuditVo.getToken());
+			if(api == null) {
+				throw new ApiNotFoundException("token为'" + apiAuditVo.getToken() + "'的接口不存在");
+			}
 		}
 		
 		int rowNum = ApiMapper.getApiAuditCount(apiAuditVo);

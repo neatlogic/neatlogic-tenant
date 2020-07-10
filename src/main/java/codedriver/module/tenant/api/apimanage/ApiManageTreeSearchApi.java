@@ -56,7 +56,8 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		//获取系统中所有的模块
 		List<ModuleVo> moduleList = ModuleUtil.getAllModuleList();
 		//获取所有的内存API
-		Map<String, ApiVo> apiMap = ApiComponentFactory.getApiMap();
+		HashMap<String,ApiVo> apiMap = new HashMap<String,ApiVo>();
+		apiMap.putAll(ApiComponentFactory.getApiMap());
 		//获取数据库中所有的API
 		List<ApiVo> dbApiList = apiMapper.getAllApi();
 		//内存API与数据库API去重：如果token相同，数据库api数据覆盖内存api数据
