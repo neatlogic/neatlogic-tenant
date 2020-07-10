@@ -1,18 +1,5 @@
 package codedriver.module.tenant.api.apimanage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ComponentNotFoundException;
@@ -22,9 +9,21 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 @Service
 public class ApiManageSearchApi extends ApiComponentBase {
 
@@ -84,10 +83,22 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			if(apiVo.getIsActive() != null && !apiVo.getIsActive().equals(api.getIsActive())) {
 				continue;
 			}
-			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getHandler())) {
+//			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getHandler())) {
+//				continue;
+//			}
+			if(StringUtils.isNotBlank(handler) && !handler.equals(api.getHandler())) {
 				continue;
 			}
-			if(StringUtils.isNotBlank(handler) && !handler.equals(api.getHandler())) {
+			//根据接口类型筛选接口（用于接口管理页的系统接口/自定义接口的相互切换）
+			if(StringUtils.isNotBlank(apiVo.getApiType()) && !apiVo.getApiType().equals(api.getApiType())) {
+				continue;
+			}
+			//根据模块筛选接口（用于接口管理页的目录树筛选）
+			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getModuleId())) {
+				continue;
+			}
+			//根据功能筛选接口（用于接口管理页的目录树筛选）
+			if(StringUtils.isNotBlank(apiVo.getFuncId()) && !api.getToken().contains(apiVo.getFuncId())) {
 				continue;
 			}
 			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
@@ -99,9 +110,47 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			tokenList.add(api.getToken());
 			ramTokenList.add(api.getToken());
 		}
-		
+
+		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
+		List<ApiVo> dbApiList = new ArrayList<>();
+		List<String> dbTokenList = new ArrayList<>();
+		Map<String, ApiHandlerVo> apiHandlerMap = ApiComponentFactory.getApiHandlerMap();
+		Map<String, IApiComponent> componentMap = ApiComponentFactory.getComponentMap();
+		for(ApiVo api : dbAllApiList) {
+			String voHandler = api.getHandler().toString();
+			ApiHandlerVo apiHandlerVo = apiHandlerMap.get(voHandler);
+			//根据handler字段从ApiComponentFactory的apiHandlerMap中取出ApiHandlerVo的moduleId
+			api.setModuleId(apiHandlerVo.getModuleId());
+			IApiComponent iApiComponent = componentMap.get(voHandler);
+			//根据handler字段从ApiComponentFactory的componentMap里匹配，如果匹配上，那就是系统接口
+			if (iApiComponent != null) {
+				api.setApiType(ApiVo.ApiType.SYSTEM.getValue());
+			} else {
+				api.setApiType(ApiVo.ApiType.CUSTOM.getValue());
+			}
+
+			//根据接口类型筛选接口（用于接口管理页的系统接口/自定义接口的相互切换）
+			if (StringUtils.isNotBlank(apiVo.getApiType()) && !apiVo.getApiType().equals(api.getApiType())) {
+				continue;
+			}
+			//根据模块筛选接口（用于接口管理页的目录树筛选）
+			if (StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getModuleId())) {
+				continue;
+			}
+			//根据功能筛选接口（用于接口管理页的目录树筛选）
+			if (StringUtils.isNotBlank(apiVo.getFuncId()) && !api.getToken().contains(apiVo.getFuncId())) {
+				continue;
+			}
+			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
+				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {
+					continue;
+				}
+			}
+			dbTokenList.add(api.getToken());
+			dbApiList.add(api);
+		}
 		//从数据库中取出符合搜索条件的token数据
-		List<String> dbTokenList = ApiMapper.getApiTokenList(apiVo);
+//		List<String> dbTokenList = ApiMapper.getApiTokenList(apiVo);
 		//将内存和数据库取出的token合并去重
 		for(String token : dbTokenList) {
 			if(tokenList.contains(token)) {
@@ -143,34 +192,48 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				apiMap.put(api.getToken(), api);
 			}
 		}		
-		if(!dbTokenList.isEmpty()) {
-			//从数据库中取出当前页api数据，保存在map中，如果token相同，数据库api数据覆盖内存api数据
-			List<ApiVo> dbApiList = ApiMapper.getApiListByTokenList(dbTokenList);
-			for(ApiVo api : dbApiList) {
-				if(apiMap.containsKey(api.getToken())) {
-					api.setIsDeletable(0);
-				}
-				apiMap.put(api.getToken(), api);
+		for(ApiVo api : dbApiList) {
+			if(apiMap.containsKey(api.getToken())) {
+				api.setIsDeletable(0);
 			}
+			apiMap.put(api.getToken(), api);
 		}
-		Map<String, Integer> visitTimesMap = new HashMap<>();
-		if(!tokenList.isEmpty()) {
-			List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);		
-			for(ApiVo api : visitTimesList) {
-				visitTimesMap.put(api.getToken(), api.getVisitTimes());
-			}
-		}
-		
+//		Map<String, Integer> visitTimesMap = new HashMap<>();
+//		if(!tokenList.isEmpty()) {
+//			List<ApiVo> visitTimesList = ApiMapper.getApiVisitTimesListByTokenList(tokenList);
+//			for(ApiVo api : visitTimesList) {
+//				visitTimesMap.put(api.getToken(), api.getVisitTimes());
+//			}
+//		}
+
 		//从map中按顺序取出api数据
 		List<ApiVo> apiList = new ArrayList<>();
 		for(String token : tokenList) {
 			ApiVo api = apiMap.get(token);
-			Integer visitTimes = visitTimesMap.get(token);
-			if(visitTimes != null) {
-				api.setVisitTimes(visitTimes);
-			}
+//			Integer visitTimes = visitTimesMap.get(token);
+//			if(visitTimes != null) {
+//				api.setVisitTimes(visitTimes);
+//			}
 			apiList.add(api);
-		}		
+		}
+
+		/**
+		 * 根据token获取每个API的访问次数，并保存在ApiVo的visitTimes字段中
+		 */
+		List<String> apiTokenList = new ArrayList<>();
+		apiList.stream().forEach(vo -> apiTokenList.add(vo.getToken()));
+		List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
+		if(!apiVisitTimesList.isEmpty()){
+			apiList.stream().forEach(api -> {
+				for(ApiVo vo : apiVisitTimesList){
+					if(api.getToken().equals(vo.getToken())){
+						api.setVisitTimes(vo.getVisitTimes());
+						break;
+					}
+				}
+			});
+		}
+
 		resultObj.put("tbodyList", apiList);
 		
 		return resultObj;
