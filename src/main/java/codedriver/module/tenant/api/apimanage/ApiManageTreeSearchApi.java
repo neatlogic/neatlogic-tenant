@@ -55,6 +55,17 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		JSONArray menuJsonArray = new JSONArray();
 		//获取系统中所有的模块
 		List<ModuleVo> moduleList = ModuleUtil.getAllModuleList();
+		Map<String,Set<String>> moduleMap = new HashMap<>();
+		moduleList.stream().forEach(vo -> moduleMap.put(vo.getGroup(),null));
+		for(Map.Entry<String,Set<String>> entry : moduleMap.entrySet()){
+			Set<String> moduleGroupSet = new HashSet<>();
+			for(ModuleVo vo :moduleList){
+				if(vo.getGroup().equals(entry.getKey())){
+					moduleGroupSet.add(vo.getId());
+				}
+			}
+			moduleMap.put(entry.getKey(),moduleGroupSet);
+		}
 		//获取所有的内存API
 		HashMap<String,ApiVo> apiMap = new HashMap<String,ApiVo>();
 		apiMap.putAll(ApiComponentFactory.getApiMap());
@@ -68,15 +79,16 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			apiMap.put(api.getToken(), api);
 		}
 		Collection<ApiVo> apiList = apiMap.values();
-		for(ModuleVo vo : moduleList){
+		for(Map.Entry<String,Set<String>> entry : moduleMap.entrySet()){
 			JSONObject moduleJson = new JSONObject();
-			moduleJson.put("moduleId",vo.getId());
-			moduleJson.put("moduleName",vo.getName());
+			moduleJson.put("moduleId",entry.getKey());
+//			moduleJson.put("moduleName",vo.getName());
 			//多个token的第一个单词相同，用Set可以去重
 			Set<String> funcSet = new HashSet<>(16);
 			for(ApiVo apiVo : apiList){
 				String moduleId = apiVo.getModuleId();
-				if(vo.getId().equals(moduleId)){
+				entry.getValue();
+				if(entry.getValue().contains(moduleId)){
 					String token = apiVo.getToken();
 					String funcId;
 					//有些API的token没有“/”，比如登出接口
