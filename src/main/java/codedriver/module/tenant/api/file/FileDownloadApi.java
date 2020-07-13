@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +26,7 @@ import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
@@ -41,9 +40,9 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;
-
+	
 	@Autowired
-	private FileSystem fileSystem;
+	private MinioManager minioManager;
 
 	@Override
 	public String getToken() {
@@ -76,13 +75,13 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 				if (fileTypeHandler.valid(UserContext.get().getUserUuid(), paramObj)) {
 					ServletOutputStream os = null;
 					InputStream in = null;
-					if (fileVo.getPath().startsWith("hdfs:")) {
-						in = fileSystem.open(new Path(fileVo.getPath().substring(5)));
-					} else if (fileVo.getPath().startsWith("file:")) {
+					if (fileVo.getPath().startsWith("file:")) {
 						File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
 						if (file.exists() && file.isFile()) {
 							in = new FileInputStream(file);
 						}
+					}else if(fileVo.getPath().startsWith("minio:")) {
+						in = minioManager.getObject(Config.MINIO_BUCKET,fileVo.getPath().replaceAll("minio:", ""));
 					}
 					if (in != null) {
 						String fileNameEncode = "";
