@@ -55,8 +55,11 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		JSONArray menuJsonArray = new JSONArray();
 		//获取系统中所有的模块
 		List<ModuleVo> moduleList = ModuleUtil.getAllModuleList();
+		Set<String> moduleGroupSet = new HashSet<>();
+		//获取所有的moduleGroup
+		moduleList.stream().forEach(vo -> moduleGroupSet.add(vo.getGroup()));
 		//获取所有的内存API
-		HashMap<String,ApiVo> apiMap = new HashMap<String,ApiVo>();
+		HashMap<String,ApiVo> apiMap = new HashMap<>();
 		apiMap.putAll(ApiComponentFactory.getApiMap());
 		//获取数据库中所有的API
 		List<ApiVo> dbApiList = apiMapper.getAllApi();
@@ -68,15 +71,15 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			apiMap.put(api.getToken(), api);
 		}
 		Collection<ApiVo> apiList = apiMap.values();
-		for(ModuleVo vo : moduleList){
+		for(String module : moduleGroupSet){
 			JSONObject moduleJson = new JSONObject();
-			moduleJson.put("moduleId",vo.getId());
-			moduleJson.put("moduleName",vo.getName());
+			moduleJson.put("moduleId",module);
+//			moduleJson.put("moduleName",vo.getName());
 			//多个token的第一个单词相同，用Set可以去重
 			Set<String> funcSet = new HashSet<>(16);
 			for(ApiVo apiVo : apiList){
-				String moduleId = apiVo.getModuleId();
-				if(vo.getId().equals(moduleId)){
+				String moduleGroup = apiVo.getModuleGroup();
+				if(module.equals(moduleGroup)){
 					String token = apiVo.getToken();
 					String funcId;
 					//有些API的token没有“/”，比如登出接口

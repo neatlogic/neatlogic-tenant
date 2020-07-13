@@ -65,7 +65,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		if(apiHandlerVo == null) {
 			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
 		}
-			
+
 		ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
 		if(ramApiVo == null) {
 			ApiMapper.replaceApi(apiVo);

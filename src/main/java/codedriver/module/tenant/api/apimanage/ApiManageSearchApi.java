@@ -9,7 +9,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
-import codedriver.framework.restful.core.IApiComponent;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -24,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Service
 public class ApiManageSearchApi extends ApiComponentBase {
 
@@ -94,7 +94,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				continue;
 			}
 			//根据模块筛选接口（用于接口管理页的目录树筛选）
-			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getModuleId())) {
+			if(StringUtils.isNotBlank(apiVo.getModuleGroup()) && !apiVo.getModuleGroup().equals(api.getModuleGroup())) {
 				continue;
 			}
 			//根据功能筛选接口（用于接口管理页的目录树筛选）
@@ -114,21 +114,12 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
 		List<ApiVo> dbApiList = new ArrayList<>();
 		List<String> dbTokenList = new ArrayList<>();
-		Map<String, ApiHandlerVo> apiHandlerMap = ApiComponentFactory.getApiHandlerMap();
-		Map<String, IApiComponent> componentMap = ApiComponentFactory.getComponentMap();
+		Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
 		for(ApiVo api : dbAllApiList) {
-			String voHandler = api.getHandler().toString();
-			ApiHandlerVo apiHandlerVo = apiHandlerMap.get(voHandler);
-			if(apiHandlerVo == null) {
-				continue;
-			}
-			//根据handler字段从ApiComponentFactory的apiHandlerMap中取出ApiHandlerVo的moduleId
-			api.setModuleId(apiHandlerVo.getModuleId());
-			IApiComponent iApiComponent = componentMap.get(voHandler);
-			//根据handler字段从ApiComponentFactory的componentMap里匹配，如果匹配上，那就是系统接口
-			if (iApiComponent != null) {
+
+			if(ramApiMap.get(api.getToken()) != null){
 				api.setApiType(ApiVo.ApiType.SYSTEM.getValue());
-			} else {
+			}else{
 				api.setApiType(ApiVo.ApiType.CUSTOM.getValue());
 			}
 
@@ -137,7 +128,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				continue;
 			}
 			//根据模块筛选接口（用于接口管理页的目录树筛选）
-			if (StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getModuleId())) {
+			if(StringUtils.isNotBlank(apiVo.getModuleGroup()) && !apiVo.getModuleGroup().equals(api.getModuleGroup())) {
 				continue;
 			}
 			//根据功能筛选接口（用于接口管理页的目录树筛选）
@@ -225,16 +216,18 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		 */
 		List<String> apiTokenList = new ArrayList<>();
 		apiList.stream().forEach(vo -> apiTokenList.add(vo.getToken()));
-		List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
-		if(!apiVisitTimesList.isEmpty()){
-			apiList.stream().forEach(api -> {
-				for(ApiVo vo : apiVisitTimesList){
-					if(api.getToken().equals(vo.getToken())){
-						api.setVisitTimes(vo.getVisitTimes());
-						break;
+		if(!apiTokenList.isEmpty()){
+			List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
+			if(!apiVisitTimesList.isEmpty()){
+				apiList.stream().forEach(api -> {
+					for(ApiVo vo : apiVisitTimesList){
+						if(api.getToken().equals(vo.getToken())){
+							api.setVisitTimes(vo.getVisitTimes());
+							break;
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 
 		resultObj.put("tbodyList", apiList);
