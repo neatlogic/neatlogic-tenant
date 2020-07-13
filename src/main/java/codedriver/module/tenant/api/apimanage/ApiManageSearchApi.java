@@ -114,7 +114,15 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
 		List<ApiVo> dbApiList = new ArrayList<>();
 		List<String> dbTokenList = new ArrayList<>();
+		Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
 		for(ApiVo api : dbAllApiList) {
+
+			if(ramApiMap.get(api.getToken()) != null){
+				api.setApiType(ApiVo.ApiType.SYSTEM.getValue());
+			}else{
+				api.setApiType(ApiVo.ApiType.CUSTOM.getValue());
+			}
+
 			//根据接口类型筛选接口（用于接口管理页的系统接口/自定义接口的相互切换）
 			if (StringUtils.isNotBlank(apiVo.getApiType()) && !apiVo.getApiType().equals(api.getApiType())) {
 				continue;
