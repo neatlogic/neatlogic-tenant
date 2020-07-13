@@ -71,7 +71,7 @@ public class ImageDownloadApi extends BinaryStreamApiComponentBase {
 					in = new FileInputStream(file);
 				}
 			} else if(fileVo.getPath().startsWith("minio:")) {
-				in = minioManager.getObject(Config.MINIO_BUCKET,fileVo.getPath().replaceAll("minio:", ""));
+				in = minioManager.getObject(Config.MINIO_BUCKET(),fileVo.getPath().replaceAll("minio:", ""));
 			}
 			if (in != null) {
 				response.setContentType(fileVo.getContentType());
