@@ -11,7 +11,6 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,13 +63,6 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		apiMap.putAll(ApiComponentFactory.getApiMap());
 		//获取数据库中所有的API
 		List<ApiVo> dbApiList = apiMapper.getAllApi();
-		//为每一个ApiVo的moduleId和moduleGroup赋值
-		for(ApiVo api : dbApiList) {
-			if(StringUtils.isBlank(api.getModuleId())){
-				api.getModuleId(api.getHandler());
-			}
-			api.getModuleGroup(api.getModuleId());
-		}
 		//内存API与数据库API去重：如果token相同，数据库api数据覆盖内存api数据
 		for(ApiVo api : dbApiList){
 			if(apiMap.containsKey(api.getToken())) {

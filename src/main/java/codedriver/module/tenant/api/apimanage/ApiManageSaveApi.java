@@ -66,9 +66,6 @@ public class ApiManageSaveApi extends ApiComponentBase {
 			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
 		}
 
-		//设置moduleId以保存到数据库
-		apiVo.getModuleId(apiVo.getHandler());
-			
 		ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
 		if(ramApiVo == null) {
 			ApiMapper.replaceApi(apiVo);
