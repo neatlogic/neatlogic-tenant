@@ -83,7 +83,7 @@ public class TeamSearchApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
 		JSONObject returnObj = new JSONObject();

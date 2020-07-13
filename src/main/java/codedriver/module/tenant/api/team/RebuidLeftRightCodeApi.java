@@ -39,7 +39,7 @@ public class RebuidLeftRightCodeApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
-		teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
+		teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		return null;
 	}
 

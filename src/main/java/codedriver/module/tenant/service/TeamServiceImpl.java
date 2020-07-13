@@ -1,5 +1,6 @@
 package codedriver.module.tenant.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,7 +18,16 @@ public class TeamServiceImpl implements TeamService {
 	private TeamMapper teamMapper;
 	
 	public Integer rebuildLeftRightCode(String parentUuid, Integer parentLft) {
-		List<TeamVo> teamList = teamMapper.getTeamByParentUuid(parentUuid);
+		List<TeamVo> teamList;
+		if(TeamVo.ROOT_PARENTUUID.equals(parentUuid)){
+			teamList = new ArrayList<>();
+			TeamVo vo = buildRootTeam();
+			List<TeamVo> teamVoListForRoot = teamMapper.getTeamByParentUuid("0");
+			vo.setChildCount(teamVoListForRoot.isEmpty() ? 0 : teamVoListForRoot.size());
+			teamList.add(vo);
+		}else{
+			teamList = teamMapper.getTeamByParentUuid(parentUuid);
+		}
 		for(TeamVo team : teamList) {
 			if(team.getChildCount() == 0) {
 				teamMapper.updateTeamLeftRightCode(team.getUuid(), parentLft + 1, parentLft + 2);
@@ -45,7 +55,7 @@ public class TeamServiceImpl implements TeamService {
 		Integer maxRhtCode;
 		if(vo != null && vo.getRht() != null){
 			maxRhtCode = vo.getRht();
-			if(Objects.equals(maxRhtCode, count * 2) || count == 0) {
+			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
 				return true;
 			}
 		}
@@ -57,38 +67,38 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public TeamVo buildRootTeam() {
-		int count = teamMapper.getTeamCountOnLock();
+		TeamVo maxRhtCode = teamMapper.getMaxRhtCode();
 		TeamVo rootTeam = new TeamVo();
 		rootTeam.setUuid("0");
 		rootTeam.setName("root");
 		rootTeam.setParentUuid("-1");
-		rootTeam.setLft(0);
-		rootTeam.setRht(count == 0 ? 1 : count * 2);
+		rootTeam.setLft(1);
+		rootTeam.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
 		return rootTeam;
 	}
 
-	@Override
-	public void recursiveDeleteTeam(String parentUuid) {
-		List<TeamVo> teamList = teamMapper.getTeamByParentUuid(parentUuid);
-		if(teamList.size() == 0){
-			teamMapper.deleteTeamByUuid(parentUuid);
-		}else{
-			teamMapper.deleteTeamByUuid(parentUuid);
-			for(TeamVo vo : teamList){
-				recursiveDeleteTeam(vo.getUuid());
-			}
-		}
-	}
-
-	@Override
-	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid) {
-		List<TeamVo> teamList = teamMapper.getTeamByParentUuid(uuid);
-		for(TeamVo vo : teamList){
-			if(targetUuid.equals(vo.getUuid())){
-				return true;
-			}
-			checkTeamIsExistsByUuid(vo.getUuid(),targetUuid);
-		}
-		return false;
-	}
+//	@Override
+//	public void recursiveDeleteTeam(String parentUuid) {
+//		List<TeamVo> teamList = teamMapper.getTeamByParentUuid(parentUuid);
+//		if(teamList.size() == 0){
+//			teamMapper.deleteTeamByUuid(parentUuid);
+//		}else{
+//			teamMapper.deleteTeamByUuid(parentUuid);
+//			for(TeamVo vo : teamList){
+//				recursiveDeleteTeam(vo.getUuid());
+//			}
+//		}
+//	}
+//
+//	@Override
+//	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid) {
+//		List<TeamVo> teamList = teamMapper.getTeamByParentUuid(uuid);
+//		for(TeamVo vo : teamList){
+//			if(targetUuid.equals(vo.getUuid())){
+//				return true;
+//			}
+//			checkTeamIsExistsByUuid(vo.getUuid(),targetUuid);
+//		}
+//		return false;
+//	}
 }

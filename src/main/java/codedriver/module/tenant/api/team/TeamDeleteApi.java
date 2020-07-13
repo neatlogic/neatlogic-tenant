@@ -56,23 +56,18 @@ public class TeamDeleteApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
 		String uuid = jsonObj.getString("uuid");
 		TeamVo team = teamMapper.getTeamByUuid(uuid);
 		if(team == null) {
 			throw new TeamNotFoundException(uuid);
 		}
-//		teamMapper.deleteTeamByLeftRightCode(team.getLft(), team.getRht());
-		teamService.recursiveDeleteTeam(team.getUuid());
-		//删除完毕后立即重建左右编码
-		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_UUID, 0);
-		}
+		teamMapper.deleteTeamByLeftRightCode(team.getLft(), team.getRht());
 		//计算被删除块右边的节点移动步长
-// 		int step = team.getRht() - team.getLft() + 1;
-//		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
-//		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
+ 		int step = team.getRht() - team.getLft() + 1;
+		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
+		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
 		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}

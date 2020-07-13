@@ -15,7 +15,7 @@ public interface TeamService {
 
 	public TeamVo buildRootTeam();
 
-	public void recursiveDeleteTeam(String parentUuid);
-
-	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid);
+//	public void recursiveDeleteTeam(String parentUuid);
+//
+//	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid);
 }
