@@ -64,7 +64,7 @@ public class TeamSaveApi extends ApiComponentBase{
 		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",isRequired=true, xss=true),
 		@Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
 		@Param(name = "level", type = ApiParamType.STRING, isRequired = true, desc = "层级"),
-		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
+//		@Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "标签ID集合"),
 		@Param( name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")
 	})
 	@Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
@@ -86,7 +86,7 @@ public class TeamSaveApi extends ApiComponentBase{
 			}
 			teamVo.setUuid(uuid);
 			teamMapper.updateTeamNameByUuid(teamVo);
-			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
+//			teamMapper.deleteTeamTagByUuid(teamVo.getUuid());
 		}else {
 			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
 			if(!teamService.checkLeftRightCodeIsExists()) {
@@ -118,13 +118,13 @@ public class TeamSaveApi extends ApiComponentBase{
 				}
 			}
 		}
-		List<Long> tagIdList = JSON.parseArray(jsonObj.getString("tagIdList"), Long.class);
-		if(CollectionUtils.isNotEmpty(tagIdList)) {
-			for(Long tagId : tagIdList) {
-				teamVo.setTagId(tagId);
-				teamMapper.insertTeamTag(teamVo);
-			}
-		}
+//		List<Long> tagIdList = JSON.parseArray(jsonObj.getString("tagIdList"), Long.class);
+//		if(CollectionUtils.isNotEmpty(tagIdList)) {
+//			for(Long tagId : tagIdList) {
+//				teamVo.setTagId(tagId);
+//				teamMapper.insertTeamTag(teamVo);
+//			}
+//		}
 		
 		returnObj.put("uuid", teamVo.getUuid());
 		return returnObj;

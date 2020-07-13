@@ -14,7 +14,10 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 import com.alibaba.fastjson.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +82,20 @@ public class TeamTreeApi extends ApiComponentBase {
             returnObj.put("rowNum", rowNum);
 		}
 		List<TeamVo> tbodyList = teamMapper.searchTeam(teamVo);
+		/** 查出分组用户数量和子分组数量 **/
+		List<String> teamUuidList = tbodyList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
+		List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
+		Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
+    	for(TeamVo team : teamUserCountAndChildCountList) {
+    		teamUserCountAndChildCountMap.put(team.getUuid(), team);
+    	}
+    	for(TeamVo team : tbodyList) {
+    		TeamVo teamUserCountAndChildCount = teamUserCountAndChildCountMap.get(team.getUuid());
+    		if(teamUserCountAndChildCount != null) {
+        		team.setChildCount(teamUserCountAndChildCount.getChildCount());
+        		team.setUserCount(teamUserCountAndChildCount.getUserCount());
+    		}
+    	}
         returnObj.put("tbodyList", tbodyList);
         return returnObj;
     }

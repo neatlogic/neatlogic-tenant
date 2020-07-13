@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,39 +49,51 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "uuid", desc = "主键ID", xss = true, type = ApiParamType.STRING),
-            @Param( name = "keyword", desc = "关键字", xss = true, type = ApiParamType.STRING)
+    	@Param(name = "uuid", type = ApiParamType.STRING, xss = true, desc = "主键ID"),
+    	@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字")
     })
     @Output({
-            @Param(
-                    name = "children",
-                    type = ApiParamType.JSONARRAY,
-                    desc = "用户组织架构集合")
+    	@Param(name = "children", type = ApiParamType.JSONARRAY, desc = "用户组织架构集合")
     })
     @Description(desc = "组织架构树检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//        String uuid = jsonObj.getString("uuid");
-//        JSONObject returnObj = new JSONObject();
-//        JSONArray returnArray = new JSONArray();
-//	    returnArray.add(iterativeAssembly(uuid, null));
-//        returnObj.put("children", returnArray);
-//        return returnObj;
     	JSONObject resultObj = new JSONObject();   	
     	resultObj.put("children", new ArrayList<>());
+    	List<TeamVo> teamList = new ArrayList<>();
     	String uuid = jsonObj.getString("uuid");
-    	TeamVo teamVo = teamMapper.getTeamByUuid(uuid);
-    	if(teamVo == null) {
-    		throw new TeamNotFoundException(uuid);
-    	}
-    	List<TeamVo> teamList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
-    	if(CollectionUtils.isNotEmpty(teamList)) {
-    		List<String> teamUuidList = new ArrayList<>();
-        	Map<String, TeamVo> teamMap = new HashMap<>();
+    	String keyword = jsonObj.getString("keyword");
+		List<String> teamUuidList = new ArrayList<>();
+    	Map<String, TeamVo> teamMap = new HashMap<>();
+    	if(StringUtils.isNotBlank(uuid)) {
+        	TeamVo teamVo = teamMapper.getTeamByUuid(uuid);
+        	if(teamVo == null) {
+        		throw new TeamNotFoundException(uuid);
+        	}
+        	teamList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
         	for(TeamVo team : teamList) {
         		teamMap.put(team.getUuid(), team);
         		teamUuidList.add(team.getUuid());
         	}
+    	}else if(StringUtils.isNotBlank(keyword)){
+    		TeamVo keywordTeam = new TeamVo();
+    		keywordTeam.setKeyword(keyword);
+    		List<TeamVo> targetTeamList = teamMapper.searchTeam(keywordTeam);
+    		for(TeamVo teamVo : targetTeamList) {
+    			List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
+    			for(TeamVo team : ancestorsAndSelf) {
+    				if(!teamUuidList.contains(team.getUuid())) {
+                		teamMap.put(team.getUuid(), team);
+                		teamUuidList.add(team.getUuid());
+                		teamList.add(team);
+    				}
+            	}
+    		}
+    	}else {
+    		return resultObj;
+    	}
+    	
+    	if(CollectionUtils.isNotEmpty(teamList)) {
         	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
         	Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
         	for(TeamVo team : teamUserCountAndChildCountList) {
@@ -104,25 +117,4 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     	}
     	return resultObj;
     }
-    
-//    public JSONObject iterativeAssembly(String uuid, JSONObject dataObj){
-//        TeamVo teamVo = teamMapper.getTeamByUuid(uuid);
-//        JSONObject teamObj = new JSONObject();
-//        teamObj.put("name", teamVo.getName());
-//        teamObj.put("uuid", teamVo.getUuid());
-////        teamObj.put("sort", teamVo.getSort());
-//        teamObj.put("parentUuid", teamVo.getParentUuid());
-//        teamObj.put("tagList", teamVo.getTagList());
-//        teamObj.put("userCount", teamVo.getUserCount());
-//        teamObj.put("childCount", teamVo.getChildCount());
-//        if (dataObj != null){
-//            JSONArray childArray = new JSONArray();
-//            childArray.add(dataObj);
-//            teamObj.put("children", childArray);
-//        }
-//        if (!TeamVo.ROOT_UUID.equals(teamVo.getParentUuid())){
-//         return iterativeAssembly(teamVo.getParentUuid(), teamObj);
-//        }
-//        return teamObj;
-//    }
 }
