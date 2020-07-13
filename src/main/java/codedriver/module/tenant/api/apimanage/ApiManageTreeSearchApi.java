@@ -11,6 +11,7 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,22 +56,21 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		JSONArray menuJsonArray = new JSONArray();
 		//获取系统中所有的模块
 		List<ModuleVo> moduleList = ModuleUtil.getAllModuleList();
-		Map<String,Set<String>> moduleMap = new HashMap<>();
-		moduleList.stream().forEach(vo -> moduleMap.put(vo.getGroup(),null));
-		for(Map.Entry<String,Set<String>> entry : moduleMap.entrySet()){
-			Set<String> moduleGroupSet = new HashSet<>();
-			for(ModuleVo vo :moduleList){
-				if(vo.getGroup().equals(entry.getKey())){
-					moduleGroupSet.add(vo.getId());
-				}
-			}
-			moduleMap.put(entry.getKey(),moduleGroupSet);
-		}
+		Set<String> moduleGroupSet = new HashSet<>();
+		//获取所有的moduleGroup
+		moduleList.stream().forEach(vo -> moduleGroupSet.add(vo.getGroup()));
 		//获取所有的内存API
-		HashMap<String,ApiVo> apiMap = new HashMap<String,ApiVo>();
+		HashMap<String,ApiVo> apiMap = new HashMap<>();
 		apiMap.putAll(ApiComponentFactory.getApiMap());
 		//获取数据库中所有的API
 		List<ApiVo> dbApiList = apiMapper.getAllApi();
+		//为每一个ApiVo的moduleId和moduleGroup赋值
+		for(ApiVo api : dbApiList) {
+			if(StringUtils.isBlank(api.getModuleId())){
+				api.getModuleId(api.getHandler());
+			}
+			api.getModuleGroup(api.getModuleId());
+		}
 		//内存API与数据库API去重：如果token相同，数据库api数据覆盖内存api数据
 		for(ApiVo api : dbApiList){
 			if(apiMap.containsKey(api.getToken())) {
@@ -79,16 +79,15 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			apiMap.put(api.getToken(), api);
 		}
 		Collection<ApiVo> apiList = apiMap.values();
-		for(Map.Entry<String,Set<String>> entry : moduleMap.entrySet()){
+		for(String module : moduleGroupSet){
 			JSONObject moduleJson = new JSONObject();
-			moduleJson.put("moduleId",entry.getKey());
+			moduleJson.put("moduleId",module);
 //			moduleJson.put("moduleName",vo.getName());
 			//多个token的第一个单词相同，用Set可以去重
 			Set<String> funcSet = new HashSet<>(16);
 			for(ApiVo apiVo : apiList){
-				String moduleId = apiVo.getModuleId();
-				entry.getValue();
-				if(entry.getValue().contains(moduleId)){
+				String moduleGroup = apiVo.getModuleGroup();
+				if(module.equals(moduleGroup)){
 					String token = apiVo.getToken();
 					String funcId;
 					//有些API的token没有“/”，比如登出接口
