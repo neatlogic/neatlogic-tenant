@@ -48,7 +48,8 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     }
 
     @Input({
-            @Param( name = "uuid", isRequired = true, desc = "主键ID", xss = true, type = ApiParamType.STRING)
+            @Param( name = "uuid", desc = "主键ID", xss = true, type = ApiParamType.STRING),
+            @Param( name = "keyword", desc = "关键字", xss = true, type = ApiParamType.STRING)
     })
     @Output({
             @Param(
