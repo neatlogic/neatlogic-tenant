@@ -55,6 +55,10 @@ public class TeamSearchApi extends ApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "父分组uuid",
 					isRequired = false),
+			@Param(name = "level",
+					type = ApiParamType.STRING,
+					desc = "级别",
+					isRequired = false),
 			@Param(name = "currentPage",
 					type = ApiParamType.INTEGER,
 					desc = "当前页",
@@ -67,14 +71,14 @@ public class TeamSearchApi extends ApiComponentBase {
 				type = ApiParamType.BOOLEAN,
 				desc = "是否需要分页，默认true",
 				isRequired = false) 
-})
+	})
 	@Output({
 			@Param(name = "teamList",
 					type = ApiParamType.STRING,
 					explode = TeamVo[].class,
 					desc = "分组信息"),
 			@Param(explode=BasePageVo.class)
-			})
+	})
 	@Description(desc = "分组查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
