@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
+import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -64,36 +65,25 @@ public class TeamGetApi extends ApiComponentBase {
 	@Description(desc = "获取组信息接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) {
+		String uuid = jsonObj.getString("uuid");
 		TeamVo team = new TeamVo();
 		team.setName(jsonObj.getString("name"));
-		team.setUuid(jsonObj.getString("uuid"));
+		team.setUuid(uuid);
 		TeamVo teamVo = teamMapper.getTeam(team);
+		if(teamVo == null) {
+			throw new TeamNotFoundException(uuid);
+		}
 		int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
 		teamVo.setUserCount(userCount);
-		TeamVo parentTeam = null;
 		List<String> pathNameList = new ArrayList<>();
-		int isEdit = jsonObj.getIntValue("isEdit");
-		if(isEdit == 1) {
-			if("0".equals(teamVo.getParentUuid())){
-				parentTeam = teamService.buildRootTeam();
-			}else{
-				parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
+		List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
+		for(TeamVo ancestor : ancestorsAndSelf) {
+			if(!TeamVo.ROOT_UUID.equals(ancestor.getUuid()) && !teamVo.getUuid().equals(ancestor.getUuid())) {
+				pathNameList.add(ancestor.getName());
 			}
-		}else {
-			parentTeam = teamVo;
-		}
-		if (!parentTeam.getUuid().equals("0")){
-			getTeamPath(parentTeam, pathNameList);
 		}
 		teamVo.setPathNameList(pathNameList);		
 		return teamVo;
 	}
-	
-	private void getTeamPath(TeamVo teamVo, List<String> pathNameList){
-		if (!teamVo.getParentUuid().equals("0")){
-			TeamVo parentTeam = teamMapper.getTeamByUuid(teamVo.getParentUuid());
-			getTeamPath(parentTeam, pathNameList);
-		}
-		pathNameList.add(teamVo.getName());
-	}
+
 }
