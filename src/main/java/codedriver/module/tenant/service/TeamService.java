@@ -1,5 +1,7 @@
 package codedriver.module.tenant.service;
 
+import codedriver.framework.dto.TeamVo;
+
 public interface TeamService {
 	
 	public Integer rebuildLeftRightCode(String parentUuid, Integer parentLft);
@@ -10,4 +12,10 @@ public interface TeamService {
 	* @return boolean
 	 */
 	public boolean checkLeftRightCodeIsExists();
+
+	public TeamVo buildRootTeam();
+
+//	public void recursiveDeleteTeam(String parentUuid);
+//
+//	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid);
 }

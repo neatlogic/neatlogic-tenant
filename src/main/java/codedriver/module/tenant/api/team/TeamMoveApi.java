@@ -1,12 +1,5 @@
 package codedriver.module.tenant.api.team;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
@@ -18,6 +11,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.team.TeamMoveException;
 import codedriver.module.tenant.service.TeamService;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -58,7 +56,7 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+        teamMapper.getTeamCountOnLock();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
@@ -68,7 +66,12 @@ public class TeamMoveApi extends ApiComponentBase {
         	throw new TeamNotFoundException(uuid);
         }
         String parentUuid = jsonObj.getString("parentUuid");
-		TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+		TeamVo parentTeam;
+		if("0".equals(parentUuid)){
+            parentTeam = teamService.buildRootTeam();
+        }else{
+            parentTeam = teamMapper.getTeamByUuid(parentUuid);
+        }
         if(parentTeam == null) {
         	throw new TeamNotFoundException(parentUuid);
         }
@@ -93,6 +96,9 @@ public class TeamMoveApi extends ApiComponentBase {
             if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
             	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
             }
+//            if(teamService.checkTeamIsExistsByUuid(team.getUuid(), parentUuid)) {
+//                throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
+//            }
      		team.setParentUuid(parentUuid);
      		teamMapper.updateTeamParentUuidByUuid(team);
         }

@@ -1,16 +1,5 @@
 package codedriver.module.tenant.api.team;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.TeamLevel;
@@ -27,6 +16,15 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TeamService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @AuthAction(name="SYSTEM_TEAM_EDIT")
@@ -42,7 +40,7 @@ public class TeamSaveApi extends ApiComponentBase{
     
     @Autowired
     private TeamService teamService;
-	
+
 	@Override
 	public String getToken() {
 		return "team/save";
@@ -86,7 +84,8 @@ public class TeamSaveApi extends ApiComponentBase{
 			teamVo.setUuid(uuid);
 			teamMapper.updateTeamNameByUuid(teamVo);
 		}else {
-			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+//			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+			teamMapper.getTeamCountOnLock();
 			if(!teamService.checkLeftRightCodeIsExists()) {
 				teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 			}
@@ -94,7 +93,13 @@ public class TeamSaveApi extends ApiComponentBase{
 			if (StringUtils.isBlank(parentUuid)){
 				parentUuid = TeamVo.ROOT_UUID;
 			}
-			TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			TeamVo parentTeam;
+			if("0".equals(parentUuid)){
+				parentTeam = teamService.buildRootTeam();
+			}else{
+				parentTeam = teamMapper.getTeamByUuid(parentUuid);
+			}
+
 			if(parentTeam == null) {
 				throw new TeamNotFoundException(parentUuid);
 			}

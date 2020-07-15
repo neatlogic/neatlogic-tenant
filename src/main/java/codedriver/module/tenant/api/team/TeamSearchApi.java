@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.team;
 
 import java.util.List;
 
+import codedriver.module.tenant.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,9 @@ public class TeamSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private TeamMapper teamMapper;
+
+	@Autowired
+	private TeamService teamService;
 
 	@Override
 	public String getToken() {
@@ -81,6 +85,9 @@ public class TeamSearchApi extends ApiComponentBase {
 	@Description(desc = "分组查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		if(!teamService.checkLeftRightCodeIsExists()) {
+			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		}
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
 		JSONObject returnObj = new JSONObject();
 		if (teamVo.getNeedPage()) {
