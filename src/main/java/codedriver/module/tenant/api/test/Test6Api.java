@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.core.ApiComponentBase;
+@Service
 public class Test6Api extends ApiComponentBase {
 	
 	@Override
