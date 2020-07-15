@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.team;
 import java.util.ArrayList;
 import java.util.List;
 
-import codedriver.module.tenant.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,7 +74,7 @@ public class TeamGetApi extends ApiComponentBase {
 		List<String> pathNameList = new ArrayList<>();
 		List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
 		for(TeamVo ancestor : ancestorsAndSelf) {
-			if(!TeamVo.ROOT_UUID.equals(ancestor.getUuid()) && !teamVo.getUuid().equals(ancestor.getUuid())) {
+			if(!teamVo.getUuid().equals(ancestor.getUuid())) {
 				pathNameList.add(ancestor.getName());
 			}
 		}

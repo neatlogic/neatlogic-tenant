@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dto.TeamVo;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TeamService;
 
@@ -38,8 +37,8 @@ public class RebuidLeftRightCodeApi extends ApiComponentBase {
 
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
-		teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+		teamMapper.getTeamCountOnLock();
+		teamService.rebuildLeftRightCode();
 		return null;
 	}
 

@@ -58,7 +58,7 @@ public class TeamMoveApi extends ApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         teamMapper.getTeamCountOnLock();
 		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+			teamService.rebuildLeftRightCode();
 		}
     	String uuid = jsonObj.getString("uuid");
         TeamVo team = teamMapper.getTeamByUuid(uuid);
@@ -66,14 +66,17 @@ public class TeamMoveApi extends ApiComponentBase {
         	throw new TeamNotFoundException(uuid);
         }
         String parentUuid = jsonObj.getString("parentUuid");
-		TeamVo parentTeam;
-		if("0".equals(parentUuid)){
-            parentTeam = teamService.buildRootTeam();
+		TeamVo parentTeam = new TeamVo();
+		if(TeamVo.ROOT_UUID.equals(parentUuid)){
+            parentTeam.setUuid(TeamVo.ROOT_UUID);
+            parentTeam.setName("root");
+            parentTeam.setParentUuid(TeamVo.ROOT_PARENTUUID);
+            parentTeam.setLft(1);
         }else{
             parentTeam = teamMapper.getTeamByUuid(parentUuid);
-        }
-        if(parentTeam == null) {
-        	throw new TeamNotFoundException(parentUuid);
+            if(parentTeam == null) {
+            	throw new TeamNotFoundException(parentUuid);
+            }
         }
         if(Objects.equal(uuid, parentUuid)) {
         	throw new TeamMoveException("移动后的父节点不可以是当前节点");
@@ -96,9 +99,6 @@ public class TeamMoveApi extends ApiComponentBase {
             if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
             	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
             }
-//            if(teamService.checkTeamIsExistsByUuid(team.getUuid(), parentUuid)) {
-//                throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
-//            }
      		team.setParentUuid(parentUuid);
      		teamMapper.updateTeamParentUuidByUuid(team);
         }

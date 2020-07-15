@@ -49,7 +49,7 @@ public class TeamDeleteApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		teamMapper.getTeamCountOnLock();
 		if(!teamService.checkLeftRightCodeIsExists()) {
-			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
+			teamService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");
 		TeamVo team = teamMapper.getTeamByUuid(uuid);

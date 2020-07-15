@@ -4,7 +4,7 @@ import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
 	
-	public Integer rebuildLeftRightCode(String parentUuid, Integer parentLft);
+	public void rebuildLeftRightCode();
 	/**
 	 * 
 	* @Time:2020年5月21日
@@ -15,7 +15,4 @@ public interface TeamService {
 
 	public TeamVo buildRootTeam();
 
-//	public void recursiveDeleteTeam(String parentUuid);
-//
-//	public boolean checkTeamIsExistsByUuid(String uuid,String targetUuid);
 }

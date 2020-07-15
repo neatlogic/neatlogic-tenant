@@ -94,6 +94,11 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     	}
     	
     	if(CollectionUtils.isNotEmpty(teamList)) {
+    		TeamVo rootTeam = new TeamVo();
+    		rootTeam.setUuid(TeamVo.ROOT_UUID);
+    		rootTeam.setName("root");
+    		rootTeam.setParentUuid(TeamVo.ROOT_PARENTUUID);
+    		teamMap.put(TeamVo.ROOT_UUID, rootTeam);
         	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
         	Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
         	for(TeamVo team : teamUserCountAndChildCountList) {
@@ -110,10 +115,7 @@ public class TeamTreeSearchApi extends ApiComponentBase {
             		team.setUserCount(teamUserCountAndChildCount.getUserCount());
         		}
         	}
-        	TeamVo rootTeam = teamMap.get(TeamVo.ROOT_UUID);
-        	if(rootTeam != null) {
-        		resultObj.put("children", rootTeam.getChildren());
-        	}
+        	resultObj.put("children", rootTeam.getChildren());
     	}
     	return resultObj;
     }
