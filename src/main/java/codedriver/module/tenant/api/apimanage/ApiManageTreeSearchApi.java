@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -54,10 +55,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		//存储最终目录的数组
 		JSONArray menuJsonArray = new JSONArray();
 		//获取系统中所有的模块
-		List<ModuleVo> moduleList = ModuleUtil.getAllModuleList();
-		Set<String> moduleGroupSet = new HashSet<>();
-		//获取所有的moduleGroup
-		moduleList.stream().forEach(vo -> moduleGroupSet.add(vo.getGroup()));
+		Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
 		//获取所有的内存API
 		HashMap<String,ApiVo> apiMap = new HashMap<>();
 		apiMap.putAll(ApiComponentFactory.getApiMap());
@@ -71,15 +69,15 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			apiMap.put(api.getToken(), api);
 		}
 		Collection<ApiVo> apiList = apiMap.values();
-		for(String module : moduleGroupSet){
+		for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
 			JSONObject moduleJson = new JSONObject();
-			moduleJson.put("moduleId",module);
-//			moduleJson.put("moduleName",vo.getName());
+			moduleJson.put("moduleGroup",vo.getKey());
+			moduleJson.put("moduleGroupName",vo.getValue().getGroupName());
 			//多个token的第一个单词相同，用Set可以去重
 			Set<String> funcSet = new HashSet<>(16);
 			for(ApiVo apiVo : apiList){
 				String moduleGroup = apiVo.getModuleGroup();
-				if(module.equals(moduleGroup)){
+				if(vo.getKey().equals(moduleGroup)){
 					String token = apiVo.getToken();
 					String funcId;
 					//有些API的token没有“/”，比如登出接口
