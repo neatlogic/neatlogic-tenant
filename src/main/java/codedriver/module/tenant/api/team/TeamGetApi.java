@@ -25,9 +25,6 @@ public class TeamGetApi extends ApiComponentBase {
 	@Autowired
 	private TeamMapper teamMapper;
 
-	@Autowired
-	private TeamService teamService;
-
 	@Override
 	public String getToken() {
 		return "team/get";
