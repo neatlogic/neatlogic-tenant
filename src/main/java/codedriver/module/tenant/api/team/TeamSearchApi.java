@@ -45,7 +45,6 @@ public class TeamSearchApi extends ApiComponentBase {
 			@Param(name = "keyword",
 					type = ApiParamType.STRING,
 					desc = "关键字",
-					isRequired = true,
 					xss = true),
 			@Param(name = "uuid",
 					type = ApiParamType.STRING,
