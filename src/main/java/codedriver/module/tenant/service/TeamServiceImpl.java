@@ -19,7 +19,6 @@ public class TeamServiceImpl implements TeamService {
 	@Autowired
 	private TeamMapper teamMapper;
 
-	@Transactional(propagation = Propagation.REQUIRED)
 	public Integer rebuildLeftRightCode(String parentUuid, Integer parentLft) {
 		List<TeamVo> teamList;
 		if(TeamVo.ROOT_PARENTUUID.equals(parentUuid)){
@@ -54,11 +53,9 @@ public class TeamServiceImpl implements TeamService {
 //		}
 		int count = 0;
 		count = teamMapper.getTeamCountOnLock();
-		TeamVo vo = teamMapper.getMaxRhtCode();
-		Integer maxRhtCode;
-		if(vo != null && vo.getRht() != null){
-			maxRhtCode = vo.getRht();
-			if(Objects.equals(maxRhtCode, count * 2 + 1) || count == 0) {
+		Integer maxRhtCode = teamMapper.getMaxRhtCode();
+		if(maxRhtCode != null){
+			if(Objects.equals(maxRhtCode.intValue(), count * 2 + 1) || count == 0) {
 				return true;
 			}
 		}
@@ -70,13 +67,13 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public TeamVo buildRootTeam() {
-		TeamVo maxRhtCode = teamMapper.getMaxRhtCode();
+		Integer maxRhtCode = teamMapper.getMaxRhtCode();
 		TeamVo rootTeam = new TeamVo();
 		rootTeam.setUuid("0");
 		rootTeam.setName("root");
 		rootTeam.setParentUuid("-1");
 		rootTeam.setLft(1);
-		rootTeam.setRht(maxRhtCode == null ? 2 : maxRhtCode.getRht().intValue() + 1);
+		rootTeam.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
 		return rootTeam;
 	}
 
