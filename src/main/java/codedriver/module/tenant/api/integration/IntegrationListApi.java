@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -32,7 +34,9 @@ public class IntegrationListApi extends ApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-
+	@Input({
+		@Param(name = "handler", type = ApiParamType.STRING, desc = "组件")
+	})
 	@Output({ @Param(explode = IntegrationVo[].class, desc = "集成设置列表") })
 	@Description(desc = "集成设置数据列表接口")
 	@Override
@@ -40,6 +44,7 @@ public class IntegrationListApi extends ApiComponentBase {
 		IntegrationVo integrationVo = new IntegrationVo();
 		integrationVo.setNeedPage(false);
 		integrationVo.setIsActive(null);
+		integrationVo.setHandler(jsonObj.getString("handler"));
 		return integrationMapper.searchIntegration(integrationVo);
 	}
 
