@@ -1,14 +1,5 @@
 package codedriver.module.tenant.api.team;
 
-import codedriver.framework.transaction.util.TransactionUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
@@ -20,6 +11,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.team.TeamMoveException;
 import codedriver.module.tenant.service.TeamService;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -35,9 +31,6 @@ public class TeamMoveApi extends ApiComponentBase {
     
     @Autowired
     private TeamService teamService;
-
-    @Autowired
-    private TransactionUtil transactionUtil;
 
     @Override
     public String getToken() {
@@ -63,7 +56,6 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
@@ -124,7 +116,6 @@ public class TeamMoveApi extends ApiComponentBase {
 		
 		//更新被移动块中节点的左右编码值
 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft() - team.getRht(), team.getRht() - team.getRht(), lft - team.getLft() + team.getRht());
-        transactionUtil.commitTx(transactionStatus);
         return null;
     }
 }

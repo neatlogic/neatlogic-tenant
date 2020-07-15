@@ -10,13 +10,16 @@ import org.springframework.stereotype.Service;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TeamServiceImpl implements TeamService {
 
 	@Autowired
 	private TeamMapper teamMapper;
-	
+
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Integer rebuildLeftRightCode(String parentUuid, Integer parentLft) {
 		List<TeamVo> teamList;
 		if(TeamVo.ROOT_PARENTUUID.equals(parentUuid)){

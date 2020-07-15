@@ -1,13 +1,5 @@
 package codedriver.module.tenant.api.team;
 
-import codedriver.framework.transaction.util.TransactionUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -18,6 +10,10 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TeamService;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
@@ -29,9 +25,6 @@ public class TeamDeleteApi extends ApiComponentBase {
     
     @Autowired
     private TeamService teamService;
-
-	@Autowired
-	private TransactionUtil transactionUtil;
 
 	@Override
 	public String getToken() {
@@ -54,7 +47,6 @@ public class TeamDeleteApi extends ApiComponentBase {
 	@Description(desc = "删除分组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		TransactionStatus transactionStatus = transactionUtil.openTx();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
@@ -68,7 +60,6 @@ public class TeamDeleteApi extends ApiComponentBase {
  		int step = team.getRht() - team.getLft() + 1;
 		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
 		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
-		transactionUtil.commitTx(transactionStatus);
 		return null;
 	}
 	
