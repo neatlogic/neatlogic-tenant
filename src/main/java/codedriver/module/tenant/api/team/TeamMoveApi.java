@@ -56,6 +56,7 @@ public class TeamMoveApi extends ApiComponentBase {
     @Description( desc = "组织架构移动接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        teamMapper.getTeamCountOnLock();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}

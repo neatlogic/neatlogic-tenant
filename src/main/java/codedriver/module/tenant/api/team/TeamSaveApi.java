@@ -85,6 +85,7 @@ public class TeamSaveApi extends ApiComponentBase{
 			teamMapper.updateTeamNameByUuid(teamVo);
 		}else {
 //			teamMapper.getTeamLockByUuid(TeamVo.ROOT_UUID);
+			teamMapper.getTeamCountOnLock();
 			if(!teamService.checkLeftRightCodeIsExists()) {
 				teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 			}

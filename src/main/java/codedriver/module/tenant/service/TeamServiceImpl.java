@@ -24,8 +24,8 @@ public class TeamServiceImpl implements TeamService {
 		if(TeamVo.ROOT_PARENTUUID.equals(parentUuid)){
 			teamList = new ArrayList<>();
 			TeamVo vo = buildRootTeam();
-			List<TeamVo> teamVoListForRoot = teamMapper.getTeamByParentUuid("0");
-			vo.setChildCount(teamVoListForRoot.isEmpty() ? 0 : teamVoListForRoot.size());
+			List<TeamVo> teamVoListForRoot = teamMapper.getTeamByParentUuid(TeamVo.ROOT_UUID);
+			vo.setChildCount(teamVoListForRoot.size());
 			teamList.add(vo);
 		}else{
 			teamList = teamMapper.getTeamByParentUuid(parentUuid);
@@ -51,8 +51,7 @@ public class TeamServiceImpl implements TeamService {
 //		if(rootTeam == null) {
 //			throw new TeamNotFoundException(TeamVo.ROOT_UUID);
 //		}
-		int count = 0;
-		count = teamMapper.getTeamCountOnLock();
+		int count = teamMapper.getTeamCountOnLock();
 		Integer maxRhtCode = teamMapper.getMaxRhtCode();
 		if(maxRhtCode != null){
 			if(Objects.equals(maxRhtCode.intValue(), count * 2 + 1) || count == 0) {

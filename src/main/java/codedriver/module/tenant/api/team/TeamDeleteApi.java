@@ -47,6 +47,7 @@ public class TeamDeleteApi extends ApiComponentBase {
 	@Description(desc = "删除分组接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		teamMapper.getTeamCountOnLock();
 		if(!teamService.checkLeftRightCodeIsExists()) {
 			teamService.rebuildLeftRightCode(TeamVo.ROOT_PARENTUUID, 0);
 		}
