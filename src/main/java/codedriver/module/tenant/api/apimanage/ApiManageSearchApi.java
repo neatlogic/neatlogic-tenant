@@ -47,7 +47,9 @@ public class ApiManageSearchApi extends ApiComponentBase {
 
 	@Input({
 		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
-		@Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块id"),
+		@Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"),
+		@Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"),
+		@Param(name = "apiType", type = ApiParamType.STRING, desc = "接口类型(system|custom)"),
 		@Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"),
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="当前页码，默认值1"),
