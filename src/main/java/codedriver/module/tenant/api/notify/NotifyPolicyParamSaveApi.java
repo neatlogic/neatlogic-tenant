@@ -68,6 +68,19 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(basicTypeEnum == null) {
 			throw new ParamIrregularException("参数”paramType“不符合格式要求");
 		}
+		JSONObject paramConfig = new JSONObject();
+		if(ParamType.STRING == basicTypeEnum || ParamType.NUMBER == basicTypeEnum || ParamType.ARRAY == basicTypeEnum) {
+			paramConfig.put("type", "text");
+			paramConfig.put("value", "");
+			paramConfig.put("defaultValue", "");
+			paramConfig.put("maxlength", 50);
+		}else if(ParamType.DATE == basicTypeEnum) {
+			paramConfig.put("type", "datetimerange");
+			paramConfig.put("value", "");
+			paramConfig.put("defaultValue", "");
+			paramConfig.put("format", "yyyy-MM-dd HH:mm:ss");
+			paramConfig.put("valueType", "timestamp");
+		}
 		String name = jsonObj.getString("name");
 		String label = jsonObj.getString("label");
 		ConditionParamVo resultParamVo = null;
@@ -78,6 +91,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setParamType(paramType);
 				notifyPolicyParamVo.setLabel(label);
+				notifyPolicyParamVo.setConfig(paramConfig);
 				notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 				notifyPolicyParamVo.getExpressionList().clear();
@@ -91,10 +105,11 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(isNew) {
 			ConditionParamVo notifyPolicyParamVo = new ConditionParamVo();
 			notifyPolicyParamVo.setName(name);
-			notifyPolicyParamVo.setParamType(paramType);
 			notifyPolicyParamVo.setLabel(label);
 			notifyPolicyParamVo.setController(FormHandlerType.INPUT.toString());
+			notifyPolicyParamVo.setConfig(paramConfig);
 			notifyPolicyParamVo.setType("custom");
+			notifyPolicyParamVo.setParamType(paramType);
 			notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 			notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
 			for(Expression expression : basicTypeEnum.getExpressionList()) {
