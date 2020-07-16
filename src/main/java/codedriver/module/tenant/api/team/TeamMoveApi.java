@@ -81,6 +81,15 @@ public class TeamMoveApi extends ApiComponentBase {
         if(Objects.equal(uuid, parentUuid)) {
         	throw new TeamMoveException("移动后的父节点不可以是当前节点");
         }
+        
+        //将被移动块中的所有节点的左右编码值设置为<=0
+ 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
+ 		//计算被移动块右边的节点移动步长
+ 		int step = team.getRht() - team.getLft() + 1;
+ 		//更新旧位置右边的左右编码值
+		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
+		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
+		
         //找出被移动块移动后左编码值     	
 		int lft = 0;
  		int sort = jsonObj.getIntValue("sort");
@@ -102,14 +111,6 @@ public class TeamMoveApi extends ApiComponentBase {
      		team.setParentUuid(parentUuid);
      		teamMapper.updateTeamParentUuidByUuid(team);
         }
-
- 		//将被移动块中的所有节点的左右编码值设置为<=0
- 		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
- 		//计算被移动块右边的节点移动步长
- 		int step = team.getRht() - team.getLft() + 1;
- 		//更新旧位置右边的左右编码值
-		teamMapper.batchUpdateTeamLeftCode(team.getLft(), -step);
-		teamMapper.batchUpdateTeamRightCode(team.getLft(), -step);
 		
 		//更新新位置右边的左右编码值
 		teamMapper.batchUpdateTeamLeftCode(lft, step);

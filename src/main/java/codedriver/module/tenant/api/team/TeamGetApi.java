@@ -71,10 +71,11 @@ public class TeamGetApi extends ApiComponentBase {
 		}
 		int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
 		teamVo.setUserCount(userCount);
+		int isEdit = jsonObj.getIntValue("isEdit");
 		List<String> pathNameList = new ArrayList<>();
 		List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
 		for(TeamVo ancestor : ancestorsAndSelf) {
-			if(!teamVo.getUuid().equals(ancestor.getUuid())) {
+			if(isEdit == 0 || !teamVo.getUuid().equals(ancestor.getUuid())) {
 				pathNameList.add(ancestor.getName());
 			}
 		}
