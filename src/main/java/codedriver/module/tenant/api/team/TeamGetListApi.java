@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.team;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,7 +14,6 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
-import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
@@ -56,16 +56,16 @@ public class TeamGetListApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<String> teamUuiddList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-        if(CollectionUtils.isNotEmpty(teamUuiddList)) {
-            List<TeamVo> teamList = new ArrayList<>();
-        	for(String teamUuid : teamUuiddList) {
-        		TeamVo team = teamMapper.getTeamByUuid(teamUuid);
-        		if(team == null) {
-        			throw new TeamNotFoundException(teamUuid);
-        		}
-                teamList.add(team);
-        	}
+        returnObj.put("teamList", new ArrayList<>());
+        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+        if(CollectionUtils.isNotEmpty(teamUuidList)) {
+        	List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+        	teamList.sort(new Comparator<TeamVo>() {
+				@Override
+				public int compare(TeamVo o1, TeamVo o2) {
+					return teamUuidList.indexOf(o1.getUuid()) - teamUuidList.indexOf(o2.getUuid());
+				}       		
+        	});
             returnObj.put("teamList", teamList);
         }
         return returnObj;

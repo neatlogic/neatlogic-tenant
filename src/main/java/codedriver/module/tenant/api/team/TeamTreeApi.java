@@ -84,8 +84,8 @@ public class TeamTreeApi extends ApiComponentBase {
 		}
 		List<TeamVo> tbodyList = teamMapper.searchTeam(teamVo);
 		/** 查出分组用户数量和子分组数量 **/
-		List<String> teamUuidList = tbodyList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
-		if(CollectionUtils.isNotEmpty(teamUuidList)) {
+		if(CollectionUtils.isNotEmpty(tbodyList)) {
+			List<String> teamUuidList = tbodyList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
 			List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
 			Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
 	    	for(TeamVo team : teamUserCountAndChildCountList) {
