@@ -68,6 +68,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 		if(basicTypeEnum == null) {
 			throw new ParamIrregularException("参数”paramType“不符合格式要求");
 		}
+		String controller = FormHandlerType.INPUT.toString();
 		JSONObject paramConfig = new JSONObject();
 		if(ParamType.STRING == basicTypeEnum || ParamType.NUMBER == basicTypeEnum || ParamType.ARRAY == basicTypeEnum) {
 			paramConfig.put("type", "text");
@@ -75,6 +76,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			paramConfig.put("defaultValue", "");
 			paramConfig.put("maxlength", 50);
 		}else if(ParamType.DATE == basicTypeEnum) {
+			controller = FormHandlerType.DATE.toString();
 			paramConfig.put("type", "datetimerange");
 			paramConfig.put("value", "");
 			paramConfig.put("defaultValue", "");
@@ -91,6 +93,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setParamType(paramType);
 				notifyPolicyParamVo.setLabel(label);
+				notifyPolicyParamVo.setController(controller);
 				notifyPolicyParamVo.setConfig(paramConfig);
 				notifyPolicyParamVo.setParamTypeName(basicTypeEnum.getText());
 				notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
@@ -106,7 +109,7 @@ public class NotifyPolicyParamSaveApi extends ApiComponentBase {
 			ConditionParamVo notifyPolicyParamVo = new ConditionParamVo();
 			notifyPolicyParamVo.setName(name);
 			notifyPolicyParamVo.setLabel(label);
-			notifyPolicyParamVo.setController(FormHandlerType.INPUT.toString());
+			notifyPolicyParamVo.setController(controller);
 			notifyPolicyParamVo.setConfig(paramConfig);
 			notifyPolicyParamVo.setType("custom");
 			notifyPolicyParamVo.setParamType(paramType);
