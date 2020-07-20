@@ -1,6 +1,5 @@
 package codedriver.module.tenant.service.apiaudit;
 
-import codedriver.framework.common.util.DateUtil;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
@@ -28,7 +27,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
-        //根据初筛出来的token去api_audit表中查询记录
         List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
 
         for(ApiAuditVo vo : apiAuditVoList){
@@ -61,7 +59,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         return apiAuditMapList;
     }
 
-    private List<ApiVo> assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) {
+    private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) {
         /**
          * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间和结束时间
          */
@@ -102,7 +100,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             apiList.add(api);
             apiTokenList.add(api.getToken());
         }
+        //把筛选出来的api的token塞到apiAuditVo，以便之后的数据库查询
         apiAuditVo.setTokenList(apiTokenList);
-        return apiList;
     }
 }

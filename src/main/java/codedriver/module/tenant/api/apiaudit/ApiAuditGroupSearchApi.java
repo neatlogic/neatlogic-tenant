@@ -78,12 +78,15 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 
 		SimpleDateFormat sdfOfDay = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdfOfMonth = new SimpleDateFormat("yyyy-MM");
-		//计算时间跨度来决定按日还是按月分组
+		//计算时间跨度
 		List<Date> timeRangeForDay = DateUtil.calBetweenDaysDate(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
 
 		List<Map<String,Object>> resultList = new ArrayList<>();
 
 		if(timeRangeForDay.size() <= 31){
+			/**
+			 * 按天统计各类型操作数
+			 */
 			for(Date date : timeRangeForDay){
 				Map<String,Object> countMap = new HashMap<>();
 				countMap.put("time",sdfOfDay.format(date));
@@ -105,7 +108,11 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 				resultList.add(countMap);
 			}
 		}else{
-			//根据起始时间和结束时间计算月度
+			/**
+			 * 根据起始时间和结束时间计算月度
+			 * timeRangeForMonth中记录了起始时间与结束时间之间的每个月
+			 * 遍历每一个筛选出来的ApiAuditVo，按月统计各类型操作数
+			 */
 			List<String> timeRangeForMonth = DateUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
 			for(String month : timeRangeForMonth){
 				Map<String,Object> countMap = new HashMap<>();
