@@ -89,6 +89,8 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 			 */
 			for(Date date : timeRangeForDay){
 				Map<String,Object> countMap = new HashMap<>();
+				countMap.put("startTime",sdfOfDay.format(date));
+				countMap.put("endTime",sdfOfDay.format(date));
 				countMap.put("time",sdfOfDay.format(date));
 				countMap.put("count",0);
 				countMap.put("createCount",0);
@@ -114,8 +116,23 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 			 * 遍历每一个筛选出来的ApiAuditVo，按月统计各类型操作数
 			 */
 			List<String> timeRangeForMonth = DateUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
+			String currentMonth = sdfOfMonth.format(Calendar.getInstance().getTime());
 			for(String month : timeRangeForMonth){
 				Map<String,Object> countMap = new HashMap<>();
+				if(currentMonth.equals(month)){
+					Date firstDayOfMonth = DateUtil.firstDayOfMonth(Calendar.getInstance().getTime());
+					countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
+					countMap.put("endTime",sdfOfDay.format(Calendar.getInstance().getTime()));
+				}else if(sdfOfMonth.format(apiAuditVo.getStartTime()).equals(month)){
+					Date lastDayOfMonth = DateUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+					countMap.put("startTime",sdfOfDay.format(apiAuditVo.getStartTime()));
+					countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
+				}else{
+					Date firstDayOfMonth = DateUtil.firstDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+					Date lastDayOfMonth = DateUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+					countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
+					countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
+				}
 				countMap.put("time",month);
 				countMap.put("count",0);
 				countMap.put("createCount",0);
