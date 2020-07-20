@@ -1,7 +1,6 @@
 package codedriver.module.tenant.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,19 +33,6 @@ public class TeamServiceImpl implements TeamService {
 			}
 		}
 		return parentLft;
-	}
-
-	@Override
-	public boolean checkLeftRightCodeIsExists() {
-		int count = teamMapper.getTeamCountOnLock();
-		if(count == 0) {
-			return true;
-		}
-		Integer maxRhtCode = teamMapper.getMaxRhtCode();
-		if(Objects.equals(maxRhtCode, count * 2 + 1)) {
-			return true;
-		}
-		return false;
 	}
 
 	@Override
