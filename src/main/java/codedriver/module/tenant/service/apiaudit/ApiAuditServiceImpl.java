@@ -61,7 +61,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 
     private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) {
         /**
-         * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间和结束时间
+         * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间
          */
         if (apiAuditVo.getTimeRange() != null && StringUtils.isNotBlank(apiAuditVo.getTimeUnit())) {
             if (TIME_UINT_OF_DAY.equals(apiAuditVo.getTimeUnit())) {

@@ -72,32 +72,34 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 		//TODO 表头待定|自定义表头
 		List<String> headerList = new ArrayList<>();
 		List<String> columnList = new ArrayList<>();
-		Map<String, String> map = apiAuditMapList.get(0);
-		for(String key : map.keySet()){
-			headerList.add(key);
-			columnList.add(key);
-		}
-		List<Map<String, String>> dataMapList = apiAuditMapList;
-		workbook = ExcelUtil.createExcel(workbook, headerList, columnList, null, dataMapList);
+		if(!apiAuditMapList.isEmpty()){
+			Map<String, String> map = apiAuditMapList.get(0);
+			for(String key : map.keySet()){
+				headerList.add(key);
+				columnList.add(key);
+			}
+			List<Map<String, String>> dataMapList = apiAuditMapList;
+			workbook = ExcelUtil.createExcel(workbook, headerList, columnList, null, dataMapList);
 
-		if(workbook != null){
-			throw new RuntimeException("导出操作审计错误");
-		}
+			if(workbook == null){
+				throw new RuntimeException("导出操作审计错误");
+			}
 
-		String fileNameEncode = "apiAudits.xls";
-		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-		} else {
-			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-		}
-		response.setContentType("application/vnd.ms-excel;charset=utf-8");
-		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+			String fileNameEncode = "apiAudits.xls";
+			Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+			if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+				fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+			} else {
+				fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+			}
+			response.setContentType("application/vnd.ms-excel;charset=utf-8");
+			response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
 
-		try (OutputStream os = response.getOutputStream()){
-			workbook.write(os);
-		} catch (IOException e) {
-			e.printStackTrace();
+			try (OutputStream os = response.getOutputStream()){
+				workbook.write(os);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return null;
