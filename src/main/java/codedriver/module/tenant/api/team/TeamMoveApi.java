@@ -57,7 +57,7 @@ public class TeamMoveApi extends ApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         teamMapper.getTeamCountOnLock();
-		if(!teamService.checkLeftRightCodeIsExists()) {
+		if(teamMapper.checkLeftRightCodeIsWrong() > 0) {
 			teamService.rebuildLeftRightCode();
 		}
     	String uuid = jsonObj.getString("uuid");
@@ -81,7 +81,17 @@ public class TeamMoveApi extends ApiComponentBase {
         if(Objects.equal(uuid, parentUuid)) {
         	throw new TeamMoveException("移动后的父节点不可以是当前节点");
         }
-        
+
+        if(!parentUuid.equals(team.getParentUuid())) {
+        	//判断移动后的父节点是否在当前节点的后代节点中
+            if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
+            	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
+            }
+      		
+     		team.setParentUuid(parentUuid);
+     		teamMapper.updateTeamParentUuidByUuid(team);
+        }
+ 		
         //将被移动块中的所有节点的左右编码值设置为<=0
  		teamMapper.batchUpdateTeamLeftRightCodeByLeftRightCode(team.getLft(), team.getRht(), -team.getRht());
  		//计算被移动块右边的节点移动步长
@@ -96,21 +106,9 @@ public class TeamMoveApi extends ApiComponentBase {
 		if(sort == 0) {//移动到首位
 			lft = parentTeam.getLft() + 1;
  		}else {
- 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndStartNum(parentUuid, sort - 1);
+ 			TeamVo prevTeam = teamMapper.getTeamByParentUuidAndStartNum(parentUuid, sort);
  			lft = prevTeam.getRht() + 1;
  		}
-        if(parentUuid.equals(team.getParentUuid())) {
-        	if(Objects.equal(team.getLft(), lft)) {
-        		return null;//没有移动
-        	}
-        }else {
-        	//判断移动后的父节点是否在当前节点的后代节点中
-            if(teamMapper.checkTeamIsExistsByLeftRightCode(parentUuid, team.getLft(), team.getRht()) > 0) {
-            	throw new TeamMoveException("移动后的父节点不可以是当前节点的后代节点");
-            }
-     		team.setParentUuid(parentUuid);
-     		teamMapper.updateTeamParentUuidByUuid(team);
-        }
 		
 		//更新新位置右边的左右编码值
 		teamMapper.batchUpdateTeamLeftCode(lft, step);

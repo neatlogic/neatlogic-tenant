@@ -85,7 +85,7 @@ public class TeamSaveApi extends ApiComponentBase{
 			teamMapper.updateTeamNameByUuid(teamVo);
 		}else {
 			teamMapper.getTeamCountOnLock();
-			if(!teamService.checkLeftRightCodeIsExists()) {
+			if(teamMapper.checkLeftRightCodeIsWrong() > 0) {
 				teamService.rebuildLeftRightCode();
 			}
 			String parentUuid = jsonObj.getString("parentUuid");
