@@ -1,5 +1,6 @@
 package codedriver.module.tenant.service.apiaudit;
 
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
@@ -24,7 +25,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     private ApiMapper apiMapper;
 
     @Override
-    public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) {
+    public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
@@ -42,7 +43,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     @Override
-    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) {
+    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
@@ -59,7 +60,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         return apiAuditList;
     }
 
-    private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) {
+    private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) throws ClassNotFoundException {
         /**
          * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间
          */
@@ -97,6 +98,13 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 }
             }
             //TODO 根据操作类型筛选
+            if(StringUtils.isNotBlank(apiAuditVo.getOperationType())){
+                Class<?> apiClass = Class.forName(api.getHandler());
+                OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                if(annotation == null || !apiAuditVo.getOperationType().equals(annotation.type().getValue())){
+                    continue;
+                }
+            }
             apiList.add(api);
             apiTokenList.add(api.getToken());
         }
