@@ -29,12 +29,19 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
-
+        /**
+         * 补充从数据库无法获取的字段
+         */
         for(ApiAuditVo vo : apiAuditVoList){
             for(ApiVo api : apiList){
                 if(vo.getToken().equals(api.getToken())){
                     vo.setApiName(api.getName());
                     vo.setModuleGroup(api.getModuleGroup());
+                    Class<?> apiClass = Class.forName(api.getHandler());
+                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                    if(annotation != null){
+                        vo.setOperationType(annotation.type().getValue());
+                    }
                     break;
                 }
             }
@@ -47,11 +54,19 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
+        /**
+         * 补充从数据库无法获取的字段
+         */
         for(ApiAuditVo vo : apiAuditList){
             for(ApiVo api : apiList){
                 if(vo.getToken().equals(api.getToken())){
                     vo.setApiName(api.getName());
                     vo.setModuleGroup(api.getModuleGroup());
+                    Class<?> apiClass = Class.forName(api.getHandler());
+                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                    if(annotation != null){
+                        vo.setOperationType(annotation.type().getValue());
+                    }
                     break;
                 }
             }
@@ -77,7 +92,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         List<ApiVo> dbApiList = apiMapper.getAllApi();
         Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
         for (ApiVo vo : dbApiList) {
-            if (ramApiMap.get(vo.getToken()) != null) {
+            if (ramApiMap.get(vo.getToken()) == null) {
                 apiVoList.add(vo);
             }
         }

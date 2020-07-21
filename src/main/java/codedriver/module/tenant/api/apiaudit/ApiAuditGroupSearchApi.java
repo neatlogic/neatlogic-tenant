@@ -100,10 +100,18 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 					if(sdfOfDay.format(vo.getStartTime()).equals(sdfOfDay.format(date))){
 						countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
 						//TODO 按操作类型计数
-						countMap.put("createCount",1);
-						countMap.put("deleteCount",1);
-						countMap.put("updateCount",1);
-						countMap.put("retrieveCount",1);
+						if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
+							countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
+							countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
+							countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
+							countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
+						}
 					}
 				}
 				resultList.add(countMap);
@@ -142,10 +150,18 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 					if(sdfOfMonth.format(vo.getStartTime()).equals(month)){
 						countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
 						//TODO 按操作类型计数
-						countMap.put("createCount",1);
-						countMap.put("deleteCount",1);
-						countMap.put("updateCount",1);
-						countMap.put("retrieveCount",1);
+						if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
+							countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
+							countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
+							countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
+						}
+						if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
+							countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
+						}
 					}
 				}
 				resultList.add(countMap);
