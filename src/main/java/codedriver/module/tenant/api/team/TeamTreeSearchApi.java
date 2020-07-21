@@ -4,10 +4,8 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-05 18:49
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamTreeSearchApi extends ApiComponentBase {
 
     @Autowired

@@ -5,8 +5,10 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -22,6 +24,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class RoleUserSaveApi extends ApiComponentBase {
 
     @Autowired

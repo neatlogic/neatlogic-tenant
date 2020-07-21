@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.mailserver;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class MailServerActiveApi extends ApiComponentBase {
 
 	@Autowired

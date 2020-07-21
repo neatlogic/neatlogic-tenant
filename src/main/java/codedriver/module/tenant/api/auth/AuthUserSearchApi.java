@@ -3,10 +3,8 @@ package codedriver.module.tenant.api.auth;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +22,7 @@ import java.util.Set;
  * @create: 2020-03-13 12:01
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthUserSearchApi extends ApiComponentBase {
 
     @Autowired

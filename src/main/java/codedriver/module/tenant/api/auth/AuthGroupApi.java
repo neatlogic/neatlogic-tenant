@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -24,6 +26,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2020-03-17 12:03
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthGroupApi extends ApiComponentBase {
 
     @Override

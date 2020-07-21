@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.role;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import com.alibaba.fastjson.JSON;
 
 import java.util.List;
@@ -22,6 +24,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 @AuthAction(name = "SYSTEM_ROLE_EDIT")
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.DELETE)
 public class RoleDeleteApi extends ApiComponentBase {
 
 	@Autowired

@@ -2,10 +2,8 @@ package codedriver.module.tenant.api.apiaudit;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.DateUtil;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.module.tenant.service.apiaudit.ApiAuditService;
@@ -28,6 +26,7 @@ import java.util.*;
  */
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditGroupSearchApi extends ApiComponentBase {
 
 	@Autowired

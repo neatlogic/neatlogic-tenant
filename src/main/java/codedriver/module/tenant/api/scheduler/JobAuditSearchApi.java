@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.scheduler;
 
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +15,6 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
@@ -26,6 +24,7 @@ import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @Service
 @Transactional
 @AuthAction(name = "SYSTEM_JOB_EDIT")
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class JobAuditSearchApi extends ApiComponentBase {
 
 	@Autowired

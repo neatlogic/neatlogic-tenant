@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.scheduler;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,10 +14,6 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -31,6 +29,7 @@ import codedriver.framework.scheduler.exception.ScheduleJobNameRepeatException;
 @Service
 @AuthAction(name = "SYSTEM_JOB_EDIT")
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class JobSaveApi extends ApiComponentBase {
 	@Autowired
 	private SchedulerMapper schedulerMapper;

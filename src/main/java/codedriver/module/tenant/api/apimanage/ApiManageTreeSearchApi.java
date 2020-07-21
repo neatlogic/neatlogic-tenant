@@ -3,8 +3,10 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.ModuleVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
@@ -26,6 +28,7 @@ import java.util.*;
  */
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Autowired

@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.reminder;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +21,6 @@ import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.reminder.dto.GlobalReminderHandlerVo;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.dto.param.ReminderHistoryParamVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
@@ -33,6 +31,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  * @create: 2020-03-09 15:04
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ReminderHistoryApi extends ApiComponentBase {
 
 	@Autowired

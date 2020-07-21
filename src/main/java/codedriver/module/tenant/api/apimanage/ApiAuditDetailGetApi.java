@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailGetApi extends ApiComponentBase {
 
 	@Autowired

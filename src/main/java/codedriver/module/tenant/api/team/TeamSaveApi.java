@@ -10,10 +10,8 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSON;
@@ -30,6 +28,7 @@ import java.util.List;
 @AuthAction(name="SYSTEM_TEAM_EDIT")
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class TeamSaveApi extends ApiComponentBase{
 
 	@Autowired

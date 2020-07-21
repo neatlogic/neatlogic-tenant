@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.apiaudit;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.framework.restful.dto.ApiAuditVo;
@@ -37,6 +38,7 @@ import java.util.*;
  */
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 
 	@Autowired

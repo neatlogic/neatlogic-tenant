@@ -5,8 +5,10 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TeamService;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AuthAction(name = "SYSTEM_TEAM_EDIT")
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.DELETE)
 public class TeamDeleteApi extends ApiComponentBase {
 
 	@Autowired

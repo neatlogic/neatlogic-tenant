@@ -9,6 +9,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,10 +35,6 @@ import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.minio.core.MinioManager;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.tenant.exception.file.EmptyFileException;
 import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
@@ -44,6 +42,7 @@ import codedriver.module.tenant.exception.file.FileTooLargeException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class FileUploadApi extends BinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(FileUploadApi.class);
 //	@Autowired
