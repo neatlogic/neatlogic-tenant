@@ -8,5 +8,5 @@ import java.util.Map;
 public interface ApiAuditService {
 
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo vo);
-    public List<Map<String, String>> searchApiAuditMapList(ApiAuditVo vo);
+    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo vo);
 }

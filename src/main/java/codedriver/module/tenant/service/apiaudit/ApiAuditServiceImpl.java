@@ -42,21 +42,21 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     @Override
-    public List<Map<String, String>> searchApiAuditMapList(ApiAuditVo apiAuditVo) {
+    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
-        List<Map<String, String>> apiAuditMapList = apiMapper.searchApiAuditMapList(apiAuditVo);
-        for(Map<String, String> map : apiAuditMapList){
+        List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
+        for(ApiAuditVo vo : apiAuditList){
             for(ApiVo api : apiList){
-                if(map.get("token").equals(api.getToken())){
-                    map.put("apiName",api.getName());
-                    map.put("moduleGroup",api.getModuleGroup());
+                if(vo.getToken().equals(api.getToken())){
+                    vo.setApiName(api.getName());
+                    vo.setModuleGroup(api.getModuleGroup());
                     break;
                 }
             }
         }
 
-        return apiAuditMapList;
+        return apiAuditList;
     }
 
     private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) {
