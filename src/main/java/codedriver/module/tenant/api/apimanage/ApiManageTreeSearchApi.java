@@ -9,7 +9,6 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +56,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		// TODO 增加一个接口，点击第二层目录时查询其下所有子目录
 		String apiMenuType = jsonObj.getString("apiMenuType");
 		//存储最终目录的数组
-		JSONArray menuJsonArray = new JSONArray();
+//		JSONArray menuJsonArray = new JSONArray();
 		List<Map<String,Object>> menuMapList = new ArrayList<>();
 		if(StringUtils.isNotBlank(apiMenuType)){
 			List<ApiVo> apiList = null;
@@ -89,8 +88,6 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 						if(vo.getKey().equals(moduleGroup)){
 							String token = apiVo.getToken();
 							Func func = new Func();
-//						int count = (token.length() - token.replace("/", "").length());
-//						System.out.println(count);
 							//有些API的token没有“/”，比如登出接口
 							if(token.indexOf("/") < 0){
 								func.setFuncId(token);
@@ -103,55 +100,31 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 					moduleMap.put("funcList",funcSet);
 					menuMapList.add(moduleMap);
 				}
-			}
-			//TODO 分析出每个模块每个功能下最长的token有几个"/"，以此来判断是否有子目录
-			List<Map<String,Object>> menuArray = new ArrayList();
-			for(Map<String,Object> map : menuMapList){
-				Set<Func> funcSet = (Set<Func>)map.get("funcList");
-				Map<String,Object> moduleMap = new HashMap<>();
-				moduleMap.put("moduleGroup",map.get("moduleGroup").toString());
-				List<Map<String,Object>> funcList = new ArrayList<>();
-				for(Func func : funcSet){
-					Map<String,Object> funcMap = new HashMap<>();
-					funcMap.put("funcId",func.getFuncId());
-					int count = 0;
-					for(ApiVo apiVo : apiList){
-						String moduleGroup = apiVo.getModuleGroup();
-						if(map.get("moduleGroup").toString().equals(moduleGroup)){
-							String token = apiVo.getToken();
-							if(token.startsWith(func.getFuncId())){
-								if((token.length() - token.replace("/", "").length()) >= count){
-									count = (token.length() - token.replace("/", "").length());
-								}
-							}
-							funcMap.put("count",count);
-						}
+                if(CollectionUtils.isNotEmpty(menuMapList)){
+                    //TODO 分析出每个模块每个功能下最长的token有几个"/"，以此来判断是否有子目录
+                    for(Map<String,Object> map : menuMapList){
+                        Set<Func> funcSet = (Set<Func>)map.get("funcList");
+                        for(Func func : funcSet){
+                            int count = 0;
+                            for(ApiVo apiVo : apiList){
+                                String moduleGroup = apiVo.getModuleGroup();
+                                if(map.get("moduleGroup").toString().equals(moduleGroup)){
+                                    String token = apiVo.getToken();
+                                    if(token.startsWith(func.getFuncId())){
+                                        int slashCount = (token.length() - token.replace("/", "").length());
+                                        if(slashCount >= count){
+                                            count = slashCount;
+                                        }
+                                    }
+                                }
+                            }
+                            if(count > 1){
+                                func.setIsHasChild(1);
+                            }
+                        }
+                    }
+                }
 
-					}
-					funcList.add(funcMap);
-				}
-				moduleMap.put("funcList",funcList);
-				menuArray.add(moduleMap);
-			}
-			System.out.println(menuArray);
-
-			//TODO 匹配目录集，去给hasChildren赋值
-			for(Map<String,Object> moduleMap : menuMapList){
-				for(Map<String,Object> map : menuArray){
-					if(moduleMap.get("moduleGroup").equals(map.get("moduleGroup"))){
-						Set<Func> funcList = (Set<Func>) moduleMap.get("funcList");
-						List<Map<String,Object>> countFuncList = (List<Map<String,Object>>)map.get("funcList");
-						for(Func func : funcList){
-							for(Map<String,Object> countMap : countFuncList){
-								if(func.getFuncId().equals(countMap.get("funcId"))){
-									if(Integer.parseInt(countMap.get("count").toString()) > 1){
-										func.setHasChildren(true);
-									}
-								}
-							}
-						}
-					}
-				}
 			}
 		}
 		return menuMapList;
@@ -160,7 +133,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 	class Func{
 		private String funcId;
 
-		private Boolean hasChildren = false;
+		private int isHasChild = 0;
 
 		public String getFuncId() {
 			return funcId;
@@ -170,13 +143,13 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			this.funcId = funcId;
 		}
 
-		public Boolean getHasChildren() {
-			return hasChildren;
-		}
+        public int getIsHasChild() {
+            return isHasChild;
+        }
 
-		public void setHasChildren(Boolean hasChildren) {
-			this.hasChildren = hasChildren;
-		}
+        public void setIsHasChild(int isHasChild) {
+            this.isHasChild = isHasChild;
+        }
 
 		@Override
 		public boolean equals(Object o) {
