@@ -64,9 +64,9 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 			List<ApiVo> apiList = null;
 			//获取系统中所有的模块
 			Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
-			if("system".equals(apiMenuType)){
+			if(ApiVo.ApiType.SYSTEM.getValue().equals(apiMenuType)){
 				apiList = ApiComponentFactory.getApiList();
-			}else if("custom".equals(apiMenuType)) {
+			}else if(ApiVo.ApiType.CUSTOM.getValue().equals(apiMenuType)) {
 				//获取数据库中所有的API
 				List<ApiVo> dbApiList = apiMapper.getAllApi();
 				Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();

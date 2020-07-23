@@ -37,75 +37,72 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "所属模块"),
-			@Param(name = "funcId", type = ApiParamType.STRING, desc = "所属功能"),
-			@Param(name = "type", type = ApiParamType.STRING, desc = "目录类型(system|custom)"),
+			@Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "所属模块",isRequired = true),
+			@Param(name = "funcId", type = ApiParamType.STRING, desc = "所属功能",isRequired = true),
+			@Param(name = "type", type = ApiParamType.STRING, desc = "目录类型(system|custom)",isRequired = true),
 	})
 	@Output({})
 	@Description(desc = "获取接口管理页树形目录子目录接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO 先根据type、moduleGroup、funcId筛选出API
-		Object moduleGroup = jsonObj.get("moduleGroup");
-		Object funcId = jsonObj.get("funcId");
-		Object type = jsonObj.get("type");
-		if(type != null && moduleGroup != null && funcId != null){
-			List<String> tokenList = new ArrayList<>();
-			if(type.toString().equals("system")){
-				List<ApiVo> ramApiList = ApiComponentFactory.getApiList();
-				for(ApiVo vo : ramApiList){
-					if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId.toString() + "/")){
+		String moduleGroup = jsonObj.getString("moduleGroup");
+		String funcId = jsonObj.getString("funcId");
+		String type = jsonObj.getString("type");
+		List<String> tokenList = new ArrayList<>();
+		if(ApiVo.ApiType.SYSTEM.getValue().equals(type)){
+			List<ApiVo> ramApiList = ApiComponentFactory.getApiList();
+			for(ApiVo vo : ramApiList){
+				if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
+					tokenList.add(vo.getToken());
+				}
+			}
+		}else if(ApiVo.ApiType.CUSTOM.getValue().equals(type)){
+			//获取数据库中所有的API
+			List<ApiVo> dbApiList = apiMapper.getAllApi();
+			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+			//与系统中的API匹配token，如果匹配不上则表示是自定义API
+			for (ApiVo vo : dbApiList) {
+				if (ramApiMap.get(vo.getToken()) == null) {
+					if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
 						tokenList.add(vo.getToken());
 					}
 				}
-			}else if(type.toString().equals("custom")){
-				//获取数据库中所有的API
-				List<ApiVo> dbApiList = apiMapper.getAllApi();
-				Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
-				//与系统中的API匹配token，如果匹配不上则表示是自定义API
-				for (ApiVo vo : dbApiList) {
-					if (ramApiMap.get(vo.getToken()) == null) {
-						if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId.toString() + "/")){
-							tokenList.add(vo.getToken());
-						}
-					}
-				}
 			}
-
-			Set<Func> result = new HashSet<>();
-			String[] funcSplit = funcId.toString().split("/");
-			/**
-			 * 与入参的funcId根据"/"拆分后的数组比较长度
-			 * 如果大于1，说明下面还有func
-			 * 比如入参funcId为"process/channel"，当前token为"process/channel/form/get"
-			 * 那么下一层func就是form
-			 */
-			for(String token : tokenList){
-				String[] split = token.split("/");
-				if(split.length - funcSplit.length > 1){
-					Func func = new Func();
-					String s = split[funcSplit.length];
-					func.setFuncId(s);
-					if(result.contains(func)){
-						if(split.length - funcSplit.length > 2){
-							result.stream().forEach(vo -> {
-								if (vo.getFuncId().equals(func.funcId) && vo.getIsHasChild() == 0) {
-									vo.setIsHasChild(1);
-								}
-							});
-						}
-					}else{
-						if(split.length - funcSplit.length > 2){
-							func.setIsHasChild(1);
-						}
-						result.add(func);
-					}
-				}
-			}
-
-			return result;
 		}
-		return null;
+
+		Set<Func> result = new HashSet<>();
+		String[] funcSplit = funcId.split("/");
+		/**
+		 * 与入参的funcId根据"/"拆分后的数组比较长度
+		 * 如果大于1，说明下面还有func
+		 * 比如入参funcId为"process/channel"，当前token为"process/channel/form/get"
+		 * 那么下一层func就是form
+		 */
+		for(String token : tokenList){
+			String[] split = token.split("/");
+			if(split.length - funcSplit.length > 1){
+				Func func = new Func();
+				String s = split[funcSplit.length];
+				func.setFuncId(s);
+				if(result.contains(func)){
+					if(split.length - funcSplit.length > 2){
+						result.stream().forEach(vo -> {
+							if (vo.getFuncId().equals(func.funcId) && vo.getIsHasChild() == 0) {
+								vo.setIsHasChild(1);
+							}
+						});
+					}
+				}else{
+					if(split.length - funcSplit.length > 2){
+						func.setIsHasChild(1);
+					}
+					result.add(func);
+				}
+			}
+		}
+
+		return result;
 	}
 
 
