@@ -76,87 +76,91 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
 		List<ApiAuditVo> apiAuditVoList = apiAuditService.searchApiAuditForExport(apiAuditVo);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		/**
-		 * 利用反射把ApiAuditVo中标识为excel列的字段保存在map中
-		 */
-		Class<ApiAuditVo> apiAuditVoClass = ApiAuditVo.class;
-		Field[] declaredFields = apiAuditVoClass.getDeclaredFields();
-		List<Map<String, String>> fieldMapList = new ArrayList<>();
-		for(int i = 0;i < declaredFields.length;i++){
-			Map<String, String> map = new LinkedHashMap<>();
-			ExcelField entityField = declaredFields[i].getAnnotation(ExcelField.class);
-			if(entityField != null){
-				map.put(declaredFields[i].getName(),entityField.name());
-				fieldMapList.add(map);
-			}
-		}
-		/**
-		 * 筛选出ApiAuditVo中的getter方法
-		 */
-		Method[] methods = ApiAuditVo.class.getDeclaredMethods();
-		List<Method> methodList = new ArrayList<>();
-		for(int i = 0;i < methods.length;i++){
-			if(methods[i].getName().startsWith("get")){
-				methodList.add(methods[i]);
-			}
-		}
-		/**
-		 * 利用筛选出的getter方法与fieldMapList中的字段匹配
-		 * 匹配上之后用反射获取对应getter的调用结果
-		 * 把与当前getter对应的字段与调用结果保存在map中
-		 */
-		List<Map<String, Object>> resultList = new ArrayList<>();
+
 		if(CollectionUtils.isNotEmpty(apiAuditVoList)){
-			for(ApiAuditVo vo : apiAuditVoList){
-				Map<String, Object> map = new LinkedHashMap<>();
-				for(Map<String, String> fieldMap : fieldMapList){
-					for(Method method : methodList){
-						String methodName = method.getName();
-						String getterField = methodName.substring(methodName.indexOf("t") + 1);
-						String field = getterField.substring(0, 1).toLowerCase() + getterField.substring(1);
-						String fieldName = fieldMap.get(field);
-						if(StringUtils.isBlank(fieldName)){
-							continue;
-						}
-						Object result = method.invoke(vo);
-						if(result instanceof Date){
-							result = sdf.format(result);
-						}
-						map.put(fieldName,result);
-					}
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			/**
+			 * 利用反射把ApiAuditVo中标识为excel列的字段保存在map中
+			 */
+			Class<ApiAuditVo> apiAuditVoClass = ApiAuditVo.class;
+			Field[] declaredFields = apiAuditVoClass.getDeclaredFields();
+			List<Map<String, String>> fieldMapList = new ArrayList<>();
+			for(int i = 0;i < declaredFields.length;i++){
+				Map<String, String> map = new LinkedHashMap<>();
+				ExcelField entityField = declaredFields[i].getAnnotation(ExcelField.class);
+				if(entityField != null){
+					map.put(declaredFields[i].getName(),entityField.name());
+					fieldMapList.add(map);
 				}
-				resultList.add(map);
+			}
+			/**
+			 * 筛选出ApiAuditVo中的getter方法
+			 */
+			Method[] methods = ApiAuditVo.class.getDeclaredMethods();
+			List<Method> methodList = new ArrayList<>();
+			for(int i = 0;i < methods.length;i++){
+				if(methods[i].getName().startsWith("get")){
+					methodList.add(methods[i]);
+				}
+			}
+			/**
+			 * 利用筛选出的getter方法与fieldMapList中的字段匹配
+			 * 匹配上之后用反射获取对应getter的调用结果
+			 * 把与当前getter对应的字段与调用结果保存在map中
+			 */
+			List<Map<String, Object>> resultList = new ArrayList<>();
+			if(CollectionUtils.isNotEmpty(apiAuditVoList)){
+				for(ApiAuditVo vo : apiAuditVoList){
+					Map<String, Object> map = new LinkedHashMap<>();
+					for(Map<String, String> fieldMap : fieldMapList){
+						for(Method method : methodList){
+							String methodName = method.getName();
+							String getterField = methodName.substring(methodName.indexOf("t") + 1);
+							String field = getterField.substring(0, 1).toLowerCase() + getterField.substring(1);
+							String fieldName = fieldMap.get(field);
+							if(StringUtils.isBlank(fieldName)){
+								continue;
+							}
+							Object result = method.invoke(vo);
+							if(result instanceof Date){
+								result = sdf.format(result);
+							}
+							map.put(fieldName,result);
+						}
+					}
+					resultList.add(map);
+				}
+			}
+
+			List<String> headerList = new ArrayList<>();
+			List<String> columnList = new ArrayList<>();
+			if(CollectionUtils.isNotEmpty(resultList)){
+				Map<String, Object> map = resultList.get(0);
+				for(String key : map.keySet()){
+					headerList.add(key);
+					columnList.add(key);
+				}
+				SXSSFWorkbook workbook = new SXSSFWorkbook();
+
+				ExcelUtil.exportData(workbook,headerList,columnList,resultList);
+				String fileName = "操作审计";
+				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+				if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0 || flag) {
+					fileName = URLEncoder.encode((fileName + ".xlsx"), "UTF-8");
+				} else {
+					fileName = new String((fileName + ".xlsx").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+				}
+
+				response.setContentType("application/vnd.ms-excel;charset=utf-8");
+				response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+				try (OutputStream os = response.getOutputStream()){
+					workbook.write(os);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
-		List<String> headerList = new ArrayList<>();
-		List<String> columnList = new ArrayList<>();
-		if(CollectionUtils.isNotEmpty(resultList)){
-			Map<String, Object> map = resultList.get(0);
-			for(String key : map.keySet()){
-				headerList.add(key);
-				columnList.add(key);
-			}
-			SXSSFWorkbook workbook = new SXSSFWorkbook();
-
-			ExcelUtil.exportData(workbook,headerList,columnList,resultList);
-			String fileName = "操作审计";
-			Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-			if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0 || flag) {
-				fileName = URLEncoder.encode((fileName + ".xlsx"), "UTF-8");
-			} else {
-				fileName = new String((fileName + ".xlsx").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-			}
-
-			response.setContentType("application/vnd.ms-excel;charset=utf-8");
-			response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-			try (OutputStream os = response.getOutputStream()){
-				workbook.write(os);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		return null;
 	}
 }

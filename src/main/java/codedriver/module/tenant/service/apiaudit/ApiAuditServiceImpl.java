@@ -5,6 +5,7 @@ import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
+        if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
+            return null;
+        }
         List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
         /**
          * 补充从数据库无法获取的字段
@@ -53,6 +57,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
+        if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
+            return null;
+        }
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
         /**
          * 补充从数据库无法获取的字段
@@ -104,8 +111,24 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 continue;
             }
             //根据功能筛选接口
-            if (StringUtils.isNotBlank(apiAuditVo.getFuncId()) && !api.getToken().contains(apiAuditVo.getFuncId())) {
-                continue;
+//            if (StringUtils.isNotBlank(apiAuditVo.getFuncId()) && !api.getToken().contains(apiAuditVo.getFuncId())) {
+//                continue;
+//            }
+            if (StringUtils.isNotBlank(apiAuditVo.getFuncId())) {
+                if(apiAuditVo.getFuncId().contains("/")){
+                    if(!api.getToken().contains("/")){
+                        continue;
+                    }else if(api.getToken().contains("/") && !api.getToken().startsWith(apiAuditVo.getFuncId() + "/")){
+                        continue;
+                    }
+                }else {
+                    if(!api.getToken().contains("/") && !apiAuditVo.getFuncId().equals(api.getToken())) {
+                        continue;
+                    }else if(api.getToken().contains("/") && !api.getToken().startsWith(apiAuditVo.getFuncId() + "/")) {
+                        continue;
+                    }
+                }
+
             }
             if (StringUtils.isNotBlank(apiAuditVo.getKeyword())) {
                 if (!api.getName().contains(apiAuditVo.getKeyword()) && !api.getToken().contains(apiAuditVo.getKeyword())) {
