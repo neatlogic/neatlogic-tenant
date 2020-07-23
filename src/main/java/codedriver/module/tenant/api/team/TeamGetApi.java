@@ -73,7 +73,7 @@ public class TeamGetApi extends ApiComponentBase {
 		teamVo.setUserCount(userCount);
 		int isEdit = jsonObj.getIntValue("isEdit");
 		List<String> pathNameList = new ArrayList<>();
-		List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
+		List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(), null);
 		for(TeamVo ancestor : ancestorsAndSelf) {
 			if(isEdit == 0 || !teamVo.getUuid().equals(ancestor.getUuid())) {
 				pathNameList.add(ancestor.getName());
