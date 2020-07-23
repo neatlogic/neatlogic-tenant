@@ -48,7 +48,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name = "apiMenuType", type = ApiParamType.STRING, desc = "目录类型(system|custom)")})
+	@Input({@Param(name = "apiMenuType", type = ApiParamType.STRING, desc = "目录类型(system|custom)",isRequired = true)})
 	@Output({})
 	@Description(desc = "接口管理-树形目录接口")
 	@Override
@@ -60,65 +60,65 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		//存储最终目录的数组
 //		JSONArray menuJsonArray = new JSONArray();
 		List<Map<String,Object>> menuMapList = new ArrayList<>();
-		if(StringUtils.isNotBlank(apiMenuType)){
-			List<ApiVo> apiList = null;
-			//获取系统中所有的模块
-			Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
-			if(ApiVo.ApiType.SYSTEM.getValue().equals(apiMenuType)){
-				apiList = ApiComponentFactory.getApiList();
-			}else if(ApiVo.ApiType.CUSTOM.getValue().equals(apiMenuType)) {
-				//获取数据库中所有的API
-				List<ApiVo> dbApiList = apiMapper.getAllApi();
-				Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
-				apiList = new ArrayList<>();
-				//与系统中的API匹配token，如果匹配不上则表示是自定义API
-				for (ApiVo vo : dbApiList) {
-					if (ramApiMap.get(vo.getToken()) == null) {
-						apiList.add(vo);
-					}
-				}
-			}
-			if(CollectionUtils.isNotEmpty(apiList)){
-				for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
-					Map<String,Object> moduleMap = new JSONObject();
-					moduleMap.put("moduleGroup",vo.getKey());
-					moduleMap.put("moduleGroupName",vo.getValue().getGroupName());
-					//多个token的第一个单词相同，用Set可以去重
-					Set<Func> funcSet = new HashSet<>(16);
-					for(ApiVo apiVo : apiList){
-						String moduleGroup = apiVo.getModuleGroup();
-						if(vo.getKey().equals(moduleGroup)){
-							String token = apiVo.getToken();
-							Func func = new Func();
-							//有些API的token没有“/”，比如登出接口
-							String[] slashSplit = token.split("/");
-							func.setFuncId(slashSplit[0]);
-//							if(token.indexOf("/") < 0){
-//								func.setFuncId(token);
-//							}else{
-//								func.setFuncId(token.substring(0,token.indexOf("/")));
-//							}
-							if(funcSet.contains(func)){
-								if(slashSplit.length > 2){
-									funcSet.stream().forEach(func1 -> {
-										if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
-											func1.setIsHasChild(1);
-										}
-									});
-								}
-							}else{
-								if(slashSplit.length > 2){
-									func.setIsHasChild(1);
-								}
-								funcSet.add(func);
-							}
-						}
-					}
-					moduleMap.put("funcList",funcSet);
-					menuMapList.add(moduleMap);
+
+		List<ApiVo> apiList = null;
+		//获取系统中所有的模块
+		Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
+		if(ApiVo.ApiType.SYSTEM.getValue().equals(apiMenuType)){
+			apiList = ApiComponentFactory.getApiList();
+		}else if(ApiVo.ApiType.CUSTOM.getValue().equals(apiMenuType)) {
+			//获取数据库中所有的API
+			List<ApiVo> dbApiList = apiMapper.getAllApi();
+			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+			apiList = new ArrayList<>();
+			//与系统中的API匹配token，如果匹配不上则表示是自定义API
+			for (ApiVo vo : dbApiList) {
+				if (ramApiMap.get(vo.getToken()) == null) {
+					apiList.add(vo);
 				}
 			}
 		}
+		if(CollectionUtils.isNotEmpty(apiList)){
+			for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
+				Map<String,Object> moduleMap = new JSONObject();
+				moduleMap.put("moduleGroup",vo.getKey());
+				moduleMap.put("moduleGroupName",vo.getValue().getGroupName());
+				//多个token的第一个单词相同，用Set可以去重
+				Set<Func> funcSet = new HashSet<>(16);
+				for(ApiVo apiVo : apiList){
+					String moduleGroup = apiVo.getModuleGroup();
+					if(vo.getKey().equals(moduleGroup)){
+						String token = apiVo.getToken();
+						Func func = new Func();
+						//有些API的token没有“/”，比如登出接口
+						String[] slashSplit = token.split("/");
+						func.setFuncId(slashSplit[0]);
+//						if(token.indexOf("/") < 0){
+//							func.setFuncId(token);
+//						}else{
+//							func.setFuncId(token.substring(0,token.indexOf("/")));
+//						}
+						if(funcSet.contains(func)){
+							if(slashSplit.length > 2){
+								funcSet.stream().forEach(func1 -> {
+									if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
+										func1.setIsHasChild(1);
+									}
+								});
+							}
+						}else{
+							if(slashSplit.length > 2){
+								func.setIsHasChild(1);
+							}
+							funcSet.add(func);
+						}
+					}
+				}
+				moduleMap.put("funcList",funcSet);
+				menuMapList.add(moduleMap);
+			}
+		}
+
 		return menuMapList;
 	}
 
