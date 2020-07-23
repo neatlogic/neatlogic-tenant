@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -20,7 +19,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.user.UserCurrentPasswordException;
 
-@AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 @Transactional
 public class UserPasswordUpdateApi extends ApiComponentBase {

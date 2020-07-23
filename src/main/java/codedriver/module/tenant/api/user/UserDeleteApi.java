@@ -1,7 +1,5 @@
 package codedriver.module.tenant.api.user;
 
-import com.alibaba.fastjson.JSON;
-
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -9,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -21,7 +20,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@AuthAction(name="SYSTEM_USER_EDIT")
+@AuthAction(name="USER_MODIFY")
 @Service
 @Transactional
 public class UserDeleteApi extends ApiComponentBase{

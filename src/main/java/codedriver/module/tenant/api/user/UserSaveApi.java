@@ -14,13 +14,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -29,7 +31,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.util.UuidUtil;
 
-@AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 @Transactional
 public class UserSaveApi extends ApiComponentBase {
@@ -114,6 +115,15 @@ public class UserSaveApi extends ApiComponentBase {
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		boolean hasAuth = false;
+		if(UserContext.get().getUserId(true).equals(jsonObj.getString("uuid"))) {
+			hasAuth = true;
+		}else {
+			hasAuth = AuthActionChecker.check("USER_MODIFY");
+		}
+		if(!hasAuth) {
+			throw new PermissionDeniedException();
+		}
 		UserVo userVo = new UserVo();		
 		userVo.setUserId(jsonObj.getString("userId"));
 		userVo.setUserName(jsonObj.getString("userName"));
