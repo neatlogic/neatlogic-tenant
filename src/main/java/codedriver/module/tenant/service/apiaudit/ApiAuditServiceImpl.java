@@ -82,7 +82,37 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         return apiAuditList;
     }
 
-    private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo,List<ApiVo> apiList) throws ClassNotFoundException {
+    @Override
+    public List<ApiVo> getApiListForTree() {
+        List<String> distinctTokenInApiAudit = apiMapper.getDistinctTokenInApiAudit();
+        List<ApiVo> apiList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(distinctTokenInApiAudit)){
+            Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+            List<ApiVo> dbApiList = apiMapper.getAllApi();
+            if(CollectionUtils.isNotEmpty(dbApiList)){
+                List<ApiVo> dbApiVos = new ArrayList<>();
+                for (ApiVo vo : dbApiList) {
+                    if (ramApiMap.get(vo.getToken()) == null) {
+                        dbApiVos.add(vo);
+                    }
+                }
+                for (String token : distinctTokenInApiAudit) {
+                    ApiVo apiVo = ramApiMap.get(token);
+                    if (apiVo != null) {
+                        apiList.add(apiVo);
+                    }
+                    for (ApiVo vo : dbApiVos) {
+                        if (vo.getToken().equals(token)) {
+                            apiList.add(vo);
+                        }
+                    }
+                }
+            }
+        }
+        return apiList;
+    }
+
+    private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo, List<ApiVo> apiList) throws ClassNotFoundException {
         /**
          * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间
          */
