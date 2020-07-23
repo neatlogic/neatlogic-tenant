@@ -100,8 +100,21 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				continue;
 			}
 			//根据功能筛选接口（用于接口管理页的目录树筛选）
-			if(StringUtils.isNotBlank(apiVo.getFuncId()) && !api.getToken().contains(apiVo.getFuncId())) {
-				continue;
+			if (StringUtils.isNotBlank(apiVo.getFuncId())) {
+				if(apiVo.getFuncId().contains("/")){
+					if(!api.getToken().contains("/")){
+						continue;
+					}else if(api.getToken().contains("/") && !api.getToken().startsWith(apiVo.getFuncId() + "/")){
+						continue;
+					}
+				}else {
+					if(!api.getToken().contains("/") && !apiVo.getFuncId().equals(api.getToken())) {
+						continue;
+					}else if(api.getToken().contains("/") && !api.getToken().startsWith(apiVo.getFuncId() + "/")) {
+						continue;
+					}
+				}
+
 			}
 			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
 				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {
@@ -134,8 +147,18 @@ public class ApiManageSearchApi extends ApiComponentBase {
 				continue;
 			}
 			//根据功能筛选接口（用于接口管理页的目录树筛选）
-			if (StringUtils.isNotBlank(apiVo.getFuncId()) && !api.getToken().contains(apiVo.getFuncId())) {
-				continue;
+			if(apiVo.getFuncId().contains("/")){
+				if(!api.getToken().contains("/")){
+					continue;
+				}else if(api.getToken().contains("/") && !api.getToken().startsWith(apiVo.getFuncId() + "/")){
+					continue;
+				}
+			}else {
+				if(!api.getToken().contains("/") && !apiVo.getFuncId().equals(api.getToken())) {
+					continue;
+				}else if(api.getToken().contains("/") && !api.getToken().startsWith(apiVo.getFuncId() + "/")) {
+					continue;
+				}
 			}
 			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
 				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {

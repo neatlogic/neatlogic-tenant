@@ -1,10 +1,12 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
@@ -46,7 +48,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ })
+	@Input({@Param(name = "apiMenuType", type = ApiParamType.STRING, desc = "目录类型(system|custom)")})
 	@Output({})
 	@Description(desc = "接口管理-树形目录接口")
 	@Override
@@ -89,42 +91,32 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 							String token = apiVo.getToken();
 							Func func = new Func();
 							//有些API的token没有“/”，比如登出接口
-							if(token.indexOf("/") < 0){
-								func.setFuncId(token);
+							String[] slashSplit = token.split("/");
+							func.setFuncId(slashSplit[0]);
+//							if(token.indexOf("/") < 0){
+//								func.setFuncId(token);
+//							}else{
+//								func.setFuncId(token.substring(0,token.indexOf("/")));
+//							}
+							if(funcSet.contains(func)){
+								if(slashSplit.length > 2){
+									funcSet.stream().forEach(func1 -> {
+										if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
+											func1.setIsHasChild(1);
+										}
+									});
+								}
 							}else{
-								func.setFuncId(token.substring(0,token.indexOf("/")));
+								if(slashSplit.length > 2){
+									func.setIsHasChild(1);
+								}
+								funcSet.add(func);
 							}
-							funcSet.add(func);
 						}
 					}
 					moduleMap.put("funcList",funcSet);
 					menuMapList.add(moduleMap);
 				}
-                if(CollectionUtils.isNotEmpty(menuMapList)){
-                    //TODO 分析出每个模块每个功能下最长的token有几个"/"，以此来判断是否有子目录
-                    for(Map<String,Object> map : menuMapList){
-                        Set<Func> funcSet = (Set<Func>)map.get("funcList");
-                        for(Func func : funcSet){
-                            int count = 0;
-                            for(ApiVo apiVo : apiList){
-                                String moduleGroup = apiVo.getModuleGroup();
-                                if(map.get("moduleGroup").toString().equals(moduleGroup)){
-                                    String token = apiVo.getToken();
-                                    if(token.startsWith(func.getFuncId())){
-                                        int slashCount = (token.length() - token.replace("/", "").length());
-                                        if(slashCount >= count){
-                                            count = slashCount;
-                                        }
-                                    }
-                                }
-                            }
-                            if(count > 1){
-                                func.setIsHasChild(1);
-                            }
-                        }
-                    }
-                }
-
 			}
 		}
 		return menuMapList;
