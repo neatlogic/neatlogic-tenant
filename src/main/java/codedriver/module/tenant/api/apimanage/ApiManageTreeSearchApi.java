@@ -87,7 +87,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		}
 		if(CollectionUtils.isNotEmpty(apiList)){
 			for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
-				Map<String,Object> moduleMap = new JSONObject();
+				Map<String,Object> moduleMap = new HashMap<>();
 				moduleMap.put("moduleGroup",vo.getKey());
 				moduleMap.put("moduleGroupName",vo.getValue().getGroupName());
 				//多个token的第一个单词相同，用Set可以去重

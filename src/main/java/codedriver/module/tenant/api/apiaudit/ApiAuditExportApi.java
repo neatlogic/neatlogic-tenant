@@ -82,8 +82,7 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 			/**
 			 * 利用反射把ApiAuditVo中标识为excel列的字段保存在map中
 			 */
-			Class<ApiAuditVo> apiAuditVoClass = ApiAuditVo.class;
-			Field[] declaredFields = apiAuditVoClass.getDeclaredFields();
+			Field[] declaredFields = ApiAuditVo.class.getDeclaredFields();
 			List<Map<String, String>> fieldMapList = new ArrayList<>();
 			for(int i = 0;i < declaredFields.length;i++){
 				Map<String, String> map = new LinkedHashMap<>();

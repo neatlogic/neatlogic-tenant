@@ -36,20 +36,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         /**
          * 补充从数据库无法获取的字段
          */
-        for(ApiAuditVo vo : apiAuditVoList){
-            for(ApiVo api : apiList){
-                if(vo.getToken().equals(api.getToken())){
-                    vo.setApiName(api.getName());
-                    vo.setModuleGroup(api.getModuleGroup());
-                    Class<?> apiClass = Class.forName(api.getHandler());
-                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
-                    if(annotation != null){
-                        vo.setOperationType(annotation.type().getValue());
-                    }
-                    break;
-                }
-            }
-        }
+        addFields(apiList, apiAuditVoList);
         return apiAuditVoList;
     }
 
@@ -64,24 +51,15 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         /**
          * 补充从数据库无法获取的字段
          */
-        for(ApiAuditVo vo : apiAuditList){
-            for(ApiVo api : apiList){
-                if(vo.getToken().equals(api.getToken())){
-                    vo.setApiName(api.getName());
-                    vo.setModuleGroup(api.getModuleGroup());
-                    Class<?> apiClass = Class.forName(api.getHandler());
-                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
-                    if(annotation != null){
-                        vo.setOperationType(annotation.type().getValue());
-                    }
-                    break;
-                }
-            }
-        }
+        addFields(apiList, apiAuditList);
 
         return apiAuditList;
     }
 
+    /**
+     * 筛选出api_audit表中有记录的API
+     * @return
+     */
     @Override
     public List<ApiVo> getApiListForTree() {
         List<String> distinctTokenInApiAudit = apiMapper.getDistinctTokenInApiAudit();
@@ -127,14 +105,15 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             apiAuditVo.setEndTime(Calendar.getInstance().getTime());
         }
 
-        List<ApiVo> apiVoList = ApiComponentFactory.getApiList();
-        List<ApiVo> dbApiList = apiMapper.getAllApi();
-        Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
-        for (ApiVo vo : dbApiList) {
-            if (ramApiMap.get(vo.getToken()) == null) {
-                apiVoList.add(vo);
-            }
-        }
+        /** 首先筛选出api_audit表中有记录的API，再用这些API做进一步的筛选 */
+        List<ApiVo> apiVoList = getApiListForTree();
+//        List<ApiVo> dbApiList = apiMapper.getAllApi();
+//        Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+//        for (ApiVo vo : dbApiList) {
+//            if (ramApiMap.get(vo.getToken()) == null) {
+//                apiVoList.add(vo);
+//            }
+//        }
 //        List<ApiVo> apiList = new ArrayList<>();
         List<String> apiTokenList = new ArrayList<>();
         for (ApiVo api : apiVoList) {
@@ -176,5 +155,22 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         }
         //把筛选出来的api的token塞到apiAuditVo，以便之后的数据库查询
         apiAuditVo.setTokenList(apiTokenList);
+    }
+
+    private void addFields(List<ApiVo> apiList, List<ApiAuditVo> apiAuditVoList) throws ClassNotFoundException {
+        for (ApiAuditVo vo : apiAuditVoList) {
+            for (ApiVo api : apiList) {
+                if (vo.getToken().equals(api.getToken())) {
+                    vo.setApiName(api.getName());
+                    vo.setModuleGroup(api.getModuleGroup());
+                    Class<?> apiClass = Class.forName(api.getHandler());
+                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                    if (annotation != null) {
+                        vo.setOperationType(annotation.type().getValue());
+                    }
+                    break;
+                }
+            }
+        }
     }
 }

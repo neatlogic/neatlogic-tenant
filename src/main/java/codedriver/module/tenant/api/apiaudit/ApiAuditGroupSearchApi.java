@@ -1,11 +1,11 @@
 package codedriver.module.tenant.api.apiaudit;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.DateUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.dto.ApiAuditVo;
+import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -80,7 +80,7 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 			SimpleDateFormat sdfOfDay = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat sdfOfMonth = new SimpleDateFormat("yyyy-MM");
 			//计算时间跨度
-			List<Date> timeRangeForDay = DateUtil.calBetweenDaysDate(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
+			List<Date> timeRangeForDay = TimeUtil.calBetweenDaysDate(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
 
 			List<Map<String,Object>> resultList = new ArrayList<>();
 
@@ -124,21 +124,21 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 				 * timeRangeForMonth中记录了起始时间与结束时间之间的每个月
 				 * 遍历每一个筛选出来的ApiAuditVo，按月统计各类型操作数
 				 */
-				List<String> timeRangeForMonth = DateUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
+				List<String> timeRangeForMonth = TimeUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
 				String currentMonth = sdfOfMonth.format(Calendar.getInstance().getTime());
 				for(String month : timeRangeForMonth){
 					Map<String,Object> countMap = new HashMap<>();
 					if(currentMonth.equals(month)){
-						Date firstDayOfMonth = DateUtil.firstDayOfMonth(Calendar.getInstance().getTime());
+						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(Calendar.getInstance().getTime());
 						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
 						countMap.put("endTime",sdfOfDay.format(Calendar.getInstance().getTime()));
 					}else if(sdfOfMonth.format(apiAuditVo.getStartTime()).equals(month)){
-						Date lastDayOfMonth = DateUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
 						countMap.put("startTime",sdfOfDay.format(apiAuditVo.getStartTime()));
 						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
 					}else{
-						Date firstDayOfMonth = DateUtil.firstDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
-						Date lastDayOfMonth = DateUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
 						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
 						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
 					}
