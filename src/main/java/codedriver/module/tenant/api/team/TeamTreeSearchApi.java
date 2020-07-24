@@ -69,7 +69,7 @@ public class TeamTreeSearchApi extends ApiComponentBase {
         	if(teamVo == null) {
         		throw new TeamNotFoundException(uuid);
         	}
-        	teamList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
+        	teamList = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(), null);
         	for(TeamVo team : teamList) {
         		teamMap.put(team.getUuid(), team);
         		teamUuidList.add(team.getUuid());
@@ -79,7 +79,7 @@ public class TeamTreeSearchApi extends ApiComponentBase {
     		keywordTeam.setKeyword(keyword);
     		List<TeamVo> targetTeamList = teamMapper.searchTeam(keywordTeam);
     		for(TeamVo teamVo : targetTeamList) {
-    			List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht());
+    			List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(), null);
     			for(TeamVo team : ancestorsAndSelf) {
     				if(!teamUuidList.contains(team.getUuid())) {
                 		teamMap.put(team.getUuid(), team);

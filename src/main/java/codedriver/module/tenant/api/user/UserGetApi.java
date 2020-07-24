@@ -25,7 +25,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@AuthAction(name = "SYSTEM_USER_EDIT")
 @Service
 public class UserGetApi extends ApiComponentBase {
 

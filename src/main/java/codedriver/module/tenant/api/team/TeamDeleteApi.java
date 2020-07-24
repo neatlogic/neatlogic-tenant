@@ -51,7 +51,7 @@ public class TeamDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		teamMapper.getTeamCountOnLock();
-		if(!teamService.checkLeftRightCodeIsExists()) {
+		if(teamMapper.checkLeftRightCodeIsWrong() > 0) {
 			teamService.rebuildLeftRightCode();
 		}
 		String uuid = jsonObj.getString("uuid");

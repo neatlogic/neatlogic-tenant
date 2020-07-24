@@ -1,19 +1,18 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
-import codedriver.framework.dto.ModuleVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,6 @@ import java.util.*;
  */
 
 @Service
-@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Autowired
@@ -49,52 +47,115 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({ })
+	@Input({@Param(name = "apiMenuType", type = ApiParamType.STRING, desc = "目录类型(system|custom)",isRequired = true)})
 	@Output({})
 	@Description(desc = "接口管理-树形目录接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-
+		// TODO 根据apiType判断返回系统接口目录还是自定义接口目录，还要有全部的目录，以提供给操作审计使用
+		// TODO 默认展示两层目录，在第二层标识是否有子目录
+		// TODO 增加一个接口，点击第二层目录时查询其下所有子目录
+		String apiMenuType = jsonObj.getString("apiMenuType");
 		//存储最终目录的数组
-		JSONArray menuJsonArray = new JSONArray();
+//		JSONArray menuJsonArray = new JSONArray();
+		List<Map<String,Object>> menuMapList = new ArrayList<>();
+
+		List<ApiVo> apiList = null;
 		//获取系统中所有的模块
 		Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
-		//获取所有的内存API
-		HashMap<String,ApiVo> apiMap = new HashMap<>();
-		apiMap.putAll(ApiComponentFactory.getApiMap());
-		//获取数据库中所有的API
-		List<ApiVo> dbApiList = apiMapper.getAllApi();
-		//内存API与数据库API去重：如果token相同，数据库api数据覆盖内存api数据
-		for(ApiVo api : dbApiList){
-			if(apiMap.containsKey(api.getToken())) {
-				api.setIsDeletable(0);
-			}
-			apiMap.put(api.getToken(), api);
-		}
-		Collection<ApiVo> apiList = apiMap.values();
-		for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
-			JSONObject moduleJson = new JSONObject();
-			moduleJson.put("moduleGroup",vo.getKey());
-			moduleJson.put("moduleGroupName",vo.getValue().getGroupName());
-			//多个token的第一个单词相同，用Set可以去重
-			Set<String> funcSet = new HashSet<>(16);
-			for(ApiVo apiVo : apiList){
-				String moduleGroup = apiVo.getModuleGroup();
-				if(vo.getKey().equals(moduleGroup)){
-					String token = apiVo.getToken();
-					String funcId;
-					//有些API的token没有“/”，比如登出接口
-					if(token.indexOf("/") < 0){
-						funcId = token;
-					}else{
-						funcId = token.substring(0,token.indexOf("/"));
-					}
-					funcSet.add(funcId);
+		if(ApiVo.ApiType.SYSTEM.getValue().equals(apiMenuType)){
+			apiList = ApiComponentFactory.getApiList();
+		}else if(ApiVo.ApiType.CUSTOM.getValue().equals(apiMenuType)) {
+			//获取数据库中所有的API
+			List<ApiVo> dbApiList = apiMapper.getAllApi();
+			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+			apiList = new ArrayList<>();
+			//与系统中的API匹配token，如果匹配不上则表示是自定义API
+			for (ApiVo vo : dbApiList) {
+				if (ramApiMap.get(vo.getToken()) == null) {
+					apiList.add(vo);
 				}
 			}
-			moduleJson.put("funcList",funcSet);
-			menuJsonArray.add(moduleJson);
 		}
-		return menuJsonArray;
+		if(CollectionUtils.isNotEmpty(apiList)){
+			for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
+				Map<String,Object> moduleMap = new JSONObject();
+				moduleMap.put("moduleGroup",vo.getKey());
+				moduleMap.put("moduleGroupName",vo.getValue().getGroupName());
+				//多个token的第一个单词相同，用Set可以去重
+				Set<Func> funcSet = new HashSet<>(16);
+				for(ApiVo apiVo : apiList){
+					String moduleGroup = apiVo.getModuleGroup();
+					if(vo.getKey().equals(moduleGroup)){
+						String token = apiVo.getToken();
+						Func func = new Func();
+						//有些API的token没有“/”，比如登出接口
+						String[] slashSplit = token.split("/");
+						func.setFuncId(slashSplit[0]);
+//						if(token.indexOf("/") < 0){
+//							func.setFuncId(token);
+//						}else{
+//							func.setFuncId(token.substring(0,token.indexOf("/")));
+//						}
+						if(funcSet.contains(func)){
+							if(slashSplit.length > 2){
+								funcSet.stream().forEach(func1 -> {
+									if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
+										func1.setIsHasChild(1);
+									}
+								});
+							}
+						}else{
+							if(slashSplit.length > 2){
+								func.setIsHasChild(1);
+							}
+							funcSet.add(func);
+						}
+					}
+				}
+				moduleMap.put("funcList",funcSet);
+				menuMapList.add(moduleMap);
+			}
+		}
+
+		return menuMapList;
+	}
+
+	class Func{
+		private String funcId;
+
+		private int isHasChild = 0;
+
+		public String getFuncId() {
+			return funcId;
+		}
+
+		public void setFuncId(String funcId) {
+			this.funcId = funcId;
+		}
+
+        public int getIsHasChild() {
+            return isHasChild;
+        }
+
+        public void setIsHasChild(int isHasChild) {
+            this.isHasChild = isHasChild;
+        }
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Func func = (Func) o;
+			return Objects.equals(funcId, func.funcId);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((funcId == null) ? 0 : funcId.hashCode());
+			return result;
+		}
 	}
 }
