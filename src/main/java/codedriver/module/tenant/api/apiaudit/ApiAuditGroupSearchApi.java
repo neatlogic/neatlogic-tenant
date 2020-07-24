@@ -71,107 +71,107 @@ public class ApiAuditGroupSearchApi extends ApiComponentBase {
 	@Description(desc = "操作审计分组查询接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
-
-		//筛选出符合条件的所有记录
-		List<ApiAuditVo> apiAuditVoList = apiAuditService.searchApiAuditVo(apiAuditVo);
-
-		if(CollectionUtils.isNotEmpty(apiAuditVoList)){
-			SimpleDateFormat sdfOfDay = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat sdfOfMonth = new SimpleDateFormat("yyyy-MM");
-			//计算时间跨度
-			List<Date> timeRangeForDay = TimeUtil.calBetweenDaysDate(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
-
-			List<Map<String,Object>> resultList = new ArrayList<>();
-
-			if(timeRangeForDay.size() <= 31){
-				/**
-				 * 按天统计各类型操作数
-				 */
-				for(Date date : timeRangeForDay){
-					Map<String,Object> countMap = new HashMap<>();
-					countMap.put("startTime",sdfOfDay.format(date));
-					countMap.put("endTime",sdfOfDay.format(date));
-					countMap.put("time",sdfOfDay.format(date));
-					countMap.put("count",0);
-					countMap.put("createCount",0);
-					countMap.put("deleteCount",0);
-					countMap.put("updateCount",0);
-					countMap.put("retrieveCount",0);
-					for(ApiAuditVo vo : apiAuditVoList){
-						if(sdfOfDay.format(vo.getStartTime()).equals(sdfOfDay.format(date))){
-							countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
-							//TODO 按操作类型计数
-							if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
-								countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
-								countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
-								countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
-								countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
-							}
-						}
-					}
-					resultList.add(countMap);
-				}
-			}else{
-				/**
-				 * 根据起始时间和结束时间计算月度
-				 * timeRangeForMonth中记录了起始时间与结束时间之间的每个月
-				 * 遍历每一个筛选出来的ApiAuditVo，按月统计各类型操作数
-				 */
-				List<String> timeRangeForMonth = TimeUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
-				String currentMonth = sdfOfMonth.format(Calendar.getInstance().getTime());
-				for(String month : timeRangeForMonth){
-					Map<String,Object> countMap = new HashMap<>();
-					if(currentMonth.equals(month)){
-						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(Calendar.getInstance().getTime());
-						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
-						countMap.put("endTime",sdfOfDay.format(Calendar.getInstance().getTime()));
-					}else if(sdfOfMonth.format(apiAuditVo.getStartTime()).equals(month)){
-						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
-						countMap.put("startTime",sdfOfDay.format(apiAuditVo.getStartTime()));
-						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
-					}else{
-						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
-						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
-						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
-						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
-					}
-					countMap.put("time",month);
-					countMap.put("count",0);
-					countMap.put("createCount",0);
-					countMap.put("deleteCount",0);
-					countMap.put("updateCount",0);
-					countMap.put("retrieveCount",0);
-					for(ApiAuditVo vo : apiAuditVoList){
-						if(sdfOfMonth.format(vo.getStartTime()).equals(month)){
-							countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
-							//TODO 按操作类型计数
-							if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
-								countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
-								countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
-								countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
-							}
-							if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
-								countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
-							}
-						}
-					}
-					resultList.add(countMap);
-				}
-			}
-
-			return resultList;
-		}
+//		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
+//
+//		//筛选出符合条件的所有记录
+//		List<ApiAuditVo> apiAuditVoList = apiAuditService.searchApiAuditVo(apiAuditVo);
+//
+//		if(CollectionUtils.isNotEmpty(apiAuditVoList)){
+//			SimpleDateFormat sdfOfDay = new SimpleDateFormat("yyyy-MM-dd");
+//			SimpleDateFormat sdfOfMonth = new SimpleDateFormat("yyyy-MM");
+//			//计算时间跨度
+//			List<Date> timeRangeForDay = TimeUtil.calBetweenDaysDate(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
+//
+//			List<Map<String,Object>> resultList = new ArrayList<>();
+//
+//			if(timeRangeForDay.size() <= 31){
+//				/**
+//				 * 按天统计各类型操作数
+//				 */
+//				for(Date date : timeRangeForDay){
+//					Map<String,Object> countMap = new HashMap<>();
+//					countMap.put("startTime",sdfOfDay.format(date));
+//					countMap.put("endTime",sdfOfDay.format(date));
+//					countMap.put("time",sdfOfDay.format(date));
+//					countMap.put("count",0);
+//					countMap.put("createCount",0);
+//					countMap.put("deleteCount",0);
+//					countMap.put("updateCount",0);
+//					countMap.put("retrieveCount",0);
+//					for(ApiAuditVo vo : apiAuditVoList){
+//						if(sdfOfDay.format(vo.getStartTime()).equals(sdfOfDay.format(date))){
+//							countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
+//							//TODO 按操作类型计数
+//							if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
+//								countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
+//								countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
+//								countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
+//								countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
+//							}
+//						}
+//					}
+//					resultList.add(countMap);
+//				}
+//			}else{
+//				/**
+//				 * 根据起始时间和结束时间计算月度
+//				 * timeRangeForMonth中记录了起始时间与结束时间之间的每个月
+//				 * 遍历每一个筛选出来的ApiAuditVo，按月统计各类型操作数
+//				 */
+//				List<String> timeRangeForMonth = TimeUtil.calculateMonthly(sdfOfDay.format(apiAuditVo.getStartTime()),sdfOfDay.format(apiAuditVo.getEndTime()));
+//				String currentMonth = sdfOfMonth.format(Calendar.getInstance().getTime());
+//				for(String month : timeRangeForMonth){
+//					Map<String,Object> countMap = new HashMap<>();
+//					if(currentMonth.equals(month)){
+//						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(Calendar.getInstance().getTime());
+//						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
+//						countMap.put("endTime",sdfOfDay.format(Calendar.getInstance().getTime()));
+//					}else if(sdfOfMonth.format(apiAuditVo.getStartTime()).equals(month)){
+//						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+//						countMap.put("startTime",sdfOfDay.format(apiAuditVo.getStartTime()));
+//						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
+//					}else{
+//						Date firstDayOfMonth = TimeUtil.firstDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+//						Date lastDayOfMonth = TimeUtil.lastDayOfMonth(sdfOfDay.parse(month + "-01 00:00:00"));
+//						countMap.put("startTime",sdfOfDay.format(firstDayOfMonth));
+//						countMap.put("endTime",sdfOfDay.format(lastDayOfMonth));
+//					}
+//					countMap.put("time",month);
+//					countMap.put("count",0);
+//					countMap.put("createCount",0);
+//					countMap.put("deleteCount",0);
+//					countMap.put("updateCount",0);
+//					countMap.put("retrieveCount",0);
+//					for(ApiAuditVo vo : apiAuditVoList){
+//						if(sdfOfMonth.format(vo.getStartTime()).equals(month)){
+//							countMap.put("count",Integer.parseInt(countMap.get("count").toString()) + 1);
+//							//TODO 按操作类型计数
+//							if(OperationTypeEnum.CREATE.getValue().equals(vo.getOperationType())){
+//								countMap.put("createCount",Integer.parseInt(countMap.get("createCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.DELETE.getValue().equals(vo.getOperationType())){
+//								countMap.put("deleteCount",Integer.parseInt(countMap.get("deleteCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.UPDATE.getValue().equals(vo.getOperationType())){
+//								countMap.put("updateCount",Integer.parseInt(countMap.get("updateCount").toString()) + 1);
+//							}
+//							if(OperationTypeEnum.SEARCH.getValue().equals(vo.getOperationType())){
+//								countMap.put("retrieveCount",Integer.parseInt(countMap.get("retrieveCount").toString()) + 1);
+//							}
+//						}
+//					}
+//					resultList.add(countMap);
+//				}
+//			}
+//
+//			return resultList;
+//		}
 
 		return null;
 	}
