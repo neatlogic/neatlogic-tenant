@@ -158,19 +158,22 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     private void addFields(List<ApiVo> apiList, List<ApiAuditVo> apiAuditVoList) throws ClassNotFoundException {
-        for (ApiAuditVo vo : apiAuditVoList) {
-            for (ApiVo api : apiList) {
-                if (vo.getToken().equals(api.getToken())) {
-                    vo.setApiName(api.getName());
-                    vo.setModuleGroup(api.getModuleGroup());
-                    Class<?> apiClass = Class.forName(api.getHandler());
-                    OperationType annotation = apiClass.getAnnotation(OperationType.class);
-                    if (annotation != null) {
-                        vo.setOperationType(annotation.type().getValue());
+        if(CollectionUtils.isNotEmpty(apiList) && CollectionUtils.isNotEmpty(apiAuditVoList)){
+            for (ApiAuditVo vo : apiAuditVoList) {
+                for (ApiVo api : apiList) {
+                    if (vo.getToken().equals(api.getToken())) {
+                        vo.setApiName(api.getName());
+                        vo.setModuleGroup(api.getModuleGroup());
+                        Class<?> apiClass = Class.forName(api.getHandler());
+                        OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                        if (annotation != null) {
+                            vo.setOperationType(annotation.type().getValue());
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
+
     }
 }

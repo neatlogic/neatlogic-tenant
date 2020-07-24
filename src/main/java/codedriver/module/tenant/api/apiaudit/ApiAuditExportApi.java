@@ -108,28 +108,28 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 			 * 把与当前getter对应的字段与调用结果保存在map中
 			 */
 			List<Map<String, Object>> resultList = new ArrayList<>();
-			if(CollectionUtils.isNotEmpty(apiAuditVoList)){
-				for(ApiAuditVo vo : apiAuditVoList){
-					Map<String, Object> map = new LinkedHashMap<>();
-					for(Map<String, String> fieldMap : fieldMapList){
-						for(Method method : methodList){
-							String methodName = method.getName();
-							String getterField = methodName.substring(methodName.indexOf("t") + 1);
-							String field = getterField.substring(0, 1).toLowerCase() + getterField.substring(1);
-							String fieldName = fieldMap.get(field);
-							if(StringUtils.isBlank(fieldName)){
-								continue;
-							}
-							Object result = method.invoke(vo);
-							if(result instanceof Date){
-								result = sdf.format(result);
-							}
-							map.put(fieldName,result);
+
+			for(ApiAuditVo vo : apiAuditVoList){
+				Map<String, Object> map = new LinkedHashMap<>();
+				for(Map<String, String> fieldMap : fieldMapList){
+					for(Method method : methodList){
+						String methodName = method.getName();
+						String getterField = methodName.substring(methodName.indexOf("t") + 1);
+						String field = getterField.substring(0, 1).toLowerCase() + getterField.substring(1);
+						String fieldName = fieldMap.get(field);
+						if(StringUtils.isBlank(fieldName)){
+							continue;
 						}
+						Object result = method.invoke(vo);
+						if(result instanceof Date){
+							result = sdf.format(result);
+						}
+						map.put(fieldName,result);
 					}
-					resultList.add(map);
 				}
+				resultList.add(map);
 			}
+
 
 			List<String> headerList = new ArrayList<>();
 			List<String> columnList = new ArrayList<>();
