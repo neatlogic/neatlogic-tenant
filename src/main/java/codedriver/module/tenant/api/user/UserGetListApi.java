@@ -4,7 +4,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -23,6 +25,7 @@ import java.util.List;
  * @create: 2020-03-06 11:49
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class UserGetListApi extends ApiComponentBase {
 
     @Autowired
