@@ -93,16 +93,6 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 				}
 			}
 			/**
-			 * 筛选出ApiAuditVo中的getter方法
-			 */
-			Method[] methods = ApiAuditVo.class.getDeclaredMethods();
-			List<Method> methodList = new ArrayList<>();
-			for(int i = 0;i < methods.length;i++){
-				if(methods[i].getName().startsWith("get")){
-					methodList.add(methods[i]);
-				}
-			}
-			/**
 			 * 利用筛选出的getter方法与fieldMapList中的字段匹配
 			 * 匹配上之后用反射获取对应getter的调用结果
 			 * 把与当前getter对应的字段与调用结果保存在map中
@@ -112,20 +102,17 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 			for(ApiAuditVo vo : apiAuditVoList){
 				Map<String, Object> map = new LinkedHashMap<>();
 				for(Map<String, String> fieldMap : fieldMapList){
-					for(Method method : methodList){
-						String methodName = method.getName();
-						String getterField = methodName.substring(methodName.indexOf("t") + 1);
-						String field = getterField.substring(0, 1).toLowerCase() + getterField.substring(1);
-						String fieldName = fieldMap.get(field);
-						if(StringUtils.isBlank(fieldName)){
-							continue;
-						}
-						Object result = method.invoke(vo);
-						if(result instanceof Date){
-							result = sdf.format(result);
-						}
-						map.put(fieldName,result);
+					Set<String> fieldSet = fieldMap.keySet();
+					Collection<String> fieldNameSet = fieldMap.values();
+					Object[] fieldNameArray = fieldNameSet.toArray();
+					Object[] fieldArray = fieldSet.toArray();
+					String field = fieldArray[0].toString().substring(0, 1).toUpperCase() + fieldArray[0].toString().substring(1);
+					Method method = ApiAuditVo.class.getDeclaredMethod("get" + field);
+					Object result = method.invoke(vo);
+					if(result instanceof Date){
+						result = sdf.format(result);
 					}
+					map.put(fieldNameArray[0].toString(),result);
 				}
 				resultList.add(map);
 			}
