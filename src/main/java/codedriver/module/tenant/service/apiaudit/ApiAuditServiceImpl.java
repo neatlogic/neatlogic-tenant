@@ -90,20 +90,22 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
             List<ApiVo> dbApiList = apiMapper.getAllApi();
             if(CollectionUtils.isNotEmpty(dbApiList)){
-                List<ApiVo> dbApiVos = new ArrayList<>();
+                List<ApiVo> customApiVos = new ArrayList<>();
                 for (ApiVo vo : dbApiList) {
                     if (ramApiMap.get(vo.getToken()) == null) {
-                        dbApiVos.add(vo);
+                        customApiVos.add(vo);
                     }
                 }
+                /** 从内存和数据库中筛选api，如果内存中找不到，那就从数据库中找*/
                 for (String token : distinctTokenInApiAudit) {
                     ApiVo apiVo = ramApiMap.get(token);
                     if (apiVo != null) {
                         apiList.add(apiVo);
-                    }
-                    for (ApiVo vo : dbApiVos) {
-                        if (vo.getToken().equals(token)) {
-                            apiList.add(vo);
+                    }else {
+                        for (ApiVo vo : customApiVos) {
+                            if (vo.getToken().equals(token)) {
+                                apiList.add(vo);
+                            }
                         }
                     }
                 }
@@ -145,16 +147,12 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 //                continue;
 //            }
             if (StringUtils.isNotBlank(apiAuditVo.getFuncId())) {
-                if(apiAuditVo.getFuncId().contains("/")){
-                    if(!api.getToken().contains("/")){
-                        continue;
-                    }else if(api.getToken().contains("/") && !api.getToken().startsWith(apiAuditVo.getFuncId() + "/")){
+                if(api.getToken().contains("/")){
+                    if(!api.getToken().startsWith(apiAuditVo.getFuncId() + "/")){
                         continue;
                     }
-                }else {
-                    if(!api.getToken().contains("/") && !apiAuditVo.getFuncId().equals(api.getToken())) {
-                        continue;
-                    }else if(api.getToken().contains("/") && !api.getToken().startsWith(apiAuditVo.getFuncId() + "/")) {
+                }else{
+                    if(!api.getToken().equals(apiAuditVo.getFuncId())){
                         continue;
                     }
                 }
