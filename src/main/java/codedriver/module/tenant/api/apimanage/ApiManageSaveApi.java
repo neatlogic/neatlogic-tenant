@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.exception.type.ApiNotFoundException;
+import codedriver.framework.exception.type.ApiRepeatException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +59,8 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "json格式,配置信息"),
 		@Param(name = "username", type = ApiParamType.STRING, desc = "用户名称"),
 		@Param(name = "password", type = ApiParamType.STRING, desc = "密码"),
-		@Param(name = "description", type = ApiParamType.STRING, desc = "描述")
+		@Param(name = "description", type = ApiParamType.STRING, desc = "描述"),
+        @Param(name = "apiType", type = ApiParamType.STRING, desc = "API类型", isRequired = true)
 	})
 	@Description(desc = "接口配置信息保存接口")
 	@Override
@@ -69,17 +72,38 @@ public class ApiManageSaveApi extends ApiComponentBase {
 			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
 		}
 
-		ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
-		if(ramApiVo == null) {
-			ApiMapper.replaceApi(apiVo);
-			return null;
-		}
-		if(ramApiVo.equals(apiVo)) {
-			//如果接口配置信息与内存中接口配置信息一致，删除数据库中该接口的配置数据
-			ApiMapper.deleteApiByToken(apiVo.getToken());
-		}else {
-			ApiMapper.replaceApi(apiVo);
-		}	
+        ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
+
+		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
+            if(ramApiVo == null) {
+                ApiMapper.replaceApi(apiVo);
+                return null;
+            }else{
+                throw new ApiRepeatException("不可与系统接口使用同一个token");
+            }
+        }else if(ApiVo.ApiType.SYSTEM.getValue().equals(apiVo.getApiType())){
+            if(ramApiVo == null) {
+                throw new ApiNotFoundException("此接口不存在");
+            }
+            if(ramApiVo.equals(apiVo)) {
+                //如果接口配置信息与内存中接口配置信息一致，删除数据库中该接口的配置数据
+                ApiMapper.deleteApiByToken(apiVo.getToken());
+            }else {
+                ApiMapper.replaceApi(apiVo);
+            }
+        }
+
+//		ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
+//		if(ramApiVo == null) {
+//			ApiMapper.replaceApi(apiVo);
+//			return null;
+//		}
+//		if(ramApiVo.equals(apiVo)) {
+//			//如果接口配置信息与内存中接口配置信息一致，删除数据库中该接口的配置数据
+//			ApiMapper.deleteApiByToken(apiVo.getToken());
+//		}else {
+//			ApiMapper.replaceApi(apiVo);
+//		}
 		return null;
 	}
 
