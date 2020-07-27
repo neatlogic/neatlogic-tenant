@@ -2,7 +2,9 @@ package codedriver.module.tenant.api.counter;
 
 
 import codedriver.framework.dto.ModuleVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
  * @create: 2019-12-10 12:06
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class CounterModuleListApi extends ApiComponentBase {
 
     @Autowired

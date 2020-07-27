@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.role;
 
 import codedriver.framework.dto.RoleAuthVo;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 
@@ -20,10 +22,6 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 import java.util.List;
@@ -32,6 +30,7 @@ import java.util.Set;
 @AuthAction(name = "SYSTEM_ROLE_EDIT")
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class RoleSaveApi extends ApiComponentBase {
 
 	@Autowired

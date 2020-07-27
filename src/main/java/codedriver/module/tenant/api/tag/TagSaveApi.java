@@ -2,8 +2,10 @@ package codedriver.module.tenant.api.tag;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.TagService;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class TagSaveApi extends ApiComponentBase {
 
     @Autowired

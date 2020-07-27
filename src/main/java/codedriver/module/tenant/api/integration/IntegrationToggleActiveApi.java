@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @AuthAction(name = "INTEGRATION_EDIT")
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class IntegrationToggleActiveApi extends ApiComponentBase {
 
 	@Autowired

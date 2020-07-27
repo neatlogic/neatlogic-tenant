@@ -5,8 +5,10 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  **/
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.CREATE)
 public class TeamUserSaveApi extends ApiComponentBase {
 
     @Autowired

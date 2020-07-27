@@ -8,6 +8,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class ImageUploadApi extends BinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(ImageUploadApi.class);
 	@Autowired

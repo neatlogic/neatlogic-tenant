@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.scheduler;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -10,10 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -21,6 +19,7 @@ import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 @Service
 @AuthAction(name="SYSTEM_JOB_EDIT")
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class JobClassGetApi extends ApiComponentBase {
 	
 	@Override

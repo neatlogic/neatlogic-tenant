@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.auth;
 import java.util.*;
 
 import codedriver.framework.dto.UserDataVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +20,6 @@ import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 /**
@@ -30,6 +28,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2020-06-04
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthModuleGetApi extends ApiComponentBase {
 	
 	@Autowired

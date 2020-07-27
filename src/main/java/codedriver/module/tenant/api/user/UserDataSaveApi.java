@@ -4,16 +4,15 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserDataVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class UserDataSaveApi extends ApiComponentBase {
 
 	@Autowired
@@ -27,7 +26,7 @@ public class UserDataSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "保存用户数据接口";
+		return "保存用户数据";
 	}
 
 	@Override
@@ -39,7 +38,7 @@ public class UserDataSaveApi extends ApiComponentBase {
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "保存用户数据接口")
+	@Description(desc = "保存用户数据")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserDataVo userDataVo = new UserDataVo();

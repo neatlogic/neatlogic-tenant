@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,6 @@ import codedriver.framework.reminder.core.GlobalReminderHandlerFactory;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMapper;
 import codedriver.framework.reminder.dto.GlobalReminderSubscribeVo;
 import codedriver.framework.reminder.dto.GlobalReminderHandlerVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 /**
@@ -32,6 +30,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2019-12-10 11:35
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ReminderSubscribeSearchApi extends ApiComponentBase {
    
     @Autowired

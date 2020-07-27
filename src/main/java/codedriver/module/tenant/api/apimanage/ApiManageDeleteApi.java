@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import codedriver.module.tenant.exception.api.ApiNotAllowedToDeleteException;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.DELETE)
 public class ApiManageDeleteApi extends ApiComponentBase {
 	
 	@Autowired

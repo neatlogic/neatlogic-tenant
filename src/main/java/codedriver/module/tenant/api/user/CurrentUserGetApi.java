@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.user;
 
 import java.util.Random;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -13,6 +15,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class CurrentUserGetApi extends ApiComponentBase {
 
 	@Override

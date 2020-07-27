@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.reminder;
 import java.util.Collections;
 import java.util.List;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  * @create: 2019-12-10 11:41
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ScheduleReminderApi extends ApiComponentBase {
 
 	@Autowired

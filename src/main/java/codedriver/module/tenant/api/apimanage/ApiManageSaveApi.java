@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import codedriver.framework.restful.dto.ApiVo;
 
 @Service
 @Transactional
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class ApiManageSaveApi extends ApiComponentBase {
 
 	@Autowired

@@ -5,7 +5,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.dto.GlobalCounterVo;
 import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
@@ -23,6 +25,7 @@ import java.util.List;
  * @create: 2019-12-10 12:08
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class CounterListInfoApi extends ApiComponentBase {
 
     @Autowired

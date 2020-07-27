@@ -3,14 +3,13 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +26,14 @@ import java.util.*;
  */
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private ApiMapper apiMapper;
+
+	@Autowired
+	private ApiAuditService apiAuditService;
 
 	@Override
 	public String getToken() {
@@ -39,7 +42,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取接口管理页树形目录接口";
+		return "获取接口管理或操作审计树形目录";
 	}
 
 	@Override
@@ -47,15 +50,15 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name = "apiMenuType", type = ApiParamType.STRING, desc = "目录类型(system|custom)",isRequired = true)})
+	@Input({@Param(name = "menuType", type = ApiParamType.STRING, desc = "目录类型(system|custom|audit)",isRequired = true)})
 	@Output({})
-	@Description(desc = "接口管理-树形目录接口")
+	@Description(desc = "获取接口管理或操作审计树形目录")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO 根据apiType判断返回系统接口目录还是自定义接口目录，还要有全部的目录，以提供给操作审计使用
 		// TODO 默认展示两层目录，在第二层标识是否有子目录
 		// TODO 增加一个接口，点击第二层目录时查询其下所有子目录
-		String apiMenuType = jsonObj.getString("apiMenuType");
+		String menuType = jsonObj.getString("menuType");
 		//存储最终目录的数组
 //		JSONArray menuJsonArray = new JSONArray();
 		List<Map<String,Object>> menuMapList = new ArrayList<>();
@@ -63,9 +66,9 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		List<ApiVo> apiList = null;
 		//获取系统中所有的模块
 		Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
-		if(ApiVo.ApiType.SYSTEM.getValue().equals(apiMenuType)){
+		if(ApiVo.TreeMenuType.SYSTEM.getValue().equals(menuType)){
 			apiList = ApiComponentFactory.getApiList();
-		}else if(ApiVo.ApiType.CUSTOM.getValue().equals(apiMenuType)) {
+		}else if(ApiVo.TreeMenuType.CUSTOM.getValue().equals(menuType)) {
 			//获取数据库中所有的API
 			List<ApiVo> dbApiList = apiMapper.getAllApi();
 			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
@@ -76,10 +79,15 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 					apiList.add(vo);
 				}
 			}
+		}else if(ApiVo.TreeMenuType.AUDIT.getValue().equals(menuType)){
+			/**
+			 * 操作审计页面目录树
+			 */
+			apiList = apiAuditService.getApiListForTree();
 		}
 		if(CollectionUtils.isNotEmpty(apiList)){
 			for(Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()){
-				Map<String,Object> moduleMap = new JSONObject();
+				Map<String,Object> moduleMap = new HashMap<>();
 				moduleMap.put("moduleGroup",vo.getKey());
 				moduleMap.put("moduleGroupName",vo.getValue().getGroupName());
 				//多个token的第一个单词相同，用Set可以去重

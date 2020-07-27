@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -16,6 +18,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @AuthAction(name = "INTEGRATION_EDIT")
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationInvokeApi extends ApiComponentBase {
 
 

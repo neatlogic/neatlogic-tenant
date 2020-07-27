@@ -10,6 +10,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import codedriver.module.tenant.exception.file.FileNotFoundException;
 import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class FileDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired

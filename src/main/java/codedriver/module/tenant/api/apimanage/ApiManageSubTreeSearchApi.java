@@ -1,14 +1,13 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +15,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 
 	@Autowired
 	private ApiMapper apiMapper;
+
+	@Autowired
+	private ApiAuditService apiAuditService;
 
 	@Override
 	public String getToken() {
@@ -28,7 +31,7 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取接口管理页树形目录子目录接口";
+		return "获取接口管理与或操作审计子目录";
 	}
 
 	@Override
@@ -39,10 +42,10 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 	@Input({
 			@Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "所属模块",isRequired = true),
 			@Param(name = "funcId", type = ApiParamType.STRING, desc = "所属功能",isRequired = true),
-			@Param(name = "type", type = ApiParamType.STRING, desc = "目录类型(system|custom)",isRequired = true),
+			@Param(name = "type", type = ApiParamType.STRING, desc = "目录类型(system|custom|audit)",isRequired = true),
 	})
 	@Output({})
-	@Description(desc = "获取接口管理页树形目录子目录接口")
+	@Description(desc = "获取接口管理与或操作审计子目录")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO 先根据type、moduleGroup、funcId筛选出API
@@ -50,14 +53,14 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 		String funcId = jsonObj.getString("funcId");
 		String type = jsonObj.getString("type");
 		List<String> tokenList = new ArrayList<>();
-		if(ApiVo.ApiType.SYSTEM.getValue().equals(type)){
+		if(ApiVo.TreeMenuType.SYSTEM.getValue().equals(type)){
 			List<ApiVo> ramApiList = ApiComponentFactory.getApiList();
 			for(ApiVo vo : ramApiList){
 				if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
 					tokenList.add(vo.getToken());
 				}
 			}
-		}else if(ApiVo.ApiType.CUSTOM.getValue().equals(type)){
+		}else if(ApiVo.TreeMenuType.CUSTOM.getValue().equals(type)){
 			//获取数据库中所有的API
 			List<ApiVo> dbApiList = apiMapper.getAllApi();
 			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
@@ -67,6 +70,13 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 					if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
 						tokenList.add(vo.getToken());
 					}
+				}
+			}
+		}else if(ApiVo.TreeMenuType.AUDIT.getValue().equals(type)){
+			List<ApiVo> apiList = apiAuditService.getApiListForTree();
+			for(ApiVo vo : apiList){
+				if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
+					tokenList.add(vo.getToken());
 				}
 			}
 		}

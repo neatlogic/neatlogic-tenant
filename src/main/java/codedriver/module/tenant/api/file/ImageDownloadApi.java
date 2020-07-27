@@ -8,6 +8,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 import codedriver.module.tenant.exception.file.FileNotFoundException;
 
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class ImageDownloadApi extends BinaryStreamApiComponentBase {
 
 	@Autowired

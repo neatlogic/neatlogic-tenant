@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.reminder;
 
 import java.util.Map;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  * @create: 2019-12-10 11:55
  **/
 @Service
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class ReminderDayUpdateApi extends ApiComponentBase {
 
 	@Autowired

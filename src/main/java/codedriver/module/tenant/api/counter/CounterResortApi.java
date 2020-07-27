@@ -2,8 +2,10 @@ package codedriver.module.tenant.api.counter;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.counter.GlobalCounterService;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
  * @create: 2019-12-10 12:12
  **/
 @Service
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class CounterResortApi extends ApiComponentBase {
 
     @Autowired

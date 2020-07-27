@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.reminder;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +12,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMapper;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.reminder.dto.GlobalReminderSubscribeVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 /**
@@ -22,6 +20,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
  * @create: 2019-12-10 11:30
  **/
 @Service
+@OperationType(type = OperationTypeEnum.CREATE)
 public class ReminderSubscribeApi extends ApiComponentBase {
 
     @Autowired

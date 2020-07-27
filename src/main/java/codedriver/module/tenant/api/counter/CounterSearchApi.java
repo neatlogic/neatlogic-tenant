@@ -4,11 +4,9 @@ import codedriver.framework.counter.dto.GlobalCounterVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.annotation.Input;
 import codedriver.module.tenant.service.counter.GlobalCounterService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ import java.util.List;
  * @create: 2019-12-10 12:05
  **/
 @Service
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class CounterSearchApi extends ApiComponentBase {
 
     @Autowired
