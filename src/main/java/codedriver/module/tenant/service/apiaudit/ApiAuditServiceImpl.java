@@ -1,5 +1,6 @@
 package codedriver.module.tenant.service.apiaudit;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
@@ -168,6 +169,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                         OperationType annotation = apiClass.getAnnotation(OperationType.class);
                         if (annotation != null) {
                             vo.setOperationType(annotation.type().getValue());
+                        }else{
+                            //如果API没有加操作类型的注解，那么默认视为SEARCH
+                            vo.setOperationType(OperationTypeEnum.SEARCH.getValue());
                         }
                         break;
                     }
