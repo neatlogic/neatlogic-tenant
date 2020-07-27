@@ -78,6 +78,10 @@ public class ApiManageSaveApi extends ApiComponentBase {
         ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
 
 		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
+			if(ramApiVo != null){
+				throw new ApiRepeatException("不可与系统接口使用同一个token");
+			}
+
 			boolean isNameRepeat = false;
 			for(ApiVo api : ApiComponentFactory.getApiList()){
 				if(api.getName().equals(apiVo.getName())){
@@ -95,14 +99,11 @@ public class ApiManageSaveApi extends ApiComponentBase {
 				}
 			}
 
-			if(ramApiVo == null && !isNameRepeat) {
-                ApiMapper.replaceApi(apiVo);
-                return null;
-            }else if(isNameRepeat){
-                throw new ApiRepeatException("API名称不可重复");
-            }else if(ramApiVo != null){
-				throw new ApiRepeatException("不可与系统接口使用同一个token");
+			if(isNameRepeat){
+				throw new ApiRepeatException("API名称不可重复");
 			}
+			ApiMapper.replaceApi(apiVo);
+			return null;
         }else if(ApiVo.ApiType.SYSTEM.getValue().equals(apiVo.getApiType())){
             if(ramApiVo == null) {
                 throw new ApiNotFoundException("此接口不存在");
