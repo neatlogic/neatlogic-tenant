@@ -170,8 +170,10 @@ public class ApiManageSearchApi extends ApiComponentBase {
 			}
 			tokenList.add(token);
 		}
-		//token排序
-		tokenList.sort(String::compareTo);
+		//token排序(如果不是搜索自定义接口，就按token排序)
+		if(StringUtils.isBlank(apiVo.getApiType()) || (StringUtils.isNotBlank(apiVo.getApiType()) && !apiVo.getApiType().equals(ApiVo.ApiType.CUSTOM.getValue()))){
+			tokenList.sort(String::compareTo);
+		}
 		
 		JSONObject resultObj = new JSONObject();
 		if(apiVo.getNeedPage()) {
