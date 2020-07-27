@@ -4,6 +4,7 @@ import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.exception.type.ApiRepeatException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,8 @@ import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -75,12 +78,32 @@ public class ApiManageSaveApi extends ApiComponentBase {
         ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
 
 		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
-            if(ramApiVo == null) {
-                ApiMapper.replaceApi(apiVo);
-                return null;
-            }else{
-                throw new ApiRepeatException("不可与系统接口使用同一个token");
-            }
+			if(ramApiVo != null){
+				throw new ApiRepeatException("不可与系统接口使用同一个token");
+			}
+
+			boolean isNameRepeat = false;
+			for(ApiVo api : ApiComponentFactory.getApiList()){
+				if(api.getName().equals(apiVo.getName())){
+					isNameRepeat = true;
+					break;
+				}
+			}
+			List<ApiVo> dbApiList = ApiMapper.getAllApi();
+			if(CollectionUtils.isNotEmpty(dbApiList) && !isNameRepeat){
+				for(ApiVo api : dbApiList){
+					if(api.getName().equals(apiVo.getName()) && !api.getToken().equals(apiVo.getToken())){
+						isNameRepeat = true;
+						break;
+					}
+				}
+			}
+
+			if(isNameRepeat){
+				throw new ApiRepeatException("API名称不可重复");
+			}
+			ApiMapper.replaceApi(apiVo);
+			return null;
         }else if(ApiVo.ApiType.SYSTEM.getValue().equals(apiVo.getApiType())){
             if(ramApiVo == null) {
                 throw new ApiNotFoundException("此接口不存在");

@@ -57,6 +57,18 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         return apiAuditList;
     }
 
+    @Override
+    public int searchApiAuditVoCount(ApiAuditVo vo) throws ClassNotFoundException {
+        List<ApiVo> apiList = new ArrayList<>();
+        assembleParamsAndFilterApi(vo,apiList);
+        if(CollectionUtils.isEmpty(vo.getTokenList())){
+            return 0;
+        }
+        int apiAuditVoCount = apiMapper.searchApiAuditListCount(vo);
+        return apiAuditVoCount;
+
+    }
+
     /**
      * 筛选出api_audit表中有记录的API
      * @return

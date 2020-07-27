@@ -63,9 +63,9 @@ public class ApiAuditSearchApi extends ApiComponentBase {
 
 		//筛选出符合条件的所有记录
 		List<ApiAuditVo> apiAuditVoList = apiAuditService.searchApiAuditVo(apiAuditVo);
+		int rowNum = apiAuditService.searchApiAuditVoCount(apiAuditVo);
 
 		if(CollectionUtils.isNotEmpty(apiAuditVoList)){
-			int rowNum = apiAuditVoList.size();
 			apiAuditVo.setRowNum(rowNum);
 			apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
 		}
