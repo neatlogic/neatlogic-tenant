@@ -26,7 +26,7 @@ public class UserDataSaveApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "保存用户数据接口";
+		return "保存用户数据";
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class UserDataSaveApi extends ApiComponentBase {
 			isRequired = true)
 	})
 	@Output({})
-	@Description(desc = "保存用户数据接口")
+	@Description(desc = "保存用户数据")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserDataVo userDataVo = new UserDataVo();

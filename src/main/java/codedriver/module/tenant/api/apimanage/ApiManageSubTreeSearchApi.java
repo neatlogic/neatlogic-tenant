@@ -31,7 +31,7 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取接口管理与或操作审计子目录接口";
+		return "获取接口管理与或操作审计子目录";
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 			@Param(name = "type", type = ApiParamType.STRING, desc = "目录类型(system|custom|audit)",isRequired = true),
 	})
 	@Output({})
-	@Description(desc = "获取接口管理与或操作审计子目录接口")
+	@Description(desc = "获取接口管理与或操作审计子目录")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO 先根据type、moduleGroup、funcId筛选出API

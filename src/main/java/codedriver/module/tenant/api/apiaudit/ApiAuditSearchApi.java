@@ -34,7 +34,7 @@ public class ApiAuditSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "操作审计查询接口";
+		return "查询操作审计";
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class ApiAuditSearchApi extends ApiComponentBase {
 	})
 	@Output({
 	})
-	@Description(desc = "操作审计查询接口")
+	@Description(desc = "查询操作审计")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});

@@ -50,7 +50,7 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "操作审计导出接口";
+		return "导出操作审计";
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 			@Param(name = "endTime", type = ApiParamType.LONG, desc="结束时间"),
 			@Param(name = "keyword", type = ApiParamType.STRING, desc="搜索关键词")
 	})
-	@Description(desc = "操作审计导出接口")
+	@Description(desc = "导出操作审计")
 	@Override
 	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});

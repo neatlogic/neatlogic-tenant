@@ -42,7 +42,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取接口管理或操作审计树形目录接口";
+		return "获取接口管理或操作审计树形目录";
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 
 	@Input({@Param(name = "menuType", type = ApiParamType.STRING, desc = "目录类型(system|custom|audit)",isRequired = true)})
 	@Output({})
-	@Description(desc = "获取接口管理或操作审计树形目录接口")
+	@Description(desc = "获取接口管理或操作审计树形目录")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		// TODO 根据apiType判断返回系统接口目录还是自定义接口目录，还要有全部的目录，以提供给操作审计使用
