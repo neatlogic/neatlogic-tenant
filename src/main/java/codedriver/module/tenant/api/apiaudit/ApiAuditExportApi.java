@@ -127,7 +127,7 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 				}
 				SXSSFWorkbook workbook = new SXSSFWorkbook();
 
-				ExcelUtil.exportData(workbook,headerList,columnList,resultList);
+				ExcelUtil.exportData(workbook,headerList,columnList,resultList,new Integer(30));
 				String fileName = "操作审计";
 				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 				if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0 || flag) {
