@@ -21,7 +21,7 @@ public class ToogleSqlInterceptorApi extends ApiComponentBase {
 
 	@Override
 	public String getToken() {
-		return "/util/togglesqlaudit";
+		return "/util/togglesqlinterceptor";
 	}
 
 	@Override
@@ -49,6 +49,6 @@ public class ToogleSqlInterceptorApi extends ApiComponentBase {
 				SqlCostInterceptor.SqlIdMap.removeId(id);
 			}
 		}
-		return UserContext.get();
+		return null;
 	}
 }
