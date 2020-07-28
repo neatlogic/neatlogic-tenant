@@ -10,7 +10,6 @@ import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,17 +62,14 @@ public class ApiAuditSearchApi extends ApiComponentBase {
 
 		//筛选出符合条件的所有记录
 		List<ApiAuditVo> apiAuditVoList = apiAuditService.searchApiAuditVo(apiAuditVo);
-		int rowNum = apiAuditService.searchApiAuditVoCount(apiAuditVo);
-
-		if(CollectionUtils.isNotEmpty(apiAuditVoList)){
-			apiAuditVo.setRowNum(rowNum);
-			apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
-		}
 		JSONObject returnObj = new JSONObject();
-		returnObj.put("pageSize", apiAuditVo.getPageSize());
-		returnObj.put("currentPage", apiAuditVo.getCurrentPage());
-		returnObj.put("rowNum", apiAuditVo.getRowNum());
-		returnObj.put("pageCount", apiAuditVo.getPageCount());
+		if(apiAuditVo.getNeedPage()){
+			apiAuditVo.setPageCount(PageUtil.getPageCount(apiAuditVo.getRowNum(), apiAuditVo.getPageSize()));
+			returnObj.put("pageSize", apiAuditVo.getPageSize());
+			returnObj.put("currentPage", apiAuditVo.getCurrentPage());
+			returnObj.put("rowNum", apiAuditVo.getRowNum());
+			returnObj.put("pageCount", apiAuditVo.getPageCount());
+		}
 		returnObj.put("tbodyList", apiAuditVoList);
 
 		return returnObj;

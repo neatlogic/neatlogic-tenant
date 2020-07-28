@@ -34,6 +34,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             return null;
         }
         List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
+        if(apiAuditVo.getNeedPage()){
+            apiAuditVo.setRowNum(apiMapper.searchApiAuditListCount(apiAuditVo));
+        }
         /**
          * 补充从数据库无法获取的字段
          */
