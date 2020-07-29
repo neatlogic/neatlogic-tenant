@@ -81,7 +81,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 //					}else if(fileVo.getPath().startsWith("minio:")) {
 //						in = minioManager.getObject(Config.MINIO_BUCKET(),fileVo.getPath().replaceAll("minio:", ""));
 //					}
-					in = FileUtil.getData(fileVo);
+					in = FileUtil.getData(fileVo.getPath());
 					if (in != null) {
 						String fileNameEncode = "";
 						Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;

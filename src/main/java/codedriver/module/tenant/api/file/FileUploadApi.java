@@ -64,8 +64,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 	}
 
 	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
-			 @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
-			 @Param(name = "storageMedium", type = ApiParamType.STRING, desc = "存储介质", isRequired = true)
+			 @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true)
 	})
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口")
@@ -78,8 +77,6 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
-		//存储介质storageMediumHandler，以此决定存储到minio还是其他文件系统
-		String storageMediumHandler = paramObj.getString("storageMediumHandler");
 		List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
 		FileTypeVo fileTypeVo = null;
 		for (FileTypeVo f : fileTypeList) {
@@ -167,11 +164,13 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 //				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
 //				fileVo.setPath("minio:" + finalPath);
 //				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
-				FileUtil.saveData(storageMediumHandler,tenantUuid,multipartFile.getInputStream(),fileVo,multipartFile.getContentType());
+				String filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
+				fileVo.setPath(filePath);
 			} catch (Exception ex) {
 				//如果指定的存储介质出现异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo,null);
+				String filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
+				fileVo.setPath(filePath);
 			}
 
 			fileMapper.insertFile(fileVo);

@@ -68,7 +68,6 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = "upload";
-		String storageMediumHandler = paramObj.getString("storageMediumHandler");
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
@@ -88,11 +87,13 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 //					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 //					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId();
 //					fileVo.setPath("minio:" + finalPath);
-					FileUtil.saveData(storageMediumHandler,tenantUuid,multipartFile.getInputStream(),fileVo,multipartFile.getContentType());
+					String filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
+					fileVo.setPath(filePath);
 				} catch (Exception ex) {
 					//如果指定的存储介质出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
-					FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo,null);
+					String filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
+					fileVo.setPath(filePath);
 				}
 
 				fileMapper.insertFile(fileVo);
