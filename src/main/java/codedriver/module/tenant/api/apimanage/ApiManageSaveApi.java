@@ -63,13 +63,15 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		@Param(name = "username", type = ApiParamType.STRING, desc = "用户名称"),
 		@Param(name = "password", type = ApiParamType.STRING, desc = "密码"),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "描述"),
-        @Param(name = "apiType", type = ApiParamType.STRING, desc = "API类型", isRequired = true)
+        @Param(name = "apiType", type = ApiParamType.STRING, desc = "API类型", isRequired = true),
+        @Param(name = "operationType", type = ApiParamType.STRING, desc = "操作类型(create|update)", isRequired = true)
 	})
 	@Description(desc = "接口配置信息保存接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ApiVo apiVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiVo>() {});
-		
+		String operationType = jsonObj.getString("operationType");
+
 		ApiHandlerVo apiHandlerVo = ApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
 		if(apiHandlerVo == null) {
 			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
@@ -81,15 +83,34 @@ public class ApiManageSaveApi extends ApiComponentBase {
 			if(ramApiVo != null){
 				throw new ApiRepeatException("不可与系统接口使用同一个token");
 			}
+			List<ApiVo> dbApiList = ApiMapper.getAllApi();
+			//校验token是否与自定义接口重复
+			boolean isTokenRepeat = false;
+			//如果添加自定义接口，就要校验当前token是否与其余自定义接口重复
+			if(OperationTypeEnum.CREATE.getValue().equals(operationType)){
+				if(CollectionUtils.isNotEmpty(dbApiList) && !isTokenRepeat){
+					for(ApiVo api : dbApiList){
+						if(api.getToken().equals(apiVo.getToken())){
+							isTokenRepeat = true;
+							break;
+						}
+					}
+				}
+			}
+			if(isTokenRepeat){
+				throw new ApiRepeatException(apiVo.getToken() + "已存在");
+			}
 
 			boolean isNameRepeat = false;
+			//校验接口名称是否与系统接口重复
 			for(ApiVo api : ApiComponentFactory.getApiList()){
 				if(api.getName().equals(apiVo.getName())){
 					isNameRepeat = true;
 					break;
 				}
 			}
-			List<ApiVo> dbApiList = ApiMapper.getAllApi();
+			//校验接口名称是否与其他自定义接口重复
+//			List<ApiVo> dbApiList = ApiMapper.getAllApi();
 			if(CollectionUtils.isNotEmpty(dbApiList) && !isNameRepeat){
 				for(ApiVo api : dbApiList){
 					if(api.getName().equals(apiVo.getName()) && !api.getToken().equals(apiVo.getToken())){
@@ -100,7 +121,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 			}
 
 			if(isNameRepeat){
-				throw new ApiRepeatException("API名称不可重复");
+				throw new ApiRepeatException("接口名称：" + apiVo.getName() + "已被占用");
 			}
 			ApiMapper.replaceApi(apiVo);
 			return null;
