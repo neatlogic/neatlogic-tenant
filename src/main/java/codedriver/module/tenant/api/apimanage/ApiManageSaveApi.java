@@ -98,7 +98,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 				}
 			}
 			if(isTokenRepeat){
-				throw new ApiRepeatException(apiVo.getToken() + "已存在");
+				throw new ApiRepeatException("接口地址：" + apiVo.getToken() + "已存在");
 			}
 
 			boolean isNameRepeat = false;
