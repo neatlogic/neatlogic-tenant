@@ -68,7 +68,7 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = "upload";
-		String storageMedium = paramObj.getString("storageMedium");
+		String storageMediumHandler = paramObj.getString("storageMediumHandler");
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
@@ -88,11 +88,11 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 //					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 //					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId();
 //					fileVo.setPath("minio:" + finalPath);
-					FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
+					FileUtil.saveData(storageMediumHandler,tenantUuid,multipartFile.getInputStream(),fileVo,multipartFile.getContentType());
 				} catch (Exception ex) {
 					//如果指定的存储介质出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
-					FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile,fileVo);
+					FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo,null);
 				}
 
 				fileMapper.insertFile(fileVo);

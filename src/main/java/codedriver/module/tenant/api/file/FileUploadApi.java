@@ -1,14 +1,28 @@
 package codedriver.module.tenant.api.file;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.common.util.RC4Util;
+import codedriver.framework.exception.user.NoTenantException;
+import codedriver.framework.file.core.FileTypeHandlerFactory;
+import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.core.LocalFileSystemHandler;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileTypeVo;
+import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.module.tenant.exception.file.EmptyFileException;
+import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
+import codedriver.module.tenant.exception.file.FileTooLargeException;
+import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,26 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.config.Config;
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.RC4Util;
-import codedriver.framework.exception.user.NoTenantException;
-import codedriver.framework.file.core.FileTypeHandlerFactory;
-import codedriver.framework.file.core.IFileTypeHandler;
-import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileTypeVo;
-import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.minio.core.MinioManager;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.tenant.exception.file.EmptyFileException;
-import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
-import codedriver.module.tenant.exception.file.FileTooLargeException;
-import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -81,8 +78,8 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
-		//存储介质storageMedium，以此决定存储到minio还是其他文件系统
-		String storageMedium = paramObj.getString("storageMedium");
+		//存储介质storageMediumHandler，以此决定存储到minio还是其他文件系统
+		String storageMediumHandler = paramObj.getString("storageMediumHandler");
 		List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
 		FileTypeVo fileTypeVo = null;
 		for (FileTypeVo f : fileTypeList) {
@@ -170,11 +167,11 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 //				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
 //				fileVo.setPath("minio:" + finalPath);
 //				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
-				FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
+				FileUtil.saveData(storageMediumHandler,tenantUuid,multipartFile.getInputStream(),fileVo,multipartFile.getContentType());
 			} catch (Exception ex) {
 				//如果指定的存储介质出现异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile,fileVo);
+				FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo,null);
 			}
 
 			fileMapper.insertFile(fileVo);
