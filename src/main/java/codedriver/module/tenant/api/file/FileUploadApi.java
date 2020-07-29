@@ -1,18 +1,14 @@
 package codedriver.module.tenant.api.file;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +66,10 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true), @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true) })
+	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
+			 @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
+			 @Param(name = "storageMedium", type = ApiParamType.STRING, desc = "存储介质", isRequired = true)
+	})
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口")
 	@Override
@@ -82,6 +81,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
+		//存储介质storageMedium，以此决定存储到minio还是其他文件系统
 		String storageMedium = paramObj.getString("storageMedium");
 		List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
 		FileTypeVo fileTypeVo = null;
@@ -172,9 +172,9 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 //				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
 				FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
 			} catch (Exception ex) {
-				//如果minio异常，则上传到本地
+				//如果指定的存储介质出现异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
+				FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile,fileVo);
 			}
 
 			fileMapper.insertFile(fileVo);

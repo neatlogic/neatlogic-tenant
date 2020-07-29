@@ -1,17 +1,12 @@
 package codedriver.module.tenant.api.file;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
@@ -96,9 +90,9 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 //					fileVo.setPath("minio:" + finalPath);
 					FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
 				} catch (Exception ex) {
-					//如果minio异常，则上传到本地
+					//如果指定的存储介质出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
-					FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
+					FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile,fileVo);
 				}
 
 				fileMapper.insertFile(fileVo);
