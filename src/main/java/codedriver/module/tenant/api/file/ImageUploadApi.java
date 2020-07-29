@@ -82,20 +82,18 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 				fileVo.setUserUuid(userUuid);
 				fileVo.setType("image");
 				fileVo.setContentType(multipartFile.getContentType());
-
+				String filePath = null;
 				try {
 //					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 //					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId();
 //					fileVo.setPath("minio:" + finalPath);
-					String filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
-					fileVo.setPath(filePath);
+					filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 				} catch (Exception ex) {
-					//如果指定的存储介质出现异常，则上传到本地
+					//如果minio出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
-					String filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
-					fileVo.setPath(filePath);
+					filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 				}
-
+				fileVo.setPath(filePath);
 				fileMapper.insertFile(fileVo);
 
 				returnObj.put("uploaded", true);

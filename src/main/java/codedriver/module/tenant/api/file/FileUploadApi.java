@@ -152,6 +152,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setUserUuid(userUuid);
 			fileVo.setType(type);
 			fileVo.setContentType(multipartFile.getContentType());
+			String filePath = null;
 			try {
 				/*//TODO 废弃Hadoop
 				 * FsStatus fsStatus = fileSystem.getStatus(); String finalPath = "/" +
@@ -164,15 +165,13 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 //				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
 //				fileVo.setPath("minio:" + finalPath);
 //				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
-				String filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
-				fileVo.setPath(filePath);
+				filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 			} catch (Exception ex) {
-				//如果指定的存储介质出现异常，则上传到本地
+				//如果minio出现异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				String filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
-				fileVo.setPath(filePath);
+				filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 			}
-
+			fileVo.setPath(filePath);
 			fileMapper.insertFile(fileVo);
 			fileTypeHandler.afterUpload(fileVo, paramObj);
 			return fileMapper.getFileById(fileVo.getId());
