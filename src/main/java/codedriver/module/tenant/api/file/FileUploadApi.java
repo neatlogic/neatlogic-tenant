@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import org.apache.commons.io.IOUtils;
@@ -81,6 +82,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
 		String type = paramObj.getString("type");
+		String storageMedium = paramObj.getString("storageMedium");
 		List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
 		FileTypeVo fileTypeVo = null;
 		for (FileTypeVo f : fileTypeList) {
@@ -164,25 +166,15 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				 * IOUtils.copyLarge(multipartFile.getInputStream(), fos); fos.flush();
 				 * fos.close(); fileVo.setPath("hdfs:" + finalPath);
 				 */
-				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
-				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId(); 
-				fileVo.setPath("minio:" + finalPath);
-				minioManager.saveObject(Config.MINIO_BUCKET(), finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
+//				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+//				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
+//				fileVo.setPath("minio:" + finalPath);
+//				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
+				FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
 			} catch (Exception ex) {
 				//如果minio异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
-				String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
-				String finalPath = Config.DATA_HOME() + filePath;
-				File file = new File(finalPath);
-				if (!file.getParentFile().exists()) {
-					file.getParentFile().mkdirs();
-				}
-				FileOutputStream fos = new FileOutputStream(file);
-				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-				fos.flush();
-				fos.close();
-				fileVo.setPath("file:" + filePath);
+				FileUtil.saveData(storageMedium,tenantUuid,multipartFile,fileVo);
 			}
 
 			fileMapper.insertFile(fileVo);
