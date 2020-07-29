@@ -1,34 +1,29 @@
 package codedriver.module.tenant.api.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.exception.user.NoTenantException;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.module.tenant.exception.file.FileNotFoundException;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.common.config.Config;
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.user.NoTenantException;
-import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.minio.core.MinioManager;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.tenant.exception.file.FileNotFoundException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -68,14 +63,15 @@ public class ImageDownloadApi extends BinaryStreamApiComponentBase {
 		if (fileVo != null && fileVo.getType().equals("image")) {
 			ServletOutputStream os = null;
 			InputStream in = null;
-			if (fileVo.getPath().startsWith("file:")) {
-				File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
-				if (file.exists() && file.isFile()) {
-					in = new FileInputStream(file);
-				}
-			} else if(fileVo.getPath().startsWith("minio:")) {
-				in = minioManager.getObject(Config.MINIO_BUCKET(),fileVo.getPath().replaceAll("minio:", ""));
-			}
+//			if (fileVo.getPath().startsWith("file:")) {
+//				File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
+//				if (file.exists() && file.isFile()) {
+//					in = new FileInputStream(file);
+//				}
+//			} else if(fileVo.getPath().startsWith("minio:")) {
+//				in = minioManager.getObject(Config.MINIO_BUCKET(),fileVo.getPath().replaceAll("minio:", ""));
+//			}
+			in = FileUtil.getData(fileVo.getPath());
 			if (in != null) {
 				response.setContentType(fileVo.getContentType());
 				os = response.getOutputStream();

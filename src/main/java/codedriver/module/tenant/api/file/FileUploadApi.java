@@ -1,17 +1,28 @@
 package codedriver.module.tenant.api.file;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.common.util.RC4Util;
+import codedriver.framework.exception.user.NoTenantException;
+import codedriver.framework.file.core.FileTypeHandlerFactory;
+import codedriver.framework.file.core.IFileTypeHandler;
+import codedriver.framework.file.core.LocalFileSystemHandler;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileTypeVo;
+import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.minio.core.MinioManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import org.apache.commons.io.IOUtils;
+import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.module.tenant.exception.file.EmptyFileException;
+import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
+import codedriver.module.tenant.exception.file.FileTooLargeException;
+import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,26 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.config.Config;
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.RC4Util;
-import codedriver.framework.exception.user.NoTenantException;
-import codedriver.framework.file.core.FileTypeHandlerFactory;
-import codedriver.framework.file.core.IFileTypeHandler;
-import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileTypeVo;
-import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.minio.core.MinioManager;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.tenant.exception.file.EmptyFileException;
-import codedriver.module.tenant.exception.file.FileExtNotAllowedException;
-import codedriver.module.tenant.exception.file.FileTooLargeException;
-import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
@@ -69,7 +63,9 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true), @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true) })
+	@Input({ @Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
+			 @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true)
+	})
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口")
 	@Override
@@ -156,6 +152,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 			fileVo.setUserUuid(userUuid);
 			fileVo.setType(type);
 			fileVo.setContentType(multipartFile.getContentType());
+			String filePath = null;
 			try {
 				/*//TODO 废弃Hadoop
 				 * FsStatus fsStatus = fileSystem.getStatus(); String finalPath = "/" +
@@ -164,27 +161,17 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 				 * IOUtils.copyLarge(multipartFile.getInputStream(), fos); fos.flush();
 				 * fos.close(); fileVo.setPath("hdfs:" + finalPath);
 				 */
-				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
-				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId(); 
-				fileVo.setPath("minio:" + finalPath);
-				minioManager.saveObject(Config.MINIO_BUCKET(), finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
+//				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+//				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
+//				fileVo.setPath("minio:" + finalPath);
+//				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
+				filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 			} catch (Exception ex) {
-				//如果minio异常，则上传到本地
+				//如果minio出现异常，则上传到本地
 				logger.error(ex.getMessage(),ex);
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
-				String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
-				String finalPath = Config.DATA_HOME() + filePath;
-				File file = new File(finalPath);
-				if (!file.getParentFile().exists()) {
-					file.getParentFile().mkdirs();
-				}
-				FileOutputStream fos = new FileOutputStream(file);
-				IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-				fos.flush();
-				fos.close();
-				fileVo.setPath("file:" + filePath);
+				filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 			}
-
+			fileVo.setPath(filePath);
 			fileMapper.insertFile(fileVo);
 			fileTypeHandler.afterUpload(fileVo, paramObj);
 			return fileMapper.getFileById(fileVo.getId());

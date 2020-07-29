@@ -1,16 +1,12 @@
 package codedriver.module.tenant.api.file;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +19,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.config.Config;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
@@ -87,29 +82,18 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 				fileVo.setUserUuid(userUuid);
 				fileVo.setType("image");
 				fileVo.setContentType(multipartFile.getContentType());
-
+				String filePath = null;
 				try {
-					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
-					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId(); 
-					fileVo.setPath("minio:" + finalPath);
-					minioManager.saveObject(Config.MINIO_BUCKET(), finalPath, multipartFile.getInputStream(), size,multipartFile.getContentType());
+//					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+//					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId();
+//					fileVo.setPath("minio:" + finalPath);
+					filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 				} catch (Exception ex) {
-					//如果minio异常，则上传到本地
+					//如果minio出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy" + File.separator + "MM" + File.separator + "dd");
-					String filePath = tenantUuid + File.separator + sdf.format(new Date()) + File.separator + fileVo.getId();
-					String finalPath = Config.DATA_HOME() + filePath;
-					File file = new File(finalPath);
-					if (!file.getParentFile().exists()) {
-						file.getParentFile().mkdirs();
-					}
-					FileOutputStream fos = new FileOutputStream(file);
-					IOUtils.copyLarge(multipartFile.getInputStream(), fos);
-					fos.flush();
-					fos.close();
-					fileVo.setPath("file:" + filePath);
+					filePath = FileUtil.saveData(LocalFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 				}
-
+				fileVo.setPath(filePath);
 				fileMapper.insertFile(fileVo);
 
 				returnObj.put("uploaded", true);
