@@ -4,6 +4,9 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.exception.file.FileAccessDeniedException;
+import codedriver.framework.exception.file.FileNotFoundException;
+import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
@@ -16,9 +19,6 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.tenant.exception.file.FileAccessDeniedException;
-import codedriver.module.tenant.exception.file.FileNotFoundException;
-import codedriver.module.tenant.exception.file.FileTypeHandlerNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +108,7 @@ public class FileDownloadApi extends BinaryStreamApiComponentBase {
 						}
 					}
 				} else {
-					throw new FileAccessDeniedException(fileVo.getName());
+					throw new FileAccessDeniedException(fileVo.getName(),"下载");
 				}
 			} else {
 				throw new FileTypeHandlerNotFoundException(fileVo.getType());
