@@ -32,8 +32,6 @@ import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ImageUploadApi extends BinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(ImageUploadApi.class);
-	@Autowired
-	private MinioManager minioManager;
 
 	@Autowired
 	private FileMapper fileMapper;
