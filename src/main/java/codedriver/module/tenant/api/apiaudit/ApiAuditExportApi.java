@@ -128,16 +128,15 @@ public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
 				SXSSFWorkbook workbook = new SXSSFWorkbook();
 
 				ExcelUtil.exportData(workbook,headerList,columnList,resultList,new Integer(30));
-				String fileName = "操作审计";
+				String fileNameEncode = "操作审计.xlsx";
 				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-				if (request.getHeader("User-Agent").toUpperCase().indexOf("MSIE") > 0 || flag) {
-					fileName = URLEncoder.encode((fileName + ".xlsx"), "UTF-8");
+				if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+					fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
 				} else {
-					fileName = new String((fileName + ".xlsx").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+					fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 				}
-
 				response.setContentType("application/vnd.ms-excel;charset=utf-8");
-				response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+				response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
 				try (OutputStream os = response.getOutputStream()){
 					workbook.write(os);
 				} catch (IOException e) {
