@@ -18,7 +18,7 @@ import codedriver.module.tenant.dao.mapper.MenuMapper;
 import codedriver.module.tenant.dto.MenuVo;
 
 @Service
-@AuthAction(name = "SYSTEM_MENU_EDIT")
+@AuthAction(name = "MENU_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MenuSearchApi extends ApiComponentBase {
 	

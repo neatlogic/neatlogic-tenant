@@ -27,7 +27,7 @@ import codedriver.framework.scheduler.exception.ScheduleIllegalParameterExceptio
 import codedriver.framework.scheduler.exception.ScheduleJobNameRepeatException;
 
 @Service
-@AuthAction(name = "SYSTEM_JOB_EDIT")
+@AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 public class JobSaveApi extends ApiComponentBase {

@@ -15,7 +15,7 @@ import codedriver.framework.scheduler.dto.JobPropVo;
 import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @Service
-@AuthAction(name="SYSTEM_JOB_EDIT")
+@AuthAction(name="SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobGetApi extends ApiComponentBase {
 	

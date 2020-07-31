@@ -19,7 +19,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.integration.IntegrationUrlIllegalException;
 
 @Service
-@AuthAction(name = "INTEGRATION_EDIT")
+@AuthAction(name = "INTERFACE_MODIFY")
 @OperationType(type = OperationTypeEnum.CREATE)
 public class IntegrationSaveApi extends ApiComponentBase {
 

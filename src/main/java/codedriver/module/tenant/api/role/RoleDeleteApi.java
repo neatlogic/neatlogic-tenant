@@ -21,7 +21,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
-@AuthAction(name = "SYSTEM_ROLE_EDIT")
+@AuthAction(name = "ROLE_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)

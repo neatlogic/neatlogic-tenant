@@ -15,7 +15,7 @@ import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.exception.ScheduleJobAuditNotFoundException;
 
 @Service
-@AuthAction(name = "SYSTEM_JOB_EDIT")
+@AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobAuditLogGetApi extends ApiComponentBase {
 
