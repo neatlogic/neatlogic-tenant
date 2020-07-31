@@ -1,17 +1,24 @@
 package codedriver.module.tenant.service.apiaudit;
 
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -25,6 +32,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 
     @Autowired
     private ApiMapper apiMapper;
+
+    @Autowired
+    private FileMapper fileMapper;
 
     @Override
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
@@ -45,13 +55,46 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     @Override
-    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
+    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) throws Exception {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
             return null;
         }
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
+
+        /**
+         * 根据detailFileId分别读取调用记录文件中的参数、结果、异常
+         */
+        if(CollectionUtils.isNotEmpty(apiAuditList)){
+            for(ApiAuditVo vo : apiAuditList){
+                Long detailFileId = vo.getDetailFileId();
+                if(detailFileId != null){
+                    FileVo fileVo = fileMapper.getFileById(detailFileId);
+                    if(fileVo != null){
+                        String path = fileVo.getPath();
+                        InputStream stream = FileUtil.getData(path);
+                        if(stream != null){
+                            String data = IOUtils.toString(stream, Charset.forName("UTF-8"));
+                            JSONObject jsonObject = JSONObject.parseObject(data);
+                            String param = jsonObject.getString("param");
+                            String result = jsonObject.getString("result");
+                            String error = jsonObject.getString("error");
+                            if(StringUtils.isNotBlank(param)){
+                                vo.setParam(param);
+                            }
+                            if(StringUtils.isNotBlank(result)){
+                                vo.setResult(result);
+                            }
+                            if(StringUtils.isNotBlank(error)){
+                                vo.setError(error);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         /**
          * 补充从数据库无法获取的字段
          */
