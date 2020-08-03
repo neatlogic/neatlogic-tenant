@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
-@AuthAction(name="SYSTEM_TEAM_EDIT")
+@AuthAction(name="TEAM_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)

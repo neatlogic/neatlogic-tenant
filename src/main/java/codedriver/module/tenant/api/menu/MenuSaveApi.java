@@ -17,7 +17,7 @@ import codedriver.module.tenant.exception.menu.MenuSaveException;
 import codedriver.module.tenant.service.MenuService;
 
 @Service
-@AuthAction(name = "SYSTEM_MENU_EDIT")
+@AuthAction(name = "MENU_MODIFY")
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MenuSaveApi extends ApiComponentBase {
 

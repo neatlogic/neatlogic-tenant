@@ -22,7 +22,7 @@ import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 
 @Service
-@AuthAction(name = "SYSTEM_JOB_EDIT")
+@AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobClassSearchApi extends ApiComponentBase {
 

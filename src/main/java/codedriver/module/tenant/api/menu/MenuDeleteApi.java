@@ -14,7 +14,7 @@ import codedriver.module.tenant.exception.menu.MenuDeleteException;
 import codedriver.module.tenant.service.MenuService;
 
 @Service
-@AuthAction(name="SYSTEM_MENU_EDIT")
+@AuthAction(name="MENU_MODIFY")
 @OperationType(type = OperationTypeEnum.DELETE)
 public class MenuDeleteApi extends ApiComponentBase{
 

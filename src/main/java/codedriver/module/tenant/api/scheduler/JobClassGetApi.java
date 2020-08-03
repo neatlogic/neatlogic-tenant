@@ -18,7 +18,7 @@ import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 @Service
-@AuthAction(name="SYSTEM_JOB_EDIT")
+@AuthAction(name="SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobClassGetApi extends ApiComponentBase {
 	

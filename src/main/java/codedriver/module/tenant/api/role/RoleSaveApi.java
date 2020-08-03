@@ -27,7 +27,7 @@ import codedriver.framework.restful.core.ApiComponentBase;
 import java.util.List;
 import java.util.Set;
 
-@AuthAction(name = "SYSTEM_ROLE_EDIT")
+@AuthAction(name = "ROLE_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)

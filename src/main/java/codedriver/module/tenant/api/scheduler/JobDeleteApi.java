@@ -23,7 +23,7 @@ import codedriver.framework.scheduler.dto.JobVo;
 import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 
 @Service
-@AuthAction(name = "SYSTEM_JOB_EDIT")
+@AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class JobDeleteApi extends ApiComponentBase {

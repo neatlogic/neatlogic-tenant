@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@AuthAction(name = "SYSTEM_TEAM_EDIT")
+@AuthAction(name = "TEAM_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)

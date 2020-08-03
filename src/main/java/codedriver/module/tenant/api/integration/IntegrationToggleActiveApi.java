@@ -17,7 +17,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
-@AuthAction(name = "INTEGRATION_EDIT")
+@AuthAction(name = "INTERFACE_MODIFY")
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class IntegrationToggleActiveApi extends ApiComponentBase {
 
