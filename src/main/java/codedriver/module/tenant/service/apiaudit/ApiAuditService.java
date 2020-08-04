@@ -11,4 +11,5 @@ public interface ApiAuditService {
     public int searchApiAuditVoCount(ApiAuditVo vo) throws ClassNotFoundException;
     public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo vo) throws Exception;
     public List<ApiVo> getApiListForTree();
+    public String getAuditContentOnFile(String filePath);
 }

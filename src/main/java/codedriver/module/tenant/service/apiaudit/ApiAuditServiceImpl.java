@@ -1,24 +1,25 @@
 package codedriver.module.tenant.service.apiaudit;
 
-import codedriver.framework.common.util.FileUtil;
-import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -27,14 +28,13 @@ import java.util.Map;
 @Service
 public class ApiAuditServiceImpl implements ApiAuditService{
 
+    Logger logger = LoggerFactory.getLogger(ApiAuditServiceImpl.class);
+
     private static final String TIME_UINT_OF_DAY = "day";
     private static final String TIME_UINT_OF_MONTH = "month";
 
     @Autowired
     private ApiMapper apiMapper;
-
-    @Autowired
-    private FileMapper fileMapper;
 
     @Override
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
@@ -64,36 +64,29 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
 
         /**
-         * 根据detailFileId分别读取调用记录文件中的参数、结果、异常
+         * 读取文件中的参数/结果/错误
          */
         if(CollectionUtils.isNotEmpty(apiAuditList)){
             for(ApiAuditVo vo : apiAuditList){
-                Long detailFileId = vo.getDetailFileId();
-                if(detailFileId != null){
-                    FileVo fileVo = fileMapper.getFileById(detailFileId);
-                    if(fileVo != null){
-                        String path = fileVo.getPath();
-                        InputStream stream = FileUtil.getData(path);
-                        if(stream != null){
-                            String data = IOUtils.toString(stream, Charset.forName("UTF-8"));
-                            JSONObject jsonObject = JSONObject.parseObject(data);
-                            String param = jsonObject.getString("param");
-                            String result = jsonObject.getString("result");
-                            String error = jsonObject.getString("error");
-                            if(StringUtils.isNotBlank(param)){
-                                vo.setParam(param);
-                            }
-                            if(StringUtils.isNotBlank(result)){
-                                vo.setResult(result);
-                            }
-                            if(StringUtils.isNotBlank(error)){
-                                vo.setError(error);
-                            }
-                        }
-                    }
+                String paramFilePath = vo.getParamFilePath();
+                String resultFilePath = vo.getResultFilePath();
+                String errorFilePath = vo.getErrorFilePath();
+
+                if(StringUtils.isNotBlank(paramFilePath)){
+                    String param = getAuditContentOnFile(paramFilePath);
+                    vo.setParam(param);
+                }
+                if(StringUtils.isNotBlank(resultFilePath)){
+                    String result = getAuditContentOnFile(resultFilePath);
+                    vo.setResult(result);
+                }
+                if(StringUtils.isNotBlank(errorFilePath)){
+                    String error = getAuditContentOnFile(errorFilePath);
+                    vo.setError(error);
                 }
             }
         }
+
 
         /**
          * 补充从数据库无法获取的字段
@@ -149,6 +142,57 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             }
         }
         return apiList;
+    }
+
+    @Override
+    public String getAuditContentOnFile(String filePath){
+        if(StringUtils.isBlank(filePath) || !filePath.contains("?")
+                || !filePath.contains("&") || !filePath.contains("=")){
+            return null;
+        }
+        String result = null;
+//        raf.seek(0);
+        String path = filePath.split("\\?")[0];
+//        String indexStr = filePath.split("\\?")[1];
+        String[] indexs = filePath.split("\\?")[1].split("&");
+//        String startIndexStr = indexs[0].split("=")[1];
+//        String offsetStr = indexs[1].split("=")[1];
+        Long startIndex = Long.parseLong(indexs[0].split("=")[1]);
+        Long offset = Long.parseLong(indexs[1].split("=")[1]);
+
+        RandomAccessFile raf = null;
+        File file = new File(Config.DATA_HOME() + path.substring(5));
+        if(file.exists() && file.isFile()){
+            try {
+                raf = new RandomAccessFile(file,"r");
+            } catch (FileNotFoundException e) {
+                logger.error("文件：" + filePath + "不存在");
+                e.printStackTrace();
+                return null;
+            }
+        }
+        if(raf != null){
+            try {
+                raf.seek(startIndex);
+            } catch (IOException e) {
+                logger.error("文件指针移动失败：" + filePath + "\n" + e.getMessage());
+                return null;
+            }
+            byte[] buff = new byte[offset.intValue()];
+            try {
+                raf.read(buff);
+            } catch (IOException e) {
+                logger.error("文件读取失败：" + filePath + "\n" + e.getMessage());
+                return null;
+            }
+            result = new String(buff,0,buff.length, StandardCharsets.UTF_8);
+            try {
+                raf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 
     private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo, List<ApiVo> apiList) throws ClassNotFoundException {
