@@ -46,7 +46,9 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		String filePath = jsonObj.getString("filePath");
+		System.out.println("读取文件前：" + System.currentTimeMillis());
 		String result = apiAuditService.getAuditContentOnFile(filePath);
+		System.out.println("读取文件后：" + System.currentTimeMillis());
 
 		if(StringUtils.isNotBlank(result)){
 			String fileNameEncode = "API_AUDIT.log";
@@ -54,7 +56,7 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 			if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
 				fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
 			} else {
-				fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+				fileNameEncode = new String(fileNameEncode.getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 			}
 			response.setContentType("aplication/x-msdownload;charset=utf-8");
 			response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");

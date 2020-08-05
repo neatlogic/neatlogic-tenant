@@ -30,6 +30,8 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 
     Logger logger = LoggerFactory.getLogger(ApiAuditServiceImpl.class);
 
+    private static long maxFileSize = 1024 * 1024;
+
     private static final String TIME_UINT_OF_DAY = "day";
     private static final String TIME_UINT_OF_MONTH = "month";
 
@@ -62,7 +64,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             return null;
         }
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
-
+        System.out.println("读取文件前：" + System.currentTimeMillis());
         /**
          * 读取文件中的参数/结果/错误
          */
@@ -73,20 +75,35 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 String errorFilePath = vo.getErrorFilePath();
 
                 if(StringUtils.isNotBlank(paramFilePath)){
-                    String param = getAuditContentOnFile(paramFilePath);
-                    vo.setParam(param);
+                    long offset = Long.parseLong(paramFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                    if(offset > maxFileSize){
+                        vo.setParam("内容过长，不予导出");
+                    }else{
+                        String param = getAuditContentOnFile(paramFilePath);
+                        vo.setParam(param);
+                    }
                 }
                 if(StringUtils.isNotBlank(resultFilePath)){
-                    String result = getAuditContentOnFile(resultFilePath);
-                    vo.setResult(result);
+                    long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                    if(offset > maxFileSize){
+                        vo.setResult("内容过长，不予导出");
+                    }else{
+                        String result = getAuditContentOnFile(resultFilePath);
+                        vo.setResult(result);
+                    }
                 }
                 if(StringUtils.isNotBlank(errorFilePath)){
-                    String error = getAuditContentOnFile(errorFilePath);
-                    vo.setError(error);
+                    long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                    if(offset > maxFileSize){
+                        vo.setError("内容过长，不予导出");
+                    }else{
+                        String error = getAuditContentOnFile(errorFilePath);
+                        vo.setError(error);
+                    }
                 }
             }
         }
-
+        System.out.println("读取文件后：" + System.currentTimeMillis());
 
         /**
          * 补充从数据库无法获取的字段

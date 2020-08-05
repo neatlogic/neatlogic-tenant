@@ -38,7 +38,9 @@ public class ApiAuditDetailGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 
 		String filePath = jsonObj.getString("filePath");
+		System.out.println("读取文件前：" + System.currentTimeMillis());
 		String result = apiAuditService.getAuditContentOnFile(filePath);
+		System.out.println("读取文件后：" + System.currentTimeMillis());
 
 		return result;
 	}
