@@ -29,7 +29,7 @@ public class UserSearchApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "用户查询接口";
+		return "查询用户";
 	}
 
 	@Override
