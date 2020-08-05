@@ -34,7 +34,7 @@ public class UserSearchForSelectApi extends ApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "查询用户(下拉)";
+		return "查询用户_下拉";
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class UserSearchForSelectApi extends ApiComponentBase {
 			@Param(name = "rowNum",
 					type = ApiParamType.INTEGER,
 			 		desc = "总条目数")})
-	@Description(desc = "查询用户(下拉)")
+	@Description(desc = "查询用户_下拉")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		
