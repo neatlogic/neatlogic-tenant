@@ -1,9 +1,11 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +40,19 @@ public class ApiAuditDetailGetApi extends ApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 
 		String filePath = jsonObj.getString("filePath");
-		System.out.println("读取文件前：" + System.currentTimeMillis());
-		String result = apiAuditService.getAuditContentOnFile(filePath);
-		System.out.println("读取文件后：" + System.currentTimeMillis());
 
+		if(!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")){
+			throw new FilePathIllegalException("文件路径格式错误");
+		}
+
+		long offset = Long.parseLong(filePath.split("\\?")[1].split("&")[1].split("=")[1]);
+
+		String result = null;
+		if(offset > ApiAuditVo.maxFileSize){
+			result = apiAuditService.getAuditContentOnFile(filePath) + "\n剩余内容可下载文件后查看";
+		}else{
+			result = apiAuditService.getAuditContentOnFile(filePath);
+		}
 		return result;
 	}
 

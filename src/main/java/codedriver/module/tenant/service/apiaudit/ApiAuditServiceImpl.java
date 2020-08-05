@@ -1,6 +1,6 @@
 package codedriver.module.tenant.service.apiaudit;
 
-import codedriver.framework.common.config.Config;
+import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
@@ -15,10 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,8 +27,6 @@ import java.util.Map;
 public class ApiAuditServiceImpl implements ApiAuditService{
 
     Logger logger = LoggerFactory.getLogger(ApiAuditServiceImpl.class);
-
-    private static long maxFileSize = 1024 * 1024;
 
     private static final String TIME_UINT_OF_DAY = "day";
     private static final String TIME_UINT_OF_MONTH = "month";
@@ -64,7 +60,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             return null;
         }
         List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
-        System.out.println("读取文件前：" + System.currentTimeMillis());
         /**
          * 读取文件中的参数/结果/错误
          */
@@ -76,7 +71,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 
                 if(StringUtils.isNotBlank(paramFilePath)){
                     long offset = Long.parseLong(paramFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > maxFileSize){
+                    if(offset > ApiAuditVo.maxFileSize){
                         vo.setParam("内容过长，不予导出");
                     }else{
                         String param = getAuditContentOnFile(paramFilePath);
@@ -85,7 +80,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 }
                 if(StringUtils.isNotBlank(resultFilePath)){
                     long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > maxFileSize){
+                    if(offset > ApiAuditVo.maxFileSize){
                         vo.setResult("内容过长，不予导出");
                     }else{
                         String result = getAuditContentOnFile(resultFilePath);
@@ -94,7 +89,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 }
                 if(StringUtils.isNotBlank(errorFilePath)){
                     long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > maxFileSize){
+                    if(offset > ApiAuditVo.maxFileSize){
                         vo.setError("内容过长，不予导出");
                     }else{
                         String error = getAuditContentOnFile(errorFilePath);
@@ -103,8 +98,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 }
             }
         }
-        System.out.println("读取文件后：" + System.currentTimeMillis());
-
         /**
          * 补充从数据库无法获取的字段
          */
@@ -168,47 +161,48 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             return null;
         }
         String result = null;
-//        raf.seek(0);
         String path = filePath.split("\\?")[0];
-//        String indexStr = filePath.split("\\?")[1];
         String[] indexs = filePath.split("\\?")[1].split("&");
-//        String startIndexStr = indexs[0].split("=")[1];
-//        String offsetStr = indexs[1].split("=")[1];
         Long startIndex = Long.parseLong(indexs[0].split("=")[1]);
         Long offset = Long.parseLong(indexs[1].split("=")[1]);
 
-        RandomAccessFile raf = null;
-        File file = new File(Config.DATA_HOME() + path.substring(5));
-        if(file.exists() && file.isFile()){
-            try {
-                raf = new RandomAccessFile(file,"r");
-            } catch (FileNotFoundException e) {
-                logger.error("文件：" + filePath + "不存在");
-                e.printStackTrace();
-                return null;
-            }
+        InputStream in = null;
+        try {
+            in = FileUtil.getData(path);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if(raf != null){
-            try {
-                raf.seek(startIndex);
-            } catch (IOException e) {
-                logger.error("文件指针移动失败：" + filePath + "\n" + e.getMessage());
-                return null;
+        if(in != null){
+            /**
+             * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
+             */
+            int buffSize = 0;
+            if(offset > ApiAuditVo.maxFileSize){
+                buffSize = (int)ApiAuditVo.maxFileSize;
+            }else{
+                buffSize = offset.intValue();
             }
-            byte[] buff = new byte[offset.intValue()];
             try {
-                raf.read(buff);
+                in.skip(startIndex);
             } catch (IOException e) {
-                logger.error("文件读取失败：" + filePath + "\n" + e.getMessage());
-                return null;
-            }
-            result = new String(buff,0,buff.length, StandardCharsets.UTF_8);
-            try {
-                raf.close();
-            } catch (IOException e) {
+                logger.error("skip error:" + filePath);
                 e.printStackTrace();
             }
+            byte[] buff = new byte[buffSize];
+            try {
+                in.read(buff);
+            } catch (IOException e) {
+                logger.error("read data error:" + filePath);
+                e.printStackTrace();
+            }
+            result = new String(buff,StandardCharsets.UTF_8);
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         return result;
     }
 

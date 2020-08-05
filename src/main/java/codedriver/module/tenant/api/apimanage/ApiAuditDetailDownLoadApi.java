@@ -1,18 +1,19 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.module.tenant.service.apiaudit.ApiAuditService;
+import codedriver.framework.restful.dto.ApiAuditVo;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -20,9 +21,6 @@ import java.nio.charset.StandardCharsets;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
-
-	@Autowired
-	private ApiAuditService apiAuditService;
 
 	@Override
 	public String getToken() {
@@ -46,11 +44,29 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		String filePath = jsonObj.getString("filePath");
-		System.out.println("读取文件前：" + System.currentTimeMillis());
-		String result = apiAuditService.getAuditContentOnFile(filePath);
-		System.out.println("读取文件后：" + System.currentTimeMillis());
 
-		if(StringUtils.isNotBlank(result)){
+		if(!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")){
+			throw new FilePathIllegalException("文件路径格式错误");
+		}
+
+		String path = filePath.split("\\?")[0];
+		String[] indexs = filePath.split("\\?")[1].split("&");
+		Long startIndex = Long.parseLong(indexs[0].split("=")[1]);
+		Long offset = Long.parseLong(indexs[1].split("=")[1]);
+
+		InputStream in = null;
+		try {
+			in = FileUtil.getData(path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(in != null){
+			try {
+				in.skip(startIndex);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 			String fileNameEncode = "API_AUDIT.log";
 			Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
 			if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
@@ -60,13 +76,34 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 			}
 			response.setContentType("aplication/x-msdownload;charset=utf-8");
 			response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-			try (OutputStream os = response.getOutputStream()){
-				os.write(result.getBytes(StandardCharsets.UTF_8));
+			OutputStream os = response.getOutputStream();
+
+			byte[] buff = new byte[(int)ApiAuditVo.maxFileSize];
+			int len = 0;
+			long endPoint = 0;
+			while((len = in.read(buff)) != -1){
+				try {
+					/**
+					 * endPoint用来记录累计读取到的字节数
+					 * 如果大于偏移量，说明实际读到的数据超过了需要的数据
+					 * 那么就需要减掉多读出来的数据
+					 */
+					endPoint += len;
+					if(endPoint > offset){
+						len = (int)(len - (endPoint - offset));
+					}
+					os.write(buff,0,len);
+					os.flush();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				in.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
 		return null;
 	}
 
