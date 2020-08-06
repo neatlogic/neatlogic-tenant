@@ -22,7 +22,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.minio.core.MinioManager;
+import codedriver.framework.file.core.MinioFileSystemHandler;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -85,7 +85,7 @@ public class ImageUploadApi extends BinaryStreamApiComponentBase {
 //					SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
 //					String finalPath ="/" + tenantUuid + "/images/"+format.format(new Date()) + "/" + fileVo.getId();
 //					fileVo.setPath("minio:" + finalPath);
-					filePath = FileUtil.saveData(MinioManager.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
+					filePath = FileUtil.saveData(MinioFileSystemHandler.NAME,tenantUuid,multipartFile.getInputStream(),fileVo.getId(),fileVo.getContentType(),fileVo.getType());
 				} catch (Exception ex) {
 					//如果minio出现异常，则上传到本地
 					logger.error(ex.getMessage(),ex);
