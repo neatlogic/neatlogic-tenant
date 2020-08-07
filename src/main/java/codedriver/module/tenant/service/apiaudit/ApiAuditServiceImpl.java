@@ -207,6 +207,11 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo, List<ApiVo> apiList) throws ClassNotFoundException {
+
+        if(StringUtils.isNotBlank(apiAuditVo.getKeyword()) && apiAuditVo.getKeyword().contains(".")){
+            apiAuditVo.setIp(apiAuditVo.getKeyword());
+        }
+
         /**
          * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间
          */
@@ -251,7 +256,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 }
 
             }
-            if (StringUtils.isNotBlank(apiAuditVo.getKeyword())) {
+            if (StringUtils.isNotBlank(apiAuditVo.getKeyword()) && !apiAuditVo.getKeyword().contains(".")) {
                 if (!api.getName().contains(apiAuditVo.getKeyword()) && !api.getToken().contains(apiAuditVo.getKeyword())) {
                     continue;
                 }
