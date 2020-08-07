@@ -57,32 +57,24 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 		InputStream in = null;
 		try {
 			in = FileUtil.getData(path);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if(in != null){
-			try {
+			if(in != null){
 				in.skip(startIndex);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
-			String fileNameEncode = "API_AUDIT.log";
-			Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-			if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-				fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-			} else {
-				fileNameEncode = new String(fileNameEncode.getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-			}
-			response.setContentType("aplication/x-msdownload;charset=utf-8");
-			response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
-			OutputStream os = response.getOutputStream();
+				String fileNameEncode = "API_AUDIT.log";
+				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+				if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+					fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+				} else {
+					fileNameEncode = new String(fileNameEncode.getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+				}
+				response.setContentType("aplication/x-msdownload;charset=utf-8");
+				response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+				OutputStream os = response.getOutputStream();
 
-			byte[] buff = new byte[(int)ApiAuditVo.maxFileSize];
-			int len = 0;
-			long endPoint = 0;
-			while((len = in.read(buff)) != -1){
-				try {
+				byte[] buff = new byte[(int)ApiAuditVo.maxFileSize];
+				int len = 0;
+				long endPoint = 0;
+				while((len = in.read(buff)) != -1){
 					/**
 					 * endPoint用来记录累计读取到的字节数
 					 * 如果大于偏移量，说明实际读到的数据超过了需要的数据
@@ -94,16 +86,16 @@ public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
 					}
 					os.write(buff,0,len);
 					os.flush();
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
-			try {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			if(in != null){
 				in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
+
 		return null;
 	}
 

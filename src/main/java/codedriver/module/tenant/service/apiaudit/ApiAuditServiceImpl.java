@@ -169,37 +169,32 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         InputStream in = null;
         try {
             in = FileUtil.getData(path);
+            if(in != null){
+                /**
+                 * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
+                 */
+                int buffSize = 0;
+                if(offset > ApiAuditVo.maxFileSize){
+                    buffSize = (int)ApiAuditVo.maxFileSize;
+                }else{
+                    buffSize = offset.intValue();
+                }
+
+                in.skip(startIndex);
+                byte[] buff = new byte[buffSize];
+                in.read(buff);
+
+                result = new String(buff,StandardCharsets.UTF_8);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        if(in != null){
-            /**
-             * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
-             */
-            int buffSize = 0;
-            if(offset > ApiAuditVo.maxFileSize){
-                buffSize = (int)ApiAuditVo.maxFileSize;
-            }else{
-                buffSize = offset.intValue();
-            }
-            try {
-                in.skip(startIndex);
-            } catch (IOException e) {
-                logger.error("skip error:" + filePath);
-                e.printStackTrace();
-            }
-            byte[] buff = new byte[buffSize];
-            try {
-                in.read(buff);
-            } catch (IOException e) {
-                logger.error("read data error:" + filePath);
-                e.printStackTrace();
-            }
-            result = new String(buff,StandardCharsets.UTF_8);
-            try {
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        }finally {
+            if(in != null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
