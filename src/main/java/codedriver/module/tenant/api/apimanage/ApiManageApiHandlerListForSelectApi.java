@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -46,7 +47,7 @@ public class ApiManageApiHandlerListForSelectApi extends ApiComponentBase {
             }
             apiHandlerList.add(apiHandlerVo);
         }
-        apiHandlerList.sort((apiHandler1, apiHandler2) -> apiHandler1.getHandler().compareTo(apiHandler2.getHandler()));
+        apiHandlerList.sort(Comparator.comparing(ApiHandlerVo::getHandler));
 
         for(ApiHandlerVo vo : apiHandlerList){
             resultList.add(new ValueTextVo(vo.getHandler(),vo.getName()));
