@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -46,8 +45,7 @@ public class NotifyPolicySearchForSelectApi extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
 	})
 	@Output({
-		@Param(explode=BasePageVo.class),
-		@Param(name = "tbodyList", explode = NotifyPolicyVo[].class, desc = "通知策略列表")
+		@Param(name = "list", explode = ValueTextVo[].class, desc = "通知策略列表")
 	})
 	@Description(desc = "查询通知策略管理列表_下拉框")
 	@Override
@@ -56,7 +54,7 @@ public class NotifyPolicySearchForSelectApi extends ApiComponentBase {
 		NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(jsonObj, NotifyPolicyVo.class);
 		List<ValueTextVo> tbodyList = notifyMapper.getNotifyPolicyListForSelect(notifyPolicyVo);
 
-		resultObj.put("tbodyList", tbodyList);
+		resultObj.put("list", tbodyList);
 		if(notifyPolicyVo.getNeedPage()) {
 			int rowNum = notifyMapper.getNotifyPolicyCount(notifyPolicyVo);
 			resultObj.put("currentPage", notifyPolicyVo.getCurrentPage());

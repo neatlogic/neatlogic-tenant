@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -43,7 +42,7 @@ public class IntegrationSearchForSelectApi extends ApiComponentBase {
 		@Param(name = "handler", type = ApiParamType.STRING, desc = "组件"), 
 		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"), 
 		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量") })
-	@Output({ @Param(explode = BasePageVo.class), @Param(name = "integrationList", explode = IntegrationVo[].class, desc = "集成设置列表") })
+	@Output({@Param(name = "list", explode = ValueTextVo[].class, desc = "集成设置列表") })
 	@Description(desc = "查询集成设置_下拉框")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -59,7 +58,7 @@ public class IntegrationSearchForSelectApi extends ApiComponentBase {
 		returnObj.put("currentPage", integrationVo.getCurrentPage());
 		returnObj.put("rowNum", integrationVo.getRowNum());
 		returnObj.put("pageCount", integrationVo.getPageCount());
-		returnObj.put("tbodyList", integrationList);
+		returnObj.put("list", integrationList);
 		return returnObj;
 	}
 }
