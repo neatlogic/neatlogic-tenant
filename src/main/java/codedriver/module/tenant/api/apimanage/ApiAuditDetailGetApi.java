@@ -5,18 +5,13 @@ import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.dto.ApiAuditVo;
-import codedriver.module.tenant.service.apiaudit.ApiAuditService;
+import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailGetApi extends ApiComponentBase {
-
-	@Autowired
-	private ApiAuditService apiAuditService;
 
 	@Override
 	public String getToken() {
@@ -48,10 +43,10 @@ public class ApiAuditDetailGetApi extends ApiComponentBase {
 		long offset = Long.parseLong(filePath.split("\\?")[1].split("&")[1].split("=")[1]);
 
 		String result = null;
-		if(offset > ApiAuditVo.maxFileSize){
-			result = apiAuditService.getAuditContentOnFile(filePath) + "\n剩余内容可下载文件后查看";
+		if(offset > AuditUtil.maxFileSize){
+			result = AuditUtil.getAuditDetail(filePath) + "\n--------------------\n剩余内容可下载文件后查看";
 		}else{
-			result = apiAuditService.getAuditContentOnFile(filePath);
+			result = AuditUtil.getAuditDetail(filePath);
 		}
 		return result;
 	}

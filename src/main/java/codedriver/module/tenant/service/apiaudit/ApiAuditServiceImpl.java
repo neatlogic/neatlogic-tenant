@@ -1,23 +1,18 @@
 package codedriver.module.tenant.service.apiaudit;
 
-import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.ApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.framework.util.AuditUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -25,8 +20,6 @@ import java.util.Map;
 
 @Service
 public class ApiAuditServiceImpl implements ApiAuditService{
-
-    Logger logger = LoggerFactory.getLogger(ApiAuditServiceImpl.class);
 
     private static final String TIME_UINT_OF_DAY = "day";
     private static final String TIME_UINT_OF_MONTH = "month";
@@ -71,28 +64,28 @@ public class ApiAuditServiceImpl implements ApiAuditService{
 
                 if(StringUtils.isNotBlank(paramFilePath)){
                     long offset = Long.parseLong(paramFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > ApiAuditVo.maxFileSize){
+                    if(offset > AuditUtil.maxFileSize){
                         vo.setParam("内容过长，不予导出");
                     }else{
-                        String param = getAuditContentOnFile(paramFilePath);
+                        String param = AuditUtil.getAuditDetail(paramFilePath);
                         vo.setParam(param);
                     }
                 }
                 if(StringUtils.isNotBlank(resultFilePath)){
                     long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > ApiAuditVo.maxFileSize){
+                    if(offset > AuditUtil.maxFileSize){
                         vo.setResult("内容过长，不予导出");
                     }else{
-                        String result = getAuditContentOnFile(resultFilePath);
+                        String result = AuditUtil.getAuditDetail(resultFilePath);
                         vo.setResult(result);
                     }
                 }
                 if(StringUtils.isNotBlank(errorFilePath)){
                     long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > ApiAuditVo.maxFileSize){
+                    if(offset > AuditUtil.maxFileSize){
                         vo.setError("内容过长，不予导出");
                     }else{
-                        String error = getAuditContentOnFile(errorFilePath);
+                        String error = AuditUtil.getAuditDetail(errorFilePath);
                         vo.setError(error);
                     }
                 }
@@ -152,53 +145,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             }
         }
         return apiList;
-    }
-
-    @Override
-    public String getAuditContentOnFile(String filePath){
-        if(StringUtils.isBlank(filePath) || !filePath.contains("?")
-                || !filePath.contains("&") || !filePath.contains("=")){
-            return null;
-        }
-        String result = null;
-        String path = filePath.split("\\?")[0];
-        String[] indexs = filePath.split("\\?")[1].split("&");
-        Long startIndex = Long.parseLong(indexs[0].split("=")[1]);
-        Long offset = Long.parseLong(indexs[1].split("=")[1]);
-
-        InputStream in = null;
-        try {
-            in = FileUtil.getData(path);
-            if(in != null){
-                /**
-                 * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
-                 */
-                int buffSize = 0;
-                if(offset > ApiAuditVo.maxFileSize){
-                    buffSize = (int)ApiAuditVo.maxFileSize;
-                }else{
-                    buffSize = offset.intValue();
-                }
-
-                in.skip(startIndex);
-                byte[] buff = new byte[buffSize];
-                in.read(buff);
-
-                result = new String(buff,StandardCharsets.UTF_8);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            if(in != null){
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return result;
     }
 
     private void assembleParamsAndFilterApi(ApiAuditVo apiAuditVo, List<ApiVo> apiList) throws ClassNotFoundException {
