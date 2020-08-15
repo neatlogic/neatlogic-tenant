@@ -40,7 +40,7 @@ public class AuthModuleGetApi extends ApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取用户模块对应权限接口";
+        return "获取用户模块对应权限";
     }
 
     @Override
