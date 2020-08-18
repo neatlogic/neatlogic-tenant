@@ -33,6 +33,9 @@ public class IntegrationAuditDetailGetApi extends ApiComponentBase {
 	@Description(desc = "获取集成管理审计内容")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+
+		JSONObject resultJson = new JSONObject();
+
 		String filePath = jsonObj.getString("filePath");
 
 		if(!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")){
@@ -43,10 +46,14 @@ public class IntegrationAuditDetailGetApi extends ApiComponentBase {
 
 		String result = null;
 		if(offset > AuditUtil.maxFileSize){
-			result = AuditUtil.getAuditDetail(filePath) + "\n--------------------\n剩余内容可下载文件后查看";
+			result = AuditUtil.getAuditDetail(filePath);
+			resultJson.put("result",result);
+			resultJson.put("hasMore",true);
 		}else{
 			result = AuditUtil.getAuditDetail(filePath);
+			resultJson.put("result",result);
+			resultJson.put("hasMore",false);
 		}
-		return result;
+		return resultJson;
 	}
 }

@@ -34,6 +34,8 @@ public class ApiAuditDetailGetApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 
+		JSONObject resultJson = new JSONObject();
+
 		String filePath = jsonObj.getString("filePath");
 
 		if(!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")){
@@ -44,11 +46,15 @@ public class ApiAuditDetailGetApi extends ApiComponentBase {
 
 		String result = null;
 		if(offset > AuditUtil.maxFileSize){
-			result = AuditUtil.getAuditDetail(filePath) + "\n--------------------\n剩余内容可下载文件后查看";
+			result = AuditUtil.getAuditDetail(filePath);
+			resultJson.put("result",result);
+			resultJson.put("hasMore",true);
 		}else{
 			result = AuditUtil.getAuditDetail(filePath);
+			resultJson.put("result",result);
+			resultJson.put("hasMore",false);
 		}
-		return result;
+		return resultJson;
 	}
 
 }
