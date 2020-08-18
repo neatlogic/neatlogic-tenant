@@ -33,7 +33,7 @@ import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.minio.core.MinioManager;
+import codedriver.framework.file.core.MinioFileSystemHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -167,7 +167,7 @@ public class FileUploadApi extends BinaryStreamApiComponentBase {
 //				String finalPath = "/"+tenantUuid + "/upload/" + type + "/" +format.format(new Date()) + "/" + fileVo.getId();
 //				fileVo.setPath("minio:" + finalPath);
 //				minioManager.saveData(tenantUuid,multipartFile,fileVo,format);
-				filePath = FileUtil.saveData(MinioManager.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId(), fileVo.getContentType(), fileVo.getType());
+				filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId(), fileVo.getContentType(), fileVo.getType());
 			} catch (Exception ex) {
 				// 如果minio出现异常，则上传到本地
 				logger.error(ex.getMessage(), ex);
