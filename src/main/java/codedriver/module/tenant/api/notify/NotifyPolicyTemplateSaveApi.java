@@ -13,8 +13,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ActionType;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.notify.constvalue.NotifyPolicyActionType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
@@ -94,7 +94,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 					notifyTemplateVo.setTitle(title);
 					notifyTemplateVo.setContent(content);
 					notifyTemplateVo.setNotifyHandler(notifyHandler);
-					notifyTemplateVo.setAction(NotifyPolicyActionType.UPDATE.getValue());
+					notifyTemplateVo.setAction(ActionType.UPDATE.getValue());
 					notifyTemplateVo.setActionTime(new Date());
 					notifyTemplateVo.setActionUser(UserContext.get().getUserName());
 					isExists = true;
@@ -110,7 +110,7 @@ public class NotifyPolicyTemplateSaveApi extends ApiComponentBase {
 			notifyTemplateVo.setTitle(title);
 			notifyTemplateVo.setContent(content);
 			notifyTemplateVo.setNotifyHandler(notifyHandler);
-			notifyTemplateVo.setAction(NotifyPolicyActionType.CREATE.getValue());
+			notifyTemplateVo.setAction(ActionType.CREATE.getValue());
 			notifyTemplateVo.setActionTime(new Date());
 			notifyTemplateVo.setActionUser(UserContext.get().getUserName());
 			templateList.add(notifyTemplateVo);
