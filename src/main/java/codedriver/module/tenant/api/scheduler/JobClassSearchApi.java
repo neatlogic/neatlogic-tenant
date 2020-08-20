@@ -62,7 +62,7 @@ public class JobClassSearchApi extends ApiComponentBase {
 		List<JobClassVo> jobClassList = SchedulerManager.getAllPublicJobClassList();
 		List<JobClassVo> jobClassFilterList = new ArrayList<>();
 		List<String> moduleList = new ArrayList<>();
-		if (StringUtils.isNoneBlank(jobClassVo.getModuleId())) {
+		if (StringUtils.isNotBlank(jobClassVo.getModuleId())) {
 			moduleList = ModuleUtil.getModuleGroup(jobClassVo.getModuleId()).getModuleIdList();
 		}
 		for (JobClassVo jobClass : jobClassList) {
