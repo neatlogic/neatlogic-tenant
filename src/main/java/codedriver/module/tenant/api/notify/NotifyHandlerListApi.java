@@ -11,11 +11,11 @@ import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NotifyHandlerListApi extends ApiComponentBase {
+public class NotifyHandlerListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

@@ -19,13 +19,13 @@ import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @AuthAction(name = "ROLE_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class RoleDeleteApi extends ApiComponentBase {
+public class RoleDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private RoleMapper roleMapper;

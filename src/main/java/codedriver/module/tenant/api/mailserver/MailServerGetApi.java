@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.mailserver;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +12,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MailServerGetApi extends ApiComponentBase {
+public class MailServerGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private MailServerMapper mailServerMapper;

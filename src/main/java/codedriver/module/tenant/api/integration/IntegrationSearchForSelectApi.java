@@ -7,7 +7,8 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationSearchForSelectApi extends ApiComponentBase {
+public class IntegrationSearchForSelectApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

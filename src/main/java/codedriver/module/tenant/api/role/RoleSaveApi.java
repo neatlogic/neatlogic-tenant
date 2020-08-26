@@ -4,6 +4,8 @@ import codedriver.framework.dto.RoleAuthVo;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 
@@ -22,7 +24,6 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,7 @@ import java.util.Set;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class RoleSaveApi extends ApiComponentBase {
+public class RoleSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	RoleMapper roleMapper;

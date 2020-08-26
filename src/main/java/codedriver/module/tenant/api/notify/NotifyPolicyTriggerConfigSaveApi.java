@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +35,11 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyTriggerConfigNotFoundException;
 import codedriver.framework.notify.exception.NotifyTemplateNotFoundException;
 import codedriver.framework.notify.exception.NotifyTemplateNotifyHandlerNotMatchException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.SnowflakeUtil;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class NotifyPolicyTriggerConfigSaveApi extends ApiComponentBase {
+public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private NotifyMapper notifyMapper;

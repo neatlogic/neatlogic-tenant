@@ -5,6 +5,8 @@ import java.util.Set;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,13 +28,12 @@ import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.util.UuidUtil;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class UserSaveApi extends ApiComponentBase {
+public class UserSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	UserMapper userMapper;

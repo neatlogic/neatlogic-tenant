@@ -6,14 +6,15 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserDataVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class UserDataSaveApi extends ApiComponentBase {
+public class UserDataSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	UserMapper userMapper;

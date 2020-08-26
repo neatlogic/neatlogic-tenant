@@ -4,7 +4,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.TagService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagSearchApi extends ApiComponentBase {
+public class TagSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private TagService tagService;

@@ -14,12 +14,12 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @AuthAction(name = "INTERFACE_MODIFY")
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class IntegrationToggleActiveApi extends ApiComponentBase {
+public class IntegrationToggleActiveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

@@ -24,12 +24,12 @@ import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class UserAuthSaveApi extends ApiComponentBase {
+public class UserAuthSaveApi extends PrivateApiComponentBase {
 
     @Autowired
     private UserMapper userMapper;

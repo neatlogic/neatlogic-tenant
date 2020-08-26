@@ -6,7 +6,7 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TeamTreeSearchApi extends ApiComponentBase {
+public class TeamTreeSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;

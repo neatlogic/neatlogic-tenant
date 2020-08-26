@@ -5,7 +5,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.dto.GlobalCounterSubscribeVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.counter.GlobalCounterService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class CounterSubscribeApi extends ApiComponentBase {
+public class CounterSubscribeApi extends PrivateApiComponentBase {
 
     @Autowired
     private GlobalCounterService counterService;

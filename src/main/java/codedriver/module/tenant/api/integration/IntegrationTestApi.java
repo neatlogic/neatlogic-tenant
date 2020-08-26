@@ -15,12 +15,12 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class IntegrationTestApi extends ApiComponentBase {
+public class IntegrationTestApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

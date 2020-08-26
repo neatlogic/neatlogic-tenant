@@ -8,7 +8,8 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class UserReminderCountApi extends ApiComponentBase {
+public class UserReminderCountApi extends PrivateApiComponentBase {
 
     @Autowired
     private GlobalReminderMessageMapper reminderMessageMapper;

@@ -16,7 +16,7 @@ import codedriver.framework.reminder.dto.ReminderMessageSearchVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 
 /**
@@ -26,7 +26,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ReminderDayUpdateApi extends ApiComponentBase {
+public class ReminderDayUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private GlobalReminderMessageMapper reminderMessageMapper;

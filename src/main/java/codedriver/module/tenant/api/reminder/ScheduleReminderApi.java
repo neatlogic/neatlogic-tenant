@@ -20,7 +20,7 @@ import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 
 /**
@@ -30,7 +30,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ScheduleReminderApi extends ApiComponentBase {
+public class ScheduleReminderApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private GlobalReminderService reminderService;

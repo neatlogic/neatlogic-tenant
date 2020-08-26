@@ -5,6 +5,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,10 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.PatternVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationParamListApi extends ApiComponentBase {
+public class IntegrationParamListApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

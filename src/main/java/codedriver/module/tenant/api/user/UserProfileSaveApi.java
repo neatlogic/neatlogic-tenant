@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +21,13 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserProfileVo;
 import codedriver.framework.exception.type.ParamIrregularException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.userprofile.UserProfileFactory;
 import codedriver.module.tenant.exception.user.UserProfileModuleNotFoundException;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class UserProfileSaveApi extends ApiComponentBase {
+public class UserProfileSaveApi extends PrivateApiComponentBase {
 	@Autowired
 	UserMapper userMapper;
 

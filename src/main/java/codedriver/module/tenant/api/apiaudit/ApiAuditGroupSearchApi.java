@@ -1,21 +1,17 @@
 package codedriver.module.tenant.api.apiaudit;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.dto.ApiAuditVo;
-import codedriver.framework.util.TimeUtil;
-import codedriver.module.tenant.service.apiaudit.ApiAuditService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 /**
  * 操作审计统计接口
@@ -28,10 +24,7 @@ import java.util.*;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiAuditGroupSearchApi extends ApiComponentBase {
-
-	@Autowired
-	private ApiAuditService apiAuditService;
+public class ApiAuditGroupSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

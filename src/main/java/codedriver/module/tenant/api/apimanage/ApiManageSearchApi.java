@@ -5,8 +5,8 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -24,7 +24,7 @@ import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiManageSearchApi extends ApiComponentBase {
+public class ApiManageSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper ApiMapper;
@@ -70,7 +70,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		String handler = apiVo.getHandler();
 		
 		if(handler != null) {
-			ApiHandlerVo apiHandlerVo = ApiComponentFactory.getApiHandlerByHandler(handler);
+			ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(handler);
 			if(apiHandlerVo == null) {
 				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
 			}
@@ -80,7 +80,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		List<String> tokenList = new ArrayList<>();
 		List<String> ramTokenList = new ArrayList<>();
 		//从内存中取出符合搜索条件的api、token数据
-		for(ApiVo api : ApiComponentFactory.getApiList()) {
+		for(ApiVo api : PrivateApiComponentFactory.getApiList()) {
 			if(apiVo.getIsActive() != null && !apiVo.getIsActive().equals(api.getIsActive())) {
 				continue;
 			}
@@ -124,7 +124,7 @@ public class ApiManageSearchApi extends ApiComponentBase {
 		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
 		List<ApiVo> dbApiList = new ArrayList<>();
 		List<String> dbTokenList = new ArrayList<>();
-		Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+		Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
 		for(ApiVo api : dbAllApiList) {
 
 			if(ramApiMap.get(api.getToken()) != null){

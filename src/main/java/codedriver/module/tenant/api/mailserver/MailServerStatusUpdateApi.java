@@ -14,12 +14,12 @@ import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class MailServerStatusUpdateApi extends ApiComponentBase {
+public class MailServerStatusUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private MailServerMapper mailServerMapper;

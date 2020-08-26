@@ -4,6 +4,8 @@ import java.io.StringWriter;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -11,12 +13,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.integration.ParamFormatInvalidException;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.framework.util.JavascriptUtil;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationTransformTestApi extends ApiComponentBase {
+public class IntegrationTransformTestApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

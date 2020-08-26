@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.team;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +19,10 @@ import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.exception.team.TeamUserTitleNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TeamUserTitleUpdateApi extends ApiComponentBase {
+public class TeamUserTitleUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private TeamMapper teamMapper;

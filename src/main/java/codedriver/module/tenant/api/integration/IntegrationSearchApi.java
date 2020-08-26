@@ -17,11 +17,11 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationSearchApi extends ApiComponentBase {
+public class IntegrationSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

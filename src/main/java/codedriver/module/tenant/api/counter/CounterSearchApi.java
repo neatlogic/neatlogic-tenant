@@ -6,7 +6,7 @@ import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.counter.GlobalCounterService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import java.util.List;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class CounterSearchApi extends ApiComponentBase {
+public class CounterSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private GlobalCounterService counterService;

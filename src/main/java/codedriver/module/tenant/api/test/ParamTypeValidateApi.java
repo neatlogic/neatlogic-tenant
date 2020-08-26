@@ -1,8 +1,5 @@
 package codedriver.module.tenant.api.test;
 
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -11,9 +8,9 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @AuthAction(name="SCHEDULE_JOB_MODIFY")
-public class ParamTypeValidateApi extends ApiComponentBase {
+public class ParamTypeValidateApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {
@@ -48,16 +45,16 @@ public class ParamTypeValidateApi extends ApiComponentBase {
 	@Description(desc = "测试入参类型验证接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		boolean boolParam = jsonObj.getBooleanValue("boolParam");
-		String emailParam = jsonObj.getString("emailParam");
-		String enumParam = jsonObj.getString("enumParam");
-		int intParam = jsonObj.getIntValue("intParam");
-		String ipParam = jsonObj.getString("ipParam");
-		JSONArray arrayParam = jsonObj.getJSONArray("arrayParam");
-		JSONObject objectParam = jsonObj.getJSONObject("objectParam");
-		long longParam = jsonObj.getLongValue("longParam");
-		String regexParam = jsonObj.getString("regexParam");
-		String stringParam = jsonObj.getString("stringParam");
+//		boolean boolParam = jsonObj.getBooleanValue("boolParam");
+//		String emailParam = jsonObj.getString("emailParam");
+//		String enumParam = jsonObj.getString("enumParam");
+//		int intParam = jsonObj.getIntValue("intParam");
+//		String ipParam = jsonObj.getString("ipParam");
+//		JSONArray arrayParam = jsonObj.getJSONArray("arrayParam");
+//		JSONObject objectParam = jsonObj.getJSONObject("objectParam");
+//		long longParam = jsonObj.getLongValue("longParam");
+//		String regexParam = jsonObj.getString("regexParam");
+//		String stringParam = jsonObj.getString("stringParam");
 		return jsonObj;
 	}
 

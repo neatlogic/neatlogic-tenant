@@ -1,17 +1,16 @@
 package codedriver.module.tenant.api.test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.dao.mapper.TestMapper;
 
 @Transactional
-public class TestUpdateSqlApi extends ApiComponentBase {
+public class TestUpdateSqlApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private TestMapper testMapper;

@@ -1,20 +1,17 @@
 package codedriver.module.tenant.api.test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Component
-public class TestApi extends ApiComponentBase {
+public class TestApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private UserMapper userMapper;
+//	@Autowired
+//	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {

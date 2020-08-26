@@ -6,7 +6,7 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.exception.team.TeamMoveException;
 import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TeamMoveApi extends ApiComponentBase {
+public class TeamMoveApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;

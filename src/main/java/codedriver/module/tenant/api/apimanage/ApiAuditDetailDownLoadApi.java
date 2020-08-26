@@ -1,19 +1,25 @@
 package codedriver.module.tenant.api.apimanage;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.framework.util.AuditUtil;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.util.AuditUtil;
+
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiAuditDetailDownLoadApi extends BinaryStreamApiComponentBase {
+public class ApiAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Override
 	public String getToken() {

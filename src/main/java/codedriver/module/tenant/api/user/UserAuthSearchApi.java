@@ -6,7 +6,8 @@ import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class UserAuthSearchApi extends ApiComponentBase {
+public class UserAuthSearchApi extends PrivateApiComponentBase {
     
     @Autowired
     private UserMapper userMapper;

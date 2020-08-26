@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +12,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationGetApi extends ApiComponentBase {
+public class IntegrationGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

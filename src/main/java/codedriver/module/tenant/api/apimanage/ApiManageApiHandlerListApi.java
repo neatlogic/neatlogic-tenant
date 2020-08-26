@@ -15,13 +15,14 @@ import com.alibaba.fastjson.TypeReference;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiManageApiHandlerListApi extends ApiComponentBase {
+public class ApiManageApiHandlerListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {
@@ -57,7 +58,11 @@ public class ApiManageApiHandlerListApi extends ApiComponentBase {
 		List<ApiHandlerVo> apiHandlerList = new ArrayList<>();
 		String keyword = jsonObj.getString("keyword");
 		Boolean isPrivate = jsonObj.getBoolean("isPrivate");
-		for (ApiHandlerVo apiHandlerVo : ApiComponentFactory.getApiHandlerList()) {
+		 List<ApiHandlerVo> apiHandlerFactoryList = PrivateApiComponentFactory.getApiHandlerList();
+		if(!isPrivate) {
+		    apiHandlerFactoryList = PublicApiComponentFactory.getApiHandlerList();
+		}
+		for (ApiHandlerVo apiHandlerVo : apiHandlerFactoryList) {
 			if (StringUtils.isNotBlank(keyword) && !apiHandlerVo.getName().contains(keyword)) {
 				continue;
 			}

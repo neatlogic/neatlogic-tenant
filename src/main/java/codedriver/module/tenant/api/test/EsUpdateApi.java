@@ -1,12 +1,13 @@
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-public class EsUpdateApi extends ApiComponentBase {
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+public class EsUpdateApi extends PrivateApiComponentBase {
     @Autowired
     private ObjectPoolService objectPoolService;
 

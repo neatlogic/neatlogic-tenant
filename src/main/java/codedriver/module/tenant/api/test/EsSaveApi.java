@@ -1,16 +1,17 @@
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class EsSaveApi extends ApiComponentBase {
+import com.alibaba.fastjson.JSONObject;
+
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+
+public class EsSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {

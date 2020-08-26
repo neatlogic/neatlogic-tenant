@@ -20,11 +20,11 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TeamTreeApi extends ApiComponentBase {
+public class TeamTreeApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;

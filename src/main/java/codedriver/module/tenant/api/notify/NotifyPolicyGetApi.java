@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,9 @@ import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NotifyPolicyGetApi  extends ApiComponentBase {
+public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;

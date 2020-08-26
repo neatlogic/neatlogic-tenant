@@ -25,11 +25,11 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class NotifyPolicyTriggerConfigDeleteApi extends ApiComponentBase {
+public class NotifyPolicyTriggerConfigDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private NotifyMapper notifyMapper;

@@ -17,7 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.dto.JobVo;
@@ -27,7 +27,7 @@ import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @Transactional
 @AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class JobAuditSearchApi extends ApiComponentBase {
+public class JobAuditSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private SchedulerMapper schedulerMapper;

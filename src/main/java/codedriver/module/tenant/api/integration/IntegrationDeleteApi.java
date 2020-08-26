@@ -13,12 +13,12 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @AuthAction(name = "INTERFACE_MODIFY")
 @OperationType(type = OperationTypeEnum.DELETE)
-public class IntegrationDeleteApi extends ApiComponentBase {
+public class IntegrationDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private IntegrationMapper integrationMapper;

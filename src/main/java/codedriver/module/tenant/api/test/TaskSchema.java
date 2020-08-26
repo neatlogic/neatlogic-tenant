@@ -1,10 +1,5 @@
 package codedriver.module.tenant.api.test;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,7 +7,18 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
 
 class TaskSchema {
     @Retention(RetentionPolicy.RUNTIME)
@@ -242,6 +248,7 @@ class TaskSchema {
         };
     }
 
+    @SuppressWarnings("rawtypes")
     private static AttributeSetter stringListSetter() {
         return (patch, key, json) -> {
             Object value = json.get(key);
@@ -282,6 +289,7 @@ class TaskSchema {
         };
     }
 
+    @SuppressWarnings("rawtypes")
     private static AttributeSetter integerListSetter() {
         return (patch, key, json) -> {
             Object value = json.get(key);

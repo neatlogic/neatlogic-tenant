@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -11,11 +13,10 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NotifyTriggerListApi extends ApiComponentBase {
+public class NotifyTriggerListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

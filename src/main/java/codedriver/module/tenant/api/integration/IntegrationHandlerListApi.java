@@ -11,11 +11,11 @@ import codedriver.framework.integration.dto.IntegrationHandlerVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationHandlerListApi extends ApiComponentBase {
+public class IntegrationHandlerListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

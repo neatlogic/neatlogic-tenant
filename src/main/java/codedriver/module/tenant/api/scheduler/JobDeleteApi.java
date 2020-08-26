@@ -14,7 +14,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
@@ -26,7 +26,7 @@ import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
 @AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class JobDeleteApi extends ApiComponentBase {
+public class JobDeleteApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private SchedulerManager schedulerManager;

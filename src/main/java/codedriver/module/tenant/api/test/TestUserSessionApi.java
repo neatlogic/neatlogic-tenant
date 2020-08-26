@@ -1,24 +1,18 @@
 package codedriver.module.tenant.api.test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-public class TestUserSessionApi extends ApiComponentBase {
+public class TestUserSessionApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private UserMapper userMapper;
-
-	@Override
-	public boolean isPrivate() {
-		return false;
-	}
 
 	@Override
 	public String getToken() {

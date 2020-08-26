@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.role;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,11 +13,10 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class RoleGetApi extends ApiComponentBase {
+public class RoleGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private RoleMapper roleMapper;

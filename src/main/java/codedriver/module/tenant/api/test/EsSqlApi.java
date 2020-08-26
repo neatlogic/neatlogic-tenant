@@ -1,7 +1,13 @@
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSONObject;
 import com.techsure.multiattrsearch.MultiAttrsObject;
 import com.techsure.multiattrsearch.MultiAttrsQuery;
@@ -9,16 +15,11 @@ import com.techsure.multiattrsearch.ObjectPoolDataException;
 import com.techsure.multiattrsearch.query.QueryParser;
 import com.techsure.multiattrsearch.query.QueryResult;
 import com.techsure.multiattrsearch.query.QuerySyntaxException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-public class EsSqlApi extends ApiComponentBase {
+public class EsSqlApi extends PrivateApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(EsSearchApi.class);
 
     @Override

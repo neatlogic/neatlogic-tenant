@@ -4,14 +4,14 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class IntegrationAuditDetailGetApi extends ApiComponentBase {
+public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

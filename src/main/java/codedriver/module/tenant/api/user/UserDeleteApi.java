@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,12 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 
 @AuthAction(name="USER_MODIFY")
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class UserDeleteApi extends ApiComponentBase{
+public class UserDeleteApi extends PrivateApiComponentBase{
 	
 	@Autowired
 	private UserMapper userMapper;

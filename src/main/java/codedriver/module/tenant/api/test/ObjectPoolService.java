@@ -1,26 +1,23 @@
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.common.config.Config;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.*;
-import com.techsure.multiattrsearch.query.QueryBuilder;
-import com.techsure.multiattrsearch.query.QueryParser;
+import java.util.concurrent.ExecutorService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
+import com.techsure.multiattrsearch.MultiAttrsObjectPool;
+import com.techsure.multiattrsearch.query.QueryBuilder;
+import com.techsure.multiattrsearch.query.QueryParser;
 
 
 public class ObjectPoolService {
     private static final Logger logger = LoggerFactory.getLogger(ObjectPoolService.class);
 
-    private static final String POOL_NAME = "test";
-    private static final String TEST_CONFIG = "test.properties";
+//    private static final String POOL_NAME = "test";
+//    private static final String TEST_CONFIG = "test.properties";
 
     private MultiAttrsObjectPool objectPool;
     private ExecutorService executor;

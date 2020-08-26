@@ -17,15 +17,15 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ApiManageBatchUpdateApi extends ApiComponentBase {
+public class ApiManageBatchUpdateApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ApiMapper ApiMapper;
@@ -73,7 +73,7 @@ public class ApiManageBatchUpdateApi extends ApiComponentBase {
 		if(tokenList.isEmpty()) {
 			return null;
 		}
-		for(ApiVo api : ApiComponentFactory.getApiList()) {
+		for(ApiVo api : PrivateApiComponentFactory.getApiList()) {
 			if(!tokenList.contains(api.getToken())) {
 				continue;
 			}

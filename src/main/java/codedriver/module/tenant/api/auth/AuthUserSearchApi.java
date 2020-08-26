@@ -5,7 +5,8 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.Set;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class AuthUserSearchApi extends ApiComponentBase {
+public class AuthUserSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private UserMapper userMapper;

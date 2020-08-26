@@ -1,27 +1,28 @@
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.query.QueryBuilder;
-import com.techsure.multiattrsearch.query.QueryResult;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.alibaba.fastjson.JSONObject;
+import com.techsure.multiattrsearch.MultiAttrsObject;
+import com.techsure.multiattrsearch.query.QueryBuilder;
+import com.techsure.multiattrsearch.query.QueryResult;
+
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 
-public class EsSearchApi extends ApiComponentBase {
+public class EsSearchApi extends PrivateApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(EsSearchApi.class);
 
     @Override

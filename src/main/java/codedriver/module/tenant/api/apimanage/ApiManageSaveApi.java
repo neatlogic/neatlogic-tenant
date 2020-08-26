@@ -18,8 +18,8 @@ import codedriver.framework.exception.type.ComponentNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -29,7 +29,7 @@ import java.util.List;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ApiManageSaveApi extends ApiComponentBase {
+public class ApiManageSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper ApiMapper;
@@ -72,12 +72,12 @@ public class ApiManageSaveApi extends ApiComponentBase {
 		ApiVo apiVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiVo>() {});
 		String operationType = jsonObj.getString("operationType");
 
-		ApiHandlerVo apiHandlerVo = ApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
+		ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
 		if(apiHandlerVo == null) {
 			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
 		}
 
-        ApiVo ramApiVo = ApiComponentFactory.getApiByToken(apiVo.getToken());
+        ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
 
 		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
 			if(ramApiVo != null){
@@ -103,7 +103,7 @@ public class ApiManageSaveApi extends ApiComponentBase {
 
 			boolean isNameRepeat = false;
 			//校验接口名称是否与系统接口重复
-			for(ApiVo api : ApiComponentFactory.getApiList()){
+			for(ApiVo api : PrivateApiComponentFactory.getApiList()){
 				if(api.getName().equals(apiVo.getName())){
 					isNameRepeat = true;
 					break;

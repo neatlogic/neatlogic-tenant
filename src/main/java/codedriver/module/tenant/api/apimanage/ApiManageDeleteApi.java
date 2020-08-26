@@ -13,8 +13,8 @@ import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.module.tenant.exception.api.ApiNotAllowedToDeleteException;
@@ -22,7 +22,7 @@ import codedriver.module.tenant.exception.api.ApiNotAllowedToDeleteException;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class ApiManageDeleteApi extends ApiComponentBase {
+public class ApiManageDeleteApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private ApiMapper ApiMapper;
@@ -49,7 +49,7 @@ public class ApiManageDeleteApi extends ApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String token = jsonObj.getString("token");
-		ApiVo apiVo = ApiComponentFactory.getApiByToken(token);
+		ApiVo apiVo = PrivateApiComponentFactory.getApiByToken(token);
 		//内存中的接口不允许删除
 		if(apiVo != null) {
 			throw new ApiNotAllowedToDeleteException(token);

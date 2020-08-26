@@ -4,6 +4,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +22,10 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class NotifyPolicyCopyApi extends ApiComponentBase {
+public class NotifyPolicyCopyApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;

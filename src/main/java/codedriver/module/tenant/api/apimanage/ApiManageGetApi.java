@@ -9,13 +9,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.type.ApiNotFoundException;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiManageGetApi extends ApiComponentBase {
+public class ApiManageGetApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper ApiMapper;
@@ -49,7 +49,7 @@ public class ApiManageGetApi extends ApiComponentBase {
 		if(apiVo != null) {
 			return apiVo;
 		}
-		apiVo = ApiComponentFactory.getApiByToken(token);
+		apiVo = PrivateApiComponentFactory.getApiByToken(token);
 		if(apiVo != null) {
 			return apiVo;
 		}

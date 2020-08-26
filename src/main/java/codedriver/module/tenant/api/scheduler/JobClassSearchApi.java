@@ -17,14 +17,14 @@ import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 
 @Service
 @AuthAction(name = "SCHEDULE_JOB_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class JobClassSearchApi extends ApiComponentBase {
+public class JobClassSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

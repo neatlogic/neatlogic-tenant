@@ -1,22 +1,5 @@
 package codedriver.module.tenant.api.apiaudit;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
-import codedriver.framework.restful.dto.ApiAuditVo;
-import codedriver.framework.util.ExcelUtil;
-import codedriver.module.tenant.service.apiaudit.ApiAuditService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -24,7 +7,37 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.ExcelField;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.restful.dto.ApiAuditVo;
+import codedriver.framework.util.ExcelUtil;
+import codedriver.module.tenant.service.apiaudit.ApiAuditService;
 
 /**
  * 操作审计导出接口
@@ -38,7 +51,7 @@ import java.util.*;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiAuditExportApi extends BinaryStreamApiComponentBase {
+public class ApiAuditExportApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Autowired
 	private ApiAuditService apiAuditService;

@@ -32,11 +32,11 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.BinaryStreamApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class FileDownloadApi extends BinaryStreamApiComponentBase {
+public class FileDownloadApi extends PrivateBinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;

@@ -5,8 +5,8 @@ import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.module.tenant.service.apiaudit.ApiAuditService;
@@ -27,7 +27,7 @@ import java.util.*;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiManageTreeSearchApi extends ApiComponentBase {
+public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper apiMapper;
@@ -67,11 +67,11 @@ public class ApiManageTreeSearchApi extends ApiComponentBase {
 		//获取系统中所有的模块
 		Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
 		if(ApiVo.TreeMenuType.SYSTEM.getValue().equals(menuType)){
-			apiList = ApiComponentFactory.getApiList();
+			apiList = PrivateApiComponentFactory.getApiList();
 		}else if(ApiVo.TreeMenuType.CUSTOM.getValue().equals(menuType)) {
 			//获取数据库中所有的API
 			List<ApiVo> dbApiList = apiMapper.getAllApi();
-			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+			Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
 			apiList = new ArrayList<>();
 			//与系统中的API匹配token，如果匹配不上则表示是自定义API
 			for (ApiVo vo : dbApiList) {

@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +13,10 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.exception.NotifyPolicyReferencedCannotBeDeletedException;
-import codedriver.framework.restful.core.ApiComponentBase;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class NotifyPolicyDeleteApi  extends ApiComponentBase {
+public class NotifyPolicyDeleteApi  extends PrivateApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;

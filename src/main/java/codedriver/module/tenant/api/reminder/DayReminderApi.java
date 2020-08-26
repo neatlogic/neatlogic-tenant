@@ -5,6 +5,8 @@ import java.util.Map;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,6 @@ import codedriver.framework.reminder.core.IGlobalReminderHandler;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
 import codedriver.framework.reminder.dto.GlobalReminderMessageVo;
 import codedriver.framework.reminder.dto.ReminderMessageSearchVo;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.service.reminder.GlobalReminderService;
 
 /**
@@ -28,7 +29,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class DayReminderApi extends ApiComponentBase {
+public class DayReminderApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private GlobalReminderMessageMapper reminderMessageMapper;

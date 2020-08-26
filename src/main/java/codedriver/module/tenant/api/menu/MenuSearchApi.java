@@ -5,6 +5,8 @@ import java.util.List;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +15,13 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.core.ApiComponentBase;
 import codedriver.module.tenant.dao.mapper.MenuMapper;
 import codedriver.module.tenant.dto.MenuVo;
 
 @Service
 @AuthAction(name = "MENU_MODIFY")
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MenuSearchApi extends ApiComponentBase {
+public class MenuSearchApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private MenuMapper menuMapper;

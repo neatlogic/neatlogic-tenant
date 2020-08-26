@@ -9,7 +9,7 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(name = "AUTHORITY_MODIFY")
-public class UserActiveUpdateApi extends ApiComponentBase {
+public class UserActiveUpdateApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private UserMapper userMapper;

@@ -6,7 +6,7 @@ import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -23,7 +23,7 @@ import java.util.Set;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class RoleAuthSearchApi extends ApiComponentBase {
+public class RoleAuthSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private RoleMapper roleMapper;

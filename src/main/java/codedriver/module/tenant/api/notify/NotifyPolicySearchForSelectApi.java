@@ -7,7 +7,8 @@ import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NotifyPolicySearchForSelectApi extends ApiComponentBase {
+public class NotifyPolicySearchForSelectApi extends PrivateApiComponentBase {
 	
 	@Autowired
 	private NotifyMapper notifyMapper;

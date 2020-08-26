@@ -2,7 +2,7 @@ package codedriver.module.tenant.service.apiaudit;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -120,7 +120,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         List<String> distinctTokenInApiAudit = apiMapper.getDistinctTokenInApiAudit();
         List<ApiVo> apiList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(distinctTokenInApiAudit)){
-            Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+            Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
             List<ApiVo> dbApiList = apiMapper.getAllApi();
             if(CollectionUtils.isNotEmpty(dbApiList)){
                 List<ApiVo> customApiVos = new ArrayList<>();

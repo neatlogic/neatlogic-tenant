@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.ApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Component
-public class MirrorApi extends ApiComponentBase {
+public class MirrorApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getToken() {

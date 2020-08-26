@@ -3,8 +3,8 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.ApiComponentBase;
-import codedriver.framework.restful.core.ApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.module.tenant.service.apiaudit.ApiAuditService;
@@ -16,7 +16,7 @@ import java.util.*;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ApiManageSubTreeSearchApi extends ApiComponentBase {
+public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper apiMapper;
@@ -54,7 +54,7 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 		String type = jsonObj.getString("type");
 		List<String> tokenList = new ArrayList<>();
 		if(ApiVo.TreeMenuType.SYSTEM.getValue().equals(type)){
-			List<ApiVo> ramApiList = ApiComponentFactory.getApiList();
+			List<ApiVo> ramApiList = PrivateApiComponentFactory.getApiList();
 			for(ApiVo vo : ramApiList){
 				if(vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")){
 					tokenList.add(vo.getToken());
@@ -63,7 +63,7 @@ public class ApiManageSubTreeSearchApi extends ApiComponentBase {
 		}else if(ApiVo.TreeMenuType.CUSTOM.getValue().equals(type)){
 			//获取数据库中所有的API
 			List<ApiVo> dbApiList = apiMapper.getAllApi();
-			Map<String, ApiVo> ramApiMap = ApiComponentFactory.getApiMap();
+			Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
 			//与系统中的API匹配token，如果匹配不上则表示是自定义API
 			for (ApiVo vo : dbApiList) {
 				if (ramApiMap.get(vo.getToken()) == null) {
