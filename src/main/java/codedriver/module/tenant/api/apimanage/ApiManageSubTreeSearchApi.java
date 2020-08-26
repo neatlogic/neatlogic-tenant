@@ -13,10 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
+
+	private static final Pattern pattern = Pattern.compile("^[A-Za-z_\\d]+$");
 
 	@Autowired
 	private ApiMapper apiMapper;
@@ -94,6 +97,9 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
 			if(split.length - funcSplit.length > 1){
 				Func func = new Func();
 				String s = split[funcSplit.length];
+				if(!pattern.matcher(s).matches()){
+					continue;
+				}
 				func.setFuncId(s);
 				if(result.contains(func)){
 					if(split.length - funcSplit.length > 2){
@@ -104,7 +110,7 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
 						});
 					}
 				}else{
-					if(split.length - funcSplit.length > 2){
+					if(split.length - funcSplit.length > 2 && pattern.matcher(split[funcSplit.length + 1]).matches()){
 						func.setIsHasChild(1);
 					}
 					result.add(func);
