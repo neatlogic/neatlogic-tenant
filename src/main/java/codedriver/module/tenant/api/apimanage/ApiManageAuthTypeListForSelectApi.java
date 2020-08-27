@@ -1,10 +1,8 @@
 package codedriver.module.tenant.api.apimanage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.dto.ValueTextVo;
@@ -16,6 +14,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.framework.restful.web.core.ApiAuthFactory;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -41,9 +40,15 @@ public class ApiManageAuthTypeListForSelectApi extends PrivateApiComponentBase {
     @Description(desc = "获取接口组件认证方式列表_下拉框")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<ValueTextVo> resultList = new ArrayList<>();
+        JSONArray resultList = new JSONArray();
         for ( ApiVo.AuthenticateType s :  ApiVo.AuthenticateType.values()) {
-            resultList.add(new ValueTextVo(s.getValue(),s.getText()));
+            JSONObject json = new JSONObject();
+            json.put("value", s.getValue());
+            json.put("text", s.getText());
+            if(!s.getValue().equals(ApiVo.AuthenticateType.NOAUTH.getValue())) {
+                json.put("help", ApiAuthFactory.getApiAuth(s.getValue()).help());
+            }
+            resultList.add(json);
         }
         return resultList;
     }
