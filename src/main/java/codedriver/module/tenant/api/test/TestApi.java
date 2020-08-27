@@ -5,18 +5,13 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 
 @Component
-public class TestApi extends PrivateApiComponentBase {
+public class TestApi extends PublicApiComponentBase {
 
 //	@Autowired
 //	private UserMapper userMapper;
-
-	@Override
-	public String getToken() {
-		return "/test/loadclass";
-	}
 
 	@Override
 	public String getName() {

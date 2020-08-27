@@ -4,14 +4,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 @Service
-public class Test4Api extends PrivateApiComponentBase {
-	
-	@Override
-	public String getToken() {
-		return "test4";
-	}
+public class Test4Api extends PublicApiComponentBase {
 
 	@Override
 	public String getName() {

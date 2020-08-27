@@ -19,6 +19,7 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
@@ -73,11 +74,15 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 		String operationType = jsonObj.getString("operationType");
 
 		ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
+		ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
 		if(apiHandlerVo == null) {
-			throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
+		    apiHandlerVo = PublicApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
+		    if(apiHandlerVo == null) {
+		        throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
+		    }
+		    ramApiVo = PublicApiComponentFactory.getApiByToken(apiVo.getToken());
 		}
 
-        ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
 
 		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
 			if(ramApiVo != null){
