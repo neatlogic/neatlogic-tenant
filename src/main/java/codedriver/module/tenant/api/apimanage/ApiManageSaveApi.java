@@ -83,6 +83,8 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 		    ramApiVo = PublicApiComponentFactory.getApiByToken(apiVo.getToken());
 		}
 
+		apiVo.setType(apiHandlerVo.getType());
+		apiVo.setModuleId(apiHandlerVo.getModuleId());
 
 		if(ApiVo.ApiType.CUSTOM.getValue().equals(apiVo.getApiType())){
 			if(ramApiVo != null){

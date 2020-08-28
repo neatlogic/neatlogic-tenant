@@ -128,8 +128,10 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 		for(ApiVo api : dbAllApiList) {
 
 			if(ramApiMap.get(api.getToken()) != null){
+			    api.setIsPrivate(true);
 				api.setApiType(ApiVo.ApiType.SYSTEM.getValue());
 			}else{
+			    api.setIsPrivate(false);
 				api.setApiType(ApiVo.ApiType.CUSTOM.getValue());
 			}
 
