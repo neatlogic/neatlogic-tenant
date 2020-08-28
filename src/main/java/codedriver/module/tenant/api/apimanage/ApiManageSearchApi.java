@@ -1,26 +1,32 @@
 package codedriver.module.tenant.api.apimanage;
 
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.exception.type.ComponentNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.restful.dao.mapper.ApiMapper;
-import codedriver.framework.restful.dto.ApiHandlerVo;
-import codedriver.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiMapper;
+import codedriver.framework.restful.dto.ApiHandlerVo;
+import codedriver.framework.restful.dto.ApiVo;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -67,14 +73,14 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ApiVo apiVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiVo>() {});
-		String handler = apiVo.getHandler();
-		
-		if(handler != null) {
-			ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(handler);
-			if(apiHandlerVo == null) {
-				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
-			}
-		}
+//		String handler = apiVo.getHandler();
+//		
+//		if(handler != null) {
+//			ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(handler);
+//			if(apiHandlerVo == null) {
+//				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
+//			}
+//		}
 		
 		List<ApiVo> ramApiList = new ArrayList<>();
 		List<String> tokenList = new ArrayList<>();
@@ -87,9 +93,9 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 //			if(StringUtils.isNotBlank(apiVo.getModuleId()) && !apiVo.getModuleId().equals(api.getHandler())) {
 //				continue;
 //			}
-			if(StringUtils.isNotBlank(handler) && !handler.equals(api.getHandler())) {
-				continue;
-			}
+//			if(StringUtils.isNotBlank(handler) && !handler.equals(api.getHandler())) {
+//				continue;
+//			}
 			//根据接口类型筛选接口（用于接口管理页的系统接口/自定义接口的相互切换）
 			if(StringUtils.isNotBlank(apiVo.getApiType()) && !apiVo.getApiType().equals(api.getApiType())) {
 				continue;
@@ -126,11 +132,16 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 		List<String> dbTokenList = new ArrayList<>();
 		Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
 		for(ApiVo api : dbAllApiList) {
-
 			if(ramApiMap.get(api.getToken()) != null){
 			    api.setIsPrivate(true);
 				api.setApiType(ApiVo.ApiType.SYSTEM.getValue());
 			}else{
+			    ApiHandlerVo publicApiHandler =  PublicApiComponentFactory.getApiHandlerByHandler(api.getHandler());
+			    if(publicApiHandler == null) {
+			        api.setHandlerName("接口组件:" + api.getHandler() + "不存在");
+			    }else {
+			        api.setHandlerName(publicApiHandler.getName());
+			    }
 			    api.setIsPrivate(false);
 				api.setApiType(ApiVo.ApiType.CUSTOM.getValue());
 			}
