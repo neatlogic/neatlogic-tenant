@@ -3,10 +3,6 @@ package codedriver.module.tenant.api.user;
 import java.util.List;
 import java.util.Set;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +24,14 @@ import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.module.tenant.util.UuidUtil;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.UuidUtil;
 
 @Service
 @Transactional
@@ -135,7 +138,7 @@ public class UserSaveApi extends PrivateApiComponentBase {
 		
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
-			userVo.setUuid(UuidUtil.getUuid());
+			userVo.setUuid(UuidUtil.randomUuid());
 			userMapper.insertUser(userVo);
 			userMapper.insertUserPassword(userVo);
 			JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");
