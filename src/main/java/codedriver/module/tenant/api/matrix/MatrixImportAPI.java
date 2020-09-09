@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
@@ -54,6 +55,7 @@ import codedriver.framework.util.UuidUtil;
  **/
 @Service
 @Transactional
+@AuthAction(name = "MATRIX_MODIFY")
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
 

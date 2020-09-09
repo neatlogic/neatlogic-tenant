@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
@@ -27,6 +28,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
  **/
 @Service
 @Transactional
+@AuthAction(name = "MATRIX_MODIFY")
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class MatrixNameUpdateApi extends PrivateApiComponentBase {
 
