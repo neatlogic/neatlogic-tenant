@@ -33,6 +33,7 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
+import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.util.JavascriptUtil;
 
 /**
@@ -176,40 +177,14 @@ public class MatrixServiceImpl implements MatrixService {
 	}
 	
 	@Override
-	public List<String> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttribute, String keyword, int pageSize) {
-		pageSize *= 10; 
-		String type = processMatrixAttribute.getType();
-		if(MatrixAttributeType.SELECT.getValue().equals(type)) {
-			if(processMatrixAttribute != null) {
-				String config = processMatrixAttribute.getConfig();
-				if(StringUtils.isNotBlank(config)) {
-					JSONObject configObj = JSON.parseObject(config);
-					List<ValueTextVo> dataList = JSON.parseArray(configObj.getString("dataList"), ValueTextVo.class);
-					if(CollectionUtils.isNotEmpty(dataList)) {
-						List<String> valueList = new ArrayList<>();
-						for(ValueTextVo data : dataList) {
-							if(data.getText().contains(keyword)) {
-								valueList.add(data.getValue());
-							}
-						}
-						if(CollectionUtils.isNotEmpty(valueList)) {
-							return matrixDataMapper.getUuidListByAttributeValueListForSelectType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), valueList, pageSize);
-						}
-					}
-				}
-			}
-		}else if(MatrixAttributeType.USER.getValue().equals(type)) {
-			return matrixDataMapper.getUuidListByKeywordForUserType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
-		}else if(MatrixAttributeType.TEAM.getValue().equals(type)) {
-			return matrixDataMapper.getUuidListByKeywordForTeamType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
-		}else if(MatrixAttributeType.ROLE.getValue().equals(type)) {
-			return matrixDataMapper.getUuidListByKeywordForRoleType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
-		}else if(MatrixAttributeType.DATE.getValue().equals(type)) {
-			return matrixDataMapper.getUuidListByKeywordForDateType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
-		}else {
-			return matrixDataMapper.getUuidListByKeywordForInputType(processMatrixAttribute.getMatrixUuid(), processMatrixAttribute.getUuid(), keyword, pageSize);
-		}
-		return null;
+	public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttribute, MatrixDataVo dataVo) {
+	    dataVo.setPageSize(dataVo.getPageSize()*10);
+	    if(processMatrixAttribute != null) {
+    	    dataVo.setAttrType(processMatrixAttribute.getType());
+    	    dataVo.setAttributeUuid(processMatrixAttribute.getUuid());
+	    }
+		List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+		return dataMapList;
 	}
 
 	@Override
