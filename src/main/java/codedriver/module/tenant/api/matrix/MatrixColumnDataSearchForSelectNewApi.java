@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Objects;
@@ -31,7 +32,6 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
@@ -68,9 +68,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 	private MatrixAttributeMapper matrixAttributeMapper;
 
 	@Autowired
-	private MatrixDataMapper matrixDataMapper;
-
-	@Autowired
 	private MatrixExternalMapper matrixExternalMapper;
 
 	@Autowired
@@ -97,7 +94,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true), 
 		@Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
 		@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-		@Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY) })
+		@Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
+	    @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表", type = ApiParamType.JSONARRAY) })
 	@Description(desc = "矩阵属性数据查询-下拉级联接口")
 	@Output({ @Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合") })
 	@Override
@@ -111,6 +109,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		}
 
 		List<String> valueList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("valueList")), String.class);
+		JSONArray filterList = jsonObj.getJSONArray("filterList");
+		
 		List<String> columnList = dataVo.getColumnList();
 		if (CollectionUtils.isEmpty(columnList)) {
 			throw new ParamIrregularException("参数“columnList”不符合格式要求");
@@ -136,6 +136,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 					}
 				}
 				dataVo.setColumnList(distinctColumList);
+				dataVo.setFilterList(filterList);
+				List<Map<String, String>> dataMapList = null;
 				if (CollectionUtils.isNotEmpty(valueList)) {
 					for (String value : valueList) {
 						if (value.contains(SELECT_COMPOSE_JOINER)) {
@@ -152,10 +154,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 								if (processMatrixAttribute == null) {
 									throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), columnList.get(1));
 								}
-								List<String> uuidList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, split[1], dataVo.getPageSize());
-								if (CollectionUtils.isNotEmpty(uuidList)) {
-									dataVo.setUuidList(uuidList);
-									List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+								dataVo.setKeyword(split[1]);
+								dataMapList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute,dataVo);
+								if (CollectionUtils.isNotEmpty(dataMapList)) {
 									for (Map<String, String> dataMap : dataMapList) {
 										Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
 										for (Entry<String, String> entry : dataMap.entrySet()) {
@@ -178,17 +179,14 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 						}
 					}
 				} else {
+				    MatrixAttributeVo processMatrixAttribute = null;
 					if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
-						MatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
+						processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
 						if (processMatrixAttribute == null) {
 							throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
 						}
-						List<String> uuidList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo.getKeyword(), dataVo.getPageSize());
-						if (CollectionUtils.isNotEmpty(uuidList)) {
-							dataVo.setUuidList(uuidList);
-						}
 					}
-					List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
+					dataMapList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo);
 					for (Map<String, String> dataMap : dataMapList) {
 						Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
 						for (Entry<String, String> entry : dataMap.entrySet()) {

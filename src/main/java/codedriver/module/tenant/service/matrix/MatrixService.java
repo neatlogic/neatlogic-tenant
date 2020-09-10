@@ -10,6 +10,7 @@ import codedriver.framework.exception.util.FreemarkerTransformException;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
+import codedriver.framework.matrix.dto.MatrixDataVo;
 
 public interface MatrixService {
 
@@ -21,7 +22,7 @@ public interface MatrixService {
     
     public JSONObject matrixAttributeValueHandle(Object value);
     
-    public List<String> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttributeVo, String keyword, int pageSize);
+    public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttributeVo, MatrixDataVo dataVo);
     
     public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj);
     /**
