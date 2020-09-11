@@ -67,7 +67,7 @@ public class NotifyPolicyTriggerConfigDeleteApi extends PrivateApiComponentBase 
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-		List<String> notifyTriggerValueList = notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
+		List<Object> notifyTriggerValueList = notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
 		String trigger = jsonObj.getString("trigger");
 		if(!notifyTriggerValueList.contains(trigger)) {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
