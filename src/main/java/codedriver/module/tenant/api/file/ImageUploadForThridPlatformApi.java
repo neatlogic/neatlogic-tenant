@@ -1,12 +1,10 @@
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.NoTenantException;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.file.core.MinioFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -33,8 +31,6 @@ public class ImageUploadForThridPlatformApi extends PublicBinaryStreamApiCompone
 
 	@Autowired
 	private FileMapper fileMapper;
-	@Autowired
-	private UserMapper userMapper;
 
 	@Override
 	public String getName() {
@@ -51,7 +47,7 @@ public class ImageUploadForThridPlatformApi extends PublicBinaryStreamApiCompone
 		return true;
 	}
 
-	@Input({ @Param(name = "userUuid", type = ApiParamType.STRING, desc = "上传者UUID", isRequired = true) })
+	@Input({})
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "图片上传接口(供第三方使用)")
 	@Override
@@ -60,18 +56,13 @@ public class ImageUploadForThridPlatformApi extends PublicBinaryStreamApiCompone
 		if (StringUtils.isBlank(tenantUuid)) {
 			throw new NoTenantException();
 		}
-		String userUuid = paramObj.getString("userUuid");
-		UserVo user = userMapper.getUserByUuid(userUuid);
-		if(user == null){
-			throw new UserNotFoundException(userUuid);
-		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = "upload";
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
 			if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
-//				String userUuid = UserContext.get().getUserUuid(true);
+				String userUuid = UserContext.get().getUserUuid(true);
 				String oldFileName = multipartFile.getOriginalFilename();
 				Long size = multipartFile.getSize();
 

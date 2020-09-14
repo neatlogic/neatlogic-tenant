@@ -1,18 +1,16 @@
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.common.util.RC4Util;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.file.EmptyFileException;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileTooLargeException;
 import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
 import codedriver.framework.exception.user.NoTenantException;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.core.LocalFileSystemHandler;
@@ -45,9 +43,6 @@ public class FileUploadForThridPlatformApi extends PublicBinaryStreamApiComponen
 	@Autowired
 	private FileMapper fileMapper;
 
-	@Autowired
-	private UserMapper userMapper;
-
 	@Override
 	public String getName() {
 		return "附件上传接口(供第三方使用)";
@@ -58,8 +53,7 @@ public class FileUploadForThridPlatformApi extends PublicBinaryStreamApiComponen
 		return null;
 	}
 
-	@Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "上传者UUID", isRequired = true),
-			@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
+	@Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
 			@Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true) })
 	@Output({ @Param(explode = FileVo.class) })
 	@Description(desc = "附件上传接口(供第三方使用)")
@@ -68,11 +62,6 @@ public class FileUploadForThridPlatformApi extends PublicBinaryStreamApiComponen
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		if (StringUtils.isBlank(tenantUuid)) {
 			throw new NoTenantException();
-		}
-		String userUuid = paramObj.getString("userUuid");
-		UserVo user = userMapper.getUserByUuid(userUuid);
-		if(user == null){
-			throw new UserNotFoundException(userUuid);
 		}
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 		String paramName = paramObj.getString("param");
@@ -93,7 +82,7 @@ public class FileUploadForThridPlatformApi extends PublicBinaryStreamApiComponen
 		MultipartFile multipartFile = multipartRequest.getFile(paramName);
 
 		if (multipartFile != null && multipartFile.getName() != null) {
-//			String userUuid = UserContext.get().getUserUuid(true);
+			String userUuid = UserContext.get().getUserUuid(true);
 			String oldFileName = multipartFile.getOriginalFilename();
 			Long size = multipartFile.getSize();
 			// 如果配置为空代表不受任何限制
