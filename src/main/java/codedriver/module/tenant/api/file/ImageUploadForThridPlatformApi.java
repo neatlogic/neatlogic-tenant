@@ -2,7 +2,6 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.LocalFileSystemHandler;
