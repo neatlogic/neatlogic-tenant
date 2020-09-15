@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
-public class FileDeleteForThridPlatformApi extends PublicApiComponentBase {
+public class FileDeletePublicApi extends PublicApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;

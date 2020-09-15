@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ImageUploadForThridPlatformApi extends PublicBinaryStreamApiComponentBase {
-	static Logger logger = LoggerFactory.getLogger(ImageUploadForThridPlatformApi.class);
+public class ImageUploadPublicApi extends PublicBinaryStreamApiComponentBase {
+	static Logger logger = LoggerFactory.getLogger(ImageUploadPublicApi.class);
 
 	@Autowired
 	private FileMapper fileMapper;

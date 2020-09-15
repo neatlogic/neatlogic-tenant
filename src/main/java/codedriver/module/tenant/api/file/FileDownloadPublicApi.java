@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class FileDownloadForThridPlatformApi extends PublicBinaryStreamApiComponentBase {
+public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;

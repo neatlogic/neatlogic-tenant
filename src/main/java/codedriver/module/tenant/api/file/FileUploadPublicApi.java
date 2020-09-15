@@ -37,8 +37,8 @@ import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
-public class FileUploadForThridPlatformApi extends PublicBinaryStreamApiComponentBase {
-	static Logger logger = LoggerFactory.getLogger(FileUploadForThridPlatformApi.class);
+public class FileUploadPublicApi extends PublicBinaryStreamApiComponentBase {
+	static Logger logger = LoggerFactory.getLogger(FileUploadPublicApi.class);
 
 	@Autowired
 	private FileMapper fileMapper;

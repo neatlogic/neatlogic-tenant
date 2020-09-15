@@ -26,7 +26,7 @@ import java.io.InputStream;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ImageDownloadForThridPlatformApi extends PublicBinaryStreamApiComponentBase {
+public class ImageDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
 
 	@Autowired
 	private FileMapper fileMapper;
