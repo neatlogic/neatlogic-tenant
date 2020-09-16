@@ -140,11 +140,11 @@ public class FileUploadPublicApi extends PublicBinaryStreamApiComponentBase {
 			fileVo.setContentType(multipartFile.getContentType());
 			String filePath = null;
 			try {
-				filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId(), fileVo.getContentType(), fileVo.getType());
+				filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
 			} catch (Exception ex) {
 				// 如果minio出现异常，则上传到本地
 				logger.error(ex.getMessage(), ex);
-				filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId(), fileVo.getContentType(), fileVo.getType());
+				filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
 			}
 			fileVo.setPath(filePath);
 			fileMapper.insertFile(fileVo);
