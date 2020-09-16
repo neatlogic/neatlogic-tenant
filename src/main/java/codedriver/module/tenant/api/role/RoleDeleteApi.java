@@ -59,6 +59,7 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 			roleMapper.deleteTeamRoleByRoleUuid(uuid);
 			roleMapper.deleteRoleUser(new RoleUserVo(uuid));
 			roleMapper.deleteRoleByUuid(uuid);
+			roleMapper.deleteRoleAuthByRoleUuid(uuid);
 		}
 		return null;
 	}

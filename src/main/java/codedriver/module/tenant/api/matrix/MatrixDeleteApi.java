@@ -1,5 +1,8 @@
 package codedriver.module.tenant.api.matrix;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +16,8 @@ import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.dto.ProcessMatrixFormComponentVo;
+import codedriver.framework.matrix.exception.MatrixReferencedCannotBeDeletedException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -62,6 +67,10 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
     	String uuid = jsonObj.getString("uuid");
     	MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
     	if(matrixVo != null) {
+    	    List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = matrixMapper.getMatrixFormComponentByMatrixUuid(uuid);
+    	    if(CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
+    	        throw new MatrixReferencedCannotBeDeletedException(uuid);
+    	    }
         	matrixMapper.deleteMatrixByUuid(uuid);
         	if(MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
         		matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
