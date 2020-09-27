@@ -156,6 +156,7 @@ public class MatrixServiceImpl implements MatrixService {
 			UserVo userVo = userMapper.getUserBaseInfoByUuid(value);
 			if(userVo != null) {
 				resultObj.put("text", userVo.getUserName());
+				resultObj.put("avatar", userVo.getAvatar());
 			}
 		}else if(MatrixAttributeType.TEAM.getValue().equals(type)) {
 			TeamVo teamVo = teamMapper.getTeamByUuid(value);
