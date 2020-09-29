@@ -109,7 +109,7 @@ public class UserSaveApi extends PrivateApiComponentBase {
 			@Param(name = "vipLevel",
 					type = ApiParamType.ENUM,
 					desc = "用户等级",
-					isRequired = true,
+					isRequired = false,
 					rule = "0,1,2,3,4,5"),
 			@Param(name = "userAuthList",
 				type = ApiParamType.JSONOBJECT,
@@ -140,7 +140,7 @@ public class UserSaveApi extends PrivateApiComponentBase {
 		userVo.setPhone(jsonObj.getString("phone"));
 		userVo.setIsActive(jsonObj.getInteger("isActive"));
 		userVo.setUserInfo(jsonObj.getString("userInfo"));
-		userVo.setVipLevel(jsonObj.getString("vipLevel"));
+		userVo.setVipLevel(jsonObj.getInteger("vipLevel"));
 		
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
