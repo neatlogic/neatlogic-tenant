@@ -1,20 +1,22 @@
 package codedriver.module.tenant.api.user;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-
+import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.label.VIP_MANAGE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -98,7 +100,12 @@ public class UserSearchApi extends PrivateApiComponentBase {
 			resultObj.put("currentPage", userVo.getCurrentPage());
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, userVo.getPageSize()));
 		}
-		resultObj.put("tbodyList", userMapper.searchUser(userVo));
+		List<UserVo> userList = userMapper.searchUser(userVo);
+		/** 判断是否有权限查看VIP等级 */
+		if(CollectionUtils.isNotEmpty(userList) && !AuthActionChecker.check(VIP_MANAGE.class.getSimpleName())){
+			userList.stream().forEach(vo -> vo.setVipLevel(null));
+		}
+		resultObj.put("tbodyList", userList);
 		return resultObj;
 	}
 }

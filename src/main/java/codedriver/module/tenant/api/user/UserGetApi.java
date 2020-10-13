@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.label.VIP_MANAGE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -10,7 +12,6 @@ import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,6 +57,10 @@ public class UserGetApi extends PrivateApiComponentBase {
 		if (userVo == null) {
 			throw new UserNotFoundException(userUuid);
 		}
+		/** 判断是否有查看VIP等级权限 */
+        if (!AuthActionChecker.check(VIP_MANAGE.class.getSimpleName())) {
+            userVo.setVipLevel(null);
+        }
 		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);// 防止修改cache vo
 		userJson.put("userAuthList", userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
 		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
