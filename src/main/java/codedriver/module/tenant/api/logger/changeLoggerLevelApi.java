@@ -37,7 +37,7 @@ public class changeLoggerLevelApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "level", type = ApiParamType.ENUM, rule = "ALL,TRACE,DEBUG,INFO,WARN,ERROR,OFF",
-        isRequired = true, desc = "日志级别:ALL,TRACE,DEBUG,INFO,WARN,ERROR,OFF")})
+        isRequired = true, desc = "日志级别")})
     @Output({@Param(type = ApiParamType.STRING, desc = "当前日志级别")})
     @Description(desc = "修改日志级别接口")
     @Override
