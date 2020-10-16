@@ -1,8 +1,9 @@
 package codedriver.module.tenant.dao.mapper;
 
-public interface TestMapper {
-	/*UPDATE BLOCK*/
-	int updateFormAttribute();
-	
-}
+import java.util.HashMap;
+import java.util.List;
 
+public interface TestMapper {
+    public List<HashMap> testBg();
+
+}

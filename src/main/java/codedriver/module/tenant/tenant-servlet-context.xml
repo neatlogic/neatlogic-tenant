@@ -15,7 +15,7 @@
 		http://codedriver.techsure.com/schema/codedriver
 		http://codedriver.techsure.com/schema/codedriver.xsd">
 
-	<codedriver:module id="tenant" name="租户基础功能模块" group="framework" groupName="系统管理" groupSort="99"/>
+	<codedriver:module id="tenant" name="租户基础功能模块" group="framework" groupName="系统管理" groupSort="99" />
 
 	<context:component-scan base-package="codedriver.module.tenant" />
 
@@ -29,12 +29,13 @@
 	<!-- 启动expost-proxy,expose proxy在threadlocal -->
 	<aop:aspectj-autoproxy expose-proxy="true" />
 	<mvc:annotation-driven />
-	
+
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
 		<property name="basePackage" value="codedriver.module.tenant.dao.mapper" />
 	</bean>
 
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:codedriver/framework/dao/config/mybatis-config.xml" />
 		<property name="dataSource" ref="dataSource" />
 		<property name="mapperLocations">
 			<list>
