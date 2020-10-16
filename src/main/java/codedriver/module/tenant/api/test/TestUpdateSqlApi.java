@@ -33,7 +33,7 @@ public class TestUpdateSqlApi extends PrivateApiComponentBase {
 	@Description(desc = "测试更新sql")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		testMapper.updateFormAttribute();
+		//testMapper.updateFormAttribute();
 		return "OK";
 	}
 
