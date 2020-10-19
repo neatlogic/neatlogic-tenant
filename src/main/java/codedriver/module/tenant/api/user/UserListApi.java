@@ -50,7 +50,7 @@ public class UserListApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> teamUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("teamUuidList")), String.class);
 		if(CollectionUtils.isNotEmpty(teamUuidList)) {
-			List<String> userUuidList = userMapper.getUserUuidListByteamUuidList(teamUuidList);
+			List<String> userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
 			if(CollectionUtils.isNotEmpty(userUuidList)) {
 				return userMapper.getUserListByUserUuidList(userUuidList);
 			}
