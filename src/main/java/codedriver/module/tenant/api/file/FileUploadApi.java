@@ -176,7 +176,9 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
 			fileVo.setPath(filePath);
 			fileMapper.insertFile(fileVo);
 			fileTypeHandler.afterUpload(fileVo, paramObj);
-			return fileMapper.getFileById(fileVo.getId());
+			FileVo file = fileMapper.getFileById(fileVo.getId());
+			file.setUrl("api/binary/file/download?id=" + fileVo.getId());
+			return file;
 		}
 		return null;
 	}
