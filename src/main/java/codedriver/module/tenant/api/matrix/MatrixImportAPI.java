@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -187,19 +188,19 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
     private String getCellValue (Cell cell){
         String value = "";
         if (cell != null){
-            if (cell.getCellType() != Cell.CELL_TYPE_BLANK){
+            if (cell.getCellType() != CellType.BLANK){
                 switch (cell.getCellType()){
-                    case Cell.CELL_TYPE_NUMERIC :
+                    case NUMERIC :
                         if (DateUtil.isCellDateFormatted(cell)){
                             value = formatter.format(cell.getDateCellValue());
                         }else {
                             value = String.valueOf(cell.getNumericCellValue());
                         }
                         break;
-                    case Cell.CELL_TYPE_BOOLEAN:
+                    case BOOLEAN:
                         value = String.valueOf(cell.getBooleanCellValue());
                         break;
-                    case Cell.CELL_TYPE_FORMULA:
+                    case FORMULA:
                         value = cell.getCellFormula();
                         break;
                     default:
