@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.lock.service.LockService;
+import codedriver.framework.lock.service.LockManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -25,7 +25,7 @@ public class RebuidLeftRightCodeApi extends PrivateApiComponentBase {
     private TeamService teamService;
 
     @Autowired
-    private LockService lockService;
+    private LockManager lockService;
 
     @Override
     public String getToken() {
