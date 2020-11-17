@@ -68,7 +68,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",
             isRequired = true, xss = true),
         @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
-        @Param(name = "level", type = ApiParamType.STRING, isRequired = true, desc = "层级"),
+        @Param(name = "level", type = ApiParamType.STRING,  desc = "层级"),
         @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")})
     @Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
     @Description(desc = "保存组信息")
