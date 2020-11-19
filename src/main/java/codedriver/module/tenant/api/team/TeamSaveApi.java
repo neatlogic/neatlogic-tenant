@@ -76,7 +76,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String level = jsonObj.getString("level");
-        if (TeamLevel.getValue(level) == null) {
+        if (StringUtils.isNotBlank(level) && TeamLevel.getValue(level) == null) {
             throw new TeamLevelNotFoundException(level);
         }
         String uuid = jsonObj.getString("uuid");
