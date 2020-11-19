@@ -23,6 +23,7 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
+import codedriver.framework.exception.user.UserIdRepeatException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -145,6 +146,9 @@ public class UserSaveApi extends PrivateApiComponentBase {
 		String uuid = jsonObj.getString("uuid");
 		if(StringUtils.isBlank(uuid)) {
 			userVo.setUuid(UuidUtil.randomUuid());
+			if(userMapper.checkUserIdIsIsRepeat(userVo) > 0) {
+			    throw new UserIdRepeatException(userVo.getUserId());
+			}
 			userMapper.insertUser(userVo);
 			userMapper.insertUserPassword(userVo);
 			JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");
@@ -166,6 +170,9 @@ public class UserSaveApi extends PrivateApiComponentBase {
 				throw new UserNotFoundException(uuid);
 			}
 			userVo.setUuid(uuid);
+			if(userMapper.checkUserIdIsIsRepeat(userVo) > 0) {
+                throw new UserIdRepeatException(userVo.getUserId());
+            }
 			userMapper.updateUser(userVo);
 			userMapper.deleteUserRoleByUserUuid(userVo.getUuid());
 			userMapper.deleteUserTeamByUserUuid(userVo.getUuid());
