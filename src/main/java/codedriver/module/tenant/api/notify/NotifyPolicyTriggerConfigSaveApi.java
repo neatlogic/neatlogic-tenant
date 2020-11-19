@@ -3,13 +3,13 @@ package codedriver.module.tenant.api.notify;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,9 +83,14 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-		List<Object> notifyTriggerValueList = notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
 		String trigger = jsonObj.getString("trigger");
-		if(!notifyTriggerValueList.contains(trigger)) {
+		String triggerName = "";
+		for(ValueTextVo notifyTrigger : notifyTriggerList) {
+		    if(trigger.equals(notifyTrigger.getValue())) {
+		        triggerName = notifyTrigger.getText();
+		    }
+		}
+		if(StringUtils.isBlank(triggerName)) {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
 
@@ -116,12 +121,14 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 				actionObj.put("templateName", notifyTemplateVo.getName());
 			}
 		}
+		boolean existed = false;
 		Long id = jsonObj.getLong("id");
 		JSONObject conditionConfig = jsonObj.getJSONObject("conditionConfig");
 		JSONArray triggerList = config.getJSONArray("triggerList");
 		for(int i = 0; i < triggerList.size(); i++) {
 			JSONObject triggerObj = triggerList.getJSONObject(i);
 			if(trigger.equals(triggerObj.getString("trigger"))) {
+			    existed = true;
 				JSONArray notifyList = triggerObj.getJSONArray("notifyList");
 				if(id != null) {
 					boolean isExists = false;
@@ -148,6 +155,21 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 				}
 				triggerObj.put("notifyList", notifyList);
 			}
+		}
+		if(!existed) {
+		    JSONObject triggerObj = new JSONObject();
+		    JSONArray notifyList = new JSONArray();
+		    JSONObject notifyObj = new JSONObject();
+            id = SnowflakeUtil.uniqueLong();
+            notifyObj.put("id", id);
+            notifyObj.put("actionList", actionList);
+            notifyObj.put("conditionConfig", conditionConfig);
+            notifyList.add(notifyObj);
+            resultObj.put("id", id);
+            triggerObj.put("notifyList", notifyList);
+            triggerObj.put("trigger", trigger);
+            triggerObj.put("triggerName", triggerName);
+            triggerList.add(triggerObj);
 		}
 		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);

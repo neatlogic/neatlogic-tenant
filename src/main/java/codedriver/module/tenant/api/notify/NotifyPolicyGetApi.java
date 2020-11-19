@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.List;
+import java.util.Objects;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -15,6 +16,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserVo;
@@ -63,12 +65,35 @@ public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
 		if(notifyPolicyVo == null) {
 			throw new NotifyPolicyNotFoundException(id.toString());
 		}
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
+        JSONObject config = notifyPolicyVo.getConfig();
+        JSONArray triggerList = config.getJSONArray("triggerList");
+        List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        JSONArray triggerArray = new JSONArray();
+        for (ValueTextVo notifyTrigger : notifyTriggerList) {
+            boolean existed = false;
+            for(int i = 0; i < triggerList.size(); i++) {
+                JSONObject triggerObj = triggerList.getJSONObject(i);
+                if(Objects.equals(notifyTrigger.getValue(), triggerObj.getString("trigger"))) {
+                    triggerArray.add(triggerObj);
+                    existed = true;
+                    break;
+                }
+            }
+            if(!existed) {
+                JSONObject triggerObj = new JSONObject();
+                triggerObj.put("trigger", notifyTrigger.getValue());
+                triggerObj.put("triggerName", notifyTrigger.getText());
+                triggerObj.put("notifyList", new JSONArray());
+                triggerArray.add(triggerObj);
+            }
+        }
+        config.put("triggerList", triggerArray);		
+
+        List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
 		config.put("paramList", paramList);
