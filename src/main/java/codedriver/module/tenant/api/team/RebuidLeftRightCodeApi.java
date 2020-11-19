@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.lock.service.LockManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
@@ -17,9 +16,6 @@ import codedriver.module.tenant.service.TeamService;
 @Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class RebuidLeftRightCodeApi extends PrivateApiComponentBase {
-
-    @Autowired
-    private TeamMapper teamMapper;
 
     @Autowired
     private TeamService teamService;
