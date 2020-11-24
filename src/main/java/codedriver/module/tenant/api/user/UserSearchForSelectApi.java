@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -87,30 +89,43 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 		
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("list", new ArrayList<>());
-		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
-		int pageCount = 0;
-		if (userVo.getNeedPage()) {
-			int rowNum = userMapper.searchUserCount(userVo);
-			pageCount = PageUtil.getPageCount(rowNum, userVo.getPageSize());
-			resultObj.put("rowNum", rowNum);
-			resultObj.put("pageSize", userVo.getPageSize());
-			resultObj.put("currentPage", userVo.getCurrentPage());
-			resultObj.put("pageCount", pageCount);
-		}
-		if(!userVo.getNeedPage() || userVo.getCurrentPage() <= pageCount) {
-		    JSONArray resultArray = new JSONArray();
-		    List<UserVo> userList = userMapper.searchUserForSelect(userVo);
-	        for(UserVo user : userList) {
-	            JSONObject userObj = new JSONObject();
-	            userObj.put("value", "user#" + user.getUserId());
-	            userObj.put("text", user.getUserName());
-	            userObj.put("userInfo", user.getUserInfo());
-	            userObj.put("avatar", user.getAvatar());
-	            userObj.put("vipLevel", user.getVipLevel());
-	            resultArray.add(userObj);
+		List<UserVo> userList = null;
+		JSONArray valueList = jsonObj.getJSONArray("valueList");
+	    if(CollectionUtils.isNotEmpty(valueList)) {
+	        List<String> uuidList = new ArrayList<>();
+	        for(int i = 0; i < valueList.size(); i++) {
+	            String value = valueList.getString(i);
+	            uuidList.add(value.replaceAll(GroupSearch.USER.getValuePlugin(),""));
+	            userList = userMapper.getUserListByUuidList(uuidList);
 	        }
-	        resultObj.put("list", resultArray);
-		}				
+	    }else {
+	        UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
+	        int pageCount = 0;
+	        if (userVo.getNeedPage()) {
+	            int rowNum = userMapper.searchUserCount(userVo);
+	            pageCount = PageUtil.getPageCount(rowNum, userVo.getPageSize());
+	            resultObj.put("rowNum", rowNum);
+	            resultObj.put("pageSize", userVo.getPageSize());
+	            resultObj.put("currentPage", userVo.getCurrentPage());
+	            resultObj.put("pageCount", pageCount);
+	        }
+	        if(!userVo.getNeedPage() || userVo.getCurrentPage() <= pageCount) {
+	            userList = userMapper.searchUserForSelect(userVo);
+	        }
+	    }
+	    if(CollectionUtils.isNotEmpty(userList)) {
+            JSONArray resultArray = new JSONArray();
+	        for(UserVo user : userList) {
+                JSONObject userObj = new JSONObject();
+                userObj.put("value", "user#" + user.getUserId());
+                userObj.put("text", user.getUserName());
+                userObj.put("userInfo", user.getUserInfo());
+                userObj.put("avatar", user.getAvatar());
+                userObj.put("vipLevel", user.getVipLevel());
+                resultArray.add(userObj);
+            }
+            resultObj.put("list", resultArray);
+	    }
 		return resultObj;
 	}
 }
