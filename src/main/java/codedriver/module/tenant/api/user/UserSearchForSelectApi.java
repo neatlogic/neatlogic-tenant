@@ -117,7 +117,7 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
             JSONArray resultArray = new JSONArray();
 	        for(UserVo user : userList) {
                 JSONObject userObj = new JSONObject();
-                userObj.put("value", "user#" + user.getUserId());
+                userObj.put("value", "user#" + user.getUuid());
                 userObj.put("text", user.getUserName());
                 userObj.put("userInfo", user.getUserInfo());
                 userObj.put("avatar", user.getAvatar());
