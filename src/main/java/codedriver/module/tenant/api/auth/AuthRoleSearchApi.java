@@ -51,10 +51,7 @@ public class AuthRoleSearchApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String auth = jsonObj.getString("auth");
-        RoleVo roleVo = new RoleVo();
-        roleVo.setAuth(auth);
-        roleVo.setNeedPage(false);
-        List<RoleVo> roleList = roleMapper.searchRole(roleVo);
+        List<RoleVo> roleList = roleMapper.getRoleListByAuthName(auth);
         returnObj.put("roleList", roleList);
         returnObj.put("roleCount", roleList.size());
         return returnObj;
