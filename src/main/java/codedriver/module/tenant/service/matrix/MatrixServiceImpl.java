@@ -1,5 +1,7 @@
 package codedriver.module.tenant.service.matrix;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -35,6 +38,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.util.JavascriptUtil;
+import codedriver.framework.util.TimeUtil;
 
 /**
  * @program: codedriver
@@ -245,4 +249,36 @@ public class MatrixServiceImpl implements MatrixService {
 			}
 		}	
 	}
+
+    @Override
+    public boolean matrixAttributeValueVerify(MatrixAttributeVo matrixAttributeVo, String value) {
+        String type = matrixAttributeVo.getType();
+        if(type.equals(MatrixAttributeType.INPUT.getValue())) {
+            return true;
+        }else if(type.equals(MatrixAttributeType.SELECT.getValue())) {
+            String config = matrixAttributeVo.getConfig();
+            JSONArray dataList = (JSONArray)JSONPath.read(config, "dataList");
+            for(int i = 0; i < dataList.size(); i++) {
+                JSONObject dataObj = dataList.getJSONObject(i);
+                if(value.equals(dataObj.getString("value"))) {
+                    return true;
+                }
+            }
+        }else if(type.equals(MatrixAttributeType.DATE.getValue())) {
+            SimpleDateFormat sdf = new SimpleDateFormat(TimeUtil.YYYY_MM_DD_HH_MM_SS);
+            try {
+                sdf.parse(value);
+            } catch (ParseException e) {
+                return false;
+            }
+            return true;
+        }else if(type.equals(MatrixAttributeType.USER.getValue())) {
+            return userMapper.checkUserIsExists(value) > 0;
+        }else if(type.equals(MatrixAttributeType.TEAM.getValue())) {
+            return teamMapper.checkTeamIsExists(value) > 0;
+        }else if(type.equals(MatrixAttributeType.ROLE.getValue())) {
+            return roleMapper.checkRoleIsExists(value) > 0;
+        }
+        return false;
+    }
 }

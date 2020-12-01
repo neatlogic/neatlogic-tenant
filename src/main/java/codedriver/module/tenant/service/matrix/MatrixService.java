@@ -34,5 +34,13 @@ public interface MatrixService {
     * @return void
      */
     public void arrayColumnDataConversion(List<String> arrayColumnList, JSONArray tbodyList);
-
+    /**
+     * 
+    * @Time:2020年12月1日
+    * @Description: 矩阵属性值合法性校验 
+    * @param processMatrixAttributeVo
+    * @param value
+    * @return boolean
+     */
+    public boolean matrixAttributeValueVerify(MatrixAttributeVo matrixAttributeVo, String value);
 }
