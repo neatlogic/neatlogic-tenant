@@ -39,6 +39,7 @@ import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixDataNotFoundException;
 import codedriver.framework.matrix.exception.MatrixFileNotFoundException;
 import codedriver.framework.matrix.exception.MatrixHeaderMisMatchException;
+import codedriver.framework.matrix.exception.MatrixImportDataIllegalException;
 import codedriver.framework.matrix.exception.MatrixImportException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -48,6 +49,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.UuidUtil;
+import codedriver.module.tenant.service.matrix.MatrixService;
 
 /**
  * @program: codedriver
@@ -70,6 +72,9 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
 
     @Autowired
     private MatrixDataMapper dataMapper;
+    
+    @Autowired
+    private MatrixService matrixService;
 
     @Override
     public String getToken() {
@@ -120,9 +125,9 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
 
                 List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixVo.getUuid());
                 if (CollectionUtils.isNotEmpty(attributeVoList)){
-                    Map<String, String> headerMap = new HashMap<>();
+                    Map<String, MatrixAttributeVo> headerMap = new HashMap<>();
                     for (MatrixAttributeVo attributeVo : attributeVoList){
-                        headerMap.put(attributeVo.getName(), attributeVo.getUuid());
+                        headerMap.put(attributeVo.getName(), attributeVo);
                     }
                     if (is != null){
                         Workbook wb = WorkbookFactory.create(is);
@@ -157,9 +162,16 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
                                 		uuidColumn = new MatrixColumnVo(attributeUuid, value);
                                 	}
                                 }else {
-                                	attributeUuid = headerMap.get(columnName);
-                                	if(StringUtils.isNotBlank(attributeUuid)) {
-                                        rowData.add(new MatrixColumnVo(attributeUuid, value));
+                                    MatrixAttributeVo attributeVo = headerMap.get(columnName);
+                                    if(attributeVo != null) {
+                                        attributeUuid = attributeVo.getUuid();
+                                        if(StringUtils.isNotBlank(attributeUuid)) {
+                                            if(matrixService.matrixAttributeValueVerify(attributeVo, value)) {
+                                                rowData.add(new MatrixColumnVo(attributeUuid, value));
+                                            }else {
+                                                throw new MatrixImportDataIllegalException(i + 1, j + 1, value);
+                                            }
+                                        }
                                     }
                                 }
                             }
