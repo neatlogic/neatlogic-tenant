@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.role;
 
 import codedriver.framework.dto.RoleAuthVo;
 
+import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -95,7 +96,7 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 			if (CollectionUtils.isNotEmpty(userUuidList)){
 				userUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
 				for (String userUuid : userUuidList){
-					roleMapper.insertRoleUser(userUuid, roleVo.getUuid());
+					roleMapper.insertRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
 				}
 			}
 
