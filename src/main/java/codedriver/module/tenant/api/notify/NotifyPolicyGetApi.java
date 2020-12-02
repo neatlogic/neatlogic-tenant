@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.notify;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -23,7 +23,9 @@ import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 @Service
@@ -69,15 +71,14 @@ public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
-        JSONObject config = notifyPolicyVo.getConfig();
-        JSONArray triggerList = config.getJSONArray("triggerList");
+        NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+        List<NotifyTriggerVo> triggerList = config.getTriggerList();
         List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-        JSONArray triggerArray = new JSONArray();
+        List<NotifyTriggerVo> triggerArray = new ArrayList<>();
         for (ValueTextVo notifyTrigger : notifyTriggerList) {
             boolean existed = false;
-            for(int i = 0; i < triggerList.size(); i++) {
-                JSONObject triggerObj = triggerList.getJSONObject(i);
-                if(Objects.equals(notifyTrigger.getValue(), triggerObj.getString("trigger"))) {
+            for(NotifyTriggerVo triggerObj : triggerList) {
+                if(Objects.equals(notifyTrigger.getValue(), triggerObj.getTrigger())) {
                     triggerArray.add(triggerObj);
                     existed = true;
                     break;
@@ -88,16 +89,15 @@ public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
                 triggerObj.put("trigger", notifyTrigger.getValue());
                 triggerObj.put("triggerName", notifyTrigger.getText());
                 triggerObj.put("notifyList", new JSONArray());
-                triggerArray.add(triggerObj);
+                triggerArray.add(new NotifyTriggerVo((String)notifyTrigger.getValue(), notifyTrigger.getText()));
             }
         }
-        config.put("triggerList", triggerArray);		
+        config.setTriggerList(triggerArray);		
         List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
         List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
-        JSONArray paramList = config.getJSONArray("paramList");
+        List<ConditionParamVo> paramList = config.getParamList();
         if(CollectionUtils.isNotEmpty(paramList)) {
-            for(int i = 0; i < paramList.size(); i++) {
-                ConditionParamVo param = paramList.getObject(i, ConditionParamVo.class);
+            for(ConditionParamVo param : paramList) {
                 systemParamList.add(param);
                 systemConditionOptionList.add(new ConditionParamVo(param));
             }
@@ -105,16 +105,13 @@ public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
         
         systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-		config.put("paramList", systemParamList);
-		config.put("conditionOptionList", systemConditionOptionList);
-		List<String> adminUserUuidList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("adminUserUuidList")), String.class);
+		config.setParamList(systemParamList);
+		config.setConditionOptionList(systemConditionOptionList);
+		List<String> adminUserUuidList = config.getAdminUserUuidList();
 		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
 			List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
-			config.put("userList", userList);
-		}else {
-			config.put("userList", new JSONArray());
+			config.setUserList(userList);
 		}
-		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}
 

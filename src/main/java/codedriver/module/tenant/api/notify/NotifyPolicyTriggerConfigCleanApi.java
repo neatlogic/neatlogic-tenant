@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -20,7 +19,9 @@ import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 @Service
@@ -69,15 +70,14 @@ public class NotifyPolicyTriggerConfigCleanApi  extends PrivateApiComponentBase 
 		if(!notifyTriggerValueList.contains(trigger)) {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
-		JSONObject config = notifyPolicyVo.getConfig();
-		JSONArray triggerList = config.getJSONArray("triggerList");
-		for(int i = 0; i < triggerList.size(); i++) {
-			JSONObject triggerObj = triggerList.getJSONObject(i);
-			if(trigger.equals(triggerObj.getString("trigger"))) {
-				triggerObj.put("notifyList", new JSONArray());
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<NotifyTriggerVo> triggerList = config.getTriggerList();
+		for(NotifyTriggerVo notifyTriggerVo : triggerList) {
+			if(trigger.equals(notifyTriggerVo.getTrigger())) {
+				notifyTriggerVo.clearNotifyList();
 			}
 		}
-		notifyPolicyVo.setConfig(config.toJSONString());
+		//notifyPolicyVo.setConfig(config);
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return null;
 	}

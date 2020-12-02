@@ -1,8 +1,9 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -14,21 +15,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyActionVo;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
+import codedriver.framework.notify.dto.NotifyTriggerNotifyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -94,23 +99,21 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 			throw new ParamIrregularException("参数trigger不符合格式要求");
 		}
 
-		JSONObject config = notifyPolicyVo.getConfig();
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
 		JSONArray actionList = jsonObj.getJSONArray("actionList");
+		List<NotifyActionVo> actionArray = new ArrayList<>();
 		if(CollectionUtils.isNotEmpty(actionList)) {
-			Map<Long, NotifyTemplateVo> templateMap = new HashMap<>();
-			List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
-			for(NotifyTemplateVo template : templateList) {
-				templateMap.put(template.getId(), template);
-			}
+			List<NotifyTemplateVo> templateList = config.getTemplateList();
+			Map<Long, NotifyTemplateVo> templateMap = templateList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
 			for(int index = 0; index < actionList.size(); index++) {
-				JSONObject actionObj = actionList.getJSONObject(index);
-				String notifyHandler = actionObj.getString("notifyHandler");
+				NotifyActionVo actionObj = actionList.getObject(index, NotifyActionVo.class);
+				String notifyHandler = actionObj.getNotifyHandler();
 				INotifyHandler handler = NotifyHandlerFactory.getHandler(notifyHandler);
 				if(handler == null) {
 					throw new NotifyHandlerNotFoundException(notifyHandler);
 				}
-				actionObj.put("notifyHandlerName", handler.getName());
-				Long templateId = actionObj.getLong("templateId");
+				actionObj.setNotifyHandlerName(handler.getName());
+				Long templateId = actionObj.getTemplateId();
 				NotifyTemplateVo notifyTemplateVo = templateMap.get(templateId);
 				if(notifyTemplateVo == null) {
 					throw new NotifyTemplateNotFoundException(templateId.toString());
@@ -118,25 +121,24 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 				if(!Objects.equal(notifyHandler, notifyTemplateVo.getNotifyHandler())) {
 					throw new NotifyTemplateNotifyHandlerNotMatchException(templateId.toString(), handler.getName());
 				}
-				actionObj.put("templateName", notifyTemplateVo.getName());
+				actionObj.setTemplateName(notifyTemplateVo.getName());
+				actionArray.add(actionObj);
 			}
 		}
 		boolean existed = false;
 		Long id = jsonObj.getLong("id");
-		JSONObject conditionConfig = jsonObj.getJSONObject("conditionConfig");
-		JSONArray triggerList = config.getJSONArray("triggerList");
-		for(int i = 0; i < triggerList.size(); i++) {
-			JSONObject triggerObj = triggerList.getJSONObject(i);
-			if(trigger.equals(triggerObj.getString("trigger"))) {
+		ConditionConfigVo conditionConfig = jsonObj.getObject("conditionConfig", ConditionConfigVo.class);
+		List<NotifyTriggerVo> triggerList = config.getTriggerList();
+		for(NotifyTriggerVo triggerObj : triggerList) {
+			if(trigger.equals(triggerObj.getTrigger())) {
 			    existed = true;
-				JSONArray notifyList = triggerObj.getJSONArray("notifyList");
+				List<NotifyTriggerNotifyVo> notifyList = triggerObj.getNotifyList();
 				if(id != null) {
 					boolean isExists = false;
-					for(int j = 0; j < notifyList.size(); j++) {
-						JSONObject notifyObj = notifyList.getJSONObject(j);
-						if(id.equals(notifyObj.getLong("id"))) {
-							notifyObj.put("actionList", actionList);
-							notifyObj.put("conditionConfig", conditionConfig);
+					for(NotifyTriggerNotifyVo notifyObj : notifyList) {
+						if(id.equals(notifyObj.getId())) {
+							notifyObj.setActionList(actionArray);
+							notifyObj.setConditionConfig(conditionConfig);
 							isExists = true;
 						}
 					}
@@ -145,33 +147,32 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 					}
 					resultObj.put("id", id);
 				}else {
-					JSONObject notifyObj = new JSONObject();
+				    NotifyTriggerNotifyVo notifyObj = new NotifyTriggerNotifyVo();
 					id = SnowflakeUtil.uniqueLong();
-					notifyObj.put("id", id);
-					notifyObj.put("actionList", actionList);
-					notifyObj.put("conditionConfig", conditionConfig);
+					notifyObj.setId(id);
+					notifyObj.setActionList(actionArray);
+					notifyObj.setConditionConfig(conditionConfig);
 					notifyList.add(notifyObj);
 					resultObj.put("id", id);
 				}
-				triggerObj.put("notifyList", notifyList);
 			}
 		}
 		if(!existed) {
-		    JSONObject triggerObj = new JSONObject();
-		    JSONArray notifyList = new JSONArray();
-		    JSONObject notifyObj = new JSONObject();
+		    NotifyTriggerVo triggerObj = new NotifyTriggerVo();
+		    List<NotifyTriggerNotifyVo> notifyList = new ArrayList<>();
+		    NotifyTriggerNotifyVo notifyObj = new NotifyTriggerNotifyVo();
             id = SnowflakeUtil.uniqueLong();
-            notifyObj.put("id", id);
-            notifyObj.put("actionList", actionList);
-            notifyObj.put("conditionConfig", conditionConfig);
+            notifyObj.setId(id);
+            notifyObj.setActionList(actionArray);
+            notifyObj.setConditionConfig(conditionConfig);
             notifyList.add(notifyObj);
             resultObj.put("id", id);
-            triggerObj.put("notifyList", notifyList);
-            triggerObj.put("trigger", trigger);
-            triggerObj.put("triggerName", triggerName);
+            triggerObj.setNotifyList(notifyList);
+            triggerObj.setTrigger(trigger);
+            triggerObj.setTriggerName(triggerName);
             triggerList.add(triggerObj);
 		}
-		notifyPolicyVo.setConfig(config.toJSONString());
+		//notifyPolicyVo.setConfig(config);
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultObj;
 	}

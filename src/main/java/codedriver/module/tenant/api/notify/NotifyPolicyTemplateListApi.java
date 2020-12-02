@@ -11,13 +11,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
@@ -74,8 +74,8 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
 		if(StringUtils.isNotBlank(keyword)) {
 			keyword = keyword.toLowerCase();
 		}
-		JSONObject config = notifyPolicyVo.getConfig();
-		for(NotifyTemplateVo notifyTemplateVo : JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class)) {
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		for(NotifyTemplateVo notifyTemplateVo : config.getTemplateList()) {
 			if(StringUtils.isNotBlank(notifyHandler) && !notifyHandler.equals(notifyTemplateVo.getNotifyHandler())) {
 				continue;
 			}

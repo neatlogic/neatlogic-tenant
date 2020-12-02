@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -57,8 +57,8 @@ public class NotifyPolicyParamDeleteApi extends PrivateApiComponentBase {
 			throw new NotifyPolicyNotFoundException(policyId.toString());
 		}
 		String name = jsonObj.getString("name");
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<ConditionParamVo> paramList = config.getParamList();
 		Iterator<ConditionParamVo> iterator = paramList.iterator();
 		while(iterator.hasNext()) {
 			ConditionParamVo notifyPolicyParamVo = iterator.next();
@@ -66,8 +66,6 @@ public class NotifyPolicyParamDeleteApi extends PrivateApiComponentBase {
 				iterator.remove();
 			}
 		}
-		config.put("paramList", paramList);
-		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);		
 		return null;
 	}

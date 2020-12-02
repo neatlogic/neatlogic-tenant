@@ -19,7 +19,9 @@ import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 @Service
@@ -72,12 +74,11 @@ public class NotifyPolicyTriggerConfigListApi  extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("authorityConfig",notifyPolicyHandler.getAuthorityConfig());
 		resultObj.put("notifyList", new JSONArray());
-		JSONObject config = notifyPolicyVo.getConfig();
-		JSONArray triggerList = config.getJSONArray("triggerList");
-		for(int i = 0; i < triggerList.size(); i++) {
-			JSONObject triggerObj = triggerList.getJSONObject(i);
-			if(trigger.equals(triggerObj.getString("trigger"))) {
-				resultObj.put("notifyList", triggerObj.getJSONArray("notifyList"));
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<NotifyTriggerVo> triggerList = config.getTriggerList();
+		for(NotifyTriggerVo triggerObj : triggerList) {
+			if(trigger.equals(triggerObj.getTrigger())) {
+				resultObj.put("notifyList", triggerObj.getNotifyList());
 			}
 		}
 		return resultObj;

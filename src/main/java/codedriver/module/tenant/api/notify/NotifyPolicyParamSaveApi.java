@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -21,6 +20,7 @@ import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.ExpressionVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 @Service
@@ -87,8 +87,8 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
 		String label = jsonObj.getString("label");
 		ConditionParamVo resultParamVo = null;
 		boolean isNew = true;
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<ConditionParamVo> paramList = config.getParamList();
 		for(ConditionParamVo notifyPolicyParamVo : paramList) {
 			if(name.equals(notifyPolicyParamVo.getName())) {
 				notifyPolicyParamVo.setParamType(paramType);
@@ -122,8 +122,6 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
 			resultParamVo = notifyPolicyParamVo;
 		}
 
-		config.put("paramList", paramList);
-		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultParamVo;
 	}

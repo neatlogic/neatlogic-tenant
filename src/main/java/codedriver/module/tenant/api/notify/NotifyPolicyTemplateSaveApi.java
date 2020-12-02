@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -18,6 +17,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTemplateVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
@@ -79,8 +79,8 @@ public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
 		String content = jsonObj.getString("content");
 		String notifyHandler = jsonObj.getString("notifyHandler");
 		NotifyTemplateVo resultTemplateVo = null;
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<NotifyTemplateVo> templateList = JSON.parseArray(config.getJSONArray("templateList").toJSONString(), NotifyTemplateVo.class);
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<NotifyTemplateVo> templateList = config.getTemplateList();
 		for(NotifyTemplateVo notifyTemplateVo : templateList) {
 			if(name.equals(notifyTemplateVo.getName()) && !notifyTemplateVo.getId().equals(id)) {
 				throw new NotifyTemplateNameRepeatException(name);
@@ -116,8 +116,6 @@ public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
 			templateList.add(notifyTemplateVo);
 			resultTemplateVo = notifyTemplateVo;
 		}
-		config.put("templateList", templateList);
-		notifyPolicyVo.setConfig(config.toJSONString());
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultTemplateVo;
 	}

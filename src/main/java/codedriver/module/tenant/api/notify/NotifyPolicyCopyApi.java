@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -18,6 +17,7 @@ import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
@@ -67,16 +67,14 @@ public class NotifyPolicyCopyApi extends PrivateApiComponentBase {
 			throw new NotifyPolicyNameRepeatException(name);
 		}
 		notifyMapper.insertNotifyPolicy(notifyPolicyVo);
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<ConditionParamVo> paramList = config.getParamList();
 		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
 		if(notifyPolicyHandler == null) {
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		paramList.addAll(notifyPolicyHandler.getSystemParamList());
 		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-		config.put("paramList", paramList);
-		notifyPolicyVo.setConfig(config.toJSONString());
 		return notifyPolicyVo;
 	}
 

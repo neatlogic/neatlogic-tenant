@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -19,6 +18,7 @@ import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
@@ -65,8 +65,8 @@ public class NotifyPolicyConditionOptionListApi extends PrivateApiComponentBase 
 			throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
 		}
 		List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
-		JSONObject config = notifyPolicyVo.getConfig();
-		List<ConditionParamVo> customParamList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
+		NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+		List<ConditionParamVo> customParamList = config.getParamList();
 		systemConditionOptionList.addAll(customParamList);
 		String keyword = jsonObj.getString("keyword");
 		for(ConditionParamVo notifyPolicyParamVo : systemConditionOptionList) {
