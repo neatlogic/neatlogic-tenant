@@ -25,90 +25,88 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class NotifyPolicySaveApi  extends PrivateApiComponentBase {
-	
-	@Autowired
-	private NotifyMapper notifyMapper;
+public class NotifyPolicySaveApi extends PrivateApiComponentBase {
 
-	@Override
-	public String getToken() {
-		return "notify/policy/save";
-	}
+    @Autowired
+    private NotifyMapper notifyMapper;
 
-	@Override
-	public String getName() {
-		return "通知策略信息保存接口";
-	}
+    @Override
+    public String getToken() {
+        return "notify/policy/save";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "通知策略信息保存接口";
+    }
 
-	@Input({
-		@Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$", isRequired = true, desc = "策略名"),
-		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
-	})
-	@Output({
-		@Param(explode = NotifyPolicyVo.class, desc = "策略信息")
-	})
-	@Description(desc = "通知策略信息保存接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String handler = jsonObj.getString("handler");
-		INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
-		if(notifyPolicyHandler == null) {
-			throw new NotifyPolicyHandlerNotFoundException(handler);
-		}
-		Long id = jsonObj.getLong("id");
-		String name = jsonObj.getString("name");
-		if(id != null) {
-			NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
-			if(notifyPolicyVo == null) {
-				throw new NotifyPolicyNotFoundException(id.toString());
-			}
-			notifyPolicyVo.setName(name);
-			if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
-				throw new NotifyPolicyNameRepeatException(name);
-			}
-			notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
-			notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
-			NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
-			List<ConditionParamVo> paramList = config.getParamList();
-			paramList.addAll(notifyPolicyHandler.getSystemParamList());
-			paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-			return notifyPolicyVo;
-		}else {
-			NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
-			if(notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
-				throw new NotifyPolicyNameRepeatException(name);
-			}
-			notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
-			JSONObject configObj = new JSONObject();
-			JSONArray triggerList = new JSONArray();
-			for (ValueTextVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
-				JSONObject triggerObj = new JSONObject();
-				triggerObj.put("trigger", notifyTrigger.getValue());
-				triggerObj.put("triggerName", notifyTrigger.getText());
-				triggerObj.put("notifyList", new JSONArray());
-				triggerList.add(triggerObj);
-			}
-			configObj.put("triggerList", triggerList);
-			configObj.put("paramList", new JSONArray());
-			configObj.put("templateList", new JSONArray());
-			configObj.put("adminUserUuidList", new JSONArray());
-			notifyPolicyVo.setConfig(configObj.toJSONString());
-			notifyMapper.insertNotifyPolicy(notifyPolicyVo);
-			List<ConditionParamVo> paramList = notifyPolicyHandler.getSystemParamList();
-			paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-			configObj.put("paramList", paramList);
-			notifyPolicyVo.setConfig(configObj.toJSONString());
-			return notifyPolicyVo;
-		}
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
+        @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$",
+            isRequired = true, desc = "策略名"),
+        @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")})
+    @Output({@Param(explode = NotifyPolicyVo.class, desc = "策略信息")})
+    @Description(desc = "通知策略信息保存接口")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String handler = jsonObj.getString("handler");
+        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
+        if (notifyPolicyHandler == null) {
+            throw new NotifyPolicyHandlerNotFoundException(handler);
+        }
+        Long id = jsonObj.getLong("id");
+        String name = jsonObj.getString("name");
+        if (id != null) {
+            NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
+            if (notifyPolicyVo == null) {
+                throw new NotifyPolicyNotFoundException(id.toString());
+            }
+            notifyPolicyVo.setName(name);
+            if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+                throw new NotifyPolicyNameRepeatException(name);
+            }
+            notifyPolicyVo.setLcu(UserContext.get().getUserUuid(true));
+            notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
+            NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+            List<ConditionParamVo> paramList = config.getParamList();
+            paramList.addAll(notifyPolicyHandler.getSystemParamList());
+            paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+            return notifyPolicyVo;
+        } else {
+            NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
+            if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+                throw new NotifyPolicyNameRepeatException(name);
+            }
+            notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
+            JSONObject configObj = new JSONObject();
+            JSONArray triggerList = new JSONArray();
+            for (ValueTextVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
+                JSONObject triggerObj = new JSONObject();
+                triggerObj.put("trigger", notifyTrigger.getValue());
+                triggerObj.put("triggerName", notifyTrigger.getText());
+                triggerObj.put("notifyList", new JSONArray());
+                triggerList.add(triggerObj);
+            }
+            configObj.put("triggerList", triggerList);
+            configObj.put("paramList", new JSONArray());
+            configObj.put("templateList", new JSONArray());
+            configObj.put("adminUserUuidList", new JSONArray());
+            notifyPolicyVo.setConfig(configObj.toJSONString());
+            notifyMapper.insertNotifyPolicy(notifyPolicyVo);
+            List<ConditionParamVo> paramList = notifyPolicyHandler.getSystemParamList();
+            paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+            configObj.put("paramList", paramList);
+            notifyPolicyVo.setConfig(configObj.toJSONString());
+            return notifyPolicyVo;
+        }
+    }
 
 }
