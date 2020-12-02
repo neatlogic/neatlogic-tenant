@@ -92,11 +92,21 @@ public class NotifyPolicyGetApi  extends PrivateApiComponentBase {
             }
         }
         config.put("triggerList", triggerArray);		
-
-        List<ConditionParamVo> paramList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("paramList")), ConditionParamVo.class);
-		paramList.addAll(notifyPolicyHandler.getSystemParamList());
-		paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-		config.put("paramList", paramList);
+        List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+        List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
+        JSONArray paramList = config.getJSONArray("paramList");
+        if(CollectionUtils.isNotEmpty(paramList)) {
+            for(int i = 0; i < paramList.size(); i++) {
+                ConditionParamVo param = paramList.getObject(i, ConditionParamVo.class);
+                systemParamList.add(param);
+                systemConditionOptionList.add(new ConditionParamVo(param));
+            }
+        }
+        
+        systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+        systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+		config.put("paramList", systemParamList);
+		config.put("conditionOptionList", systemConditionOptionList);
 		List<String> adminUserUuidList = JSON.parseArray(JSON.toJSONString(config.getJSONArray("adminUserUuidList")), String.class);
 		if(CollectionUtils.isNotEmpty(adminUserUuidList)) {
 			List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
