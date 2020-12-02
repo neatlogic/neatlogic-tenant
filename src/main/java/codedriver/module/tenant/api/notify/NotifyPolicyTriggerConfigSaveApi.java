@@ -172,7 +172,6 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
             triggerObj.setTriggerName(triggerName);
             triggerList.add(triggerObj);
 		}
-		//notifyPolicyVo.setConfig(config);
 		notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
 		return resultObj;
 	}
