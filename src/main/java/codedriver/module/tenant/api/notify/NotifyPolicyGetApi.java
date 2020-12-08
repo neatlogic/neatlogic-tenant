@@ -3,7 +3,9 @@ package codedriver.module.tenant.api.notify;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -107,7 +109,10 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         List<String> adminUserUuidList = config.getAdminUserUuidList();
         if (CollectionUtils.isNotEmpty(adminUserUuidList)) {
             List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
-            config.setUserList(userList);
+            if(CollectionUtils.isNotEmpty(userList)){
+                List<String> list = userList.stream().map(o -> GroupSearch.USER.getValuePlugin() + o.getUuid()).collect(Collectors.toList());
+                config.setUserList(list);
+            }
         }
         return notifyPolicyVo;
     }
