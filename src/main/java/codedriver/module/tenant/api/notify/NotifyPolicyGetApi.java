@@ -8,7 +8,6 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,17 +73,14 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
             boolean existed = false;
             for (NotifyTriggerVo triggerObj : triggerList) {
-                if (Objects.equals(notifyTrigger.getTriggerName(), triggerObj.getTrigger())) {
+                if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
+                    triggerObj.setDescription(notifyTrigger.getDescription());
                     triggerArray.add(triggerObj);
                     existed = true;
                     break;
                 }
             }
             if (!existed) {
-                JSONObject triggerObj = new JSONObject();
-                triggerObj.put("trigger", notifyTrigger.getTrigger());
-                triggerObj.put("triggerName", notifyTrigger.getTriggerName());
-                triggerObj.put("notifyList", new JSONArray());
                 triggerArray.add(notifyTrigger);
             }
         }
