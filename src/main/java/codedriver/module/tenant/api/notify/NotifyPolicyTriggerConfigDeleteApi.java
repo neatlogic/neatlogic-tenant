@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -67,9 +66,9 @@ public class NotifyPolicyTriggerConfigDeleteApi extends PrivateApiComponentBase 
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
         List<Object> notifyTriggerValueList =
-            notifyTriggerList.stream().map(ValueTextVo::getValue).collect(Collectors.toList());
+            notifyTriggerList.stream().map(NotifyTriggerVo::getTrigger).collect(Collectors.toList());
         String trigger = jsonObj.getString("trigger");
         if (!notifyTriggerValueList.contains(trigger)) {
             throw new ParamIrregularException("参数trigger不符合格式要求");

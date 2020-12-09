@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.condition.ConditionConfigVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.notify.core.INotifyHandler;
@@ -84,12 +83,12 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
         String trigger = jsonObj.getString("trigger");
         String triggerName = "";
-        for (ValueTextVo notifyTrigger : notifyTriggerList) {
-            if (trigger.equals(notifyTrigger.getValue())) {
-                triggerName = notifyTrigger.getText();
+        for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
+            if (trigger.equals(notifyTrigger.getTrigger())) {
+                triggerName = notifyTrigger.getTriggerName();
             }
         }
         if (StringUtils.isBlank(triggerName)) {

@@ -8,15 +8,14 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserVo;
@@ -70,12 +69,12 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         }
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
-        List<ValueTextVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
         List<NotifyTriggerVo> triggerArray = new ArrayList<>();
-        for (ValueTextVo notifyTrigger : notifyTriggerList) {
+        for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
             boolean existed = false;
             for (NotifyTriggerVo triggerObj : triggerList) {
-                if (Objects.equals(notifyTrigger.getValue(), triggerObj.getTrigger())) {
+                if (Objects.equals(notifyTrigger.getTriggerName(), triggerObj.getTrigger())) {
                     triggerArray.add(triggerObj);
                     existed = true;
                     break;
@@ -83,10 +82,10 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
             }
             if (!existed) {
                 JSONObject triggerObj = new JSONObject();
-                triggerObj.put("trigger", notifyTrigger.getValue());
-                triggerObj.put("triggerName", notifyTrigger.getText());
+                triggerObj.put("trigger", notifyTrigger.getTrigger());
+                triggerObj.put("triggerName", notifyTrigger.getTriggerName());
                 triggerObj.put("notifyList", new JSONArray());
-                triggerArray.add(new NotifyTriggerVo((String)notifyTrigger.getValue(), notifyTrigger.getText()));
+                triggerArray.add(notifyTrigger);
             }
         }
         config.setTriggerList(triggerArray);
