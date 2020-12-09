@@ -101,6 +101,8 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
                 int toIndex = fromIndex + basePageVo.getPageSize();
                 toIndex = toIndex > rowNum ? rowNum : toIndex;
                 paramList = paramList.subList(fromIndex, toIndex);
+            }else{
+                paramList = new ArrayList<>();
             }
         }
         resultObj.put("paramList", paramList);

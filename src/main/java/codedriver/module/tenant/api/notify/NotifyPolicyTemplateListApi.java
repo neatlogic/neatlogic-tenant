@@ -104,6 +104,8 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
                 int toIndex = fromIndex + basePageVo.getPageSize();
                 toIndex = toIndex > rowNum ? rowNum : toIndex;
                 templateList = templateList.subList(fromIndex, toIndex);
+            }else{
+                templateList = new ArrayList<>();
             }
         }
 
