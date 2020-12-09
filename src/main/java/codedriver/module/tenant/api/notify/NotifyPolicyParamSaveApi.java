@@ -2,6 +2,10 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyPolicyParamNameRepeatException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -47,10 +51,13 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-        @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
-        @Param(name = "paramType", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
-        @Param(name = "label", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")})
+    @Input({
+            @Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "uuid"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "参数名"),
+            @Param(name = "paramType", type = ApiParamType.STRING, isRequired = true, desc = "参数类型"),
+            @Param(name = "label", type = ApiParamType.STRING, isRequired = true, desc = "参数描述")
+    })
     @Output({@Param(explode = ConditionParamVo.class, desc = "参数信息")})
     @Description(desc = "通知策略参数保存接口")
     @Override
@@ -81,14 +88,29 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
             paramConfig.put("format", "yyyy-MM-dd HH:mm:ss");
             paramConfig.put("valueType", "timestamp");
         }
+        String uuid = jsonObj.getString("uuid");
         String name = jsonObj.getString("name");
         String label = jsonObj.getString("label");
+        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+        if (notifyPolicyHandler == null) {
+            throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+        }
+        List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+        if(systemParamList.stream().anyMatch(o -> o.getName().equals(name))){
+            throw new NotifyPolicyParamNameRepeatException(name);
+        }
         ConditionParamVo resultParamVo = null;
         boolean isNew = true;
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<ConditionParamVo> paramList = config.getParamList();
+
+        if(paramList.stream().anyMatch(o -> name.equals(o.getName()) && !uuid.equals(o.getUuid()))){
+            throw new NotifyPolicyParamNameRepeatException(name);
+        }
+
         for (ConditionParamVo notifyPolicyParamVo : paramList) {
-            if (name.equals(notifyPolicyParamVo.getName())) {
+            if (uuid.equals(notifyPolicyParamVo.getUuid())) {
+                notifyPolicyParamVo.setName(name);
                 notifyPolicyParamVo.setParamType(paramType);
                 notifyPolicyParamVo.setLabel(label);
                 notifyPolicyParamVo.setController(controller);
@@ -98,14 +120,16 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
                 notifyPolicyParamVo.getExpressionList().clear();
                 for (Expression expression : basicTypeEnum.getExpressionList()) {
                     notifyPolicyParamVo.getExpressionList()
-                        .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+                            .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
                 }
                 isNew = false;
                 resultParamVo = notifyPolicyParamVo;
+                break;
             }
         }
         if (isNew) {
             ConditionParamVo notifyPolicyParamVo = new ConditionParamVo();
+            notifyPolicyParamVo.setUuid(uuid);
             notifyPolicyParamVo.setName(name);
             notifyPolicyParamVo.setLabel(label);
             notifyPolicyParamVo.setController(controller);
