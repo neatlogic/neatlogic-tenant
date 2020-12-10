@@ -122,6 +122,7 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
                     notifyPolicyParamVo.getExpressionList()
                             .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
                 }
+                notifyPolicyParamVo.setLcd(System.currentTimeMillis());
                 isNew = false;
                 resultParamVo = notifyPolicyParamVo;
                 break;
@@ -142,6 +143,7 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
                 notifyPolicyParamVo.getExpressionList()
                     .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
             }
+            notifyPolicyParamVo.setLcd(System.currentTimeMillis());
             paramList.add(notifyPolicyParamVo);
             resultParamVo = notifyPolicyParamVo;
         }

@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import codedriver.framework.common.dto.BasePageVo;
@@ -11,6 +13,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,6 +93,10 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
                 continue;
             }
             templateList.add(notifyTemplateVo);
+        }
+        if(CollectionUtils.isNotEmpty(templateList)){
+            templateList.sort(Comparator.comparing(NotifyTemplateVo::getLcd));
+            Collections.reverse(templateList);
         }
         JSONObject resultObj = new JSONObject();
         if(basePageVo.getNeedPage()){
