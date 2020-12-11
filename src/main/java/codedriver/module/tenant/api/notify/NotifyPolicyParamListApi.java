@@ -54,7 +54,7 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-            @Param(name = "isEditable", type = ApiParamType.ENUM, rule = "-1,0,1", desc = "-1:全部;0:系统参数;1:自定义参数"),
+            @Param(name = "isEditable", type = ApiParamType.ENUM, rule = "-1,0,1", desc = "-1:全部;0:系统参数(不可编辑);1:自定义参数(可编辑),用于筛选系统/自定义参数"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
