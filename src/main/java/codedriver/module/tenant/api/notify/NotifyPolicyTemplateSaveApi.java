@@ -96,6 +96,7 @@ public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
                     notifyTemplateVo.setAction(ActionType.UPDATE.getValue());
                     notifyTemplateVo.setActionTime(new Date());
                     notifyTemplateVo.setActionUser(UserContext.get().getUserName());
+                    notifyTemplateVo.setLcd(System.currentTimeMillis());
                     isExists = true;
                     resultTemplateVo = notifyTemplateVo;
                 }
@@ -112,6 +113,7 @@ public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
             notifyTemplateVo.setAction(ActionType.CREATE.getValue());
             notifyTemplateVo.setActionTime(new Date());
             notifyTemplateVo.setActionUser(UserContext.get().getUserName());
+            notifyTemplateVo.setLcd(System.currentTimeMillis());
             templateList.add(notifyTemplateVo);
             resultTemplateVo = notifyTemplateVo;
         }

@@ -1,50 +1,43 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
+import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.notify.core.INotifyHandler;
-import codedriver.framework.notify.core.NotifyHandlerFactory;
-import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
-import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.dto.NotifyTemplateVo;
-import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
+public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
 
     @Autowired
     private NotifyMapper notifyMapper;
 
     @Override
     public String getToken() {
-        return "notify/policy/template/list";
+        return "notify/policy/trigger/list";
     }
 
     @Override
     public String getName() {
-        return "通知策略模板列表接口";
+        return "通知策略触发类型列表接口";
     }
 
     @Override
@@ -54,7 +47,7 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-            @Param(name = "notifyHandler", type = ApiParamType.STRING, desc = "通知处理器"),
+            @Param(name = "hasAction", type = ApiParamType.ENUM, rule = "-1,0,1", desc = "是否有动作,-1:全部;0:无动作;1:有动作"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
@@ -62,45 +55,38 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "templateList", explode = NotifyTemplateVo[].class, desc = "通知模板列表")
+            @Param(name = "triggerList", explode = ConditionParamVo[].class, desc = "参数列表")
     })
-    @Description(desc = "通知策略模板列表接口")
+    @Description(desc = "通知策略触发类型列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        List<NotifyTriggerVo> resultList = new ArrayList<>();
         Long policyId = jsonObj.getLong("policyId");
+        Integer hasAction = jsonObj.getInteger("hasAction") == null ? -1 : jsonObj.getInteger("hasAction");
+        BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>(){});
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
         if (notifyPolicyVo == null) {
             throw new NotifyPolicyNotFoundException(policyId.toString());
         }
-
-        String notifyHandler = jsonObj.getString("notifyHandler");
-        if (StringUtils.isNotBlank(notifyHandler)) {
-            INotifyHandler handler = NotifyHandlerFactory.getHandler(notifyHandler);
-            if (handler == null) {
-                throw new NotifyHandlerNotFoundException(notifyHandler);
-            }
-        }
-
-        List<NotifyTemplateVo> templateList = new ArrayList<>();
-        BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyTemplateVo>(){});
-
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
-        for (NotifyTemplateVo notifyTemplateVo : config.getTemplateList()) {
-            if (StringUtils.isNotBlank(notifyHandler) && !notifyHandler.equals(notifyTemplateVo.getNotifyHandler())) {
+        List<NotifyTriggerVo> triggerList = config.getTriggerList();
+        for (NotifyTriggerVo vo : triggerList) {
+            if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
+                if (!vo.getTriggerName().toLowerCase().contains(basePageVo.getKeyword().toLowerCase())) {
+                    continue;
+                }
+            }
+            if(hasAction == 1 && CollectionUtils.isEmpty(vo.getNotifyList())){
                 continue;
             }
-            if (StringUtils.isNotBlank(basePageVo.getKeyword()) && !notifyTemplateVo.getName().toLowerCase().contains(basePageVo.getKeyword().toLowerCase())) {
+            if(hasAction == 0 && CollectionUtils.isNotEmpty(vo.getNotifyList())){
                 continue;
             }
-            templateList.add(notifyTemplateVo);
-        }
-        if(CollectionUtils.isNotEmpty(templateList)){
-            templateList.sort(Comparator.comparing(NotifyTemplateVo::getLcd));
-            Collections.reverse(templateList);
+            resultList.add(vo);
         }
         JSONObject resultObj = new JSONObject();
         if(basePageVo.getNeedPage()){
-            int rowNum = templateList.size();
+            int rowNum = resultList.size();
             int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
             resultObj.put("currentPage", basePageVo.getCurrentPage());
             resultObj.put("pageSize", basePageVo.getPageSize());
@@ -110,13 +96,12 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
             if(fromIndex < rowNum) {
                 int toIndex = fromIndex + basePageVo.getPageSize();
                 toIndex = toIndex > rowNum ? rowNum : toIndex;
-                templateList = templateList.subList(fromIndex, toIndex);
+                resultList = resultList.subList(fromIndex, toIndex);
             }else{
-                templateList = new ArrayList<>();
+                resultList = new ArrayList<>();
             }
         }
-
-        resultObj.put("templateList", templateList);
+        resultObj.put("triggerList", resultList);
         return resultObj;
     }
 
