@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import codedriver.framework.common.dto.BasePageVo;
@@ -11,6 +13,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,7 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
+            @Param(name = "isEditable", type = ApiParamType.ENUM, rule = "-1,0,1", desc = "-1:全部;0:系统参数(不可编辑);1:自定义参数(可编辑),用于筛选系统/自定义参数"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
@@ -65,6 +69,7 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ConditionParamVo> paramList = new ArrayList<>();
         Long policyId = jsonObj.getLong("policyId");
+        Integer isEditable = jsonObj.getInteger("isEditable") == null ? -1 : jsonObj.getInteger("isEditable");
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
         if (notifyPolicyVo == null) {
             throw new NotifyPolicyNotFoundException(policyId.toString());
@@ -73,21 +78,30 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+        List<ConditionParamVo> list = new ArrayList<>();
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<ConditionParamVo> customParamList = config.getParamList();
-        systemParamList.addAll(customParamList);
+        if(CollectionUtils.isNotEmpty(customParamList)){
+            customParamList.sort(Comparator.comparing(ConditionParamVo::getLcd));
+            Collections.reverse(customParamList);
+        }
+        list.addAll(customParamList);
+        List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+        systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+        list.addAll(systemParamList);
         BasePageVo basePageVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<BasePageVo>() { });
-        for (ConditionParamVo notifyPolicyParamVo : systemParamList) {
+        for (ConditionParamVo notifyPolicyParamVo : list) {
             if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
                 if (!notifyPolicyParamVo.getName().toLowerCase().contains(basePageVo.getKeyword().toLowerCase())
                     && !notifyPolicyParamVo.getLabel().toLowerCase().contains(basePageVo.getKeyword().toLowerCase())) {
                     continue;
                 }
             }
+            if(isEditable != -1 && (isEditable != notifyPolicyParamVo.getIsEditable())){
+                continue;
+            }
             paramList.add(notifyPolicyParamVo);
         }
-        paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         JSONObject resultObj = new JSONObject();
         if(basePageVo.getNeedPage()){
             int rowNum = paramList.size();
@@ -101,6 +115,8 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
                 int toIndex = fromIndex + basePageVo.getPageSize();
                 toIndex = toIndex > rowNum ? rowNum : toIndex;
                 paramList = paramList.subList(fromIndex, toIndex);
+            }else{
+                paramList = new ArrayList<>();
             }
         }
         resultObj.put("paramList", paramList);
