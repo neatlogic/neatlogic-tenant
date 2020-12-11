@@ -17,7 +17,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.usertype.UserTypeFactory;
 import org.apache.commons.collections4.CollectionUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
