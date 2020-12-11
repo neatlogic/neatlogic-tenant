@@ -97,10 +97,7 @@ public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
                     continue;
                 }
             }
-            if(isEditable == 1 && notifyPolicyParamVo.getIsEditable() == 0){
-                continue;
-            }
-            if(isEditable == 0 && notifyPolicyParamVo.getIsEditable() ==1){
+            if(isEditable != -1 && (isEditable != notifyPolicyParamVo.getIsEditable())){
                 continue;
             }
             paramList.add(notifyPolicyParamVo);
