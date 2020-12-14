@@ -4,6 +4,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.dto.UserTypeVo;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
@@ -12,6 +13,8 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.usertype.UserTypeFactory;
+import codedriver.module.tenant.service.notify.NotifyPolicyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -29,6 +33,9 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
 
     @Autowired
     private NotifyMapper notifyMapper;
+
+    @Autowired
+    private NotifyPolicyService notifyPolicyService;
 
     @Override
     public String getToken() {
@@ -68,6 +75,11 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
         if (notifyPolicyVo == null) {
             throw new NotifyPolicyNotFoundException(policyId.toString());
         }
+        /** 获取工单干系人枚举 */
+        Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
+        UserTypeVo UsertypeVo = userTypeVoMap.get("process");
+        Map<String, String> processUserType = UsertypeVo.getValues();
+        
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         for (NotifyTriggerVo vo : triggerList) {
@@ -82,6 +94,9 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
             if(hasAction == 0 && CollectionUtils.isNotEmpty(vo.getNotifyList())){
                 continue;
             }
+            /** 补充通知对象详细信息 */
+            notifyPolicyService.addReceiverExtraInfo(processUserType, vo);
+
             resultList.add(vo);
         }
         JSONObject resultObj = new JSONObject();
