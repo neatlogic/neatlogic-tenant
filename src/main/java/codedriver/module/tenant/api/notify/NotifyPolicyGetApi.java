@@ -2,7 +2,6 @@ package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserTypeVo;
@@ -20,7 +19,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.usertype.UserTypeFactory;
 import codedriver.module.tenant.service.notify.NotifyPolicyService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,10 +84,10 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
             boolean existed = false;
             for (NotifyTriggerVo triggerObj : triggerList) {
-                if (Objects.equals(notifyTrigger.getValue(), triggerObj.getTrigger())) {
+                if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
                     /** 补充通知对象详细信息 */
                     notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
-
+                    triggerObj.setDescription(notifyTrigger.getDescription());
                     triggerArray.add(triggerObj);
                     existed = true;
                     break;
