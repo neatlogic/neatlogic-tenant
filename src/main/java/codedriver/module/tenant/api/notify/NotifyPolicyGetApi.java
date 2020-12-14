@@ -1,36 +1,36 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.dto.UserTypeVo;
+import codedriver.framework.dto.UserVo;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dao.mapper.NotifyMapper;
+import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
+import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.usertype.UserTypeFactory;
+import codedriver.module.tenant.service.notify.NotifyPolicyService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dto.*;
-import codedriver.framework.notify.dto.*;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import codedriver.framework.usertype.UserTypeFactory;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.notify.core.INotifyPolicyHandler;
-import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
-import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
-import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -43,10 +43,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
     private UserMapper userMapper;
 
     @Autowired
-    private TeamMapper teamMapper;
-
-    @Autowired
-    private RoleMapper roleMapper;
+    private NotifyPolicyService notifyPolicyService;
 
     @Override
     public String getToken() {
@@ -90,53 +87,9 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
             boolean existed = false;
             for (NotifyTriggerVo triggerObj : triggerList) {
                 if (Objects.equals(notifyTrigger.getValue(), triggerObj.getTrigger())) {
-                    /** 补充通知对象详细信息开始 */
-                    List<NotifyTriggerNotifyVo> notifyTriggerNotifyVos = triggerObj.getNotifyList();
-                    if(CollectionUtils.isNotEmpty(notifyTriggerNotifyVos)){
-                        for(NotifyTriggerNotifyVo triggerNotifyVo : notifyTriggerNotifyVos){
-                            List<NotifyActionVo> actionList = triggerNotifyVo.getActionList();
-                            if(CollectionUtils.isNotEmpty(actionList)){
-                                for(NotifyActionVo actionVo : actionList){
-                                    List<String> receiverList = actionVo.getReceiverList();
-                                    if(CollectionUtils.isNotEmpty(receiverList)){
-                                        JSONArray receiverObjList = new JSONArray();
-                                        for(String receiver : receiverList){
-                                            JSONObject receiverObj = new JSONObject();
-                                            String[] split = receiver.split("#");
-                                            receiverObj.put("type",split[0]);
-                                            if (GroupSearch.USER.getValue().equals(split[0])) {
-                                                UserVo user = userMapper.getUserBaseInfoByUuid(split[1]);
-                                                if(user != null){
-                                                    receiverObj.put("uuid",user.getUuid());
-                                                    receiverObj.put("name",user.getUserName());
-                                                    receiverObj.put("pinyin",user.getPinyin());
-                                                    receiverObj.put("avatar",user.getAvatar());
-                                                    receiverObj.put("vipLevel",user.getVipLevel());
-                                                }
-                                            }else if(GroupSearch.TEAM.getValue().equals(split[0])){
-                                                TeamVo team = teamMapper.getTeamByUuid(split[1]);
-                                                if(team != null){
-                                                    receiverObj.put("uuid",team.getUuid());
-                                                    receiverObj.put("name",team.getName());
-                                                }
-                                            }else if(GroupSearch.ROLE.getValue().equals(split[0])){
-                                                RoleVo role = roleMapper.getRoleByUuid(split[1]);
-                                                if(role != null){
-                                                    receiverObj.put("uuid",role.getUuid());
-                                                    receiverObj.put("name",role.getName());
-                                                }
-                                            }else{
-                                                receiverObj.put("name",processUserType.get(split[1]));
-                                            }
-                                            receiverObjList.add(receiverObj);
-                                        }
-                                        actionVo.setReceiverObjList(receiverObjList);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    /** 补充通知对象详细信息结束 */
+                    /** 补充通知对象详细信息 */
+                    notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
+
                     triggerArray.add(triggerObj);
                     existed = true;
                     break;
