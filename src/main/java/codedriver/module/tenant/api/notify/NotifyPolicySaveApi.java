@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -15,7 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -88,10 +88,10 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
             JSONObject configObj = new JSONObject();
             JSONArray triggerList = new JSONArray();
-            for (ValueTextVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
+            for (NotifyTriggerVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
                 JSONObject triggerObj = new JSONObject();
-                triggerObj.put("trigger", notifyTrigger.getValue());
-                triggerObj.put("triggerName", notifyTrigger.getText());
+                triggerObj.put("trigger", notifyTrigger.getTrigger());
+                triggerObj.put("triggerName", notifyTrigger.getTriggerName());
                 triggerObj.put("notifyList", new JSONArray());
                 triggerList.add(triggerObj);
             }
