@@ -24,10 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,6 +77,15 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        /** 矫正旧配置数据中的触发点 */
+        /** 多删 -- 删除已经不存在的触发点 */
+        Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
+        while (iterator.hasNext()){
+            NotifyTriggerVo next = iterator.next();
+            if(!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))){
+                iterator.remove();
+            }
+        }
         List<NotifyTriggerVo> triggerArray = new ArrayList<>();
         for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
             boolean existed = false;
@@ -93,6 +99,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                     break;
                 }
             }
+            /** 少补 -- 新增老数据中没有而现在有的触发点 */
             if (!existed) {
                 triggerArray.add(notifyTrigger);
             }
