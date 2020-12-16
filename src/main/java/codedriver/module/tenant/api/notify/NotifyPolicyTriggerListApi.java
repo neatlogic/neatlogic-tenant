@@ -91,7 +91,8 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
 
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
-        /** 多删 */
+        /** 矫正旧配置数据中的触发点 */
+        /** 多删 -- 删除已经不存在的触发点 */
         Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
         while (iterator.hasNext()){
             NotifyTriggerVo next = iterator.next();
@@ -99,7 +100,7 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
                 iterator.remove();
             }
         }
-        /** 少补 */
+        /** 少补 -- 新增老数据中没有而现在有的触发点 */
         Iterator<NotifyTriggerVo> _iterator = systemTriggerList.iterator();
         while (_iterator.hasNext()){
             NotifyTriggerVo next = _iterator.next();
