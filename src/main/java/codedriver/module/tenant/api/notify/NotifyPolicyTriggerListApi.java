@@ -5,10 +5,13 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserTypeVo;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
+import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -75,13 +79,34 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
         if (notifyPolicyVo == null) {
             throw new NotifyPolicyNotFoundException(policyId.toString());
         }
+        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+        if (notifyPolicyHandler == null) {
+            throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+        }
+        List<NotifyTriggerVo> systemTriggerList = notifyPolicyHandler.getNotifyTriggerList();
         /** 获取工单干系人枚举 */
         Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
         UserTypeVo UsertypeVo = userTypeVoMap.get("process");
         Map<String, String> processUserType = UsertypeVo.getValues();
-        
+
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
+        /** 多删 */
+        Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
+        while (iterator.hasNext()){
+            NotifyTriggerVo next = iterator.next();
+            if(!systemTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))){
+                iterator.remove();
+            }
+        }
+        /** 少补 */
+        Iterator<NotifyTriggerVo> _iterator = systemTriggerList.iterator();
+        while (_iterator.hasNext()){
+            NotifyTriggerVo next = _iterator.next();
+            if(!triggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))){
+                triggerList.add(next);
+            }
+        }
         for (NotifyTriggerVo vo : triggerList) {
             if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
                 if (!vo.getTriggerName().toLowerCase().contains(basePageVo.getKeyword().toLowerCase())) {
