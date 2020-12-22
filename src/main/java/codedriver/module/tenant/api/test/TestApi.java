@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.test;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +11,8 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.dao.mapper.TestMapper;
 
+@Deprecated
+@AuthAction(action = NO_AUTH.class)
 @Component
 public class TestApi extends PrivateApiComponentBase {
 

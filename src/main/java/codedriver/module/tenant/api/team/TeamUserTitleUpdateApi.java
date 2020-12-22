@@ -1,9 +1,11 @@
 package codedriver.module.tenant.api.team;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.TEAM_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import codedriver.framework.exception.team.TeamUserTitleNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
 @Service
 @Transactional
+@AuthAction(action = TEAM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TeamUserTitleUpdateApi extends PrivateApiComponentBase {
 

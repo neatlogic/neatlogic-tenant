@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.user;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -20,6 +22,7 @@ import codedriver.module.tenant.exception.user.UserCurrentPasswordException;
 
 @Service
 @Transactional
+@AuthAction(action = NO_AUTH.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {
 	

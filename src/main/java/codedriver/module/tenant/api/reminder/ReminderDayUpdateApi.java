@@ -2,8 +2,10 @@ package codedriver.module.tenant.api.reminder;
 
 import java.util.Map;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.MESSAGE_CENTER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import codedriver.module.tenant.service.reminder.GlobalReminderService;
  * @create: 2019-12-10 11:55
  **/
 @Service
+@AuthAction(action = MESSAGE_CENTER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ReminderDayUpdateApi extends PrivateApiComponentBase {
 

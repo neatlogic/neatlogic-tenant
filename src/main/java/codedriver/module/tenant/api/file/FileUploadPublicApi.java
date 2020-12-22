@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
@@ -36,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Service
+@AuthAction(action = NO_AUTH.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class FileUploadPublicApi extends PublicBinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(FileUploadPublicApi.class);

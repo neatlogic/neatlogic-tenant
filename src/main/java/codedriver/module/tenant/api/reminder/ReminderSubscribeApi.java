@@ -1,9 +1,11 @@
 package codedriver.module.tenant.api.reminder;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.MESSAGE_CENTER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import codedriver.framework.reminder.dto.GlobalReminderSubscribeVo;
  * @create: 2019-12-10 11:30
  **/
 @Service
+@AuthAction(action = MESSAGE_CENTER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ReminderSubscribeApi extends PrivateApiComponentBase {
 

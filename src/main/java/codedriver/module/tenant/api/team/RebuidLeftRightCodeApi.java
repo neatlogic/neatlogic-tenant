@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.team;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.module.tenant.auth.label.TEAM_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,7 @@ import codedriver.module.tenant.service.TeamService;
 
 @Service
 @Transactional
+@AuthAction(action = TEAM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class RebuidLeftRightCodeApi extends PrivateApiComponentBase {
 
