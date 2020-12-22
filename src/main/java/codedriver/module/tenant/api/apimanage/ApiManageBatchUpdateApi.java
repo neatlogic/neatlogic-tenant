@@ -3,8 +3,10 @@ package codedriver.module.tenant.api.apimanage;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.INTERFACE_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import codedriver.framework.restful.dto.ApiVo;
 
 @Service
 @Transactional
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ApiManageBatchUpdateApi extends PrivateApiComponentBase {
 	

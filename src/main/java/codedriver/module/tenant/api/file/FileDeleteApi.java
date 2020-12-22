@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.file.FileAccessDeniedException;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@AuthAction(action = NO_AUTH.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class FileDeleteApi extends PrivateApiComponentBase {
 

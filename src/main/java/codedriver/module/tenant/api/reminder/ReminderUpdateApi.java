@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.reminder;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.reminder.dao.mapper.GlobalReminderMessageMapper;
@@ -9,6 +10,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.module.tenant.auth.label.MESSAGE_CENTER_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
  * @create: 2019-12-10 11:51
  **/
 @Service
+@AuthAction(action = MESSAGE_CENTER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ReminderUpdateApi extends PrivateApiComponentBase {
 
