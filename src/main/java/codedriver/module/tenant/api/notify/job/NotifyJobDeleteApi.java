@@ -7,13 +7,14 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AuthAction(name = "NOTIFY_JOB_MODIFY")
+@AuthAction(action = NOTIFY_JOB_MODIFY.class)
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class NotifyJobDeleteApi extends PrivateApiComponentBase {

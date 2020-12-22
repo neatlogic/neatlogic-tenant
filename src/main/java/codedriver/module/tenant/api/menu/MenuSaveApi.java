@@ -1,24 +1,22 @@
 package codedriver.module.tenant.api.menu;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.module.tenant.auth.label.MENU_MODIFY;
 import codedriver.module.tenant.dto.MenuVo;
 import codedriver.module.tenant.exception.menu.MenuSaveException;
 import codedriver.module.tenant.service.MenuService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
-@AuthAction(name = "MENU_MODIFY")
+@AuthAction(action = MENU_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MenuSaveApi extends PrivateApiComponentBase {
 

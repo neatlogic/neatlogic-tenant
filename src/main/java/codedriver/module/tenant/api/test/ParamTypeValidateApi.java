@@ -1,15 +1,15 @@
 package codedriver.module.tenant.api.test;
 
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-@AuthAction(name="SCHEDULE_JOB_MODIFY")
+import com.alibaba.fastjson.JSONObject;
+@AuthAction(action = NO_AUTH.class)
 public class ParamTypeValidateApi extends PrivateApiComponentBase {
 
 	@Override

@@ -1,22 +1,20 @@
 package codedriver.module.tenant.api.scheduler;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.exception.ScheduleJobAuditNotFoundException;
+import codedriver.module.tenant.auth.label.SCHEDULE_JOB_MODIFY;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
-@AuthAction(name = "SCHEDULE_JOB_MODIFY")
+@AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobAuditLogGetApi extends PrivateApiComponentBase {
 
