@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.notify.job;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
+import codedriver.framework.notify.exception.NotifyJobNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -18,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class NotifyJobDeleteApi extends PrivateApiComponentBase {
+
+	@Autowired
+	private NotifyJobMapper notifyJobMapper;
 
 	@Autowired
 	private SchedulerMapper schedulerMapper;
@@ -45,6 +50,14 @@ public class NotifyJobDeleteApi extends PrivateApiComponentBase {
 	@Description(desc = "删除通知定时任务")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		Long id = jsonObj.getLong("id");
+		if(notifyJobMapper.getJobBaseInfoById(id) == null){
+			throw new NotifyJobNotFoundException(id);
+		}
+		notifyJobMapper.deleteJobById(id);
+		notifyJobMapper.deleteReceiverByJobId(id);
+
+		// TODO 清除定时任务
 		return null;
 	}
 }
