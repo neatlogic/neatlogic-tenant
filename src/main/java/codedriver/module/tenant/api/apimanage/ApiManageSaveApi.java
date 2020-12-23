@@ -1,9 +1,11 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.exception.type.ApiRepeatException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.INTERFACE_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ApiManageSaveApi extends PrivateApiComponentBase {
 

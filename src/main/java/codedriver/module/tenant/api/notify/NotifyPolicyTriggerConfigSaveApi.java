@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import codedriver.framework.util.SnowflakeUtil;
 
 @Service
 @Transactional
+@AuthAction(action = NOTIFY_POLICY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
 

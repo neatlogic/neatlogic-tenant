@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TagSearchApi extends PrivateApiComponentBase {

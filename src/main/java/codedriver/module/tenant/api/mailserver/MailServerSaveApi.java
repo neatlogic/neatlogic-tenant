@@ -1,9 +1,11 @@
 package codedriver.module.tenant.api.mailserver;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.MAIL_SERVER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import codedriver.module.tenant.exception.mailserver.MailServerNameRepeatExcepti
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
 @Service
 @Transactional
+@AuthAction(action = MAIL_SERVER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MailServerSaveApi extends PrivateApiComponentBase {
 

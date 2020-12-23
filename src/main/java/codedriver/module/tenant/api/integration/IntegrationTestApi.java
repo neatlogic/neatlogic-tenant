@@ -1,7 +1,9 @@
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.INTEGRATION_MODIFY;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -19,6 +21,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 
 @Service
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class IntegrationTestApi extends PrivateApiComponentBase {
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,7 @@ import codedriver.framework.util.UuidUtil;
  **/
 @Service
 @Transactional
+@AuthAction(action = MATRIX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixDataSaveApi extends PrivateApiComponentBase {
 

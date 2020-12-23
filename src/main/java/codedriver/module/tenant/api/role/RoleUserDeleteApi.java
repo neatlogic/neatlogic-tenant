@@ -2,8 +2,10 @@ package codedriver.module.tenant.api.role;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.ROLE_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
+@AuthAction(action = ROLE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RoleUserDeleteApi extends PrivateApiComponentBase {
 

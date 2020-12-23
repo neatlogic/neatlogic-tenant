@@ -1,25 +1,23 @@
 package codedriver.module.tenant.api.scheduler;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import codedriver.module.tenant.auth.label.SCHEDULE_JOB_MODIFY;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Map.Entry;
 @Service
-@AuthAction(name="SCHEDULE_JOB_MODIFY")
+@AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobClassGetApi extends PrivateApiComponentBase {
 	

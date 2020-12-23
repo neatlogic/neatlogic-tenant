@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.tag;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -14,7 +16,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Deprecated
 @Service
+@AuthAction(action = NO_AUTH.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class TagDeleteApi extends PrivateApiComponentBase {
 

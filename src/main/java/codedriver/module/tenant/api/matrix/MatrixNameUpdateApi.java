@@ -1,12 +1,5 @@
 package codedriver.module.tenant.api.matrix;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -20,6 +13,12 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -28,7 +27,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
  **/
 @Service
 @Transactional
-@AuthAction(name = "MATRIX_MODIFY")
+@AuthAction(action = MATRIX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class MatrixNameUpdateApi extends PrivateApiComponentBase {
 

@@ -2,11 +2,13 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 
 @Service
 @Transactional
+@AuthAction(action = NOTIFY_POLICY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class NotifyPolicySaveApi extends PrivateApiComponentBase {
 

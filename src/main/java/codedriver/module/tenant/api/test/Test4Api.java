@@ -1,11 +1,15 @@
 package codedriver.module.tenant.api.test;
 
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 @Service
+@Deprecated
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class Test4Api extends PublicApiComponentBase {
 
 	@Override

@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.role;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
@@ -12,6 +13,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.module.tenant.auth.label.ROLE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +30,7 @@ import java.util.Set;
 
 @Service
 @Transactional
+@AuthAction(action = ROLE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class RoleAuthSaveApi extends PrivateApiComponentBase {
     

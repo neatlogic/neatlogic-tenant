@@ -1,26 +1,22 @@
 package codedriver.module.tenant.api.team;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
-
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.lock.service.LockManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.tenant.auth.label.SCHEDULE_JOB_MODIFY;
 import codedriver.module.tenant.exception.team.TeamMoveException;
 import codedriver.module.tenant.service.TeamService;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @program: codedriver
@@ -29,6 +25,7 @@ import codedriver.module.tenant.service.TeamService;
  **/
 @Service
 @Transactional
+@AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TeamMoveApi extends PrivateApiComponentBase {
 

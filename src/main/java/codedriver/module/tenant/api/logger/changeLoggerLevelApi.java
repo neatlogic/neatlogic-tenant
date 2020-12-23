@@ -1,6 +1,8 @@
 
 package codedriver.module.tenant.api.logger;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Component
+@AuthAction(action = NO_AUTH.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class changeLoggerLevelApi extends PrivateApiComponentBase {
 

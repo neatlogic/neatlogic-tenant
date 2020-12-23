@@ -1,25 +1,23 @@
 package codedriver.module.tenant.api.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.tenant.auth.label.MENU_MODIFY;
 import codedriver.module.tenant.dao.mapper.MenuMapper;
 import codedriver.module.tenant.dto.MenuVo;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
-@AuthAction(name = "MENU_MODIFY")
+@AuthAction(action = MENU_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MenuSearchApi extends PrivateApiComponentBase {
 	

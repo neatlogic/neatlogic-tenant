@@ -3,8 +3,10 @@ package codedriver.module.tenant.api.notify;
 import java.util.Date;
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
 @Transactional
+@AuthAction(action = NOTIFY_POLICY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
 

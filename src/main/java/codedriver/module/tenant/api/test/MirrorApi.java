@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.test;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NO_AUTH;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -7,6 +9,8 @@ import com.alibaba.fastjson.JSONObject;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+@Deprecated
+@AuthAction(action = NO_AUTH.class)
 @Component
 public class MirrorApi extends PrivateApiComponentBase {
 

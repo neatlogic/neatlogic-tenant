@@ -1,7 +1,9 @@
 package codedriver.module.tenant.api.mailserver;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.MAIL_SERVER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 @Transactional
+@AuthAction(action = MAIL_SERVER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class MailServerDeleteApi extends PrivateApiComponentBase {
 
