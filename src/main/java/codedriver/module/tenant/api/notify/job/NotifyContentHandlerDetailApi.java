@@ -9,6 +9,7 @@ import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundExcepti
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +50,7 @@ public class NotifyContentHandlerDetailApi extends PrivateApiComponentBase {
 		if(notifyContentHandler == null){
 			throw new NotifyContentHandlerNotFoundException(handler);
 		}
-		List<ConditionParamVo> conditionList = notifyContentHandler.getConditionOptionList();
+		JSONArray conditionList = notifyContentHandler.getConditionOptionList();
 		List<ValueTextVo> dataColumn = notifyContentHandler.getDataColumnList();
 		result.put("conditionList",conditionList);
 		result.put("dataColumnList",dataColumn);
