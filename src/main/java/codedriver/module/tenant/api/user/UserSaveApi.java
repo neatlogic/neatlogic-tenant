@@ -16,15 +16,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.exception.user.UserIdRepeatException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -127,15 +124,6 @@ public class UserSaveApi extends PrivateApiComponentBase {
 	@Description(desc = "保存用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		boolean hasAuth = false;
-		if(UserContext.get().getUserId(true).equals(jsonObj.getString("uuid"))) {
-			hasAuth = true;
-		}else {
-			hasAuth = AuthActionChecker.check("USER_MODIFY");
-		}
-		if(!hasAuth) {
-			throw new PermissionDeniedException();
-		}
 		UserVo userVo = new UserVo();		
 		userVo.setUserId(jsonObj.getString("userId"));
 		userVo.setUserName(jsonObj.getString("userName"));
