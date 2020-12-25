@@ -56,7 +56,7 @@ public class CurrentUserSaveApi extends PrivateApiComponentBase {
     @Description(desc = "保存用户接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(UserContext.get().getUserId(true));
+        UserVo currentUserVo = userMapper.getUserBaseInfoByUuid(UserContext.get().getUserUuid(true));
         currentUserVo.setUserName(jsonObj.getString("userName"));
         currentUserVo.setEmail(jsonObj.getString("email"));
         currentUserVo.setPhone(jsonObj.getString("phone"));
