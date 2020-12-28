@@ -161,6 +161,7 @@ public class MatrixServiceImpl implements MatrixService {
 			if(userVo != null) {
 				resultObj.put("text", userVo.getUserName());
 				resultObj.put("avatar", userVo.getAvatar());
+				resultObj.put("pinyin", userVo.getPinyin());
 				resultObj.put("vipLevel", userVo.getVipLevel());
 			}
 		}else if(MatrixAttributeType.TEAM.getValue().equals(type)) {
