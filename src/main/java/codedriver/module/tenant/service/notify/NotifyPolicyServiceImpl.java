@@ -50,7 +50,7 @@ public class NotifyPolicyServiceImpl implements NotifyPolicyService {
 									UserVo user = userMapper.getUserBaseInfoByUuid(split[1]);
 									if(user != null){
 										receiverObj.put("uuid",user.getUuid());
-										receiverObj.put("userName",user.getUserName());
+										receiverObj.put("name",user.getUserName());
 										receiverObj.put("pinyin",user.getPinyin());
 										receiverObj.put("avatar",user.getAvatar());
 										receiverObj.put("vipLevel",user.getVipLevel());
@@ -59,16 +59,16 @@ public class NotifyPolicyServiceImpl implements NotifyPolicyService {
 									TeamVo team = teamMapper.getTeamByUuid(split[1]);
 									if(team != null){
 										receiverObj.put("uuid",team.getUuid());
-										receiverObj.put("userName",team.getName()); //统一成userName，方便前端组件渲染
+										receiverObj.put("name",team.getName()); //统一成name，方便前端组件渲染
 									}
 								}else if(GroupSearch.ROLE.getValue().equals(split[0])){
 									RoleVo role = roleMapper.getRoleByUuid(split[1]);
 									if(role != null){
 										receiverObj.put("uuid",role.getUuid());
-										receiverObj.put("userName",role.getName());//统一成userName，方便前端组件渲染
+										receiverObj.put("name",role.getName());//统一成name，方便前端组件渲染
 									}
 								}else{
-									receiverObj.put("userName",processUserType.get(split[1]));//统一成userName，方便前端组件渲染
+									receiverObj.put("name",processUserType.get(split[1]));//统一成name，方便前端组件渲染
 								}
 								receiverObjList.add(receiverObj);
 							}
