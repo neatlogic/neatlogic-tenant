@@ -58,7 +58,7 @@ public class NotifyPolicyTemplateDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "policyId", type = ApiParamType.LONG, isRequired = true, desc = "策略id"),
-        @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id")})
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "模板id")})
     @Description(desc = "通知模板删除接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -84,7 +84,7 @@ public class NotifyPolicyTemplateDeleteApi extends PrivateApiComponentBase {
                 notifyTemplateName = notifyTemplateVo.getName();
             }
         }
-        if(index == -1){
+        if (index == -1) {
             return null;
         }
         // 判断模板是否被引用
