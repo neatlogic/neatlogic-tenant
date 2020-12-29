@@ -8,6 +8,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
+import org.omg.PortableServer.ForwardRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,26 +73,32 @@ public class NotifyPolicyTemplateDeleteApi extends PrivateApiComponentBase {
         }
 
         Long id = jsonObj.getLong("id");
+        int index = -1;
+        String notifyTemplateName = null;
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+        List<NotifyTemplateVo> templateList = config.getTemplateList();
+        for (int i = 0; i < templateList.size(); i++) {
+            NotifyTemplateVo notifyTemplateVo = templateList.get(i);
+            if (id.equals(notifyTemplateVo.getId())) {
+                index = i;
+                notifyTemplateName = notifyTemplateVo.getName();
+            }
+        }
+        if(index == -1){
+            return null;
+        }
         // 判断模板是否被引用
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         for (NotifyTriggerVo notifyTriggerVo : triggerList) {
             for (NotifyTriggerNotifyVo notifyTriggerNotifyVo : notifyTriggerVo.getNotifyList()) {
                 for (NotifyActionVo notifyActionVo : notifyTriggerNotifyVo.getActionList()) {
                     if (Objects.equals(notifyActionVo.getTemplateId(), id)) {
-                        throw new NotifyTemplateReferencedCannotBeDeletedException(id.toString());
+                        throw new NotifyTemplateReferencedCannotBeDeletedException(notifyTemplateName);
                     }
                 }
             }
         }
-        List<NotifyTemplateVo> templateList = config.getTemplateList();
-        Iterator<NotifyTemplateVo> iterator = templateList.iterator();
-        while (iterator.hasNext()) {
-            NotifyTemplateVo notifyTemplateVo = iterator.next();
-            if (id.equals(notifyTemplateVo.getId())) {
-                iterator.remove();
-            }
-        }
+        templateList.remove(index);
         notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
         return null;
     }
