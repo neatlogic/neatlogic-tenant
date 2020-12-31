@@ -123,7 +123,7 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
                 notifyPolicyParamVo.getExpressionList().clear();
                 for (Expression expression : basicTypeEnum.getExpressionList()) {
                     notifyPolicyParamVo.getExpressionList()
-                            .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+                            .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName(),expression.getIsShowConditionValue()));
                 }
                 notifyPolicyParamVo.setLcd(System.currentTimeMillis());
                 isNew = false;
@@ -144,7 +144,7 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
             notifyPolicyParamVo.setDefaultExpression(basicTypeEnum.getDefaultExpression().getExpression());
             for (Expression expression : basicTypeEnum.getExpressionList()) {
                 notifyPolicyParamVo.getExpressionList()
-                    .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName()));
+                    .add(new ExpressionVo(expression.getExpression(), expression.getExpressionName(),expression.getIsShowConditionValue()));
             }
             notifyPolicyParamVo.setLcd(System.currentTimeMillis());
             paramList.add(notifyPolicyParamVo);
