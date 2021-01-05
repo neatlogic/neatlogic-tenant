@@ -8,6 +8,7 @@ import codedriver.framework.news.dao.mapper.NewsMapper;
 import codedriver.framework.news.dto.NewsMessageSearchVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +22,7 @@ import java.util.List;
  * @Author: linbq
  * @Date: 2021/1/5 14:26
  **/
+@Service
 public class NewsServiceImpl implements NewsService {
 
     @Autowired
@@ -56,30 +58,6 @@ public class NewsServiceImpl implements NewsService {
                 searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
                 List<Long> newsMessageIdList = newsMapper.getNewsMessagePullList(searchVo);
                 insertNewsMessageUserList(newsMessageIdList);
-//            if(searchVo.getPageSize() != 0){
-//                List<Long> idList = newsMapper.getNewsMessagePullListByUserUuid(searchVo);
-//                if(CollectionUtils.isNotEmpty(idList)){
-//                    newsMessageIdList.addAll(idList);
-//                    searchVo.setPageSize(searchVo.getPageSize() - idList.size());
-//                    insertNewsMessageUserList(idList);
-//                }
-//            }
-//            if(searchVo.getPageSize() != 0){
-//                List<Long> idList = newsMapper.getNewsMessagePullListByTeamUuidList(searchVo);
-//                if(CollectionUtils.isNotEmpty(idList)){
-//                    newsMessageIdList.addAll(idList);
-//                    searchVo.setPageSize(searchVo.getPageSize() - idList.size());
-//                    insertNewsMessageUserList(idList);
-//                }
-//            }
-//            if(searchVo.getPageSize() != 0){
-//                List<Long> idList = newsMapper.getNewsMessagePullListByRoleUuidList(searchVo);
-//                if(CollectionUtils.isNotEmpty(idList)){
-//                    newsMessageIdList.addAll(idList);
-//                    searchVo.setPageSize(searchVo.getPageSize() - idList.size());
-//                    insertNewsMessageUserList(idList);
-//                }
-//            }
                 return newsMessageIdList;
             }
         }else{
