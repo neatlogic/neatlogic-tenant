@@ -14,7 +14,7 @@ import codedriver.framework.lock.service.LockManager;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.auth.label.TEAM_MODIFY;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
