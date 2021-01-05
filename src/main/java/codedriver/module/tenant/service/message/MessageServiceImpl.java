@@ -56,14 +56,14 @@ public class MessageServiceImpl implements MessageService {
             searchVo.setRowNum(rowNum);
             if(rowNum > 0){
                 searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
-                List<Long> newsMessageIdList = messageMapper.getMessagePullList(searchVo);
-                insertNewsMessageUserList(newsMessageIdList);
-                return newsMessageIdList;
+                List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
+                insertNewsMessageUserList(messageIdList);
+                return messageIdList;
             }
         }else{
-            List<Long> newsMessageIdList = messageMapper.getMessagePullList(searchVo);
-            insertNewsMessageUserList(newsMessageIdList);
-            return newsMessageIdList;
+            List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
+            insertNewsMessageUserList(messageIdList);
+            return messageIdList;
         }
         return null;
     }
@@ -72,15 +72,15 @@ public class MessageServiceImpl implements MessageService {
      * @Description: 保存用户拉取到的新消息id
      * @Author: linbq
      * @Date: 2021/1/5 14:36
-     * @Params:[newsMessageIdList]
+     * @Params:[messageIdList]
      * @Returns:void
      **/
-    private void insertNewsMessageUserList(List<Long> newsMessageIdList) {
-        int size = Math.min(1000, newsMessageIdList.size());
+    private void insertNewsMessageUserList(List<Long> messageIdList) {
+        int size = Math.min(1000, messageIdList.size());
         List<MessageSearchVo> messageSearchVoList = new ArrayList<>(size);
         String userUuid = UserContext.get().getUserUuid(true);
-        for (Long newsMessageId : newsMessageIdList) {
-            messageSearchVoList.add(new MessageSearchVo(userUuid, newsMessageId));
+        for (Long messageId : messageIdList) {
+            messageSearchVoList.add(new MessageSearchVo(userUuid, messageId));
             if (messageSearchVoList.size() == 1000) {
                 messageMapper.insertMessageUser(messageSearchVoList);
                 messageSearchVoList.clear();
