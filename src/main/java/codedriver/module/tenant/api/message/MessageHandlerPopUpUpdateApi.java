@@ -67,14 +67,14 @@ public class MessageHandlerPopUpUpdateApi extends PrivateApiComponentBase {
         if(messageHandlerVo != null){
             messageHandlerVo.setPopUp(popUp);
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            messageMapper.updateSubscribePopUp(messageHandlerVo);
+            messageMapper.updateMessageSubscribePopUp(messageHandlerVo);
         }else{
             messageHandlerVo = new MessageHandlerVo();
             messageHandlerVo.setHandler(handler);
             messageHandlerVo.setIsActive(1);
             messageHandlerVo.setPopUp(popUp);
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            messageMapper.insertSubscribe(messageHandlerVo);
+            messageMapper.insertMessageSubscribe(messageHandlerVo);
         }
         return null;
     }

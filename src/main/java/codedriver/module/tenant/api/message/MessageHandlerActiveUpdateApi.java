@@ -73,7 +73,7 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
         MessageHandlerVo messageHandlerVo = messageMapper.getMessageSubscribeByUserUuidAndHandler(searchVo);
         if (messageHandlerVo != null) {
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            messageMapper.updateSubscribeActive(messageHandlerVo);
+            messageMapper.updateMessageSubscribeActive(messageHandlerVo);
             if(messageHandlerVo.getIsActive() == 1){
                 pullMessage(handler);
             }
@@ -83,7 +83,7 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
             messageHandlerVo.setIsActive(0);
             messageHandlerVo.setPopUp(PopUpType.CLOSE.getValue());
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            messageMapper.insertSubscribe(messageHandlerVo);
+            messageMapper.insertMessageSubscribe(messageHandlerVo);
             pullMessage(handler);
         }
         return null;
