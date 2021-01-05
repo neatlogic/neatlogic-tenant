@@ -9,9 +9,11 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
+import codedriver.framework.scheduler.dto.JobAuditVo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +50,7 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
 			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
 	})
-	@Output({@Param(name = "jobList", type = ApiParamType.JSONARRAY, explode = NotifyJobVo[].class, desc = "定时任务列表"),
+	@Output({@Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = NotifyJobVo[].class, desc = "定时任务列表"),
 			@Param(explode = BaseEditorVo.class)
 	})
 	@Description(desc = "查询通知定时任务")
@@ -64,8 +66,15 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
 		}
 		List<NotifyJobVo> jobList = notifyJobMapper.searchJob(vo);
-		//TODO 查询收件人与发送次数
-		returnObj.put("jobList",jobList);
+		//TODO 查询收件人
+		if(CollectionUtils.isNotEmpty(jobList)){
+			for(NotifyJobVo job : jobList){
+				JobAuditVo jobAuditVo = new JobAuditVo();
+				jobAuditVo.setJobUuid(job.getId().toString());
+				job.setExecCount(schedulerMapper.searchJobAuditCount(jobAuditVo));
+			}
+		}
+		returnObj.put("tbodyList",jobList);
 		return returnObj;
 	}
 }
