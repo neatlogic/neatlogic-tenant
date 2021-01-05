@@ -1,10 +1,10 @@
-package codedriver.module.tenant.api.news;
+package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.news.core.NewsHandlerFactory;
-import codedriver.framework.news.dao.mapper.NewsMapper;
-import codedriver.framework.news.dto.NewsHandlerVo;
+import codedriver.framework.message.core.MessageHandlerFactory;
+import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NewsHandlerListApi extends PrivateApiComponentBase {
+public class MessageHandlerListApi extends PrivateApiComponentBase {
 
     @Autowired
-    private NewsMapper newsMapper;
+    private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "news/handler/list";
+        return "message/handler/list";
     }
 
     @Override
@@ -51,24 +51,24 @@ public class NewsHandlerListApi extends PrivateApiComponentBase {
             @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块id")
     })
     @Output({
-            @Param(explode = NewsHandlerVo[].class)
+            @Param(explode = MessageHandlerVo[].class)
     })
     @Description(desc = "查询消息类型列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String moduleId = jsonObj.getString("moduleId");
-        List<NewsHandlerVo> resultList = new ArrayList<>();
-        List<NewsHandlerVo> newsSubscribeList = newsMapper.getNewsSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-        Map<String, NewsHandlerVo> newsSubscribeMap = newsSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
-        for (NewsHandlerVo newsHandlerVo : NewsHandlerFactory.getNewsHandlerVoList()) {
-            if(StringUtils.isBlank(moduleId) || moduleId.equals(newsHandlerVo.getModuleId())){
-                NewsHandlerVo newsHandler = newsHandlerVo.clone();
-                NewsHandlerVo newsSubscribe = newsSubscribeMap.get(newsHandler.getHandler());
-                if (newsSubscribe != null) {
-                    newsHandler.setIsActive(newsSubscribe.getIsActive());
-                    newsHandler.setPopUp(newsSubscribe.getPopUp());
+        List<MessageHandlerVo> resultList = new ArrayList<>();
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
+        for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
+            if(StringUtils.isBlank(moduleId) || moduleId.equals(messageHandlerVo.getModuleId())){
+                MessageHandlerVo messageHandler = messageHandlerVo.clone();
+                MessageHandlerVo messageSubscribe = messageSubscribeMap.get(messageHandler.getHandler());
+                if (messageSubscribe != null) {
+                    messageHandler.setIsActive(messageSubscribe.getIsActive());
+                    messageHandler.setPopUp(messageSubscribe.getPopUp());
                 }
-                resultList.add(newsHandler);
+                resultList.add(messageHandler);
             }
         }
         return resultList;

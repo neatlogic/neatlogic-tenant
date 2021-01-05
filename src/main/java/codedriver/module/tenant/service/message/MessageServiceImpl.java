@@ -1,11 +1,11 @@
-package codedriver.module.tenant.service.news;
+package codedriver.module.tenant.service.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.news.dao.mapper.NewsMapper;
-import codedriver.framework.news.dto.NewsMessageSearchVo;
+import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageSearchVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,16 +23,16 @@ import java.util.List;
  * @Date: 2021/1/5 14:26
  **/
 @Service
-public class NewsServiceImpl implements NewsService {
+public class MessageServiceImpl implements MessageService {
 
     @Autowired
-    private NewsMapper newsMapper;
+    private MessageMapper messageMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private TeamMapper teamMapper;
     @Override
-    public List<Long> pullNews(NewsMessageSearchVo searchVo) {
+    public List<Long> pullMessage(MessageSearchVo searchVo) {
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         searchVo.setRoleUuidList(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
         searchVo.setTeamUuidList(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
@@ -42,9 +42,9 @@ public class NewsServiceImpl implements NewsService {
         Date earliestSendingTime = calendar.getTime();
 
         Date lastPullTime = null;
-        Long maxNewsMessageId = newsMapper.getNewsMessageUserMaxNewsMessageIdByUserUuid(UserContext.get().getUserUuid(true));
+        Long maxNewsMessageId = messageMapper.getMessageUserMaxMessageIdByUserUuid(UserContext.get().getUserUuid(true));
         if (maxNewsMessageId != null) {
-            lastPullTime = newsMapper.getNewsMessageFcdById(maxNewsMessageId);
+            lastPullTime = messageMapper.getMessageFcdById(maxNewsMessageId);
         }
         if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
             searchVo.setStartTime(earliestSendingTime);
@@ -52,16 +52,16 @@ public class NewsServiceImpl implements NewsService {
             searchVo.setStartTime(lastPullTime);
         }
         if(searchVo.getNeedPage()){
-            int rowNum = newsMapper.getNewsMessagePullCount(searchVo);
+            int rowNum = messageMapper.getMessagePullCount(searchVo);
             searchVo.setRowNum(rowNum);
             if(rowNum > 0){
                 searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
-                List<Long> newsMessageIdList = newsMapper.getNewsMessagePullList(searchVo);
+                List<Long> newsMessageIdList = messageMapper.getMessagePullList(searchVo);
                 insertNewsMessageUserList(newsMessageIdList);
                 return newsMessageIdList;
             }
         }else{
-            List<Long> newsMessageIdList = newsMapper.getNewsMessagePullList(searchVo);
+            List<Long> newsMessageIdList = messageMapper.getMessagePullList(searchVo);
             insertNewsMessageUserList(newsMessageIdList);
             return newsMessageIdList;
         }
@@ -77,17 +77,17 @@ public class NewsServiceImpl implements NewsService {
      **/
     private void insertNewsMessageUserList(List<Long> newsMessageIdList) {
         int size = Math.min(1000, newsMessageIdList.size());
-        List<NewsMessageSearchVo> newsMessageSearchVoList = new ArrayList<>(size);
+        List<MessageSearchVo> messageSearchVoList = new ArrayList<>(size);
         String userUuid = UserContext.get().getUserUuid(true);
         for (Long newsMessageId : newsMessageIdList) {
-            newsMessageSearchVoList.add(new NewsMessageSearchVo(userUuid, newsMessageId));
-            if (newsMessageSearchVoList.size() == 1000) {
-                newsMapper.insertNewsMessageUser(newsMessageSearchVoList);
-                newsMessageSearchVoList.clear();
+            messageSearchVoList.add(new MessageSearchVo(userUuid, newsMessageId));
+            if (messageSearchVoList.size() == 1000) {
+                messageMapper.insertMessageUser(messageSearchVoList);
+                messageSearchVoList.clear();
             }
         }
-        if (CollectionUtils.isNotEmpty(newsMessageSearchVoList)) {
-            newsMapper.insertNewsMessageUser(newsMessageSearchVoList);
+        if (CollectionUtils.isNotEmpty(messageSearchVoList)) {
+            messageMapper.insertMessageUser(messageSearchVoList);
         }
     }
 }

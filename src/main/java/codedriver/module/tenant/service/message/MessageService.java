@@ -1,6 +1,6 @@
-package codedriver.module.tenant.service.news;
+package codedriver.module.tenant.service.message;
 
-import codedriver.framework.news.dto.NewsMessageSearchVo;
+import codedriver.framework.message.dto.MessageSearchVo;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * @Author: linbq
  * @Date: 2021/1/5 14:25
  **/
-public interface NewsService {
+public interface MessageService {
     /**
      * @Description: 拉取新消息
      * @Author: linbq
@@ -19,5 +19,6 @@ public interface NewsService {
      * @Params:[searchVo] 拉取条件
      * @Returns:java.util.List<java.lang.Long> 返回新消息id列表
      **/
-    public List<Long> pullNews(NewsMessageSearchVo searchVo);
+    public List<Long> pullMessage(MessageSearchVo searchVo);
+
 }

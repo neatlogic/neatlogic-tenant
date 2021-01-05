@@ -1,12 +1,12 @@
-package codedriver.module.tenant.api.news;
+package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.news.dao.mapper.NewsMapper;
-import codedriver.framework.news.dto.NewsMessageSearchVo;
-import codedriver.framework.news.dto.NewsMessageVo;
+import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageSearchVo;
+import codedriver.framework.message.dto.MessageVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,14 +27,14 @@ import java.util.List;
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class NewsMessageListApi extends PrivateApiComponentBase {
+public class MessageListApi extends PrivateApiComponentBase {
 
     @Autowired
-    private NewsMapper newsMapper;
+    private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "news/message/list";
+        return "message/list";
     }
     @Override
     public String getName() {
@@ -47,29 +47,29 @@ public class NewsMessageListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "newsMessageId", type = ApiParamType.LONG, desc = "起点消息id"),
+            @Param(name = "messageId", type = ApiParamType.LONG, desc = "起点消息id"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
             @Param(name = "needPage", type = ApiParamType.INTEGER, desc = "是否分页")
     })
     @Output({
-            @Param(name = "tbodyList", explode = NewsMessageVo[].class, desc = "消息列表"),
+            @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
-        List<NewsMessageVo> newsMessageVoList = new ArrayList<>();
-        NewsMessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, NewsMessageSearchVo.class);
+        List<MessageVo> messageVoList = new ArrayList<>();
+        MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         if(searchVo.getNeedPage()){
             int pageCount = 0;
-            int rowNum = newsMapper.getNewsMessageCount(searchVo);
+            int rowNum = messageMapper.getMessageCount(searchVo);
             if(rowNum > 0){
                 pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
                 if(searchVo.getCurrentPage() <= pageCount){
-                    newsMessageVoList = newsMapper.getNewsMessageList(searchVo);
+                    messageVoList = messageMapper.getMessageList(searchVo);
                 }
             }
             resultObj.put("currentPage", searchVo.getCurrentPage());
@@ -77,12 +77,12 @@ public class NewsMessageListApi extends PrivateApiComponentBase {
             resultObj.put("pageCount", pageCount);
             resultObj.put("rowNum", rowNum);
         }else{
-            newsMessageVoList = newsMapper.getNewsMessageList(searchVo);
+            messageVoList = messageMapper.getMessageList(searchVo);
         }
-        resultObj.put("tbodyList", newsMessageVoList);
+        resultObj.put("tbodyList", messageVoList);
         int newCount = 0;
-        if(CollectionUtils.isNotEmpty(newsMessageVoList)){
-            newCount = newsMapper.getNewsMessageNewCount(searchVo);
+        if(CollectionUtils.isNotEmpty(messageVoList)){
+            newCount = messageMapper.getMessageNewCount(searchVo);
         }
         resultObj.put("newCount", newCount);
         return resultObj;

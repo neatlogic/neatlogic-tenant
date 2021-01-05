@@ -1,9 +1,9 @@
-package codedriver.module.tenant.api.news;
+package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.news.dao.mapper.NewsMapper;
-import codedriver.framework.news.dto.NewsMessageSearchVo;
+import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -22,14 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class NewsMessageIsReadUpdateApi extends PrivateApiComponentBase {
+public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
-    private NewsMapper newsMapper;
+    private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "news/message/isread/update";
+        return "message/isread/update";
     }
 
     @Override
@@ -43,13 +43,13 @@ public class NewsMessageIsReadUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "newsMessageId", type = ApiParamType.LONG, isRequired = true, desc = "消息id")
+            @Param(name = "messageId", type = ApiParamType.LONG, isRequired = true, desc = "消息id")
     })
     @Description(desc = "更新消息为已读")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long newsMessageId = jsonObj.getLong("newsMessageId");
-        newsMapper.updateNewsMessageUserIsRead(new NewsMessageSearchVo(UserContext.get().getUserUuid(true), newsMessageId));
+        Long messageId = jsonObj.getLong("messageId");
+        messageMapper.updateMessageUserIsRead(new MessageSearchVo(UserContext.get().getUserUuid(true), messageId));
         return null;
     }
 }

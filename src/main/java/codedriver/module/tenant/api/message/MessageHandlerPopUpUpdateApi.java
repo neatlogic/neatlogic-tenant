@@ -1,13 +1,12 @@
-package codedriver.module.tenant.api.news;
+package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.news.constvalue.PopUpType;
-import codedriver.framework.news.core.INewsHandler;
-import codedriver.framework.news.core.NewsHandlerFactory;
-import codedriver.framework.news.dao.mapper.NewsMapper;
-import codedriver.framework.news.dto.NewsHandlerVo;
-import codedriver.framework.news.exception.NewsHandlerNotFoundException;
+import codedriver.framework.message.core.IMessageHandler;
+import codedriver.framework.message.core.MessageHandlerFactory;
+import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageHandlerVo;
+import codedriver.framework.message.exception.MessageHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -29,14 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class NewsHandlerPopUpUpdateApi extends PrivateApiComponentBase {
+public class MessageHandlerPopUpUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
-    private NewsMapper newsMapper;
+    private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "news/handler/popup/update";
+        return "message/handler/popup/update";
     }
 
     @Override
@@ -56,26 +55,26 @@ public class NewsHandlerPopUpUpdateApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String handler = jsonObj.getString("handler");
-        INewsHandler newsHandler = NewsHandlerFactory.getHandler(handler);
+        IMessageHandler newsHandler = MessageHandlerFactory.getHandler(handler);
         if(newsHandler == null){
-            throw new NewsHandlerNotFoundException(handler);
+            throw new MessageHandlerNotFoundException(handler);
         }
         String popUp = jsonObj.getString("popUp");
-        NewsHandlerVo searchVo = new NewsHandlerVo();
+        MessageHandlerVo searchVo = new MessageHandlerVo();
         searchVo.setHandler(handler);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        NewsHandlerVo newsHandlerVo = newsMapper.getNewsSubscribeByUserUuidAndHandler(searchVo);
-        if(newsHandlerVo != null){
-            newsHandlerVo.setPopUp(popUp);
-            newsHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            newsMapper.updateNewsSubscribePopUp(newsHandlerVo);
+        MessageHandlerVo messageHandlerVo = messageMapper.getMessageSubscribeByUserUuidAndHandler(searchVo);
+        if(messageHandlerVo != null){
+            messageHandlerVo.setPopUp(popUp);
+            messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
+            messageMapper.updateSubscribePopUp(messageHandlerVo);
         }else{
-            newsHandlerVo = new NewsHandlerVo();
-            newsHandlerVo.setHandler(handler);
-            newsHandlerVo.setIsActive(1);
-            newsHandlerVo.setPopUp(popUp);
-            newsHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
-            newsMapper.insertNewsSubscribe(newsHandlerVo);
+            messageHandlerVo = new MessageHandlerVo();
+            messageHandlerVo.setHandler(handler);
+            messageHandlerVo.setIsActive(1);
+            messageHandlerVo.setPopUp(popUp);
+            messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
+            messageMapper.insertSubscribe(messageHandlerVo);
         }
         return null;
     }
