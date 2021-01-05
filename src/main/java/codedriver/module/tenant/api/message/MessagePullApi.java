@@ -67,13 +67,13 @@ public class MessagePullApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         resultObj.put("tbodyList", new ArrayList<>());
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
-        Map<String, MessageHandlerVo> newsSubscribeMap = new HashMap<>();
+        Map<String, MessageHandlerVo> messageSubscribeMap = new HashMap<>();
         List<String> unActiveHandlerList = new ArrayList<>();
-        List<MessageHandlerVo> newsSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-        for (MessageHandlerVo newsSubscribe : newsSubscribeList) {
-            newsSubscribeMap.put(newsSubscribe.getHandler(), newsSubscribe);
-            if(newsSubscribe.getIsActive() == 0){
-                unActiveHandlerList.add(newsSubscribe.getHandler());
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        for (MessageHandlerVo messageSubscribe : messageSubscribeList) {
+            messageSubscribeMap.put(messageSubscribe.getHandler(), messageSubscribe);
+            if(messageSubscribe.getIsActive() == 0){
+                unActiveHandlerList.add(messageSubscribe.getHandler());
             }
         }
         if(CollectionUtils.isNotEmpty(unActiveHandlerList)){
@@ -81,16 +81,16 @@ public class MessagePullApi extends PrivateApiComponentBase {
             handlerList.removeAll(unActiveHandlerList);
             searchVo.setHandlerList(handlerList);
         }
-        List<Long> newsMessageIdList = messageService.pullMessage(searchVo);
+        List<Long> messageMessageIdList = messageService.pullMessage(searchVo);
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("rowNum", searchVo.getRowNum());
         resultObj.put("pageCount", searchVo.getPageCount());
-        if(CollectionUtils.isNotEmpty(newsMessageIdList)){
-            List<MessageVo> messageVoList = messageMapper.getMessageListByIdList(newsMessageIdList);
+        if(CollectionUtils.isNotEmpty(messageMessageIdList)){
+            List<MessageVo> messageVoList = messageMapper.getMessageListByIdList(messageMessageIdList);
             for(MessageVo messageVo : messageVoList){
                 messageVo.setIsRead(0);
-                MessageHandlerVo messageHandlerVo = newsSubscribeMap.get(messageVo.getHandler());
+                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
                 if(messageHandlerVo != null){
                     messageVo.setPopUp(messageHandlerVo.getPopUp());
                 }else{

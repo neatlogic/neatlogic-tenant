@@ -55,8 +55,8 @@ public class MessageHandlerPopUpUpdateApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String handler = jsonObj.getString("handler");
-        IMessageHandler newsHandler = MessageHandlerFactory.getHandler(handler);
-        if(newsHandler == null){
+        IMessageHandler messageHandler = MessageHandlerFactory.getHandler(handler);
+        if(messageHandler == null){
             throw new MessageHandlerNotFoundException(handler);
         }
         String popUp = jsonObj.getString("popUp");
