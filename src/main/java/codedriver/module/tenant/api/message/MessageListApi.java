@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Title: NewsMessageListApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageListApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 查询消息列表接口
  * @Author: linbq
  * @Date: 2020/12/31 16:17

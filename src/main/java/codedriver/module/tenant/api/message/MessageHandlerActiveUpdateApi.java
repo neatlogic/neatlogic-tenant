@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Title: NewsHandlerActiveUpdateApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageHandlerActiveUpdateApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 消息类型订阅接口
  * @Author: linbq
  * @Date: 2020/12/31 14:54

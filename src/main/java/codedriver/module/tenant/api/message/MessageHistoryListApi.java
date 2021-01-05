@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Title: NewsMessageHistoryListApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageHistoryListApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 查询历史消息列表接口
  * @Author: linbq
  * @Date: 2021/1/4 11:05

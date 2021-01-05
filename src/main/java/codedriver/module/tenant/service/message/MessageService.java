@@ -5,8 +5,8 @@ import codedriver.framework.message.dto.MessageSearchVo;
 import java.util.List;
 
 /**
- * @Title: NewsService
- * @Package codedriver.module.tenant.service.news
+ * @Title: MessageService
+ * @Package codedriver.module.tenant.service.message
  * @Description: 消息通知Service接口
  * @Author: linbq
  * @Date: 2021/1/5 14:25

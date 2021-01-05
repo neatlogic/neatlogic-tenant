@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @Title: NewsHandlerPopUpUpdateApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageHandlerPopUpUpdateApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 更新消息类型桌面推送方式接口
  * @Author: linbq
  * @Date: 2020/12/31 14:55

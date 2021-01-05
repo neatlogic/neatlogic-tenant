@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @Title: NewsMessageIsDeleteUpdateApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageIsDeleteUpdateApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 更新消息为已删除接口
  * @Author: linbq
  * @Date: 2021/1/4 23:13

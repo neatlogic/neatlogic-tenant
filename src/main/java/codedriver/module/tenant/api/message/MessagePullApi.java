@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Title: NewsMessagePullApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessagePullApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 拉取新消息列表接口
  * @Author: linbq
  * @Date: 2021/1/4 15:13

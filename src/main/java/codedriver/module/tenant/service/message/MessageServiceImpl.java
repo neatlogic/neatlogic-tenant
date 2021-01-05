@@ -16,8 +16,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Title: NewsServiceImpl
- * @Package codedriver.module.tenant.service.news
+ * @Title: MessageServiceImpl
+ * @Package codedriver.module.tenant.service.message
  * @Description: 消息通知Service实现类
  * @Author: linbq
  * @Date: 2021/1/5 14:26

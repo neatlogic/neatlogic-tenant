@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @Title: NewHandlerListApi
- * @Package codedriver.module.tenant.api.news
+ * @Title: MessageHandlerListApi
+ * @Package codedriver.module.tenant.api.message
  * @Description: 查询消息类型列表接口
  * @Author: linbq
  * @Date: 2020/12/30 17:38
