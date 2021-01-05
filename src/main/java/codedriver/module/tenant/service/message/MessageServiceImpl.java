@@ -42,9 +42,9 @@ public class MessageServiceImpl implements MessageService {
         Date earliestSendingTime = calendar.getTime();
 
         Date lastPullTime = null;
-        Long maxNewsMessageId = messageMapper.getMessageUserMaxMessageIdByUserUuid(UserContext.get().getUserUuid(true));
-        if (maxNewsMessageId != null) {
-            lastPullTime = messageMapper.getMessageFcdById(maxNewsMessageId);
+        Long maxMessageId = messageMapper.getMessageUserMaxMessageIdByUserUuid(UserContext.get().getUserUuid(true));
+        if (maxMessageId != null) {
+            lastPullTime = messageMapper.getMessageFcdById(maxMessageId);
         }
         if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
             searchVo.setStartTime(earliestSendingTime);
@@ -57,12 +57,12 @@ public class MessageServiceImpl implements MessageService {
             if(rowNum > 0){
                 searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
                 List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
-                insertNewsMessageUserList(messageIdList);
+                insertMessageUserList(messageIdList);
                 return messageIdList;
             }
         }else{
             List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
-            insertNewsMessageUserList(messageIdList);
+            insertMessageUserList(messageIdList);
             return messageIdList;
         }
         return null;
@@ -75,7 +75,7 @@ public class MessageServiceImpl implements MessageService {
      * @Params:[messageIdList]
      * @Returns:void
      **/
-    private void insertNewsMessageUserList(List<Long> messageIdList) {
+    private void insertMessageUserList(List<Long> messageIdList) {
         int size = Math.min(1000, messageIdList.size());
         List<MessageSearchVo> messageSearchVoList = new ArrayList<>(size);
         String userUuid = UserContext.get().getUserUuid(true);
