@@ -49,7 +49,7 @@ public class MessageServiceImpl implements MessageService {
         if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
             Long minId = messageMapper.getMessageMinIdByGreaterThanFcd(earliestSendingTime);
             if(minId == null){
-                minId = 0L;
+                return null;
             }
             searchVo.setMessageId(minId);
         } else {
