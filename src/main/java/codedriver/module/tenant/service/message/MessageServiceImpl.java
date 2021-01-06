@@ -47,9 +47,13 @@ public class MessageServiceImpl implements MessageService {
             lastPullTime = messageMapper.getMessageFcdById(maxMessageId);
         }
         if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
-            searchVo.setStartTime(earliestSendingTime);
+            Long minId = messageMapper.getMessageMinIdByGreaterThanFcd(earliestSendingTime);
+            if(minId == null){
+                minId = 0L;
+            }
+            searchVo.setMessageId(minId);
         } else {
-            searchVo.setStartTime(lastPullTime);
+            searchVo.setMessageId(maxMessageId);
         }
         if(searchVo.getNeedPage()){
             int rowNum = messageMapper.getMessagePullCount(searchVo);
