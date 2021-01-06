@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.message;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
@@ -30,8 +31,7 @@ import java.util.stream.Collectors;
  * @Date: 2021/1/4 15:13
  **/
 @Service
-@OperationType(type = OperationTypeEnum.UPDATE)
-@Transactional
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MessagePullApi extends PrivateApiComponentBase {
 
     @Autowired
@@ -55,6 +55,7 @@ public class MessagePullApi extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "messageId", type = ApiParamType.LONG, desc = "起点消息id"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
@@ -65,39 +66,52 @@ public class MessagePullApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
-        resultObj.put("tbodyList", new ArrayList<>());
+        List<MessageVo> messageVoList = new ArrayList<>();
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
-        Map<String, MessageHandlerVo> messageSubscribeMap = new HashMap<>();
-        List<String> unActiveHandlerList = new ArrayList<>();
-        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-        for (MessageHandlerVo messageSubscribe : messageSubscribeList) {
-            messageSubscribeMap.put(messageSubscribe.getHandler(), messageSubscribe);
-            if(messageSubscribe.getIsActive() == 0){
-                unActiveHandlerList.add(messageSubscribe.getHandler());
-            }
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        int pageCount = 0;
+        int rowNum = messageMapper.getMessageNewCount(searchVo);
+        if(rowNum > 0){
+            pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+            messageVoList = messageMapper.getMessageNewList(searchVo);
         }
-        if(CollectionUtils.isNotEmpty(unActiveHandlerList)){
-            List<String> handlerList = MessageHandlerFactory.getMessageHandlerVoList().stream().map(MessageHandlerVo::getHandler).collect(Collectors.toList());
-            handlerList.removeAll(unActiveHandlerList);
-            searchVo.setHandlerList(handlerList);
-        }
-        List<Long> messageMessageIdList = messageService.pullMessage(searchVo);
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
-        resultObj.put("rowNum", searchVo.getRowNum());
-        resultObj.put("pageCount", searchVo.getPageCount());
-        if(CollectionUtils.isNotEmpty(messageMessageIdList)){
-            List<MessageVo> messageVoList = messageMapper.getMessageListByIdList(messageMessageIdList);
-            for(MessageVo messageVo : messageVoList){
-                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
-                if(messageHandlerVo != null){
-                    messageVo.setPopUp(messageHandlerVo.getPopUp());
-                }else{
-                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
-                }
-            }
-            resultObj.put("tbodyList", messageVoList);
-        }
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
+        resultObj.put("tbodyList", messageVoList);
+//        resultObj.put("tbodyList", new ArrayList<>());
+//        Map<String, MessageHandlerVo> messageSubscribeMap = new HashMap<>();
+//        List<String> unActiveHandlerList = new ArrayList<>();
+//        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+//        for (MessageHandlerVo messageSubscribe : messageSubscribeList) {
+//            messageSubscribeMap.put(messageSubscribe.getHandler(), messageSubscribe);
+//            if(messageSubscribe.getIsActive() == 0){
+//                unActiveHandlerList.add(messageSubscribe.getHandler());
+//            }
+//        }
+//        if(CollectionUtils.isNotEmpty(unActiveHandlerList)){
+//            List<String> handlerList = MessageHandlerFactory.getMessageHandlerVoList().stream().map(MessageHandlerVo::getHandler).collect(Collectors.toList());
+//            handlerList.removeAll(unActiveHandlerList);
+//            searchVo.setHandlerList(handlerList);
+//        }
+//        List<Long> messageMessageIdList = messageService.pullMessage(searchVo);
+//        resultObj.put("currentPage", searchVo.getCurrentPage());
+//        resultObj.put("pageSize", searchVo.getPageSize());
+//        resultObj.put("rowNum", searchVo.getRowNum());
+//        resultObj.put("pageCount", searchVo.getPageCount());
+//        if(CollectionUtils.isNotEmpty(messageMessageIdList)){
+//            List<MessageVo> messageVoList = messageMapper.getMessageListByIdList(messageMessageIdList);
+//            for(MessageVo messageVo : messageVoList){
+//                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
+//                if(messageHandlerVo != null){
+//                    messageVo.setPopUp(messageHandlerVo.getPopUp());
+//                }else{
+//                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
+//                }
+//            }
+//            resultObj.put("tbodyList", messageVoList);
+//        }
         return resultObj;
     }
 }
