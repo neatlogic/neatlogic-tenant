@@ -204,7 +204,12 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             }
             //TODO 根据操作类型筛选
             if(StringUtils.isNotBlank(apiAuditVo.getOperationType())){
-                Class<?> apiClass = Class.forName(api.getHandler());
+                Class<?> apiClass = null;
+                try{
+                    apiClass = Class.forName(api.getHandler());
+                }catch (ClassNotFoundException ex){
+                    continue;
+                }
                 OperationType annotation = apiClass.getAnnotation(OperationType.class);
                 if(annotation == null || !apiAuditVo.getOperationType().equals(annotation.type().getValue())){
                     continue;
@@ -224,7 +229,12 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                     if (vo.getToken().equals(api.getToken())) {
                         vo.setApiName(api.getName());
                         vo.setModuleGroup(api.getModuleGroup());
-                        Class<?> apiClass = Class.forName(api.getHandler());
+                        Class<?> apiClass = null;
+                        try{
+                            apiClass = Class.forName(api.getHandler());
+                        }catch (ClassNotFoundException ex){
+                            break;
+                        }
                         OperationType annotation = apiClass.getAnnotation(OperationType.class);
                         if (annotation != null) {
                             vo.setOperationType(annotation.type().getValue());
