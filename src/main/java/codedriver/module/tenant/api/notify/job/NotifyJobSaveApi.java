@@ -66,7 +66,7 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 			@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "插件"),
 			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "插件自带参数"),
 			@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知方式插件"),
-			@Param(name = "toList", type = ApiParamType.JSONARRAY, desc = "收件人列表，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\",\"processUserType#major\",\"custom#123@qq.com\"]"),
+			@Param(name = "toList", type = ApiParamType.JSONARRAY, desc = "收件人列表，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\",\"processUserType#major\",\"email#123@qq.com\"]"),
 			@Param(name = "ccList", type = ApiParamType.JSONARRAY,desc = "抄送人列表，格式同收件人"),
 			@Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1：激活)"),
