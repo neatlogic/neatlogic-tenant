@@ -10,10 +10,7 @@ import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.exception.MessageHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.message.MessageService;
 import com.alibaba.fastjson.JSONObject;
@@ -59,6 +56,9 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "消息类型处理器全类名")
     })
+    @Output({
+            @Param(name = "Return", type = ApiParamType.INTEGER, desc = "是否激活")
+    })
     @Description(desc = "消息类型订阅")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -77,6 +77,7 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
             if(messageHandlerVo.getIsActive() == 1){
                 pullMessage(handler);
             }
+            return messageHandlerVo.getIsActive() == 0 ? 1 : 0;
         } else {
             messageHandlerVo = new MessageHandlerVo();
             messageHandlerVo.setHandler(handler);
@@ -85,8 +86,8 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.insertMessageSubscribe(messageHandlerVo);
             pullMessage(handler);
+            return 0;
         }
-        return null;
     }
 
     private void pullMessage(String handler) {

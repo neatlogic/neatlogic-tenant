@@ -20,21 +20,21 @@ import org.springframework.transaction.annotation.Transactional;
  * @Date: 2021/1/4 23:13
  **/
 @Service
-@OperationType(type = OperationTypeEnum.UPDATE)
+@OperationType(type = OperationTypeEnum.DELETE)
 @Transactional
-public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
+public class MessageDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "message/isdelete/update";
+        return "message/delete";
     }
 
     @Override
     public String getName() {
-        return "更新消息为已删除";
+        return "删除消息";
     }
 
     @Override
@@ -42,13 +42,13 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-            @Param(name = "messageId", type = ApiParamType.LONG, desc = "消息id")
+            @Param(name = "messageId", type = ApiParamType.LONG, isRequired = true, desc = "消息id")
     })
-    @Description(desc = "更新消息为已删除")
+    @Description(desc = "删除消息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long messageId = jsonObj.getLong("messageId");
-        messageMapper.updateMessageUserIsDelete(new MessageSearchVo(UserContext.get().getUserUuid(true), messageId));
+        messageMapper.deleteMessageUser(new MessageSearchVo(UserContext.get().getUserUuid(true), messageId));
         return null;
     }
 }

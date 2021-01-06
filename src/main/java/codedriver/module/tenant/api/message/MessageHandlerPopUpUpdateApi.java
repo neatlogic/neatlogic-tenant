@@ -8,10 +8,7 @@ import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.exception.MessageHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +48,9 @@ public class MessageHandlerPopUpUpdateApi extends PrivateApiComponentBase {
             @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "消息类型处理器全类名"),
             @Param(name = "popUp", type = ApiParamType.ENUM, rule = "shortshow,longshow,close", isRequired = true, desc = "桌面推送方式")
     })
+    @Output({
+            @Param(name = "Return", type = ApiParamType.STRING, desc = "桌面推送方式")
+    })
     @Description(desc = "更新消息类型桌面推送方式")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -76,6 +76,6 @@ public class MessageHandlerPopUpUpdateApi extends PrivateApiComponentBase {
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.insertMessageSubscribe(messageHandlerVo);
         }
-        return null;
+        return popUp;
     }
 }

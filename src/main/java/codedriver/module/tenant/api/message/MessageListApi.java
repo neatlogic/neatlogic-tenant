@@ -80,11 +80,6 @@ public class MessageListApi extends PrivateApiComponentBase {
             messageVoList = messageMapper.getMessageList(searchVo);
         }
         resultObj.put("tbodyList", messageVoList);
-        int newCount = 0;
-        if(CollectionUtils.isNotEmpty(messageVoList)){
-            newCount = messageMapper.getMessageNewCount(searchVo);
-        }
-        resultObj.put("newCount", newCount);
         return resultObj;
     }
 }

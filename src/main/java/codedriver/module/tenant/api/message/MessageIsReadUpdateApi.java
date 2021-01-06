@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @Title: MessageIsReadUpdateApi
  * @Package codedriver.module.tenant.api.message
@@ -43,13 +45,13 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "messageId", type = ApiParamType.LONG, isRequired = true, desc = "消息id")
+            @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表")
     })
     @Description(desc = "更新消息为已读")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long messageId = jsonObj.getLong("messageId");
-        messageMapper.updateMessageUserIsRead(new MessageSearchVo(UserContext.get().getUserUuid(true), messageId));
+        List<Long> messageIdList = (List<Long>)jsonObj.get("messageIdList");
+        messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messageIdList);
         return null;
     }
 }
