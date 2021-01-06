@@ -25,52 +25,53 @@ import java.util.List;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    @Autowired
-    private MessageMapper messageMapper;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private TeamMapper teamMapper;
-    @Override
-    public List<Long> pullMessage(MessageSearchVo searchVo) {
-        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        searchVo.setRoleUuidList(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-        searchVo.setTeamUuidList(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - 7);
-        Date earliestSendingTime = calendar.getTime();
-
-        Date lastPullTime = null;
-        Long maxMessageId = messageMapper.getMessageUserMaxMessageIdByUserUuid(UserContext.get().getUserUuid(true));
-        if (maxMessageId != null) {
-            lastPullTime = messageMapper.getMessageFcdById(maxMessageId);
-        }
-        if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
-            Long minId = messageMapper.getMessageMinIdByGreaterThanFcd(earliestSendingTime);
-            if(minId == null){
-                return null;
-            }
-            searchVo.setMessageId(minId);
-        } else {
-            searchVo.setMessageId(maxMessageId);
-        }
-        if(searchVo.getNeedPage()){
-            int rowNum = messageMapper.getMessagePullCount(searchVo);
-            searchVo.setRowNum(rowNum);
-            if(rowNum > 0){
-                searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
-                List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
-                insertMessageUserList(messageIdList);
-                return messageIdList;
-            }
-        }else{
-            List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
-            insertMessageUserList(messageIdList);
-            return messageIdList;
-        }
-        return null;
-    }
+//    @Autowired
+//    private MessageMapper messageMapper;
+//    @Autowired
+//    private UserMapper userMapper;
+//    @Autowired
+//    private TeamMapper teamMapper;
+//    @Override
+//    public List<Long> pullMessage(MessageSearchVo searchVo) {
+//        searchVo.setPageSize(1000);
+//        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+//        searchVo.setRoleUuidList(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+//        searchVo.setTeamUuidList(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+//
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - 7);
+//        Date earliestSendingTime = calendar.getTime();
+//
+//        Date lastPullTime = null;
+//        Long maxMessageId = messageMapper.getMessageUserMaxMessageIdByUserUuid(UserContext.get().getUserUuid(true));
+//        if (maxMessageId != null) {
+//            lastPullTime = messageMapper.getMessageFcdById(maxMessageId);
+//        }
+//        if (lastPullTime == null || lastPullTime.before(earliestSendingTime)) {
+//            Long minId = messageMapper.getMessageMinIdByGreaterThanFcd(earliestSendingTime);
+//            if(minId == null){
+//                return null;
+//            }
+//            searchVo.setMessageId(minId);
+//        } else {
+//            searchVo.setMessageId(maxMessageId);
+//        }
+//        if(searchVo.getNeedPage()){
+//            int rowNum = messageMapper.getMessagePullCount(searchVo);
+//            searchVo.setRowNum(rowNum);
+//            if(rowNum > 0){
+//                searchVo.setPageCount(PageUtil.getPageCount(rowNum, searchVo.getPageSize()));
+//                List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
+//                insertMessageUserList(messageIdList);
+//                return messageIdList;
+//            }
+//        }else{
+//            List<Long> messageIdList = messageMapper.getMessagePullList(searchVo);
+//            insertMessageUserList(messageIdList);
+//            return messageIdList;
+//        }
+//        return null;
+//    }
 
     /**
      * @Description: 保存用户拉取到的新消息id
@@ -79,19 +80,19 @@ public class MessageServiceImpl implements MessageService {
      * @Params:[messageIdList]
      * @Returns:void
      **/
-    private void insertMessageUserList(List<Long> messageIdList) {
-        int size = Math.min(1000, messageIdList.size());
-        List<MessageSearchVo> messageSearchVoList = new ArrayList<>(size);
-        String userUuid = UserContext.get().getUserUuid(true);
-        for (Long messageId : messageIdList) {
-            messageSearchVoList.add(new MessageSearchVo(userUuid, messageId));
-            if (messageSearchVoList.size() == 1000) {
-                messageMapper.insertMessageUser(messageSearchVoList);
-                messageSearchVoList.clear();
-            }
-        }
-        if (CollectionUtils.isNotEmpty(messageSearchVoList)) {
-            messageMapper.insertMessageUser(messageSearchVoList);
-        }
-    }
+//    private void insertMessageUserList(List<Long> messageIdList) {
+//        int size = Math.min(1000, messageIdList.size());
+//        List<MessageSearchVo> messageSearchVoList = new ArrayList<>(size);
+//        String userUuid = UserContext.get().getUserUuid(true);
+//        for (Long messageId : messageIdList) {
+//            messageSearchVoList.add(new MessageSearchVo(userUuid, messageId));
+//            if (messageSearchVoList.size() == 1000) {
+//                messageMapper.insertMessageUser(messageSearchVoList);
+//                messageSearchVoList.clear();
+//            }
+//        }
+//        if (CollectionUtils.isNotEmpty(messageSearchVoList)) {
+//            messageMapper.insertMessageUser(messageSearchVoList);
+//        }
+//    }
 }

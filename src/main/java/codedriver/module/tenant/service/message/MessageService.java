@@ -19,6 +19,6 @@ public interface MessageService {
      * @Params:[searchVo] 拉取条件
      * @Returns:java.util.List<java.lang.Long> 返回新消息id列表
      **/
-    public List<Long> pullMessage(MessageSearchVo searchVo);
+//    public List<Long> pullMessage(MessageSearchVo searchVo);
 
 }

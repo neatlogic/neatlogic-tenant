@@ -74,9 +74,9 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
         if (messageHandlerVo != null) {
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.updateMessageSubscribeActive(messageHandlerVo);
-            if(messageHandlerVo.getIsActive() == 1){
-                pullMessage(handler);
-            }
+//            if(messageHandlerVo.getIsActive() == 1){
+//                pullMessage(handler);
+//            }
             return messageHandlerVo.getIsActive() == 0 ? 1 : 0;
         } else {
             messageHandlerVo = new MessageHandlerVo();
@@ -85,17 +85,17 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
             messageHandlerVo.setPopUp(PopUpType.CLOSE.getValue());
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.insertMessageSubscribe(messageHandlerVo);
-            pullMessage(handler);
+//            pullMessage(handler);
             return 0;
         }
     }
 
-    private void pullMessage(String handler) {
-        MessageSearchVo messageSearchVo = new MessageSearchVo();
-        messageSearchVo.setNeedPage(false);
-        List<String> handlerList = new ArrayList<>();
-        handlerList.add(handler);
-        messageSearchVo.setHandlerList(handlerList);
-        messageService.pullMessage(messageSearchVo);
-    }
+//    private void pullMessage(String handler) {
+//        MessageSearchVo messageSearchVo = new MessageSearchVo();
+//        messageSearchVo.setNeedPage(false);
+//        List<String> handlerList = new ArrayList<>();
+//        handlerList.add(handler);
+//        messageSearchVo.setHandlerList(handlerList);
+//        messageService.pullMessage(messageSearchVo);
+//    }
 }

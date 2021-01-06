@@ -74,44 +74,22 @@ public class MessagePullApi extends PrivateApiComponentBase {
         if(rowNum > 0){
             pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
             messageVoList = messageMapper.getMessageNewList(searchVo);
+            List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+            Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
+            for (MessageVo messageVo : messageVoList) {
+                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
+                if (messageHandlerVo != null) {
+                    messageVo.setPopUp(messageHandlerVo.getPopUp());
+                } else {
+                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
+                }
+            }
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
-//        resultObj.put("tbodyList", new ArrayList<>());
-//        Map<String, MessageHandlerVo> messageSubscribeMap = new HashMap<>();
-//        List<String> unActiveHandlerList = new ArrayList<>();
-//        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-//        for (MessageHandlerVo messageSubscribe : messageSubscribeList) {
-//            messageSubscribeMap.put(messageSubscribe.getHandler(), messageSubscribe);
-//            if(messageSubscribe.getIsActive() == 0){
-//                unActiveHandlerList.add(messageSubscribe.getHandler());
-//            }
-//        }
-//        if(CollectionUtils.isNotEmpty(unActiveHandlerList)){
-//            List<String> handlerList = MessageHandlerFactory.getMessageHandlerVoList().stream().map(MessageHandlerVo::getHandler).collect(Collectors.toList());
-//            handlerList.removeAll(unActiveHandlerList);
-//            searchVo.setHandlerList(handlerList);
-//        }
-//        List<Long> messageMessageIdList = messageService.pullMessage(searchVo);
-//        resultObj.put("currentPage", searchVo.getCurrentPage());
-//        resultObj.put("pageSize", searchVo.getPageSize());
-//        resultObj.put("rowNum", searchVo.getRowNum());
-//        resultObj.put("pageCount", searchVo.getPageCount());
-//        if(CollectionUtils.isNotEmpty(messageMessageIdList)){
-//            List<MessageVo> messageVoList = messageMapper.getMessageListByIdList(messageMessageIdList);
-//            for(MessageVo messageVo : messageVoList){
-//                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
-//                if(messageHandlerVo != null){
-//                    messageVo.setPopUp(messageHandlerVo.getPopUp());
-//                }else{
-//                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
-//                }
-//            }
-//            resultObj.put("tbodyList", messageVoList);
-//        }
         return resultObj;
     }
 }
