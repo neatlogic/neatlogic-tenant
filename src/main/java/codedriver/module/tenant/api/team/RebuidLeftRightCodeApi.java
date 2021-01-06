@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.module.tenant.auth.label.TEAM_MODIFY;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
