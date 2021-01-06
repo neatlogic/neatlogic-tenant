@@ -1,27 +1,26 @@
 package codedriver.module.tenant.api.auth;
 
-import java.util.*;
-
-import codedriver.framework.dto.UserDataVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
+import codedriver.framework.auth.init.MaintenanceMode;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.UserAuthVo;
+import codedriver.framework.dto.UserDataVo;
+import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * @program: codedriver
@@ -68,7 +67,13 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         Set<String> authGroupSet = new HashSet<String>();
         Set<String> authSet = new HashSet<String>();
         //获取用户权限
-        List<UserAuthVo>  userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
+        List<UserAuthVo>  userAuthList = null;
+        //维护模式下 获取厂商维护人员信息
+        if (Config.IS_MAINTENANCE_MODE() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
+            userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
+        } else {
+            userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
+        }
         for(UserAuthVo userAuth:userAuthList) {
         	authGroupSet.add(userAuth.getAuthGroup());
         	authSet.add(userAuth.getAuth());

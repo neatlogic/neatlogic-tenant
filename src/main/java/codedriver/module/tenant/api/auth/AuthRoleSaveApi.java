@@ -12,7 +12,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import codedriver.module.tenant.auth.label.AUTHORITY_MODIFY;
+import codedriver.framework.auth.label.AUTHORITY_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 

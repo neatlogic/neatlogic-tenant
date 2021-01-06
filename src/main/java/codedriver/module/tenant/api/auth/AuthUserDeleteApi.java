@@ -5,7 +5,7 @@ import java.util.List;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
-import codedriver.module.tenant.auth.label.AUTHORITY_MODIFY;
+import codedriver.framework.auth.label.AUTHORITY_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

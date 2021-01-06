@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,11 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
@@ -37,7 +44,18 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 	@Description(desc = "通知策略分类列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		return NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList();
+		List<ValueTextVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
+		Iterator<ValueTextVo> iterator = list.iterator();
+		while (iterator.hasNext()){
+			ValueTextVo next = iterator.next();
+			INotifyPolicyHandler handler = NotifyPolicyHandlerFactory.getHandler(next.getValue().toString());
+			/** 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
+			if(!AuthActionChecker.check(handler.getAuthName())){
+				iterator.remove();
+			}
+		}
+		list.add(new ValueTextVo("定时任务","定时任务"));
+		return list;
 	}
 
 }

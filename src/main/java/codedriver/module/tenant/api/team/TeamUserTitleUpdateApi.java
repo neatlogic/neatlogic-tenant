@@ -5,7 +5,7 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import codedriver.module.tenant.auth.label.TEAM_MODIFY;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
