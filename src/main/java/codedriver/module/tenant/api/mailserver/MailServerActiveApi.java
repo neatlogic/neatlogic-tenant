@@ -17,7 +17,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
-@Service
+//@Service
 @Transactional
 @AuthAction(action = MAIL_SERVER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -51,8 +51,8 @@ public class MailServerActiveApi extends PrivateApiComponentBase {
 		if(mailServerMapper.checkMailServerIsExists(uuid) == 0) {
 			throw new MailServerNotFoundException(uuid);
 		}
-		mailServerMapper.resetAllMailServerStatus();
-		mailServerMapper.activeMailServerByUuid(uuid);
+//		mailServerMapper.resetAllMailServerStatus();
+//		mailServerMapper.activeMailServerByUuid(uuid);
 		return null;
 	}
 

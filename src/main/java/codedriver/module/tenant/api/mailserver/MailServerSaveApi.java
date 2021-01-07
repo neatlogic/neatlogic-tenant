@@ -70,7 +70,6 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 				throw new MailServerNotFoundException(uuid);
 			}
 		}
-		mailServerVo.setIsActive(1);
 		mailServerMapper.replaceMailServer(mailServerVo);		
 		return mailServerVo.getUuid();
 	}
