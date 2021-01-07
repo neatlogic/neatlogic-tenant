@@ -12,7 +12,6 @@ import codedriver.framework.message.exception.MessageHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.service.message.MessageService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,8 @@ import java.util.List;
  * @Description: 消息类型订阅接口
  * @Author: linbq
  * @Date: 2020/12/31 14:54
+ * Copyright(c) 2020 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -35,8 +36,6 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private MessageMapper messageMapper;
-    @Autowired
-    private MessageService messageService;
 
     @Override
     public String getToken() {
@@ -74,9 +73,6 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
         if (messageHandlerVo != null) {
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.updateMessageSubscribeActive(messageHandlerVo);
-//            if(messageHandlerVo.getIsActive() == 1){
-//                pullMessage(handler);
-//            }
             return messageHandlerVo.getIsActive() == 0 ? 1 : 0;
         } else {
             messageHandlerVo = new MessageHandlerVo();
@@ -85,17 +81,7 @@ public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {
             messageHandlerVo.setPopUp(PopUpType.CLOSE.getValue());
             messageHandlerVo.setUserUuid(UserContext.get().getUserUuid(true));
             messageMapper.insertMessageSubscribe(messageHandlerVo);
-//            pullMessage(handler);
             return 0;
         }
     }
-
-//    private void pullMessage(String handler) {
-//        MessageSearchVo messageSearchVo = new MessageSearchVo();
-//        messageSearchVo.setNeedPage(false);
-//        List<String> handlerList = new ArrayList<>();
-//        handlerList.add(handler);
-//        messageSearchVo.setHandlerList(handlerList);
-//        messageService.pullMessage(messageSearchVo);
-//    }
 }

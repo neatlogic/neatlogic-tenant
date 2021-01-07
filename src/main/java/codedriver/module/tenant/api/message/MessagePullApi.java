@@ -13,7 +13,6 @@ import codedriver.framework.message.dto.MessageVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.service.message.MessageService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,8 @@ import java.util.stream.Collectors;
  * @Description: 拉取新消息列表接口
  * @Author: linbq
  * @Date: 2021/1/4 15:13
+ * Copyright(c) 2020 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -36,8 +37,6 @@ public class MessagePullApi extends PrivateApiComponentBase {
 
     @Autowired
     private MessageMapper messageMapper;
-    @Autowired
-    private MessageService messageService;
 
     @Override
     public String getToken() {

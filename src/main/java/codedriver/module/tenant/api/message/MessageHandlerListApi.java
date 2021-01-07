@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
  * @Description: 查询消息类型列表接口
  * @Author: linbq
  * @Date: 2020/12/30 17:38
+ * Copyright(c) 2020 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)

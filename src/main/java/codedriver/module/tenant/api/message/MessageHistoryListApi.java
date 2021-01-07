@@ -28,6 +28,8 @@ import java.util.List;
  * @Description: 查询历史消息列表接口
  * @Author: linbq
  * @Date: 2021/1/4 11:05
+ * Copyright(c) 2020 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
