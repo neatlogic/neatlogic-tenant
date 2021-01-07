@@ -81,7 +81,11 @@ public class UserGetApi extends PrivateApiComponentBase {
 			}
 			userJson.put("roleUuidList", roleUuidList);
 		}
-
+		//告诉前端是否为维护模式
+		userJson.put("isMaintenanceMode",0);
+		if (Config.IS_MAINTENANCE_MODE()){
+			userJson.put("isMaintenanceMode",1);
+		}
 		return userJson;
 	}
 }

@@ -20,10 +20,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
 import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +63,7 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 			@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "插件"),
 			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "插件自带参数"),
 			@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知方式插件"),
-			@Param(name = "toList", type = ApiParamType.JSONARRAY, desc = "收件人列表，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\",\"processUserType#major\",\"custom#123@qq.com\"]"),
+			@Param(name = "toList", type = ApiParamType.JSONARRAY, desc = "收件人列表，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\",\"processUserType#major\",\"email#123@qq.com\"]"),
 			@Param(name = "ccList", type = ApiParamType.JSONARRAY,desc = "抄送人列表，格式同收件人"),
 			@Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"),
 			@Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1：激活)"),
@@ -91,14 +88,16 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 			throw new NotifyJobNameRepeatException(job.getName());
 		}
 
-		/**
-		 * 组装接收人与抄送人
-		 */
-		JSONArray toArray = jsonObj.getJSONArray("toList");
-		JSONArray ccArray = jsonObj.getJSONArray("ccList");
+		Object messageConfig = JSONPath.read(jsonObj.toJSONString(), "config.messageConfig");
 		List<NotifyJobReceiverVo> toVoList = new ArrayList<>();
 		List<NotifyJobReceiverVo> ccVoList = new ArrayList<>();
-		getReceiverList(job, toArray,ccArray, toVoList,ccVoList);
+		if(messageConfig != null){
+			JSONObject jsonObject = JSONObject.parseObject(messageConfig.toString());
+			/**组装接收人与抄送人*/
+			JSONArray toArray = jsonObject.getJSONArray("toList");
+			JSONArray ccArray = jsonObject.getJSONArray("ccList");
+			getReceiverList(job, toArray,ccArray, toVoList,ccVoList);
+		}
 
 		NotifyJobVo oldJob = notifyJobMapper.getJobBaseInfoById(job.getId());
 		job.setLcu(UserContext.get().getUserUuid());
