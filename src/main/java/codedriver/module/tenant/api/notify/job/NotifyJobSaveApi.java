@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.notify.job;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -14,10 +15,13 @@ import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyJobNameRepeatException;
+import codedriver.framework.notify.schedule.plugin.NotifyContentJob;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
 import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
 import com.alibaba.fastjson.*;
@@ -116,7 +120,14 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 			notifyJobMapper.batchInsertReceiver(ccVoList);
 		}
 
-		//TODO 启动或停止定时任务
+		IJob schedulerhandler = SchedulerManager.getHandler(NotifyContentJob.class.getName());
+		String tenantUuid = TenantContext.get().getTenantUuid();
+		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), schedulerhandler.getGroupName(), handler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
+		if(job.getIsActive().intValue() == 1){
+			schedulerManager.loadJob(newJobObject);
+		}else{
+			schedulerManager.unloadJob(newJobObject);
+		}
 
 		return job.getId();
 	}

@@ -1,15 +1,19 @@
 package codedriver.module.tenant.api.notify.job;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyJobNotFoundException;
+import codedriver.framework.notify.schedule.plugin.NotifyContentJob;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
+import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +63,14 @@ public class NotifyJobStatusUpdateApi extends PrivateApiComponentBase {
 			job.setIsActive(isActive);
 			notifyJobMapper.updateJobStatus(job);
 		}
-		//TODO 启动或停止定时任务
+		IJob handler = SchedulerManager.getHandler(NotifyContentJob.class.getName());
+		String tenantUuid = TenantContext.get().getTenantUuid();
+		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), handler.getGroupName(), handler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
+		if(job.getIsActive().intValue() == 1){
+			schedulerManager.loadJob(newJobObject);
+		}else{
+			schedulerManager.unloadJob(newJobObject);
+		}
 		return null;
 	}
 }
