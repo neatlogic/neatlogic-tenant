@@ -3,14 +3,27 @@ package codedriver.module.tenant.api.notify.job;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.notify.constvalue.NotifyRecipientType;
+import codedriver.framework.notify.core.INotifyContentHandler;
+import codedriver.framework.notify.core.INotifyHandler;
+import codedriver.framework.notify.core.NotifyContentHandlerFactory;
+import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
+import codedriver.framework.notify.dto.job.NotifyJobReceiverVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
+import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
+import codedriver.framework.usertype.UserTypeFactory;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,6 +41,15 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private SchedulerMapper schedulerMapper;
+
+	@Autowired
+	private UserMapper userMapper;
+
+	@Autowired
+	private TeamMapper teamMapper;
+
+	@Autowired
+	private RoleMapper roleMapper;
 
 	@Override
 	public String getToken() {
@@ -66,12 +88,66 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 			returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
 		}
 		List<NotifyJobVo> jobList = notifyJobMapper.searchJob(vo);
-		//TODO 查询收件人
 		if(CollectionUtils.isNotEmpty(jobList)){
 			for(NotifyJobVo job : jobList){
 				JobAuditVo jobAuditVo = new JobAuditVo();
 				jobAuditVo.setJobUuid(job.getId().toString());
 				job.setExecCount(schedulerMapper.searchJobAuditCount(jobAuditVo));
+
+				INotifyContentHandler handler = NotifyContentHandlerFactory.getHandler(job.getHandler());
+				if(handler == null){
+					throw new NotifyContentHandlerNotFoundException(job.getHandler());
+				}
+				INotifyHandler notifyHandler = NotifyHandlerFactory.getHandler(job.getNotifyHandler());
+				if(notifyHandler == null){
+					throw new NotifyHandlerNotFoundException(job.getNotifyHandler());
+				}
+				JSONArray messageAttrList = handler.getMessageAttrList(job.getNotifyHandler());
+				/** 补充收件人详细信息，如果没有，再看是否插件自带了收件人 */
+				List<NotifyJobReceiverVo> toList = notifyJobMapper.getToListByJobId(job.getId());
+				JSONArray toArray = new JSONArray();
+				if(CollectionUtils.isNotEmpty(toList)){
+					for(NotifyJobReceiverVo receiverVo : toList){
+						if(NotifyRecipientType.USER.getValue().equals(receiverVo.getType())){
+							toArray.add(userMapper.getUserBaseInfoByUuidWithoutCache(receiverVo.getReceiver()));
+						}else if(NotifyRecipientType.TEAM.getValue().equals(receiverVo.getType())){
+							toArray.add(teamMapper.getTeamByUuid(receiverVo.getReceiver()));
+						}else if(NotifyRecipientType.ROLE.getValue().equals(receiverVo.getType())){
+							toArray.add(roleMapper.getRoleByUuid(receiverVo.getReceiver()));
+						}else if(NotifyRecipientType.EMAIL.getValue().equals(receiverVo.getType())){
+							toArray.add(new JSONObject(){
+								{
+									this.put("initType",NotifyRecipientType.EMAIL.getValue());
+									this.put("name",receiverVo.getReceiver());
+								}
+							});
+						}else if(NotifyRecipientType.PROCESSUSERTYPE.getValue().equals(receiverVo.getType())){
+							toArray.add(new JSONObject(){
+								{
+									this.put("initType",NotifyRecipientType.PROCESSUSERTYPE.getValue());
+									this.put("name",UserTypeFactory.getUserTypeMap().get("process").getValues().get(receiverVo.getReceiver()));
+								}
+							});
+						}
+					}
+				}else if(CollectionUtils.isNotEmpty(messageAttrList)){
+					for(Object obj : messageAttrList){
+						JSONObject object = JSONObject.parseObject(obj.toString());
+						if("toList".equals(object.getString("name"))){
+							toArray.add(new JSONObject(){
+								{
+									this.put("initType",NotifyRecipientType.CUSTOM.getValue());
+									this.put("name",object.getString("placeholder"));
+								}
+							});
+							break;
+						}
+					}
+				}
+				job.setToVoList(toArray);
+
+				/** 转换通知插件名称 */
+				job.setNotifyHandler(notifyHandler.getName());
 			}
 		}
 		returnObj.put("tbodyList",jobList);
