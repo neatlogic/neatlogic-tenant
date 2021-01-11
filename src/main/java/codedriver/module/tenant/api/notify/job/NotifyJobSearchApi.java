@@ -7,9 +7,15 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.notify.constvalue.NotifyRecipientType;
+import codedriver.framework.notify.core.INotifyContentHandler;
+import codedriver.framework.notify.core.INotifyHandler;
+import codedriver.framework.notify.core.NotifyContentHandlerFactory;
+import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyJobMapper;
 import codedriver.framework.notify.dto.job.NotifyJobReceiverVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
+import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -87,10 +93,20 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 				JobAuditVo jobAuditVo = new JobAuditVo();
 				jobAuditVo.setJobUuid(job.getId().toString());
 				job.setExecCount(schedulerMapper.searchJobAuditCount(jobAuditVo));
-				/** 补充收件人详细信息 */
+
+				INotifyContentHandler handler = NotifyContentHandlerFactory.getHandler(job.getHandler());
+				if(handler == null){
+					throw new NotifyContentHandlerNotFoundException(job.getHandler());
+				}
+				INotifyHandler notifyHandler = NotifyHandlerFactory.getHandler(job.getNotifyHandler());
+				if(notifyHandler == null){
+					throw new NotifyHandlerNotFoundException(job.getNotifyHandler());
+				}
+				JSONArray messageAttrList = handler.getMessageAttrList(job.getNotifyHandler());
+				/** 补充收件人详细信息，如果没有，再看是否插件自带了收件人 */
 				List<NotifyJobReceiverVo> toList = notifyJobMapper.getToListByJobId(job.getId());
+				JSONArray toArray = new JSONArray();
 				if(CollectionUtils.isNotEmpty(toList)){
-					JSONArray toArray = new JSONArray();
 					for(NotifyJobReceiverVo receiverVo : toList){
 						if(NotifyRecipientType.USER.getValue().equals(receiverVo.getType())){
 							toArray.add(userMapper.getUserBaseInfoByUuidWithoutCache(receiverVo.getReceiver()));
@@ -101,19 +117,37 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 						}else if(NotifyRecipientType.EMAIL.getValue().equals(receiverVo.getType())){
 							toArray.add(new JSONObject(){
 								{
+									this.put("initType",NotifyRecipientType.EMAIL.getValue());
 									this.put("name",receiverVo.getReceiver());
 								}
 							});
 						}else if(NotifyRecipientType.PROCESSUSERTYPE.getValue().equals(receiverVo.getType())){
 							toArray.add(new JSONObject(){
 								{
+									this.put("initType",NotifyRecipientType.PROCESSUSERTYPE.getValue());
 									this.put("name",UserTypeFactory.getUserTypeMap().get("process").getValues().get(receiverVo.getReceiver()));
 								}
 							});
 						}
 					}
-					job.setToVoList(toArray);
+				}else if(CollectionUtils.isNotEmpty(messageAttrList)){
+					for(Object obj : messageAttrList){
+						JSONObject object = JSONObject.parseObject(obj.toString());
+						if("toList".equals(object.getString("name"))){
+							toArray.add(new JSONObject(){
+								{
+									this.put("initType",NotifyRecipientType.CUSTOM.getValue());
+									this.put("name",object.getString("placeholder"));
+								}
+							});
+							break;
+						}
+					}
 				}
+				job.setToVoList(toArray);
+
+				/** 转换通知插件名称 */
+				job.setNotifyHandler(notifyHandler.getName());
 			}
 		}
 		returnObj.put("tbodyList",jobList);
