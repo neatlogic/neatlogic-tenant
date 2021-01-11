@@ -52,6 +52,7 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
+		integrationVo.setIsActive(null);
 		List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
 		if (integrationList.size() > 0) {
 			int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
