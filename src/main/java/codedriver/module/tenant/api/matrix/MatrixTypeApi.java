@@ -21,6 +21,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
  * @description:
  * @create: 2020-03-27 16:52
  **/
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixTypeApi extends PrivateApiComponentBase {
