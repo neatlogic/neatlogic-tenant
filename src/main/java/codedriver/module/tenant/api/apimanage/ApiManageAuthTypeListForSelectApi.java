@@ -16,6 +16,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.restful.web.core.ApiAuthFactory;
 
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageAuthTypeListForSelectApi extends PrivateApiComponentBase {

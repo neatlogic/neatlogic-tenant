@@ -14,6 +14,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuthenticationTypeListApi extends PrivateApiComponentBase {
