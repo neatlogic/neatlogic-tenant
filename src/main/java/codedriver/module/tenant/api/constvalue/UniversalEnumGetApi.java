@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.constvalue;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.EnumFactory;
+import codedriver.framework.common.constvalue.IEnum;
 import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -50,6 +51,8 @@ public class UniversalEnumGetApi extends PrivateApiComponentBase {
         }catch (ClassNotFoundException ex){
             throw new EnumNotFoundException(enumClass);
         }
-        return EnumFactory.getValueTextList(enumClass);
+        Class<? extends IEnum> aClass = EnumFactory.getEnumClass(enumClass);
+        Object[] objects = aClass.getEnumConstants();
+        return aClass.getMethod("getValueTextList").invoke(objects[0]);
     }
 }
