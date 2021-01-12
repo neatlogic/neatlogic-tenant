@@ -152,6 +152,7 @@ public class NotifyJobAuditSearchApi extends PrivateApiComponentBase {
 			for(NotifyJobAuditVo auditVo : jobAuditList){
 				/** 为防止相同的JSONArray被替换成$ref，需要做如下转换 */
 				auditVo.setToVoList(JSONArray.parseArray(JSONArray.toJSONString(toArray, SerializerFeature.DisableCircularReferenceDetect)));
+				auditVo.setStatusVo(JobAuditVo.Status.getStatus(auditVo.getStatus()));
 			}
 		}
 

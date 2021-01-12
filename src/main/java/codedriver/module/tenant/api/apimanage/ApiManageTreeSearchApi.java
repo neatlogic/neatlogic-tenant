@@ -121,8 +121,10 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 						}
 					}
 				}
-				moduleMap.put("funcList",funcSet);
-				menuMapList.add(moduleMap);
+				if(CollectionUtils.isNotEmpty(funcSet)){
+					moduleMap.put("funcList",funcSet);
+					menuMapList.add(moduleMap);
+				}
 			}
 		}
 
