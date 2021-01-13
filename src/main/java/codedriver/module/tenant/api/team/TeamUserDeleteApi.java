@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.team;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.auth.label.TEAM_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;

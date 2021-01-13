@@ -16,7 +16,7 @@ import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundExcepti
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyJobNameRepeatException;
 import codedriver.framework.notify.schedule.plugin.NotifyContentJob;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;

@@ -7,18 +7,14 @@ import codedriver.framework.message.core.IMessageHandler;
 import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
-import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.exception.MessageHandlerNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @Title: MessageHandlerActiveUpdateApi
