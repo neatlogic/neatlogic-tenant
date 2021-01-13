@@ -4,7 +4,9 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.MessageVo;
 import codedriver.framework.reminder.core.OperationTypeEnum;
@@ -50,12 +52,11 @@ public class MessageListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "messageId", type = ApiParamType.LONG, desc = "起点消息id"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
-            @Param(name = "needPage", type = ApiParamType.INTEGER, desc = "是否分页")
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
+            @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
@@ -64,6 +65,7 @@ public class MessageListApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         List<MessageVo> messageVoList = new ArrayList<>();
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
+        searchVo.setCurrentPage(1);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         if(searchVo.getNeedPage()){
             int pageCount = 0;
@@ -82,9 +84,22 @@ public class MessageListApi extends PrivateApiComponentBase {
             messageVoList = messageMapper.getMessageList(searchVo);
         }
         resultObj.put("tbodyList", messageVoList);
-        if(CollectionUtils.isNotEmpty(messageVoList)){
-            resultObj.put("messageId", messageVoList.get(0).getId());
+        List<String> unsubscribeHandlerList = new ArrayList<>();
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
+            if(messageHandlerVo.getIsActive() == 1){
+                resultObj.put("hasSubscription", 1);
+                return resultObj;
+            }
+            unsubscribeHandlerList.add(messageHandlerVo.getHandler());
         }
+        for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
+            if(!unsubscribeHandlerList.contains(messageHandlerVo.getHandler())){
+                resultObj.put("hasSubscription", 1);
+                return resultObj;
+            }
+        }
+        resultObj.put("hasSubscription", 0);
         return resultObj;
     }
 }
