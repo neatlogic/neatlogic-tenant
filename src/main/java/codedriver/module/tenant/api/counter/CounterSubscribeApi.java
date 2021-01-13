@@ -4,7 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.dto.GlobalCounterSubscribeVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MESSAGE_CENTER_MODIFY;

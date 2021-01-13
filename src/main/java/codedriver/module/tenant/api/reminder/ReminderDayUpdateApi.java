@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.reminder;
 import java.util.Map;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.MESSAGE_CENTER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;

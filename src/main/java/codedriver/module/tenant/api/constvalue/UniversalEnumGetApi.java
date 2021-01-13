@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.constvalue;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.EnumFactory;
 import codedriver.framework.common.constvalue.IEnum;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.exception.constvalue.EnumNotFoundException;

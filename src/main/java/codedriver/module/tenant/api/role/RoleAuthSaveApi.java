@@ -6,7 +6,7 @@ import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;

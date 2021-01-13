@@ -2,7 +2,7 @@ package codedriver.module.tenant.api.notify.job;
 
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.NotifyContentHandlerFactory;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;

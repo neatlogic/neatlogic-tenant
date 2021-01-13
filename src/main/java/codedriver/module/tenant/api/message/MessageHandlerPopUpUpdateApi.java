@@ -7,7 +7,7 @@ import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.exception.MessageHandlerNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;

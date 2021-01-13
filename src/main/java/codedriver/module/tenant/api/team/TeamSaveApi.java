@@ -11,7 +11,7 @@ import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.lock.service.LockManager;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.TEAM_MODIFY;

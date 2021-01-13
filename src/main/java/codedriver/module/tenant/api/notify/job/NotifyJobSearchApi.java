@@ -16,7 +16,7 @@ import codedriver.framework.notify.dto.job.NotifyJobReceiverVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;

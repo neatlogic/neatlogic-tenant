@@ -6,7 +6,7 @@ import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyContentHandler;
 import codedriver.framework.notify.core.NotifyContentHandlerFactory;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONArray;

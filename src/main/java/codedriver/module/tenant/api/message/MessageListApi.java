@@ -9,11 +9,10 @@ import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.MessageVo;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
