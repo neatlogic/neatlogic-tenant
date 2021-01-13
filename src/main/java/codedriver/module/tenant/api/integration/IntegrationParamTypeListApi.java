@@ -1,6 +1,6 @@
 package codedriver.module.tenant.api.integration;
 
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
 

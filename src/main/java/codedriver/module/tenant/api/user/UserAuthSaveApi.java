@@ -8,7 +8,7 @@ import codedriver.framework.dto.AuthVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.INTERFACE_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -8,7 +8,7 @@ import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
-import codedriver.framework.reminder.core.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.ROLE_MODIFY;
