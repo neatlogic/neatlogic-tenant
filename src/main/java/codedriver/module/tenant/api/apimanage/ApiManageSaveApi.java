@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.exception.type.ApiRepeatException;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.INTERFACE_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;

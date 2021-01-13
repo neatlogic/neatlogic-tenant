@@ -9,7 +9,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.matrix.exception.MatrixReferencedCannotBeDeletedException;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;

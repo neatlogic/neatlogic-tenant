@@ -4,7 +4,7 @@ import codedriver.framework.counter.dto.GlobalCounterVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.counter.core.GlobalCounterFactory;
 import codedriver.framework.counter.core.IGlobalCounter;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.counter.GlobalCounterService;

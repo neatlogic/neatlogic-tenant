@@ -2,7 +2,7 @@ package codedriver.module.tenant.api.tag;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.TagService;

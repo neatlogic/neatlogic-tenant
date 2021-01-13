@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;

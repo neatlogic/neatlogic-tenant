@@ -4,7 +4,7 @@ import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
-import codedriver.framework.restful.core.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
