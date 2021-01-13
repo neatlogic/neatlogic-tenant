@@ -122,7 +122,7 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 
 		IJob schedulerhandler = SchedulerManager.getHandler(NotifyContentJob.class.getName());
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), schedulerhandler.getGroupName(), handler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
+		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), schedulerhandler.getGroupName(), schedulerhandler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
 		if(job.getIsActive().intValue() == 1){
 			schedulerManager.loadJob(newJobObject);
 		}else{
