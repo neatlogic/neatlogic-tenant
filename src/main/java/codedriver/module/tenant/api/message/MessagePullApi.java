@@ -14,12 +14,12 @@ import codedriver.framework.reminder.core.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +72,7 @@ public class MessagePullApi extends PrivateApiComponentBase {
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         int pageCount = 0;
         int rowNum = messageMapper.getMessageNewCount(searchVo);
-        if(rowNum > 0){
+        if (rowNum > 0) {
             pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
             messageVoList = messageMapper.getMessageNewList(searchVo);
             List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
