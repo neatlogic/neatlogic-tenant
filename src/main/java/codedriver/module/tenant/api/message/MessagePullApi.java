@@ -59,6 +59,7 @@ public class MessagePullApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
+            @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "拉取新消息列表")
@@ -67,6 +68,7 @@ public class MessagePullApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         List<MessageVo> messageVoList = new ArrayList<>();
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
+        searchVo.setCurrentPage(1);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         int pageCount = 0;
         int rowNum = messageMapper.getMessageNewCount(searchVo);
@@ -89,6 +91,22 @@ public class MessagePullApi extends PrivateApiComponentBase {
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
+        List<String> unsubscribeHandlerList = new ArrayList<>();
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+        for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
+            if(messageHandlerVo.getIsActive() == 1){
+                resultObj.put("hasSubscription", 1);
+                return resultObj;
+            }
+            unsubscribeHandlerList.add(messageHandlerVo.getHandler());
+        }
+        for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
+            if(!unsubscribeHandlerList.contains(messageHandlerVo.getHandler())){
+                resultObj.put("hasSubscription", 1);
+                return resultObj;
+            }
+        }
+        resultObj.put("hasSubscription", 0);
         return resultObj;
     }
 }

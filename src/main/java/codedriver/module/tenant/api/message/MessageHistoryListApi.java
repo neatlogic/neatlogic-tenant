@@ -59,8 +59,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "模块id"),
             @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "模块id"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
-            @Param(name = "needPage", type = ApiParamType.INTEGER, desc = "是否分页")
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
