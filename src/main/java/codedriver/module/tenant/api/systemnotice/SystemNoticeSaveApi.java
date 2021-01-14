@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.systemnotice;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -70,8 +69,6 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
 
         SystemNoticeVo oldVo = systemNoticeMapper.getSystemNoticeBaseInfoById(vo.getId());
 
-        vo.setStatus(SystemNoticeVo.Status.NOTISSUED.getValue());
-        vo.setPopUp(PopUpType.CLOSE.getValue());
         vo.setLcu(UserContext.get().getUserUuid());
         if (oldVo == null) {
             vo.setFcu(UserContext.get().getUserUuid());
@@ -86,7 +83,7 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
         }
 
-        //todo 插入通知对象
+        /**保存通知对象*/
         List<SystemNoticeRecipientVo> recipientVoList = null;
         JSONArray recipientList = jsonObj.getJSONArray("recipientList");
         if (CollectionUtils.isNotEmpty(recipientList)) {
