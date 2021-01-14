@@ -2,13 +2,17 @@ package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
+import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +36,7 @@ import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.CREATE)
 @Transactional
-public class SystemNoticeSaveApi  extends PrivateApiComponentBase {
+public class SystemNoticeSaveApi extends PrivateApiComponentBase {
 
     @Autowired
     private SystemNoticeMapper systemNoticeMapper;
@@ -50,6 +55,7 @@ public class SystemNoticeSaveApi  extends PrivateApiComponentBase {
     public String getConfig() {
         return null;
     }
+
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "公告ID"),
             @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题"),
@@ -60,17 +66,19 @@ public class SystemNoticeSaveApi  extends PrivateApiComponentBase {
     @Description(desc = "保存系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>(){});
+        SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
 
         SystemNoticeVo oldVo = systemNoticeMapper.getSystemNoticeBaseInfoById(vo.getId());
 
+        vo.setStatus(SystemNoticeVo.Status.NOTISSUED.getValue());
+        vo.setPopUp(PopUpType.CLOSE.getValue());
         vo.setLcu(UserContext.get().getUserUuid());
-        if(oldVo == null){
+        if (oldVo == null) {
             vo.setFcu(UserContext.get().getUserUuid());
             systemNoticeMapper.insertSystemNotice(vo);
-        }else{
-            if(SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())){
-                // todo 先停用再编辑
+        } else {
+            if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
+                throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
             }
             systemNoticeMapper.updateSystemNotice(vo);
             systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
@@ -80,10 +88,23 @@ public class SystemNoticeSaveApi  extends PrivateApiComponentBase {
 
         //todo 插入通知对象
         List<SystemNoticeRecipientVo> recipientVoList = null;
-        if(CollectionUtils.isNotEmpty(recipientVoList)){
+        JSONArray recipientList = jsonObj.getJSONArray("recipientList");
+        if (CollectionUtils.isNotEmpty(recipientList)) {
+            recipientVoList = new ArrayList<>();
+            for (Object o : recipientList) {
+                String[] split = o.toString().split("#");
+                if (GroupSearch.getGroupSearch(split[0]) != null) {
+                    SystemNoticeRecipientVo recipientVo = new SystemNoticeRecipientVo();
+                    recipientVo.setSystemNoticeId(vo.getId());
+                    recipientVo.setType(split[0]);
+                    recipientVo.setUuid(split[1]);
+                    recipientVoList.add(recipientVo);
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(recipientVoList)) {
             systemNoticeMapper.batchInsertSystemNoticeRecipient(recipientVoList);
         }
-
 
 
         return null;
