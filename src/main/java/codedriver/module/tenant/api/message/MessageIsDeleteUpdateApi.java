@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @Title: MessageIsReadUpdateApi
  * @Package codedriver.module.tenant.api.message
- * @Description: 更新消息为已读接口
+ * @Description: 更新消息为已删除接口
  * @Author: linbq
  * @Date: 2021/1/4 23:12
  * Copyright(c) 2020 TechSureCo.,Ltd.AllRightsReserved.
@@ -25,19 +25,19 @@ import java.util.List;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
+public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "message/isread/update";
+        return "message/isdelete/update";
     }
 
     @Override
     public String getName() {
-        return "更新消息为已读";
+        return "更新消息为已删除";
     }
 
     @Override
@@ -48,11 +48,11 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表")
     })
-    @Description(desc = "更新消息为已读")
+    @Description(desc = "更新消息为已删除")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<Long> messageIdList = (List<Long>)jsonObj.get("messageIdList");
-        messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messageIdList);
+        messageMapper.updateMessageUserIsDelete(UserContext.get().getUserUuid(true), messageIdList);
         return null;
     }
 }
