@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
@@ -13,11 +14,14 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Title: MessageListApi
@@ -70,8 +74,25 @@ public class MessageListApi extends PrivateApiComponentBase {
         int rowNum = messageMapper.getMessageCount(searchVo);
         if(rowNum > 0){
             pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-            if(searchVo.getCurrentPage() <= pageCount){
-                messageVoList = messageMapper.getMessageList(searchVo);
+            messageVoList = messageMapper.getMessageList(searchVo);
+            List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
+            Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
+            List<Long> messsageIdList = new ArrayList<>(messageVoList.size());
+            for (MessageVo messageVo : messageVoList) {
+                if(messageVo.getIsRead() == 0){
+                    messsageIdList.add(messageVo.getId());
+                    MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
+                    if (messageHandlerVo != null) {
+                        messageVo.setPopUp(messageHandlerVo.getPopUp());
+                    } else {
+                        messageVo.setPopUp(PopUpType.CLOSE.getValue());
+                    }
+                } else {
+                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
+                }
+            }
+            if(CollectionUtils.isNotEmpty(messsageIdList)){
+                messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messsageIdList);
             }
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
@@ -79,6 +100,11 @@ public class MessageListApi extends PrivateApiComponentBase {
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
+
+        searchVo.setMessageId(null);
+        int newCount = messageMapper.getMessageCount(searchVo);
+        resultObj.put("newCount", newCount);
+
         List<String> unsubscribeHandlerList = new ArrayList<>();
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
