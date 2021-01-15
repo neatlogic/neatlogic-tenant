@@ -14,6 +14,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -90,7 +91,9 @@ public class MessageListApi extends PrivateApiComponentBase {
                     messageVo.setPopUp(PopUpType.CLOSE.getValue());
                 }
             }
-            messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messsageIdList);
+            if(CollectionUtils.isNotEmpty(messsageIdList)){
+                messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messsageIdList);
+            }
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
