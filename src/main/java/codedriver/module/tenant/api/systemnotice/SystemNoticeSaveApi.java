@@ -79,8 +79,8 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             }
             systemNoticeMapper.updateSystemNotice(vo);
             systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
-            // todo 只删在线用户
-            systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
+            // todo 删除system_notice_user表中的user(已读的不删)
+//            systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
         }
 
         /**保存通知对象*/

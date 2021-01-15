@@ -6,17 +6,15 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
-import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @Title: SystemNoticeDeleteApi
+ * @Title: SystemNoticeStopApi
  * @Package: codedriver.module.tenant.api.systemnotice
- * @Description: 系统公告删除接口
+ * @Description: 系统公告停用接口
  * @Author: laiwt
  * @Date: 2021/1/13 18:01
  * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
@@ -24,21 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
  **/
 
 @Service
-@OperationType(type = OperationTypeEnum.DELETE)
-@Transactional
-public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.OPERATE)
+public class SystemNoticeStopApi extends PrivateApiComponentBase {
 
     @Autowired
     private SystemNoticeMapper systemNoticeMapper;
 
     @Override
     public String getToken() {
-        return "systemnotice/delete";
+        return "systemnotice/stop";
     }
 
     @Override
     public String getName() {
-        return "删除系统公告";
+        return "停用系统公告";
     }
 
     @Override
@@ -48,20 +45,15 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "公告ID")})
     @Output({})
-    @Description(desc = "删除系统公告")
+    @Description(desc = "停用系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SystemNoticeVo vo = systemNoticeMapper.getSystemNoticeBaseInfoById(jsonObj.getLong("id"));
         if(vo == null){
-            throw new SystemNoticeNotFoundException(jsonObj.getLong("id"));
+            throw new SystemNoticeNotFoundException(vo.getId());
         }
-        if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
-            throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
-        }
-        // todo 只删在线用户，离线用户在登录时统一检查system_notice_user是否存在已删除的公告
-        systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
-        systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
-        systemNoticeMapper.deleteSystemNoticeById(vo.getId());
+        vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
+        systemNoticeMapper.updateSystemNotice(vo);
         return null;
     }
 }
