@@ -100,6 +100,11 @@ public class MessageListApi extends PrivateApiComponentBase {
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
+
+        searchVo.setMessageId(null);
+        int newCount = messageMapper.getMessageCount(searchVo);
+        resultObj.put("newCount", newCount);
+
         List<String> unsubscribeHandlerList = new ArrayList<>();
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
