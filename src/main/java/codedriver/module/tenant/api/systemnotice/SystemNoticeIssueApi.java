@@ -1,18 +1,34 @@
 package codedriver.module.tenant.api.systemnotice;
 
+import codedriver.framework.asynchronization.thread.CodeDriverThread;
+import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
+import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
+import codedriver.framework.systemnotice.dto.SystemNoticeUserVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
+import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Title: SystemNoticeIssueApi
@@ -29,8 +45,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SystemNoticeIssueApi extends PrivateApiComponentBase {
 
+    private final static int BATCH_INSERT_MAX_COUNT = 1000;
+
     @Autowired
     private SystemNoticeMapper systemNoticeMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -60,20 +81,66 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
         SystemNoticeVo oldVo = systemNoticeMapper.getSystemNoticeBaseInfoById(vo.getId());
-        if(oldVo == null){
+        if (oldVo == null) {
             throw new SystemNoticeNotFoundException(vo.getId());
         }
-        if(SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())){
-            //todo 已下发异常
+        if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
+            throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
         }
         vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
         systemNoticeMapper.updateSystemNotice(vo);
-        if(SystemNoticeVo.Status.NOTISSUED.getValue().equals(oldVo.getStatus())){
-            // todo 如果没有设置生效时间或者当前时间大于等于生效时间，则发送给在线用户
 
-        }else if(SystemNoticeVo.Status.STOPPED.getValue().equals(oldVo.getStatus())){
-            // todo 如果是已停用状态，则发送给其中的在线用户
+        /** 如果没有设置生效时间或者当前时间大于等于生效时间，则发送给在通知范围内的在线用户 **/
+        List<SystemNoticeRecipientVo> recipientList = systemNoticeMapper.getRecipientListByNoticeId(vo.getId());
+        if (CollectionUtils.isNotEmpty(recipientList)) {
+            long expireTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Config.USER_EXPIRETIME());
+            List<String> onlineUserList = null;
+            if (recipientList.stream().anyMatch(o -> UserType.ALL.getValue().equals(o.getUuid()))) {
+                /** 如果通知范围是所有人，那么找出当前所有的在线用户 **/
+                onlineUserList = userMapper.getAllOnlineUser(new Date(expireTime));
+            } else {
+                List<String> userUuidList = recipientList.stream()
+                        .filter(o -> GroupSearch.USER.getValue().equals(o.getType()))
+                        .map(SystemNoticeRecipientVo::getUuid)
+                        .collect(Collectors.toList());
+                List<String> teamUuidList = recipientList.stream()
+                        .filter(o -> GroupSearch.TEAM.getValue().equals(o.getType()))
+                        .map(SystemNoticeRecipientVo::getUuid)
+                        .collect(Collectors.toList());
+                List<String> roleUuidList = recipientList.stream()
+                        .filter(o -> GroupSearch.ROLE.getValue().equals(o.getType()))
+                        .map(SystemNoticeRecipientVo::getUuid)
+                        .collect(Collectors.toList());
+                onlineUserList = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime(userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
+            }
+
+            if (CollectionUtils.isNotEmpty(onlineUserList)
+                    && (vo.getStartTime() == null || (vo.getStartTime() != null
+                    && System.currentTimeMillis() >= vo.getStartTime().getTime()
+                    && vo.getEndTime() != null
+                    && System.currentTimeMillis() < vo.getEndTime().getTime()))) {
+                List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
+                for (String uuid : onlineUserList) {
+                    noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), uuid));
+                }
+                onlineUserList.clear();
+
+                CommonThreadPool.execute(new CodeDriverThread() {
+                    @Override
+                    protected void execute() {
+                        int count = noticeUserVoList.size() / BATCH_INSERT_MAX_COUNT + 1;
+                        for (int i = 0; i < count; i++) {
+                            int fromIndex = i * BATCH_INSERT_MAX_COUNT;
+                            int toIndex = fromIndex + BATCH_INSERT_MAX_COUNT;
+                            toIndex = toIndex < noticeUserVoList.size() ? toIndex : noticeUserVoList.size();
+                            systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList.subList(fromIndex, toIndex));
+                        }
+                        noticeUserVoList.clear();
+                    }
+                });
+            }
         }
+
         return null;
     }
 }

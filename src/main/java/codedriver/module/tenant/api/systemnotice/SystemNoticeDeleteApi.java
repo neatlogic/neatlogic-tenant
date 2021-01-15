@@ -58,8 +58,7 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
         if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
             throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
         }
-        // todo 只删在线用户，离线用户在登录时统一检查system_notice_user是否存在已删除的公告
-        systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
+        /** 只删除system_notice与system_notice_recipient，system_notice_user用定时任务去清理 **/
         systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
         systemNoticeMapper.deleteSystemNoticeById(vo.getId());
         return null;

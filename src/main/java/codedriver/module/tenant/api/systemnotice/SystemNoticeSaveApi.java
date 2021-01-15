@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.systemnotice;
 
+import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.restful.annotation.*;
@@ -36,6 +38,8 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.CREATE)
 @Transactional
 public class SystemNoticeSaveApi extends PrivateApiComponentBase {
+
+    private final static int BATCH_DELETE_MAX_COUNT = 1000;
 
     @Autowired
     private SystemNoticeMapper systemNoticeMapper;
@@ -79,8 +83,17 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             }
             systemNoticeMapper.updateSystemNotice(vo);
             systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
-            // todo 删除system_notice_user表中的user(已读的不删)
-//            systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId());
+            /**分批删除system_notice_user表中的记录(已读的不删)**/
+            CommonThreadPool.execute(new CodeDriverThread() {
+                @Override
+                protected void execute() {
+                    int noticeUserCount = systemNoticeMapper.getNotReadNoticeUserCountByNoticeId(vo.getId());
+                    int count = noticeUserCount / BATCH_DELETE_MAX_COUNT + 1;
+                    for (int i = 0; i < count; i++) {
+                        systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId(), 0, BATCH_DELETE_MAX_COUNT);
+                    }
+                }
+            });
         }
 
         /**保存通知对象*/
@@ -102,7 +115,6 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(recipientVoList)) {
             systemNoticeMapper.batchInsertSystemNoticeRecipient(recipientVoList);
         }
-
 
         return null;
     }
