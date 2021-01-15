@@ -66,22 +66,18 @@ public class MessageListApi extends PrivateApiComponentBase {
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         searchVo.setCurrentPage(1);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        if(searchVo.getNeedPage()){
-            int pageCount = 0;
-            int rowNum = messageMapper.getMessageCount(searchVo);
-            if(rowNum > 0){
-                pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-                if(searchVo.getCurrentPage() <= pageCount){
-                    messageVoList = messageMapper.getMessageList(searchVo);
-                }
+        int pageCount = 0;
+        int rowNum = messageMapper.getMessageCount(searchVo);
+        if(rowNum > 0){
+            pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+            if(searchVo.getCurrentPage() <= pageCount){
+                messageVoList = messageMapper.getMessageList(searchVo);
             }
-            resultObj.put("currentPage", searchVo.getCurrentPage());
-            resultObj.put("pageSize", searchVo.getPageSize());
-            resultObj.put("pageCount", pageCount);
-            resultObj.put("rowNum", rowNum);
-        }else{
-            messageVoList = messageMapper.getMessageList(searchVo);
         }
+        resultObj.put("currentPage", searchVo.getCurrentPage());
+        resultObj.put("pageSize", searchVo.getPageSize());
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
         List<String> unsubscribeHandlerList = new ArrayList<>();
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));

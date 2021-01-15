@@ -90,22 +90,18 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             }
         }
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        if(searchVo.getNeedPage()){
-            int pageCount = 0;
-            int rowNum = messageMapper.getMessageHistoryCount(searchVo);
-            if(rowNum > 0){
-                pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-                if(searchVo.getCurrentPage() <= pageCount){
-                    messageVoList = messageMapper.getMessageHistoryList(searchVo);
-                }
+        int pageCount = 0;
+        int rowNum = messageMapper.getMessageHistoryCount(searchVo);
+        if(rowNum > 0){
+            pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+            if(searchVo.getCurrentPage() <= pageCount){
+                messageVoList = messageMapper.getMessageHistoryList(searchVo);
             }
-            resultObj.put("currentPage", searchVo.getCurrentPage());
-            resultObj.put("pageSize", searchVo.getPageSize());
-            resultObj.put("pageCount", pageCount);
-            resultObj.put("rowNum", rowNum);
-        }else{
-            messageVoList = messageMapper.getMessageHistoryList(searchVo);
         }
+        resultObj.put("currentPage", searchVo.getCurrentPage());
+        resultObj.put("pageSize", searchVo.getPageSize());
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
         return resultObj;
     }
