@@ -77,7 +77,9 @@ public class MessagePullApi extends PrivateApiComponentBase {
             messageVoList = messageMapper.getMessageNewList(searchVo);
             List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
             Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
+            List<Long> messsageIdList = new ArrayList<>(messageVoList.size());
             for (MessageVo messageVo : messageVoList) {
+                messsageIdList.add(messageVo.getId());
                 MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
                 if (messageHandlerVo != null) {
                     messageVo.setPopUp(messageHandlerVo.getPopUp());
@@ -85,12 +87,18 @@ public class MessagePullApi extends PrivateApiComponentBase {
                     messageVo.setPopUp(PopUpType.CLOSE.getValue());
                 }
             }
+            messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messsageIdList);
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
+
+        searchVo.setMessageId(null);
+        int newCount = messageMapper.getMessageNewCount(searchVo);
+        resultObj.put("newCount", newCount);
+
         List<String> unsubscribeHandlerList = new ArrayList<>();
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
