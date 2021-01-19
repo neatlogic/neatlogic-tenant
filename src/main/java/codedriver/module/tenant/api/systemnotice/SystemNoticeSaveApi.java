@@ -84,7 +84,7 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
                 throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
             }
-            systemNoticeMapper.updateSystemNotice(vo);
+            systemNoticeMapper.updateSystemNoticeBaseInfo(vo);
             systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
             /**分批删除system_notice_user表中的记录(已读的不删)**/
             CommonThreadPool.execute(new CodeDriverThread() {

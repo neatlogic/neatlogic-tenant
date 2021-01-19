@@ -90,59 +90,64 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
         if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
             throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
         }
-        vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
-        systemNoticeMapper.updateSystemNotice(vo);
 
         /** 如果没有设置生效时间或者当前时间大于等于生效时间，则发送给在通知范围内的在线用户 **/
-        List<SystemNoticeRecipientVo> recipientList = systemNoticeMapper.getRecipientListByNoticeId(vo.getId());
-        if (CollectionUtils.isNotEmpty(recipientList)) {
-            long expireTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Config.USER_EXPIRETIME());
-            List<String> onlineUserList = null;
-            if (recipientList.stream().anyMatch(o -> UserType.ALL.getValue().equals(o.getUuid()))) {
-                /** 如果通知范围是所有人，那么找出当前所有的在线用户 **/
-                onlineUserList = userMapper.getAllOnlineUser(new Date(expireTime));
-            } else {
-                List<String> userUuidList = recipientList.stream()
-                        .filter(o -> GroupSearch.USER.getValue().equals(o.getType()))
-                        .map(SystemNoticeRecipientVo::getUuid)
-                        .collect(Collectors.toList());
-                List<String> teamUuidList = recipientList.stream()
-                        .filter(o -> GroupSearch.TEAM.getValue().equals(o.getType()))
-                        .map(SystemNoticeRecipientVo::getUuid)
-                        .collect(Collectors.toList());
-                List<String> roleUuidList = recipientList.stream()
-                        .filter(o -> GroupSearch.ROLE.getValue().equals(o.getType()))
-                        .map(SystemNoticeRecipientVo::getUuid)
-                        .collect(Collectors.toList());
-                onlineUserList = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime(userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
-            }
+        if (vo.getStartTime() == null || (vo.getStartTime() != null
+                && System.currentTimeMillis() >= vo.getStartTime().getTime()
+                && vo.getEndTime() != null
+                && System.currentTimeMillis() < vo.getEndTime().getTime())) {
 
-            if (CollectionUtils.isNotEmpty(onlineUserList)
-                    && (vo.getStartTime() == null || (vo.getStartTime() != null
-                    && System.currentTimeMillis() >= vo.getStartTime().getTime()
-                    && vo.getEndTime() != null
-                    && System.currentTimeMillis() < vo.getEndTime().getTime()))) {
-                List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
-                for (String uuid : onlineUserList) {
-                    noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), uuid));
+            /** 立即更改公告状态为已发布 **/
+            vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
+            vo.setIssueTime(vo.getStartTime() == null ? new Date() : vo.getStartTime());
+
+            List<SystemNoticeRecipientVo> recipientList = systemNoticeMapper.getRecipientListByNoticeId(vo.getId());
+            if (CollectionUtils.isNotEmpty(recipientList)) {
+                long expireTime = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Config.USER_EXPIRETIME());
+                List<String> onlineUserList = null;
+                if (recipientList.stream().anyMatch(o -> UserType.ALL.getValue().equals(o.getUuid()))) {
+                    /** 如果通知范围是所有人，那么找出当前所有的在线用户 **/
+                    onlineUserList = userMapper.getAllOnlineUser(new Date(expireTime));
+                } else {
+                    List<String> userUuidList = recipientList.stream()
+                            .filter(o -> GroupSearch.USER.getValue().equals(o.getType()))
+                            .map(SystemNoticeRecipientVo::getUuid)
+                            .collect(Collectors.toList());
+                    List<String> teamUuidList = recipientList.stream()
+                            .filter(o -> GroupSearch.TEAM.getValue().equals(o.getType()))
+                            .map(SystemNoticeRecipientVo::getUuid)
+                            .collect(Collectors.toList());
+                    List<String> roleUuidList = recipientList.stream()
+                            .filter(o -> GroupSearch.ROLE.getValue().equals(o.getType()))
+                            .map(SystemNoticeRecipientVo::getUuid)
+                            .collect(Collectors.toList());
+                    onlineUserList = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime(userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
                 }
-                onlineUserList.clear();
 
-                CommonThreadPool.execute(new CodeDriverThread() {
-                    @Override
-                    protected void execute() {
-                        int count = noticeUserVoList.size() / BATCH_INSERT_MAX_COUNT + 1;
-                        for (int i = 0; i < count; i++) {
-                            int fromIndex = i * BATCH_INSERT_MAX_COUNT;
-                            int toIndex = fromIndex + BATCH_INSERT_MAX_COUNT;
-                            toIndex = toIndex < noticeUserVoList.size() ? toIndex : noticeUserVoList.size();
-                            systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList.subList(fromIndex, toIndex));
-                        }
-                        noticeUserVoList.clear();
+                if (CollectionUtils.isNotEmpty(onlineUserList)) {
+                    List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
+                    for (String uuid : onlineUserList) {
+                        noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), uuid));
                     }
-                });
+                    onlineUserList.clear();
+
+                    CommonThreadPool.execute(new CodeDriverThread() {
+                        @Override
+                        protected void execute() {
+                            int count = noticeUserVoList.size() / BATCH_INSERT_MAX_COUNT + 1;
+                            for (int i = 0; i < count; i++) {
+                                int fromIndex = i * BATCH_INSERT_MAX_COUNT;
+                                int toIndex = fromIndex + BATCH_INSERT_MAX_COUNT;
+                                toIndex = toIndex < noticeUserVoList.size() ? toIndex : noticeUserVoList.size();
+                                systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList.subList(fromIndex, toIndex));
+                            }
+                            noticeUserVoList.clear();
+                        }
+                    });
+                }
             }
         }
+        systemNoticeMapper.updateSystemNoticeIssueInfo(vo);
 
         return null;
     }

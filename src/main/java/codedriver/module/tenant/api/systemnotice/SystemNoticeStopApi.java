@@ -56,7 +56,7 @@ public class SystemNoticeStopApi extends PrivateApiComponentBase {
             throw new SystemNoticeNotFoundException(vo.getId());
         }
         vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
-        systemNoticeMapper.updateSystemNotice(vo);
+        systemNoticeMapper.updateSystemNoticeStatus(vo);
         return null;
     }
 }
