@@ -14,6 +14,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,14 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
                 if(moduleId.equals(messageHandlerVo.getModuleId())){
                     handlerList.add(messageHandlerVo.getHandler());
                 }
+            }
+            if(CollectionUtils.isEmpty(handlerList)){
+                resultObj.put("currentPage", searchVo.getCurrentPage());
+                resultObj.put("pageSize", searchVo.getPageSize());
+                resultObj.put("pageCount", 0);
+                resultObj.put("rowNum", 0);
+                resultObj.put("tbodyList", messageVoList);
+                return resultObj;
             }
             searchVo.setHandlerList(handlerList);
         }
