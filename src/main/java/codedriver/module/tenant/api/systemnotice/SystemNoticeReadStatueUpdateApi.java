@@ -6,9 +6,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
-import codedriver.framework.systemnotice.dto.SystemNoticeVo;
-import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,16 +44,17 @@ public class SystemNoticeReadStatueUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "公告ID")})
+    @Input({@Param(name = "idList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "公告ID列表")})
     @Output({})
     @Description(desc = "更新系统公告已读状态")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        SystemNoticeVo vo = systemNoticeMapper.getSystemNoticeBaseInfoById(jsonObj.getLong("id"));
-        if(vo == null){
-            throw new SystemNoticeNotFoundException(vo.getId());
+        JSONArray idList = jsonObj.getJSONArray("idList");
+        if(CollectionUtils.isNotEmpty(idList)){
+            for(Object id : idList){
+                systemNoticeMapper.updateSystemNoticeUserReadStatus(Long.valueOf(id.toString()), UserContext.get().getUserUuid(true));
+            }
         }
-        systemNoticeMapper.updateSystemNoticeUserReadStatus(vo.getId(), UserContext.get().getUserUuid(true));
         return null;
     }
 }
