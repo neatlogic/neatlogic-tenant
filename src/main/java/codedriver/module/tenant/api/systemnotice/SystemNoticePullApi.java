@@ -10,10 +10,12 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
+import codedriver.framework.util.HtmlUtil;
 import codedriver.module.tenant.service.systemnotice.SystemNoticeService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +98,9 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
             returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
         }
         List<SystemNoticeVo> noticeList = systemNoticeMapper.searchIssuedNoticeListByUserUuid(vo,UserContext.get().getUserUuid(true));
+        if(CollectionUtils.isNotEmpty(noticeList)){
+            noticeList.stream().forEach(o -> o.setContent(HtmlUtil.removeHtml(o.getContent(),null)));
+        }
         returnObj.put("tbodyList",noticeList);
 
         /** 按发布时间倒序，寻找第一个需要弹窗的公告 **/
