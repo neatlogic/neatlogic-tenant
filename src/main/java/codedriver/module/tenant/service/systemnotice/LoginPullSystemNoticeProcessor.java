@@ -32,7 +32,7 @@ public class LoginPullSystemNoticeProcessor extends LoginPostProcessorBase {
         systemNoticeService.pullIssuedSystemNotice();
 
         /**
-         * 检查是否存在【当前用户可看的】、【到了生效时间，却还没发布】公告，如果有，则下发给自己
+         * 检查是否存在【当前用户可看的】、【到了生效时间，却还没发布】公告，如果有，则下发给当前用户
          * 其他的通知用户，如果在线则由前端定时拉取，如果离线则登录时拉取
          **/
         systemNoticeService.pullActiveSystemNotice();
