@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -86,10 +87,12 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
+        List<NotifyTriggerVo> notifyTriggerVoList = notifyPolicyHandler.getNotifyTriggerList();
+        List<String> notifyTriggerList = new ArrayList<>(notifyTriggerVoList.size());
         String trigger = jsonObj.getString("trigger");
         String triggerName = "";
-        for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
+        for (NotifyTriggerVo notifyTrigger : notifyTriggerVoList) {
+            notifyTriggerList.add(notifyTrigger.getTrigger());
             if (trigger.equals(notifyTrigger.getTrigger())) {
                 triggerName = notifyTrigger.getTriggerName();
             }
@@ -129,32 +132,38 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
         Long id = jsonObj.getLong("id");
         ConditionConfigVo conditionConfig = jsonObj.getObject("conditionConfig", ConditionConfigVo.class);
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
-        for (NotifyTriggerVo triggerObj : triggerList) {
-            if (trigger.equals(triggerObj.getTrigger())) {
-                existed = true;
-                List<NotifyTriggerNotifyVo> notifyList = triggerObj.getNotifyList();
-                if (id != null) {
-                    boolean isExists = false;
-                    for (NotifyTriggerNotifyVo notifyObj : notifyList) {
-                        if (id.equals(notifyObj.getId())) {
-                            notifyObj.setActionList(actionArray);
-                            notifyObj.setConditionConfig(conditionConfig);
-                            isExists = true;
+        Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
+        while(iterator.hasNext()){
+            NotifyTriggerVo triggerObj = iterator.next();
+            if(notifyTriggerList.contains(triggerObj.getTrigger())){
+                if (trigger.equals(triggerObj.getTrigger())) {
+                    existed = true;
+                    List<NotifyTriggerNotifyVo> notifyList = triggerObj.getNotifyList();
+                    if (id != null) {
+                        boolean isExists = false;
+                        for (NotifyTriggerNotifyVo notifyObj : notifyList) {
+                            if (id.equals(notifyObj.getId())) {
+                                notifyObj.setActionList(actionArray);
+                                notifyObj.setConditionConfig(conditionConfig);
+                                isExists = true;
+                            }
                         }
+                        if (!isExists) {
+                            throw new NotifyPolicyTriggerConfigNotFoundException(id.toString());
+                        }
+                        resultObj.put("id", id);
+                    } else {
+                        NotifyTriggerNotifyVo notifyObj = new NotifyTriggerNotifyVo();
+                        id = SnowflakeUtil.uniqueLong();
+                        notifyObj.setId(id);
+                        notifyObj.setActionList(actionArray);
+                        notifyObj.setConditionConfig(conditionConfig);
+                        notifyList.add(notifyObj);
+                        resultObj.put("id", id);
                     }
-                    if (!isExists) {
-                        throw new NotifyPolicyTriggerConfigNotFoundException(id.toString());
-                    }
-                    resultObj.put("id", id);
-                } else {
-                    NotifyTriggerNotifyVo notifyObj = new NotifyTriggerNotifyVo();
-                    id = SnowflakeUtil.uniqueLong();
-                    notifyObj.setId(id);
-                    notifyObj.setActionList(actionArray);
-                    notifyObj.setConditionConfig(conditionConfig);
-                    notifyList.add(notifyObj);
-                    resultObj.put("id", id);
                 }
+            }else{
+                iterator.remove();
             }
         }
         if (!existed) {
