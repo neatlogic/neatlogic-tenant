@@ -1,6 +1,5 @@
 package codedriver.module.tenant.service.systemnotice;
 
-import java.util.List;
 
 /**
  * @Title: SystemNoticeService
@@ -14,7 +13,7 @@ import java.util.List;
 public interface SystemNoticeService {
 
     /**
-     * @Description: 如果当前用户的system_notice_user中存在system_notice中没有的公告记录，清理掉
+     * @Description: 清理掉system_notice_user中因删除公告或更改公告通知对象而遗留的记录
      * @Author: laiwt
      * @Date: 2021/1/20 11:10
      * @Params: []
@@ -26,27 +25,27 @@ public interface SystemNoticeService {
      * @Description: 检查是否存在【已发布却到了失效时间的】公告，如果有，则停用
      * @Author: laiwt
      * @Date: 2021/1/20 11:12
-     * @Params: [uuidList]
+     * @Params: []
      * @Returns: void
     **/
-    public void stopExpiredSystemNotice(List<String> uuidList);
+    public void stopExpiredSystemNotice();
 
     /**
      * @Description: 在system_notice_user插入【当前用户可看的】、【已发布的】公告
      * @Author: laiwt
      * @Date: 2021/1/20 11:12
-     * @Params: [uuidList]
+     * @Params: []
      * @Returns: void
     **/
-    public void pullIssuedSystemNotice(List<String> uuidList);
+    public void pullIssuedSystemNotice();
 
     /**
      * @Description: 检查是否存在【当前用户可看的】、【到了生效时间，却还没发布】公告，
      * 如果有则下发给当前用户
      * @Author: laiwt
      * @Date: 2021/1/20 11:13
-     * @Params: [uuidList]
+     * @Params: []
      * @Returns: void
     **/
-    public void pullActiveSystemNotice(List<String> uuidList);
+    public void pullActiveSystemNotice();
 }

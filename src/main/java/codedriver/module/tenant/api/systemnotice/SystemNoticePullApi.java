@@ -82,9 +82,9 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         uuidList.addAll(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
 
         systemNoticeService.clearSystemNoticeUser();
-        systemNoticeService.stopExpiredSystemNotice(uuidList);
-        systemNoticeService.pullIssuedSystemNotice(uuidList);
-        systemNoticeService.pullActiveSystemNotice(uuidList);
+        systemNoticeService.stopExpiredSystemNotice();
+        systemNoticeService.pullIssuedSystemNotice();
+        systemNoticeService.pullActiveSystemNotice();
 
         vo.setRecipientList(uuidList);
         JSONObject returnObj = new JSONObject();

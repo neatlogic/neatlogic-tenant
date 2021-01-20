@@ -39,18 +39,14 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
         systemNoticeMapper.deleteNotExistsNoticeByUserUuid(UserContext.get().getUserUuid(true));
 
         /** 清理掉system_notice_user中，因更改公告通知对象而残留的记录 **/
-        List<String> uuidList = new ArrayList<>();
-        uuidList.add(UserContext.get().getUserUuid(true));
-        uuidList.add(UserType.ALL.getValue());
-        uuidList.addAll(userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-        uuidList.addAll(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-
-        systemNoticeMapper.deleteNoticeUserWhoIsNotInNoticeScope(UserContext.get().getUserUuid(true),uuidList);
+        List<String> recipientUuidList = getRecipientUuidList();
+        systemNoticeMapper.deleteNoticeUserWhoIsNotInNoticeScope(UserContext.get().getUserUuid(true),recipientUuidList);
     }
 
     @Override
-    public void stopExpiredSystemNotice(List<String> uuidList) {
-        List<SystemNoticeVo> expiredNoticeList = systemNoticeMapper.getExpiredNoticeListByRecipientUuidList(uuidList);
+    public void stopExpiredSystemNotice() {
+        List<String> recipientUuidList = getRecipientUuidList();
+        List<SystemNoticeVo> expiredNoticeList = systemNoticeMapper.getExpiredNoticeListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(expiredNoticeList)) {
             for (SystemNoticeVo vo : expiredNoticeList) {
                 vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
@@ -60,8 +56,9 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
     }
 
     @Override
-    public void pullIssuedSystemNotice(List<String> uuidList) {
-        List<Long> issuedNoticeList = systemNoticeMapper.getIssuedNoticeIdListByRecipientUuidList(uuidList);
+    public void pullIssuedSystemNotice() {
+        List<String> recipientUuidList = getRecipientUuidList();
+        List<Long> issuedNoticeList = systemNoticeMapper.getIssuedNoticeIdListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(issuedNoticeList)) {
             List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
             for (Long id : issuedNoticeList) {
@@ -72,8 +69,9 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
     }
 
     @Override
-    public void pullActiveSystemNotice(List<String> uuidList) {
-        List<SystemNoticeVo> hasBeenActiveNoticeList = systemNoticeMapper.getHasBeenActiveNoticeListByRecipientUuidList(uuidList);
+    public void pullActiveSystemNotice() {
+        List<String> recipientUuidList = getRecipientUuidList();
+        List<SystemNoticeVo> hasBeenActiveNoticeList = systemNoticeMapper.getHasBeenActiveNoticeListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(hasBeenActiveNoticeList)) {
             TransactionStatus transactionStatus = TransactionUtil.openTx();
             List<SystemNoticeUserVo> currentUserNoticeList = new ArrayList<>();
@@ -90,5 +88,14 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
             }
             TransactionUtil.commitTx(transactionStatus);
         }
+    }
+
+    private List<String> getRecipientUuidList(){
+        List<String> uuidList = new ArrayList<>();
+        uuidList.add(UserContext.get().getUserUuid(true));
+        uuidList.add(UserType.ALL.getValue());
+        uuidList.addAll(userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        return uuidList;
     }
 }

@@ -40,8 +40,6 @@ import java.util.List;
 @Transactional
 public class SystemNoticeSaveApi extends PrivateApiComponentBase {
 
-    private final static int BATCH_DELETE_MAX_COUNT = 1000;
-
     @Autowired
     private SystemNoticeMapper systemNoticeMapper;
 
