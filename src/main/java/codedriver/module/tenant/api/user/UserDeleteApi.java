@@ -53,8 +53,7 @@ public class UserDeleteApi extends PrivateApiComponentBase{
     			userMapper.deleteUserAuth(new UserAuthVo(userUuid));
     			userMapper.deleteUserRoleByUserUuid(userUuid);
     			userMapper.deleteUserTeamByUserUuid(userUuid);
-//    			userMapper.deleteUserByUuid(userUuid);
-				userMapper.updateUserToDeleteByUuid(userUuid);
+    			userMapper.deleteUserByUuid(userUuid);
 			}
     	}
 		return null;

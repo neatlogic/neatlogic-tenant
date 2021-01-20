@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
@@ -93,8 +92,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		
 		JSONObject resultObj = new JSONObject();
-		UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
-		userVo.setIsActive(1);
+		UserVo userVo = JSON.toJavaObject(jsonObj, UserVo.class);
 		if (userVo.getNeedPage()) {
 			int rowNum = userMapper.searchUserCount(userVo);
 			resultObj.put("rowNum", rowNum);
