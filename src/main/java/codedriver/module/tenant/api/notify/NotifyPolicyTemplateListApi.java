@@ -57,8 +57,7 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
             @Param(name = "notifyHandler", type = ApiParamType.STRING, desc = "通知处理器"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
     @Output({
             @Param(explode = BasePageVo.class),
@@ -94,16 +93,15 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
             }
             templateList.add(notifyTemplateVo);
         }
-        if(CollectionUtils.isNotEmpty(templateList)){
-            templateList.sort(Comparator.comparing(NotifyTemplateVo::getLcd));
-            Collections.reverse(templateList);
-        }
         JSONObject resultObj = new JSONObject();
-        if(basePageVo.getNeedPage()){
-            int rowNum = templateList.size();
-            int pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
-            resultObj.put("currentPage", basePageVo.getCurrentPage());
-            resultObj.put("pageSize", basePageVo.getPageSize());
+        resultObj.put("currentPage", basePageVo.getCurrentPage());
+        resultObj.put("pageSize", basePageVo.getPageSize());
+        int rowNum = 0;
+        int pageCount = 0;
+        if(CollectionUtils.isNotEmpty(templateList)){
+            templateList.sort((e1, e2) -> e2.getActionTime().compareTo(e1.getActionTime()));
+            rowNum = templateList.size();
+            pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
             resultObj.put("pageCount", pageCount);
             resultObj.put("rowNum", rowNum);
             int fromIndex = basePageVo.getStartNum();
@@ -116,6 +114,8 @@ public class NotifyPolicyTemplateListApi extends PrivateApiComponentBase {
             }
         }
 
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
         resultObj.put("templateList", templateList);
         return resultObj;
     }
