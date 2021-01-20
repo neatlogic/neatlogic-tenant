@@ -1,8 +1,6 @@
 package codedriver.module.tenant.api.systemnotice;
 
-import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
@@ -86,17 +84,6 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             }
             systemNoticeMapper.updateSystemNoticeBaseInfo(vo);
             systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
-            /**分批删除system_notice_user表中的记录(已读的不删)**/
-            CommonThreadPool.execute(new CodeDriverThread() {
-                @Override
-                protected void execute() {
-                    int noticeUserCount = systemNoticeMapper.getNotReadNoticeUserCountByNoticeId(vo.getId());
-                    int count = noticeUserCount / BATCH_DELETE_MAX_COUNT + 1;
-                    for (int i = 0; i < count; i++) {
-                        systemNoticeMapper.deleteNoticeUserByNoticeId(vo.getId(), 0, BATCH_DELETE_MAX_COUNT);
-                    }
-                }
-            });
         }
 
         /**保存通知对象*/
