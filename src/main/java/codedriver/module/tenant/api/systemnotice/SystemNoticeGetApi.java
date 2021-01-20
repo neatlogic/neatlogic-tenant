@@ -46,7 +46,7 @@ public class SystemNoticeGetApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "公告ID")})
-    @Output({@Param(name = "notice",explode = SystemNoticeVo.class)})
+    @Output({@Param(explode = SystemNoticeVo.class)})
     @Description(desc = "获取系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -54,8 +54,6 @@ public class SystemNoticeGetApi extends PrivateApiComponentBase {
         if(vo == null){
             throw new SystemNoticeNotFoundException(jsonObj.getLong("id"));
         }
-        JSONObject result = new JSONObject();
-        result.put("notice",vo);
-        return result;
+        return vo;
     }
 }

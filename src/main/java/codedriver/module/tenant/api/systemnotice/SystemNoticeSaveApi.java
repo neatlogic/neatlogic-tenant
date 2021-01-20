@@ -68,7 +68,7 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "内容"),
             @Param(name = "recipientList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "通知对象列表,可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
     })
-    @Output({@Param(explode = SystemNoticeVo.class)})
+    @Output({})
     @Description(desc = "保存系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
