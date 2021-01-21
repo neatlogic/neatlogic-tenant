@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Title: SystemNoticeServiceImpl
@@ -35,12 +37,16 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
 
     @Override
     public void clearSystemNoticeUser() {
-        /** 清理掉system_notice_user中，因公告被删除而残留的记录 **/
-        systemNoticeMapper.deleteNotExistsNoticeByUserUuid(UserContext.get().getUserUuid(true));
-
-        /** 清理掉system_notice_user中，因更改公告通知对象而残留的记录 **/
         List<String> recipientUuidList = getRecipientUuidList();
-        systemNoticeMapper.deleteNoticeUserWhoIsNotInNoticeScope(UserContext.get().getUserUuid(true),recipientUuidList);
+        Set<Long> noticeIdList = new HashSet<>();
+        /** 获取system_notice_user中，因公告被删除而残留的记录 **/
+        noticeIdList.addAll(systemNoticeMapper.getNotExistsNoticeIdListFromNoticeUserByUserUuid(UserContext.get().getUserUuid(true)));
+        /** 获取system_notice_user中，因更改公告通知对象而残留的记录  **/
+        noticeIdList.addAll(systemNoticeMapper.getNotInNoticeScopeNoticeIdListByUserUuid(recipientUuidList,UserContext.get().getUserUuid(true)));
+        /** 清理掉上述两种记录 **/
+        if(CollectionUtils.isNotEmpty(noticeIdList)){
+            systemNoticeMapper.deleteSystemNoticeUserByUserUuid(UserContext.get().getUserUuid(true),noticeIdList);
+        }
     }
 
     @Override
