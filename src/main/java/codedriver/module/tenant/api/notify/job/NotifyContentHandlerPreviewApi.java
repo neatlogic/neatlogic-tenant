@@ -29,7 +29,10 @@ public class NotifyContentHandlerPreviewApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "通知内容插件")})
+	@Input({
+			@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "通知内容插件"),
+			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "插件可接受的额外参数，比如待我处理的工单插件，可接受dataColumnList来定制表格显示字段")
+	})
 	@Output({@Param(name = "content",type = ApiParamType.STRING ,desc = "预览视图HTML")})
 	@Description(desc = "获取通知内容插件预览视图")
 	@Override
@@ -40,7 +43,7 @@ public class NotifyContentHandlerPreviewApi extends PrivateApiComponentBase {
 			throw new NotifyContentHandlerNotFoundException(handler);
 		}
 		JSONObject result = new JSONObject();
-		result.put("content",notifyContentHandler.preview());
+		result.put("content",notifyContentHandler.preview(jsonObj.getJSONObject("config")));
 		return result;
 	}
 }
