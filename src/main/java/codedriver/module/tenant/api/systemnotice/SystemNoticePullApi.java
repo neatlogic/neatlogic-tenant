@@ -103,16 +103,17 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         }
         returnObj.put("tbodyList",noticeList);
 
+        // todo 更换逻辑 --laiwt
         /** 按发布时间倒序，寻找第一个需要弹窗的公告 **/
-        SystemNoticeVo popUpNotice = systemNoticeMapper.getFirstPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),null);
-        if(popUpNotice != null){
-            /** 更新状态为已读 **/
-            systemNoticeMapper.updateSystemNoticeUserReadStatus(popUpNotice.getId(),UserContext.get().getUserUuid(true));
-            /** 判断是否有下一条需要弹窗的公告 **/
-            int hasNext = systemNoticeMapper.checkHasNextNeedPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),popUpNotice.getId());
-            returnObj.put("popUpNotice",popUpNotice);
-            returnObj.put("hasNext",hasNext);
-        }
+//        SystemNoticeVo popUpNotice = systemNoticeMapper.getFirstPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),null);
+//        if(popUpNotice != null){
+//            /** 更新状态为已读 **/
+//            systemNoticeMapper.updateSystemNoticeUserReadStatus(popUpNotice.getId(),UserContext.get().getUserUuid(true));
+//            /** 判断是否有下一条需要弹窗的公告 **/
+//            int hasNext = systemNoticeMapper.checkHasNextNeedPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),popUpNotice.getId());
+//            returnObj.put("popUpNotice",popUpNotice);
+//            returnObj.put("hasNext",hasNext);
+//        }
 
         return returnObj;
     }
