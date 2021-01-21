@@ -6,6 +6,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.auth.label.TEAM_MODIFY;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public class TeamUserTitleUpdateApi extends PrivateApiComponentBase {
 	@Input({
 		@Param(name = "teamUuid", type = ApiParamType.STRING, isRequired = true, desc = "组uuid"),
 		@Param(name = "userUuid", type = ApiParamType.STRING, isRequired = true, desc = "用户uuid"),
-		@Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "头衔")
+		@Param(name = "title", type = ApiParamType.STRING, desc = "头衔")
 	})
 	@Output({
 		@Param(name="Return", explode = TeamUserVo.class, desc = "组用户头衔信息")
@@ -66,7 +67,7 @@ public class TeamUserTitleUpdateApi extends PrivateApiComponentBase {
 		if(userMapper.checkUserIsExists(teamUserVo.getUserUuid()) == 0) {
 			throw new UserNotFoundException(teamUserVo.getUserUuid());
 		}
-		if(TeamUserTitle.getValue(teamUserVo.getTitle()) == null) {
+		if(StringUtils.isNotBlank(teamUserVo.getTitle()) && TeamUserTitle.getValue(teamUserVo.getTitle()) == null) {
 			throw new TeamUserTitleNotFoundException(teamUserVo.getTitle());
 		}
 		teamMapper.updateTeamUserTitle(teamUserVo);
