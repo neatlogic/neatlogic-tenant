@@ -2,12 +2,15 @@ package codedriver.module.tenant.api.team;
 
 import java.util.List;
 
+import codedriver.framework.common.constvalue.TeamUserTitle;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +59,13 @@ public class TeamUserListApi extends PrivateApiComponentBase  {
 		}
 		JSONObject resultObj = new JSONObject();
 		List<UserVo> teamUserList = userMapper.getUserListByTeamUuid(teamUuid);
+		if(CollectionUtils.isNotEmpty(teamUserList)){
+			teamUserList.stream().forEach(o -> {
+				if(StringUtils.isNotBlank(o.getTitle())){
+					o.setTitleText(TeamUserTitle.getText(o.getTitle()));
+				}
+			});
+		}
 		resultObj.put("teamUserList", teamUserList);
 		return resultObj;
 	}
