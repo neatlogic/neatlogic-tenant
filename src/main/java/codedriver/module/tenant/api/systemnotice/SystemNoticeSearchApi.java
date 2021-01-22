@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.systemnotice;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -73,7 +74,10 @@ public class SystemNoticeSearchApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
-    @Output({@Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = SystemNoticeVo.class)})
+    @Output({
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = SystemNoticeVo.class),
+            @Param(explode = BasePageVo.class)
+    })
     @Description(desc = "查询系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

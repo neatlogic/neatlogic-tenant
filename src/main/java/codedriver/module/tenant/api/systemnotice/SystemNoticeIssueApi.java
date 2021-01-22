@@ -91,11 +91,12 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
         }
 
+        long currentTimeMillis = System.currentTimeMillis();
         /** 如果没有设置生效时间或者当前时间大于等于生效时间，则发送给在通知范围内的在线用户 **/
         if (vo.getStartTime() == null || (vo.getStartTime() != null
-                && System.currentTimeMillis() >= vo.getStartTime().getTime()
+                && currentTimeMillis >= vo.getStartTime().getTime()
                 && vo.getEndTime() != null
-                && System.currentTimeMillis() < vo.getEndTime().getTime())) {
+                && currentTimeMillis < vo.getEndTime().getTime())) {
 
             /** 立即更改公告状态为已发布 **/
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());

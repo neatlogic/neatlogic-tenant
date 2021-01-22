@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.systemnotice;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.restful.annotation.*;
@@ -68,9 +69,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", explode = SystemNoticeVo.class, desc = "公告列表"),
-            @Param(name = "popUpNotice", explode = SystemNoticeVo.class, desc = "需要弹窗的公告"),
-            @Param(name = "hasNext", desc = "是否有下一条需要弹窗的公告(1:是;0:否)")
-
+            @Param(explode = BasePageVo.class)
     })
     @Description(desc = "拉取系统公告")
     @Override
