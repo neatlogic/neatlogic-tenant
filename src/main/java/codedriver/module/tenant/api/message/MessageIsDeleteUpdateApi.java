@@ -7,11 +7,14 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Title: MessageIsReadUpdateApi
@@ -46,13 +49,32 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表")
+            @Param(name = "messageId", type = ApiParamType.LONG, desc = "消息id"),
+            @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表"),
+            @Param(name = "date", type = ApiParamType.LONG, desc = "日期")
     })
     @Description(desc = "更新消息为已删除")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<Long> messageIdList = (List<Long>)jsonObj.get("messageIdList");
-        messageMapper.updateMessageUserIsDelete(UserContext.get().getUserUuid(true), messageIdList);
+        Long messageId = jsonObj.getLong("messageId");
+        if (messageId != null) {
+            messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageId(UserContext.get().getUserUuid(true), messageId);
+        } else {
+            List<Long> messageIdList = (List<Long>) jsonObj.get("messageIdList");
+            if (CollectionUtils.isNotEmpty(messageIdList)) {
+                messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdList(UserContext.get().getUserUuid(true), messageIdList);
+            } else {
+                Date date = jsonObj.getDate("date");
+                if (date != null) {
+                    Long fromMessageId = messageMapper.getMessageMaxIdByLessThanFcd(date);
+                    Date nextDay = new Date(date.getTime() + TimeUnit.HOURS.toMillis(24));
+                    Long toMessageId = messageMapper.getMessageMaxIdByLessThanFcd(nextDay);
+                    messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdRange(UserContext.get().getUserUuid(true), fromMessageId, toMessageId);
+                } else {
+                    messageMapper.updateMessageUserIsDeleteByUserUuid(UserContext.get().getUserUuid(true));
+                }
+            }
+        }
         return null;
     }
 }
