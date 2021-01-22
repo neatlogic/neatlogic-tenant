@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +58,7 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "messageId", type = ApiParamType.LONG, desc = "消息id"),
             @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表"),
-            @Param(name = "date", type = ApiParamType.LONG, desc = "日期")
+            @Param(name = "daysAgo", type = ApiParamType.INTEGER, desc = "距离今天的天数")
     })
     @Output({
             @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数")
@@ -71,10 +75,11 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(messageIdList)) {
                 messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdList(userUuid, messageIdList);
             } else {
-                Date date = jsonObj.getDate("date");
-                if (date != null) {
-                    Long fromMessageId = messageMapper.getMessageMaxIdByLessThanFcd(date);
-                    Date nextDay = new Date(date.getTime() + TimeUnit.HOURS.toMillis(24));
+                Integer daysAgo = jsonObj.getInteger("daysAgo");
+                if (daysAgo != null) {
+                    Date currentDay = Date.from(LocalDate.now().minusDays(daysAgo).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+                    Long fromMessageId = messageMapper.getMessageMaxIdByLessThanFcd(currentDay);
+                    Date nextDay = new Date(currentDay.getTime() + TimeUnit.HOURS.toMillis(24));
                     Long toMessageId = messageMapper.getMessageMaxIdByLessThanFcd(nextDay);
                     messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdRange(userUuid, fromMessageId, toMessageId);
                 } else {
