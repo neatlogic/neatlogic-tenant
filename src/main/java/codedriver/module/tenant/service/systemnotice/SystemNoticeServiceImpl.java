@@ -6,11 +6,9 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeUserVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
-import codedriver.framework.transaction.util.TransactionUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,7 +77,6 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
         List<String> recipientUuidList = getRecipientUuidList();
         List<SystemNoticeVo> hasBeenActiveNoticeList = systemNoticeMapper.getHasBeenActiveNoticeListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(hasBeenActiveNoticeList)) {
-            TransactionStatus transactionStatus = TransactionUtil.openTx();
             List<SystemNoticeUserVo> currentUserNoticeList = new ArrayList<>();
             /** 更改这些公告的状态为已发布 **/
             for (SystemNoticeVo vo : hasBeenActiveNoticeList) {
@@ -92,7 +89,6 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
             if (CollectionUtils.isNotEmpty(currentUserNoticeList)) {
                 systemNoticeMapper.batchInsertSystemNoticeUser(currentUserNoticeList);
             }
-            TransactionUtil.commitTx(transactionStatus);
         }
     }
 
