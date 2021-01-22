@@ -87,6 +87,6 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
         searchVo.setUserUuid(userUuid);
         int newCount = messageMapper.getMessageNewCount(searchVo);
         resultObj.put("newCount", newCount);
-        return null;
+        return resultObj;
     }
 }
