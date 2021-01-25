@@ -99,7 +99,11 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         }
         List<SystemNoticeVo> noticeList = systemNoticeMapper.searchIssuedNoticeListByUserUuid(vo,UserContext.get().getUserUuid(true));
         if(CollectionUtils.isNotEmpty(noticeList)){
-            noticeList.stream().forEach(o -> o.setContent(HtmlUtil.removeHtml(o.getContent(),null)));
+            /** 提取内容中的图片&过滤掉所有的HTML标签 **/
+            noticeList.stream().forEach(o -> {
+                o.setImgList(HtmlUtil.getFigureList(o.getContent()));
+                o.setContent(HtmlUtil.removeHtml(o.getContent(),null));
+            });
         }
         returnObj.put("tbodyList",noticeList);
 
@@ -110,7 +114,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
             pageVo.setPageSize(100);
             pageVo.setPageCount(PageUtil.getPageCount(popUpNoticeCount, pageVo.getPageSize()));
             List<Long> idList = new ArrayList<>();
-            for(int i = 0;i < pageVo.getPageCount();i++){
+            for(int i = 1;i <= pageVo.getPageCount();i++){
                 pageVo.setCurrentPage(i);
                 idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),pageVo));
             }
