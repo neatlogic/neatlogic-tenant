@@ -17,6 +17,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
+import codedriver.framework.util.HtmlUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -121,6 +122,10 @@ public class SystemNoticeSearchApi extends PrivateApiComponentBase {
                     }
                     noticeVo.setRecipientObjList(recipientObjList);
                 }
+                /** 提取内容中的图片 **/
+                noticeVo.setImgList(HtmlUtil.getFigureList(noticeVo.getContent()));
+                /** 过滤掉内容中所有的HTML标签 **/
+                noticeVo.setContent(HtmlUtil.removeHtml(noticeVo.getContent(),null));
                 noticeVo.setStatusVo(SystemNoticeVo.Status.getStatus(noticeVo.getStatus()));
                 noticeVo.setFcuVo(userMapper.getUserBaseInfoByUuidWithoutCache(noticeVo.getFcu()));
             }

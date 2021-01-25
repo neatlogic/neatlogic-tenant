@@ -69,6 +69,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", explode = SystemNoticeVo.class, desc = "公告列表"),
+            @Param(name = "popUpNoticeIdList",desc = "需要弹窗的公告ID列表"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "拉取系统公告")
@@ -98,21 +99,27 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         }
         List<SystemNoticeVo> noticeList = systemNoticeMapper.searchIssuedNoticeListByUserUuid(vo,UserContext.get().getUserUuid(true));
         if(CollectionUtils.isNotEmpty(noticeList)){
-            noticeList.stream().forEach(o -> o.setContent(HtmlUtil.removeHtml(o.getContent(),null)));
+            /** 提取内容中的图片&过滤掉所有的HTML标签 **/
+            noticeList.stream().forEach(o -> {
+                o.setImgList(HtmlUtil.getFigureList(o.getContent()));
+                o.setContent(HtmlUtil.removeHtml(o.getContent(),null));
+            });
         }
         returnObj.put("tbodyList",noticeList);
 
-        // todo 更换逻辑 --laiwt
-        /** 按发布时间倒序，寻找第一个需要弹窗的公告 **/
-//        SystemNoticeVo popUpNotice = systemNoticeMapper.getFirstPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),null);
-//        if(popUpNotice != null){
-//            /** 更新状态为已读 **/
-//            systemNoticeMapper.updateSystemNoticeUserReadStatus(popUpNotice.getId(),UserContext.get().getUserUuid(true));
-//            /** 判断是否有下一条需要弹窗的公告 **/
-//            int hasNext = systemNoticeMapper.checkHasNextNeedPopUpNoticeByUserUuid(UserContext.get().getUserUuid(true),popUpNotice.getId());
-//            returnObj.put("popUpNotice",popUpNotice);
-//            returnObj.put("hasNext",hasNext);
-//        }
+        /** 查找需要弹窗的公告ID **/
+        int popUpNoticeCount = systemNoticeMapper.getPopUpNoticeCountByUserUuid(UserContext.get().getUserUuid(true));
+        if(popUpNoticeCount > 0){
+            BasePageVo pageVo = new BasePageVo();
+            pageVo.setPageSize(100);
+            pageVo.setPageCount(PageUtil.getPageCount(popUpNoticeCount, pageVo.getPageSize()));
+            List<Long> idList = new ArrayList<>();
+            for(int i = 1;i <= pageVo.getPageCount();i++){
+                pageVo.setCurrentPage(i);
+                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),pageVo));
+            }
+            returnObj.put("popUpNoticeIdList",idList);
+        }
 
         return returnObj;
     }
