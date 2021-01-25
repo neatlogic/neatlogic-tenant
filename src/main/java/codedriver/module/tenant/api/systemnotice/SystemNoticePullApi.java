@@ -111,7 +111,8 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
             pageVo.setPageCount(PageUtil.getPageCount(popUpNoticeCount, pageVo.getPageSize()));
             List<Long> idList = new ArrayList<>();
             for(int i = 0;i < pageVo.getPageCount();i++){
-                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),i,pageVo.getPageSize()));
+                pageVo.setCurrentPage(i);
+                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),pageVo));
             }
             returnObj.put("popUpNoticeIdList",idList);
         }
