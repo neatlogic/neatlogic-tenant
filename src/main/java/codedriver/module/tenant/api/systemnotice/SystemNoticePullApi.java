@@ -106,10 +106,12 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         /** 查找需要弹窗的公告ID **/
         int popUpNoticeCount = systemNoticeMapper.getPopUpNoticeCountByUserUuid(UserContext.get().getUserUuid(true));
         if(popUpNoticeCount > 0){
+            BasePageVo pageVo = new BasePageVo();
+            pageVo.setPageSize(100);
+            pageVo.setPageCount(PageUtil.getPageCount(popUpNoticeCount, pageVo.getPageSize()));
             List<Long> idList = new ArrayList<>();
-            int count = popUpNoticeCount / 100 + 1;
-            for(int i = 0;i < count;i++){
-                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),i,100));
+            for(int i = 0;i < pageVo.getPageCount();i++){
+                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),i,pageVo.getPageSize()));
             }
             returnObj.put("popUpNoticeIdList",idList);
         }
