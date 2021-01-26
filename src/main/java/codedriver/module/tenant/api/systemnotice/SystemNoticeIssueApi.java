@@ -92,11 +92,15 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
         }
 
         long currentTimeMillis = System.currentTimeMillis();
-        /** 如果没有设置生效时间或者当前时间大于等于生效时间，则发送给在通知范围内的在线用户 **/
-        if (vo.getStartTime() == null || (vo.getStartTime() != null
-                && currentTimeMillis >= vo.getStartTime().getTime()
-                && vo.getEndTime() != null
-                && currentTimeMillis < vo.getEndTime().getTime())) {
+        /**
+         * 符合以下情形之一则立即下发给通知范围内的在线用户
+         * 1、没有设置生效与失效时间
+         * 2、没有设置生效时间且失效时间大于当前时间
+         * 3、生效时间小于等于当前时间且失效时间大于当前时间
+         * 4、生效时间小于等于当前时间且没有设置失效时间
+        **/
+        if((vo.getStartTime() == null || (vo.getStartTime() != null && currentTimeMillis >= vo.getStartTime().getTime()))
+                && (vo.getEndTime() == null || (vo.getEndTime() != null && currentTimeMillis < vo.getEndTime().getTime()))){
 
             /** 立即更改公告状态为已发布 **/
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
