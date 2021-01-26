@@ -1,5 +1,6 @@
 package codedriver.module.tenant.service.apiaudit;
 
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
@@ -52,50 +53,59 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
             return null;
         }
-        List<ApiAuditVo> apiAuditList = apiMapper.searchApiAuditForExport(apiAuditVo);
-        /**
-         * 读取文件中的参数/结果/错误
-         */
-        if(CollectionUtils.isNotEmpty(apiAuditList)){
-            for(ApiAuditVo vo : apiAuditList){
-                String paramFilePath = vo.getParamFilePath();
-                String resultFilePath = vo.getResultFilePath();
-                String errorFilePath = vo.getErrorFilePath();
+        List<ApiAuditVo> apiAuditList = null;
+        int count = apiMapper.searchApiAuditListCount(apiAuditVo);
+        if(count > 0){
+            apiAuditVo.setPageSize(100);
+            apiAuditVo.setPageCount(PageUtil.getPageCount(count, apiAuditVo.getPageSize()));
+            apiAuditList = new ArrayList<>();
+            List<ApiAuditVo> list = null;
+            for(int i = 1;i <= apiAuditVo.getPageCount();i++){
+                apiAuditVo.setCurrentPage(i);
+                list = apiMapper.searchApiAuditForExport(apiAuditVo);
+                if(CollectionUtils.isNotEmpty(list)){
+                    /**读取文件中的参数/结果/错误**/
+                    for(ApiAuditVo vo : list){
+                        String paramFilePath = vo.getParamFilePath();
+                        String resultFilePath = vo.getResultFilePath();
+                        String errorFilePath = vo.getErrorFilePath();
 
-                if(StringUtils.isNotBlank(paramFilePath)){
-                    long offset = Long.parseLong(paramFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > AuditUtil.maxFileSize){
-                        vo.setParam("内容过长，不予导出");
-                    }else{
-                        String param = AuditUtil.getAuditDetail(paramFilePath);
-                        vo.setParam(param);
+                        if(StringUtils.isNotBlank(paramFilePath)){
+                            long offset = Long.parseLong(paramFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                            if(offset > AuditUtil.maxExportSize){
+                                vo.setParam("内容过长，不予导出");
+                            }else{
+                                String param = AuditUtil.getAuditDetail(paramFilePath);
+                                vo.setParam(param);
+                            }
+                        }
+                        if(StringUtils.isNotBlank(resultFilePath)){
+                            long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                            if(offset > AuditUtil.maxExportSize){
+                                vo.setResult("内容过长，不予导出");
+                            }else{
+                                String result = AuditUtil.getAuditDetail(resultFilePath);
+                                vo.setResult(result);
+                            }
+                        }
+                        if(StringUtils.isNotBlank(errorFilePath)){
+                            long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
+                            if(offset > AuditUtil.maxExportSize){
+                                vo.setError("内容过长，不予导出");
+                            }else{
+                                String error = AuditUtil.getAuditDetail(errorFilePath);
+                                vo.setError(error);
+                            }
+                        }
                     }
-                }
-                if(StringUtils.isNotBlank(resultFilePath)){
-                    long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > AuditUtil.maxFileSize){
-                        vo.setResult("内容过长，不予导出");
-                    }else{
-                        String result = AuditUtil.getAuditDetail(resultFilePath);
-                        vo.setResult(result);
-                    }
-                }
-                if(StringUtils.isNotBlank(errorFilePath)){
-                    long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
-                    if(offset > AuditUtil.maxFileSize){
-                        vo.setError("内容过长，不予导出");
-                    }else{
-                        String error = AuditUtil.getAuditDetail(errorFilePath);
-                        vo.setError(error);
-                    }
+                    /**补充从数据库无法获取的字段**/
+                    addFields(apiList, list);
+
+                    apiAuditList.addAll(list);
+                    list.clear();
                 }
             }
         }
-        /**
-         * 补充从数据库无法获取的字段
-         */
-        addFields(apiList, apiAuditList);
-
         return apiAuditList;
     }
 
