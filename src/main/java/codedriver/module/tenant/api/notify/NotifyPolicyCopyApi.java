@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -63,6 +64,7 @@ public class NotifyPolicyCopyApi extends PrivateApiComponentBase {
         String name = jsonObj.getString("name");
         notifyPolicyVo.setName(name);
         notifyPolicyVo.setId(null);
+        notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
         if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
             throw new NotifyPolicyNameRepeatException(name);
         }
