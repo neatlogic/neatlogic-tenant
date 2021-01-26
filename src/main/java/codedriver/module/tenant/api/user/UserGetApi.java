@@ -55,7 +55,7 @@ public class UserGetApi extends PrivateApiComponentBase {
 		}
 		UserVo userVo = null;
 		//维护模式下 获取厂商维护人员信息
-		if (Config.IS_MAINTENANCE_MODE() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
+		if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
 			userVo = MaintenanceMode.getMaintenanceUser();
 		} else {
 			userVo = userMapper.getUserByUuid(userUuid);
@@ -82,9 +82,9 @@ public class UserGetApi extends PrivateApiComponentBase {
 			userJson.put("roleUuidList", roleUuidList);
 		}
 		//告诉前端是否为维护模式
-		userJson.put("isMaintenanceMode",0);
-		if (Config.IS_MAINTENANCE_MODE()){
-			userJson.put("isMaintenanceMode",1);
+		userJson.put("isMaintenanceMode", 0);
+		if (Config.ENABLE_SUPERADMIN()) {
+			userJson.put("isMaintenanceMode", 1);
 		}
 		return userJson;
 	}

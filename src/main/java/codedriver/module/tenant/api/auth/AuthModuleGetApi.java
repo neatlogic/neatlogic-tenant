@@ -69,7 +69,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         //获取用户权限
         List<UserAuthVo>  userAuthList = null;
         //维护模式下 获取厂商维护人员信息
-        if (Config.IS_MAINTENANCE_MODE() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
+        if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
             userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
         } else {
             userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
