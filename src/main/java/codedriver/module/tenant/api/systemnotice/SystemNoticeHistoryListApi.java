@@ -93,7 +93,7 @@ public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
         if(CollectionUtils.isNotEmpty(noticeVoList)){
             for(SystemNoticeVo noticeVo : noticeVoList){
                 /** 提取内容中的图片 **/
-                noticeVo.setImgList(HtmlUtil.getFigureList(noticeVo.getContent()));
+                noticeVo.setImgList(HtmlUtil.getImgSrcList(noticeVo.getContent()));
                 /** 过滤掉内容中所有的HTML标签 **/
                 noticeVo.setContent(HtmlUtil.removeHtml(noticeVo.getContent(),null));
             }
