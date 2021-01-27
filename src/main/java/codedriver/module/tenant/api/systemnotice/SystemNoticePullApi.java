@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Title: SystemNoticePullApi
@@ -116,7 +117,10 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
             List<Long> idList = new ArrayList<>();
             for(int i = 1;i <= pageVo.getPageCount();i++){
                 pageVo.setCurrentPage(i);
-                idList.addAll(systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true),pageVo));
+                List<SystemNoticeVo> popUpNoticeIdList = systemNoticeMapper.getPopUpNoticeIdListByUserUuid(UserContext.get().getUserUuid(true), pageVo);
+                if(CollectionUtils.isNotEmpty(popUpNoticeIdList)){
+                    idList.addAll(popUpNoticeIdList.stream().map(SystemNoticeVo::getId).collect(Collectors.toList()));
+                }
             }
             returnObj.put("popUpNoticeIdList",idList);
         }
