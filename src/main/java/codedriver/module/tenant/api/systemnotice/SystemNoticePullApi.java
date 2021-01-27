@@ -103,7 +103,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         if(CollectionUtils.isNotEmpty(noticeList)){
             /** 提取内容中的图片&过滤掉所有的HTML标签 **/
             noticeList.stream().forEach(o -> {
-                o.setImgList(HtmlUtil.getFigureList(o.getContent()));
+                o.setImgList(HtmlUtil.getImgSrcList(o.getContent()));
                 o.setContent(HtmlUtil.removeHtml(o.getContent(),null));
             });
         }
