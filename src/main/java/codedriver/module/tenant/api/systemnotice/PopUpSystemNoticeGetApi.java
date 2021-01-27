@@ -1,6 +1,5 @@
 package codedriver.module.tenant.api.systemnotice;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -54,7 +53,7 @@ public class PopUpSystemNoticeGetApi extends PrivateApiComponentBase {
         if(notice == null){
             throw new SystemNoticeNotFoundException(id);
         }
-        systemNoticeMapper.updateSystemNoticeUserReadStatus(id,UserContext.get().getUserUuid(true));
+//        systemNoticeMapper.updateSystemNoticeUserReadStatus(id,UserContext.get().getUserUuid(true));
         return notice;
     }
 }
