@@ -90,9 +90,10 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         systemNoticeService.pullActiveSystemNotice();
 
         vo.setRecipientList(uuidList);
+        vo.setIsRead(0);
         JSONObject returnObj = new JSONObject();
         if (vo.getNeedPage()) {
-            int rowNum = systemNoticeMapper.searchIssuedNoticeCountByUserUuid(UserContext.get().getUserUuid(true));
+            int rowNum = systemNoticeMapper.searchIssuedNoticeCountByUserUuid(UserContext.get().getUserUuid(true),vo);
             returnObj.put("pageSize", vo.getPageSize());
             returnObj.put("currentPage", vo.getCurrentPage());
             returnObj.put("rowNum", rowNum);
