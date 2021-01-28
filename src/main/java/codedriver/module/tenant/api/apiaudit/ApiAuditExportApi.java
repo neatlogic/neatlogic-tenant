@@ -79,9 +79,11 @@ public class ApiAuditExportApi extends PrivateBinaryStreamApiComponentBase {
 		response.setContentType("application/text;charset=GBK");
 		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
 		ServletOutputStream os = response.getOutputStream();
-		ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
-		apiAuditService.exportApiAudit(apiAuditVo,os);
-		os.close();
+		if(os != null){
+			ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});
+			apiAuditService.exportApiAudit(apiAuditVo,os);
+			os.close();
+		}
 		return null;
 	}
 }
