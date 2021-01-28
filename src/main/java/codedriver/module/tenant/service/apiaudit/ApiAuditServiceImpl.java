@@ -1,6 +1,7 @@
 package codedriver.module.tenant.service.apiaudit;
 
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.restful.annotation.ExcelField;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
@@ -9,21 +10,26 @@ import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.AuditUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class ApiAuditServiceImpl implements ApiAuditService{
 
     private static final String TIME_UINT_OF_DAY = "day";
     private static final String TIME_UINT_OF_MONTH = "month";
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private ApiMapper apiMapper;
@@ -47,23 +53,36 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     }
 
     @Override
-    public List<ApiAuditVo> searchApiAuditForExport(ApiAuditVo apiAuditVo) throws Exception {
+    public void exportApiAudit(ApiAuditVo apiAuditVo, OutputStream stream) throws Exception {
         List<ApiVo> apiList = new ArrayList<>();
         assembleParamsAndFilterApi(apiAuditVo,apiList);
         if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
-            return null;
+            return;
         }
-        List<ApiAuditVo> apiAuditList = null;
+        StringBuilder sb = new StringBuilder();
+        Field[] declaredFields = ApiAuditVo.class.getDeclaredFields();
+        List<String> excelFieldList = new ArrayList<>();
+        for(int i = 0;i < declaredFields.length;i++){
+            ExcelField excelField = declaredFields[i].getAnnotation(ExcelField.class);
+            if(excelField != null){
+                excelFieldList.add(declaredFields[i].getName());
+                /** 写入表头 **/
+                sb.append(excelField.name() + ",");
+            }
+        }
+        sb.append("\n");
+        stream.write(sb.toString().getBytes("GBK"));
+        stream.flush();
+
         int count = apiMapper.searchApiAuditListCount(apiAuditVo);
         if(count > 0){
-            apiAuditVo.setPageSize(100);
             apiAuditVo.setPageCount(PageUtil.getPageCount(count, apiAuditVo.getPageSize()));
-            apiAuditList = new ArrayList<>();
             List<ApiAuditVo> list = null;
             for(int i = 1;i <= apiAuditVo.getPageCount();i++){
                 apiAuditVo.setCurrentPage(i);
                 list = apiMapper.searchApiAuditForExport(apiAuditVo);
                 if(CollectionUtils.isNotEmpty(list)){
+                    StringBuilder contentSb = new StringBuilder();
                     /**读取文件中的参数/结果/错误**/
                     for(ApiAuditVo vo : list){
                         String paramFilePath = vo.getParamFilePath();
@@ -76,8 +95,16 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 vo.setParam("内容过长，不予导出");
                             }else{
                                 String param = AuditUtil.getAuditDetail(paramFilePath);
+                                if(StringUtils.isNotBlank(param)){
+                                    param = param.replaceAll("\"","\"\"");
+                                    param = "\"" + param + "\"";
+                                }else{
+                                    param = "无";
+                                }
                                 vo.setParam(param);
                             }
+                        }else {
+                            vo.setParam("无");
                         }
                         if(StringUtils.isNotBlank(resultFilePath)){
                             long offset = Long.parseLong(resultFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
@@ -85,8 +112,16 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 vo.setResult("内容过长，不予导出");
                             }else{
                                 String result = AuditUtil.getAuditDetail(resultFilePath);
+                                if(StringUtils.isNotBlank(result)){
+                                    result = result.replaceAll("\"","\"\"");
+                                    result = "\"" + result + "\"";
+                                }else{
+                                    result = "无";
+                                }
                                 vo.setResult(result);
                             }
+                        }else{
+                            vo.setResult("无");
                         }
                         if(StringUtils.isNotBlank(errorFilePath)){
                             long offset = Long.parseLong(errorFilePath.split("\\?")[1].split("&")[1].split("=")[1]);
@@ -94,19 +129,59 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 vo.setError("内容过长，不予导出");
                             }else{
                                 String error = AuditUtil.getAuditDetail(errorFilePath);
+                                if(StringUtils.isNotBlank(error)){
+                                    error = error.replaceAll("\"","\"\"");
+                                    error = "\"" + error + "\"";
+                                }else{
+                                    error = "无";
+                                }
                                 vo.setError(error);
                             }
+                        }else{
+                            vo.setError("无");
                         }
-                    }
-                    /**补充从数据库无法获取的字段**/
-                    addFields(apiList, list);
+                        /**补充从数据库无法获取的字段**/
+                        for (ApiVo api : apiList) {
+                            if (vo.getToken().equals(api.getToken())) {
+                                vo.setApiName(api.getName());
+                                vo.setModuleGroup(api.getModuleGroup());
+                                Class<?> apiClass = null;
+                                try{
+                                    apiClass = Class.forName(api.getHandler());
+                                }catch (ClassNotFoundException ex){
+                                    break;
+                                }
+                                OperationType annotation = apiClass.getAnnotation(OperationType.class);
+                                if (annotation != null) {
+                                    vo.setOperationType(annotation.type().getValue());
+                                }else{
+                                    //如果API没有加操作类型的注解，那么默认视为SEARCH
+                                    vo.setOperationType(OperationTypeEnum.SEARCH.getValue());
+                                }
+                                break;
+                            }
+                        }
 
-                    apiAuditList.addAll(list);
+                        for(String field : excelFieldList){
+                            field = field.substring(0, 1).toUpperCase() + field.substring(1);
+                            Method method = ApiAuditVo.class.getDeclaredMethod("get" + field);
+                            Object result = method.invoke(vo);
+                            if(result != null){
+                                if(result instanceof Date){
+                                    result = sdf.format(result);
+                                }
+                                contentSb.append(result + ",");
+                            }
+                        }
+                        contentSb.append("\n");
+                        //写入流中
+                        stream.write(contentSb.toString().getBytes("GBK"));
+                        stream.flush();
+                    }
                     list.clear();
                 }
             }
         }
-        return apiAuditList;
     }
 
     @Override
