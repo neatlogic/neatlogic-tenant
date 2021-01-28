@@ -71,12 +71,11 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             }
         }
         sb.append("\n");
-        IOUtils.copyLarge(IOUtils.toInputStream(sb.toString(), Charset.forName("GBK")), stream);
+        stream.write(sb.toString().getBytes("GBK"));
         stream.flush();
 
         int count = apiMapper.searchApiAuditListCount(apiAuditVo);
         if(count > 0){
-            apiAuditVo.setPageSize(50);
             apiAuditVo.setPageCount(PageUtil.getPageCount(count, apiAuditVo.getPageSize()));
             List<ApiAuditVo> list = null;
             for(int i = 1;i <= apiAuditVo.getPageCount();i++){
@@ -99,7 +98,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 if(StringUtils.isNotBlank(param)){
                                     param = param.replaceAll("\"","\"\"");
                                     param = "\"" + param + "\"";
-//                                    param = param.replaceAll(",","\",\"");
                                 }else{
                                     param = "无";
                                 }
@@ -117,7 +115,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 if(StringUtils.isNotBlank(result)){
                                     result = result.replaceAll("\"","\"\"");
                                     result = "\"" + result + "\"";
-//                                    result = result.replaceAll(",","\",\"");
                                 }else{
                                     result = "无";
                                 }
@@ -135,7 +132,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                                 if(StringUtils.isNotBlank(error)){
                                     error = error.replaceAll("\"","\"\"");
                                     error = "\"" + error + "\"";
-//                                    error = error.replaceAll(",","\",\"");
                                 }else{
                                     error = "无";
                                 }
@@ -179,15 +175,13 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                         }
                         contentSb.append("\n");
                         //写入流中
-                        IOUtils.copyLarge(IOUtils.toInputStream(contentSb.toString(), Charset.forName("GBK")), stream);
-//                        stream.write(contentSb.toString().getBytes("GBK"));
+                        stream.write(contentSb.toString().getBytes("GBK"));
                         stream.flush();
                     }
                     list.clear();
                 }
             }
         }
-//        return null;
     }
 
     @Override
