@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -54,7 +55,9 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 				iterator.remove();
 			}
 		}
-		list.add(new ValueTextVo("定时任务","定时任务"));
+		if(AuthActionChecker.check(NOTIFY_JOB_MODIFY.class.getSimpleName())){
+			list.add(new ValueTextVo("定时任务","定时任务"));
+		}
 		return list;
 	}
 
