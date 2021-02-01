@@ -10,8 +10,9 @@ import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * @Title: SystemNoticeStopApi
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Service;
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SystemNoticeStopApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private SystemNoticeMapper systemNoticeMapper;
 
     @Override
@@ -56,7 +57,8 @@ public class SystemNoticeStopApi extends PrivateApiComponentBase {
             throw new SystemNoticeNotFoundException(vo.getId());
         }
         vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
-        systemNoticeMapper.updateSystemNoticeStatus(vo);
+        /** 停用后清除下发时段，下次下发时再指定 **/
+        systemNoticeMapper.stopSystemNoticeById(vo.getId());
         return null;
     }
 }
