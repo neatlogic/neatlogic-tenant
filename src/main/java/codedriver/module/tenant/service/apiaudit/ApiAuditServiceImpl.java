@@ -9,25 +9,20 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.AuditUtil;
+import codedriver.framework.util.TimeUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
 public class ApiAuditServiceImpl implements ApiAuditService{
-
-    private static final String TIME_UINT_OF_DAY = "day";
-    private static final String TIME_UINT_OF_MONTH = "month";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -174,10 +169,10 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                             }
                         }
                         contentSb.append("\n");
-                        //写入流中
-                        stream.write(contentSb.toString().getBytes("GBK"));
-                        stream.flush();
                     }
+                    //写入流中
+                    stream.write(contentSb.toString().getBytes("GBK"));
+                    stream.flush();
                     list.clear();
                 }
             }
@@ -242,12 +237,8 @@ public class ApiAuditServiceImpl implements ApiAuditService{
          * 如果选择按下拉框上的时间跨度筛选，那么就要计算出筛选的起止时间
          */
         if (apiAuditVo.getTimeRange() != null && StringUtils.isNotBlank(apiAuditVo.getTimeUnit())) {
-            if (TIME_UINT_OF_DAY.equals(apiAuditVo.getTimeUnit())) {
-                apiAuditVo.setStartTime(DateUtils.addDays(Calendar.getInstance().getTime(), -apiAuditVo.getTimeRange()));
-            } else if (TIME_UINT_OF_MONTH.equals(apiAuditVo.getTimeUnit())) {
-                apiAuditVo.setStartTime(DateUtils.addMonths(Calendar.getInstance().getTime(), -apiAuditVo.getTimeRange()));
-            }
-            apiAuditVo.setEndTime(Calendar.getInstance().getTime());
+            apiAuditVo.setStartTime(TimeUtil.recentTimeTransfer(apiAuditVo.getTimeRange(), apiAuditVo.getTimeUnit()));
+            apiAuditVo.setEndTime(new Date());
         }
 
         /** 首先筛选出api_audit表中有记录的API，再用这些API做进一步的筛选 */
