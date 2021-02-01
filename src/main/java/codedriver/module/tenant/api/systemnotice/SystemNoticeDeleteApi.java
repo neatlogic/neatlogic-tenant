@@ -58,9 +58,9 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
         if(vo == null){
             throw new SystemNoticeNotFoundException(jsonObj.getLong("id"));
         }
-        if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
-            throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
-        }
+//        if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
+//            throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
+//        }
         /** 只删除system_notice与system_notice_recipient，
          * system_notice_user由每个用户登录或者pull时自我删除
          **/
