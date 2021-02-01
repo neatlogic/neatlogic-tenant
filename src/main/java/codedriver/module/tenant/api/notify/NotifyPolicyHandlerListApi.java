@@ -1,10 +1,12 @@
 package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -57,6 +59,9 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 		}
 		if(AuthActionChecker.check(NOTIFY_JOB_MODIFY.class.getSimpleName())){
 			list.add(new ValueTextVo("定时任务","定时任务"));
+		}
+		if(CollectionUtils.isEmpty(list)){
+			throw new PermissionDeniedException();
 		}
 		return list;
 	}
