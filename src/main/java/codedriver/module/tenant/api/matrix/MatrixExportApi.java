@@ -8,16 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dto.UserVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -63,20 +70,29 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 	
 	private final static Logger logger = LoggerFactory.getLogger(MatrixExportApi.class);
 
-    @Autowired
+    @Resource
     private MatrixAttributeMapper attributeMapper;
 
-    @Autowired
+    @Resource
     private MatrixMapper matrixMapper;
 
-    @Autowired
+    @Resource
     private MatrixDataMapper matrixDataMapper;
 	
-	@Autowired
+	@Resource
 	private IntegrationMapper integrationMapper;
 
-    @Autowired
+    @Resource
     private MatrixExternalMapper externalMapper;
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private TeamMapper teamMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
     
     @Override
     public String getToken() {
@@ -133,6 +149,32 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
                     dataVo.setCurrentPage(currentPage);
                     dataVo.setStartNum(null);
                 	List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo);
+                	/** 转换用户、分组、角色字段值为用户名、分组名、角色名 **/
+                	if(CollectionUtils.isNotEmpty(dataMapList)){
+                	    for(Map<String,String> map : dataMapList){
+                            for(MatrixAttributeVo attributeVo : attributeVoList){
+                                String value = map.get(attributeVo.getUuid());
+                                if(StringUtils.isNotBlank(value)){
+                                    if(GroupSearch.USER.getValue().equals(attributeVo.getType())){
+                                        UserVo user = userMapper.getUserBaseInfoByUuid(value);
+                                        if(user != null){
+                                            map.put(attributeVo.getUuid(),user.getUserName());
+                                        }
+                                    }else if(GroupSearch.TEAM.getValue().equals(attributeVo.getType())){
+                                        TeamVo team = teamMapper.getTeamByUuid(value);
+                                        if(team != null){
+                                            map.put(attributeVo.getUuid(),team.getName());
+                                        }
+                                    }else if(GroupSearch.ROLE.getValue().equals(attributeVo.getType())){
+                                        RoleVo role = roleMapper.getRoleByUuid(value);
+                                        if(role != null){
+                                            map.put(attributeVo.getUuid(),role.getName());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 	workbook = ExcelUtil.createExcel(workbook, headerList, columnList, columnSelectValueList, dataMapList);
                 	currentPage++;
                 }              

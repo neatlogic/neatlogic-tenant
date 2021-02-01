@@ -7,13 +7,13 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
-import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * @Title: SystemNoticeDeleteApi
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private SystemNoticeMapper systemNoticeMapper;
 
     @Override
@@ -58,9 +58,10 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
         if(vo == null){
             throw new SystemNoticeNotFoundException(jsonObj.getLong("id"));
         }
-        if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
-            throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
-        }
+        /** 不再限制删除已下发公告 **/
+//        if(SystemNoticeVo.Status.ISSUED.getValue().equals(vo.getStatus())){
+//            throw new SystemNoticeHasBeenIssuedException(vo.getTitle());
+//        }
         /** 只删除system_notice与system_notice_recipient，
          * system_notice_user由每个用户登录或者pull时自我删除
          **/
