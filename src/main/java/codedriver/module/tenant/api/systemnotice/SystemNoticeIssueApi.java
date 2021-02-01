@@ -16,16 +16,17 @@ import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeUserVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
+import codedriver.framework.systemnotice.exception.SystemNoticeExpiredTimeLessThanActiveTimeException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,10 +51,10 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
 
     private final static Integer PAGE_SIZE = 100;
 
-    @Autowired
+    @Resource
     private SystemNoticeMapper systemNoticeMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -89,6 +90,9 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
         }
         if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
             throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
+        }
+        if(vo.getStartTime() != null && vo.getEndTime() != null && vo.getEndTime().getTime() < vo.getStartTime().getTime()){
+            throw new SystemNoticeExpiredTimeLessThanActiveTimeException();
         }
 
         long currentTimeMillis = System.currentTimeMillis();
