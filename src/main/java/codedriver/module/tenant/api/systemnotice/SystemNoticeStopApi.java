@@ -1,5 +1,6 @@
 package codedriver.module.tenant.api.systemnotice;
 
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
@@ -56,9 +57,9 @@ public class SystemNoticeStopApi extends PrivateApiComponentBase {
         if(vo == null){
             throw new SystemNoticeNotFoundException(vo.getId());
         }
-        vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
+        vo.setLcu(UserContext.get().getUserUuid());
         /** 停用后清除下发时段，下次下发时再指定 **/
-        systemNoticeMapper.stopSystemNoticeById(vo.getId());
+        systemNoticeMapper.stopSystemNoticeById(vo);
         return null;
     }
 }
