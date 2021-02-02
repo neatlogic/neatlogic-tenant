@@ -43,7 +43,7 @@ public class NotifyContentHandlerPreviewApi extends PrivateApiComponentBase {
 			throw new NotifyContentHandlerNotFoundException(handler);
 		}
 		JSONObject result = new JSONObject();
-		result.put("content",notifyContentHandler.preview(jsonObj.getJSONObject("config")));
+		result.put("content",notifyContentHandler.preview(jsonObj.getJSONObject("config"),"codedriver.framework.notify.handler.MessageNotifyHandler"));
 		return result;
 	}
 }
