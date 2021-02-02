@@ -76,8 +76,8 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "公告ID"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "生效时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "失效时间"),
-            @Param(name = "popUp", type = ApiParamType.ENUM, rule = "longshow,close", desc = "是否弹窗(longshow:持续弹窗;close:不弹窗)"),
-            @Param(name = "ignoreRead", type = ApiParamType.ENUM, rule = "0,1", desc = "1:忽略已读;0:不忽略已读")
+            @Param(name = "popUp", type = ApiParamType.ENUM, rule = "longshow,close", desc = "是否弹窗(longshow:持续弹窗;close:不弹窗)",isRequired = true),
+            @Param(name = "ignoreRead", type = ApiParamType.ENUM, rule = "0,1", desc = "1:忽略已读;0:不忽略已读",isRequired = true)
     })
     @Output({})
     @Description(desc = "下发系统公告")
