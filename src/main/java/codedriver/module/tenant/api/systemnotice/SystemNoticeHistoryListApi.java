@@ -83,13 +83,13 @@ public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
         }
 
         if (vo.getNeedPage()) {
-            int rowNum = systemNoticeMapper.searchIssuedNoticeCountByUserUuid(UserContext.get().getUserUuid(true),vo);
+            int rowNum = systemNoticeMapper.searchNoticeHistoryCountByUserUuid(UserContext.get().getUserUuid(true),vo);
             returnObj.put("pageSize", vo.getPageSize());
             returnObj.put("currentPage", vo.getCurrentPage());
             returnObj.put("rowNum", rowNum);
             returnObj.put("pageCount", PageUtil.getPageCount(rowNum, vo.getPageSize()));
         }
-        List<SystemNoticeVo> noticeVoList = systemNoticeMapper.searchIssuedNoticeListByUserUuid(vo,UserContext.get().getUserUuid(true));
+        List<SystemNoticeVo> noticeVoList = systemNoticeMapper.searchNoticeHistoryListByUserUuid(vo,UserContext.get().getUserUuid(true));
         if(CollectionUtils.isNotEmpty(noticeVoList)){
             for(SystemNoticeVo noticeVo : noticeVoList){
                 /** 提取内容中的图片 **/
