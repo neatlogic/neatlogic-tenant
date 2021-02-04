@@ -53,8 +53,7 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
         List<SystemNoticeVo> expiredNoticeList = systemNoticeMapper.getExpiredNoticeListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(expiredNoticeList)) {
             for (SystemNoticeVo vo : expiredNoticeList) {
-                vo.setStatus(SystemNoticeVo.Status.STOPPED.getValue());
-                systemNoticeMapper.updateSystemNoticeStatus(vo);
+                systemNoticeMapper.stopSystemNoticeById(vo);
             }
         }
     }
