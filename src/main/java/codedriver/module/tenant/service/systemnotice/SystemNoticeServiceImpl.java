@@ -83,7 +83,7 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
                 vo.setIssueTime(vo.getStartTime());
                 systemNoticeMapper.updateSystemNoticeStatus(vo);
                 currentUserNoticeList.add(new SystemNoticeUserVo(vo.getId(), UserContext.get().getUserUuid(true)));
-                /** 如果设置了不忽略已读，那么更改is_read为0 **/
+                /** 如果没有忽略已读，那么更改is_read为0 **/
                 if(vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0){
                     systemNoticeMapper.updateSystemNoticeUserReadStatus(vo.getId(),UserContext.get().getUserUuid(true),0);
                 }
