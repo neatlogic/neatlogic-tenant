@@ -108,7 +108,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
         if((vo.getStartTime() == null || (vo.getStartTime() != null && currentTimeMillis >= vo.getStartTime().getTime()))
                 && (vo.getEndTime() == null || (vo.getEndTime() != null && currentTimeMillis < vo.getEndTime().getTime()))){
 
-            /** 立即更改公告状态为已发布 **/
+            /** 立即更改公告状态为已下发 **/
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
             vo.setIssueTime(vo.getStartTime() == null ? new Date() : vo.getStartTime());
 
