@@ -112,16 +112,12 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
             vo.setIssueTime(vo.getStartTime() == null ? new Date() : vo.getStartTime());
 
-            /** 如果设置了忽略已读，把is_read设为0 **/
+            /** 如果设置了忽略已读，把system_notice_user中的is_read设为0 **/
             if(vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0){
                 CommonThreadPool.execute(new CodeDriverThread() {
                     @Override
                     protected void execute() {
-                        int count = systemNoticeMapper.getHasReadSystemNoticeUserCountById(vo.getId());
-                        while(count > 0){
-                            systemNoticeMapper.batchUpdateHasReadSystemNoticeUser(vo.getId(),100);
-                            count = systemNoticeMapper.getHasReadSystemNoticeUserCountById(vo.getId());
-                        }
+                        systemNoticeMapper.updateReadStatusToNotReadByNoticeId(vo.getId());
                     }
                 });
             }
