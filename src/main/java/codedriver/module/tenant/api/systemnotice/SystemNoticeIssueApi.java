@@ -23,8 +23,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -77,7 +79,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "生效时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "失效时间"),
             @Param(name = "popUp", type = ApiParamType.ENUM, rule = "longshow,close", desc = "是否弹窗(longshow:持续弹窗;close:不弹窗)",isRequired = true),
-            @Param(name = "ignoreRead", type = ApiParamType.ENUM, rule = "0,1", desc = "1:忽略已读;0:不忽略已读",isRequired = true)
+            @Param(name = "ignoreRead", type = ApiParamType.ENUM, rule = "0,1", desc = "1:忽略已读;0:不忽略已读")
     })
     @Output({})
     @Description(desc = "下发系统公告")
@@ -109,6 +111,20 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             /** 立即更改公告状态为已发布 **/
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
             vo.setIssueTime(vo.getStartTime() == null ? new Date() : vo.getStartTime());
+
+            /** 如果设置了忽略已读，把is_read设为0 **/
+            if(vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0){
+                CommonThreadPool.execute(new CodeDriverThread() {
+                    @Override
+                    protected void execute() {
+                        int count = systemNoticeMapper.getHasReadSystemNoticeUserCountById(vo.getId());
+                        while(count > 0){
+                            systemNoticeMapper.batchUpdateHasReadSystemNoticeUser(vo.getId(),100);
+                            count = systemNoticeMapper.getHasReadSystemNoticeUserCountById(vo.getId());
+                        }
+                    }
+                });
+            }
 
             List<SystemNoticeRecipientVo> recipientList = systemNoticeMapper.getRecipientListByNoticeId(vo.getId());
             if (CollectionUtils.isNotEmpty(recipientList)) {
