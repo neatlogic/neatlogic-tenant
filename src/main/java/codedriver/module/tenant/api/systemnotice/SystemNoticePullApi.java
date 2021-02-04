@@ -63,7 +63,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "issueTime", type = ApiParamType.LONG, desc = "发布时间"),
+            @Param(name = "issueTime", type = ApiParamType.LONG, desc = "下发时间"),
             @Param(name = "direction", type = ApiParamType.ENUM, rule = "before", desc = "before:找issueTime之前的公告"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
