@@ -77,12 +77,16 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
         List<SystemNoticeVo> hasBeenActiveNoticeList = systemNoticeMapper.getHasBeenActiveNoticeListByRecipientUuidList(recipientUuidList);
         if (CollectionUtils.isNotEmpty(hasBeenActiveNoticeList)) {
             List<SystemNoticeUserVo> currentUserNoticeList = new ArrayList<>();
-            /** 更改这些公告的状态为已发布 **/
+            /** 更改这些公告的状态为已下发 **/
             for (SystemNoticeVo vo : hasBeenActiveNoticeList) {
                 vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
                 vo.setIssueTime(vo.getStartTime());
                 systemNoticeMapper.updateSystemNoticeStatus(vo);
                 currentUserNoticeList.add(new SystemNoticeUserVo(vo.getId(), UserContext.get().getUserUuid(true)));
+                /** 如果没有忽略已读，那么更改is_read为0 **/
+                if(vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0){
+                    systemNoticeMapper.updateSystemNoticeUserReadStatus(vo.getId(),UserContext.get().getUserUuid(true),0);
+                }
             }
             /** 发送给当前用户 **/
             if (CollectionUtils.isNotEmpty(currentUserNoticeList)) {

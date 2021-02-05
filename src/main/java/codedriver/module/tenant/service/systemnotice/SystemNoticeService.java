@@ -22,7 +22,7 @@ public interface SystemNoticeService {
     public void clearSystemNoticeUser();
 
     /**
-     * @Description: 检查是否存在【已发布却到了失效时间的】公告，如果有，则停用
+     * @Description: 检查是否存在【已下发却到了失效时间的】公告，如果有，则停用
      * @Author: laiwt
      * @Date: 2021/1/20 11:12
      * @Params: []
@@ -31,7 +31,7 @@ public interface SystemNoticeService {
     public void stopExpiredSystemNotice();
 
     /**
-     * @Description: 在system_notice_user插入【当前用户可看的】、【已发布的】公告
+     * @Description: 在system_notice_user插入【当前用户可看的】、【已下发的】公告
      * @Author: laiwt
      * @Date: 2021/1/20 11:12
      * @Params: []
@@ -40,7 +40,7 @@ public interface SystemNoticeService {
     public void pullIssuedSystemNotice();
 
     /**
-     * @Description: 检查是否存在【当前用户可看的】、【到了生效时间，却还没发布】公告，
+     * @Description: 检查是否存在【当前用户可看的】、【到了生效时间，却还没下发】公告，
      * 如果有则下发给当前用户
      * @Author: laiwt
      * @Date: 2021/1/20 11:13
