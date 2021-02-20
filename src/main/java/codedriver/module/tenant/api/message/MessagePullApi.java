@@ -14,6 +14,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
-@OperationType(type = OperationTypeEnum.SEARCH)
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class MessagePullApi extends PrivateApiComponentBase {
 
     @Autowired
@@ -68,27 +69,37 @@ public class MessagePullApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         List<MessageVo> messageVoList = new ArrayList<>();
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         searchVo.setCurrentPage(1);
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         int pageCount = 0;
         int rowNum = messageMapper.getMessageNewCount(searchVo);
         if (rowNum > 0) {
-            pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
             messageVoList = messageMapper.getMessageNewList(searchVo);
-            List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-            Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
-            List<Long> messsageIdList = new ArrayList<>(messageVoList.size());
-            for (MessageVo messageVo : messageVoList) {
-                messsageIdList.add(messageVo.getId());
-                MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
-                if (messageHandlerVo != null) {
-                    messageVo.setPopUp(messageHandlerVo.getPopUp());
-                } else {
-                    messageVo.setPopUp(PopUpType.CLOSE.getValue());
+            if(CollectionUtils.isNotEmpty(messageVoList)){
+                pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+                Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
+                List<Long> messageIdList = new ArrayList<>(messageVoList.size());
+                for (MessageVo messageVo : messageVoList) {
+                    messageIdList.add(messageVo.getId());
+                    MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
+                    if (messageHandlerVo != null) {
+                        messageVo.setPopUp(messageHandlerVo.getPopUp());
+                        if(!messageHandlerVo.getPopUp().equals(PopUpType.LONGSHOW.getValue())){
+                            messageIdList.add(messageVo.getId());
+                        }
+                    } else {
+                        messageVo.setPopUp(PopUpType.CLOSE.getValue());
+                        messageIdList.add(messageVo.getId());
+                    }
                 }
+                if(CollectionUtils.isNotEmpty(messageIdList)){
+                    messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messageIdList);
+                }
+            }else{
+                rowNum = 0;
             }
-            messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messsageIdList);
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
@@ -101,7 +112,6 @@ public class MessagePullApi extends PrivateApiComponentBase {
         resultObj.put("newCount", newCount);
 
         List<String> unsubscribeHandlerList = new ArrayList<>();
-        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
             if(messageHandlerVo.getIsActive() == 1){
                 resultObj.put("hasSubscription", 1);
