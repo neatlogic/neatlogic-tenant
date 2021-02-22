@@ -3,8 +3,10 @@ package codedriver.module.tenant.api.scheduler;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -98,7 +100,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		return resultObj;
 	}
 	
-	private int saveJob(JobVo job) {
+	private int saveJob(JobVo job) throws ScheduleJobNameRepeatException {
 		String uuid = job.getUuid();
 		if (schedulerMapper.checkJobNameIsExists(job) > 0) {
 			throw new ScheduleJobNameRepeatException(job.getName());
@@ -117,6 +119,16 @@ public class JobSaveApi extends PrivateApiComponentBase {
 			}
 		}
 		return 1;
+	}
+
+	public IValid name() {
+		return value -> {
+			JobVo vo = JSON.toJavaObject(value, JobVo.class);
+			if (schedulerMapper.checkJobNameIsExists(vo) > 0) {
+				return new FieldValidResultVo(new ScheduleJobNameRepeatException(vo.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 }

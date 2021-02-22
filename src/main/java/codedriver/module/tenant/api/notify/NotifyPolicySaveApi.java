@@ -3,12 +3,15 @@ package codedriver.module.tenant.api.notify;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,6 +114,16 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             notifyPolicyVo.setConfig(configObj.toJSONString());
             return notifyPolicyVo;
         }
+    }
+
+    public IValid name(){
+        return value -> {
+            NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(value,NotifyPolicyVo.class);
+            if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+                return new FieldValidResultVo(new NotifyPolicyNameRepeatException(notifyPolicyVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 }
