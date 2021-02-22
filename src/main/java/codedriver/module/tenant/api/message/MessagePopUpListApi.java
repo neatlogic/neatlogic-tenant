@@ -107,6 +107,7 @@ public class MessagePopUpListApi extends PrivateApiComponentBase {
                     break;
                 }
                 rowNum -= closeCount;
+                searchVo.setPageSize(closeCount);
                 searchVo.setMessageId(messageVoList.get(messageVoList.size() - 1).getId());
             }
         }

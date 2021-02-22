@@ -82,7 +82,6 @@ public class MessagePullApi extends PrivateApiComponentBase {
                 Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
                 List<Long> messageIdList = new ArrayList<>(messageVoList.size());
                 for (MessageVo messageVo : messageVoList) {
-                    messageIdList.add(messageVo.getId());
                     MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
                     if (messageHandlerVo != null) {
                         messageVo.setPopUp(messageHandlerVo.getPopUp());
