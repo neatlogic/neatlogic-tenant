@@ -1,10 +1,12 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.exception.type.ApiRepeatException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.core.IValid;
 import codedriver.module.tenant.auth.label.INTERFACE_MODIFY;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 
 	@Autowired
 	private ApiMapper ApiMapper;
-	
+
 	@Override
 	public String getToken() {
 		return "apimanage/save";
@@ -52,7 +54,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 	public String getConfig() {
 		return null;
 	}
-	
+
 	@Input({
 		@Param(name = "token", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\{\\}\\d/]+$", isRequired = true, desc = "token"),
 		@Param(name = "name", type = ApiParamType.STRING, maxLength = 50, isRequired = true, desc = "名称"),
@@ -160,5 +162,60 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 //		}
 		return null;
 	}
+
+    public IValid token() {
+        return value -> {
+            String token = value.getString("token");
+            ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(token);
+            if (ramApiVo != null) {
+                return new FieldValidResultVo(new ApiRepeatException(token + "已存在"));
+            }
+            List<ApiVo> dbApiList = ApiMapper.getAllApi();
+            //校验token是否与自定义接口重复
+            boolean isTokenRepeat = false;
+            if (CollectionUtils.isNotEmpty(dbApiList) && !isTokenRepeat) {
+                for (ApiVo api : dbApiList) {
+                    if (api.getToken().equals(token)) {
+                        isTokenRepeat = true;
+                        break;
+                    }
+                }
+            }
+            if (isTokenRepeat) {
+                return new FieldValidResultVo(new ApiRepeatException(token + "已存在"));
+            }
+            return new FieldValidResultVo();
+        };
+    }
+
+    public IValid name() {
+        return value -> {
+            String token = value.getString("token");
+            String name = value.getString("name");
+            boolean isNameRepeat = false;
+            //校验接口名称是否与系统接口重复
+            for (ApiVo api : PrivateApiComponentFactory.getApiList()) {
+                if (api.getName().equals(name)) {
+                    isNameRepeat = true;
+                    break;
+                }
+            }
+            //校验接口名称是否与其他自定义接口重复
+            List<ApiVo> dbApiList = ApiMapper.getAllApi();
+            if (CollectionUtils.isNotEmpty(dbApiList) && !isNameRepeat) {
+                for (ApiVo api : dbApiList) {
+                    if (api.getName().equals(name) && !api.getToken().equals(token)) {
+                        isNameRepeat = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isNameRepeat) {
+                return new FieldValidResultVo(new ApiRepeatException(name + "已存在"));
+            }
+            return new FieldValidResultVo();
+        };
+    }
 
 }
