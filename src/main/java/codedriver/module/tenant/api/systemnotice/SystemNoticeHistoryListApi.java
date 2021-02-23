@@ -65,6 +65,7 @@ public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
     @Output({
+            @Param(name = "notReadCount", type = ApiParamType.INTEGER, desc = "未读的公告数"),
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = SystemNoticeVo.class),
             @Param(explode = BasePageVo.class)
     })
@@ -98,6 +99,9 @@ public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
                 noticeVo.setContent(HtmlUtil.removeHtml(noticeVo.getContent(),null));
             }
         }
+        /** 计算未读的公告数量 **/
+        int notReadCount = systemNoticeMapper.getNotReadNoticeCountByUserUuid(UserContext.get().getUserUuid());
+        returnObj.put("notReadCount",notReadCount);
         returnObj.put("tbodyList",noticeVoList);
         return returnObj;
     }
