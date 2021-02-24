@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -102,15 +104,13 @@ public class TeamSearchForSelectApi extends PrivateApiComponentBase {
 		List<ValueTextVo> list = new ArrayList<>();
 		List<TeamVo> teamList = teamMapper.searchTeam(teamVo);
 		if (CollectionUtils.isNotEmpty(teamList)) {
-			for (TeamVo team : teamList) {
+			List<TeamVo> nameRepeatedCount = teamMapper.getRepeatTeamNameByNameList(teamList.stream().map(TeamVo::getName).collect(Collectors.toList()));
+			Map<String, Integer> map = nameRepeatedCount.stream().collect(Collectors.toMap(e -> e.getName(), e -> e.getNameRepeatCount()));
+			for(TeamVo team : teamList){
 				ValueTextVo vo = new ValueTextVo();
 				vo.setValue(GroupSearch.TEAM.getValuePlugin() + team.getUuid());
-				/**
-				 * 如果有重名的分组，找出其父分组的名称
-				 * 移动端上下滑动时，用户感觉不到分页，所以不能只在当前页寻找重名的分组
-				 * 而是应该从全部分组中找当前页是否存在重名的分组
-				 **/
-				if(teamMapper.checkTeamNameIsRepeated(team) > 0){
+				/** 如果有重名的分组，找出其父分组的名称 **/
+				if(map.get(team.getName()) > 1){
 					TeamVo parent = teamMapper.getTeamByUuid(team.getParentUuid());
 					if(parent != null){
 						team.setParentName(parent.getName());
