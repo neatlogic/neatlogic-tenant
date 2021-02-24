@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -11,8 +12,13 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -93,7 +99,25 @@ public class TeamSearchForSelectApi extends PrivateApiComponentBase {
 			resultObj.put("rowNum", rowNum);
 			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, teamVo.getPageSize()));
 		}
-		resultObj.put("list", teamMapper.searchTeamForSelect(teamVo));
+		List<ValueTextVo> list = new ArrayList<>();
+		List<TeamVo> teamList = teamMapper.searchTeam(teamVo);
+		if (CollectionUtils.isNotEmpty(teamList)) {
+			for (TeamVo team : teamList) {
+				ValueTextVo vo = new ValueTextVo();
+				vo.setValue(GroupSearch.TEAM.getValuePlugin() + team.getUuid());
+				/** 如果有重名的分组，找出其父分组的名称 **/
+				if(teamList.stream().anyMatch(o -> o.getName().equals(team.getName()))){
+					TeamVo parent = teamMapper.getTeamByUuid(team.getParentUuid());
+					if(parent != null){
+						team.setParentName(parent.getName());
+					}
+				}
+				vo.setText(StringUtils.isNotBlank(team.getParentName())
+						? team.getName() + "(" + team.getParentName() + ")" : team.getName());
+				list.add(vo);
+			}
+		}
+		resultObj.put("list", list);
 		return resultObj;
 	}
 }
