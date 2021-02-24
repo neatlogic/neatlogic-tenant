@@ -105,9 +105,12 @@ public class TeamSearchForSelectApi extends PrivateApiComponentBase {
 			for (TeamVo team : teamList) {
 				ValueTextVo vo = new ValueTextVo();
 				vo.setValue(GroupSearch.TEAM.getValuePlugin() + team.getUuid());
-				/** 如果有重名的分组，找出其父分组的名称 **/
-				if(teamList.stream().anyMatch(o -> o.getName().equals(team.getName())
-						&& !o.getUuid().equals(team.getUuid()))){
+				/**
+				 * 如果有重名的分组，找出其父分组的名称
+				 * 移动端上下滑动时，用户感觉不到分页，所以不能只在当前页寻找重名的分组
+				 * 而是应该从全部分组中找当前页是否存在重名的分组
+				 **/
+				if(teamMapper.checkTeamNameIsRepeated(team) > 0){
 					TeamVo parent = teamMapper.getTeamByUuid(team.getParentUuid());
 					if(parent != null){
 						team.setParentName(parent.getName());
