@@ -62,7 +62,6 @@ public class MessageListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
             @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
-            @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
