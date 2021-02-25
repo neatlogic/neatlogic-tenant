@@ -2,12 +2,15 @@ package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TimeUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +60,12 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
             @Param(name = "messageId", type = ApiParamType.LONG, desc = "消息id"),
             @Param(name = "messageIdList", type = ApiParamType.JSONARRAY, desc = "消息id列表"),
             @Param(name = "daysAgo", type = ApiParamType.INTEGER, desc = "距离今天的天数"),
-            @Param(name = "messageType", type = ApiParamType.STRING, desc = "消息分类")
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "消息标题，模糊搜索"),
+            @Param(name = "messageType", type = ApiParamType.STRING, desc = "消息分类"),
+            @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
+            @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
+            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位")
     })
     @Output({
             @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数")
@@ -66,16 +74,13 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = UserContext.get().getUserUuid(true);
-        MessageSearchVo searchVo = new MessageSearchVo();
+        MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         searchVo.setUserUuid(userUuid);
         Long messageId = jsonObj.getLong("messageId");
-        if (messageId != null) {
-            searchVo.setMessageId(messageId);
+        if (searchVo.getMessageId() != null) {
             messageMapper.updateMessageUserIsReadByUserUuidAndMessageId(searchVo);
         } else {
-            List<Long> messageIdList = (List<Long>) jsonObj.get("messageIdList");
-            if (CollectionUtils.isNotEmpty(messageIdList)) {
-                searchVo.setMessageIdList(messageIdList);
+            if (CollectionUtils.isNotEmpty(searchVo.getMessageIdList())) {
                 messageMapper.updateMessageUserIsReadByUserUuidAndMessageIdList(searchVo);
             } else {
                 Integer daysAgo = jsonObj.getInteger("daysAgo");
@@ -88,10 +93,20 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
                     searchVo.setMaxMessageId(toMessageId);
                     messageMapper.updateMessageUserIsReadByUserUuidAndMessageIdRange(searchVo);
                 } else {
-                    String messageType = jsonObj.getString("messageType");
-                    if (StringUtils.isNotBlank(messageType)) {
-                        searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
-                        messageMapper.updateMessageUserIsReadByUserUuidAndTriggerList(searchVo);
+                    if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
+                        Integer timeRange = jsonObj.getInteger("timeRange");
+                        String timeUnit = jsonObj.getString("timeUnit");
+                        if (timeRange != null && StringUtils.isNotBlank(timeUnit)) {
+                            searchVo.setStartTime(TimeUtil.recentTimeTransfer(timeRange, timeUnit));
+                            searchVo.setEndTime(new Date());
+                        }
+                    }
+                    if (searchVo.getStartTime() != null || searchVo.getEndTime() != null) {
+                        String messageType = jsonObj.getString("messageType");
+                        if (StringUtils.isNotBlank(messageType)) {
+                            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
+                        }
+                        messageMapper.updateMessageUserIsReadByUserUuidAndKeywordAndTriggerList(searchVo);
                     } else {
                         messageMapper.updateMessageUserIsReadByUserUuid(userUuid);
                     }
