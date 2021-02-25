@@ -100,7 +100,8 @@ public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
             }
         }
         /** 计算未读的公告数量 **/
-        int notReadCount = systemNoticeMapper.getNotReadNoticeCountByUserUuid(UserContext.get().getUserUuid());
+        vo.setIsRead(0);
+        int notReadCount = systemNoticeMapper.searchNoticeHistoryCountByUserUuid(UserContext.get().getUserUuid(),vo);
         returnObj.put("notReadCount",notReadCount);
         returnObj.put("tbodyList",noticeVoList);
         return returnObj;
