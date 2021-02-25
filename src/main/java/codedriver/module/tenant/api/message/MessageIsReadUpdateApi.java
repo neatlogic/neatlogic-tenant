@@ -35,19 +35,19 @@ import java.util.concurrent.TimeUnit;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
+public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private MessageMapper messageMapper;
 
     @Override
     public String getToken() {
-        return "message/isdelete/update";
+        return "message/isread/update";
     }
 
     @Override
     public String getName() {
-        return "更新消息为已删除";
+        return "更新消息为已读";
     }
 
     @Override
@@ -63,34 +63,34 @@ public class MessageIsDeleteUpdateApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数")
     })
-    @Description(desc = "更新消息为已删除")
+    @Description(desc = "更新消息为已读")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = UserContext.get().getUserUuid(true);
         Long messageId = jsonObj.getLong("messageId");
         if (messageId != null) {
-            messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageId(userUuid, messageId);
+            messageMapper.updateMessageUserIsReadByUserUuidAndMessageId(userUuid, messageId);
         } else {
             List<Long> messageIdList = (List<Long>) jsonObj.get("messageIdList");
             if (CollectionUtils.isNotEmpty(messageIdList)) {
-                messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdList(userUuid, messageIdList);
+                messageMapper.updateMessageUserIsReadByUserUuidAndMessageIdList(userUuid, messageIdList);
             } else {
                 Integer daysAgo = jsonObj.getInteger("daysAgo");
                 if (daysAgo != null) {
                     Date currentDay = Date.from(LocalDate.now().minusDays(daysAgo).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-                    Long fromMessageId = messageMapper.getMessageMaxIdByLessThanFcd(currentDay);
+                    Long fromMessageId = messageMapper.getMessageMaxIdByLessThanInsertTime(currentDay);
                     Date nextDay = new Date(currentDay.getTime() + TimeUnit.HOURS.toMillis(24));
-                    Long toMessageId = messageMapper.getMessageMaxIdByLessThanFcd(nextDay);
-                    messageMapper.updateMessageUserIsDeleteByUserUuidAndMessageIdRange(userUuid, fromMessageId, toMessageId);
+                    Long toMessageId = messageMapper.getMessageMaxIdByLessThanInsertTime(nextDay);
+                    messageMapper.updateMessageUserIsReadByUserUuidAndMessageIdRange(userUuid, fromMessageId, toMessageId);
                 } else {
-                    messageMapper.updateMessageUserIsDeleteByUserUuid(userUuid);
+                    messageMapper.updateMessageUserIsReadByUserUuid(userUuid);
                 }
             }
         }
         JSONObject resultObj = new JSONObject();
         MessageSearchVo searchVo = new MessageSearchVo();
         searchVo.setUserUuid(userUuid);
-        int newCount = messageMapper.getMessageNewCount(searchVo);
+        int newCount = messageMapper.getMessageCount(searchVo);
         resultObj.put("newCount", newCount);
         return resultObj;
     }
