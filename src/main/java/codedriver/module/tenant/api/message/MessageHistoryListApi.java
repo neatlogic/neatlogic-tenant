@@ -10,7 +10,6 @@ import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.MessageVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
-import codedriver.framework.notify.dto.NotifyTreeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;

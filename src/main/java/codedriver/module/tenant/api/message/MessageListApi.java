@@ -4,7 +4,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Title: MessageListApi
@@ -62,7 +59,6 @@ public class MessageListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
             @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
-            @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
