@@ -56,7 +56,6 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块id"),
             @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "消息标题，模糊搜索"),
             @Param(name = "messageType", type = ApiParamType.STRING, desc = "消息分类"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
@@ -68,6 +67,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
+            @Param(name = "unReadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询历史消息列表")
@@ -92,30 +92,13 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             resultObj.put("tbodyList", messageVoList);
             return resultObj;
         }
-        String moduleId = jsonObj.getString("moduleId");
-        if (StringUtils.isNotBlank(moduleId)) {
-            List<String> handlerList = new ArrayList<>();
-            for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
-                if (moduleId.equals(messageHandlerVo.getModuleId())) {
-                    handlerList.add(messageHandlerVo.getHandler());
-                }
-            }
-            if (CollectionUtils.isEmpty(handlerList)) {
-                resultObj.put("currentPage", searchVo.getCurrentPage());
-                resultObj.put("pageSize", searchVo.getPageSize());
-                resultObj.put("pageCount", 0);
-                resultObj.put("rowNum", 0);
-                resultObj.put("tbodyList", messageVoList);
-                return resultObj;
-            }
-            searchVo.setHandlerList(handlerList);
-        }
 
         String messageType = jsonObj.getString("messageType");
         if (StringUtils.isNotBlank(messageType)) {
             searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
         }
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        int unReadCount = 0;
         int pageCount = 0;
         int rowNum = messageMapper.getMessageHistoryCount(searchVo);
         if (rowNum > 0) {
@@ -123,11 +106,14 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             if (searchVo.getCurrentPage() <= pageCount) {
                 messageVoList = messageMapper.getMessageHistoryList(searchVo);
             }
+            searchVo.setIsRead(0);
+            unReadCount = messageMapper.getMessageHistoryCount(searchVo);
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
+        resultObj.put("unReadCount", unReadCount);
         resultObj.put("tbodyList", messageVoList);
         return resultObj;
     }

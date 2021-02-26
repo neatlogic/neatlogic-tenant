@@ -15,9 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -56,20 +54,32 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
     @Description(desc = "查询历史消息分类树")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTrigger(UserContext.get().getUserUuid(true));
-        Map<String, Integer> triggerMessageCountMap = triggerMessageCountVoList.stream().collect(Collectors.toMap(e -> e.getTrigger(), e -> e.getCount()));
+        String userUuid = UserContext.get().getUserUuid(true);
+        List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTriggerAndIsRead(userUuid);
+        Map<String, Integer> triggerMessageUnreadCountMap = new HashMap<>();
+        Map<String, Integer> triggerMessageReadCountMap = new HashMap<>();
+        for(TriggerMessageCountVo triggerMessageCountVo : triggerMessageCountVoList){
+            if(Objects.equals(triggerMessageCountVo.getIsRead(), 0)){
+                triggerMessageUnreadCountMap.put(triggerMessageCountVo.getTrigger(), triggerMessageCountVo.getCount());
+            }else if(Objects.equals(triggerMessageCountVo.getIsRead(), 1)){
+                triggerMessageReadCountMap.put(triggerMessageCountVo.getTrigger(), triggerMessageCountVo.getCount());
+            }
+        }
         List<NotifyTreeVo> moduleTreeVoList = NotifyPolicyHandlerFactory.getModuleTreeVoList();
         List<NotifyTreeVo> triggerTreeVoList = new ArrayList<>();
-                /** 复制分类树，并收集叶子节点 **/
+        /** 复制分类树，并收集叶子节点 **/
         List<NotifyTreeVo> resultList = copy(moduleTreeVoList, triggerTreeVoList);
 
         for(NotifyTreeVo treeVo : triggerTreeVoList){
-            Integer count = triggerMessageCountMap.get(treeVo.getUuid());
-            if(count == null){
-                treeVo.setCount(0);
-            }else{
-                treeVo.setCount(count);
+            Integer unreadCount = triggerMessageUnreadCountMap.get(treeVo.getUuid());
+            if(unreadCount == null){
+                unreadCount = 0;
+            }treeVo.setUnreadCount(unreadCount);
+            Integer readCount = triggerMessageReadCountMap.get(treeVo.getUuid());
+            if(readCount == null){
+                readCount = 0;
             }
+            treeVo.setTotal(unreadCount + readCount);
         }
         return resultList;
     }
