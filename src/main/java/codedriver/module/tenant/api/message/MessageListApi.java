@@ -59,6 +59,7 @@ public class MessageListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
             @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
+            @Param(name = "unreadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
@@ -109,6 +110,11 @@ public class MessageListApi extends PrivateApiComponentBase {
             resultObj.put("rowNum", searchVo.getRowNum());
         }
         resultObj.put("tbodyList", messageVoList);
+
+        searchVo = new MessageSearchVo();
+        searchVo.setUserUuid(userUuid);
+        int unreadCount = messageMapper.getMessageCount(searchVo);
+        resultObj.put("unreadCount", unreadCount);
 
         List<String> unsubscribeHandlerList = new ArrayList<>();
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
