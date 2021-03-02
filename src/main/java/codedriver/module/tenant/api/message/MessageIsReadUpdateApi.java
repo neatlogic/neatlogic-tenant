@@ -68,7 +68,7 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
             @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位")
     })
     @Output({
-            @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数")
+            @Param(name = "unreadCount", type = ApiParamType.INTEGER, desc = "未读消息数量")
     })
     @Description(desc = "更新消息为已读")
     @Override
@@ -116,8 +116,8 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         searchVo = new MessageSearchVo();
         searchVo.setUserUuid(userUuid);
-        int newCount = messageMapper.getMessageCount(searchVo);
-        resultObj.put("newCount", newCount);
+        int unreadCount = messageMapper.getMessageCount(searchVo);
+        resultObj.put("unreadCount", unreadCount);
         return resultObj;
     }
 }
