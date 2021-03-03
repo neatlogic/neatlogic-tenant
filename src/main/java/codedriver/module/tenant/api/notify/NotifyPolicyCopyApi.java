@@ -4,11 +4,14 @@ import java.util.List;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +81,17 @@ public class NotifyPolicyCopyApi extends PrivateApiComponentBase {
         paramList.addAll(notifyPolicyHandler.getSystemParamList());
         paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         return notifyPolicyVo;
+    }
+
+    public IValid name(){
+        return value -> {
+            NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(value,NotifyPolicyVo.class);
+            notifyPolicyVo.setId(null);
+            if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+                return new FieldValidResultVo(new NotifyPolicyNameRepeatException(notifyPolicyVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 }

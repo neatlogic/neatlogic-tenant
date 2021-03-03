@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixNameRepeatException;
@@ -11,6 +12,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
@@ -77,5 +79,18 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         }
         returnObj.put("matrix", matrixVo);
         return returnObj;
+    }
+
+    public IValid name(){
+        return value -> {
+            MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
+            if(StringUtils.isBlank(matrixVo.getUuid())){
+                matrixVo.setUuid(UuidUtil.randomUuid());
+            }
+            if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+                return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 }

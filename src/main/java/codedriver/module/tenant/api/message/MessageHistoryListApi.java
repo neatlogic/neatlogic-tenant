@@ -9,6 +9,7 @@ import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.MessageVo;
+import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -53,17 +54,20 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
     public String getConfig() {
         return null;
     }
+
     @Input({
-            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "模块id"),
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "消息标题，模糊搜索"),
+            @Param(name = "messageType", type = ApiParamType.STRING, desc = "消息分类"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "模块id"),
-            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "模块id"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
+            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
+            @Param(name = "unReadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询历史消息列表")
@@ -72,45 +76,44 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         List<MessageVo> messageVoList = new ArrayList<>();
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
-        String moduleId = jsonObj.getString("moduleId");
-        if(StringUtils.isNotBlank(moduleId)){
-            List<String> handlerList = new ArrayList<>();
-            for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
-                if(moduleId.equals(messageHandlerVo.getModuleId())){
-                    handlerList.add(messageHandlerVo.getHandler());
-                }
-            }
-            if(CollectionUtils.isEmpty(handlerList)){
-                resultObj.put("currentPage", searchVo.getCurrentPage());
-                resultObj.put("pageSize", searchVo.getPageSize());
-                resultObj.put("pageCount", 0);
-                resultObj.put("rowNum", 0);
-                resultObj.put("tbodyList", messageVoList);
-                return resultObj;
-            }
-            searchVo.setHandlerList(handlerList);
-        }
-        if(searchVo.getStartTime() == null && searchVo.getEndTime() == null){
+        if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = jsonObj.getInteger("timeRange");
             String timeUnit = jsonObj.getString("timeUnit");
-            if(timeRange != null && StringUtils.isNotBlank(timeUnit)){
+            if (timeRange != null && StringUtils.isNotBlank(timeUnit)) {
                 searchVo.setStartTime(TimeUtil.recentTimeTransfer(timeRange, timeUnit));
                 searchVo.setEndTime(new Date());
             }
         }
+        if (searchVo.getStartTime() == null || searchVo.getEndTime() == null) {
+            resultObj.put("currentPage", searchVo.getCurrentPage());
+            resultObj.put("pageSize", searchVo.getPageSize());
+            resultObj.put("pageCount", 0);
+            resultObj.put("rowNum", 0);
+            resultObj.put("tbodyList", messageVoList);
+            return resultObj;
+        }
+
+        String messageType = jsonObj.getString("messageType");
+        if (StringUtils.isNotBlank(messageType)) {
+            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
+        }
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        int unReadCount = 0;
         int pageCount = 0;
         int rowNum = messageMapper.getMessageHistoryCount(searchVo);
-        if(rowNum > 0){
+        if (rowNum > 0) {
             pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-            if(searchVo.getCurrentPage() <= pageCount){
+            if (searchVo.getCurrentPage() <= pageCount) {
                 messageVoList = messageMapper.getMessageHistoryList(searchVo);
             }
+            searchVo.setIsRead(0);
+            unReadCount = messageMapper.getMessageHistoryCount(searchVo);
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
+        resultObj.put("unReadCount", unReadCount);
         resultObj.put("tbodyList", messageVoList);
         return resultObj;
     }

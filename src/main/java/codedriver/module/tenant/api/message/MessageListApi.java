@@ -4,7 +4,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageHandlerVo;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Title: MessageListApi
@@ -33,7 +30,7 @@ import java.util.stream.Collectors;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
-@OperationType(type = OperationTypeEnum.UPDATE)
+@OperationType(type = OperationTypeEnum.SEARCH)
 public class MessageListApi extends PrivateApiComponentBase {
 
     @Autowired
@@ -54,66 +51,73 @@ public class MessageListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "messageId", type = ApiParamType.LONG, desc = "起点消息id"),
+            @Param(name = "messageId", type = ApiParamType.LONG, desc = "单个消息id"),
+            @Param(name = "minMessageId", type = ApiParamType.LONG, desc = "最小消息id"),
+            @Param(name = "maxMessageId", type = ApiParamType.LONG, desc = "最大消息id"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
             @Param(name = "hasSubscription", type = ApiParamType.INTEGER, desc = "是否有订阅消息"),
-            @Param(name = "newCount", type = ApiParamType.INTEGER, desc = "新消息总数"),
+            @Param(name = "unreadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询消息列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
-        List<MessageVo> messageVoList = new ArrayList<>();
-        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
-        MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
-        searchVo.setCurrentPage(1);
-        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        int pageCount = 0;
-        int rowNum = messageMapper.getMessageCount(searchVo);
-        if(rowNum > 0){
-            messageVoList = messageMapper.getMessageList(searchVo);
-            if(CollectionUtils.isNotEmpty(messageVoList)){
-                pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
-                Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
-                List<Long> messageIdList = new ArrayList<>(messageVoList.size());
-                for (MessageVo messageVo : messageVoList) {
-                    if(messageVo.getIsRead() == 0){
-                        MessageHandlerVo messageHandlerVo = messageSubscribeMap.get(messageVo.getHandler());
-                        if (messageHandlerVo != null) {
-                            messageVo.setPopUp(messageHandlerVo.getPopUp());
-                            if(!messageHandlerVo.getPopUp().equals(PopUpType.LONGSHOW.getValue())){
-                                messageIdList.add(messageVo.getId());
-                            }
-                        } else {
-                            messageVo.setPopUp(PopUpType.CLOSE.getValue());
-                            messageIdList.add(messageVo.getId());
-                        }
-                    } else {
-                        messageVo.setPopUp(PopUpType.CLOSE.getValue());
-                    }
-                }
-                if(CollectionUtils.isNotEmpty(messageIdList)){
-                    messageMapper.updateMessageUserIsRead(UserContext.get().getUserUuid(true), messageIdList);
-                }
+        String userUuid = UserContext.get().getUserUuid(true);
+        MessageSearchVo searchVo = new MessageSearchVo();
+        searchVo.setUserUuid(userUuid);
+        List<MessageVo> messageVoList = null;
+        Long messageId = jsonObj.getLong("messageId");
+        if(messageId != null){
+            /** 查询单个消息内容 **/
+            searchVo.setMessageId(messageId);
+            MessageVo messageVo = messageMapper.getMessageByIdAndUserUuid(searchVo);
+            messageVoList = new ArrayList<>();
+            resultObj.put("currentPage", 1);
+            resultObj.put("pageSize", 1);
+            if(messageVo != null){
+                messageVoList.add(messageVo);
+                resultObj.put("pageCount", 1);
+                resultObj.put("rowNum", 1);
             }else{
-                rowNum = 0;
+                resultObj.put("pageCount", 0);
+                resultObj.put("rowNum", 0);
             }
+        }else {
+            Integer pageSize = jsonObj.getInteger("pageSize");
+            if(pageSize != null){
+                searchVo.setPageSize(pageSize);
+            }
+            Long maxMessageId = jsonObj.getLong("maxMessageId");
+            if(maxMessageId != null){
+                /** 查询下一页 **/
+                searchVo.setMaxMessageId(maxMessageId);
+            }else {
+                Long minMessageId = jsonObj.getLong("minMessageId");
+                if(minMessageId != null){
+                    /** 查询上一页 **/
+                    searchVo.setMinMessageId(minMessageId);
+                }
+            }
+            messageVoList = getMessageVoList(searchVo);
+
+            resultObj.put("currentPage", searchVo.getCurrentPage());
+            resultObj.put("pageSize", searchVo.getPageSize());
+            resultObj.put("pageCount", searchVo.getPageCount());
+            resultObj.put("rowNum", searchVo.getRowNum());
         }
-        resultObj.put("currentPage", searchVo.getCurrentPage());
-        resultObj.put("pageSize", searchVo.getPageSize());
-        resultObj.put("pageCount", pageCount);
-        resultObj.put("rowNum", rowNum);
         resultObj.put("tbodyList", messageVoList);
 
-        searchVo.setMessageId(null);
-        int newCount = messageMapper.getMessageCount(searchVo);
-        resultObj.put("newCount", newCount);
+        searchVo = new MessageSearchVo();
+        searchVo.setUserUuid(userUuid);
+        int unreadCount = messageMapper.getMessageCount(searchVo);
+        resultObj.put("unreadCount", unreadCount);
 
         List<String> unsubscribeHandlerList = new ArrayList<>();
+        List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         for(MessageHandlerVo messageHandlerVo : messageSubscribeList){
             if(messageHandlerVo.getIsActive() == 1){
                 resultObj.put("hasSubscription", 1);
@@ -129,5 +133,29 @@ public class MessageListApi extends PrivateApiComponentBase {
         }
         resultObj.put("hasSubscription", 0);
         return resultObj;
+    }
+    /**
+     * @Description: 分页查询抽屉列表
+     * @Author: linbq
+     * @Date: 2021/2/24 19:46
+     * @Params:[searchVo]
+     * @Returns:java.util.List<codedriver.framework.message.dto.MessageVo>
+     **/
+    private List<MessageVo> getMessageVoList(MessageSearchVo searchVo){
+        searchVo.setCurrentPage(1);
+        int pageCount = 0;
+        int rowNum = messageMapper.getMessageCount(searchVo);
+        if(rowNum > 0){
+            List<MessageVo> messageVoList = messageMapper.getMessageList(searchVo);
+            if(CollectionUtils.isNotEmpty(messageVoList)){
+                pageCount = PageUtil.getPageCount(rowNum, searchVo.getPageSize());
+                searchVo.setPageCount(pageCount);
+            }else{
+                rowNum = 0;
+            }
+            searchVo.setRowNum(rowNum);
+            return messageVoList;
+        }
+        return null;
     }
 }
