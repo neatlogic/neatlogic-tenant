@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.notify.job;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyContentHandler;
 import codedriver.framework.notify.core.NotifyContentHandlerFactory;
@@ -14,7 +13,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -38,7 +36,6 @@ public class NotifyContentHandlerDetailApi extends PrivateApiComponentBase {
 	@Input({@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "通知内容插件")})
 	@Output({
 			@Param(name = "conditionList", explode = ConditionParamVo[].class,desc = "条件列表"),
-			@Param(name = "dataColumnList", explode = ValueTextVo[].class,desc = "内容数据列")
 	})
 	@Description(desc = "获取通知内容插件详情")
 	@Override
@@ -51,9 +48,7 @@ public class NotifyContentHandlerDetailApi extends PrivateApiComponentBase {
 			throw new NotifyContentHandlerNotFoundException(handler);
 		}
 		JSONArray conditionList = notifyContentHandler.getConditionOptionList();
-		List<ValueTextVo> dataColumn = notifyContentHandler.getDataColumnList();
 		result.put("conditionList",conditionList);
-		result.put("dataColumnList",dataColumn);
 		return result;
 	}
 }

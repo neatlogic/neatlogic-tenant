@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.notify.job;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.notify.core.INotifyContentHandler;
 import codedriver.framework.notify.core.NotifyContentHandlerFactory;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
@@ -35,10 +36,14 @@ public class NotifyContentHandlerMessageAttrListApi extends PrivateApiComponentB
 			@Param(name = "handler", type = ApiParamType.STRING,isRequired = true, desc = "通知内容插件"),
 			@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = true,desc = "通知方式插件")
 	})
-	@Output({})
+	@Output({
+			@Param(name = "attrList", type = ApiParamType.JSONARRAY,desc = "属性列表(标题、正文等)"),
+			@Param(name = "dataColumnList", explode = ValueTextVo[].class,desc = "工单字段")
+	})
 	@Description(desc = "获取通知消息属性列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
+		JSONObject result = new JSONObject();
 		String handler = jsonObj.getString("handler");
 		String notifyHandler = jsonObj.getString("notifyHandler");
 		INotifyContentHandler notifyContentHandler = NotifyContentHandlerFactory.getHandler(handler);
@@ -48,6 +53,8 @@ public class NotifyContentHandlerMessageAttrListApi extends PrivateApiComponentB
 		if(NotifyHandlerFactory.getHandler(notifyHandler) == null){
 			throw new NotifyHandlerNotFoundException(notifyHandler);
 		}
-		return notifyContentHandler.getMessageAttrList(notifyHandler);
+		result.put("attrList",notifyContentHandler.getMessageAttrList(notifyHandler));
+		result.put("dataColumnList",notifyContentHandler.getDataColumnList(notifyHandler));
+		return result;
 	}
 }
