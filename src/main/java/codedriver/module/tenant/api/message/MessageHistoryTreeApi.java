@@ -1,17 +1,18 @@
 package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.message.dao.mapper.MessageMapper;
+import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.TriggerMessageCountVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyTreeVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,14 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
     public String getConfig() {
         return null;
     }
+
+    @Input({
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "消息标题，模糊搜索"),
+            @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
+            @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
+            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位")
+    })
     @Output({
             @Param(name = "list", explode = NotifyTreeVo[].class, desc = "查询历史消息分类树")
     })
@@ -55,7 +64,25 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = UserContext.get().getUserUuid(true);
-        List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTriggerAndIsRead(userUuid);
+        List<NotifyTreeVo> moduleTreeVoList = NotifyPolicyHandlerFactory.getModuleTreeVoList();
+        List<NotifyTreeVo> triggerTreeVoList = new ArrayList<>();
+        /** 复制分类树，并收集叶子节点 **/
+        List<NotifyTreeVo> resultList = copy(moduleTreeVoList, triggerTreeVoList);
+
+        MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
+        if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
+            Integer timeRange = jsonObj.getInteger("timeRange");
+            String timeUnit = jsonObj.getString("timeUnit");
+            if (timeRange != null && StringUtils.isNotBlank(timeUnit)) {
+                searchVo.setStartTime(TimeUtil.recentTimeTransfer(timeRange, timeUnit));
+                searchVo.setEndTime(new Date());
+            }
+        }
+        if (searchVo.getStartTime() == null || searchVo.getEndTime() == null) {
+            return resultList;
+        }
+        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+        List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTriggerAndIsRead(searchVo);
         Map<String, Integer> triggerMessageUnreadCountMap = new HashMap<>();
         Map<String, Integer> triggerMessageReadCountMap = new HashMap<>();
         for(TriggerMessageCountVo triggerMessageCountVo : triggerMessageCountVoList){
@@ -65,10 +92,6 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
                 triggerMessageReadCountMap.put(triggerMessageCountVo.getTrigger(), triggerMessageCountVo.getCount());
             }
         }
-        List<NotifyTreeVo> moduleTreeVoList = NotifyPolicyHandlerFactory.getModuleTreeVoList();
-        List<NotifyTreeVo> triggerTreeVoList = new ArrayList<>();
-        /** 复制分类树，并收集叶子节点 **/
-        List<NotifyTreeVo> resultList = copy(moduleTreeVoList, triggerTreeVoList);
 
         for(NotifyTreeVo treeVo : triggerTreeVoList){
             Integer unreadCount = triggerMessageUnreadCountMap.get(treeVo.getUuid());
