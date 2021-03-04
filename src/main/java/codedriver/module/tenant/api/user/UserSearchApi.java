@@ -39,56 +39,24 @@ public class UserSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword",
-                    type = ApiParamType.STRING,
-                    desc = "关键字(用户id或名称),模糊查询",
-                    isRequired = true,
-                    xss = true),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = true, xss = true),
             @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "状态"),
-            @Param(name = "vipLevel",
-                    type = ApiParamType.INTEGER,
-                    desc = "VIP等级"),
-            @Param(name = "authGroup",
-                    type = ApiParamType.STRING,
-                    desc = "权限模块"),
-            @Param(name = "auth",
-                    type = ApiParamType.STRING,
-                    desc = "权限"),
-            @Param(name = "teamUuid",
-                    type = ApiParamType.STRING,
-                    desc = "用户组uuid"
-            ),
-            @Param(name = "roleUuid",
-                    type = ApiParamType.STRING,
-                    desc = "角色uuid"),
-            @Param(name = "currentPage",
-                    type = ApiParamType.INTEGER,
-                    desc = "当前页数",
-                    isRequired = false),
-            @Param(name = "pageSize",
-                    type = ApiParamType.INTEGER,
-                    desc = "每页展示数量 默认10",
-                    isRequired = false),
-            @Param(name = "needPage",
-                    type = ApiParamType.BOOLEAN,
-                    desc = "是否分页")})
+            @Param(name = "vipLevel", type = ApiParamType.INTEGER, desc = "VIP等级"),
+            @Param(name = "authGroup", type = ApiParamType.STRING, desc = "权限模块"),
+            @Param(name = "auth", type = ApiParamType.STRING, desc = "权限"),
+            @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "用户组uuid"),
+            @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "角色uuid"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数", isRequired = false),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
+    })
     @Output({
-            @Param(name = "tbodyList",
-                    type = ApiParamType.JSONARRAY,
-                    explode = UserVo[].class,
-                    desc = "table数据列表"),
-            @Param(name = "pageCount",
-                    type = ApiParamType.INTEGER,
-                    desc = "总页数"),
-            @Param(name = "currentPage",
-                    type = ApiParamType.INTEGER,
-                    desc = "当前页数"),
-            @Param(name = "pageSize",
-                    type = ApiParamType.INTEGER,
-                    desc = "每页展示数量"),
-            @Param(name = "rowNum",
-                    type = ApiParamType.INTEGER,
-                    desc = "总条目数")})
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = UserVo[].class, desc = "table数据列表"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总条目数")
+    })
     @Description(desc = "查询用户接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
