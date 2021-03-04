@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.file;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.file.FileAccessDeniedException;
 import codedriver.framework.exception.file.FileNotFoundException;
@@ -12,11 +13,8 @@ import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.publicapi.PublicBinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -48,6 +46,7 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
 		return null;
 	}
 
+	@CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
 	@Input({ @Param(name = "id", type = ApiParamType.LONG, desc = "附件id", isRequired = true) })
 	@Description(desc = "附件下载接口(供第三方使用)")
 	@Override
