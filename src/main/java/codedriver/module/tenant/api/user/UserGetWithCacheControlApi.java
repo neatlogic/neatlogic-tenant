@@ -43,7 +43,7 @@ public class UserGetWithCacheControlApi extends PrivateApiComponentBase {
 	@CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
 	@Input({ @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid") })
 	@Output({ @Param(name = "Return", explode = UserVo.class, desc = "用户详情") })
-	@Description(desc = "根据用户Id查询用户详情，前端会缓存30000秒，后端mybatis二级缓存30000秒")
+	@Description(desc = "根据用户Id查询用户详情，前端会缓存30000秒，后端mybatis二级缓存300秒")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String userUuid = jsonObj.getString("userUuid");
