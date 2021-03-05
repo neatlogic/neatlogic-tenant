@@ -12,18 +12,17 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.auth.label.AUTHORITY_MODIFY;
+import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -37,8 +36,11 @@ import java.util.stream.Collectors;
 public class AuthUserSaveApi extends PrivateApiComponentBase {
 
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserService userService;
 
     @Override
     public String getToken() {
@@ -68,19 +70,7 @@ public class AuthUserSaveApi extends PrivateApiComponentBase {
         String auth = jsonObj.getString("auth");
         List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
         List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-        Set<String> uuidList = new HashSet<>();
-        if(CollectionUtils.isNotEmpty(userUuidList)) {
-            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
-            if(CollectionUtils.isNotEmpty(existUserUuidList)){
-                uuidList.addAll(existUserUuidList.stream().collect(Collectors.toSet()));
-            }
-        }
-        if(CollectionUtils.isNotEmpty(teamUuidList)){
-            List<String> list = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
-            if(CollectionUtils.isNotEmpty(list)){
-                uuidList.addAll(list.stream().collect(Collectors.toSet()));
-            }
-        }
+        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
 
         if(CollectionUtils.isNotEmpty(uuidList)){
             userMapper.deleteUserAuth(new UserAuthVo(null, auth));
