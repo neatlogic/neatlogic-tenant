@@ -77,7 +77,7 @@ public class TeamUserSaveApi extends PrivateApiComponentBase {
         teamMapper.deleteTeamUser(new TeamUserVo(teamUuid));
         List<String> userUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("userUuidList")), String.class);
 		if (CollectionUtils.isNotEmpty(userUuidList)){
-			List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
+			List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,null);
 			userUuidList.retainAll(existUserUuidList);
 			for (String userUuid: userUuidList){
 				String title = teamUserTitleMap.get(userUuid);

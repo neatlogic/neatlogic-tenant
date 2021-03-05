@@ -18,8 +18,12 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -29,6 +33,7 @@ import java.util.List;
 @Service
 @AuthAction(action = AUTHORITY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
+@Transactional
 public class AuthUserSaveApi extends PrivateApiComponentBase {
 
 
@@ -53,20 +58,34 @@ public class AuthUserSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param( name = "auth", desc = "权限", type = ApiParamType.STRING, isRequired = true),
             @Param( name = "authGroup", desc = "权限组", type = ApiParamType.STRING, isRequired = true),
-            @Param( name = "userUuidList", desc = "用户uuid集合", type = ApiParamType.JSONARRAY)
+            @Param( name = "userUuidList", desc = "用户uuid集合", type = ApiParamType.JSONARRAY),
+            @Param( name = "teamUuidList", desc = "分组uuid集合", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "权限用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        String authGroup = jsonObj.getString("authGroup");
+        String auth = jsonObj.getString("auth");
         List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+        Set<String> uuidList = new HashSet<>();
         if(CollectionUtils.isNotEmpty(userUuidList)) {
-        	String authGroup = jsonObj.getString("authGroup");
-        	String auth = jsonObj.getString("auth");
+            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
+            if(CollectionUtils.isNotEmpty(existUserUuidList)){
+                uuidList.addAll(existUserUuidList.stream().collect(Collectors.toSet()));
+            }
+        }
+        if(CollectionUtils.isNotEmpty(teamUuidList)){
+            List<String> list = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
+            if(CollectionUtils.isNotEmpty(list)){
+                uuidList.addAll(list.stream().collect(Collectors.toSet()));
+            }
+        }
+
+        if(CollectionUtils.isNotEmpty(uuidList)){
             userMapper.deleteUserAuth(new UserAuthVo(null, auth));
-            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
-			userUuidList.retainAll(existUserUuidList);
-        	for(String userUuid : userUuidList) {
-        		UserAuthVo userAuthVo = new UserAuthVo();
+            for(String userUuid : uuidList) {
+                UserAuthVo userAuthVo = new UserAuthVo();
                 userAuthVo.setAuthGroup(authGroup);
                 userAuthVo.setAuth(auth);
                 userAuthVo.setUserUuid(userUuid);
