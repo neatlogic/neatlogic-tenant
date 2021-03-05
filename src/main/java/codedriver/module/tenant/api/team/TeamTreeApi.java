@@ -45,6 +45,7 @@ public class TeamTreeApi extends PrivateApiComponentBase {
     }
 
     @Input({ @Param( name = "parentUuid", desc = "teamUuid，这里指父级uuid", type = ApiParamType.STRING),
+             @Param( name = "isActive", desc = "是否只统计激活的用户", type = ApiParamType.INTEGER),
              @Param( name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
              @Param( name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
              @Param( name = "pageSize", desc = "每页最大数", type = ApiParamType.INTEGER)
@@ -57,6 +58,7 @@ public class TeamTreeApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
+        Integer isActive = jsonObj.getInteger("isActive");
 //        TeamVo teamVo = JSON.toJavaObject(jsonObj, TeamVo.class);
         TeamVo teamVo = new TeamVo();
         Boolean needPage = jsonObj.getBoolean("needPage");
@@ -85,7 +87,7 @@ public class TeamTreeApi extends PrivateApiComponentBase {
 		/** 查出分组用户数量和子分组数量 **/
 		if(CollectionUtils.isNotEmpty(tbodyList)) {
 			List<String> teamUuidList = tbodyList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
-			List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
+			List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList,isActive);
 			Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
 	    	for(TeamVo team : teamUserCountAndChildCountList) {
 	    		teamUserCountAndChildCountMap.put(team.getUuid(), team);
