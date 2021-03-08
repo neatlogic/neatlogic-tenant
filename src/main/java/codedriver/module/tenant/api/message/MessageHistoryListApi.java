@@ -113,7 +113,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
-        resultObj.put("uneadCount", unreadCount);
+        resultObj.put("unreadCount", unreadCount);
         resultObj.put("tbodyList", messageVoList);
         return resultObj;
     }
