@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -14,15 +13,17 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.auth.label.ROLE_MODIFY;
+import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -30,11 +31,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class RoleUserSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private RoleMapper roleMapper;
 
-    @Autowired
-    private UserMapper userMapper;
+    @Resource
+    private UserService userService;
 
     @Override
     public String getToken() {
@@ -59,7 +60,12 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
             @Param(name = "userUuidList",
                     type = ApiParamType.JSONARRAY,
                     desc = "用户Uuid集合"
-            )})
+            ),
+            @Param(name = "teamUuidList",
+                    type = ApiParamType.JSONARRAY,
+                    desc = "分组Uuid集合"
+            )
+    })
     @Description(desc = "角色用户添加接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -67,15 +73,15 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
         if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
-        roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
-		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-		if (CollectionUtils.isNotEmpty(userUuidList)){
-            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList);
-            userUuidList.retainAll(existUserUuidList);
-			for (String userUuid : userUuidList){
-				roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
-			}
-		}
+        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
+        if(CollectionUtils.isNotEmpty(uuidList)){
+            roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
+            for (String userUuid : uuidList){
+                roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
+            }
+        }
         return null;
     }
 }

@@ -98,7 +98,7 @@ public class TeamTreeSearchApi extends PrivateApiComponentBase {
     		rootTeam.setName("root");
     		rootTeam.setParentUuid(TeamVo.ROOT_PARENTUUID);
     		teamMap.put(TeamVo.ROOT_UUID, rootTeam);
-        	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList);
+        	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList,null);
         	Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
         	for(TeamVo team : teamUserCountAndChildCountList) {
         		teamUserCountAndChildCountMap.put(team.getUuid(), team);
