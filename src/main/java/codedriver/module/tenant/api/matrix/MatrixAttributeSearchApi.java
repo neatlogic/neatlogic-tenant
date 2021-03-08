@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -109,7 +109,8 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
     		resultObj.put("type", MatrixType.EXTERNAL.getValue());
     		MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
             if(externalVo == null) {
-            	throw new MatrixExternalNotFoundException(matrixUuid);
+                resultObj.put("processMatrixAttributeList", new JSONArray());
+                return resultObj;
             }
             IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
             if(integrationVo != null) {

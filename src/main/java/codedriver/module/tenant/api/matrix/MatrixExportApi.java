@@ -182,7 +182,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         }else {
         	MatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
             if(externalVo == null) {
-            	throw new MatrixExternalNotFoundException(matrixUuid);
+            	throw new MatrixExternalNotFoundException(matrixVo.getName());
             }
             IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
             IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());

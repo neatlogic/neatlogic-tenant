@@ -170,7 +170,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 			returnObj.put("type", MatrixType.EXTERNAL.getValue());
 			MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
 			if (externalVo == null) {
-				throw new MatrixExternalNotFoundException(dataVo.getMatrixUuid());
+				throw new MatrixExternalNotFoundException(matrixVo.getName());
 			}
 			IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
 			IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
