@@ -4,9 +4,12 @@ import java.util.Date;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.core.IValid;
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,6 +123,25 @@ public class NotifyPolicyTemplateSaveApi extends PrivateApiComponentBase {
         }
         notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
         return resultTemplateVo;
+    }
+
+    public IValid name(){
+        return value -> {
+            NotifyTemplateVo templateVo = JSON.toJavaObject(value,NotifyTemplateVo.class);
+            Long policyId = value.getLong("policyId");
+            NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
+            if (notifyPolicyVo == null) {
+                return new FieldValidResultVo(new NotifyPolicyNotFoundException(policyId.toString()));
+            }
+            NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+            List<NotifyTemplateVo> templateList = config.getTemplateList();
+            for (NotifyTemplateVo notifyTemplateVo : templateList) {
+                if (templateVo.getName().equals(notifyTemplateVo.getName()) && !notifyTemplateVo.getId().equals(templateVo.getId())) {
+                    return new FieldValidResultVo(new NotifyTemplateNameRepeatException(templateVo.getName()));
+                }
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 }
