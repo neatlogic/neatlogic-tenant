@@ -67,7 +67,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", explode = MessageVo[].class, desc = "消息列表"),
-            @Param(name = "unReadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
+            @Param(name = "unreadCount", type = ApiParamType.INTEGER, desc = "未读消息数量"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "查询历史消息列表")
@@ -98,7 +98,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
         }
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        int unReadCount = 0;
+        int unreadCount = 0;
         int pageCount = 0;
         int rowNum = messageMapper.getMessageHistoryCount(searchVo);
         if (rowNum > 0) {
@@ -107,13 +107,13 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
                 messageVoList = messageMapper.getMessageHistoryList(searchVo);
             }
             searchVo.setIsRead(0);
-            unReadCount = messageMapper.getMessageHistoryCount(searchVo);
+            unreadCount = messageMapper.getMessageHistoryCount(searchVo);
         }
         resultObj.put("currentPage", searchVo.getCurrentPage());
         resultObj.put("pageSize", searchVo.getPageSize());
         resultObj.put("pageCount", pageCount);
         resultObj.put("rowNum", rowNum);
-        resultObj.put("unReadCount", unReadCount);
+        resultObj.put("unreadCount", unreadCount);
         resultObj.put("tbodyList", messageVoList);
         return resultObj;
     }
