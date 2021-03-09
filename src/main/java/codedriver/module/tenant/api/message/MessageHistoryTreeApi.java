@@ -12,6 +12,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,9 +66,6 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = UserContext.get().getUserUuid(true);
         List<NotifyTreeVo> moduleTreeVoList = NotifyPolicyHandlerFactory.getModuleTreeVoList();
-        List<NotifyTreeVo> triggerTreeVoList = new ArrayList<>();
-        /** 复制分类树，并收集叶子节点 **/
-        List<NotifyTreeVo> resultList = copy(moduleTreeVoList, triggerTreeVoList);
 
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
@@ -78,44 +76,52 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
                 searchVo.setEndTime(new Date());
             }
         }
-        if (searchVo.getStartTime() == null || searchVo.getEndTime() == null) {
-            return resultList;
-        }
-        searchVo.setUserUuid(UserContext.get().getUserUuid(true));
-        List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTriggerAndIsRead(searchVo);
+
         Map<String, Integer> triggerMessageUnreadCountMap = new HashMap<>();
         Map<String, Integer> triggerMessageReadCountMap = new HashMap<>();
-        for(TriggerMessageCountVo triggerMessageCountVo : triggerMessageCountVoList){
-            if(Objects.equals(triggerMessageCountVo.getIsRead(), 0)){
-                triggerMessageUnreadCountMap.put(triggerMessageCountVo.getTrigger(), triggerMessageCountVo.getCount());
-            }else if(Objects.equals(triggerMessageCountVo.getIsRead(), 1)){
-                triggerMessageReadCountMap.put(triggerMessageCountVo.getTrigger(), triggerMessageCountVo.getCount());
+        if (searchVo.getStartTime() != null && searchVo.getEndTime() != null) {
+            searchVo.setUserUuid(UserContext.get().getUserUuid(true));
+            List<TriggerMessageCountVo> triggerMessageCountVoList = messageMapper.getTriggerMessageCountListGroupByTriggerAndIsRead(searchVo);
+            for(TriggerMessageCountVo triggerMessageCountVo : triggerMessageCountVoList){
+                String key = triggerMessageCountVo.getNotifyPolicyHandler() + "#" + triggerMessageCountVo.getTrigger();
+                if(Objects.equals(triggerMessageCountVo.getIsRead(), 0)){
+                    triggerMessageUnreadCountMap.put(key, triggerMessageCountVo.getCount());
+                }else if(Objects.equals(triggerMessageCountVo.getIsRead(), 1)){
+                    triggerMessageReadCountMap.put(key, triggerMessageCountVo.getCount());
+                }
             }
         }
+        /** 复制分类树，并收集叶子节点 **/
+        List<NotifyTreeVo> resultList = copy(moduleTreeVoList, "", triggerMessageUnreadCountMap, triggerMessageReadCountMap);
 
-        for(NotifyTreeVo treeVo : triggerTreeVoList){
-            Integer unreadCount = triggerMessageUnreadCountMap.get(treeVo.getUuid());
-            if(unreadCount == null){
-                unreadCount = 0;
-            }treeVo.setUnreadCount(unreadCount);
-            Integer readCount = triggerMessageReadCountMap.get(treeVo.getUuid());
-            if(readCount == null){
-                readCount = 0;
-            }
-            treeVo.setTotal(unreadCount + readCount);
-        }
         return resultList;
     }
 
-    private List<NotifyTreeVo> copy(List<NotifyTreeVo> notifyTreeVoList, List<NotifyTreeVo> triggerTreeVoList){
+    private List<NotifyTreeVo> copy(List<NotifyTreeVo> notifyTreeVoList, String parentUuid, Map<String, Integer> triggerMessageUnreadCountMap, Map<String, Integer> triggerMessageReadCountMap){
         List<NotifyTreeVo> resultList = new ArrayList<>(notifyTreeVoList.size());
         for(NotifyTreeVo notifyTreeVo : notifyTreeVoList){
             NotifyTreeVo newNotifyTreeVo = new NotifyTreeVo(notifyTreeVo.getUuid(), notifyTreeVo.getName());
-            resultList.add(newNotifyTreeVo);
             if(notifyTreeVo.getChildren() != null){
-                newNotifyTreeVo.setChildren(copy(notifyTreeVo.getChildren(), triggerTreeVoList));
+                List<NotifyTreeVo> children = copy(notifyTreeVo.getChildren(), newNotifyTreeVo.getUuid(), triggerMessageUnreadCountMap, triggerMessageReadCountMap);
+                if(CollectionUtils.isNotEmpty(children)){
+                    newNotifyTreeVo.setChildren(children);
+                    resultList.add(newNotifyTreeVo);
+                }
             }else{
-                triggerTreeVoList.add(newNotifyTreeVo);
+                String key = parentUuid + "#" + newNotifyTreeVo.getUuid();
+                Integer unreadCount = triggerMessageUnreadCountMap.get(key);
+                if(unreadCount == null){
+                    unreadCount = 0;
+                }
+                newNotifyTreeVo.setUnreadCount(unreadCount);
+                Integer readCount = triggerMessageReadCountMap.get(key);
+                if(readCount == null){
+                    readCount = 0;
+                }
+                newNotifyTreeVo.setTotal(unreadCount + readCount);
+                if(newNotifyTreeVo.getTotal() > 0){
+                    resultList.add(newNotifyTreeVo);
+                }
             }
         }
         return resultList;
