@@ -21,6 +21,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * @Title: NotifyPolicyHandlerTreeApi
+ * @Package codedriver.module.tenant.api.notify
+ * @Description: 通知策略分类树接口
+ * @Author: linbq
+ * @Date: 2021/2/24 12:03
+ * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ **/
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerTreeApi extends PrivateApiComponentBase {
