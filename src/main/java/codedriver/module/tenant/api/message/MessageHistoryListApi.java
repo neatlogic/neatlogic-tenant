@@ -14,6 +14,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TimeUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "消息标题，模糊搜索"),
-            @Param(name = "messageType", type = ApiParamType.STRING, desc = "消息分类"),
+            @Param(name = "messageTypePath", type = ApiParamType.JSONARRAY, desc = "消息分类路径"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
@@ -93,9 +94,22 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             return resultObj;
         }
 
-        String messageType = jsonObj.getString("messageType");
-        if (StringUtils.isNotBlank(messageType)) {
-            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
+//        String messageType = jsonObj.getString("messageType");
+//        if (StringUtils.isNotBlank(messageType)) {
+//            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
+//        }
+        JSONArray messageTypePath = jsonObj.getJSONArray("messageTypePath");
+        if(CollectionUtils.isNotEmpty(messageTypePath)){
+            if(messageTypePath.size() == 1){
+                searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageTypePath.getString(0)));
+            }else if(messageTypePath.size() == 2){
+                searchVo.setNotifyPolicyHandler(messageTypePath.getString(1));
+            }else if(messageTypePath.size() == 3){
+                searchVo.setNotifyPolicyHandler(messageTypePath.getString(1));
+                List<String> triggerList = new ArrayList<>();
+                triggerList.add(messageTypePath.getString(2));
+                searchVo.setTriggerList(triggerList);
+            }
         }
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         int unreadCount = 0;
