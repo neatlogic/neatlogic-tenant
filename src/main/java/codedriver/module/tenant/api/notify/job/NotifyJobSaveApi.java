@@ -4,6 +4,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.constvalue.NotifyRecipientType;
 import codedriver.framework.notify.core.INotifyContentHandler;
 import codedriver.framework.notify.core.INotifyHandler;
@@ -18,6 +19,7 @@ import codedriver.framework.notify.exception.NotifyJobNameRepeatException;
 import codedriver.framework.notify.schedule.plugin.NotifyContentJob;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
@@ -130,6 +132,16 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 		}
 
 		return job.getId();
+	}
+
+	public IValid name() {
+		return value -> {
+			NotifyJobVo job = JSON.toJavaObject(value, NotifyJobVo.class);
+			if (notifyJobMapper.checkNameIsRepeat(job) > 0) {
+				return new FieldValidResultVo(new NotifyJobNameRepeatException(job.getName()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 
 	/***
