@@ -94,10 +94,6 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
             return resultObj;
         }
 
-//        String messageType = jsonObj.getString("messageType");
-//        if (StringUtils.isNotBlank(messageType)) {
-//            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
-//        }
         JSONArray messageTypePath = jsonObj.getJSONArray("messageTypePath");
         if(CollectionUtils.isNotEmpty(messageTypePath)){
             if(messageTypePath.size() == 1){

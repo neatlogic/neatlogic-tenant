@@ -104,10 +104,6 @@ public class MessageIsReadUpdateApi extends PrivateApiComponentBase {
                         }
                     }
                     if (searchVo.getStartTime() != null || searchVo.getEndTime() != null) {
-//                        String messageType = jsonObj.getString("messageType");
-//                        if (StringUtils.isNotBlank(messageType)) {
-//                            searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageType));
-//                        }
                         JSONArray messageTypePath = jsonObj.getJSONArray("messageTypePath");
                         if(CollectionUtils.isNotEmpty(messageTypePath)){
                             if(messageTypePath.size() == 1){
