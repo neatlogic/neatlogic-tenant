@@ -66,23 +66,20 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         MatrixVo matrixVo = JSON.toJavaObject(jsonObj, MatrixVo.class);
         matrixVo.setLcu(UserContext.get().getUserUuid(true));
-        if (StringUtils.isNotBlank(matrixVo.getUuid())){
-        	if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-        		throw new MatrixNameRepeatException(matrixVo.getName());
-        	}
-            if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
-                return new FieldValidResultVo(new MatrixLabelRepeatException(matrixVo.getName()));
-            }
+        boolean isUuidBlank = StringUtils.isBlank(matrixVo.getUuid());
+        if(isUuidBlank){
+            matrixVo.setUuid(UuidUtil.randomUuid());
+        }
+        if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            throw new MatrixNameRepeatException(matrixVo.getName());
+        }
+        if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+            throw new MatrixLabelRepeatException(matrixVo.getLabel());
+        }
+        if (!isUuidBlank){
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }else {
             matrixVo.setFcu(UserContext.get().getUserUuid(true));
-            matrixVo.setUuid(UuidUtil.randomUuid());
-            if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-            	throw new MatrixNameRepeatException(matrixVo.getName());
-        	}
-            if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
-                return new FieldValidResultVo(new MatrixLabelRepeatException(matrixVo.getName()));
-            }
             matrixMapper.insertMatrix(matrixVo);
         }
         returnObj.put("matrix", matrixVo);
