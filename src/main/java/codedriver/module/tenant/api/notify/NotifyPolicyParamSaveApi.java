@@ -3,15 +3,18 @@ package codedriver.module.tenant.api.notify;
 import java.util.List;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyParamNameRepeatException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.module.tenant.auth.label.NOTIFY_POLICY_MODIFY;
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,6 +156,31 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
 
         notifyMapper.updateNotifyPolicyById(notifyPolicyVo);
         return resultParamVo;
+    }
+
+    public IValid name(){
+        return value -> {
+            ConditionParamVo paramVo = JSON.toJavaObject(value,ConditionParamVo.class);
+            Long policyId = value.getLong("policyId");
+            NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(policyId);
+            if (notifyPolicyVo == null) {
+                return new FieldValidResultVo(new NotifyPolicyNotFoundException(policyId.toString()));
+            }
+            INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+            if (notifyPolicyHandler == null) {
+                return new FieldValidResultVo(new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler()));
+            }
+            List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
+            if(systemParamList.stream().anyMatch(o -> o.getName().equals(paramVo.getName()))){
+                return new FieldValidResultVo(new NotifyPolicyParamNameRepeatException(paramVo.getName()));
+            }
+            NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
+            List<ConditionParamVo> paramList = config.getParamList();
+            if(paramList.stream().anyMatch(o -> paramVo.getName().equals(o.getName()) && !paramVo.getUuid().equals(o.getUuid()))){
+                return new FieldValidResultVo(new NotifyPolicyParamNameRepeatException(paramVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 }

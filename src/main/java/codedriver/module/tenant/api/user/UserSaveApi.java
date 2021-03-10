@@ -5,6 +5,8 @@ import java.util.Set;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.USER_MODIFY;
+import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.restful.core.IValid;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -193,5 +195,18 @@ public class UserSaveApi extends PrivateApiComponentBase {
 		}
 		
 		return userVo.getUuid();
+	}
+
+	public IValid userId(){
+		return value -> {
+			UserVo userVo = JSON.toJavaObject(value, UserVo.class);
+			if(StringUtils.isBlank(userVo.getUuid())){
+				userVo.setUuid(UuidUtil.randomUuid());
+			}
+			if(userMapper.checkUserIdIsIsRepeat(userVo) > 0) {
+				return new FieldValidResultVo(new UserIdRepeatException(userVo.getUserId()));
+			}
+			return new FieldValidResultVo();
+		};
 	}
 }
