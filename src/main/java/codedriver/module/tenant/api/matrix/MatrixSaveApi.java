@@ -6,6 +6,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixLabelRepeatException;
 import codedriver.framework.matrix.exception.MatrixNameRepeatException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
@@ -53,6 +54,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({ @Param( name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
+             @Param( name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true),
              @Param( name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
              @Param( name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid")
     })
@@ -64,17 +66,20 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         MatrixVo matrixVo = JSON.toJavaObject(jsonObj, MatrixVo.class);
         matrixVo.setLcu(UserContext.get().getUserUuid(true));
-        if (StringUtils.isNotBlank(matrixVo.getUuid())){
-        	if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-        		throw new MatrixNameRepeatException(matrixVo.getName());
-        	}
+        boolean isUuidBlank = StringUtils.isBlank(matrixVo.getUuid());
+        if(isUuidBlank){
+            matrixVo.setUuid(UuidUtil.randomUuid());
+        }
+        if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            throw new MatrixNameRepeatException(matrixVo.getName());
+        }
+        if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+            throw new MatrixLabelRepeatException(matrixVo.getLabel());
+        }
+        if (!isUuidBlank){
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }else {
             matrixVo.setFcu(UserContext.get().getUserUuid(true));
-            matrixVo.setUuid(UuidUtil.randomUuid());
-            if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-            	throw new MatrixNameRepeatException(matrixVo.getName());
-        	}
             matrixMapper.insertMatrix(matrixVo);
         }
         returnObj.put("matrix", matrixVo);
@@ -89,6 +94,19 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             }
             if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
                 return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
+    }
+
+    public IValid label(){
+        return value -> {
+            MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
+            if(StringUtils.isBlank(matrixVo.getUuid())){
+                matrixVo.setUuid(UuidUtil.randomUuid());
+            }
+            if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+                return new FieldValidResultVo(new MatrixLabelRepeatException(matrixVo.getLabel()));
             }
             return new FieldValidResultVo();
         };

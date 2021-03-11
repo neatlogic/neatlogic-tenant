@@ -103,12 +103,14 @@ public class MessageCountApi extends PrivateApiComponentBase {
             needPopUpHandlerList.addAll(popUpLongShowHandlerList);
             messageSearchVo.setHandlerList(needPopUpHandlerList);
             MessageVo messageVo = messageMapper.getLastPopUpMessage(messageSearchVo);
-            if(popUpShortShowHandlerList.contains(messageVo.getHandler())){
-                messageVo.setPopUp(PopUpType.SHORTSHOW.getValue());
-            }else if(popUpLongShowHandlerList.contains(messageVo.getHandler())){
-                messageVo.setPopUp(PopUpType.LONGSHOW.getValue());
+            if(messageVo != null){
+                if(popUpShortShowHandlerList.contains(messageVo.getHandler())){
+                    messageVo.setPopUp(PopUpType.SHORTSHOW.getValue());
+                }else if(popUpLongShowHandlerList.contains(messageVo.getHandler())){
+                    messageVo.setPopUp(PopUpType.LONGSHOW.getValue());
+                }
+                resultObj.put("message", messageVo);
             }
-            resultObj.put("message", messageVo);
         }
         int unreadCount = 0;
         if(popUpCount < 100){
