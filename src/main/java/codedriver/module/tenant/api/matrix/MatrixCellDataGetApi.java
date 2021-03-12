@@ -124,7 +124,7 @@ public class MatrixCellDataGetApi extends PrivateApiComponentBase {
 			} else {
 				MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
 				if (externalVo == null) {
-					throw new MatrixExternalNotFoundException(matrixUuid);
+					throw new MatrixExternalNotFoundException(matrixVo.getName());
 				}
 				IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
 				IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
