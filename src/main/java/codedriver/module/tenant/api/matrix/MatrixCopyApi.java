@@ -11,6 +11,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixLabelRepeatException;
 import codedriver.framework.matrix.exception.MatrixNameRepeatException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -25,6 +26,7 @@ import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,12 +71,14 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
 
     @Input({ 
     	@Param(name = "uuid", desc = "矩阵数据源uuid", isRequired = true, type = ApiParamType.STRING),
-        @Param(name = "name", desc = "矩阵名称", isRequired = true, type = ApiParamType.STRING)
+        @Param(name = "name", desc = "矩阵名称", isRequired = true, type = ApiParamType.STRING),
+        @Param( name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true)
     })
     @Description(desc = "矩阵数据源复制接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	String uuid = jsonObj.getString("uuid");
+    	String label = jsonObj.getString("label");
         MatrixVo sourceMatrix = matrixMapper.getMatrixByUuid(uuid);
     	if(sourceMatrix == null) {
     		throw new MatrixNotFoundException(uuid);
@@ -85,9 +89,13 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
             String targetMatrixUuid = UuidUtil.randomUuid();
             sourceMatrix.setUuid(targetMatrixUuid);
             sourceMatrix.setName(name);
+            sourceMatrix.setLabel(label);
         	if(matrixMapper.checkMatrixNameIsRepeat(sourceMatrix) > 0){
         		throw new MatrixNameRepeatException(name);
         	}
+            if(matrixMapper.checkMatrixLabelIsRepeat(sourceMatrix) > 0) {
+                throw new MatrixLabelRepeatException(sourceMatrix.getLabel());
+            }
             sourceMatrix.setFcu(UserContext.get().getUserUuid(true));
             sourceMatrix.setLcu(UserContext.get().getUserUuid(true));
             matrixMapper.insertMatrix(sourceMatrix);
