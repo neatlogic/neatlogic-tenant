@@ -4,13 +4,16 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
+import codedriver.framework.systemnotice.exception.SystemNoticeRepeatException;
 import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -60,7 +63,7 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "公告ID"),
-            @Param(name = "title", type = ApiParamType.STRING, isRequired = true, desc = "标题"),
+            @Param(name = "title", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", maxLength = 50, isRequired = true, desc = "标题"),
             @Param(name = "content", type = ApiParamType.STRING, isRequired = true, desc = "内容"),
             @Param(name = "recipientList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "通知对象列表,可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\"]"),
     })
@@ -69,6 +72,10 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
+
+        if(systemNoticeMapper.checkSystemNoticeNameRepeat(vo) > 0){
+            throw new SystemNoticeRepeatException(vo.getTitle());
+        }
 
         SystemNoticeVo oldVo = systemNoticeMapper.getSystemNoticeBaseInfoById(vo.getId());
 
@@ -105,5 +112,15 @@ public class SystemNoticeSaveApi extends PrivateApiComponentBase {
         }
 
         return null;
+    }
+
+    public IValid title(){
+        return value -> {
+            SystemNoticeVo noticeVo = JSON.toJavaObject(value, SystemNoticeVo.class);
+            if(systemNoticeMapper.checkSystemNoticeNameRepeat(noticeVo) > 0){
+                return new FieldValidResultVo(new SystemNoticeRepeatException(noticeVo.getTitle()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 }
