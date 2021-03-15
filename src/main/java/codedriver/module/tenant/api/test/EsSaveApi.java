@@ -1,14 +1,11 @@
 package codedriver.module.tenant.api.test;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 
 public class EsSaveApi extends PrivateApiComponentBase {
@@ -46,7 +43,7 @@ public class EsSaveApi extends PrivateApiComponentBase {
         } else {
             jsonObj.put(tagsKey, tags);
         }
-        objectPoolService.saveTask(TenantContext.get().getTenantUuid(), id, jsonObj);
+        //objectPoolService.saveTask(TenantContext.get().getTenantUuid(), id, jsonObj);
         return id;
     }
 

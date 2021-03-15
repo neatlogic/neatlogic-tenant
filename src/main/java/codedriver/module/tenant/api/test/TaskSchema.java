@@ -1,27 +1,7 @@
 package codedriver.module.tenant.api.test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-
 class TaskSchema {
-    @Retention(RetentionPolicy.RUNTIME)
+    /*@Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface TaskAttribute {
         String value();
@@ -565,5 +545,5 @@ class TaskSchema {
 
     public void setHandler(String handler) {
         this.handler = handler;
-    }
+    }*/
 }

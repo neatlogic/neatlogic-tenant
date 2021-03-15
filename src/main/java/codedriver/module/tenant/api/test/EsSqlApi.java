@@ -1,23 +1,11 @@
 package codedriver.module.tenant.api.test;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsQuery;
-import com.techsure.multiattrsearch.ObjectPoolDataException;
-import com.techsure.multiattrsearch.query.QueryParser;
-import com.techsure.multiattrsearch.query.QueryResult;
-import com.techsure.multiattrsearch.query.QuerySyntaxException;
-
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 public class EsSqlApi extends PrivateApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(EsSearchApi.class);
@@ -43,7 +31,7 @@ public class EsSqlApi extends PrivateApiComponentBase {
     @Description(desc = "测试es查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String sql = jsonObj.getString("sql");
+        /*String sql = jsonObj.getString("sql");
         if (sql == null || "".equals((sql = sql.trim()))) {
             return Collections.emptyMap();
         }
@@ -69,7 +57,8 @@ public class EsSqlApi extends PrivateApiComponentBase {
         } catch (ObjectPoolDataException e) {
             logger.debug("data exception", e);
             return e.getMessage();
-        }
+        }*/
+        return null;
     }
 
 }

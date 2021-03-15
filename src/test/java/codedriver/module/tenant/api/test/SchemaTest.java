@@ -1,17 +1,7 @@
 package codedriver.module.tenant.api.test;
 
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
 public class SchemaTest {
-    @Test
+   /* @Test
     public void baseTest() {
         MultiAttrsObjectPatch patch = (MultiAttrsObjectPatch) Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 new Class[]{MultiAttrsObjectPatch.class}, new InvocationHandler() {
@@ -48,5 +38,5 @@ public class SchemaTest {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 }

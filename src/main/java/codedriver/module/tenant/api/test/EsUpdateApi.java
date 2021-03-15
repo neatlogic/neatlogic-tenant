@@ -1,11 +1,8 @@
 package codedriver.module.tenant.api.test;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EsUpdateApi extends PrivateApiComponentBase {
     @Autowired
@@ -22,7 +19,7 @@ public class EsUpdateApi extends PrivateApiComponentBase {
             return null;
         }
 
-        objectPoolService.updateTaskTitle(TenantContext.get().getTenantUuid(), id, title);
+        //objectPoolService.updateTaskTitle(TenantContext.get().getTenantUuid(), id, title);
         return id;
     }
 
