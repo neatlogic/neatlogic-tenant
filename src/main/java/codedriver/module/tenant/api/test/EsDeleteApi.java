@@ -1,11 +1,8 @@
 package codedriver.module.tenant.api.test;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EsDeleteApi extends PrivateApiComponentBase {
     @Autowired
@@ -14,11 +11,11 @@ public class EsDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String id = jsonObj.getString("id");
-        if (id == null || id.isEmpty()) {
-            return "";
-        }
-
-        objectPoolService.deleteTask(TenantContext.get().getTenantUuid(), id);
+//        if (id == null || id.isEmpty()) {
+//            return "";
+//        }
+//
+//        objectPoolService.deleteTask(TenantContext.get().getTenantUuid(), id);
         return id;
     }
 

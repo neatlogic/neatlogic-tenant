@@ -1,25 +1,13 @@
 package codedriver.module.tenant.api.test;
 
-import static com.techsure.multiattrsearch.query.QueryBuilder.attr;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.query.QueryBuilder;
-import com.techsure.multiattrsearch.query.QueryResult;
-
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import java.util.Collections;
 
 
 public class EsSearchApi extends PrivateApiComponentBase {
@@ -46,7 +34,7 @@ public class EsSearchApi extends PrivateApiComponentBase {
     @Description(desc = "测试es查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Integer status = jsonObj.getInteger("status");
+        /*Integer status = jsonObj.getInteger("status");
         List<String> tags = Util.getList(jsonObj, "tags");
         String title = jsonObj.getString("title");
         String handler = jsonObj.getString("handler");
@@ -83,7 +71,7 @@ public class EsSearchApi extends PrivateApiComponentBase {
                 titles.put(el.getId(), el.getString("title"));
             }
             return titles;
-        }
+        }*/
         return Collections.emptyMap();
     }
 

@@ -1,16 +1,9 @@
 package codedriver.module.tenant.api.test;
 
-import java.util.concurrent.ExecutorService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
-import com.techsure.multiattrsearch.MultiAttrsObject;
-import com.techsure.multiattrsearch.MultiAttrsObjectPatch;
-import com.techsure.multiattrsearch.MultiAttrsObjectPool;
-import com.techsure.multiattrsearch.query.QueryBuilder;
-import com.techsure.multiattrsearch.query.QueryParser;
+import java.util.concurrent.ExecutorService;
 
 
 public class ObjectPoolService {
@@ -19,7 +12,7 @@ public class ObjectPoolService {
 //    private static final String POOL_NAME = "test";
 //    private static final String TEST_CONFIG = "test.properties";
 
-    private MultiAttrsObjectPool objectPool;
+//    private MultiAttrsObjectPool objectPool;
     private ExecutorService executor;
 
     public ObjectPoolService() {
@@ -67,7 +60,7 @@ public class ObjectPoolService {
         executor = tp;*/
     }
 
-    public void saveTask(String tenantId, String taskId, JSONObject data) {
+   /* public void saveTask(String tenantId, String taskId, JSONObject data) {
         executor.submit(()-> {
             objectPool.checkout(tenantId, null);
             MultiAttrsObjectPatch patch = objectPool.save(taskId);
@@ -127,5 +120,5 @@ public class ObjectPoolService {
 
     public QueryParser createQueryParser() {
         return objectPool.createQueryParser();
-    }
+    }*/
 }
