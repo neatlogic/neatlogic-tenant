@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.module.tenant.dao.mapper.TestMapper">
-	<select id="testBg" resultType="java.util.HashMap">
-		SELECT * FROM user
-		BG{user.id}
-	</select>
+    <select id="testBg" resultType="java.util.HashMap">
+        SELECT *
+        FROM user BG{user.id}
+    </select>
+
+
+    <select id="getContent" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT compress_content
+        FROM test_content
+    </select>
+
+    <insert id="insertContent">
+        REPLACE INTO test_content (id, content, compress_content)
+        values (1, #{value}, #{value,typeHandler=CompressHandler})
+    </insert>
 </mapper>
 

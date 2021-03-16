@@ -61,7 +61,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             ExcelField excelField = declaredFields[i].getAnnotation(ExcelField.class);
             if(excelField != null){
                 excelFieldList.add(declaredFields[i].getName());
-                /** 写入表头 **/
+                /* 写入表头 **/
                 sb.append(excelField.name() + ",");
             }
         }
@@ -78,7 +78,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
                 list = apiMapper.searchApiAuditForExport(apiAuditVo);
                 if(CollectionUtils.isNotEmpty(list)){
                     StringBuilder contentSb = new StringBuilder();
-                    /**读取文件中的参数/结果/错误**/
+                    /*读取文件中的参数/结果/错误**/
                     for(ApiAuditVo vo : list){
                         String paramFilePath = vo.getParamFilePath();
                         String resultFilePath = vo.getResultFilePath();

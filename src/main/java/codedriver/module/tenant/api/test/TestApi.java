@@ -2,14 +2,13 @@ package codedriver.module.tenant.api.test;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.NO_AUTH;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.ResubmitInterval;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.dao.mapper.TestMapper;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Deprecated
 @AuthAction(action = NO_AUTH.class)
@@ -30,15 +29,11 @@ public class TestApi extends PrivateApiComponentBase {
     }
 
     @Description(desc = "测试BG")
+    @ResubmitInterval(value = 10)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return testMapper.testBg();
-    }
-    
-    public static void main(String[] atgv) {
-        String sql ="aasa BG{123}";
-        sql = sql.replaceAll("BG\\{([^\\}]+)\\}", "new$1new");
-        System.out.println(sql);
+        String str = jsonObj.getString("content");
+        return testMapper.getContent(str);
     }
 
     @Override
