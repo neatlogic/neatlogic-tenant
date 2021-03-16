@@ -40,6 +40,10 @@ public class ImageDownloadApi extends PrivateBinaryStreamApiComponentBase {
 	}
 
 	@Override
+	public boolean supportAnonymousAccess(){
+		return true;
+	}
+	@Override
 	public String getConfig() {
 		return null;
 	}
