@@ -4,27 +4,27 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.lock.core.LockManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.TEAM_MODIFY;
 import codedriver.module.tenant.service.TeamService;
+import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
 
 @AuthAction(action = TEAM_MODIFY.class)
 
@@ -33,16 +33,16 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class TeamSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
-    @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
+    @Resource
     private TeamService teamService;
 
-    @Autowired
+    @Resource
+    private UserService userService;
+
+    @Resource
     private LockManager lockService;
 
     @Override
@@ -60,12 +60,15 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "组id", isRequired = false),
-        @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",
+    @Input({
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id", isRequired = false),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",
             isRequired = true, xss = true),
-        @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
-        @Param(name = "level", type = ApiParamType.STRING,  desc = "层级"),
-        @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合")})
+            @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
+            @Param(name = "level", type = ApiParamType.STRING,  desc = "层级"),
+            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合"),
+            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid集合")
+    })
     @Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
     @Description(desc = "保存组信息")
     @Override
@@ -113,11 +116,10 @@ public class TeamSaveApi extends PrivateApiComponentBase {
 
             teamMapper.insertTeam(teamVo);
             List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-            if (CollectionUtils.isNotEmpty(userUuidList)) {
-                for (String userUuid : userUuidList) {
-                    if (userMapper.checkUserIsExists(userUuid) == 0) {
-                        throw new UserNotFoundException(userUuid);
-                    }
+            List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+            Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList, teamUuidList);
+            if (CollectionUtils.isNotEmpty(uuidList)) {
+                for (String userUuid : uuidList) {
                     teamMapper.insertTeamUser(new TeamUserVo(teamVo.getUuid(), userUuid));
                 }
             }

@@ -3,7 +3,6 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleAuthVo;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.dto.RoleVo;
@@ -12,16 +11,17 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.ROLE_MODIFY;
+import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Set;
 
@@ -31,11 +31,11 @@ import java.util.Set;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class RoleSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	RoleMapper roleMapper;
 	
-	@Autowired
-	UserMapper userMapper;
+	@Resource
+	UserService userService;
 
 	@Override
 	public String getToken() {
@@ -66,6 +66,9 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 			@Param(name = "userUuidList",
 					type = ApiParamType.JSONARRAY,
 					desc = "用户uuid集合"),
+			@Param(name = "teamUuidList",
+					type = ApiParamType.JSONARRAY,
+					desc = "分组uuid集合"),
 			@Param( name= "roleAuthList",
 					desc = "角色权限集合",
 					type = ApiParamType.JSONOBJECT)})
@@ -89,9 +92,10 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 		} else {
 			roleMapper.insertRole(roleVo);
 			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-			if (CollectionUtils.isNotEmpty(userUuidList)){
-				userUuidList = userMapper.checkUserUuidListIsExists(userUuidList,null);
-				for (String userUuid : userUuidList){
+			List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+			Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList, teamUuidList);
+			if (CollectionUtils.isNotEmpty(uuidList)){
+				for (String userUuid : uuidList){
 					roleMapper.insertRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
 				}
 			}
