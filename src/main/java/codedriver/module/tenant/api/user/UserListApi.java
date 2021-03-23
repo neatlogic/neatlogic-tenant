@@ -40,7 +40,8 @@ public class UserListApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "用户组uuid集合")
+		@Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "用户组uuid集合"),
+		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "用户是否激活")
 	})
 	@Output({
 		@Param(name = "userList", type = ApiParamType.JSONARRAY, desc = "用户集合")
@@ -49,10 +50,11 @@ public class UserListApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> teamUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("teamUuidList")), String.class);
+		Integer isActive = jsonObj.getInteger("isActive");
 		if(CollectionUtils.isNotEmpty(teamUuidList)) {
 			List<String> userUuidList = userMapper.getUserUuidListByTeamUuidList(teamUuidList);
 			if(CollectionUtils.isNotEmpty(userUuidList)) {
-				return userMapper.getUserListByUserUuidList(userUuidList);
+				return userMapper.getUserListByUserUuidList(userUuidList,isActive);
 			}
 		}
 		return new ArrayList<>();
