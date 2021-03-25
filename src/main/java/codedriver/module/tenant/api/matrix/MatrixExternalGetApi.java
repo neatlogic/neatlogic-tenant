@@ -31,7 +31,7 @@ public class MatrixExternalGetApi extends PrivateApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
-    @Resource
+    @Override
     public String getToken() {
         return "matrix/external/get";
     }
