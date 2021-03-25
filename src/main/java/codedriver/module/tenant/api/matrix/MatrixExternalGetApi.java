@@ -1,10 +1,5 @@
 package codedriver.module.tenant.api.matrix;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
@@ -13,13 +8,13 @@ import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * @program: codedriver
@@ -30,13 +25,13 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private MatrixExternalMapper externalMapper;
 
-    @Autowired
+    @Resource
     private MatrixMapper matrixMapper;
 
-    @Override
+    @Resource
     public String getToken() {
         return "matrix/external/get";
     }
@@ -51,21 +46,21 @@ public class MatrixExternalGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "matrixUuid", desc = "矩阵uuid", isRequired = true, type = ApiParamType.STRING)})
+    @Input({@Param(name = "matrixUuid", desc = "矩阵uuid", isRequired = true, type = ApiParamType.STRING)})
     @Description(desc = "外部数据源矩阵获取接口")
-    @Output({ @Param( name = "Return", explode = MatrixExternalVo.class, desc = "外部矩阵数据源")})
+    @Output({@Param(name = "Return", explode = MatrixExternalVo.class, desc = "外部矩阵数据源")})
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-    	String matrixUuid = jsonObj.getString("matrixUuid");
-    	MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-        if(matrixVo == null) {
-        	throw new MatrixNotFoundException(matrixUuid);
+        String matrixUuid = jsonObj.getString("matrixUuid");
+        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+        if (matrixVo == null) {
+            throw new MatrixNotFoundException(matrixUuid);
         }
-        
-        if(MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+
+        if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-        }else {
-        	throw new MatrixExternalException("矩阵:'" + matrixUuid + "'不是外部数据源类型");
+        } else {
+            throw new MatrixExternalException("矩阵:'" + matrixUuid + "'不是外部数据源类型");
         }
     }
 }

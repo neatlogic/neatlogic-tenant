@@ -8,11 +8,11 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixLabelRepeatException;
 import codedriver.framework.matrix.exception.MatrixNameRepeatException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
@@ -20,9 +20,10 @@ import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * @program: codedriver
@@ -35,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private MatrixMapper matrixMapper;
 
     @Override
@@ -53,13 +54,13 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({ @Param( name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
-             @Param( name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true),
-             @Param( name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
-             @Param( name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid")
+    @Input({@Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
+            @Param(name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid")
     })
     @Output({
-            @Param( name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")
+            @Param(name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")
     })
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -67,18 +68,18 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         MatrixVo matrixVo = JSON.toJavaObject(jsonObj, MatrixVo.class);
         matrixVo.setLcu(UserContext.get().getUserUuid(true));
         boolean isUuidBlank = StringUtils.isBlank(matrixVo.getUuid());
-        if(isUuidBlank){
+        if (isUuidBlank) {
             matrixVo.setUuid(UuidUtil.randomUuid());
         }
-        if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+        if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
             throw new MatrixNameRepeatException(matrixVo.getName());
         }
-        if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+        if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
             throw new MatrixLabelRepeatException(matrixVo.getLabel());
         }
-        if (!isUuidBlank){
+        if (!isUuidBlank) {
             matrixMapper.updateMatrixNameAndLcu(matrixVo);
-        }else {
+        } else {
             matrixVo.setFcu(UserContext.get().getUserUuid(true));
             matrixMapper.insertMatrix(matrixVo);
         }
@@ -86,26 +87,26 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         return returnObj;
     }
 
-    public IValid name(){
+    public IValid name() {
         return value -> {
             MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
-            if(StringUtils.isBlank(matrixVo.getUuid())){
+            if (StringUtils.isBlank(matrixVo.getUuid())) {
                 matrixVo.setUuid(UuidUtil.randomUuid());
             }
-            if(matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
                 return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));
             }
             return new FieldValidResultVo();
         };
     }
 
-    public IValid label(){
+    public IValid label() {
         return value -> {
             MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
-            if(StringUtils.isBlank(matrixVo.getUuid())){
+            if (StringUtils.isBlank(matrixVo.getUuid())) {
                 matrixVo.setUuid(UuidUtil.randomUuid());
             }
-            if(matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+            if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
                 return new FieldValidResultVo(new MatrixLabelRepeatException(matrixVo.getLabel()));
             }
             return new FieldValidResultVo();
