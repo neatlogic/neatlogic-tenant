@@ -92,11 +92,10 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
             if (obj instanceof FormVersionVo) {
                 FormVersionVo formVersionVo = (FormVersionVo) obj;
                 formVersionVo.setFormUuid(uuid);
-                //将导入版本设置为激活版本
-                formVersionVo.setIsActive(0);
                 FormVersionVo existsFormVersionVo = formMapper.getFormVersionByUuid(formVersionVo.getUuid());
                 //如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
                 if (existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(uuid)) {
+                    formVersionVo.setIsActive(existsFormVersionVo.getIsActive());
                     formMapper.updateFormVersion(formVersionVo);
                     resultObj.put("versionUuid", formVersionVo.getUuid());
                     resultObj.put("result", "版本" + existsFormVersionVo.getVersion() + "被覆盖");
@@ -108,6 +107,7 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
                     } else {
                         version += 1;
                     }
+                    formVersionVo.setIsActive(0);
                     formVersionVo.setVersion(version);
                     formVersionVo.setUuid(null);
                     formMapper.insertFormVersion(formVersionVo);
@@ -119,7 +119,6 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
             } else {
                 throw new FormImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
             }
-
         }
 
         return null;
