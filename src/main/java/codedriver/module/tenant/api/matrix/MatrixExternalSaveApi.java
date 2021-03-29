@@ -15,7 +15,9 @@ import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalNoReturnException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -97,11 +99,8 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
                 return new FieldValidResultVo(new IntegrationHandlerNotFoundException(integrationVo.getHandler()));
             }
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
-            if(resultVo == null){
-                return new FieldValidResultVo(new MatrixExternalException("集成配置接口无返回结果"));
-            }
             if(StringUtils.isNotBlank(resultVo.getError())){
-                return new FieldValidResultVo(new MatrixExternalException("外部接口访问异常"));
+                return new FieldValidResultVo(new MatrixExternalAccessException());
             }
             try{
                 handler.validate(resultVo);

@@ -101,41 +101,35 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
                 logger.error(resultVo.getError());
                 throw new MatrixExternalException("外部接口访问异常");
             }
-            try{
+            try {
                 handler.validate(resultVo);
-            }catch (ApiRuntimeException ex){
+            } catch (ApiRuntimeException ex) {
                 logger.error(ex.getMessage());
                 throw new MatrixExternalException(ex.getMessage());
             }
-            if (StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-                JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-                if (MapUtils.isNotEmpty(transformedResult)) {
-                    returnObj.putAll(transformedResult);
-                    JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
-                    if (CollectionUtils.isNotEmpty(tbodyArray)) {
-                        List<Map<String, Object>> tbodyList = new ArrayList<>();
-                        for (int i = 0; i < tbodyArray.size(); i++) {
-                            JSONObject rowData = tbodyArray.getJSONObject(i);
-                            Integer pageSize = jsonObj.getInteger("pageSize");
-                            pageSize = pageSize == null ? 10 : pageSize;
-                            if (MapUtils.isNotEmpty(rowData)) {
-                                Map<String, Object> rowDataMap = new HashMap<>();
-                                for (Entry<String, Object> entry : rowData.entrySet()) {
-                                    rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
-                                }
-                                tbodyList.add(rowDataMap);
-                                if (tbodyList.size() >= pageSize) {
-                                    break;
-                                }
-                            }
+            JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+            returnObj.putAll(transformedResult);
+            JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+            if (CollectionUtils.isNotEmpty(tbodyArray)) {
+                List<Map<String, Object>> tbodyList = new ArrayList<>();
+                for (int i = 0; i < tbodyArray.size(); i++) {
+                    JSONObject rowData = tbodyArray.getJSONObject(i);
+                    Integer pageSize = jsonObj.getInteger("pageSize");
+                    pageSize = pageSize == null ? 10 : pageSize;
+                    if (MapUtils.isNotEmpty(rowData)) {
+                        Map<String, Object> rowDataMap = new HashMap<>();
+                        for (Entry<String, Object> entry : rowData.entrySet()) {
+                            rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
                         }
-                        returnObj.put("tbodyList", tbodyList);
+                        tbodyList.add(rowDataMap);
+                        if (tbodyList.size() >= pageSize) {
+                            break;
+                        }
                     }
                 }
-            } else if(StringUtils.isBlank(resultVo.getTransformedResult())){
-                throw new MatrixExternalNoReturnException();
+                returnObj.put("tbodyList", tbodyList);
             }
-        }else{
+        } else {
             throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
 
