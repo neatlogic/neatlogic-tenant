@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.form;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.file.FileExtNotAllowedException;
+import codedriver.framework.exception.file.FileNotUploadException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -67,7 +69,7 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
         Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
         //如果没有导入文件, 抛异常
         if (multipartFileMap == null || multipartFileMap.isEmpty()) {
-            throw new FormImportException("没有导入文件");
+            throw new FileNotUploadException();
         }
         ObjectInputStream ois = null;
         Object obj = null;
@@ -80,7 +82,7 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                 ois = new ObjectInputStream(multipartFile.getInputStream());
                 obj = ois.readObject();
             } catch (IOException e) {
-                throw new FormImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
+                throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
             } finally {
                 if (ois != null) {
                     ois.close();
@@ -143,7 +145,7 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                 }
                 return resultList;
             } else {
-                throw new FormImportException(multipartFile.getOriginalFilename() + "文件格式不正确");
+                throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
             }
         }
         return null;
