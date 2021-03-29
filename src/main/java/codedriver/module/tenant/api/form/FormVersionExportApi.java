@@ -49,27 +49,21 @@ public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true),
             @Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "表单版本uuid", isRequired = true)
     })
     @Description(desc = "表单版本导出接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String uuid = paramObj.getString("uuid");
-        FormVo formVo = formMapper.getFormByUuid(uuid);
-        //判断表单是否存在
-        if (formVo == null) {
-            throw new FormNotFoundException(uuid);
-        }
-
         String formVersionUuid = paramObj.getString("formVersionUuid");
         //判断要导出的表单版本是否存在
         FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVersionUuid);
         if (formVersion == null) {
             throw new FormVersionNotFoundException(formVersionUuid);
         }
-        if (!uuid.equals(formVersion.getFormUuid())) {
-            throw new FormIllegalParameterException("表单版本：'" + formVersionUuid + "'不属于表单：'" + uuid + "'的版本");
+        FormVo formVo = formMapper.getFormByUuid(formVersion.getFormUuid());
+        //判断表单是否存在
+        if (formVo == null) {
+            throw new FormNotFoundException(formVersion.getFormUuid());
         }
         formVersion.setFormName(formVo.getName());
         //设置导出文件名, 表单名称_版本号

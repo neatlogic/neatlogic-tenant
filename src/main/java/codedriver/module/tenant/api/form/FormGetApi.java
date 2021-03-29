@@ -1,6 +1,7 @@
 package codedriver.module.tenant.api.form;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
@@ -42,46 +43,59 @@ public class FormGetApi extends PrivateApiComponentBase {
 
     @Override
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid"),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"),
     })
     @Output({@Param(explode = FormVo.class)})
     @Description(desc = "单个表单查询接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String uuid = jsonObj.getString("uuid");
-        FormVo formVo = formMapper.getFormByUuid(uuid);
-        //判断表单是否存在
-        if (formVo == null) {
-            throw new FormNotFoundException(uuid);
-        }
-        FormVersionVo formVersion = null;
+        FormVo formVo = null;
         String currentVersionUuid = jsonObj.getString("currentVersionUuid");
+        String uuid = jsonObj.getString("uuid");
         if (StringUtils.isNotBlank(currentVersionUuid)) {
-            formVersion = formMapper.getFormVersionByUuid(currentVersionUuid);
+            FormVersionVo formVersion = formMapper.getFormVersionByUuid(currentVersionUuid);
             //判断表单版本是否存在
             if (formVersion == null) {
-                throw new FormVersionNotFoundException(uuid);
+                throw new FormVersionNotFoundException(currentVersionUuid);
             }
-            if (!uuid.equals(formVersion.getFormUuid())) {
-                throw new FormIllegalParameterException("表单版本：'" + currentVersionUuid + "'不属于表单：'" + uuid + "'的版本");
+            formVo = formMapper.getFormByUuid(formVersion.getFormUuid());
+            //判断表单是否存在
+            if (formVo == null) {
+                throw new FormNotFoundException(formVersion.getFormUuid());
             }
             formVo.setCurrentVersionUuid(currentVersionUuid);
-        } else {//获取激活版本
-            formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
+            //表单内容
+            formVo.setFormConfig(formVersion.getFormConfig());
+            //表单版本列表
+            List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(formVersion.getFormUuid());
+            formVo.setVersionList(formVersionList);
+            //引用数量
+//            int count = formMapper.getFormReferenceCount(uuid);
+//            formVo.setReferenceCount(count);
+            return formVo;
+        } else if(StringUtils.isNotBlank(uuid)) {//获取激活版本
+            formVo = formMapper.getFormByUuid(uuid);
+            //判断表单是否存在
+            if (formVo == null) {
+                throw new FormNotFoundException(uuid);
+            }
+            FormVersionVo formVersion = formMapper.getActionFormVersionByFormUuid(uuid);
             if (formVersion == null) {
                 throw new FormActiveVersionNotFoundExcepiton(uuid);
             }
             formVo.setCurrentVersionUuid(formVersion.getUuid());
+            //表单内容
+            formVo.setFormConfig(formVersion.getFormConfig());
+            //表单版本列表
+            List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
+            formVo.setVersionList(formVersionList);
+            //引用数量
+//    		int count = formMapper.getFormReferenceCount(uuid);
+//    		formVo.setReferenceCount(count);
+            return formVo;
+        } else {
+            throw new ParamIrregularException("参数：'uuid'和'currentVersionUuid'，不能同时为空");
         }
-        //表单内容
-        formVo.setFormConfig(formVersion.getFormConfig());
-        //表单版本列表
-        List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
-        formVo.setVersionList(formVersionList);
-        //引用数量
-//		int count = formMapper.getFormReferenceCount(uuid);
-//		formVo.setReferenceCount(count);
-        return formVo;
     }
 
 }

@@ -60,7 +60,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true),
             @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50, desc = "表单名称"),
-            //@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活", isRequired = true),
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
             @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true)
     })
@@ -70,8 +69,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
     })
     @Description(desc = "表单保存接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {
-        });
+        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
         if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
             throw new FormNameRepeatException(formVo.getName());
         }
@@ -88,8 +86,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setFormConfig(formVo.getFormConfig());
         formVersionVo.setFormUuid(formVo.getUuid());
-        //formMapper.resetFormVersionIsActiveByFormUuid(formVo.getUuid());
-        //formVersionVo.setIsActive(1);
         if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
             Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
             if (version == null) {//如果表单没有激活版本时，设置当前版本号为1，且为激活版本
@@ -105,9 +101,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
             FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVo.getCurrentVersionUuid());
             if (formVersion == null) {
                 throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
-            }
-            if (!formVo.getUuid().equals(formVersion.getFormUuid())) {
-                throw new FormIllegalParameterException("表单版本：'" + formVo.getCurrentVersionUuid() + "'不属于表单：'" + formVo.getUuid() + "'的版本");
             }
             formVersionVo.setUuid(formVo.getCurrentVersionUuid());
             formVersionVo.setIsActive(formVersion.getIsActive());

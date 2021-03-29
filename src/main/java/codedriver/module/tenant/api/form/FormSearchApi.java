@@ -54,8 +54,7 @@ public class FormSearchApi extends PrivateApiComponentBase {
     @Description(desc = "表单列表搜索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {
-        });
+        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
         JSONObject resultObj = new JSONObject();
         if (formVo.getNeedPage()) {
             int rowNum = formMapper.searchFormCount(formVo);

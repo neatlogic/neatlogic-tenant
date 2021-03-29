@@ -55,8 +55,7 @@ public class FormSearchForSelectApi extends PrivateApiComponentBase {
     @Description(desc = "查询表单列表_下拉框")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {
-        });
+        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
         JSONObject resultObj = new JSONObject();
         if (formVo.getNeedPage()) {
             int rowNum = formMapper.searchFormCount(formVo);

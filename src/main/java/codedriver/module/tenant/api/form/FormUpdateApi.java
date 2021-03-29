@@ -52,8 +52,7 @@ public class FormUpdateApi extends PrivateApiComponentBase {
     @Description(desc = "表单基本信息更新接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<FormVo>() {
-        });
+        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
         //判断表单是否存在
         if (formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
             throw new FormNotFoundException(formVo.getUuid());
