@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -95,7 +96,7 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
             IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(value.getString("integrationUuid"));
             IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
             if (handler == null) {
-                return new FieldValidResultVo(new MatrixExternalIntegrationHandlerNotFoundException(integrationVo.getHandler()));
+                return new FieldValidResultVo(new IntegrationHandlerNotFoundException(integrationVo.getHandler()));
             }
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
             if (StringUtils.isNotBlank(resultVo.getError())) {
