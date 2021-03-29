@@ -1,19 +1,8 @@
 package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.module.tenant.auth.label.INTEGRATION_MODIFY;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -21,12 +10,14 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.tenant.auth.label.INTEGRATION_MODIFY;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
 
 @Service
 @AuthAction(action = INTEGRATION_MODIFY.class)
@@ -62,36 +53,10 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
 			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 		}
 		IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
-		if(IIntegrationHandler.Type.MATRIX.getValue().equals(handler.getType())
-				&& StringUtils.isBlank(resultVo.getError()) && StringUtils.isNotBlank(resultVo.getTransformedResult())){
-			JSONObject transformedResult = null;
-			try {
-				transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-			}catch (Exception ex){
-				resultVo.appendError("返回结果不是JSON格式");
-				return resultVo;
-			}
-			if(MapUtils.isNotEmpty(transformedResult)){
-				Set<String> keys = transformedResult.keySet();
-				Set<String> keySet = new HashSet<>();
-				handler.getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
-				if(!CollectionUtils.containsAll(keys,keySet)){
-					resultVo.appendError("返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
-					return resultVo;
-				}
-				JSONArray theadList = transformedResult.getJSONArray("theadList");
-				if(CollectionUtils.isNotEmpty(theadList)){
-					for(int i = 0; i < theadList.size();i++){
-						if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
-							resultVo.appendError("返回结果不符合格式,theadList缺少key或title");
-							return resultVo;
-						}
-					}
-				}else{
-					resultVo.appendError("返回结果不符合格式,缺少theadList");
-					return resultVo;
-				}
-			}
+		try {
+			handler.validate(resultVo);
+		}catch (ApiRuntimeException ex){
+			resultVo.appendError(ex.getMessage());
 		}
 		return resultVo;
 	}
