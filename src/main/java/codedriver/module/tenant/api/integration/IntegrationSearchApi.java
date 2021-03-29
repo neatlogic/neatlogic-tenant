@@ -88,15 +88,6 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
         returnObj.put("rowNum", integrationVo.getRowNum());
         returnObj.put("pageCount", integrationVo.getPageCount());
         returnObj.put("tbodyList", integrationList);
-
-        JSONArray theadList = new JSONArray();
-        theadList.add(new JSONObject(){
-            {
-                this.put("key","handlerName");
-                this.put("title","处理器名称");
-            }
-        });
-        returnObj.put("theadList",theadList);
         return returnObj;
     }
 }

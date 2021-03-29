@@ -106,22 +106,24 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
                 try {
                     transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
                 }catch (Exception ex){
-                    throw new MatrixExternalException("外部接口返回值不是JSON格式");
+                    throw new MatrixExternalException("外部接口返回结果不是JSON格式");
                 }
                 if (MapUtils.isNotEmpty(transformedResult)) {
-                    Set<String> keySet = new HashSet<String>(){
-                        {
-                            this.add("tbodyList");
-                            this.add("theadList");
-                            this.add("currentPage");
-                            this.add("currentPage");
-                            this.add("pageSize");
-                            this.add("pageCount");
-                        }
-                    };
                     Set<String> keys = transformedResult.keySet();
+                    Set<String> keySet = new HashSet<>();
+                    handler.getOutputPattern().stream().forEach(o -> keySet.add(o.getName()));
                     if(!CollectionUtils.containsAll(keys,keySet)){
-                        throw new MatrixExternalException("外部接口返回值不符合格式");
+                        throw new MatrixExternalException("外部接口返回结果不符合格式，缺少" + JSON.toJSONString(CollectionUtils.removeAll(keySet, keys)));
+                    }
+                    JSONArray theadList = transformedResult.getJSONArray("theadList");
+                    if(CollectionUtils.isNotEmpty(theadList)){
+                        for(int i = 0; i < theadList.size();i++){
+                            if(!theadList.getJSONObject(i).containsKey("key") || !theadList.getJSONObject(i).containsKey("title")){
+                                throw new MatrixExternalException("外部接口返回结果不符合格式,theadList缺少key或title");
+                            }
+                        }
+                    }else{
+                        throw new MatrixExternalException("外部接口返回结果不符合格式,缺少theadList");
                     }
                     returnObj.putAll(transformedResult);
                     JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
@@ -146,8 +148,10 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
                     }
                 }
             } else if(StringUtils.isBlank(resultVo.getTransformedResult())){
-                throw new MatrixExternalException("外部接口无返回值");
+                throw new MatrixExternalException("外部接口无返回结果");
             }
+        }else{
+            throw new MatrixExternalException("没有配置外部数据源");
         }
 
         //TODO 暂时屏蔽引用，没考虑好怎么实现
