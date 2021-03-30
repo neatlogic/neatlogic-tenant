@@ -2,6 +2,7 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -14,8 +15,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -30,10 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 @Service
@@ -102,33 +99,38 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
             if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
-                throw new MatrixExternalException("外部接口访问异常");
-            } else if (StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-                JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-                if (MapUtils.isNotEmpty(transformedResult)) {
-                    returnObj.putAll(transformedResult);
-                    JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
-                    if (CollectionUtils.isNotEmpty(tbodyArray)) {
-                        List<Map<String, Object>> tbodyList = new ArrayList<>();
-                        for (int i = 0; i < tbodyArray.size(); i++) {
-                            JSONObject rowData = tbodyArray.getJSONObject(i);
-                            Integer pageSize = jsonObj.getInteger("pageSize");
-                            pageSize = pageSize == null ? 10 : pageSize;
-                            if (MapUtils.isNotEmpty(rowData)) {
-                                Map<String, Object> rowDataMap = new HashMap<>();
-                                for (Entry<String, Object> entry : rowData.entrySet()) {
-                                    rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
-                                }
-                                tbodyList.add(rowDataMap);
-                                if (tbodyList.size() >= pageSize) {
-                                    break;
-                                }
-                            }
+                throw new MatrixExternalAccessException();
+            }
+            try {
+                handler.validate(resultVo);
+            } catch (ApiRuntimeException ex) {
+                logger.error(ex.getMessage());
+                throw new ApiRuntimeException(ex.getMessage());
+            }
+            JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+            returnObj.putAll(transformedResult);
+            JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+            if (CollectionUtils.isNotEmpty(tbodyArray)) {
+                List<Map<String, Object>> tbodyList = new ArrayList<>();
+                for (int i = 0; i < tbodyArray.size(); i++) {
+                    JSONObject rowData = tbodyArray.getJSONObject(i);
+                    Integer pageSize = jsonObj.getInteger("pageSize");
+                    pageSize = pageSize == null ? 10 : pageSize;
+                    if (MapUtils.isNotEmpty(rowData)) {
+                        Map<String, Object> rowDataMap = new HashMap<>();
+                        for (Entry<String, Object> entry : rowData.entrySet()) {
+                            rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
                         }
-                        returnObj.put("tbodyList", tbodyList);
+                        tbodyList.add(rowDataMap);
+                        if (tbodyList.size() >= pageSize) {
+                            break;
+                        }
                     }
                 }
+                returnObj.put("tbodyList", tbodyList);
             }
+        } else {
+            throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
 
         //TODO 暂时屏蔽引用，没考虑好怎么实现
