@@ -17,7 +17,6 @@ import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixExternalNoReturnException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -105,7 +104,7 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
             try{
                 handler.validate(resultVo);
             }catch (ApiRuntimeException ex){
-                return new FieldValidResultVo(new MatrixExternalException(ex.getMessage()));
+                return new FieldValidResultVo(new ApiRuntimeException(ex.getMessage()));
             }
             return new FieldValidResultVo();
         };

@@ -99,13 +99,13 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
             if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
-                throw new MatrixExternalException("外部接口访问异常");
+                throw new MatrixExternalAccessException();
             }
             try {
                 handler.validate(resultVo);
             } catch (ApiRuntimeException ex) {
                 logger.error(ex.getMessage());
-                throw new MatrixExternalException(ex.getMessage());
+                throw new ApiRuntimeException(ex.getMessage());
             }
             JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
             returnObj.putAll(transformedResult);
