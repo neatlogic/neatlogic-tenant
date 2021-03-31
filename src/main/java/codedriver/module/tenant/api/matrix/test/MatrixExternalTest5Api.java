@@ -3,7 +3,7 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.tenant.api.matrix;
+package codedriver.module.tenant.api.matrix.test;
 
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -19,18 +19,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixExternalTest4Api extends PrivateApiComponentBase {
+public class MatrixExternalTest5Api extends PrivateApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(MatrixExternalTest4Api.class);
+    private final static Logger logger = LoggerFactory.getLogger(MatrixExternalTest5Api.class);
 
     @Override
     public String getToken() {
-        return "matrix/external/test4";
+        return "matrix/external/test5";
     }
 
     @Override
     public String getName() {
-        return "返回结果为空串";
+        return "返回结果为空JSON";
     }
 
     @Override
@@ -38,10 +38,10 @@ public class MatrixExternalTest4Api extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "返回结果为空串")
+    @Description(desc = "返回结果为空JSON")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return "";
+        return new JSONObject();
     }
 
 }

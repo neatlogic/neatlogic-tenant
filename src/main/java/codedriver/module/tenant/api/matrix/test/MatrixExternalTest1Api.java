@@ -3,7 +3,7 @@
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
-package codedriver.module.tenant.api.matrix;
+package codedriver.module.tenant.api.matrix.test;
 
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -20,18 +20,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixExternalTest3Api extends PrivateApiComponentBase {
+public class MatrixExternalTest1Api extends PrivateApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(MatrixExternalTest3Api.class);
+    private final static Logger logger = LoggerFactory.getLogger(MatrixExternalTest1Api.class);
 
     @Override
     public String getToken() {
-        return "matrix/external/test3";
+        return "matrix/external/test1";
     }
 
     @Override
     public String getName() {
-        return "返回结果theadLit缺少key或title";
+        return "返回结果结构完整";
     }
 
     @Override
@@ -39,7 +39,7 @@ public class MatrixExternalTest3Api extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "返回结果theadLit缺少key或title")
+    @Description(desc = "返回结果结构完整")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
@@ -51,7 +51,7 @@ public class MatrixExternalTest3Api extends PrivateApiComponentBase {
             {
                 this.add(new JSONObject(){
                     {
-//                        this.put("key","label");
+                        this.put("key","label");
                         this.put("title","标题");
                     }
                 });
