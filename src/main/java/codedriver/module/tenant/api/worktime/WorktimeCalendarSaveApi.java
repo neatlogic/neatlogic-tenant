@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.worktime;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -16,10 +21,10 @@ import codedriver.framework.worktime.exception.WorktimeNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -33,7 +38,7 @@ import java.util.List;
 @AuthAction(action = WORKTIME_MODIFY.class)
 public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private WorktimeMapper worktimeMapper;
 	
 	@Override
