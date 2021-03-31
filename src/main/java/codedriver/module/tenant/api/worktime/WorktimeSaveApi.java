@@ -21,7 +21,6 @@ import codedriver.framework.worktime.exception.WorktimeNameRepeatException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,8 +68,7 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
     @Description(desc = "工作时间窗口信息保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        WorktimeVo worktimeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeVo>() {
-        });
+        WorktimeVo worktimeVo = JSON.toJavaObject(jsonObj, WorktimeVo.class);
         if (worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
             throw new WorktimeNameRepeatException(worktimeVo.getName());
         }

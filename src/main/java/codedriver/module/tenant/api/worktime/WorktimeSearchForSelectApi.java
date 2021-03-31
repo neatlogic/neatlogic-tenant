@@ -15,7 +15,6 @@ import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -56,8 +55,7 @@ public class WorktimeSearchForSelectApi extends PrivateApiComponentBase {
     @Description(desc = "查询工作时间窗口列表_下拉框")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        WorktimeVo worktimeVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeVo>() {
-        });
+        WorktimeVo worktimeVo = JSON.toJavaObject(jsonObj, WorktimeVo.class);
         JSONObject resultObj = new JSONObject();
         if (worktimeVo.getNeedPage()) {
             int rowNum = worktimeMapper.searchWorktimeCount(worktimeVo);

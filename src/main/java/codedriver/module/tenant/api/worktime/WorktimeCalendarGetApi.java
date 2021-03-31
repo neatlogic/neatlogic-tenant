@@ -15,7 +15,6 @@ import codedriver.framework.worktime.exception.WorktimeNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -55,8 +54,7 @@ public class WorktimeCalendarGetApi extends PrivateApiComponentBase {
     @Description(desc = "工作日历信息获取接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        WorktimeRangeVo worktimeDetailVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<WorktimeRangeVo>() {
-        });
+        WorktimeRangeVo worktimeDetailVo = JSON.toJavaObject(jsonObj, WorktimeRangeVo.class);
         if (worktimeMapper.checkWorktimeIsExists(worktimeDetailVo.getWorktimeUuid()) == 0) {
             throw new WorktimeNotFoundException(worktimeDetailVo.getWorktimeUuid());
         }
