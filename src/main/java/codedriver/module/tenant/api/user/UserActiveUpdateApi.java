@@ -62,11 +62,13 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
                 }
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
-                if(isActive == 0){
-                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
-                    userMapper.deleteUserRoleByUserUuid(userUuid);
-                    userMapper.deleteUserTeamByUserUuid(userUuid);
-                }
+                //禁用用户时删除userSession
+                userMapper.deleteUserSessionByUserUuid(userUuid);
+//                if(isActive == 0){
+//                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
+//                    userMapper.deleteUserRoleByUserUuid(userUuid);
+//                    userMapper.deleteUserTeamByUserUuid(userUuid);
+//                }
             }
         }
         return null;
