@@ -149,20 +149,4 @@ public class WorktimeCalendarGetApi extends PrivateApiComponentBase {
 		}
 		return "" + monthIndex;
 	}
-
-//	private Object getClassType(int dayOfWeek, boolean selected) {
-//		int classType = 0;
-//		if(dayOfWeek >=2 && dayOfWeek <= 6) {//工作日
-//			classType = 1;
-//		}else if(dayOfWeek == 1 || dayOfWeek == 7){//非工作日
-//			classType = 2;
-//		}else {//空格
-//			return classType;	
-//		}
-//		
-//		if(selected) {//已选中
-//			classType *= 4;
-//		}
-//		return classType;
-//	}
 }
