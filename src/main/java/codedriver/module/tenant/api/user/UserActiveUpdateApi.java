@@ -1,7 +1,9 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.cache.UserSessionCache;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
@@ -56,17 +58,21 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(userUuidList)) {
             UserVo userVo = new UserVo();
             userVo.setIsActive(isActive);
+            String tenantUuid = TenantContext.get().getTenantUuid();
             for (String userUuid : userUuidList) {
                 if (userMapper.checkUserIsExists(userUuid) == 0) {
                     throw new UserNotFoundException(userUuid);
                 }
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
-                if(isActive == 0){
-                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
-                    userMapper.deleteUserRoleByUserUuid(userUuid);
-                    userMapper.deleteUserTeamByUserUuid(userUuid);
-                }
+                //禁用用户时删除userSession
+                UserSessionCache.removeItem(tenantUuid, userUuid);
+                userMapper.deleteUserSessionByUserUuid(userUuid);
+//                if(isActive == 0){
+//                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
+//                    userMapper.deleteUserRoleByUserUuid(userUuid);
+//                    userMapper.deleteUserTeamByUserUuid(userUuid);
+//                }
             }
         }
         return null;
