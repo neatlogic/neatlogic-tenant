@@ -3,12 +3,13 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.matrix.exception.MatrixReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -18,12 +19,10 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @program: codedriver
@@ -67,8 +66,7 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
         String uuid = jsonObj.getString("uuid");
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
         if (matrixVo != null) {
-            List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = matrixMapper.getMatrixFormComponentByMatrixUuid(uuid);
-            if (CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
+            if (DependencyManager.getDependencyCount(CalleeType.MATRIX, uuid) > 0) {
                 throw new MatrixReferencedCannotBeDeletedException(uuid);
             }
             matrixMapper.deleteMatrixByUuid(uuid);

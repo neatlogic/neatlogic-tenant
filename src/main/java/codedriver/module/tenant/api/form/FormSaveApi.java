@@ -10,7 +10,6 @@ import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
-import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -35,9 +34,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
-
-    @Resource
-    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -119,7 +115,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
         formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
         if (CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
             for (ProcessMatrixFormComponentVo processMatrixFormComponentVo : processMatrixFormComponentList) {
-                matrixMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
+                formMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
             }
         }
         JSONObject resultObj = new JSONObject();
