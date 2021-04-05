@@ -57,20 +57,20 @@ public class NotifyPolicyInvokerList extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject resultObj = new JSONObject();
-		NotifyPolicyInvokerVo notifyPolicyInvokerVo = JSON.toJavaObject(jsonObj, NotifyPolicyInvokerVo.class); 
-		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(notifyPolicyInvokerVo.getPolicyId());
-		if(notifyPolicyVo == null) {
-			throw new NotifyPolicyNotFoundException(notifyPolicyInvokerVo.getPolicyId().toString());
-		}
-		List<NotifyPolicyInvokerVo> notifyPolicyInvokerList = notifyMapper.getNotifyPolicyInvokerList(notifyPolicyInvokerVo);
-		resultObj.put("notifyPolicyInvokerList", notifyPolicyInvokerList);
-		if(notifyPolicyInvokerVo.getNeedPage()) {
-			int rowNum = notifyMapper.getNotifyPolicyInvokerCountByPolicyId(notifyPolicyInvokerVo.getPolicyId());
-			resultObj.put("currentPage", notifyPolicyInvokerVo.getCurrentPage());
-			resultObj.put("pageSize", notifyPolicyInvokerVo.getPageSize());
-			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyInvokerVo.getPageSize()));
-			resultObj.put("rowNum", rowNum);
-		}
+//		NotifyPolicyInvokerVo notifyPolicyInvokerVo = JSON.toJavaObject(jsonObj, NotifyPolicyInvokerVo.class);
+//		NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(notifyPolicyInvokerVo.getPolicyId());
+//		if(notifyPolicyVo == null) {
+//			throw new NotifyPolicyNotFoundException(notifyPolicyInvokerVo.getPolicyId().toString());
+//		}
+//		List<NotifyPolicyInvokerVo> notifyPolicyInvokerList = notifyMapper.getNotifyPolicyInvokerList(notifyPolicyInvokerVo);
+//		resultObj.put("notifyPolicyInvokerList", notifyPolicyInvokerList);
+//		if(notifyPolicyInvokerVo.getNeedPage()) {
+//			int rowNum = notifyMapper.getNotifyPolicyInvokerCountByPolicyId(notifyPolicyInvokerVo.getPolicyId());
+//			resultObj.put("currentPage", notifyPolicyInvokerVo.getCurrentPage());
+//			resultObj.put("pageSize", notifyPolicyInvokerVo.getPageSize());
+//			resultObj.put("pageCount", PageUtil.getPageCount(rowNum, notifyPolicyInvokerVo.getPageSize()));
+//			resultObj.put("rowNum", rowNum);
+//		}
 		return resultObj;
 	}
 

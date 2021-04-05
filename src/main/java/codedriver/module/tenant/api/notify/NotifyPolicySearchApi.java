@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -60,20 +62,24 @@ public class NotifyPolicySearchApi  extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(jsonObj, NotifyPolicyVo.class);
 		List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
-		if(CollectionUtils.isNotEmpty(tbodyList)) {			
-			List<Long> policyIdList = tbodyList.stream().map(NotifyPolicyVo::getId).collect(Collectors.toList());
-			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
-			Map<Long, Integer> notifyPolicyInvokerCountMap = new HashMap<>();
-			for(NotifyPolicyVo notifyPolicy : notifyPolicyInvokerCountList) {
-				notifyPolicyInvokerCountMap.put(notifyPolicy.getId(), notifyPolicy.getInvokerCount());
-			}
-			for(NotifyPolicyVo notifyPolicy : tbodyList) {
-				Integer invokerCount = notifyPolicyInvokerCountMap.get(notifyPolicy.getId());
-				invokerCount = invokerCount == null ? 0 : invokerCount;
-				notifyPolicy.setInvokerCount(invokerCount);
-			}
+//		if(CollectionUtils.isNotEmpty(tbodyList)) {
+//			List<Long> policyIdList = tbodyList.stream().map(NotifyPolicyVo::getId).collect(Collectors.toList());
+//			List<NotifyPolicyVo> notifyPolicyInvokerCountList = notifyMapper.getNotifyPolicyInvokerCountListByPolicyIdList(policyIdList);
+//			Map<Long, Integer> notifyPolicyInvokerCountMap = new HashMap<>();
+//			for(NotifyPolicyVo notifyPolicy : notifyPolicyInvokerCountList) {
+//				notifyPolicyInvokerCountMap.put(notifyPolicy.getId(), notifyPolicy.getInvokerCount());
+//			}
+//			for(NotifyPolicyVo notifyPolicy : tbodyList) {
+//				Integer invokerCount = notifyPolicyInvokerCountMap.get(notifyPolicy.getId());
+//				invokerCount = invokerCount == null ? 0 : invokerCount;
+//				notifyPolicy.setInvokerCount(invokerCount);
+//			}
+//		}
+
+		for(NotifyPolicyVo notifyPolicyVo1 : tbodyList){
+			int count = DependencyManager.getDependencyCount(CalleeType.NOTIFY_POLICY, notifyPolicyVo1.getId());
+			notifyPolicyVo1.setInvokerCount(count);
 		}
-		
 		resultObj.put("tbodyList", tbodyList);
 		if(notifyPolicyVo.getNeedPage()) {
 			int rowNum = notifyMapper.getNotifyPolicyCount(notifyPolicyVo);
