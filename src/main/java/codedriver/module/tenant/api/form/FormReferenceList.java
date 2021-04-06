@@ -19,8 +19,9 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+//@Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormReferenceList extends PrivateApiComponentBase {
 
     @Resource
