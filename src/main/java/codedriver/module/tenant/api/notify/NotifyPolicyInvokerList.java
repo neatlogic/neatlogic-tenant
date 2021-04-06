@@ -1,29 +1,21 @@
 package codedriver.module.tenant.api.notify;
 
-import java.util.List;
-
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.notify.dao.mapper.NotifyMapper;
-import codedriver.framework.notify.dto.NotifyPolicyInvokerVo;
-import codedriver.framework.notify.dto.NotifyPolicyVo;
-import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class NotifyPolicyInvokerList extends PrivateApiComponentBase {
 
-	@Autowired
-	private NotifyMapper notifyMapper;
+//	@Autowired
+//	private NotifyMapper notifyMapper;
 	
 	@Override
 	public String getToken() {
@@ -51,7 +43,7 @@ public class NotifyPolicyInvokerList extends PrivateApiComponentBase {
 		@Param(name="pageSize",type=ApiParamType.INTEGER,isRequired=true,desc="页大小"),
 		@Param(name="pageCount",type=ApiParamType.INTEGER,isRequired=true,desc="总页数"),
 		@Param(name="rowNum",type=ApiParamType.INTEGER,isRequired=true,desc="总行数"),
-		@Param(name = "notifyPolicyInvokerList", explode = NotifyPolicyInvokerVo[].class, desc = "通知策略引用列表")
+//		@Param(name = "notifyPolicyInvokerList", explode = NotifyPolicyInvokerVo[].class, desc = "通知策略引用列表")
 	})
 	@Description(desc = "通知策略引用列表接口")
 	@Override

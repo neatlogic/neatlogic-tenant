@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Service
+@Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Deprecated
 public class FormReferenceList extends PrivateApiComponentBase {
@@ -56,7 +56,6 @@ public class FormReferenceList extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String formUuid = jsonObj.getString("formUuid");
-        //判断表单是否存在
         if (formMapper.checkFormIsExists(formUuid) == 0) {
             throw new FormNotFoundException(formUuid);
         }
