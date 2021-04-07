@@ -1,7 +1,11 @@
 package codedriver.module.tenant.api.form;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.restful.annotation.*;
@@ -12,9 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Deprecated
 public class FormReferenceList extends PrivateApiComponentBase {
 
     @Resource
@@ -42,36 +49,32 @@ public class FormReferenceList extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-            @Param(name = "list", type = ApiParamType.JSONARRAY, desc = "表单引用列表")
+            @Param(explode = BasePageVo.class),
+            @Param(name = "list", explode = ValueTextVo[].class, desc = "引用列表")
     })
     @Description(desc = "表单引用列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-//        ProcessFormVo processFormVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ProcessFormVo>() {
-//        });
-//        //判断表单是否存在
-//        if (formMapper.checkFormIsExists(processFormVo.getFormUuid()) == 0) {
-//            throw new FormNotFoundException(processFormVo.getFormUuid());
-//        }
-//        JSONObject resultObj = new JSONObject();
-//        if (processFormVo.getNeedPage()) {
-//            int rowNum = formMapper.getFormReferenceCount(processFormVo.getFormUuid());
-//            int pageCount = PageUtil.getPageCount(rowNum, processFormVo.getPageSize());
-//            processFormVo.setPageCount(pageCount);
-//            processFormVo.setRowNum(rowNum);
-//            resultObj.put("currentPage", processFormVo.getCurrentPage());
-//            resultObj.put("pageSize", processFormVo.getPageSize());
-//            resultObj.put("pageCount", pageCount);
-//            resultObj.put("rowNum", rowNum);
-//        }
-//        List<ProcessVo> processList = formMapper.getFormReferenceList(processFormVo);
-//        resultObj.put("processList", processList);
-//        return resultObj;
-        return null;
+        String formUuid = jsonObj.getString("formUuid");
+        if (formMapper.checkFormIsExists(formUuid) == 0) {
+            throw new FormNotFoundException(formUuid);
+        }
+        BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
+        JSONObject resultObj = new JSONObject();
+        int pageCount = 0;
+        int rowNum = DependencyManager.getDependencyCount(CalleeType.FORM, formUuid);
+        if(rowNum > 0){
+            pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
+            List<ValueTextVo> list = DependencyManager.getDependencyList(CalleeType.FORM, formUuid, basePageVo);
+            resultObj.put("list", list);
+        }else {
+            resultObj.put("list", new ArrayList<>());
+        }
+        resultObj.put("currentPage", basePageVo.getCurrentPage());
+        resultObj.put("pageSize", basePageVo.getPageSize());
+        resultObj.put("pageCount", pageCount);
+        resultObj.put("rowNum", rowNum);
+        return resultObj;
     }
 
 }

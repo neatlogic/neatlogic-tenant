@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.form;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.restful.annotation.*;
@@ -66,11 +68,10 @@ public class FormSearchApi extends PrivateApiComponentBase {
             resultObj.put("rowNum", rowNum);
         }
         List<FormVo> formList = formMapper.searchFormList(formVo);
-//		int count = 0;
-//		for(FormVo form : formList) {
-//			count = formMapper.getFormReferenceCount(form.getUuid());
-//			form.setReferenceCount(count);
-//		}
+		for(FormVo form : formList) {
+            int count = DependencyManager.getDependencyCount(CalleeType.FORM, form.getUuid());
+			form.setReferenceCount(count);
+		}
         resultObj.put("formList", formList);
         return resultObj;
     }

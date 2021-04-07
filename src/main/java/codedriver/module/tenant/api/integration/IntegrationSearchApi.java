@@ -4,6 +4,8 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.*;
@@ -80,6 +82,8 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                         }
                     }
                 }
+                int count = DependencyManager.getDependencyCount(CalleeType.INTEGRATION, inte.getUuid());
+                inte.setReferenceCount(count);
             }
         }
         JSONObject returnObj = new JSONObject();
