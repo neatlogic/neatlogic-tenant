@@ -62,7 +62,7 @@ public class NotifyPolicySearchApi extends PrivateApiComponentBase {
 
         for (NotifyPolicyVo notifyPolicy : tbodyList) {
             int count = DependencyManager.getDependencyCount(CalleeType.NOTIFY_POLICY, notifyPolicy.getId());
-            notifyPolicy.setInvokerCount(count);
+            notifyPolicy.setReferenceCount(count);
         }
         resultObj.put("tbodyList", tbodyList);
         if (notifyPolicyVo.getNeedPage()) {
