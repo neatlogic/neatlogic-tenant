@@ -107,7 +107,8 @@ public class WorktimeSearchApi extends PrivateApiComponentBase {
                 }
                 worktime.setWorkingHoursSet(workingHoursSet);
                 worktime.setConfig(null);
-                worktime.setRelCount(DependencyManager.getDependencyCount(CalleeType.WORKTIME, worktime.getUuid()));
+                int count = DependencyManager.getDependencyCount(CalleeType.WORKTIME, worktime.getUuid());
+                worktime.setReferenceCount(count);
             }
         }
         resultObj.put("tbodyList", worktimeList);
