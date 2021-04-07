@@ -4,8 +4,12 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.matrix.constvalue.MatrixType;
+import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixExternalIntegrationUuidEmptyException;
 import codedriver.framework.matrix.exception.MatrixLabelRepeatException;
 import codedriver.framework.matrix.exception.MatrixNameRepeatException;
 import codedriver.framework.restful.annotation.Input;
@@ -17,6 +21,7 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
+import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +44,12 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
+    @Resource
+    private MatrixExternalMapper externalMapper;
+
+    @Resource
+    private MatrixService matrixService;
+
     @Override
     public String getToken() {
         return "matrix/save";
@@ -57,7 +68,8 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     @Input({@Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
             @Param(name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true),
             @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
+            @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid")
     })
     @Output({
             @Param(name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")
@@ -82,6 +94,20 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         } else {
             matrixVo.setFcu(UserContext.get().getUserUuid(true));
             matrixMapper.insertMatrix(matrixVo);
+        }
+        if(MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())){
+            String integrationUuid = jsonObj.getString("integrationUuid");
+            if(StringUtils.isNotBlank(integrationUuid)){
+                matrixService.validateMatrixExternalData(integrationUuid);
+                MatrixExternalVo externalVo = new MatrixExternalVo(matrixVo.getUuid(),integrationUuid);
+                if (externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
+                    externalMapper.insertMatrixExternal(externalVo);
+                } else {
+                    externalMapper.updateMatrixExternal(externalVo);
+                }
+            }else{
+                throw new MatrixExternalIntegrationUuidEmptyException();
+            }
         }
         returnObj.put("matrix", matrixVo);
         return returnObj;

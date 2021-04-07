@@ -8,15 +8,23 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
+import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.exception.util.FreemarkerTransformException;
+import codedriver.framework.integration.core.IIntegrationHandler;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
+import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.util.JavascriptUtil;
 import codedriver.framework.util.TimeUtil;
+import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -56,6 +64,9 @@ public class MatrixServiceImpl implements MatrixService {
 
     @Resource
     private RoleMapper roleMapper;
+
+    @Resource
+    private IntegrationMapper integrationMapper;
 
     @Override
     public List<MatrixAttributeVo> getExternalMatrixAttributeList(String matrixUuid, IntegrationVo integrationVo) throws FreemarkerTransformException {
@@ -277,5 +288,27 @@ public class MatrixServiceImpl implements MatrixService {
             return roleMapper.checkRoleIsExists(value) > 0;
         }
         return false;
+    }
+
+    /**
+     * 校验集成接口数据是否符合矩阵格式
+     * @param integrationUuid 集成配置uuid
+     * @throws ApiRuntimeException
+     */
+    @Override
+    public void validateMatrixExternalData(String integrationUuid) throws ApiRuntimeException {
+        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
+        if(integrationVo == null){
+            throw new IntegrationNotFoundException(integrationUuid);
+        }
+        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+        if (handler == null) {
+            throw  new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+        }
+        IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
+        if(StringUtils.isNotBlank(resultVo.getError())){
+            throw new MatrixExternalAccessException();
+        }
+        handler.validate(resultVo);
     }
 }
