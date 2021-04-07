@@ -3,6 +3,7 @@ package codedriver.module.tenant.service.matrix;
 import java.util.List;
 import java.util.Map;
 
+import codedriver.framework.exception.core.ApiRuntimeException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -43,4 +44,11 @@ public interface MatrixService {
     * @return boolean
      */
     public boolean matrixAttributeValueVerify(MatrixAttributeVo matrixAttributeVo, String value);
+
+    /**
+     * 校验集成接口数据是否符合矩阵格式
+     * @param integrationUuid 集成配置uuid
+     * @throws ApiRuntimeException
+     */
+    public void validateMatrixExternalData(String integrationUuid) throws ApiRuntimeException;
 }

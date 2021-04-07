@@ -21,6 +21,7 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
+import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,9 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixExternalMapper externalMapper;
+
+    @Resource
+    private MatrixService matrixService;
 
     @Override
     public String getToken() {
@@ -94,6 +98,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         if(MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())){
             String integrationUuid = jsonObj.getString("integrationUuid");
             if(StringUtils.isNotBlank(integrationUuid)){
+                matrixService.validateMatrixExternalData(integrationUuid);
                 MatrixExternalVo externalVo = new MatrixExternalVo(matrixVo.getUuid(),integrationUuid);
                 if (externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
                     externalMapper.insertMatrixExternal(externalVo);
