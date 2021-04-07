@@ -83,7 +83,7 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
         }
 
         if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-            matrixService.validateMatrixExternalData(jsonObj.getString("integrationUuid"));
+            matrixService.validateMatrixExternalData(externalVo.getIntegrationUuid());
             if (externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
                 externalMapper.insertMatrixExternal(externalVo);
             } else {
