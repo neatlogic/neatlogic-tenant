@@ -8,18 +8,15 @@ import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
-import codedriver.framework.form.exception.FormIllegalParameterException;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
-import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.ProcessMatrixFormComponentVo;
+import codedriver.framework.form.dto.ProcessMatrixFormComponentVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,9 +34,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
-
-    @Resource
-    private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
@@ -121,7 +115,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
         formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
         if (CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
             for (ProcessMatrixFormComponentVo processMatrixFormComponentVo : processMatrixFormComponentList) {
-                matrixMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
+                formMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
             }
         }
         JSONObject resultObj = new JSONObject();

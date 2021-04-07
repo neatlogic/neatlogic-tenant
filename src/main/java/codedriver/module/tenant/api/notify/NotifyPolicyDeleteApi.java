@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -47,7 +49,8 @@ public class NotifyPolicyDeleteApi  extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
-		if(notifyMapper.getNotifyPolicyInvokerCountByPolicyId(id) > 0) {
+		int count = DependencyManager.getDependencyCount(CalleeType.NOTIFY_POLICY, id);
+		if(count > 0) {
 			throw new NotifyPolicyReferencedCannotBeDeletedException(id.toString());
 		}
 		notifyMapper.deleteNotifyPolicyById(id);

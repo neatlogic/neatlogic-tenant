@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.restful.annotation.*;
@@ -80,7 +82,12 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
                 returnObj.put("pageSize", matrix.getPageSize());
                 returnObj.put("currentPage", matrix.getCurrentPage());
             }
-            returnObj.put("tbodyList", matrixMapper.searchMatrix(matrix));
+            List<MatrixVo> tbodyList = matrixMapper.searchMatrix(matrix);
+            for(MatrixVo matrixVo : tbodyList){
+                int count = DependencyManager.getDependencyCount(CalleeType.MATRIX, matrixVo.getUuid());
+                matrixVo.setReferenceCount(count);
+            }
+            returnObj.put("tbodyList", tbodyList);
         }
         return returnObj;
     }
