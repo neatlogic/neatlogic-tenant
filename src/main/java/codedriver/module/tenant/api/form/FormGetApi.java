@@ -54,28 +54,22 @@ public class FormGetApi extends PrivateApiComponentBase {
         String uuid = jsonObj.getString("uuid");
         if (StringUtils.isNotBlank(currentVersionUuid)) {
             FormVersionVo formVersion = formMapper.getFormVersionByUuid(currentVersionUuid);
-            //判断表单版本是否存在
             if (formVersion == null) {
                 throw new FormVersionNotFoundException(currentVersionUuid);
             }
             FormVo formVo = formMapper.getFormByUuid(formVersion.getFormUuid());
-            //判断表单是否存在
             if (formVo == null) {
                 throw new FormNotFoundException(formVersion.getFormUuid());
             }
             formVo.setCurrentVersionUuid(currentVersionUuid);
-            //表单内容
             formVo.setFormConfig(formVersion.getFormConfig());
-            //表单版本列表
             List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(formVersion.getFormUuid());
             formVo.setVersionList(formVersionList);
-            //引用数量
             int count = DependencyManager.getDependencyCount(CalleeType.FORM, formVo.getUuid());
             formVo.setReferenceCount(count);
             return formVo;
-        } else if(StringUtils.isNotBlank(uuid)) {//获取激活版本
+        } else if(StringUtils.isNotBlank(uuid)) {
             FormVo formVo = formMapper.getFormByUuid(uuid);
-            //判断表单是否存在
             if (formVo == null) {
                 throw new FormNotFoundException(uuid);
             }
@@ -84,12 +78,9 @@ public class FormGetApi extends PrivateApiComponentBase {
                 throw new FormActiveVersionNotFoundExcepiton(uuid);
             }
             formVo.setCurrentVersionUuid(formVersion.getUuid());
-            //表单内容
             formVo.setFormConfig(formVersion.getFormConfig());
-            //表单版本列表
             List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
             formVo.setVersionList(formVersionList);
-            //引用数量
             int count = DependencyManager.getDependencyCount(CalleeType.FORM, formVo.getUuid());
     		formVo.setReferenceCount(count);
             return formVo;
