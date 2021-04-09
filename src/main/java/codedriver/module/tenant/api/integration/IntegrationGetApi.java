@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -41,6 +43,8 @@ public class IntegrationGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
+		int count = DependencyManager.getDependencyCount(CalleeType.INTEGRATION, integrationVo.getUuid());
+		integrationVo.setReferenceCount(count);
 		return integrationVo;
 	}
 }
