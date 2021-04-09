@@ -63,14 +63,16 @@ public class MessageHandlerListApi extends PrivateApiComponentBase {
         List<MessageHandlerVo> messageSubscribeList = messageMapper.getMessageSubscribeListByUserUuid(UserContext.get().getUserUuid(true));
         Map<String, MessageHandlerVo> messageSubscribeMap = messageSubscribeList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
         for (MessageHandlerVo messageHandlerVo : MessageHandlerFactory.getMessageHandlerVoList()) {
-            if(StringUtils.isBlank(moduleId) || moduleId.equals(messageHandlerVo.getModuleId())){
-                MessageHandlerVo messageHandler = messageHandlerVo.clone();
-                MessageHandlerVo messageSubscribe = messageSubscribeMap.get(messageHandler.getHandler());
-                if (messageSubscribe != null) {
-                    messageHandler.setIsActive(messageSubscribe.getIsActive());
-                    messageHandler.setPopUp(messageSubscribe.getPopUp());
+            if(messageHandlerVo.isPublic()){
+                if(StringUtils.isBlank(moduleId) || moduleId.equals(messageHandlerVo.getModuleId())){
+                    MessageHandlerVo messageHandler = messageHandlerVo.clone();
+                    MessageHandlerVo messageSubscribe = messageSubscribeMap.get(messageHandler.getHandler());
+                    if (messageSubscribe != null) {
+                        messageHandler.setIsActive(messageSubscribe.getIsActive());
+                        messageHandler.setPopUp(messageSubscribe.getPopUp());
+                    }
+                    resultList.add(messageHandler);
                 }
-                resultList.add(messageHandler);
             }
         }
         return resultList;
