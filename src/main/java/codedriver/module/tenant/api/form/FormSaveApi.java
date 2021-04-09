@@ -10,7 +10,7 @@ import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
-import codedriver.framework.form.dto.ProcessMatrixFormComponentVo;
+import codedriver.framework.form.dto.FormAttributeMatrixVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
@@ -111,11 +111,11 @@ public class FormSaveApi extends PrivateApiComponentBase {
             }
         }
 
-        List<ProcessMatrixFormComponentVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
-        formMapper.deleteProcessMatrixFormComponentByFormVersionUuid(formVersionVo.getUuid());
+        List<FormAttributeMatrixVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
+        formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
         if (CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
-            for (ProcessMatrixFormComponentVo processMatrixFormComponentVo : processMatrixFormComponentList) {
-                formMapper.insertMatrixFormComponent(processMatrixFormComponentVo);
+            for (FormAttributeMatrixVo formAttributeMatrixVo : processMatrixFormComponentList) {
+                formMapper.insertFormAttributeMatrix(formAttributeMatrixVo);
             }
         }
         JSONObject resultObj = new JSONObject();
