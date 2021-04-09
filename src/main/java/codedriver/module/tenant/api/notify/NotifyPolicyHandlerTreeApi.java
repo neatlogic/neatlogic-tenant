@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.auth.core.AuthActionChecker;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -12,7 +11,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
