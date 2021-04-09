@@ -6,6 +6,8 @@
 package codedriver.module.tenant.api.worktime;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -13,6 +15,7 @@ import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import codedriver.framework.worktime.exception.WorktimeNotFoundException;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.tools.ant.taskdefs.optional.depend.Depend;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -53,6 +56,8 @@ public class WorktimeGetApi extends PrivateApiComponentBase {
         if (worktime == null) {
             throw new WorktimeNotFoundException(uuid);
         }
+        int count = DependencyManager.getDependencyCount(CalleeType.WORKTIME, uuid);
+        worktime.setReferenceCount(count);
         return worktime;
     }
 
