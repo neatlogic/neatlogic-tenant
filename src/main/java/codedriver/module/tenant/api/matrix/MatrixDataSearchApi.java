@@ -78,7 +78,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "矩阵数据检索接口";
+        return "matrix/data/search";
     }
 
     @Override
