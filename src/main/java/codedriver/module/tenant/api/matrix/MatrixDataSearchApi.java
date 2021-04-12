@@ -162,12 +162,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
                     logger.error(resultVo.getError());
                     throw new MatrixExternalAccessException();
                 }
-                try {
-                    handler.validate(resultVo);
-                } catch (ApiRuntimeException ex) {
-                    logger.error(ex.getMessage());
-                    throw new ApiRuntimeException(ex.getMessage());
-                }
+                handler.validate(resultVo);
                 JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
                 returnObj.putAll(transformedResult);
                 JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
