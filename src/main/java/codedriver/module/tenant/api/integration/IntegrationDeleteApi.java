@@ -2,6 +2,9 @@ package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.exception.integration.IntegrationReferencedCannotBeDeletedException;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
@@ -41,7 +44,11 @@ public class IntegrationDeleteApi extends PrivateApiComponentBase {
 	@Description(desc = "集成设置删除接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		integrationMapper.deleteIntegrationByUuid(jsonObj.getString("uuid"));
+		String uuid = jsonObj.getString("uuid");
+		if(DependencyManager.getDependencyCount(CalleeType.INTEGRATION, uuid) > 0){
+			throw new IntegrationReferencedCannotBeDeletedException(uuid);
+		}
+		integrationMapper.deleteIntegrationByUuid(uuid);
 		return null;
 	}
 }

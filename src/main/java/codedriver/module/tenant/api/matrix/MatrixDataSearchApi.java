@@ -91,15 +91,19 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
+    @Input({
+            @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
             @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)
     })
-    @Output({@Param(name = "tbodyList", desc = "矩阵数据集合"),
-            @Param(name = "theadList", desc = "矩阵属性集合"),
-            @Param(explode = BasePageVo.class)})
+    @Output({
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "矩阵数据集合"),
+            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "矩阵属性集合"),
+            @Param(name = "referenceCount", type = ApiParamType.INTEGER, desc = "被引用次数"),
+            @Param(explode = BasePageVo.class)
+    })
     @Description(desc = "矩阵数据检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {

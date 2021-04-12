@@ -74,8 +74,9 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER)
     })
     @Output({
-            @Param(name = "tbodyList", desc = "矩阵数据集合"),
-            @Param(name = "theadList", desc = "矩阵属性集合"),
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "矩阵数据集合"),
+            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "矩阵属性集合"),
+            @Param(name = "referenceCount", type = ApiParamType.INTEGER, desc = "被引用次数"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "矩阵数据检索接口")
