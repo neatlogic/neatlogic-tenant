@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
@@ -133,12 +135,8 @@ public class MatrixExternalDataSearchApi extends PrivateApiComponentBase {
             throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
 
-        //TODO 暂时屏蔽引用，没考虑好怎么实现
-        //List<ProcessMatrixDispatcherVo> dispatcherVoList = matrixMapper.getMatrixDispatcherByMatrixUuid(dataVo.getMatrixUuid());
-        returnObj.put("dispatcherVoList", CollectionUtils.EMPTY_COLLECTION);//dispatcherVoList
-        //List<ProcessMatrixFormComponentVo> componentVoList = matrixMapper.getMatrixFormComponentByMatrixUuid(dataVo.getMatrixUuid());
-        returnObj.put("componentVoList", CollectionUtils.EMPTY_COLLECTION);//componentVoList
-        returnObj.put("usedCount", 0);//dispatcherVoList.size() + componentVoList.size()
+        int count = DependencyManager.getDependencyCount(CalleeType.MATRIX, matrixUuid);
+        returnObj.put("referenceCount", count);
         return returnObj;
     }
 

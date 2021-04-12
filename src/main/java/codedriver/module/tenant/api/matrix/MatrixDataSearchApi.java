@@ -6,6 +6,7 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -22,6 +23,7 @@ import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.*;
@@ -76,7 +78,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matrix/data/search";
+        return "矩阵数据检索接口";
     }
 
     @Override
@@ -158,27 +160,30 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
                 IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
                 if (StringUtils.isNotBlank(resultVo.getError())) {
                     logger.error(resultVo.getError());
-                    throw new MatrixExternalException("外部接口访问异常");
-                } else if (StringUtils.isNotBlank(resultVo.getTransformedResult())) {
-                    JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-                    if (MapUtils.isNotEmpty(transformedResult)) {
-                        returnObj.putAll(transformedResult);
-                        JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
-                        if (CollectionUtils.isNotEmpty(tbodyArray)) {
-                            for (int i = 0; i < tbodyArray.size(); i++) {
-                                JSONObject rowData = tbodyArray.getJSONObject(i);
-                                Integer pageSize = jsonObj.getInteger("pageSize");
-                                pageSize = pageSize == null ? 10 : pageSize;
-                                if (MapUtils.isNotEmpty(rowData)) {
-                                    Map<String, Object> rowDataMap = new HashMap<>();
-                                    for (Entry<String, Object> entry : rowData.entrySet()) {
-                                        rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
-                                    }
-                                    tbodyList.add(rowDataMap);
-                                    if (tbodyList.size() >= pageSize) {
-                                        break;
-                                    }
-                                }
+                    throw new MatrixExternalAccessException();
+                }
+                try {
+                    handler.validate(resultVo);
+                } catch (ApiRuntimeException ex) {
+                    logger.error(ex.getMessage());
+                    throw new ApiRuntimeException(ex.getMessage());
+                }
+                JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+                returnObj.putAll(transformedResult);
+                JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+                if (CollectionUtils.isNotEmpty(tbodyArray)) {
+                    for (int i = 0; i < tbodyArray.size(); i++) {
+                        JSONObject rowData = tbodyArray.getJSONObject(i);
+                        Integer pageSize = jsonObj.getInteger("pageSize");
+                        pageSize = pageSize == null ? 10 : pageSize;
+                        if (MapUtils.isNotEmpty(rowData)) {
+                            Map<String, Object> rowDataMap = new HashMap<>();
+                            for (Entry<String, Object> entry : rowData.entrySet()) {
+                                rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
+                            }
+                            tbodyList.add(rowDataMap);
+                            if (tbodyList.size() >= pageSize) {
+                                break;
                             }
                         }
                     }
