@@ -53,7 +53,7 @@ public class FormDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        if (formMapper.checkFormIsExists(uuid) == 0) {
+        if (formMapper.checkFormIsExists(uuid) > 0) {
             int count = DependencyManager.getDependencyCount(CalleeType.FORM, uuid);
             if (count > 0) {
                 throw new FormReferencedCannotBeDeletedException(uuid);
