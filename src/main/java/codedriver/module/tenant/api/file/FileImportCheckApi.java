@@ -72,7 +72,7 @@ public class FileImportCheckApi extends PrivateBinaryStreamApiComponentBase {
             throw new FileNotUploadException();
         }
         List<ValueTextVo> resultList = new ArrayList<>();
-        //遍历导入文件, 目前只获取第一个文件内容, 其余的放弃
+        //遍历导入文件
         for (Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
             MultipartFile multipartFile = entry.getValue();
             try (ZipInputStream zipis = new ZipInputStream(multipartFile.getInputStream())) {
