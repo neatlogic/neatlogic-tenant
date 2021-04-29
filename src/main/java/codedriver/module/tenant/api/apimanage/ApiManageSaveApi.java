@@ -85,7 +85,6 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 		    if(apiHandlerVo == null) {
 		        throw new ComponentNotFoundException("接口组件:" + apiVo.getHandler() + "不存在");
 		    }
-		    ramApiVo = PublicApiComponentFactory.getApiByToken(apiVo.getToken());
 		}
 
 		apiVo.setType(apiHandlerVo.getType());
