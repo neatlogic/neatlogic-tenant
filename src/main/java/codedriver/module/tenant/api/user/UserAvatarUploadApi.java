@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.user;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -12,11 +12,11 @@ import codedriver.framework.file.core.LocalFileSystemHandler;
 import codedriver.framework.file.core.MinioFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 @Transactional
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(UserAvatarUploadApi.class);

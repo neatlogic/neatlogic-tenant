@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.form;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -26,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FormExportApi extends PrivateBinaryStreamApiComponentBase {
 

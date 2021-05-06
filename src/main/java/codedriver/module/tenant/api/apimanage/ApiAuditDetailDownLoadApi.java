@@ -1,23 +1,20 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.util.AuditUtil;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
-import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.util.AuditUtil;
-
 @Service
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 

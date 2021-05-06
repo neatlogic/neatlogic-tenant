@@ -1,11 +1,11 @@
 package codedriver.module.tenant.api.menu;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.auth.label.MENU_MODIFY;
 import codedriver.module.tenant.exception.menu.MenuDeleteException;
 import codedriver.module.tenant.service.MenuService;
 import com.alibaba.fastjson.JSONObject;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@AuthAction(action = MENU_MODIFY.class)
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class MenuDeleteApi extends PrivateApiComponentBase{
 

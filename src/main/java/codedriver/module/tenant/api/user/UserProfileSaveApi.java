@@ -1,34 +1,31 @@
 package codedriver.module.tenant.api.user;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.NO_AUTH;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.UserProfileVo;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
+import codedriver.framework.userprofile.UserProfileFactory;
+import codedriver.module.tenant.exception.user.UserProfileModuleNotFoundException;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dto.UserProfileVo;
-import codedriver.framework.exception.type.ParamIrregularException;
-import codedriver.framework.userprofile.UserProfileFactory;
-import codedriver.module.tenant.exception.user.UserProfileModuleNotFoundException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AuthAction(action = NO_AUTH.class)
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserProfileSaveApi extends PrivateApiComponentBase {
 	@Autowired

@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 
 @Service
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ImageDownloadApi extends PrivateBinaryStreamApiComponentBase {
 

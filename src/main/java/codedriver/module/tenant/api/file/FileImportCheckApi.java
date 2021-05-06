@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.file;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileNotUploadException;
@@ -22,15 +24,13 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 /**
  * 检查导入的文件接口
@@ -40,6 +40,7 @@ import java.util.zip.ZipOutputStream;
  **/
 @Service
 @Transactional
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FileImportCheckApi extends PrivateBinaryStreamApiComponentBase {
 

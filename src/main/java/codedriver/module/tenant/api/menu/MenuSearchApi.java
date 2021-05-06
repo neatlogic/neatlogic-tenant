@@ -2,11 +2,11 @@ package codedriver.module.tenant.api.menu;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWOKR_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.auth.label.MENU_MODIFY;
 import codedriver.module.tenant.dao.mapper.MenuMapper;
 import codedriver.module.tenant.dto.MenuVo;
 import com.alibaba.fastjson.JSONObject;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AuthAction(action = MENU_MODIFY.class)
+@AuthAction(action = FRAMEWOKR_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MenuSearchApi extends PrivateApiComponentBase {
 	

@@ -18,4 +18,9 @@ public class INTERFACE_MODIFY extends AuthBase {
 	public String getAuthGroup() {
 		return "framework";
 	}
+
+	@Override
+	public Integer sort() {
+		return 10;
+	}
 }
