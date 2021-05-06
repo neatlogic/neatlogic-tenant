@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -23,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 

@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.apiaudit;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -32,7 +32,7 @@ import java.nio.charset.StandardCharsets;
  * 如果匹配上，则调用当前getter获取对应属性值，并且放置在一个map中，将每一个这样的map存放在
  * List中，最后用此List作为导出Excel的结果集
  */
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditExportApi extends PrivateBinaryStreamApiComponentBase {

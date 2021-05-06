@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -20,6 +22,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.groupsearch.core.GroupSearchHandlerFactory;
 import codedriver.framework.restful.groupsearch.core.IGroupSearchHandler;
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
 

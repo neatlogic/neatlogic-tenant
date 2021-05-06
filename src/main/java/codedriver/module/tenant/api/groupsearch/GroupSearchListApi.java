@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.groupsearch;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -17,6 +19,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Deprecated
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GroupSearchListApi extends PrivateApiComponentBase {
 	@Override

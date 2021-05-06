@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.notify.job;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.notify.core.INotifyContentHandler;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyContentHandlerDetailApi extends PrivateApiComponentBase {
 

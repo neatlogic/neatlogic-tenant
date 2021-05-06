@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class MessageCountApi extends PrivateApiComponentBase {
 

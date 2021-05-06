@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.file;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.LocalFileSystemHandler;
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Service
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class ImageUploadApi extends PrivateBinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(ImageUploadApi.class);

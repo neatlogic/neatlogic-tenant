@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.test;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -9,7 +9,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 public class ParamTypeValidateApi extends PrivateApiComponentBase {
 
 	@Override

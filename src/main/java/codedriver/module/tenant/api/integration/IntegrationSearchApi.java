@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.BasePageVo;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationSearchApi extends PrivateApiComponentBase {
 

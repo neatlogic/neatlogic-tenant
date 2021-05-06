@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.tag;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 @Deprecated
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TagSearchApi extends PrivateApiComponentBase {
 

@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -30,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyGetApi extends PrivateApiComponentBase {
 

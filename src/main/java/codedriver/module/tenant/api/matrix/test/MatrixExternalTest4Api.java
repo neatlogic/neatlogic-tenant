@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.matrix.test;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
  * 用于矩阵外部数据源测试
  */
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalTest4Api extends PrivateApiComponentBase {
 

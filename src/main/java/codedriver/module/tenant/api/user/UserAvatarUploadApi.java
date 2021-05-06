@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.user;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 @Transactional
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
 	static Logger logger = LoggerFactory.getLogger(UserAvatarUploadApi.class);

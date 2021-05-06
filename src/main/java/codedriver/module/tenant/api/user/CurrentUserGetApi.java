@@ -2,6 +2,8 @@ package codedriver.module.tenant.api.user;
 
 import java.util.Random;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class CurrentUserGetApi extends PrivateApiComponentBase {
 

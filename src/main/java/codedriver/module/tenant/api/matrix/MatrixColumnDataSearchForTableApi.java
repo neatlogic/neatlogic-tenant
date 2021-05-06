@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 

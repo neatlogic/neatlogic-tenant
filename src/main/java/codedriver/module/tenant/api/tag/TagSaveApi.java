@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.tag;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.TagVo;
 import codedriver.framework.restful.annotation.Description;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Deprecated
 @Service
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class TagSaveApi extends PrivateApiComponentBase {
 

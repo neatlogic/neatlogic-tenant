@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  * @create: 2020-03-26 19:06
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
 
