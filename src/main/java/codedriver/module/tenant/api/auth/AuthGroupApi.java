@@ -1,26 +1,24 @@
 package codedriver.module.tenant.api.auth;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.OperationType;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @program: codedriver
