@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 
@@ -25,6 +27,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyTemplateGetApi extends PrivateApiComponentBase {
 

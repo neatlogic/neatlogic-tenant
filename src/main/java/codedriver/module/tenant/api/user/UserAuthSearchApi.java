@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleAuthVo;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserAuthSearchApi extends PrivateApiComponentBase {
     

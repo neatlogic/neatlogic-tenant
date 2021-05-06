@@ -1,7 +1,7 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.constvalue.MatrixType;
@@ -38,7 +38,7 @@ import java.util.List;
  * @create: 2020-03-26 19:05
  **/
 @Service
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBase {
 

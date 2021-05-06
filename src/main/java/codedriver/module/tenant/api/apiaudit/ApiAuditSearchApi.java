@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apiaudit;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -20,6 +22,7 @@ import java.util.List;
  */
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditSearchApi extends PrivateApiComponentBase {
 

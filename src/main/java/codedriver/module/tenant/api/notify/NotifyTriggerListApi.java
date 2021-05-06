@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -15,6 +17,7 @@ import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyTriggerListApi extends PrivateApiComponentBase {
 

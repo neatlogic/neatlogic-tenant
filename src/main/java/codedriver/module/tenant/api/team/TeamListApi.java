@@ -3,6 +3,8 @@ package codedriver.module.tenant.api.team;
 import java.util.ArrayList;
 import java.util.List;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -20,6 +22,7 @@ import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamListApi extends PrivateApiComponentBase {
 	@Autowired

@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
  **/
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SystemNoticePullApi extends PrivateApiComponentBase {
 

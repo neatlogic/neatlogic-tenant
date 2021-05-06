@@ -1,6 +1,8 @@
 package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageSearchVo;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class MessagePopUpCloseApi extends PrivateApiComponentBase {
 

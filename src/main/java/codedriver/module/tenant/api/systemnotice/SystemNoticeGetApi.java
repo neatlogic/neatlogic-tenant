@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.systemnotice;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  **/
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Transactional
 public class SystemNoticeGetApi extends PrivateApiComponentBase {

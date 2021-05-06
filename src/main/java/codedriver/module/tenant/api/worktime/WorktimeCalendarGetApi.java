@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.worktime;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -23,6 +25,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorktimeCalendarGetApi extends PrivateApiComponentBase {
 

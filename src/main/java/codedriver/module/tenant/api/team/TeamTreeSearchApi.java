@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.team;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
  * @create: 2020-03-05 18:49
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamTreeSearchApi extends PrivateApiComponentBase {
 

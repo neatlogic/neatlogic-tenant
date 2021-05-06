@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.dependency;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
@@ -32,6 +34,7 @@ import java.util.List;
  * @since: 2021/4/2 11:06
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DependencyListApi extends PrivateApiComponentBase {
 

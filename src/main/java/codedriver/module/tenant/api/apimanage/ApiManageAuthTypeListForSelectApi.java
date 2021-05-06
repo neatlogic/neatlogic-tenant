@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -18,6 +20,7 @@ import codedriver.framework.restful.web.core.ApiAuthFactory;
 
 @Deprecated
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageAuthTypeListForSelectApi extends PrivateApiComponentBase {
 

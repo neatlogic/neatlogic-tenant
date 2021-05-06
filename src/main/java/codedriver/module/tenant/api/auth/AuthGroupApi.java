@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
  * @create: 2020-03-17 12:03
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthGroupApi extends PrivateApiComponentBase {
 

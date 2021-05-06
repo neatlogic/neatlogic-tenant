@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apiaudit;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -23,6 +25,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
  */
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditGroupSearchApi extends PrivateApiComponentBase {
 

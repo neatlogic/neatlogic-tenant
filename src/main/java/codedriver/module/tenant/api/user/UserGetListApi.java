@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -25,6 +27,7 @@ import java.util.List;
  * @create: 2020-03-06 11:49
  **/
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserGetListApi extends PrivateApiComponentBase {
 

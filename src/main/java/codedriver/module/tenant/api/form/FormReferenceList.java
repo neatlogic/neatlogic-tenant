@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.form;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Deprecated
 public class FormReferenceList extends PrivateApiComponentBase {

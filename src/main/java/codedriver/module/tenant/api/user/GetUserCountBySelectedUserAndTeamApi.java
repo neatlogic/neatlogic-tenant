@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.user;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetUserCountBySelectedUserAndTeamApi extends PrivateApiComponentBase {
 

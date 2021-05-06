@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
@@ -26,6 +28,7 @@ import java.util.*;
  */
 
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 

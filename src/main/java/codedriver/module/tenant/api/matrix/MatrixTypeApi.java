@@ -1,5 +1,7 @@
 package codedriver.module.tenant.api.matrix;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.restful.annotation.Description;
@@ -21,6 +23,7 @@ import java.util.List;
  **/
 @Deprecated
 @Service
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixTypeApi extends PrivateApiComponentBase {
 

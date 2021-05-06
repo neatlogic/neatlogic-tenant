@@ -6,7 +6,7 @@
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWOKR_BASE;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileNotUploadException;
@@ -40,7 +40,7 @@ import java.util.zip.ZipInputStream;
  **/
 @Service
 @Transactional
-@AuthAction(action = FRAMEWOKR_BASE.class)
+@AuthAction(action = FRAMEWORK_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FileImportCheckApi extends PrivateBinaryStreamApiComponentBase {
 
