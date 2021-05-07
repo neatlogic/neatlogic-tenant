@@ -20,7 +20,7 @@ public class API_AUDIT_VIEW extends AuthBase {
 	}
 
 	@Override
-	public Integer sort() {
+	public Integer getSort() {
 		return 8;
 	}
 }

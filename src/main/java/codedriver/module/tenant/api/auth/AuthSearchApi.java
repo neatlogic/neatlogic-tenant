@@ -1,32 +1,26 @@
 package codedriver.module.tenant.api.auth;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
+import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.AuthGroupVo;
 import codedriver.framework.dto.AuthVo;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 
 @Service
 @AuthAction(action = FRAMEWORK_BASE.class)
@@ -102,6 +96,7 @@ public class AuthSearchApi extends PrivateApiComponentBase {
                         authVo.setName(authBase.getAuthName());
                         authVo.setDisplayName(authBase.getAuthDisplayName());
                         authVo.setDescription(authBase.getAuthIntroduction());
+                        authVo.setSort(authBase.getSort());
                         if (roleAuthMap.containsKey(authVo.getName())){
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
                         }
@@ -112,6 +107,7 @@ public class AuthSearchApi extends PrivateApiComponentBase {
                     }
 
                 }
+                authArray.sort(Comparator.comparing(AuthVo::getSort));
                 authGroupVo.setAuthVoList(authArray);
             }
             authGroupVoList.add(authGroupVo);
