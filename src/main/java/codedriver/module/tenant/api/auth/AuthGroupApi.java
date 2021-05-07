@@ -1,9 +1,13 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.auth;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.restful.annotation.Description;
@@ -26,7 +30,7 @@ import java.util.Set;
  * @create: 2020-03-17 12:03
  **/
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthGroupApi extends PrivateApiComponentBase {
 

@@ -1,8 +1,12 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -24,18 +28,8 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @Title: SystemNoticeHistoryListApi
- * @Package: codedriver.module.tenant.api.systemnotice
- * @Description: 历史系统公告查询接口
- * @Author: laiwt
- * @Date: 2021/1/13 18:01
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
-
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SystemNoticeHistoryListApi extends PrivateApiComponentBase {
 

@@ -8,7 +8,6 @@ package codedriver.module.tenant.api.file;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -37,7 +36,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FileDownloadApi extends PrivateBinaryStreamApiComponentBase {
 

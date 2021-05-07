@@ -1,12 +1,11 @@
 /*
- * Copyright(c) 2021. TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
 package codedriver.module.tenant.api.matrix.test;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Service;
  * 用于矩阵外部数据源测试
  */
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalTest3Api extends PrivateApiComponentBase {
 

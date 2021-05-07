@@ -1,12 +1,11 @@
 /*
- * Copyright(c) 2021 TechSureCo.,Ltd.AllRightsReserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
 package codedriver.module.tenant.api.worktime;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -29,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class WorktimeSearchApi extends PrivateApiComponentBase {
 

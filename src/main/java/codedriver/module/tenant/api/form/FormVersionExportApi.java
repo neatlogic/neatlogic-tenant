@@ -1,7 +1,11 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.form;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -28,7 +32,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
 

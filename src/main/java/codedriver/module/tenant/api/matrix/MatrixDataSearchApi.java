@@ -1,14 +1,17 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.FRAMEWORK_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
@@ -26,7 +29,6 @@ import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
-import codedriver.framework.matrix.exception.MatrixExternalException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -55,7 +57,7 @@ import java.util.Map.Entry;
  * @create: 2020-03-30 16:34
  **/
 @Service
-@AuthAction(action = FRAMEWORK_BASE.class)
+
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
