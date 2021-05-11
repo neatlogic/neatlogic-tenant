@@ -84,7 +84,7 @@ public class NotifyPolicyExceptionNotifyAddApi extends PrivateApiComponentBase {
                     }
                 }
             } else {
-                throw new ParamIrregularException("参数“userUuidList”不符合格式要求");
+                throw new ParamIrregularException("userUuidList");
             }
         }
         notifyMapper.updateNotifyPolicyById(notifyPolicyVo);

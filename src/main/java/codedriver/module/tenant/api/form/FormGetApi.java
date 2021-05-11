@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
@@ -92,7 +93,7 @@ public class FormGetApi extends PrivateApiComponentBase {
     		formVo.setReferenceCount(count);
             return formVo;
         } else {
-            throw new ParamIrregularException("参数：'uuid'和'currentVersionUuid'，不能同时为空");
+            throw new ParamNotExistsException("uuid", "currentVersionUuid");
         }
     }
 

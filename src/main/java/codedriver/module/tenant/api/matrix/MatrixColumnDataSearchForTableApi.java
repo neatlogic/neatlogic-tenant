@@ -115,7 +115,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         }
         List<String> columnList = dataVo.getColumnList();
         if (CollectionUtils.isEmpty(columnList)) {
-            throw new ParamIrregularException("参数“columnList”不符合格式要求");
+            throw new ParamIrregularException("columnList");
         }
         List<String> searchColumnList = JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
         if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {

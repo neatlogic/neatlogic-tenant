@@ -6,6 +6,7 @@ import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -112,7 +113,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
             }
             return formVo;
         } else {
-            throw new ParamIrregularException("参数：'uuid'和'currentVersionUuid'，不能同时为空");
+            throw new ParamNotExistsException("uuid", "currentVersionUuid");
         }
     }
 

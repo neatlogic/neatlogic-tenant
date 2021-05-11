@@ -76,7 +76,7 @@ public class NotifyPolicyParamSaveApi extends PrivateApiComponentBase {
         String paramType = jsonObj.getString("paramType");
         ParamType basicTypeEnum = ParamType.getParamType(paramType);
         if (basicTypeEnum == null) {
-            throw new ParamIrregularException("参数”paramType“不符合格式要求");
+            throw new ParamIrregularException("paramType");
         }
         String controller = FormHandlerType.INPUT.toString();
         JSONObject paramConfig = new JSONObject();

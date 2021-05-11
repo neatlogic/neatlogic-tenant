@@ -70,7 +70,7 @@ public class NotifyPolicyTriggerConfigCleanApi extends PrivateApiComponentBase {
             notifyTriggerList.stream().map(NotifyTriggerVo::getTrigger).collect(Collectors.toList());
         String trigger = jsonObj.getString("trigger");
         if (!notifyTriggerValueList.contains(trigger)) {
-            throw new ParamIrregularException("参数trigger不符合格式要求");
+            throw new ParamIrregularException("trigger");
         }
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
