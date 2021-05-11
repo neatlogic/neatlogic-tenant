@@ -3,19 +3,24 @@ package codedriver.module.tenant.api.mailserver;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.MailServerMapper;
+import codedriver.framework.dto.MailServerVo;
+import codedriver.framework.dto.UserVo;
 import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.dto.NotifyVo;
+import codedriver.framework.notify.exception.EmailServerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyNoReceiverException;
 import codedriver.framework.notify.handler.EmailNotifyHandler;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MAIL_SERVER_MODIFY;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,9 @@ import org.springframework.stereotype.Service;
 @AuthAction(action = MAIL_SERVER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MailServerTestApi extends PrivateApiComponentBase {
+
+    @Autowired
+    private MailServerMapper mailServerMapper;
 
     @Override
     public String getToken() {
@@ -48,19 +56,33 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "emailAddress", type = ApiParamType.EMAIL, isRequired = true, desc = "邮箱地址")
     })
-    @Description(desc = "邮件服务器信息删除接口")
+    @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "测试发送结果或异常信息")})
+    @Description(desc = "测试邮件服务器能否正常发送邮件")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName());
         if (handler == null) {
             throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
         }
-        NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null);
-        notifyBuilder.withTitleTemplate("测试邮件");
-        notifyBuilder.withContentTemplate("您配置的邮件服务器信息可用！");
-        notifyBuilder.addEmailAddress(jsonObj.getString("emailAddress"));
-        NotifyVo notifyVo = notifyBuilder.build();
-        return handler.execute(notifyVo);
+        MailServerVo mailServerVo = mailServerMapper.getActiveMailServer();
+        if (mailServerVo == null || StringUtils.isBlank(mailServerVo.getHost()) || mailServerVo.getPort() == null) {
+            throw new EmailServerNotFoundException();
+        }
+        HtmlEmail se = new HtmlEmail();
+        se.addTo(jsonObj.getString("emailAddress"));
+        se.setHostName(mailServerVo.getHost());
+        se.setSmtpPort(mailServerVo.getPort());
+        if (StringUtils.isNotBlank(mailServerVo.getUserName()) && StringUtils.isNotBlank(mailServerVo.getPassword())) {
+            se.setAuthentication(mailServerVo.getUserName(), mailServerVo.getPassword());
+        }
+        if (StringUtils.isNotBlank(mailServerVo.getFromAddress())) {
+            se.setFrom(mailServerVo.getFromAddress(), mailServerVo.getName());
+        }
+
+        se.setSubject("测试邮件");
+        se.addPart("您配置的邮件服务器信息可用！", "text/html;charset=utf-8");
+        se.send();
+        return null;
     }
 
 }
