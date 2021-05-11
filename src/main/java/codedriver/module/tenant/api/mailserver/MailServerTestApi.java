@@ -30,37 +30,37 @@ import org.springframework.stereotype.Service;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MailServerTestApi extends PrivateApiComponentBase {
 
-	@Override
-	public String getToken() {
-		return "mailserver/test";
-	}
+    @Override
+    public String getToken() {
+        return "mailserver/test";
+    }
 
-	@Override
-	public String getName() {
-		return "测试邮件服务器能否正常发送邮件";
-	}
+    @Override
+    public String getName() {
+        return "测试邮件服务器能否正常发送邮件";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({
-		@Param(name = "emailAddress", type = ApiParamType.EMAIL, isRequired = true, desc = "邮箱地址")
-	})
-	@Description(desc = "邮件服务器信息删除接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName());
-		if (handler == null) {
-			throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
-		}
-		NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null);
-		notifyBuilder.withTitleTemplate("测试邮件");
-		notifyBuilder.withContentTemplate("您配置的邮件服务器信息可用！");
-		notifyBuilder.addEmailAddress(jsonObj.getString("emailAddress"));
-		NotifyVo notifyVo = notifyBuilder.build();
-		return handler.execute(notifyVo);
-	}
+    @Input({
+            @Param(name = "emailAddress", type = ApiParamType.EMAIL, isRequired = true, desc = "邮箱地址")
+    })
+    @Description(desc = "邮件服务器信息删除接口")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName());
+        if (handler == null) {
+            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
+        }
+        NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null);
+        notifyBuilder.withTitleTemplate("测试邮件");
+        notifyBuilder.withContentTemplate("您配置的邮件服务器信息可用！");
+        notifyBuilder.addEmailAddress(jsonObj.getString("emailAddress"));
+        NotifyVo notifyVo = notifyBuilder.build();
+        return handler.execute(notifyVo);
+    }
 
 }
