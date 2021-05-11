@@ -57,7 +57,7 @@ public class MailServerTestApi extends PrivateApiComponentBase {
 		}
 		NotifyVo.Builder notifyBuilder = new NotifyVo.Builder(null);
 		notifyBuilder.withTitleTemplate("测试邮件");
-		notifyBuilder.withContentTemplate("您配置的邮件服务器信息正确！");
+		notifyBuilder.withContentTemplate("您配置的邮件服务器信息可用！");
 		notifyBuilder.addEmailAddress(jsonObj.getString("emailAddress"));
 		NotifyVo notifyVo = notifyBuilder.build();
 		return handler.execute(notifyVo);
