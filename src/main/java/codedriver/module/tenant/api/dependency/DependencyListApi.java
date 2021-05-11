@@ -98,7 +98,7 @@ public class DependencyListApi extends PrivateApiComponentBase {
         }
         ICalleeType calleeType = CalleeTypeFactory.getCalleeType(jsonObj.getString("calleeType"));
         if (calleeType == null) {
-            throw new ParamIrregularException("calleeType（被调用者类型）");
+            throw new ParamIrregularException("calleeType（被调用者类型）", CalleeTypeFactory.getAllCalleeTypeToString());
         }
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         JSONObject resultObj = new JSONObject();
