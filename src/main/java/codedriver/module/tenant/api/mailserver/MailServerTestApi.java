@@ -60,8 +60,7 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Description(desc = "测试邮件服务器能否正常发送邮件")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        INotifyHandler handler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName());
-        if (handler == null) {
+        if (NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName()) == null) {
             throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
         }
         MailServerVo mailServerVo = mailServerMapper.getActiveMailServer();
@@ -78,7 +77,6 @@ public class MailServerTestApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(mailServerVo.getFromAddress())) {
             se.setFrom(mailServerVo.getFromAddress(), mailServerVo.getName());
         }
-
         se.setSubject("测试邮件");
         se.addPart("您配置的邮件服务器信息可用！", "text/html;charset=utf-8");
         se.send();
