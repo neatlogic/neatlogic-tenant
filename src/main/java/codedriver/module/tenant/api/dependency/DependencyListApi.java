@@ -93,12 +93,12 @@ public class DependencyListApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(uuid)) {
                 callee = uuid;
             } else {
-                throw new ParamNotExistsException("参数：“id和uuid”不能同时为空");
+                throw new ParamNotExistsException("id", "uuid");
             }
         }
         ICalleeType calleeType = CalleeTypeFactory.getCalleeType(jsonObj.getString("calleeType"));
         if (calleeType == null) {
-            throw new ParamIrregularException("参数“calleeType（被调用者类型）”不符合格式要求，合法值为" + CalleeTypeFactory.getAllCalleeTypeToString());
+            throw new ParamIrregularException("calleeType（被调用者类型）", CalleeTypeFactory.getAllCalleeTypeToString());
         }
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         JSONObject resultObj = new JSONObject();

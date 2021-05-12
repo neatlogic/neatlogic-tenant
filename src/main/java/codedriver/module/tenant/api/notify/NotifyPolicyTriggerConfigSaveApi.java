@@ -98,7 +98,7 @@ public class NotifyPolicyTriggerConfigSaveApi extends PrivateApiComponentBase {
             }
         }
         if (StringUtils.isBlank(triggerName)) {
-            throw new ParamIrregularException("参数trigger不符合格式要求");
+            throw new ParamIrregularException("trigger");
         }
 
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();

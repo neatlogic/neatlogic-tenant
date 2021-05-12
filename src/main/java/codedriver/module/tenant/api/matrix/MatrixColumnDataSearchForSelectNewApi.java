@@ -111,7 +111,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		
 		List<String> columnList = dataVo.getColumnList();
 		if (CollectionUtils.isEmpty(columnList)) {
-			throw new ParamIrregularException("参数“columnList”不符合格式要求");
+			throw new ParamIrregularException("columnList");
 		}
 		String keywordColumn = jsonObj.getString("keywordColumn");
 		List<Map<String, JSONObject>> resultList = new ArrayList<>();

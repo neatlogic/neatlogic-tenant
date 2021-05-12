@@ -69,7 +69,7 @@ public class UserProfileSaveApi extends PrivateApiComponentBase {
 			throw new UserProfileModuleNotFoundException(moduleId);
 		}
 		if(checked == 0&&StringUtils.isBlank(operate)) {
-			throw new ParamIrregularException("参数“operate”不符合格式要求");
+			throw new ParamIrregularException("operate");
 		}
 		//找出对用的json
 		String config = UserProfileFactory.getUserProfileMap().get(moduleId).getConfig();
