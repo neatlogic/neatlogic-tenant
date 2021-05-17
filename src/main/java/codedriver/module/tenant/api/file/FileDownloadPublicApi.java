@@ -7,7 +7,6 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -106,5 +105,10 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
             throw new FileNotFoundException(id);
         }
         return null;
+    }
+
+    @Override
+    public String getToken() {
+        return "file/download";
     }
 }
