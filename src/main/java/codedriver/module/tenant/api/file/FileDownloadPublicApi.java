@@ -109,6 +109,6 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "file/download";
+        return "/public/file/download";
     }
 }
