@@ -67,7 +67,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 		@Param(name = "expire", type = ApiParamType.LONG, desc = "使用期限"),
 		@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "json格式,配置信息"),
 		@Param(name = "username", type = ApiParamType.STRING, desc = "用户名称"),
-		@Param(name = "password", type = ApiParamType.STRING, desc = "密码"),
+		@Param(name = "password", type = ApiParamType.REGEX, rule = "^(?!.*[\\u4E00-\\u9FA5\\s])(?!^[a-zA-Z]+$)(?!^[\\d]+$)(?!^[^a-zA-Z\\d]+$)^.{8,20}$", desc = "密码"),
 		@Param(name = "description", type = ApiParamType.STRING, desc = "描述"),
         @Param(name = "apiType", type = ApiParamType.STRING, desc = "API类型", isRequired = true),
         @Param(name = "operationType", type = ApiParamType.STRING, desc = "操作类型(create|update)", isRequired = true)
