@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.apimanage;
 
-import codedriver.framework.auth.core.AuthAction;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -53,9 +52,7 @@ public class ApiManageAuthTypeListForSelectApi extends PrivateApiComponentBase {
             JSONObject json = new JSONObject();
             json.put("value", s.getValue());
             json.put("text", s.getText());
-            if(!s.getValue().equals(ApiVo.AuthenticateType.NOAUTH.getValue())) {
-                json.put("help", ApiAuthFactory.getApiAuth(s.getValue()).help());
-            }
+            json.put("help", ApiAuthFactory.getApiAuth(s.getValue()).help());
             resultList.add(json);
         }
         return resultList;
