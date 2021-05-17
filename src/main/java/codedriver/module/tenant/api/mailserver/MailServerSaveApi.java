@@ -49,7 +49,7 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 		@Param(name = "host", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "smtp主机"),
 		@Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "smtp端口"),
 		@Param(name = "userName", type = ApiParamType.EMAIL, isRequired = true,  maxLength = 50, desc = "用户"),
-		@Param(name = "password", type = ApiParamType.REGEX, rule = "^(?!.*[\\u4E00-\\u9FA5\\s])(?!^[a-zA-Z]+$)(?!^[\\d]+$)(?!^[^a-zA-Z\\d]+$)^.{8,20}$", isRequired = true,  maxLength = 50, desc = "密码"),
+		@Param(name = "password", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "密码"),
 		@Param(name = "domain", type = ApiParamType.STRING,  maxLength = 50, desc = "域名"),
 		@Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "")
 	})
