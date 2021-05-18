@@ -11,27 +11,30 @@ import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class FileGetApi extends PrivateApiComponentBase {
+public class FileListApi extends PrivateApiComponentBase {
 
     @Resource
     private FileMapper fileMapper;
 
     @Override
     public String getToken() {
-        return "file/get";
+        return "file/list";
     }
 
     @Override
     public String getName() {
-        return "获取附件信息";
+        return "根据附件id列表获取附件信息";
     }
 
     @Override
@@ -41,13 +44,17 @@ public class FileGetApi extends PrivateApiComponentBase {
 
     @Override
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "附件id")
+            @Param(name = "idList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "附件id")
     })
-    @Output({@Param(explode = FileVo.class)})
-    @Description(desc = "获取附件信息接口")
+    @Output({@Param(explode = FileVo[].class)})
+    @Description(desc = "根据附件id列表获取附件信息接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long fileId = jsonObj.getLong("id");
-        return fileMapper.getFileById(fileId);
+        JSONArray jsonList = jsonObj.getJSONArray("idList");
+        List<Long> fileIdList = new ArrayList<>();
+        for (int i = 0; i < jsonList.size(); i++) {
+            fileIdList.add(jsonList.getLong(i));
+        }
+        return fileMapper.getFileListByIdList(fileIdList);
     }
 
 }
