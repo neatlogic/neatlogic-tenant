@@ -23,17 +23,17 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 @Service
 
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ToogleSqlInterceptorApi extends PrivateApiComponentBase {
+public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
 
-	@Override
-	public String getToken() {
-		return "/util/togglesqlinterceptor";
-	}
+    @Override
+    public String getToken() {
+        return "/util/togglesqlinterceptor";
+    }
 
-	@Override
-	public String getName() {
-		return "控制系统SQL追踪";
-	}
+    @Override
+    public String getName() {
+        return "控制系统SQL追踪";
+    }
 
 	@Override
 	public String getConfig() {
