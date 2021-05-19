@@ -7,7 +7,6 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -98,7 +97,7 @@ public class FileDownloadApi extends PrivateBinaryStreamApiComponentBase {
                         } else {
                             response.setContentType(fileVo.getContentType());
                         }
-                        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileNameEncode + "\"");
+                        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
                         os = response.getOutputStream();
                         IOUtils.copyLarge(in, os);
                         if (os != null) {

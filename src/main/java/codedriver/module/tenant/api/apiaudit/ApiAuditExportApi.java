@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.apiaudit;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -82,7 +81,7 @@ public class ApiAuditExportApi extends PrivateBinaryStreamApiComponentBase {
 			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
 		}
 		response.setContentType("application/text;charset=GBK");
-		response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+		response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 		ServletOutputStream os = response.getOutputStream();
 		if(os != null){
 			ApiAuditVo apiAuditVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiAuditVo>() {});

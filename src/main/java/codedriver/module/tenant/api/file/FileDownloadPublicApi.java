@@ -84,7 +84,7 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
                         } else {
                             response.setContentType(fileVo.getContentType());
                         }
-                        response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+                        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
                         os = response.getOutputStream();
                         IOUtils.copyLarge(in, os);
                         if (os != null) {

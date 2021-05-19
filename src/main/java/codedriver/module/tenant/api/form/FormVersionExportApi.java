@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.form;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -81,7 +80,7 @@ public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
             fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
         }
         response.setContentType("aplication/x-msdownload");
-        response.setHeader("Content-Disposition", "attachment;fileName=\"" + fileNameEncode + "\"");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
         //获取序列化字节数组
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
