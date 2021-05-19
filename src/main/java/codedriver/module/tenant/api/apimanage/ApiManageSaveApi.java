@@ -60,7 +60,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 		@Param(name = "name", type = ApiParamType.STRING, maxLength = 50, isRequired = true, desc = "名称"),
 		@Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "处理器"),
 		@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否保存调用记录"),
-		@Param(name = "authtype", type = ApiParamType.STRING, isRequired = true, desc = "认证方式"),
+		@Param(name = "authtype", type = ApiParamType.ENUM, rule = "basic", isRequired = true, desc = "认证方式"),
 		@Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "是否激活"),
 		@Param(name = "timeout", type = ApiParamType.INTEGER, desc = "请求时效"),
 		@Param(name = "qps", type = ApiParamType.INTEGER, desc = "每秒访问几次，大于0生效"),
