@@ -80,7 +80,7 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
                         }
 
                         if (StringUtils.isBlank(fileVo.getContentType())) {
-                            response.setContentType("aplication/x-msdownload");
+                            response.setContentType("application/x-msdownload");
                         } else {
                             response.setContentType(fileVo.getContentType());
                         }
