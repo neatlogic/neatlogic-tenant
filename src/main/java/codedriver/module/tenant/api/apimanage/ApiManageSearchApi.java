@@ -5,10 +5,7 @@
 
 package codedriver.module.tenant.api.apimanage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import codedriver.framework.auth.core.AuthAction;
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +55,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
+		@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"),
 		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
 		@Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"),
 		@Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"),
@@ -129,6 +127,9 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 					continue;
 				}
 			}
+			if(apiVo.getNeedAudit() != null && !Objects.equals(apiVo.getNeedAudit(),api.getNeedAudit())){
+				continue;
+			}
 			ramApiList.add(api);
 			tokenList.add(api.getToken());
 			ramTokenList.add(api.getToken());
@@ -177,6 +178,9 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {
 					continue;
 				}
+			}
+			if(apiVo.getNeedAudit() != null && !Objects.equals(apiVo.getNeedAudit(),api.getNeedAudit())){
+				continue;
 			}
 			dbTokenList.add(api.getToken());
 			dbApiList.add(api);
