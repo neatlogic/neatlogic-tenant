@@ -84,7 +84,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
             String parentUuid = jsonObj.getString("parentUuid");
             if (StringUtils.isBlank(parentUuid)) {
                 parentUuid = TeamVo.ROOT_UUID;
-            }else if(!TeamVo.ROOT_UUID.equals(parentUuid)){
+            } else if (!TeamVo.ROOT_UUID.equals(parentUuid)) {
                 TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
                 if (parentTeam == null) {
                     throw new TeamNotFoundException(parentUuid);
