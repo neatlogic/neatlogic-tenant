@@ -4,8 +4,8 @@ import codedriver.framework.dto.TeamVo;
 
 public interface TeamService {
 	
-	public void rebuildLeftRightCode();
+//	public void rebuildLeftRightCode();
 
-	public TeamVo buildRootTeam();
+//	public TeamVo buildRootTeam();
 
 }

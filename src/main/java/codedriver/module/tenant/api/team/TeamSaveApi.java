@@ -9,6 +9,7 @@ import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.lock.core.LockManager;
+import codedriver.framework.lrcode.LRCodeManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -73,7 +74,6 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     @Description(desc = "保存组信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
         String level = jsonObj.getString("level");
         if (StringUtils.isNotBlank(level) && TeamLevel.getValue(level) == null) {
             throw new TeamLevelNotFoundException(level);
@@ -89,30 +89,19 @@ public class TeamSaveApi extends PrivateApiComponentBase {
             teamVo.setUuid(uuid);
             teamMapper.updateTeamNameByUuid(teamVo);
         } else {
-            lockService.getLockById("team");
-            if (teamMapper.checkLeftRightCodeIsWrong() > 0) {
-                teamService.rebuildLeftRightCode();
-            }
             String parentUuid = jsonObj.getString("parentUuid");
             if (StringUtils.isBlank(parentUuid)) {
                 parentUuid = TeamVo.ROOT_UUID;
-            }
-            TeamVo parentTeam;
-            if (TeamVo.ROOT_UUID.equals(parentUuid)) {
-                parentTeam = teamService.buildRootTeam();
-            } else {
-                parentTeam = teamMapper.getTeamByUuid(parentUuid);
+            }else if(!TeamVo.ROOT_UUID.equals(parentUuid)){
+                TeamVo parentTeam = teamMapper.getTeamByUuid(parentUuid);
                 if (parentTeam == null) {
                     throw new TeamNotFoundException(parentUuid);
                 }
             }
-
             teamVo.setParentUuid(parentUuid);
-            teamVo.setLft(parentTeam.getRht());
-            teamVo.setRht(teamVo.getLft() + 1);
-            // 更新插入位置右边的左右编码值
-            teamMapper.batchUpdateTeamLeftCode(teamVo.getLft(), 2);
-            teamMapper.batchUpdateTeamRightCode(teamVo.getLft(), 2);
+            int lft = LRCodeManager.beforeAddTreeNode("team", "uuid", "parent_uuid", parentUuid);
+            teamVo.setLft(lft);
+            teamVo.setRht(lft + 1);
 
             teamMapper.insertTeam(teamVo);
             List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
@@ -124,8 +113,65 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 }
             }
         }
-
+        JSONObject returnObj = new JSONObject();
         returnObj.put("uuid", teamVo.getUuid());
         return returnObj;
     }
+
+//    private Object backup(JSONObject jsonObj){
+//        JSONObject returnObj = new JSONObject();
+//        String level = jsonObj.getString("level");
+//        if (StringUtils.isNotBlank(level) && TeamLevel.getValue(level) == null) {
+//            throw new TeamLevelNotFoundException(level);
+//        }
+//        String uuid = jsonObj.getString("uuid");
+//        TeamVo teamVo = new TeamVo();
+//        teamVo.setName(jsonObj.getString("name"));
+//        teamVo.setLevel(level);
+//        if (StringUtils.isNotBlank(uuid)) {
+//            if (teamMapper.checkTeamIsExists(uuid) == 0) {
+//                throw new TeamNotFoundException(uuid);
+//            }
+//            teamVo.setUuid(uuid);
+//            teamMapper.updateTeamNameByUuid(teamVo);
+//        } else {
+//            lockService.getLockById("team");
+//            if (teamMapper.checkLeftRightCodeIsWrong() > 0) {
+//                teamService.rebuildLeftRightCode();
+//            }
+//            String parentUuid = jsonObj.getString("parentUuid");
+//            if (StringUtils.isBlank(parentUuid)) {
+//                parentUuid = TeamVo.ROOT_UUID;
+//            }
+//            TeamVo parentTeam;
+//            if (TeamVo.ROOT_UUID.equals(parentUuid)) {
+//                parentTeam = teamService.buildRootTeam();
+//            } else {
+//                parentTeam = teamMapper.getTeamByUuid(parentUuid);
+//                if (parentTeam == null) {
+//                    throw new TeamNotFoundException(parentUuid);
+//                }
+//            }
+//
+//            teamVo.setParentUuid(parentUuid);
+//            teamVo.setLft(parentTeam.getRht());
+//            teamVo.setRht(teamVo.getLft() + 1);
+//            // 更新插入位置右边的左右编码值
+//            teamMapper.batchUpdateTeamLeftCode(teamVo.getLft(), 2);
+//            teamMapper.batchUpdateTeamRightCode(teamVo.getLft(), 2);
+//
+//            teamMapper.insertTeam(teamVo);
+//            List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+//            List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+//            Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList, teamUuidList);
+//            if (CollectionUtils.isNotEmpty(uuidList)) {
+//                for (String userUuid : uuidList) {
+//                    teamMapper.insertTeamUser(new TeamUserVo(teamVo.getUuid(), userUuid));
+//                }
+//            }
+//        }
+//
+//        returnObj.put("uuid", teamVo.getUuid());
+//        return returnObj;
+//    }
 }

@@ -48,7 +48,7 @@ public class TeamUserDeleteApi extends PrivateApiComponentBase {
 
 	@Input({
         @Param( name = "teamUuid", isRequired = true, desc = "分组uuid", type = ApiParamType.STRING),
-        @Param( name = "userUuidList", desc = "用户Uuid集合", type = ApiParamType.JSONARRAY)
+        @Param( name = "userUuidList", isRequired = true, desc = "用户Uuid集合", type = ApiParamType.JSONARRAY)
 	})
 	@Description( desc = "分组用户删除接口")
 	@Override
@@ -57,11 +57,12 @@ public class TeamUserDeleteApi extends PrivateApiComponentBase {
     	if(teamMapper.checkTeamIsExists(teamUuid) == 0) {
 			throw new TeamNotFoundException(teamUuid);
 		}
-    	List<String> userUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("userUuidList")), String.class);
+    	List<String> userUuidList = jsonObj.getJSONArray("userUuidList").toJavaList(String.class);
     	if (CollectionUtils.isNotEmpty(userUuidList)){
-    		for (String userUuid: userUuidList){
-    			teamMapper.deleteTeamUser(new TeamUserVo(teamUuid, userUuid));
-    		}
+			teamMapper.deleteTeamUserByTeamUuidAndUserUuidList(teamUuid, userUuidList);
+//    		for (String userUuid: userUuidList){
+//    			teamMapper.deleteTeamUser(new TeamUserVo(teamUuid, userUuid));
+//    		}
     	}
 		return null;
 	}

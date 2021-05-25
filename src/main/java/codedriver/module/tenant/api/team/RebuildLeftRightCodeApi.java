@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.team;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.TEAM_MODIFY;
+import codedriver.framework.lrcode.LRCodeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +49,9 @@ public class RebuildLeftRightCodeApi extends PrivateApiComponentBase {
 
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        lockService.getLockById("team");
-        teamService.rebuildLeftRightCode();
+//        lockService.getLockById("team");
+//        teamService.rebuildLeftRightCode();
+        LRCodeManager.rebuildLeftRightCode("team", "uuid", "parent_uuid");
         return null;
     }
 
