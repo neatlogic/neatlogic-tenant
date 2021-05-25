@@ -5,7 +5,6 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.lock.core.LockManager;
 import codedriver.framework.lrcode.LRCodeManager;
 import codedriver.framework.lrcode.constvalue.MoveType;
 import codedriver.framework.lrcode.exception.MoveTargetNodeIllegalException;
@@ -13,8 +12,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.TEAM_MODIFY;
-import codedriver.module.tenant.exception.team.TeamMoveException;
-import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,12 +32,6 @@ public class TeamMoveApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private LockManager lockService;
 
     @Override
     public String getToken() {

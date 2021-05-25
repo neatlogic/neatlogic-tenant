@@ -8,13 +8,11 @@ import codedriver.framework.dto.TeamUserVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.lock.core.LockManager;
 import codedriver.framework.lrcode.LRCodeManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.TEAM_MODIFY;
-import codedriver.module.tenant.service.TeamService;
 import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -38,13 +36,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     private TeamMapper teamMapper;
 
     @Resource
-    private TeamService teamService;
-
-    @Resource
     private UserService userService;
-
-    @Resource
-    private LockManager lockService;
 
     @Override
     public String getToken() {
