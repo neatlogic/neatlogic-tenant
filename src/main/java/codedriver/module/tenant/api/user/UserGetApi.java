@@ -6,7 +6,7 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.auth.init.MaintenanceMode;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -66,8 +66,10 @@ public class UserGetApi extends PrivateApiComponentBase {
 			userVo = MaintenanceMode.getMaintenanceUser();
 		} else {
 			userVo = userMapper.getUserByUuid(userUuid);
-			if (userVo != null) {
-				userVo.setUserAuthList(userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid)));
+			List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
+			if (userVo != null && CollectionUtils.isNotEmpty(userAuthVoList)) {
+				AuthActionChecker.getAuthList(userAuthVoList);
+				userVo.setUserAuthList(userAuthVoList);
 			}
 		}
 		if (userVo == null) {
