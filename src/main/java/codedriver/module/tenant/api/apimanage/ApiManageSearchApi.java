@@ -123,7 +123,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 
 			}
 			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
-				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {
+				if(!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword()))
+						&& !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
 					continue;
 				}
 			}
@@ -175,7 +176,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 				}
 			}
 			if(StringUtils.isNotBlank(apiVo.getKeyword())) {
-				if(!api.getName().contains(apiVo.getKeyword()) && !api.getToken().contains(apiVo.getKeyword())) {
+				if(!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword()))
+						&& !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
 					continue;
 				}
 			}

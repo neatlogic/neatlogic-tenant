@@ -50,6 +50,7 @@ public class UserDeleteApi extends PrivateApiComponentBase{
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
     	if(CollectionUtils.isNotEmpty(userUuidList)) {
     		for(String userUuid : userUuidList) {
+    			userMapper.deleteUserSessionByUserUuid(userUuid);
     			userMapper.deleteUserAuth(new UserAuthVo(userUuid));
     			userMapper.deleteUserRoleByUserUuid(userUuid);
     			userMapper.deleteUserTeamByUserUuid(userUuid);
