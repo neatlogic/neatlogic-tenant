@@ -78,6 +78,10 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		ApiVo apiVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiVo>() {});
+		Integer needAudit = jsonObj.getInteger("needAudit");
+		if(needAudit == null){
+			apiVo.setNeedAudit(null);
+		}
 //		String handler = apiVo.getHandler();
 //		
 //		if(handler != null) {
@@ -86,7 +90,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 //				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
 //			}
 //		}
-		
+		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
 		List<ApiVo> ramApiList = new ArrayList<>();
 		List<String> tokenList = new ArrayList<>();
 		List<String> ramTokenList = new ArrayList<>();
@@ -128,15 +132,22 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 					continue;
 				}
 			}
-			if(apiVo.getNeedAudit() != null && !Objects.equals(apiVo.getNeedAudit(),api.getNeedAudit())){
-				continue;
+			// 系统接口默认关闭审计，开启审计的接口会在数据库有记录，所以先从数据库看是否有记录
+			if(apiVo.getNeedAudit() != null){
+				Optional<ApiVo> first = dbAllApiList.stream().filter(o -> Objects.equals(o.getToken(), api.getToken())).findFirst();
+				if(first != null && first.isPresent()){
+					if(!Objects.equals(apiVo.getNeedAudit(),first.get().getNeedAudit())){
+						continue;
+					}
+				}else if(!Objects.equals(apiVo.getNeedAudit(),api.getNeedAudit())){
+					continue;
+				}
 			}
 			ramApiList.add(api);
 			tokenList.add(api.getToken());
 			ramTokenList.add(api.getToken());
 		}
 
-		List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
 		List<ApiVo> dbApiList = new ArrayList<>();
 		List<String> dbTokenList = new ArrayList<>();
 		Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
