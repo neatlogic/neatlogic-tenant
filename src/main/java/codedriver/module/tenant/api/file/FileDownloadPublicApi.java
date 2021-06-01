@@ -76,7 +76,7 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
                 HttpServletResponse resp = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
                 if (resp != null) {
                     resp.setStatus(205);
-                    resp.getWriter().print(StringUtils.EMPTY);
+//                    resp.getWriter().print(StringUtils.EMPTY);
                 }
             }
         }
