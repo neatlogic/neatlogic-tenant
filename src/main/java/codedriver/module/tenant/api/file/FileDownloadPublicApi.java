@@ -26,13 +26,17 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 @Service
 
@@ -62,6 +66,19 @@ public class FileDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
         String tenantUuid = TenantContext.get().getTenantUuid();
         if (StringUtils.isBlank(tenantUuid)) {
             throw new NoTenantException();
+        }
+        BigDecimal lastModified = null;
+        if(paramObj.getDouble("lastModified") != null) {
+            lastModified = new BigDecimal(Double.toString(paramObj.getDouble("lastModified")));
+        }
+        if (lastModified != null) {
+            if (lastModified.multiply(new BigDecimal("1000")).longValue() >= fileVo.getUploadTime().getTime()) {
+                HttpServletResponse resp = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
+                if (resp != null) {
+                    resp.setStatus(205);
+                    resp.getWriter().print(StringUtils.EMPTY);
+                }
+            }
         }
         if (fileVo != null) {
             IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
