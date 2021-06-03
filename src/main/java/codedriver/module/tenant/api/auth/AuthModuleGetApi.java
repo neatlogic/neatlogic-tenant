@@ -7,7 +7,7 @@ package codedriver.module.tenant.api.auth;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.auth.init.MaintenanceMode;
@@ -18,8 +18,8 @@ import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserDataVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -80,6 +80,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
         } else {
             userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
+            AuthActionChecker.getAuthList(userAuthList);
         }
         for(UserAuthVo userAuth:userAuthList) {
         	authGroupSet.add(userAuth.getAuthGroup());
