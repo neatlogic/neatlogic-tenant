@@ -31,6 +31,7 @@ import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -119,7 +120,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 			boolean isNameRepeat = false;
 			//校验接口名称是否与系统接口重复
 			for(ApiVo api : PrivateApiComponentFactory.getApiList()){
-				if(api.getName().equals(apiVo.getName())){
+				if(Objects.equals(api.getName(),apiVo.getName())){
 					isNameRepeat = true;
 					break;
 				}
@@ -128,7 +129,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
 //			List<ApiVo> dbApiList = ApiMapper.getAllApi();
 			if(CollectionUtils.isNotEmpty(dbApiList) && !isNameRepeat){
 				for(ApiVo api : dbApiList){
-					if(api.getName().equals(apiVo.getName()) && !api.getToken().equals(apiVo.getToken())){
+					if(Objects.equals(api.getName(),apiVo.getName()) && !Objects.equals(api.getToken(),apiVo.getToken())){
 						isNameRepeat = true;
 						break;
 					}
