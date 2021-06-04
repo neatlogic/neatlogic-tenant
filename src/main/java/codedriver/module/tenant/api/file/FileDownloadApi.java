@@ -80,7 +80,7 @@ public class FileDownloadApi extends PrivateBinaryStreamApiComponentBase {
                         boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
                         if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
                             fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
-                            /** chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
+                            /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
                             fileNameEncode = fileNameEncode.replace("%40", "@");
                             fileNameEncode = fileNameEncode.replace("%23", "#");
                             fileNameEncode = fileNameEncode.replace("%24", "$");
