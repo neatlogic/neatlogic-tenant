@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
             @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
             @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
-            @Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
+            @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "tbodyList", desc = "矩阵数据源列表", explode = MatrixVo[].class),
@@ -69,10 +70,12 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        List<String> valueList = JSON.parseArray(jsonObj.getString("valueList"), String.class);
-        if (CollectionUtils.isNotEmpty(valueList)) {
+        MatrixVo matrix = JSON.toJavaObject(jsonObj, MatrixVo.class);
+        JSONArray defaultValue = matrix.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixVo> tbodyList = new ArrayList<>();
-            for (String uuid : valueList) {
+            for (int i = 0; i < defaultValue.size(); i++) {
+                String uuid = defaultValue.getString(i);
                 MatrixVo processMatrixVo = matrixMapper.getMatrixByUuid(uuid);
                 if (processMatrixVo != null) {
                     tbodyList.add(processMatrixVo);
@@ -80,7 +83,6 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             }
             returnObj.put("tbodyList", tbodyList);
         } else {
-            MatrixVo matrix = JSON.toJavaObject(jsonObj, MatrixVo.class);
             if (matrix.getNeedPage()) {
                 int rowNum = matrixMapper.searchMatrixCount(matrix);
                 matrix.setPageCount(PageUtil.getPageCount(rowNum, matrix.getPageSize()));

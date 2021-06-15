@@ -59,7 +59,7 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 					type = ApiParamType.STRING,
 					desc = "关键字(用户id或名称),模糊查询",
 					xss = true),
-			@Param(name = "valueList",
+			@Param(name = "defaultValue",
 					type = ApiParamType.JSONARRAY,
 					desc = "用于回显的参数列表",
 					xss = true),
@@ -97,14 +97,14 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 		JSONObject resultObj = new JSONObject();
 		resultObj.put("list", new ArrayList<>());
 		List<UserVo> userList = null;
-		JSONArray valueList = jsonObj.getJSONArray("valueList");
-	    if(CollectionUtils.isNotEmpty(valueList)) {
+		JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
+	    if(CollectionUtils.isNotEmpty(defaultValue)) {
 	        List<String> uuidList = new ArrayList<>();
-	        for(int i = 0; i < valueList.size(); i++) {
-	            String value = valueList.getString(i);
+	        for(int i = 0; i < defaultValue.size(); i++) {
+	            String value = defaultValue.getString(i);
 	            uuidList.add(value.replaceAll(GroupSearch.USER.getValuePlugin(),""));
-	            userList = userMapper.getUserListByUuidList(uuidList);
 	        }
+			userList = userMapper.getUserListByUuidList(uuidList);
 	    }else {
 	        UserVo userVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<UserVo>() {});
 	        int pageCount = 0;
