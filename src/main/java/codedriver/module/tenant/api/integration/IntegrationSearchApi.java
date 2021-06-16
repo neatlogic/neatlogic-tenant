@@ -51,7 +51,7 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param(name = "valueList", type = ApiParamType.JSONARRAY, desc = "回显值"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "回显值"),
             @Param(name = "handler", type = ApiParamType.STRING, desc = "组件"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量")})

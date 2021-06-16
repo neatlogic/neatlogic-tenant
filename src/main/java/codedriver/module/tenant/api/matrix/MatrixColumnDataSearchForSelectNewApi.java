@@ -92,21 +92,20 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true), 
 		@Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
 		@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-		@Param(name = "valueList", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
+		@Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
 	    @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY) })
 	@Description(desc = "矩阵属性数据查询-下拉级联接口")
 	@Output({ @Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合") })
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    
-		MatrixDataVo dataVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MatrixDataVo>() {
-		});
+		MatrixDataVo dataVo = JSONObject.toJavaObject(jsonObj, MatrixDataVo.class);
 		MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
 		if (matrixVo == null) {
 			throw new MatrixNotFoundException(dataVo.getMatrixUuid());
 		}
 
-		List<String> valueList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("valueList")), String.class);
+		JSONArray defaultValue = dataVo.getDefaultValue();
 		JSONArray filterList = jsonObj.getJSONArray("filterList");
 		
 		List<String> columnList = dataVo.getColumnList();
@@ -136,8 +135,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 				dataVo.setColumnList(distinctColumList);
 				dataVo.setFilterList(filterList);
 				List<Map<String, String>> dataMapList = null;
-				if (CollectionUtils.isNotEmpty(valueList)) {
-					for (String value : valueList) {
+				if (CollectionUtils.isNotEmpty(defaultValue)) {
+					for (String value : defaultValue.toJavaList(String.class)) {
 						if (value.contains(SELECT_COMPOSE_JOINER)) {
 							List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
 							String[] split = value.split(SELECT_COMPOSE_JOINER);
@@ -219,8 +218,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 			}
 			List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
 			jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
-			if (CollectionUtils.isNotEmpty(valueList)) {
-				for (String value : valueList) {
+			if (CollectionUtils.isNotEmpty(defaultValue)) {
+				for (String value : defaultValue.toJavaList(String.class)) {
 					if (value.contains(SELECT_COMPOSE_JOINER)) {
 						
 						String[] split = value.split(SELECT_COMPOSE_JOINER);
