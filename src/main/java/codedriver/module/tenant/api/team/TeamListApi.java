@@ -21,7 +21,7 @@ import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 
-//@Service
+@Service
 @Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamListApi extends PrivateApiComponentBase {
