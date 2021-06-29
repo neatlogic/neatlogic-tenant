@@ -199,7 +199,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
             boolean isNameRepeat = false;
             //校验接口名称是否与系统接口重复
             for (ApiVo api : PrivateApiComponentFactory.getApiList()) {
-                if (api.getName().equals(name)) {
+                if (Objects.equals(api.getName(),name)) {
                     isNameRepeat = true;
                     break;
                 }
