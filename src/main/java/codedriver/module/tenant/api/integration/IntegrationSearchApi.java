@@ -20,6 +20,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,16 +77,18 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                     if (CollectionUtils.isNotEmpty(paramList)) {
                         for (Object paramObj : paramList) {
                             JSONObject param = (JSONObject) paramObj;
-                            ParamType pt = ParamType.getParamType(param.getString("type"));
-                            if (pt != null) {
-                                //增加参数回显模版-赖文韬-202006291121
-                                String freemarkerTemplate = pt.getFreemarkerTemplate(param.getString("name"));
-                                param.put("freemarkerTemplate", freemarkerTemplate);
-                                param.put("expresstionList", pt.getExpressionJSONArray());
-                            }
                             //设置typeName
                             String type = param.getString("type");
-                            param.put("typeName", Objects.requireNonNull(ParamType.getParamType(type)).getText());
+                            if (StringUtils.isNotBlank(type)) {
+                                ParamType pt = ParamType.getParamType(type);
+                                if (pt != null) {
+                                    //增加参数回显模版-赖文韬-202006291121
+                                    String freemarkerTemplate = pt.getFreemarkerTemplate(param.getString("name"));
+                                    param.put("freemarkerTemplate", freemarkerTemplate);
+                                    param.put("expresstionList", pt.getExpressionJSONArray());
+                                    param.put("typeName", Objects.requireNonNull(pt).getText());
+                                }
+                            }
                         }
                     }
                 }
