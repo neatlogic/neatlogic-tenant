@@ -19,7 +19,6 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.util.UuidUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -120,12 +119,10 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
         List<String> failReasonList = new ArrayList<>();
         String name = integrationVo.getName();
         IntegrationVo old = integrationMapper.getIntegrationByUuid(integrationVo.getUuid());
-        if (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
-            String newName = name + UuidUtil.randomUuid().substring(0, 5);
-            if (newName.length() > 50) {
-                newName = newName.substring(0, 50);
-            }
-            integrationVo.setName(newName);
+        int index = 0;
+        while (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
+            index++;
+            integrationVo.setName(name + "_" + index);
         }
         IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
         if (handler == null) {
