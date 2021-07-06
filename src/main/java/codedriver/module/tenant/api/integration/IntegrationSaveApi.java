@@ -3,7 +3,11 @@ package codedriver.module.tenant.api.integration;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.exception.integration.HttpMethodNotFoundException;
+import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.integration.IntegrationNameRepeatsException;
+import codedriver.framework.integration.authentication.costvalue.HttpMethod;
+import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -57,6 +61,12 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
         if (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
             throw new IntegrationNameRepeatsException(integrationVo.getName());
+        }
+        if (IntegrationHandlerFactory.getHandler(integrationVo.getHandler()) == null) {
+            throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+        }
+        if (HttpMethod.getHttpMethod(integrationVo.getMethod()) == null) {
+            throw new HttpMethodNotFoundException(integrationVo.getMethod());
         }
         if (integrationVo.getUrl().contains("integration/run/")) {
             throw new IntegrationUrlIllegalException(integrationVo.getUrl());
