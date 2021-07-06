@@ -137,6 +137,9 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
         if (!urlPattern.matcher(integrationVo.getUrl()).matches()) {
             failReasonList.add("url不符合格式要求");
         }
+        if (integrationVo.getUrl().contains("integration/run/")) {
+            failReasonList.add("url可能是集成调用地址，不允许配置");
+        }
         if (CollectionUtils.isEmpty(failReasonList)) {
             if (old == null) {
                 integrationMapper.insertIntegration(integrationVo);
