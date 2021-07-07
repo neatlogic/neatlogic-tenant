@@ -18,9 +18,11 @@ import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import codedriver.framework.worktime.exception.WorktimeConfigIllegalException;
 import codedriver.framework.worktime.exception.WorktimeNameRepeatException;
+import codedriver.framework.worktime.exception.WorktimeStartTimeGreaterThanOrEqualToEndTimeException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,7 +75,6 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             throw new WorktimeNameRepeatException(worktimeVo.getName());
         }
         //验证config
-        List<String> list = new ArrayList<>();
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
         JSONObject configJson = JSON.parseObject(worktimeVo.getConfig());
         for (Entry<String, Object> entry : configJson.entrySet()) {
@@ -87,21 +88,26 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
                 JSONArray jsonArray = (JSONArray) value;
                 for (int i = 0; i < jsonArray.size(); i++) {
                     JSONObject obj = jsonArray.getJSONObject(i);
-                    list.add("startTime");
-                    list.add("endTime");
-                    for (Entry<String, Object> entry2 : obj.entrySet()) {
-                        if (!list.remove(entry2.getKey())) {
-                            throw new WorktimeConfigIllegalException(entry2.getKey());
-                        }
-                        String value2 = entry2.getValue().toString();
-                        try {
-                            timeFormatter.parse(value2);
-                        } catch (DateTimeException e) {
-                            throw new WorktimeConfigIllegalException(value2);
-                        }
+                    String startTime = obj.getString("startTime");
+                    if (StringUtils.isBlank(startTime)) {
+                        throw new WorktimeConfigIllegalException("startTime");
                     }
-                    if (list.size() > 0) {
-                        throw new WorktimeConfigIllegalException(obj.toString());
+                    try {
+                        timeFormatter.parse(startTime);
+                    } catch (DateTimeException e) {
+                        throw new WorktimeConfigIllegalException(startTime);
+                    }
+                    String endTime = obj.getString("endTime");
+                    if (StringUtils.isBlank(endTime)) {
+                        throw new WorktimeConfigIllegalException("endTime");
+                    }
+                    try {
+                        timeFormatter.parse(endTime);
+                    } catch (DateTimeException e) {
+                        throw new WorktimeConfigIllegalException(endTime);
+                    }
+                    if (startTime.compareTo(endTime) > 0) {
+                        throw new WorktimeStartTimeGreaterThanOrEqualToEndTimeException();
                     }
                 }
             } else {
@@ -131,5 +137,4 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             return new FieldValidResultVo();
         };
     }
-
 }
