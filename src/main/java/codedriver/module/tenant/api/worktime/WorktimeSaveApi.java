@@ -30,8 +30,6 @@ import javax.annotation.Resource;
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map.Entry;
 
 @Service
