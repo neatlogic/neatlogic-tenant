@@ -8,8 +8,10 @@ package codedriver.module.tenant.api.mq;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.MQ_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.mq.dao.mapper.MqTopicMapper;
-import codedriver.framework.mq.dto.TopicVo;
+import codedriver.framework.exception.mq.SubscribeNotFoundException;
+import codedriver.framework.mq.core.SubscribeManager;
+import codedriver.framework.mq.dao.mapper.MqSubscribeMapper;
+import codedriver.framework.mq.dto.SubscribeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -18,25 +20,27 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = MQ_MODIFY.class)
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class UpdateTopicApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.DELETE)
+@Transactional
+public class DeleteSubscribeApi extends PrivateApiComponentBase {
 
     @Resource
-    private MqTopicMapper mqTopicMapper;
+    private MqSubscribeMapper mqSubscribeMapper;
 
     @Override
     public String getToken() {
-        return "/mq/topic/update";
+        return "/mq/subscribe/delete";
     }
 
     @Override
     public String getName() {
-        return "更新消息队列主题激活状态";
+        return "删除消息队列订阅";
     }
 
     @Override
@@ -44,17 +48,16 @@ public class UpdateTopicApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "唯一标识"),
-            @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "是否激活")})
-    @Description(desc = "更新消息队列主题激活状态接口")
+    @Input({@Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "id")})
+    @Description(desc = "删除消息队列订阅接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        TopicVo topicVo = JSONObject.toJavaObject(jsonObj, TopicVo.class);
-        if (topicVo.getIsActive().equals(1)) {
-            mqTopicMapper.deleteInActiveTopic(topicVo.getName());
-        } else {
-            mqTopicMapper.insertInActiveTopic(topicVo);
+        SubscribeVo subVo = mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
+        if (subVo == null) {
+            throw new SubscribeNotFoundException(jsonObj.getLong("id"));
         }
+        mqSubscribeMapper.deleteSubscribeById(jsonObj.getLong("id"));
+        SubscribeManager.destroy(subVo.getTopicName(), subVo.getName());
         return null;
     }
 

@@ -41,12 +41,12 @@ public class GetSubscribeApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "name", rule = "^[a-zA-Z_]+$", type = ApiParamType.REGEX, desc = "订阅名称")})
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id", isRequired = true)})
     @Output({@Param(explode = SubscribeVo.class)})
     @Description(desc = "获取消息队列订阅信息接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return mqSubscribeMapper.getSubscribeByName(jsonObj.getString("name"));
+        return mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
     }
 
 }
