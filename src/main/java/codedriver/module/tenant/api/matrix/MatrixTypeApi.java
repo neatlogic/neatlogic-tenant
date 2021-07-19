@@ -26,7 +26,7 @@ import java.util.List;
  * @create: 2020-03-27 16:52
  **/
 @Deprecated
-@Service
+//@Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixTypeApi extends PrivateApiComponentBase {

@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.dependency.constvalue.CalleeType;
@@ -41,7 +40,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.Map.Entry;
 
-@Service
+//@Service
 @Deprecated
 
 @OperationType(type = OperationTypeEnum.SEARCH)

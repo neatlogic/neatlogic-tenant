@@ -20,16 +20,11 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixAttributeVo;
-import codedriver.framework.matrix.dto.MatrixDataVo;
-import codedriver.framework.matrix.dto.MatrixExternalVo;
-import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.dao.mapper.*;
+import codedriver.framework.matrix.dto.*;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -37,6 +32,7 @@ import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,6 +77,9 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
     @Resource
     private MatrixExternalMapper externalMapper;
 
+    @Resource
+    private MatrixViewMapper viewMapper;
+
     @Override
     public String getToken() {
         return "matrix/data/search";
@@ -119,7 +118,8 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
         List<Map<String, Object>> tbodyList = new ArrayList<>();
-        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+        String type = matrixVo.getType();
+        if (MatrixType.CUSTOM.getValue().equals(type)) {
             List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
             if (CollectionUtils.isNotEmpty(attributeVoList)) {
                 List<String> columnList = new ArrayList<>();
@@ -156,7 +156,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
                 List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo, TenantContext.get().getTenantUuid());
                 tbodyList = matrixService.matrixTableDataValueHandle(attributeVoList, dataList);
             }
-        } else {
+        } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
             MatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
             if (externalVo != null) {
                 IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
@@ -192,6 +192,48 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
                         }
                     }
                 }
+            }
+        } else if (MatrixType.VIEW.getValue().equals(type)) {
+            MatrixViewVo matrixViewVo = viewMapper.getMatrixViewByMatrixUuid(dataVo.getMatrixUuid());
+            if (matrixViewVo == null) {
+                throw new MatrixViewNotFoundException(matrixVo.getName());
+            }
+            JSONArray attributeList = (JSONArray) JSONPath.read(matrixViewVo.getConfig(), "attributeList");
+            if (CollectionUtils.isNotEmpty(attributeList)) {
+                List<String> columnList = new ArrayList<>();
+                JSONArray headList = new JSONArray();
+                JSONObject selectionObj = new JSONObject();
+                selectionObj.put("key", "selection");
+                selectionObj.put("width", 60);
+                headList.add(selectionObj);
+                List<MatrixAttributeVo> attributeVoList = attributeList.toJavaList(MatrixAttributeVo.class);
+                for (MatrixAttributeVo attributeVo : attributeVoList) {
+                    columnList.add(attributeVo.getUuid());
+                    JSONObject columnObj = new JSONObject();
+                    columnObj.put("title", attributeVo.getName());
+                    columnObj.put("key", attributeVo.getUuid());
+                    headList.add(columnObj);
+                }
+                JSONObject actionObj = new JSONObject();
+                actionObj.put("title", "");
+                actionObj.put("key", "action");
+                actionObj.put("align", "right");
+                actionObj.put("width", 10);
+                headList.add(actionObj);
+
+                returnObj.put("theadList", headList);
+
+                dataVo.setColumnList(columnList);
+                if (dataVo.getNeedPage()) {
+                    int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo, TenantContext.get().getTenantUuid());
+                    returnObj.put("pageCount", PageUtil.getPageCount(rowNum, dataVo.getPageSize()));
+                    returnObj.put("rowNum", rowNum);
+                    returnObj.put("pageSize", dataVo.getPageSize());
+                    returnObj.put("currentPage", dataVo.getCurrentPage());
+                }
+
+                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo, TenantContext.get().getTenantUuid());
+                tbodyList = matrixService.matrixTableDataValueHandle(attributeVoList, dataList);
             }
         }
 

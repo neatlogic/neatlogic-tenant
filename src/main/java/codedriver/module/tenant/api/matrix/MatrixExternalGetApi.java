@@ -13,6 +13,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -67,7 +68,7 @@ public class MatrixExternalGetApi extends PrivateApiComponentBase {
         if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
         } else {
-            throw new MatrixExternalException("矩阵:'" + matrixUuid + "'不是外部数据源类型");
+            throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
     }
 }

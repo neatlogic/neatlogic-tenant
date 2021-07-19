@@ -48,7 +48,7 @@ import java.util.Map;
 @Transactional
 @AuthAction(action = MATRIX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
-public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
+public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -109,7 +109,7 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
                     originalFilename = originalFilename.substring(0, originalFilename.indexOf("."));
                 }
                 if (!originalFilename.equals(matrixVo.getName())) {
-                    throw new MatrixImportException("文件的名称与矩阵名称不相同，不能导入");
+                    throw new MatrixNameDifferentImportFileNameException();
                 }
 
                 List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixVo.getUuid());
@@ -181,9 +181,12 @@ public class MatrixImportAPI extends PrivateBinaryStreamApiComponentBase {
             returnObj.put("update", update);
             returnObj.put("unExist", unExist);
             return returnObj;
-        } else {
-            throw new MatrixImportException("外部数据源不支持导入");
+        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            throw new MatrixExternalImportException();
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            throw new MatrixViewImportException();
         }
+        return null;
     }
 
     private String getCellValue(Cell cell) {

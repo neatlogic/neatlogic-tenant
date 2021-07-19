@@ -17,6 +17,7 @@ import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -90,7 +91,7 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
                 externalMapper.updateMatrixExternal(externalVo);
             }
         } else {
-            throw new MatrixExternalException("矩阵:'" + externalVo.getMatrixUuid() + "'不是外部数据源类型");
+            throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
         return null;
     }

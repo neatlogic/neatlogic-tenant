@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Service
-
+//@Service
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeValueToTextBatchApi extends PrivateApiComponentBase {
 	

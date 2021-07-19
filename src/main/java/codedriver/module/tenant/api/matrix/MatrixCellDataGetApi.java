@@ -25,10 +25,7 @@ import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -47,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
-
+//@Service
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixCellDataGetApi extends PrivateApiComponentBase {
 
@@ -162,7 +159,7 @@ public class MatrixCellDataGetApi extends PrivateApiComponentBase {
                     IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
                     if (StringUtils.isNotBlank(resultVo.getError())) {
                         logger.error(resultVo.getError());
-                        throw new MatrixExternalException("外部接口访问异常");
+                        throw new MatrixExternalAccessException();
                     } else {
                         List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
                         if (CollectionUtils.isNotEmpty(tbodyList)) {

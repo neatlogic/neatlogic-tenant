@@ -20,19 +20,14 @@ import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dao.mapper.MatrixViewMapper;
 import codedriver.framework.matrix.dto.*;
-import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.matrix.MatrixService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.*;
 import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -67,6 +62,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 
 	@Resource
 	private MatrixExternalMapper matrixExternalMapper;
+
+	@Resource
+	private MatrixViewMapper viewMapper;
 
 	@Resource
 	private IntegrationMapper integrationMapper;
@@ -195,7 +193,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 				}
 			}
 
-		} else {
+		} else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
 			MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
 			if (externalVo == null) {
 				throw new MatrixExternalNotFoundException(matrixVo.getName());
@@ -236,7 +234,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 						IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
 						if (StringUtils.isNotBlank(resultVo.getError())) {
 							logger.error(resultVo.getError());
-							throw new MatrixExternalException("外部接口访问异常");
+							throw new MatrixExternalAccessException();
 						} else {
 							resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null));
 						}
@@ -261,12 +259,98 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 				IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
 				if (StringUtils.isNotBlank(resultVo.getError())) {
 					logger.error(resultVo.getError());
-					throw new MatrixExternalException("外部接口访问异常");
+					throw new MatrixExternalAccessException();
 				} else {
 					resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
 				}
 			}
+		} else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+			MatrixViewVo matrixViewVo = viewMapper.getMatrixViewByMatrixUuid(dataVo.getMatrixUuid());
+			if (matrixViewVo == null) {
+				throw new MatrixViewNotFoundException(matrixVo.getName());
+			}
+			JSONArray attributeList = (JSONArray) JSONPath.read(matrixViewVo.getConfig(), "attributeList");
+//			List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
+			if (CollectionUtils.isNotEmpty(attributeList)) {
+				Map<String, MatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
+				List<MatrixAttributeVo> attributeVoList = attributeList.toJavaList(MatrixAttributeVo.class);
+				for (MatrixAttributeVo processMatrixAttributeVo : attributeVoList) {
+					processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+				}
+				/** 属性集合去重 **/
+				List<String> distinctColumList = new ArrayList<>();
+				for (String column : columnList) {
+					if (!processMatrixAttributeMap.containsKey(column)) {
+						throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
+					}
+					if (!distinctColumList.contains(column)) {
+						distinctColumList.add(column);
+					}
+				}
+				dataVo.setColumnList(distinctColumList);
+				dataVo.setFilterList(filterList);
+				List<Map<String, String>> dataMapList = null;
+				if (CollectionUtils.isNotEmpty(defaultValue)) {
+					for (String value : defaultValue.toJavaList(String.class)) {
+						if (value.contains(SELECT_COMPOSE_JOINER)) {
+							List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+							String[] split = value.split(SELECT_COMPOSE_JOINER);
+							if (StringUtils.isNotBlank(columnList.get(0))) {
+								MatrixColumnVo processMatrixColumnVo = new MatrixColumnVo(columnList.get(0), split[0]);
+								processMatrixColumnVo.setExpression(Expression.EQUAL.getExpression());
+								sourceColumnList.add(processMatrixColumnVo);
+							}
+							dataVo.setSourceColumnList(sourceColumnList);
+							if (columnList.size() >= 2 && StringUtils.isNotBlank(columnList.get(1))) {
+								MatrixAttributeVo processMatrixAttribute = processMatrixAttributeMap.get(columnList.get(1));
+								if (processMatrixAttribute == null) {
+									throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), columnList.get(1));
+								}
+								dataVo.setKeyword(split[1]);
+								dataMapList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute,dataVo);
+								if (CollectionUtils.isNotEmpty(dataMapList)) {
+									for (Map<String, String> dataMap : dataMapList) {
+										Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
+										for (Entry<String, String> entry : dataMap.entrySet()) {
+											String attributeUuid = entry.getKey();
+											resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+										}
+										JSONObject textObj = resultMap.get(columnList.get(1));
+										if (MapUtils.isNotEmpty(textObj) && Objects.equal(textObj.get("text"), split[1])) {
+											resultList.add(resultMap);
+											;
+										}
+									}
+								} else {
+									return returnObj;
+								}
+
+							} else {
+								return returnObj;
+							}
+						}
+					}
+				} else {
+					MatrixAttributeVo processMatrixAttribute = null;
+					if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+						processMatrixAttribute = processMatrixAttributeMap.get(keywordColumn);
+						if (processMatrixAttribute == null) {
+							throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
+						}
+					}
+					dataMapList = matrixService.matrixAttributeValueKeyWordSearch(processMatrixAttribute, dataVo);
+					for (Map<String, String> dataMap : dataMapList) {
+						Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
+						for (Entry<String, String> entry : dataMap.entrySet()) {
+							String attributeUuid = entry.getKey();
+							resultMap.put(attributeUuid, matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+						}
+						resultList.add(resultMap);
+					}
+				}
+			}
 		}
+
 		if(columnList.size() == 2) {
 			for(Map<String, JSONObject> resultObj : resultList) {
 				JSONObject firstObj = resultObj.get(columnList.get(0));

@@ -3,12 +3,14 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.SchemaMapper;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dao.mapper.MatrixViewMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.Description;
@@ -42,7 +44,13 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
     private MatrixExternalMapper matrixExternalMapper;
 
     @Resource
+    private MatrixViewMapper matrixViewMapper;
+
+    @Resource
     private MatrixAttributeMapper matrixAttributeMapper;
+
+    @Resource
+    private SchemaMapper schemaMapper;
 
     @Override
     public String getToken() {
@@ -73,8 +81,11 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
             if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
                 matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
                 matrixAttributeMapper.dropMatrixDynamicTable(uuid, TenantContext.get().getTenantUuid());
-            } else {
+            } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
                 matrixExternalMapper.deleteMatrixExternalByMatrixUuid(uuid);
+            } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+                matrixViewMapper.deleteMatrixViewByMatrixUuid(uuid);
+                schemaMapper.deleteView(TenantContext.get().getDataDbName() + ".matrix_" + uuid);
             }
         }
         return null;

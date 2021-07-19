@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
@@ -18,7 +17,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -29,8 +27,8 @@ import java.util.List;
  * @description:
  * @create: 2020-03-26 19:06
  **/
-@Service
-
+//@Service
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixSearchForSelectApi extends PrivateApiComponentBase {
 

@@ -15,22 +15,24 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dao.mapper.*;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
+import codedriver.framework.matrix.dto.MatrixViewVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.matrix.MatrixService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -64,6 +66,9 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
     private MatrixExternalMapper matrixExternalMapper;
 
     @Resource
+    private MatrixViewMapper matrixViewMapper;
+
+    @Resource
     private IntegrationMapper integrationMapper;
 
     @Override
@@ -86,7 +91,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "processMatrixAttributeList", desc = "矩阵属性集合", explode = MatrixAttributeVo[].class),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external")
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view")
     })
     @Description(desc = "矩阵属性检索接口")
     @Override
@@ -97,8 +102,8 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(matrixUuid);
         }
-        if (matrixVo.getType().equals(MatrixType.CUSTOM.getValue())) {
-            resultObj.put("type", MatrixType.CUSTOM.getValue());
+        String type = matrixVo.getType();
+        if (MatrixType.CUSTOM.getValue().equals(type)) {
             List<MatrixAttributeVo> processMatrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
             if (CollectionUtils.isNotEmpty(processMatrixAttributeList)) {
                 List<String> attributeUuidList = processMatrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
@@ -109,8 +114,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
                 }
             }
             resultObj.put("processMatrixAttributeList", processMatrixAttributeList);
-        } else {
-            resultObj.put("type", MatrixType.EXTERNAL.getValue());
+        } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
             MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
             if (externalVo == null) {
                 throw new MatrixExternalNotFoundException(matrixVo.getName());
@@ -123,7 +127,15 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
                 }
                 resultObj.put("processMatrixAttributeList", matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo));
             }
+        } else if (MatrixType.VIEW.getValue().equals(type)) {
+            MatrixViewVo matrixViewVo = matrixViewMapper.getMatrixViewByMatrixUuid(matrixUuid);
+            if (matrixViewVo == null) {
+                throw new MatrixViewNotFoundException(matrixVo.getName());
+            }
+            JSONArray attributeList = (JSONArray) JSONPath.read(matrixViewVo.getConfig(), "attributeList");
+            resultObj.put("processMatrixAttributeList", attributeList);
         }
+        resultObj.put("type", type);
         return resultObj;
     }
 
