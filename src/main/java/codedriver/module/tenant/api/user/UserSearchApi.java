@@ -66,6 +66,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
 
         JSONObject resultObj = new JSONObject();
         UserVo userVo = JSON.toJavaObject(jsonObj, UserVo.class);
+        userVo.setIsDelete(0);
         if (userVo.getNeedPage()) {
             int rowNum = userMapper.searchUserCount(userVo);
             resultObj.put("rowNum", rowNum);
