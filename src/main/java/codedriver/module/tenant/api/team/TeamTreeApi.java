@@ -83,6 +83,7 @@ public class TeamTreeApi extends PrivateApiComponentBase {
 			parentUuid = TeamVo.ROOT_UUID;
 		}
     	teamVo.setParentUuid(parentUuid);
+        teamVo.setIsDelete(0);
 		if (teamVo.getNeedPage()){
 			int rowNum = teamMapper.searchTeamCount(teamVo);
 			returnObj.put("currentPage", teamVo.getCurrentPage());
