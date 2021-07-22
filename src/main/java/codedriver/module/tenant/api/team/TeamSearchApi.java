@@ -89,7 +89,7 @@ public class TeamSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TeamVo teamVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<TeamVo>() {});
-		teamVo.setIsDelete(1);
+		teamVo.setIsDelete(0);
 		JSONObject returnObj = new JSONObject();
 		if (teamVo.getNeedPage()) {
 			int rowNum = teamMapper.searchTeamCount(teamVo);
