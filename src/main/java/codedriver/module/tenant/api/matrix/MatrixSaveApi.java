@@ -4,7 +4,6 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.dao.mapper.SchemaMapper;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.database.DataBaseNotFoundException;
@@ -34,17 +33,13 @@ import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @program: codedriver
@@ -132,7 +127,6 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
                     externalMapper.updateMatrixExternal(externalVo);
                 }
             }else{
-//                throw new MatrixExternalIntegrationUuidEmptyException();
                 throw new ParamNotExistsException("integrationUuid");
             }
         } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
@@ -145,7 +139,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
                 throw new FileNotFoundException(fileId);
             }
 //            String xml = IOUtils.toString(FileUtil.getData(fileVo.getPath()), StandardCharsets.UTF_8);
-            String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ci><attrs><attr name=\"uuid\" label=\"用户uuid\"/><attr name=\"user_id\" label=\"用户id\"/><attr name=\"user_name\" label=\"用户名\"/><attr name=\"teamName\" label=\"分组\"/><attr name=\"vipLevel\" label=\"是否VIP\"/><attr name=\"phone\" label=\"电话\"/><attr name=\"email\" label=\"邮件\"/></attrs><sql>SELECT `u`.`uuid` AS uuid, `u`.`id` AS id, `u`.`user_name` AS name, `u`.`user_id` as user_id, `u`.`user_name` as user_name, u.email as email, u.phone as phone, if(u.vip_level=0,'否','是') as vipLevel, group_concat( `t`.`name`) AS teamName FROM `user` `u` LEFT JOIN `user_team` `ut` ON `u`.`uuid` = `ut`.`user_uuid` LEFT JOIN `team` `t` ON `t`.`uuid` = `ut`.`team_uuid` GROUP BY u.uuid </sql></ci>";
+            String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ci><attrs><attr name=\"uuid\" label=\"用户uuid\"/><attr name=\"user_id\" label=\"用户id\"/><attr name=\"user_name\" label=\"用户名\"/><attr name=\"teamName\" label=\"分组\"/><attr name=\"vipLevel\" label=\"是否VIP\"/><attr name=\"phone\" label=\"电话\"/><attr name=\"email\" label=\"邮件\"/></attrs><sql>SELECT `u`.`uuid` AS uuid, `u`.`id` AS id, `u`.`user_id` as user_id, `u`.`user_name` as user_name, u.email as email, u.phone as phone, if(u.vip_level=0,'否','是') as vipLevel, group_concat( `t`.`name`) AS teamName FROM `user` `u` LEFT JOIN `user_team` `ut` ON `u`.`uuid` = `ut`.`user_uuid` LEFT JOIN `team` `t` ON `t`.`uuid` = `ut`.`team_uuid` GROUP BY u.uuid </sql></ci>";
             if (StringUtils.isBlank(xml)) {
                 throw new MatrixViewSettingFileNotFoundException();
             }
@@ -156,7 +150,11 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             JSONObject config = new JSONObject();
             config.put("attributeList", matrixAttributeVoList);
             matrixViewVo.setConfig(config.toJSONString());
-            viewMapper.insertMatrixView(matrixViewVo);
+            if (viewMapper.checkMatrixViewIsExists(matrixVo.getUuid()) == 0) {
+                viewMapper.insertMatrixView(matrixViewVo);
+            } else {
+                viewMapper.updateMatrixView(matrixViewVo);
+            }
         }
         returnObj.put("matrix", matrixVo);
         return returnObj;
@@ -206,7 +204,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
                     }
                 }).execute();
                 if (!s.isSucceed()) {
-                    throw new CreateMatrixViewSchemaException(matrixName, true);
+                    throw new MatrixViewCreateSchemaException(matrixName, true);
                 }
             }
         }

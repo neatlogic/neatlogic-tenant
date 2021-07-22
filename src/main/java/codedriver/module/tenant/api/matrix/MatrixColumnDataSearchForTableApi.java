@@ -214,8 +214,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             } else {
                 matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
                 /** 将arrayColumnList包含的属性值转成数组 **/
-                List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
-                if (CollectionUtils.isNotEmpty(arrayColumnList)) {
+                JSONArray arrayColumnArray = jsonObj.getJSONArray("arrayColumnList");
+                if (CollectionUtils.isNotEmpty(arrayColumnArray)) {
+                    List<String> arrayColumnList = arrayColumnArray.toJavaList(String.class);
                     JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
                     if (CollectionUtils.isNotEmpty(tbodyList)) {
                         matrixService.arrayColumnDataConversion(arrayColumnList, tbodyList);

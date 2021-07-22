@@ -77,43 +77,44 @@ public class MatrixAttributeValueToTextBatchApi extends PrivateApiComponentBase 
     @Description( desc = "批量将矩阵属性值转换成显示文本接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String matrixUuid = jsonObj.getString("matrixUuid");
-		MatrixVo matrixVo =  matrixMapper.getMatrixByUuid(matrixUuid);
-		if(matrixVo == null) {
-			throw new MatrixNotFoundException(matrixUuid);
-		}
-		JSONObject attributeData = jsonObj.getJSONObject("attributeData");
-		Map<String, Object> resultMap = new HashMap<>(attributeData.size());
-		if (matrixVo.getType().equals(MatrixType.CUSTOM.getValue())){
-			List<MatrixAttributeVo> attributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-	        if (MapUtils.isNotEmpty(attributeData) && CollectionUtils.isNotEmpty(attributeList)){
-	        	Map<String, MatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
-	        	for(MatrixAttributeVo processMatrixAttributeVo : attributeList) {
-	        		processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
-	        	}
-
-	        	for(Entry<String, Object> entry : attributeData.entrySet()) {
-	        		String attributeUuid = entry.getKey();        		
-	        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
-	        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
-	        		for(String value : attributeValueList) {
-						attributeArray.add(matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
-	        		}
-	        		resultMap.put(attributeUuid, attributeArray);
-	        	}
-	        }
-		}else {
-        	for(Entry<String, Object> entry : attributeData.entrySet()) {
-        		String attributeUuid = entry.getKey();        		
-        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
-        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
-        		for(String value : attributeValueList) {
-					attributeArray.add(matrixService.matrixAttributeValueHandle(value));
-        		}
-        		resultMap.put(attributeUuid, attributeArray);
-        	}
-		}		
-		return resultMap;
+//		String matrixUuid = jsonObj.getString("matrixUuid");
+//		MatrixVo matrixVo =  matrixMapper.getMatrixByUuid(matrixUuid);
+//		if(matrixVo == null) {
+//			throw new MatrixNotFoundException(matrixUuid);
+//		}
+//		JSONObject attributeData = jsonObj.getJSONObject("attributeData");
+//		Map<String, Object> resultMap = new HashMap<>(attributeData.size());
+//		if (matrixVo.getType().equals(MatrixType.CUSTOM.getValue())){
+//			List<MatrixAttributeVo> attributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+//	        if (MapUtils.isNotEmpty(attributeData) && CollectionUtils.isNotEmpty(attributeList)){
+//	        	Map<String, MatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
+//	        	for(MatrixAttributeVo processMatrixAttributeVo : attributeList) {
+//	        		processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+//	        	}
+//
+//	        	for(Entry<String, Object> entry : attributeData.entrySet()) {
+//	        		String attributeUuid = entry.getKey();
+//	        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
+//	        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
+//	        		for(String value : attributeValueList) {
+//						attributeArray.add(matrixService.matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), value));
+//	        		}
+//	        		resultMap.put(attributeUuid, attributeArray);
+//	        	}
+//	        }
+//		}else {
+//        	for(Entry<String, Object> entry : attributeData.entrySet()) {
+//        		String attributeUuid = entry.getKey();
+//        		List<String> attributeValueList = JSON.parseArray(entry.getValue().toString(), String.class);
+//        		JSONArray attributeArray = new JSONArray(attributeValueList.size());
+//        		for(String value : attributeValueList) {
+//					attributeArray.add(matrixService.matrixAttributeValueHandle(value));
+//        		}
+//        		resultMap.put(attributeUuid, attributeArray);
+//        	}
+//		}
+//		return resultMap;
+		return null;
 	}
 
 }

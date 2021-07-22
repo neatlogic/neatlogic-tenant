@@ -89,89 +89,90 @@ public class MatrixCellDataGetApi extends PrivateApiComponentBase {
     @Description(desc = "矩阵单元格数据获取接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String matrixUuid = jsonObj.getString("matrixUuid");
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-        if (matrixVo == null) {
-            throw new MatrixNotFoundException(matrixUuid);
-        }
-
-        List<String> resultObj = new ArrayList<>();
-        List<String> sourceColumnValueList = JSON.parseArray(jsonObj.getString("sourceColumnValueList"), String.class);
-        if (CollectionUtils.isNotEmpty(sourceColumnValueList)) {
-            String sourceColumn = jsonObj.getString("sourceColumn");
-            String targetColumn = jsonObj.getString("targetColumn");
-            if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-                List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-                List<String> attributeUuidList = attributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-                if (!attributeUuidList.contains(sourceColumn)) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, sourceColumn);
-                }
-
-                if (!attributeUuidList.contains(targetColumn)) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, targetColumn);
-                }
-                MatrixColumnVo sourceColumnVo = new MatrixColumnVo();
-                sourceColumnVo.setColumn(sourceColumn);
-                for (String sourceColumnValue : sourceColumnValueList) {
-                    sourceColumnVo.setValue(sourceColumnValue);
-                    String targetColumnValue = null;
-                    List<String> targetColumnValueList = matrixDataMapper.getDynamicTableCellData(matrixUuid, sourceColumnVo, targetColumn, TenantContext.get().getTenantUuid());
-                    if (CollectionUtils.isNotEmpty(targetColumnValueList)) {
-                        targetColumnValue = targetColumnValueList.get(0);
-                    }
-                    resultObj.add(targetColumnValue);
-                }
-            } else {
-                MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-                if (externalVo == null) {
-                    throw new MatrixExternalNotFoundException(matrixVo.getName());
-                }
-                IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
-                IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-                if (handler == null) {
-                    throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
-                }
-                List<String> attributeUuidList = new ArrayList<>();
-                List<MatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
-                for (MatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
-                    attributeUuidList.add(processMatrixAttributeVo.getUuid());
-                }
-                if (!attributeUuidList.contains(sourceColumn)) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, sourceColumn);
-                }
-
-                if (!attributeUuidList.contains(targetColumn)) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, targetColumn);
-                }
-
-                List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-                MatrixColumnVo sourceColumnVo = new MatrixColumnVo();
-                sourceColumnVo.setColumn(sourceColumn);
-                List<String> columnList = new ArrayList<>();
-                columnList.add(targetColumn);
-                for (String sourceColumnValue : sourceColumnValueList) {
-                    sourceColumnVo.setValue(sourceColumnValue);
-                    sourceColumnVo.setExpression(Expression.EQUAL.getExpression());
-                    String targetColumnValue = null;
-                    sourceColumnList.clear();
-                    sourceColumnList.add(sourceColumnVo);
-                    integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
-                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
-                    if (StringUtils.isNotBlank(resultVo.getError())) {
-                        logger.error(resultVo.getError());
-                        throw new MatrixExternalAccessException();
-                    } else {
-                        List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
-                        if (CollectionUtils.isNotEmpty(tbodyList)) {
-                            targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
-                        }
-                    }
-                    resultObj.add(targetColumnValue);
-                }
-            }
-        }
-
-        return resultObj;
+//        String matrixUuid = jsonObj.getString("matrixUuid");
+//        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+//        if (matrixVo == null) {
+//            throw new MatrixNotFoundException(matrixUuid);
+//        }
+//
+//        List<String> resultObj = new ArrayList<>();
+//        List<String> sourceColumnValueList = JSON.parseArray(jsonObj.getString("sourceColumnValueList"), String.class);
+//        if (CollectionUtils.isNotEmpty(sourceColumnValueList)) {
+//            String sourceColumn = jsonObj.getString("sourceColumn");
+//            String targetColumn = jsonObj.getString("targetColumn");
+//            if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+//                List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+//                List<String> attributeUuidList = attributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
+//                if (!attributeUuidList.contains(sourceColumn)) {
+//                    throw new MatrixAttributeNotFoundException(matrixUuid, sourceColumn);
+//                }
+//
+//                if (!attributeUuidList.contains(targetColumn)) {
+//                    throw new MatrixAttributeNotFoundException(matrixUuid, targetColumn);
+//                }
+//                MatrixColumnVo sourceColumnVo = new MatrixColumnVo();
+//                sourceColumnVo.setColumn(sourceColumn);
+//                for (String sourceColumnValue : sourceColumnValueList) {
+//                    sourceColumnVo.setValue(sourceColumnValue);
+//                    String targetColumnValue = null;
+//                    List<String> targetColumnValueList = matrixDataMapper.getDynamicTableCellData(matrixUuid, sourceColumnVo, targetColumn, TenantContext.get().getTenantUuid());
+//                    if (CollectionUtils.isNotEmpty(targetColumnValueList)) {
+//                        targetColumnValue = targetColumnValueList.get(0);
+//                    }
+//                    resultObj.add(targetColumnValue);
+//                }
+//            } else {
+//                MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+//                if (externalVo == null) {
+//                    throw new MatrixExternalNotFoundException(matrixVo.getName());
+//                }
+//                IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+//                IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+//                if (handler == null) {
+//                    throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+//                }
+//                List<String> attributeUuidList = new ArrayList<>();
+//                List<MatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(matrixUuid, integrationVo);
+//                for (MatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
+//                    attributeUuidList.add(processMatrixAttributeVo.getUuid());
+//                }
+//                if (!attributeUuidList.contains(sourceColumn)) {
+//                    throw new MatrixAttributeNotFoundException(matrixUuid, sourceColumn);
+//                }
+//
+//                if (!attributeUuidList.contains(targetColumn)) {
+//                    throw new MatrixAttributeNotFoundException(matrixUuid, targetColumn);
+//                }
+//
+//                List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
+//                MatrixColumnVo sourceColumnVo = new MatrixColumnVo();
+//                sourceColumnVo.setColumn(sourceColumn);
+//                List<String> columnList = new ArrayList<>();
+//                columnList.add(targetColumn);
+//                for (String sourceColumnValue : sourceColumnValueList) {
+//                    sourceColumnVo.setValue(sourceColumnValue);
+//                    sourceColumnVo.setExpression(Expression.EQUAL.getExpression());
+//                    String targetColumnValue = null;
+//                    sourceColumnList.clear();
+//                    sourceColumnList.add(sourceColumnVo);
+//                    integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
+//                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
+//                    if (StringUtils.isNotBlank(resultVo.getError())) {
+//                        logger.error(resultVo.getError());
+//                        throw new MatrixExternalAccessException();
+//                    } else {
+//                        List<Map<String, JSONObject>> tbodyList = matrixService.getExternalDataTbodyList(resultVo, columnList, 1, null);
+//                        if (CollectionUtils.isNotEmpty(tbodyList)) {
+//                            targetColumnValue = tbodyList.get(0).get(targetColumn).getString("value");
+//                        }
+//                    }
+//                    resultObj.add(targetColumnValue);
+//                }
+//            }
+//        }
+//
+//        return resultObj;
+        return null;
     }
 
 }

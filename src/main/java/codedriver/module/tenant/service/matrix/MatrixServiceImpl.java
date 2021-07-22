@@ -244,7 +244,7 @@ public class MatrixServiceImpl implements MatrixService {
                     String value = valueObj.getString("value");
                     if (StringUtils.isNotBlank(value)) {
                         if (value.startsWith("[") && value.endsWith("]")) {
-                            List<String> valueList = JSON.parseArray(valueObj.getJSONArray("value").toJSONString(), String.class);
+                            List<String> valueList = valueObj.getJSONArray("value").toJavaList(String.class);
                             for (String valueStr : valueList) {
                                 valueObjList.add(new ValueTextVo(valueStr, valueStr));
                             }
