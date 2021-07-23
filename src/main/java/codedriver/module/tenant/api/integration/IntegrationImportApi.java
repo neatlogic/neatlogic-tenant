@@ -24,6 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -118,30 +119,49 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
     private JSONObject save(IntegrationVo integrationVo) {
         List<String> failReasonList = new ArrayList<>();
         String name = integrationVo.getName();
-        IntegrationVo old = integrationMapper.getIntegrationByUuid(integrationVo.getUuid());
-        int index = 0;
-        while (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
-            index++;
-            integrationVo.setName(name + "_" + index);
+        if (StringUtils.isBlank(name)) {
+            failReasonList.add("名称不能为空");
         }
-        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-        if (handler == null) {
-            failReasonList.add("不存在的集成配置处理器：" + integrationVo.getHandler());
+        if (StringUtils.isBlank(integrationVo.getHandler())) {
+            failReasonList.add("集成配置处理器不能为空");
         }
-        if (HttpMethod.getHttpMethod(integrationVo.getMethod()) == null) {
-            failReasonList.add("不存在的请求方式：" + integrationVo.getMethod());
+        if (StringUtils.isBlank(integrationVo.getMethod())) {
+            failReasonList.add("请求方式不能为空");
         }
-        if (!urlPattern.matcher(integrationVo.getUrl()).matches()) {
-            failReasonList.add("url不符合格式要求");
-        }
-        if (integrationVo.getUrl().contains("integration/run/")) {
-            failReasonList.add("url可能是集成调用地址，不允许配置");
+        if (StringUtils.isBlank(integrationVo.getUrl())) {
+            failReasonList.add("url不能为空");
         }
         if (CollectionUtils.isEmpty(failReasonList)) {
-            if (old == null) {
-                integrationMapper.insertIntegration(integrationVo);
+            IntegrationVo old = integrationMapper.getIntegrationByUuid(integrationVo.getUuid());
+            int index = 0;
+            while (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
+                index++;
+                integrationVo.setName(name + "_" + index);
+            }
+            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+            if (handler == null) {
+                failReasonList.add("不存在的集成配置处理器：" + integrationVo.getHandler());
+            }
+            if (HttpMethod.getHttpMethod(integrationVo.getMethod()) == null) {
+                failReasonList.add("不存在的请求方式：" + integrationVo.getMethod());
+            }
+            if (!urlPattern.matcher(integrationVo.getUrl()).matches()) {
+                failReasonList.add("url不符合格式要求");
+            }
+            if (integrationVo.getUrl().contains("integration/run/")) {
+                failReasonList.add("url可能是集成调用地址，不允许配置");
+            }
+            if (CollectionUtils.isEmpty(failReasonList)) {
+                if (old == null) {
+                    integrationMapper.insertIntegration(integrationVo);
+                } else {
+                    integrationMapper.updateIntegration(integrationVo);
+                }
             } else {
-                integrationMapper.updateIntegration(integrationVo);
+                JSONObject result = new JSONObject();
+                result.put("item", "导入：" + name + "时出现如下问题：");
+                result.put("list", failReasonList);
+                return result;
             }
         } else {
             JSONObject result = new JSONObject();
