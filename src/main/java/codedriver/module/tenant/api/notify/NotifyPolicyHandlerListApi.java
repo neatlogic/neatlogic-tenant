@@ -7,9 +7,13 @@ package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.auth.core.AuthActionChecker;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
+import codedriver.framework.notify.dto.NotifyPolicyHandlerVo;
+import codedriver.framework.notify.dto.NotifyTreeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
@@ -17,13 +21,12 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.NOTIFY_JOB_MODIFY;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 
@@ -51,23 +54,40 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
     @Description(desc = "通知策略分类列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<ValueTextVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
-        Iterator<ValueTextVo> iterator = list.iterator();
-        while (iterator.hasNext()) {
-            ValueTextVo next = iterator.next();
-            INotifyPolicyHandler handler = NotifyPolicyHandlerFactory.getHandler(next.getValue().toString());
+        Map<String, List<NotifyPolicyHandlerVo>> moduleGroupNotifyPolicyHandlerListMap = new HashMap<>();
+        List<NotifyPolicyHandlerVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
+        for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : list) {
             /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
-            if (!AuthActionChecker.check(handler.getAuthName())) {
-                iterator.remove();
+            if (AuthActionChecker.check(notifyPolicyHandlerVo.getAuthName())) {
+                moduleGroupNotifyPolicyHandlerListMap.computeIfAbsent(notifyPolicyHandlerVo.getModuleGroup(), key -> new ArrayList<>()).add(notifyPolicyHandlerVo);
+            }
+        }
+        JSONArray resultTree = new JSONArray();
+        List<ModuleGroupVo> moduleGroupList = ModuleUtil.getAllModuleGroupList();
+        for (ModuleGroupVo moduleGroupVo : moduleGroupList) {
+            List<NotifyPolicyHandlerVo> notifyPolicyHandlerVoList = moduleGroupNotifyPolicyHandlerListMap.get(moduleGroupVo.getGroup());
+            if (CollectionUtils.isNotEmpty(notifyPolicyHandlerVoList)) {
+                JSONArray children = new JSONArray();
+                for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : notifyPolicyHandlerVoList) {
+                    JSONObject child = new JSONObject();
+                    child.put("value", notifyPolicyHandlerVo.getHandler());
+                    child.put("text", notifyPolicyHandlerVo.getName());
+                    children.add(child);
+                }
+                JSONObject moduleGroupObj = new JSONObject();
+                moduleGroupObj.put("value", moduleGroupVo.getGroup());
+                moduleGroupObj.put("text", moduleGroupVo.getGroupName());
+                moduleGroupObj.put("children", children);
+                resultTree.add(moduleGroupObj);
             }
         }
         if (AuthActionChecker.check(NOTIFY_JOB_MODIFY.class)) {
-            list.add(new ValueTextVo("定时任务", "定时任务"));
+            resultTree.add(new ValueTextVo("定时任务", "定时任务"));
         }
-        if (CollectionUtils.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(resultTree)) {
             throw new PermissionDeniedException();
         }
-        return list;
+        return resultTree;
     }
 
 }
