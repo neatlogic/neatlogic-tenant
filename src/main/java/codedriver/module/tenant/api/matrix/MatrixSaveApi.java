@@ -162,7 +162,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
 
     private List<MatrixAttributeVo> buildView(String matrixUuid, String matrixName, String xml) {
 
-        List<MatrixAttributeVo> processMatrixAttributeList = new ArrayList<>();
+        List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
         MatrixViewSqlBuilder viewBuilder = new MatrixViewSqlBuilder(xml);
 //        viewBuilder.setCiId(ciVo.getId());
         viewBuilder.setViewName("matrix_" + matrixUuid);
@@ -173,31 +173,26 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             } catch (Exception ex) {
                 throw new MatrixViewSqlIrregularException(ex);
             }
-            List<AttrVo> attrList = viewBuilder.getAttrList();
+            List<MatrixViewAttributeVo> attrList = viewBuilder.getAttrList();
             if (CollectionUtils.isNotEmpty(attrList)) {
-//                Map<String, Long> attrIdMap = new HashMap<>();
                 int sort = 0;
-                for (AttrVo attrVo : attrList) {
-//                    attrVo.setCiId(ciVo.getId());
-//                    attrMapper.insertAttr(attrVo);
-//                    attrIdMap.put(attrVo.getName(), attrVo.getId());
-                    MatrixAttributeVo processMatrixAttributeVo = new MatrixAttributeVo();
-                    processMatrixAttributeVo.setMatrixUuid(matrixUuid);
-                    processMatrixAttributeVo.setUuid(attrVo.getName());
-                    processMatrixAttributeVo.setName(attrVo.getLabel());
-                    processMatrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
-                    processMatrixAttributeVo.setIsDeletable(0);
-                    processMatrixAttributeVo.setSort(sort++);
-                    processMatrixAttributeVo.setIsRequired(0);
-                    processMatrixAttributeList.add(processMatrixAttributeVo);
+                for (MatrixViewAttributeVo attrVo : attrList) {
+                    MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
+                    matrixAttributeVo.setMatrixUuid(matrixUuid);
+                    matrixAttributeVo.setUuid(attrVo.getName());
+                    matrixAttributeVo.setName(attrVo.getLabel());
+                    matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
+                    matrixAttributeVo.setIsDeletable(0);
+                    matrixAttributeVo.setSort(sort++);
+                    matrixAttributeVo.setIsRequired(0);
+                    matrixAttributeList.add(matrixAttributeVo);
                 }
-//                viewBuilder.setAttrIdMap(attrIdMap);
                 EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
                     System.out.println(TenantContext.get().getDataDbName());
                     if (schemaMapper.checkSchemaIsExists(TenantContext.get().getDataDbName()) > 0) {
                         //创建配置项表
-                        String viewSql = viewBuilder.getCreateViewSql();
-                        System.out.println(viewSql);
+//                        String viewSql = viewBuilder.getCreateViewSql();
+//                        System.out.println(viewSql);
                         schemaMapper.insertView(viewBuilder.getCreateViewSql());
                     } else {
                         throw new DataBaseNotFoundException();
@@ -208,7 +203,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
                 }
             }
         }
-        return processMatrixAttributeList;
+        return matrixAttributeList;
     }
 
     public IValid name() {

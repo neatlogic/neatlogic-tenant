@@ -84,6 +84,9 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
             String name = jsonObj.getString("name");
             //判断name是否存在
             String targetMatrixUuid = UuidUtil.randomUuid();
+            while (matrixMapper.checkMatrixIsExists(targetMatrixUuid) > 0) {
+                targetMatrixUuid = UuidUtil.randomUuid();
+            }
             sourceMatrix.setUuid(targetMatrixUuid);
             sourceMatrix.setName(name);
             sourceMatrix.setLabel(label);
@@ -111,10 +114,7 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
                     attributeVo.setUuid(targetAttributeUuid);
                     matrixAttributeMapper.insertMatrixAttribute(attributeVo);
                 }
-
-                if (matrixAttributeMapper.checkMatrixAttributeTableExist("matrix_" + targetMatrixUuid) == 0) {
-                    matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, TenantContext.get().getTenantUuid());
-                }
+                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, TenantContext.get().getTenantUuid());
                 //数据拷贝
                 matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, TenantContext.get().getTenantUuid());
             }

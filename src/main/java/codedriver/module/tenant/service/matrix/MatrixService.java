@@ -39,7 +39,7 @@ public interface MatrixService {
      * 
     * @Time:2020年12月1日
     * @Description: 矩阵属性值合法性校验 
-    * @param processMatrixAttributeVo
+    * @param matrixAttributeVo
     * @param value
     * @return boolean
      */
