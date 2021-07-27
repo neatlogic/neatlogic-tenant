@@ -21,13 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-/**
- * @program: codedriver
- * @description:
- * @create: 2020-04-03 19:06
- **/
 @Service
-
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalGetApi extends PrivateApiComponentBase {
 

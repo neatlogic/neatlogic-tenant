@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -39,18 +44,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @program: codedriver
- * @description:
- * @create: 2020-04-01 16:32
- **/
 @Service
 @Transactional
 @AuthAction(action = MATRIX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
 
-    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Resource
     private MatrixMapper matrixMapper;
@@ -96,19 +96,19 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
             MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
             //获取所有导入文件
             Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
-            if (multipartFileMap == null || multipartFileMap.isEmpty()) {
+            if (multipartFileMap.isEmpty()) {
                 throw new MatrixFileNotFoundException();
             }
-            MultipartFile multipartFile = null;
-            InputStream is = null;
+            MultipartFile multipartFile;
+            InputStream is;
             for (Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
                 multipartFile = entry.getValue();
                 is = multipartFile.getInputStream();
                 String originalFilename = multipartFile.getOriginalFilename();
-                if (originalFilename.indexOf(".") != -1) {
+                if (StringUtils.isNotBlank(originalFilename) && originalFilename.contains(".")) {
                     originalFilename = originalFilename.substring(0, originalFilename.indexOf("."));
                 }
-                if (!originalFilename.equals(matrixVo.getName())) {
+                if (StringUtils.isNotBlank(originalFilename) && !originalFilename.equals(matrixVo.getName())) {
                     throw new MatrixNameDifferentImportFileNameException();
                 }
 
@@ -118,60 +118,57 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
                     for (MatrixAttributeVo attributeVo : attributeVoList) {
                         headerMap.put(attributeVo.getName(), attributeVo);
                     }
-                    if (is != null) {
-                        Workbook wb = WorkbookFactory.create(is);
-                        Sheet sheet = wb.getSheetAt(0);
-                        int rowNum = sheet.getLastRowNum();
-                        //获取头栏位
-                        Row headerRow = sheet.getRow(0);
-                        int colNum = headerRow.getLastCellNum();
-                        //attributeList 缺少uuid
-                        if (colNum != attributeVoList.size() + 1) {
-                            throw new MatrixHeaderMisMatchException(originalFilename);
-                        }
-                        String schemaName = TenantContext.get().getDataDbName();
-                        //解析数据
-                        for (int i = 1; i <= rowNum; i++) {
-                            Row row = sheet.getRow(i);
-                            boolean isNew = false;
-                            MatrixColumnVo uuidColumn = null;
-                            List<MatrixColumnVo> rowData = new ArrayList<>();
-                            for (int j = 0; j < colNum; j++) {
-                                Cell tbodycell = row.getCell(j);
-                                String value = getCellValue(tbodycell);
-                                String attributeUuid = null;
-                                Cell theadCell = headerRow.getCell(j);
-                                String columnName = theadCell.getStringCellValue();
-                                if (("uuid").equals(columnName)) {
-                                    attributeUuid = "uuid";
-                                    if (StringUtils.isBlank(value) || dataMapper.getDynamicTableDataCountByUuid(value, matrixVo.getUuid(), schemaName) == 0) {
-                                        value = UuidUtil.randomUuid();
-                                        isNew = true;
-                                        rowData.add(new MatrixColumnVo(attributeUuid, value));
-                                    } else {
-                                        uuidColumn = new MatrixColumnVo(attributeUuid, value);
-                                    }
+                    Workbook wb = WorkbookFactory.create(is);
+                    Sheet sheet = wb.getSheetAt(0);
+                    int rowNum = sheet.getLastRowNum();
+                    //获取头栏位
+                    Row headerRow = sheet.getRow(0);
+                    int colNum = headerRow.getLastCellNum();
+                    //attributeList 缺少uuid
+                    if (colNum != attributeVoList.size() + 1) {
+                        throw new MatrixHeaderMisMatchException(originalFilename);
+                    }
+                    //解析数据
+                    for (int i = 1; i <= rowNum; i++) {
+                        Row row = sheet.getRow(i);
+                        boolean isNew = false;
+                        MatrixColumnVo uuidColumn = null;
+                        List<MatrixColumnVo> rowData = new ArrayList<>();
+                        for (int j = 0; j < colNum; j++) {
+                            Cell tbodycell = row.getCell(j);
+                            String value = getCellValue(tbodycell);
+                            String attributeUuid;
+                            Cell theadCell = headerRow.getCell(j);
+                            String columnName = theadCell.getStringCellValue();
+                            if (("uuid").equals(columnName)) {
+                                attributeUuid = "uuid";
+                                if (StringUtils.isBlank(value) || dataMapper.getDynamicTableDataCountByUuid(value, matrixVo.getUuid(), TenantContext.get().getTenantUuid()) == 0) {
+                                    value = UuidUtil.randomUuid();
+                                    isNew = true;
+                                    rowData.add(new MatrixColumnVo(attributeUuid, value));
                                 } else {
-                                    MatrixAttributeVo attributeVo = headerMap.get(columnName);
-                                    if (attributeVo != null) {
-                                        attributeUuid = attributeVo.getUuid();
-                                        if (StringUtils.isNotBlank(attributeUuid)) {
-                                            if (matrixService.matrixAttributeValueVerify(attributeVo, value)) {
-                                                rowData.add(new MatrixColumnVo(attributeUuid, value));
-                                            } else {
-                                                throw new MatrixImportDataIllegalException(i + 1, j + 1, value);
-                                            }
+                                    uuidColumn = new MatrixColumnVo(attributeUuid, value);
+                                }
+                            } else {
+                                MatrixAttributeVo attributeVo = headerMap.get(columnName);
+                                if (attributeVo != null) {
+                                    attributeUuid = attributeVo.getUuid();
+                                    if (StringUtils.isNotBlank(attributeUuid)) {
+                                        if (matrixService.matrixAttributeValueVerify(attributeVo, value)) {
+                                            rowData.add(new MatrixColumnVo(attributeUuid, value));
+                                        } else {
+                                            throw new MatrixImportDataIllegalException(i + 1, j + 1, value);
                                         }
                                     }
                                 }
                             }
-                            if (isNew) {
-                                dataMapper.insertDynamicTableData(rowData, matrixUuid, schemaName);
-                                insert++;
-                                update++;
-                            } else {
-                                dataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, schemaName);
-                            }
+                        }
+                        if (isNew) {
+                            dataMapper.insertDynamicTableData(rowData, matrixUuid, TenantContext.get().getTenantUuid());
+                            insert++;
+                            update++;
+                        } else {
+                            dataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, TenantContext.get().getTenantUuid());
                         }
                     }
                 } else {
