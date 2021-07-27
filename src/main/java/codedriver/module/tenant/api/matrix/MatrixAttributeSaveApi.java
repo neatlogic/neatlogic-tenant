@@ -8,8 +8,9 @@ import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalSaveAttributeException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewSaveAttributeException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -80,7 +81,7 @@ public class MatrixAttributeSaveApi extends PrivateApiComponentBase {
             throw new MatrixNotFoundException(matrixUuid);
         }
         if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-            List<MatrixAttributeVo> attributeVoList = JSON.parseArray(jsonObj.getString("matrixAttributeList"), MatrixAttributeVo.class);
+            List<MatrixAttributeVo> attributeVoList = jsonObj.getJSONArray("matrixAttributeList").toJavaList(MatrixAttributeVo.class);
             List<MatrixAttributeVo> oldMatrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
             boolean dataExist = CollectionUtils.isNotEmpty(oldMatrixAttributeList);
             if (dataExist) {
@@ -131,8 +132,10 @@ public class MatrixAttributeSaveApi extends PrivateApiComponentBase {
                     attributeMapper.dropMatrixDynamicTable(matrixUuid, TenantContext.get().getTenantUuid());
                 }
             }
-        } else {
-            throw new MatrixExternalException("矩阵外部数据源没有保存属性操作");
+        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            throw new MatrixExternalSaveAttributeException();
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            throw new MatrixViewSaveAttributeException();
         }
 
         return null;

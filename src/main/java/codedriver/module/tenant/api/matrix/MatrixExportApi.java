@@ -31,7 +31,7 @@ import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalAccessException;
 import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
@@ -197,7 +197,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
             if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
-                throw new MatrixExternalException("外部接口访问异常");
+                throw new MatrixExternalAccessException();
             } else if (StringUtils.isNotBlank(resultVo.getTransformedResult())) {
                 JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
                 if (MapUtils.isNotEmpty(transformedResult)) {

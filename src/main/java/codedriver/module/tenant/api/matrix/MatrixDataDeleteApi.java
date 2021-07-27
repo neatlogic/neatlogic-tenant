@@ -7,8 +7,9 @@ import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalDeleteDataException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewDeleteDataException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -67,12 +68,14 @@ public class MatrixDataDeleteApi extends PrivateApiComponentBase {
             throw new MatrixNotFoundException(matrixUuid);
         }
         if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-            List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
+            List<String> uuidList = jsonObj.getJSONArray("uuidList").toJavaList(String.class);
             for (String uuid : uuidList) {
                 dataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid, TenantContext.get().getTenantUuid());
             }
-        } else {
-            throw new MatrixExternalException("矩阵外部数据源没有删除数据操作");
+        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            throw new MatrixExternalDeleteDataException();
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            throw new MatrixViewDeleteDataException();
         }
 
         return null;

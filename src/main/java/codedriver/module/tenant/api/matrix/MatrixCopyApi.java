@@ -11,10 +11,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixLabelRepeatException;
-import codedriver.framework.matrix.exception.MatrixNameRepeatException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -87,6 +84,9 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
             String name = jsonObj.getString("name");
             //判断name是否存在
             String targetMatrixUuid = UuidUtil.randomUuid();
+            while (matrixMapper.checkMatrixIsExists(targetMatrixUuid) > 0) {
+                targetMatrixUuid = UuidUtil.randomUuid();
+            }
             sourceMatrix.setUuid(targetMatrixUuid);
             sourceMatrix.setName(name);
             sourceMatrix.setLabel(label);
@@ -114,15 +114,14 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
                     attributeVo.setUuid(targetAttributeUuid);
                     matrixAttributeMapper.insertMatrixAttribute(attributeVo);
                 }
-
-                if (matrixAttributeMapper.checkMatrixAttributeTableExist("matrix_" + targetMatrixUuid) == 0) {
-                    matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, TenantContext.get().getTenantUuid());
-                }
+                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, TenantContext.get().getTenantUuid());
                 //数据拷贝
                 matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, TenantContext.get().getTenantUuid());
             }
-        } else {
-            throw new MatrixExternalException("矩阵外部数据源没有复制操作");
+        } else if (MatrixType.EXTERNAL.getValue().equals(sourceMatrix.getType())) {
+            throw new MatrixExternalCopyException();
+        } else if (MatrixType.VIEW.getValue().equals(sourceMatrix.getType())) {
+            throw new MatrixViewCopyException();
         }
 
         return null;

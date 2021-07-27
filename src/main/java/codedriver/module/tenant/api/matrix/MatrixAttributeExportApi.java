@@ -12,8 +12,9 @@ import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalExportTemplateException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewExportTemplateException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -100,8 +101,10 @@ public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBas
 				response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
 				ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
 			}
-		} else {
-			throw new MatrixExternalException("矩阵外部数据源没有导出模板操作");
+		} else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType()))  {
+			throw new MatrixExternalExportTemplateException();
+		} else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+			throw new MatrixViewExportTemplateException();
 		}
 
 		return null;

@@ -19,15 +19,9 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixMapper;
+import codedriver.framework.matrix.dao.mapper.*;
 import codedriver.framework.matrix.dto.*;
-import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -35,6 +29,7 @@ import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -68,6 +63,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixExternalMapper matrixExternalMapper;
+
+    @Resource
+    private MatrixViewMapper viewMapper;
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -118,8 +116,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             throw new ParamIrregularException("columnList");
         }
         List<String> searchColumnList = JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
-        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-            returnObj.put("type", MatrixType.CUSTOM.getValue());
+        String type = matrixVo.getType();
+        if (MatrixType.CUSTOM.getValue().equals(type)) {
             Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
             List<MatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
             for (MatrixAttributeVo attribute : processMatrixAttributeList) {
@@ -164,8 +162,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 returnObj.put("pageCount", pageCount);
                 returnObj.put("rowNum", rowNum);
             }
-        } else {
-            returnObj.put("type", MatrixType.EXTERNAL.getValue());
+        } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
             MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
             if (externalVo == null) {
                 throw new MatrixExternalNotFoundException(matrixVo.getName());
@@ -213,12 +210,13 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
             if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
-                throw new MatrixExternalException("外部接口访问异常");
+                throw new MatrixExternalAccessException();
             } else {
                 matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
                 /** 将arrayColumnList包含的属性值转成数组 **/
-                List<String> arrayColumnList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("arrayColumnList")), String.class);
-                if (CollectionUtils.isNotEmpty(arrayColumnList)) {
+                JSONArray arrayColumnArray = jsonObj.getJSONArray("arrayColumnList");
+                if (CollectionUtils.isNotEmpty(arrayColumnArray)) {
+                    List<String> arrayColumnList = arrayColumnArray.toJavaList(String.class);
                     JSONArray tbodyList = returnObj.getJSONArray("tbodyList");
                     if (CollectionUtils.isNotEmpty(tbodyList)) {
                         matrixService.arrayColumnDataConversion(arrayColumnList, tbodyList);
@@ -226,7 +224,61 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
             }
             returnObj.put("theadList", theadList);
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            MatrixViewVo matrixViewVo = viewMapper.getMatrixViewByMatrixUuid(dataVo.getMatrixUuid());
+            if (matrixViewVo == null) {
+                throw new MatrixViewNotFoundException(matrixVo.getName());
+            }
+            JSONArray attributeList = (JSONArray) JSONPath.read(matrixViewVo.getConfig(), "attributeList");
+            if (CollectionUtils.isNotEmpty(attributeList)) {
+                Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
+//                List<MatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
+                List<MatrixAttributeVo> processMatrixAttributeList = attributeList.toJavaList(MatrixAttributeVo.class);
+                for (MatrixAttributeVo attribute : processMatrixAttributeList) {
+                    attributeMap.put(attribute.getUuid(), attribute);
+                }
+                // theadList
+                JSONArray theadList = new JSONArray();
+                for (String column : dataVo.getColumnList()) {
+                    MatrixAttributeVo attribute = attributeMap.get(column);
+                    if (attribute != null) {
+                        JSONObject theadObj = new JSONObject();
+                        theadObj.put("key", attribute.getUuid());
+                        theadObj.put("title", attribute.getName());
+                        theadList.add(theadObj);
+                    } else {
+                        throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
+                    }
+                }
+                returnObj.put("theadList", theadList);
+                List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo, TenantContext.get().getTenantUuid());
+                List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
+                returnObj.put("tbodyList", tbodyList);
+
+                if (CollectionUtils.isNotEmpty(searchColumnList)) {
+                    JSONArray searchColumnDetailList = new JSONArray();
+                    for (String column : searchColumnList) {
+                        MatrixAttributeVo attribute = attributeMap.get(column);
+                        if (attribute != null) {
+                            searchColumnDetailList.add(attribute);
+                        } else {
+                            throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), column);
+                        }
+                    }
+                    returnObj.put("searchColumnDetailList", searchColumnDetailList);
+                }
+
+                if (dataVo.getNeedPage()) {
+                    int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo, TenantContext.get().getTenantUuid());
+                    int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
+                    returnObj.put("currentPage", dataVo.getCurrentPage());
+                    returnObj.put("pageSize", dataVo.getPageSize());
+                    returnObj.put("pageCount", pageCount);
+                    returnObj.put("rowNum", rowNum);
+                }
+            }
         }
+        returnObj.put("type", type);
         return returnObj;
     }
 }

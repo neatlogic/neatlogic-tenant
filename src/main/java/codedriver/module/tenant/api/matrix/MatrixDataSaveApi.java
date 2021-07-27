@@ -11,9 +11,7 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
-import codedriver.framework.matrix.exception.MatrixExternalException;
-import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -120,8 +118,10 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
                     matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, TenantContext.get().getTenantUuid());
                 }
             }
-        } else {
-            throw new MatrixExternalException("矩阵外部数据源没有保存一行数据操作");
+        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            throw new MatrixExternalEditRowDataException();
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            throw new MatrixViewEditRowDataException();
         }
 
         return null;

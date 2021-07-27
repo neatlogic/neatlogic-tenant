@@ -6,7 +6,6 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
@@ -17,8 +16,9 @@ import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalException;
+import codedriver.framework.matrix.exception.MatrixExternalEditRowDataException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
+import codedriver.framework.matrix.exception.MatrixViewEditRowDataException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -108,8 +108,10 @@ public class MatrixDataGetApi extends PrivateApiComponentBase {
                 }
                 return rowData;
             }
-        } else {
-            throw new MatrixExternalException("矩阵外部数据源没有获取一行数据操作");
+        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            throw new MatrixExternalEditRowDataException();
+        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+            throw new MatrixViewEditRowDataException();
         }
 
 
