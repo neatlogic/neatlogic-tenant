@@ -80,7 +80,7 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
             matrixMapper.deleteMatrixByUuid(uuid);
             if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
                 matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
-                matrixAttributeMapper.dropMatrixDynamicTable(uuid, TenantContext.get().getTenantUuid());
+                matrixAttributeMapper.dropMatrixDynamicTable(uuid, TenantContext.get().getDataDbName());
             } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
                 matrixExternalMapper.deleteMatrixExternalByMatrixUuid(uuid);
             } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {

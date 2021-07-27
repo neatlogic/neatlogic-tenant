@@ -6,7 +6,6 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -32,7 +31,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -104,16 +102,16 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
         }
         String type = matrixVo.getType();
         if (MatrixType.CUSTOM.getValue().equals(type)) {
-            List<MatrixAttributeVo> processMatrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-            if (CollectionUtils.isNotEmpty(processMatrixAttributeList)) {
-                List<String> attributeUuidList = processMatrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-                Map<String, Long> attributeDataCountMap = matrixDataMapper.checkMatrixAttributeHasDataByAttributeUuidList(matrixUuid, attributeUuidList, TenantContext.get().getTenantUuid());
-                for (MatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
-                    long count = attributeDataCountMap.get(processMatrixAttributeVo.getUuid());
-                    processMatrixAttributeVo.setIsDeletable(count == 0 ? 1 : 0);
+            List<MatrixAttributeVo> matrixAttributeList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+            if (CollectionUtils.isNotEmpty(matrixAttributeList)) {
+                List<String> attributeUuidList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
+                Map<String, Long> attributeDataCountMap = matrixDataMapper.checkMatrixAttributeHasDataByAttributeUuidList(matrixUuid, attributeUuidList, TenantContext.get().getDataDbName());
+                for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
+                    long count = attributeDataCountMap.get(matrixAttributeVo.getUuid());
+                    matrixAttributeVo.setIsDeletable(count == 0 ? 1 : 0);
                 }
             }
-            resultObj.put("processMatrixAttributeList", processMatrixAttributeList);
+            resultObj.put("processMatrixAttributeList", matrixAttributeList);
         } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
             MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
             if (externalVo == null) {

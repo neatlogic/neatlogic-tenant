@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.matrix.constvalue.MatrixAttributeType;
@@ -22,7 +21,6 @@ import codedriver.framework.matrix.exception.MatrixViewEditRowDataException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -71,7 +69,7 @@ public class MatrixDataGetApi extends PrivateApiComponentBase {
     @Description(desc = "矩阵一行数据获取接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        MatrixDataVo dataVo = JSON.toJavaObject(jsonObj, MatrixDataVo.class);
+        MatrixDataVo dataVo = JSONObject.toJavaObject(jsonObj, MatrixDataVo.class);
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
@@ -84,7 +82,7 @@ public class MatrixDataGetApi extends PrivateApiComponentBase {
                     columnList.add(attributeVo.getUuid());
                 }
                 dataVo.setColumnList(columnList);
-                Map<String, String> rowData = matrixDataMapper.getDynamicRowDataByUuid(dataVo, TenantContext.get().getTenantUuid());
+                Map<String, String> rowData = matrixDataMapper.getDynamicRowDataByUuid(dataVo);
                 for (MatrixAttributeVo attributeVo : attributeVoList) {
                     if (MatrixAttributeType.USER.getValue().equals(attributeVo.getType())) {
                         String value = rowData.get(attributeVo.getUuid());

@@ -29,7 +29,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.matrix.MatrixService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -112,7 +111,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        MatrixDataVo dataVo = JSON.toJavaObject(jsonObj, MatrixDataVo.class);
+        MatrixDataVo dataVo = JSONObject.toJavaObject(jsonObj, MatrixDataVo.class);
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
@@ -146,14 +145,14 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
                 dataVo.setColumnList(columnList);
                 if (dataVo.getNeedPage()) {
-                    int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo, TenantContext.get().getTenantUuid());
+                    int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
                     returnObj.put("pageCount", PageUtil.getPageCount(rowNum, dataVo.getPageSize()));
                     returnObj.put("rowNum", rowNum);
                     returnObj.put("pageSize", dataVo.getPageSize());
                     returnObj.put("currentPage", dataVo.getCurrentPage());
                 }
 
-                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo, TenantContext.get().getTenantUuid());
+                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo);
                 tbodyList = matrixService.matrixTableDataValueHandle(attributeVoList, dataList);
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
@@ -225,14 +224,14 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
 
                 dataVo.setColumnList(columnList);
                 if (dataVo.getNeedPage()) {
-                    int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo, TenantContext.get().getTenantUuid());
+                    int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
                     returnObj.put("pageCount", PageUtil.getPageCount(rowNum, dataVo.getPageSize()));
                     returnObj.put("rowNum", rowNum);
                     returnObj.put("pageSize", dataVo.getPageSize());
                     returnObj.put("currentPage", dataVo.getCurrentPage());
                 }
 
-                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo, TenantContext.get().getTenantUuid());
+                List<Map<String, String>> dataList = matrixDataMapper.searchDynamicTableData(dataVo);
                 tbodyList = matrixService.matrixTableDataValueHandle(attributeVoList, dataList);
             }
         }

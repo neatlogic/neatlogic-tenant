@@ -147,12 +147,12 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 
                 int currentPage = 1;
                 dataVo.setPageSize(1000);
-                int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo, TenantContext.get().getTenantUuid());
+                int rowNum = matrixDataMapper.getDynamicTableDataCount(dataVo);
                 int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
                 while (currentPage <= pageCount) {
                     dataVo.setCurrentPage(currentPage);
                     dataVo.setStartNum(null);
-                    List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo, TenantContext.get().getTenantUuid());
+                    List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo);
                     /** 转换用户、分组、角色字段值为用户名、分组名、角色名 **/
                     if (CollectionUtils.isNotEmpty(dataMapList)) {
                         for (Map<String, String> map : dataMapList) {

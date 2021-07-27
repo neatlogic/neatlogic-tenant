@@ -70,7 +70,7 @@ public class MatrixDataDeleteApi extends PrivateApiComponentBase {
         if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
             List<String> uuidList = jsonObj.getJSONArray("uuidList").toJavaList(String.class);
             for (String uuid : uuidList) {
-                dataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid, TenantContext.get().getTenantUuid());
+                dataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuid, TenantContext.get().getDataDbName());
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             throw new MatrixExternalDeleteDataException();

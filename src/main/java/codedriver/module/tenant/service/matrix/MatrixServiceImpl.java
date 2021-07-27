@@ -1,6 +1,5 @@
 package codedriver.module.tenant.service.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
@@ -70,7 +69,7 @@ public class MatrixServiceImpl implements MatrixService {
 
     @Override
     public List<MatrixAttributeVo> getExternalMatrixAttributeList(String matrixUuid, IntegrationVo integrationVo) throws FreemarkerTransformException {
-        List<MatrixAttributeVo> processMatrixAttributeList = new ArrayList<>();
+        List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
         JSONObject config = integrationVo.getConfig();
         if (MapUtils.isNotEmpty(config)) {
             JSONObject output = config.getJSONObject("output");
@@ -85,17 +84,17 @@ public class MatrixServiceImpl implements MatrixService {
                             if (CollectionUtils.isNotEmpty(theadList)) {
                                 for (int i = 0; i < theadList.size(); i++) {
                                     JSONObject theadObj = theadList.getJSONObject(i);
-                                    MatrixAttributeVo processMatrixAttributeVo = new MatrixAttributeVo();
-                                    processMatrixAttributeVo.setMatrixUuid(matrixUuid);
-                                    processMatrixAttributeVo.setUuid(theadObj.getString("key"));
-                                    processMatrixAttributeVo.setName(theadObj.getString("title"));
-                                    processMatrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
-                                    processMatrixAttributeVo.setIsDeletable(0);
-                                    processMatrixAttributeVo.setSort(i);
-                                    processMatrixAttributeVo.setIsRequired(0);
+                                    MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
+                                    matrixAttributeVo.setMatrixUuid(matrixUuid);
+                                    matrixAttributeVo.setUuid(theadObj.getString("key"));
+                                    matrixAttributeVo.setName(theadObj.getString("title"));
+                                    matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
+                                    matrixAttributeVo.setIsDeletable(0);
+                                    matrixAttributeVo.setSort(i);
+                                    matrixAttributeVo.setIsRequired(0);
                                     Integer isSearchable = theadObj.getInteger("isSearchable");
-                                    processMatrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
-                                    processMatrixAttributeList.add(processMatrixAttributeVo);
+                                    matrixAttributeVo.setIsSearchable((isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1);
+                                    matrixAttributeList.add(matrixAttributeVo);
                                 }
                             }
                         }
@@ -105,15 +104,15 @@ public class MatrixServiceImpl implements MatrixService {
                 }
             }
         }
-        return processMatrixAttributeList;
+        return matrixAttributeList;
     }
 
     @Override
-    public List<Map<String, Object>> matrixTableDataValueHandle(List<MatrixAttributeVo> ProcessMatrixAttributeList, List<Map<String, String>> valueList) {
-        if (CollectionUtils.isNotEmpty(ProcessMatrixAttributeList)) {
-            Map<String, MatrixAttributeVo> processMatrixAttributeMap = new HashMap<>();
-            for (MatrixAttributeVo processMatrixAttributeVo : ProcessMatrixAttributeList) {
-                processMatrixAttributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+    public List<Map<String, Object>> matrixTableDataValueHandle(List<MatrixAttributeVo> matrixAttributeList, List<Map<String, String>> valueList) {
+        if (CollectionUtils.isNotEmpty(matrixAttributeList)) {
+            Map<String, MatrixAttributeVo> matrixAttributeMap = new HashMap<>();
+            for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
+                matrixAttributeMap.put(matrixAttributeVo.getUuid(), matrixAttributeVo);
             }
             if (CollectionUtils.isNotEmpty(valueList)) {
                 List<Map<String, Object>> resultList = new ArrayList<>(valueList.size());
@@ -121,7 +120,7 @@ public class MatrixServiceImpl implements MatrixService {
                     Map<String, Object> resultMap = new HashMap<>();
                     for (Entry<String, String> entry : valueMap.entrySet()) {
                         String attributeUuid = entry.getKey();
-                        resultMap.put(attributeUuid, matrixAttributeValueHandle(processMatrixAttributeMap.get(attributeUuid), entry.getValue()));
+                        resultMap.put(attributeUuid, matrixAttributeValueHandle(matrixAttributeMap.get(attributeUuid), entry.getValue()));
                     }
                     resultList.add(resultMap);
                 }
@@ -132,11 +131,11 @@ public class MatrixServiceImpl implements MatrixService {
     }
 
     @Override
-    public JSONObject matrixAttributeValueHandle(MatrixAttributeVo processMatrixAttribute, Object valueObj) {
+    public JSONObject matrixAttributeValueHandle(MatrixAttributeVo matrixAttribute, Object valueObj) {
         JSONObject resultObj = new JSONObject();
         String type = MatrixAttributeType.INPUT.getValue();
-        if (processMatrixAttribute != null) {
-            type = processMatrixAttribute.getType();
+        if (matrixAttribute != null) {
+            type = matrixAttribute.getType();
         }
         resultObj.put("type", type);
         if (valueObj == null) {
@@ -148,8 +147,8 @@ public class MatrixServiceImpl implements MatrixService {
         resultObj.put("value", value);
         resultObj.put("text", value);
         if (MatrixAttributeType.SELECT.getValue().equals(type)) {
-            if (processMatrixAttribute != null) {
-                String config = processMatrixAttribute.getConfig();
+            if (matrixAttribute != null) {
+                String config = matrixAttribute.getConfig();
                 if (StringUtils.isNotBlank(config)) {
                     JSONObject configObj = JSON.parseObject(config);
                     JSONArray dataList = configObj.getJSONArray("dataList");
@@ -191,13 +190,13 @@ public class MatrixServiceImpl implements MatrixService {
     }
 
     @Override
-    public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttribute, MatrixDataVo dataVo) {
+    public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo matrixAttribute, MatrixDataVo dataVo) {
         dataVo.setPageSize(dataVo.getPageSize() * 10);
-        if (processMatrixAttribute != null) {
-            dataVo.setAttrType(processMatrixAttribute.getType());
-            dataVo.setAttributeUuid(processMatrixAttribute.getUuid());
+        if (matrixAttribute != null) {
+            dataVo.setAttrType(matrixAttribute.getType());
+            dataVo.setAttributeUuid(matrixAttribute.getUuid());
         }
-        List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo, TenantContext.get().getTenantUuid());
+        List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList2(dataVo);
         return dataMapList;
     }
 

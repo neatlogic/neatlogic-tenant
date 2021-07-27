@@ -5,8 +5,6 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -26,7 +24,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.service.matrix.MatrixService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -106,7 +103,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        MatrixDataVo dataVo = JSON.toJavaObject(jsonObj, MatrixDataVo.class);
+        MatrixDataVo dataVo = JSONObject.toJavaObject(jsonObj, MatrixDataVo.class);
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
@@ -119,8 +116,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         String type = matrixVo.getType();
         if (MatrixType.CUSTOM.getValue().equals(type)) {
             Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
-            List<MatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-            for (MatrixAttributeVo attribute : processMatrixAttributeList) {
+            List<MatrixAttributeVo> matrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
+            for (MatrixAttributeVo attribute : matrixAttributeList) {
                 attributeMap.put(attribute.getUuid(), attribute);
             }
             // theadList
@@ -137,8 +134,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
             }
             returnObj.put("theadList", theadList);
-            List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo, TenantContext.get().getTenantUuid());
-            List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
+            List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
+            List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(matrixAttributeList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
 
             if (CollectionUtils.isNotEmpty(searchColumnList)) {
@@ -155,7 +152,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             }
 
             if (dataVo.getNeedPage()) {
-                int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo, TenantContext.get().getTenantUuid());
+                int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo);
                 int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
                 returnObj.put("currentPage", dataVo.getCurrentPage());
                 returnObj.put("pageSize", dataVo.getPageSize());
@@ -173,9 +170,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
             }
             Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
-            List<MatrixAttributeVo> processMatrixAttributeList = matrixService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
-            for (MatrixAttributeVo processMatrixAttributeVo : processMatrixAttributeList) {
-                attributeMap.put(processMatrixAttributeVo.getUuid(), processMatrixAttributeVo);
+            List<MatrixAttributeVo> matrixAttributeList = matrixService.getExternalMatrixAttributeList(dataVo.getMatrixUuid(), integrationVo);
+            for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
+                attributeMap.put(matrixAttributeVo.getUuid(), matrixAttributeVo);
             }
 
             // theadList
@@ -232,9 +229,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             JSONArray attributeList = (JSONArray) JSONPath.read(matrixViewVo.getConfig(), "attributeList");
             if (CollectionUtils.isNotEmpty(attributeList)) {
                 Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
-//                List<MatrixAttributeVo> processMatrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-                List<MatrixAttributeVo> processMatrixAttributeList = attributeList.toJavaList(MatrixAttributeVo.class);
-                for (MatrixAttributeVo attribute : processMatrixAttributeList) {
+                List<MatrixAttributeVo> matrixAttributeList = attributeList.toJavaList(MatrixAttributeVo.class);
+                for (MatrixAttributeVo attribute : matrixAttributeList) {
                     attributeMap.put(attribute.getUuid(), attribute);
                 }
                 // theadList
@@ -251,8 +247,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                     }
                 }
                 returnObj.put("theadList", theadList);
-                List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo, TenantContext.get().getTenantUuid());
-                List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(processMatrixAttributeList, dataMapList);
+                List<Map<String, String>> dataMapList = matrixDataMapper.getDynamicTableDataByColumnList(dataVo);
+                List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(matrixAttributeList, dataMapList);
                 returnObj.put("tbodyList", tbodyList);
 
                 if (CollectionUtils.isNotEmpty(searchColumnList)) {
@@ -269,7 +265,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
 
                 if (dataVo.getNeedPage()) {
-                    int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo, TenantContext.get().getTenantUuid());
+                    int rowNum = matrixDataMapper.getDynamicTableDataByColumnCount(dataVo);
                     int pageCount = PageUtil.getPageCount(rowNum, dataVo.getPageSize());
                     returnObj.put("currentPage", dataVo.getCurrentPage());
                     returnObj.put("pageSize", dataVo.getPageSize());

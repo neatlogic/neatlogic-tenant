@@ -19,7 +19,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -87,6 +86,7 @@ public class MatrixAttributeSaveApi extends PrivateApiComponentBase {
             if (dataExist) {
                 attributeMapper.deleteAttributeByMatrixUuid(matrixUuid);
             }
+            String schemaName = TenantContext.get().getDataDbName();
             if (CollectionUtils.isNotEmpty(attributeVoList)) {
                 //有数据
                 if (dataExist) {
@@ -110,12 +110,12 @@ public class MatrixAttributeSaveApi extends PrivateApiComponentBase {
 
                     //添加新增字段
                     for (String attributeUuid : addAttributeUuidList) {
-                        attributeMapper.addMatrixDynamicTableColumn(attributeUuid, matrixUuid, TenantContext.get().getTenantUuid());
+                        attributeMapper.addMatrixDynamicTableColumn(attributeUuid, matrixUuid, schemaName);
                     }
                     //找出需要删除的属性uuid列表
                     oldAttributeUuidList.removeAll(existedAttributeUuidList);
                     for (String attributeUuid : oldAttributeUuidList) {
-                        attributeMapper.dropMatrixDynamicTableColumn(attributeUuid, matrixUuid, TenantContext.get().getTenantUuid());
+                        attributeMapper.dropMatrixDynamicTableColumn(attributeUuid, matrixUuid, schemaName);
                     }
                 } else {
                     for (MatrixAttributeVo attributeVo : attributeVoList) {
@@ -123,13 +123,13 @@ public class MatrixAttributeSaveApi extends PrivateApiComponentBase {
                         attributeVo.setUuid(UuidUtil.randomUuid());
                         attributeMapper.insertMatrixAttribute(attributeVo);
                     }
-                    attributeMapper.createMatrixDynamicTable(attributeVoList, matrixUuid, TenantContext.get().getTenantUuid());
+                    attributeMapper.createMatrixDynamicTable(attributeVoList, matrixUuid, schemaName);
                 }
             } else {
                 //无数据
                 if (dataExist) {
                     // 删除动态表
-                    attributeMapper.dropMatrixDynamicTable(matrixUuid, TenantContext.get().getTenantUuid());
+                    attributeMapper.dropMatrixDynamicTable(matrixUuid, schemaName);
                 }
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
