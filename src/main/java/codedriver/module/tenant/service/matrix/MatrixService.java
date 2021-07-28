@@ -19,11 +19,11 @@ public interface MatrixService {
     
     public List<Map<String, Object>> matrixTableDataValueHandle(List<MatrixAttributeVo> attributeVoList, List<Map<String, String>> valueList);
     
-    public JSONObject matrixAttributeValueHandle(MatrixAttributeVo processMatrixAttributeVo, Object value);
+    public JSONObject matrixAttributeValueHandle(MatrixAttributeVo matrixAttributeVo, Object value);
     
     public JSONObject matrixAttributeValueHandle(Object value);
     
-    public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo processMatrixAttributeVo, MatrixDataVo dataVo);
+    public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo matrixAttributeVo, MatrixDataVo dataVo);
     
     public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj);
     /**

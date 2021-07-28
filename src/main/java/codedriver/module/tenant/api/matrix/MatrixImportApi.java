@@ -142,7 +142,7 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
                             String columnName = theadCell.getStringCellValue();
                             if (("uuid").equals(columnName)) {
                                 attributeUuid = "uuid";
-                                if (StringUtils.isBlank(value) || dataMapper.getDynamicTableDataCountByUuid(value, matrixVo.getUuid(), TenantContext.get().getTenantUuid()) == 0) {
+                                if (StringUtils.isBlank(value) || dataMapper.getDynamicTableDataCountByUuid(value, matrixVo.getUuid(), TenantContext.get().getDataDbName()) == 0) {
                                     value = UuidUtil.randomUuid();
                                     isNew = true;
                                     rowData.add(new MatrixColumnVo(attributeUuid, value));
@@ -164,11 +164,11 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
                             }
                         }
                         if (isNew) {
-                            dataMapper.insertDynamicTableData(rowData, matrixUuid, TenantContext.get().getTenantUuid());
+                            dataMapper.insertDynamicTableData(rowData, matrixUuid, TenantContext.get().getDataDbName());
                             insert++;
                             update++;
                         } else {
-                            dataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, TenantContext.get().getTenantUuid());
+                            dataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, TenantContext.get().getDataDbName());
                         }
                     }
                 } else {

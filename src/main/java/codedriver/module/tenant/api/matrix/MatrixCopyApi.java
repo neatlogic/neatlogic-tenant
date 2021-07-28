@@ -21,7 +21,6 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -114,9 +113,10 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
                     attributeVo.setUuid(targetAttributeUuid);
                     matrixAttributeMapper.insertMatrixAttribute(attributeVo);
                 }
-                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, TenantContext.get().getTenantUuid());
+                String schemaName = TenantContext.get().getDataDbName();
+                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, schemaName);
                 //数据拷贝
-                matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, TenantContext.get().getTenantUuid());
+                matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, schemaName);
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(sourceMatrix.getType())) {
             throw new MatrixExternalCopyException();
@@ -129,7 +129,7 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
 
     public IValid name() {
         return value -> {
-            MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
+            MatrixVo matrixVo = JSONObject.toJavaObject(value, MatrixVo.class);
             matrixVo.setUuid(UuidUtil.randomUuid());
             if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
                 return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));

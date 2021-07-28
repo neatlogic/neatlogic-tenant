@@ -28,7 +28,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 import codedriver.module.tenant.service.matrix.MatrixService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -76,7 +75,7 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
     @Description(desc = "外部数据源矩阵保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        MatrixExternalVo externalVo = JSON.toJavaObject(jsonObj, MatrixExternalVo.class);
+        MatrixExternalVo externalVo = JSONObject.toJavaObject(jsonObj, MatrixExternalVo.class);
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(externalVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(externalVo.getMatrixUuid());

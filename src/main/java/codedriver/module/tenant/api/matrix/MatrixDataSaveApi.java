@@ -90,32 +90,33 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
 
             boolean hasData = false;
             List<MatrixColumnVo> rowData = new ArrayList<>();
-            for (MatrixAttributeVo processMatrixAttributeVo : attributeList) {
-                String value = rowDataObj.getString(processMatrixAttributeVo.getUuid());
+            for (MatrixAttributeVo matrixAttributeVo : attributeList) {
+                String value = rowDataObj.getString(matrixAttributeVo.getUuid());
                 if (StringUtils.isNotBlank(value)) {
                     hasData = true;
-                    if (MatrixAttributeType.USER.getValue().equals(processMatrixAttributeVo.getType())) {
+                    if (MatrixAttributeType.USER.getValue().equals(matrixAttributeVo.getType())) {
                         value = value.split("#")[1];
-                    } else if (MatrixAttributeType.TEAM.getValue().equals(processMatrixAttributeVo.getType())) {
+                    } else if (MatrixAttributeType.TEAM.getValue().equals(matrixAttributeVo.getType())) {
                         value = value.split("#")[1];
-                    } else if (MatrixAttributeType.ROLE.getValue().equals(processMatrixAttributeVo.getType())) {
+                    } else if (MatrixAttributeType.ROLE.getValue().equals(matrixAttributeVo.getType())) {
                         value = value.split("#")[1];
                     }
                 }
-                rowData.add(new MatrixColumnVo(processMatrixAttributeVo.getUuid(), value));
+                rowData.add(new MatrixColumnVo(matrixAttributeVo.getUuid(), value));
             }
+            String schemaName = TenantContext.get().getDataDbName();
             String uuidValue = rowDataObj.getString("uuid");
             if (uuidValue == null) {
                 if (hasData) {
                     rowData.add(new MatrixColumnVo("uuid", UuidUtil.randomUuid()));
-                    matrixDataMapper.insertDynamicTableData(rowData, matrixUuid, TenantContext.get().getTenantUuid());
+                    matrixDataMapper.insertDynamicTableData(rowData, matrixUuid, schemaName);
                 }
             } else {
                 if (hasData) {
                     MatrixColumnVo uuidColumn = new MatrixColumnVo("uuid", uuidValue);
-                    matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, TenantContext.get().getTenantUuid());
+                    matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, schemaName);
                 } else {
-                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, TenantContext.get().getTenantUuid());
+                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, schemaName);
                 }
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {

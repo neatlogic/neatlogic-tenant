@@ -16,7 +16,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,21 +58,21 @@ public class MatrixNameUpdateApi extends PrivateApiComponentBase {
     @Description(desc = "矩阵名称变更接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        MatrixVo processMatrixVo = JSON.toJavaObject(jsonObj, MatrixVo.class);
-        if (matrixMapper.checkMatrixIsExists(processMatrixVo.getUuid()) == 0) {
-            throw new MatrixNotFoundException(processMatrixVo.getUuid());
+        MatrixVo matrixVo = JSONObject.toJavaObject(jsonObj, MatrixVo.class);
+        if (matrixMapper.checkMatrixIsExists(matrixVo.getUuid()) == 0) {
+            throw new MatrixNotFoundException(matrixVo.getUuid());
         }
-        if (matrixMapper.checkMatrixNameIsRepeat(processMatrixVo) > 0) {
-            throw new MatrixNameRepeatException(processMatrixVo.getName());
+        if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            throw new MatrixNameRepeatException(matrixVo.getName());
         }
-        processMatrixVo.setLcu(UserContext.get().getUserUuid(true));
-        matrixMapper.updateMatrixNameAndLcu(processMatrixVo);
+        matrixVo.setLcu(UserContext.get().getUserUuid(true));
+        matrixMapper.updateMatrixNameAndLcu(matrixVo);
         return null;
     }
 
     public IValid name() {
         return value -> {
-            MatrixVo matrixVo = JSON.toJavaObject(value, MatrixVo.class);
+            MatrixVo matrixVo = JSONObject.toJavaObject(value, MatrixVo.class);
             if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
                 return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));
             }
