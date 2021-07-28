@@ -5,20 +5,16 @@
 
 package codedriver.module.tenant.api.integration;
 
-import java.util.List;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dto.IntegrationHandlerVo;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 

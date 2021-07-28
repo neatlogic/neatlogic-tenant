@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.integration;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.BasePageVo;
