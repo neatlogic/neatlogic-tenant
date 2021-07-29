@@ -1,23 +1,25 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.lrcode.LRCodeManager;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.auth.label.TEAM_MODIFY;
+import codedriver.module.tenant.service.TeamService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @AuthAction(action = TEAM_MODIFY.class)
@@ -28,6 +30,9 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
 
     @Autowired
     private TeamMapper teamMapper;
+
+    @Resource
+    TeamService teamService;
 
     @Override
     public String getToken() {
@@ -59,6 +64,8 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
         teamMapper.deleteTeamByUuidList(uuidList);
         teamMapper.deleteTeamUserByTeamUuidList(uuidList);
         teamMapper.deleteTeamRoleByTeamUuidList(uuidList);
+        //delete teamUserTitle
+        teamService.deleteTeamUserTitleByTeamUuid(uuid);
         return null;
     }
 
