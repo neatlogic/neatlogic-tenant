@@ -3,6 +3,7 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -13,8 +14,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.auth.label.ROLE_MODIFY;
-import codedriver.module.tenant.service.UserService;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -35,7 +34,7 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
     private RoleMapper roleMapper;
 
     @Resource
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -61,10 +60,10 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
                     type = ApiParamType.JSONARRAY,
                     desc = "用户Uuid集合"
             ),
-            @Param(name = "teamUuidList",
-                    type = ApiParamType.JSONARRAY,
-                    desc = "分组Uuid集合"
-            )
+//            @Param(name = "teamUuidList",
+//                    type = ApiParamType.JSONARRAY,
+//                    desc = "分组Uuid集合"
+//            )
     })
     @Description(desc = "角色用户添加接口")
     @Override
@@ -73,13 +72,24 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
         if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
-        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
-        if(CollectionUtils.isNotEmpty(uuidList)){
+//        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
+//        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
+//        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
+//        if(CollectionUtils.isNotEmpty(uuidList)){
+//            roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
+//            for (String userUuid : uuidList){
+//                roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
+//            }
+//        }
+        JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+        if (CollectionUtils.isNotEmpty(userUuidArray)){
             roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
-            for (String userUuid : uuidList){
-                roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
+            List<String> userUuidList = userUuidArray.toJavaList(String.class);
+            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
+            if(CollectionUtils.isNotEmpty(existUserUuidList)){
+                for (String userUuid : existUserUuidList){
+                    roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
+                }
             }
         }
         return null;
