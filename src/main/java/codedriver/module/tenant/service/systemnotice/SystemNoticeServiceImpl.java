@@ -2,7 +2,8 @@ package codedriver.module.tenant.service.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.UserType;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeUserVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
@@ -31,7 +32,10 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
     private SystemNoticeMapper systemNoticeMapper;
 
     @Autowired
-    private UserMapper userMapper;
+    private RoleMapper roleMapper;
+
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public void clearSystemNoticeUser() {
@@ -99,8 +103,8 @@ public class SystemNoticeServiceImpl implements SystemNoticeService{
         List<String> uuidList = new ArrayList<>();
         uuidList.add(UserContext.get().getUserUuid(true));
         uuidList.add(UserType.ALL.getValue());
-        uuidList.addAll(userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-        uuidList.addAll(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
         return uuidList;
     }
 }

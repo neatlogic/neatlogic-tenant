@@ -6,12 +6,12 @@
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -42,7 +42,10 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     private SystemNoticeMapper systemNoticeMapper;
 
     @Autowired
-    private UserMapper userMapper;
+    private RoleMapper roleMapper;
+
+    @Autowired
+    private TeamMapper teamMapper;
 
     @Override
     public String getToken() {
@@ -80,8 +83,8 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         List<String> uuidList = new ArrayList<>();
         uuidList.add(UserContext.get().getUserUuid(true));
         uuidList.add(UserType.ALL.getValue());
-        uuidList.addAll(userMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-        uuidList.addAll(userMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
 
         systemNoticeService.clearSystemNoticeUser();
         systemNoticeService.stopExpiredSystemNotice();
