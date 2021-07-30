@@ -3,7 +3,9 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleAuthVo;
+import codedriver.framework.dto.RoleTeamVo;
 import codedriver.framework.dto.RoleUserVo;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
@@ -11,8 +13,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.ROLE_MODIFY;
-import codedriver.module.tenant.service.UserService;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,9 +34,9 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 
 	@Resource
 	RoleMapper roleMapper;
-	
+
 	@Resource
-	UserService userService;
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -91,12 +92,29 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 			roleMapper.updateRole(roleVo);
 		} else {
 			roleMapper.insertRole(roleVo);
-			List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-			List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-			Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList, teamUuidList);
-			if (CollectionUtils.isNotEmpty(uuidList)){
-				for (String userUuid : uuidList){
-					roleMapper.insertRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
+			JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
+			if (CollectionUtils.isNotEmpty(userUuidArray)){
+				List<String> userUuidList = userUuidArray.toJavaList(String.class);
+				List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
+				if(CollectionUtils.isNotEmpty(existUserUuidList)){
+					for (String userUuid : existUserUuidList){
+						roleMapper.insertRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
+					}
+				}
+			}
+			JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
+			if (CollectionUtils.isNotEmpty(teamUuidArray)) {
+				List<RoleTeamVo> roleTeamList = new ArrayList<>(100);
+				List<String> teamUuidList = teamUuidArray.toJavaList(String.class);
+				for (String teamUuid : teamUuidList) {
+					roleTeamList.add(new RoleTeamVo(roleVo.getUuid(), teamUuid));
+					if (roleTeamList.size() >= 100) {
+						roleMapper.insertRoleTeamList(roleTeamList);
+						roleTeamList.clear();
+					}
+				}
+				if (CollectionUtils.isNotEmpty(roleTeamList)) {
+					roleMapper.insertRoleTeamList(roleTeamList);
 				}
 			}
 
