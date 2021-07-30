@@ -69,9 +69,6 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     @Resource
     private FileMapper fileMapper;
 
-    @Resource
-    private SchemaMapper schemaMapper;
-
     @Override
     public String getToken() {
         return "matrix/save";
@@ -145,7 +142,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             if (StringUtils.isBlank(xml)) {
                 throw new MatrixViewSettingFileNotFoundException();
             }
-            List<MatrixAttributeVo> matrixAttributeVoList = buildView(matrixVo.getUuid(), matrixVo.getName(), xml);
+            List<MatrixAttributeVo> matrixAttributeVoList = matrixService.buildView(matrixVo.getUuid(), matrixVo.getName(), xml);
             MatrixViewVo matrixViewVo = new MatrixViewVo();
             matrixViewVo.setMatrixUuid(matrixVo.getUuid());
             matrixViewVo.setFileId(fileId);
@@ -160,52 +157,6 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         }
         returnObj.put("matrix", matrixVo);
         return returnObj;
-    }
-
-    private List<MatrixAttributeVo> buildView(String matrixUuid, String matrixName, String xml) {
-
-        List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
-        MatrixViewSqlBuilder viewBuilder = new MatrixViewSqlBuilder(xml);
-//        viewBuilder.setCiId(ciVo.getId());
-        viewBuilder.setViewName("matrix_" + matrixUuid);
-        if (viewBuilder.valid()) {
-            //测试一下语句是否能正常执行
-            try {
-                schemaMapper.testCiViewSql(viewBuilder.getTestSql());
-            } catch (Exception ex) {
-                throw new MatrixViewSqlIrregularException(ex);
-            }
-            List<MatrixViewAttributeVo> attrList = viewBuilder.getAttrList();
-            if (CollectionUtils.isNotEmpty(attrList)) {
-                int sort = 0;
-                for (MatrixViewAttributeVo attrVo : attrList) {
-                    MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
-                    matrixAttributeVo.setMatrixUuid(matrixUuid);
-                    matrixAttributeVo.setUuid(attrVo.getName());
-                    matrixAttributeVo.setName(attrVo.getLabel());
-                    matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
-                    matrixAttributeVo.setIsDeletable(0);
-                    matrixAttributeVo.setSort(sort++);
-                    matrixAttributeVo.setIsRequired(0);
-                    matrixAttributeList.add(matrixAttributeVo);
-                }
-                EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
-                    System.out.println(TenantContext.get().getDataDbName());
-                    if (schemaMapper.checkSchemaIsExists(TenantContext.get().getDataDbName()) > 0) {
-                        //创建配置项表
-//                        String viewSql = viewBuilder.getCreateViewSql();
-//                        System.out.println(viewSql);
-                        schemaMapper.insertView(viewBuilder.getCreateViewSql());
-                    } else {
-                        throw new DataBaseNotFoundException();
-                    }
-                }).execute();
-                if (!s.isSucceed()) {
-                    throw new MatrixViewCreateSchemaException(matrixName, true);
-                }
-            }
-        }
-        return matrixAttributeList;
     }
 
     public IValid name() {
