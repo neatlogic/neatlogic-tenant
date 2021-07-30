@@ -63,7 +63,7 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 			throw new RoleNotFoundException(roleUuid);
 		}
 		JSONObject resultObj = new JSONObject();
-		List<String> teamUuidList = roleMapper.getTeamUuidByRoleUuid(roleUuid);
+		List<String> teamUuidList = roleMapper.getTeamUuidListByRoleUuid(roleUuid);
 		if (CollectionUtils.isNotEmpty(teamUuidList)) {
 			List<TeamVo> teamList = teaMapper.getTeamByUuidList(teamUuidList);
 			resultObj.put("tbodyList", teamList);
