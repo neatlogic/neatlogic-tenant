@@ -50,7 +50,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
             @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "用户组uuid"),
             @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "角色uuid"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认0"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
     })
     @Output({
