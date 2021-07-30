@@ -1,18 +1,19 @@
 package codedriver.module.tenant.api.team;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.TeamLevel;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dto.TeamUserVo;
-import codedriver.framework.dto.TeamVo;
+import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.*;
 import codedriver.framework.exception.team.TeamLevelNotFoundException;
 import codedriver.framework.exception.team.TeamNotFoundException;
 import codedriver.framework.lrcode.LRCodeManager;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.auth.label.TEAM_MODIFY;
+import codedriver.module.tenant.service.TeamService;
 import codedriver.module.tenant.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -22,8 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @AuthAction(action = TEAM_MODIFY.class)
 
@@ -37,6 +41,11 @@ public class TeamSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private TeamService teamService;
 
     @Override
     public String getToken() {
@@ -56,17 +65,22 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id", isRequired = false),
             @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", desc = "组名",
-            isRequired = true, xss = true),
+                    isRequired = true, xss = true),
             @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
-            @Param(name = "level", type = ApiParamType.STRING,  desc = "层级"),
+            @Param(name = "level", type = ApiParamType.STRING, desc = "层级"),
             @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合"),
-            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid集合")
+            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid集合"),
+            @Param(name = "teamUserTitleList", type = ApiParamType.JSONARRAY, desc = "分组领导集合")
     })
     @Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
     @Description(desc = "保存组信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String level = jsonObj.getString("level");
+        List<TeamUserTitleVo> teamUserTitleList = null;
+        if (CollectionUtils.isNotEmpty(jsonObj.getJSONArray("teamUserTitleList"))) {
+            teamUserTitleList = jsonObj.getJSONArray("teamUserTitleList").toJavaList(TeamUserTitleVo.class);
+        }
         if (StringUtils.isNotBlank(level) && TeamLevel.getValue(level) == null) {
             throw new TeamLevelNotFoundException(level);
         }
@@ -80,6 +94,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
             }
             teamVo.setUuid(uuid);
             teamMapper.updateTeamNameByUuid(teamVo);
+            teamService.deleteTeamUserTitleByTeamUuid(uuid);
         } else {
             String parentUuid = jsonObj.getString("parentUuid");
             if (StringUtils.isBlank(parentUuid)) {
@@ -105,6 +120,28 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 }
             }
         }
+        //insert teamUserTitle
+        if (CollectionUtils.isNotEmpty(teamUserTitleList)) {
+            List<UserTitleVo> userTitleVoList = userMapper.getUserTitleListLockByTitleNameList(teamUserTitleList.stream().map(TeamUserTitleVo::getTitle).collect(Collectors.toList()));
+            Map<String, Long> userTitleMap = new HashMap<>();
+            for (UserTitleVo userTitleVo : userTitleVoList) {
+                userTitleMap.put(userTitleVo.getName(), userTitleVo.getId());
+            }
+            for (TeamUserTitleVo teamUserTitleVo : teamUserTitleList) {
+                Long titleId;
+                if (!userTitleMap.containsKey(teamUserTitleVo.getTitle())) {
+                    UserTitleVo userTitleVo = new UserTitleVo(teamUserTitleVo.getTitle());
+                    userMapper.insertUserTitle(userTitleVo);
+                    titleId = userTitleVo.getId();
+                } else {
+                    titleId = userTitleMap.get(teamUserTitleVo.getTitle());
+                }
+                for (String userUuid : teamUserTitleVo.getUserList()) {
+                    teamMapper.insertTeamUserTitle(uuid, userUuid, titleId);
+                }
+            }
+        }
+
         JSONObject returnObj = new JSONObject();
         returnObj.put("uuid", teamVo.getUuid());
         return returnObj;
