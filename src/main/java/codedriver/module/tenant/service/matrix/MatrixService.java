@@ -51,4 +51,6 @@ public interface MatrixService {
      * @throws ApiRuntimeException
      */
     public void validateMatrixExternalData(String integrationUuid) throws ApiRuntimeException;
+
+    List<MatrixAttributeVo> buildView(String matrixUuid, String matrixName, String xml);
 }

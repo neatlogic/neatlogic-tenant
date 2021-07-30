@@ -1,13 +1,16 @@
 package codedriver.module.tenant.service.matrix;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.SchemaMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
+import codedriver.framework.exception.database.DataBaseNotFoundException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.exception.util.FreemarkerTransformException;
@@ -20,7 +23,12 @@ import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
+import codedriver.framework.matrix.dto.MatrixViewAttributeVo;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
+import codedriver.framework.matrix.exception.MatrixViewCreateSchemaException;
+import codedriver.framework.matrix.exception.MatrixViewSqlIrregularException;
+import codedriver.framework.matrix.view.MatrixViewSqlBuilder;
+import codedriver.framework.transaction.core.EscapeTransactionJob;
 import codedriver.framework.util.JavascriptUtil;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
@@ -66,6 +74,9 @@ public class MatrixServiceImpl implements MatrixService {
 
     @Resource
     private IntegrationMapper integrationMapper;
+
+    @Resource
+    private SchemaMapper schemaMapper;
 
     @Override
     public List<MatrixAttributeVo> getExternalMatrixAttributeList(String matrixUuid, IntegrationVo integrationVo) throws FreemarkerTransformException {
@@ -309,5 +320,51 @@ public class MatrixServiceImpl implements MatrixService {
             throw new MatrixExternalAccessException();
         }
         handler.validate(resultVo);
+    }
+
+    @Override
+    public List<MatrixAttributeVo> buildView(String matrixUuid, String matrixName, String xml) {
+        List<MatrixAttributeVo> matrixAttributeList = new ArrayList<>();
+        MatrixViewSqlBuilder viewBuilder = new MatrixViewSqlBuilder(xml);
+//        viewBuilder.setCiId(ciVo.getId());
+        viewBuilder.setViewName("matrix_" + matrixUuid);
+        if (viewBuilder.valid()) {
+            //测试一下语句是否能正常执行
+            try {
+                schemaMapper.testCiViewSql(viewBuilder.getTestSql());
+            } catch (Exception ex) {
+                throw new MatrixViewSqlIrregularException(ex);
+            }
+            List<MatrixViewAttributeVo> attrList = viewBuilder.getAttrList();
+            if (CollectionUtils.isNotEmpty(attrList)) {
+                int sort = 0;
+                for (MatrixViewAttributeVo attrVo : attrList) {
+                    MatrixAttributeVo matrixAttributeVo = new MatrixAttributeVo();
+                    matrixAttributeVo.setMatrixUuid(matrixUuid);
+                    matrixAttributeVo.setUuid(attrVo.getName());
+                    matrixAttributeVo.setName(attrVo.getLabel());
+                    matrixAttributeVo.setType(MatrixAttributeType.INPUT.getValue());
+                    matrixAttributeVo.setIsDeletable(0);
+                    matrixAttributeVo.setSort(sort++);
+                    matrixAttributeVo.setIsRequired(0);
+                    matrixAttributeList.add(matrixAttributeVo);
+                }
+                EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
+                    System.out.println(TenantContext.get().getDataDbName());
+                    if (schemaMapper.checkSchemaIsExists(TenantContext.get().getDataDbName()) > 0) {
+                        //创建配置项表
+//                        String viewSql = viewBuilder.getCreateViewSql();
+//                        System.out.println(viewSql);
+                        schemaMapper.insertView(viewBuilder.getCreateViewSql());
+                    } else {
+                        throw new DataBaseNotFoundException();
+                    }
+                }).execute();
+                if (!s.isSucceed()) {
+                    throw new MatrixViewCreateSchemaException(matrixName, true);
+                }
+            }
+        }
+        return matrixAttributeList;
     }
 }
