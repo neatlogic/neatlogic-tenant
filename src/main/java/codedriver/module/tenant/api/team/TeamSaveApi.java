@@ -88,6 +88,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         TeamVo teamVo = new TeamVo();
         teamVo.setName(jsonObj.getString("name"));
         teamVo.setLevel(level);
+        teamVo.setUuid(uuid);
         if (StringUtils.isNotBlank(uuid)) {
             if (teamMapper.checkTeamIsExists(uuid) == 0) {
                 throw new TeamNotFoundException(uuid);
@@ -137,7 +138,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                     titleId = userTitleMap.get(teamUserTitleVo.getTitle());
                 }
                 for (String userUuid : teamUserTitleVo.getUserList()) {
-                    teamMapper.insertTeamUserTitle(uuid, userUuid, titleId);
+                    teamMapper.insertTeamUserTitle(teamVo.getUuid(), userUuid, titleId);
                 }
             }
         }
