@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,19 +67,13 @@ public class TeamUserSaveApi extends PrivateApiComponentBase {
     	if(teamMapper.checkTeamIsExists(teamUuid) == 0) {
 			throw new TeamNotFoundException(teamUuid);
 		}
-    	Map<String, String> teamUserTitleMap = new HashMap<>();
-		List<TeamUserVo> teamUserList = teamMapper.getTeamUserListByTeamUuid(teamUuid);
-		for(TeamUserVo teamUserVo : teamUserList) {
-			teamUserTitleMap.put(teamUserVo.getUserUuid(), teamUserVo.getTitle());
-		}
         List<String> userUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("userUuidList")), String.class);
         List<String> teamUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("teamUuidList")), String.class);
         Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
         if(CollectionUtils.isNotEmpty(uuidList)){
             teamMapper.deleteTeamUserByTeamUuid(teamUuid);
             for (String userUuid: uuidList){
-                String title = teamUserTitleMap.get(userUuid);
-                teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid, title));
+                teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid));
             }
         }
         return null;
