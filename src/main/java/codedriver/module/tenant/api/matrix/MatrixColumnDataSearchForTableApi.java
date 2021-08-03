@@ -141,7 +141,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 
             if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                 JSONArray searchColumnDetailList = new JSONArray();
-                List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
+                List<String> searchColumnList = searchColumnArray.toJavaList(String.class);
                 for (String column : searchColumnList) {
                     MatrixAttributeVo attribute = attributeMap.get(column);
                     if (attribute != null) {
@@ -193,7 +193,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 
             if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                 JSONArray searchColumnDetailList = new JSONArray();
-                List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
+                List<String> searchColumnList = searchColumnArray.toJavaList(String.class);
                 for (String column : searchColumnList) {
                     MatrixAttributeVo attribute = attributeMap.get(column);
                     if (attribute != null) {
@@ -256,7 +256,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 
                 if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                     JSONArray searchColumnDetailList = new JSONArray();
-                    List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
+                    List<String> searchColumnList = searchColumnArray.toJavaList(String.class);
                     for (String column : searchColumnList) {
                         MatrixAttributeVo attribute = attributeMap.get(column);
                         if (attribute != null) {
