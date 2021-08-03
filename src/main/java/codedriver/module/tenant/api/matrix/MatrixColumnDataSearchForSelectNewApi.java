@@ -83,16 +83,20 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		return null;
 	}
 
-	@Input({ @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true), 
-		@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true), 
-		@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING), 
-		@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true), 
-		@Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
-		@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-		@Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
-	    @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY) })
+	@Input({
+			@Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
+			@Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
+			@Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
+			@Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
+			@Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
+			@Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+			@Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
+	    	@Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY)
+	})
+	@Output({
+			@Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
+	})
 	@Description(desc = "矩阵属性数据查询-下拉级联接口")
-	@Output({ @Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合") })
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 	    
@@ -103,7 +107,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 		}
 
 		JSONArray defaultValue = dataVo.getDefaultValue();
-		JSONArray filterList = jsonObj.getJSONArray("filterList");
 		
 		List<String> columnList = dataVo.getColumnList();
 		if (CollectionUtils.isEmpty(columnList)) {
@@ -130,8 +133,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 					}
 				}
 				dataVo.setColumnList(distinctColumList);
-				dataVo.setFilterList(filterList);
-				List<Map<String, String>> dataMapList = null;
 				if (CollectionUtils.isNotEmpty(defaultValue)) {
 					for (String value : defaultValue.toJavaList(String.class)) {
 						if (value.contains(SELECT_COMPOSE_JOINER)) {
@@ -149,7 +150,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 									throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), columnList.get(1));
 								}
 								dataVo.setKeyword(split[1]);
-								dataMapList = matrixService.matrixAttributeValueKeyWordSearch(matrixAttribute,dataVo);
+								List<Map<String, String>> dataMapList = matrixService.matrixAttributeValueKeyWordSearch(matrixAttribute,dataVo);
 								if (CollectionUtils.isNotEmpty(dataMapList)) {
 									for (Map<String, String> dataMap : dataMapList) {
 										Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
@@ -160,7 +161,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 										JSONObject textObj = resultMap.get(columnList.get(1));
 										if (MapUtils.isNotEmpty(textObj) && Objects.equal(textObj.get("text"), split[1])) {
 											resultList.add(resultMap);
-											;
 										}
 									}
 								} else {
@@ -180,7 +180,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 							throw new MatrixAttributeNotFoundException(dataVo.getMatrixUuid(), keywordColumn);
 						}
 					}
-					dataMapList = matrixService.matrixAttributeValueKeyWordSearch(matrixAttribute, dataVo);
+					List<Map<String, String>> dataMapList = matrixService.matrixAttributeValueKeyWordSearch(matrixAttribute, dataVo);
 					for (Map<String, String> dataMap : dataMapList) {
 						Map<String, JSONObject> resultMap = new HashMap<>(dataMap.size());
 						for (Entry<String, String> entry : dataMap.entrySet()) {
@@ -287,7 +287,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 					}
 				}
 				dataVo.setColumnList(distinctColumList);
-				dataVo.setFilterList(filterList);
 				List<Map<String, String>> dataMapList = null;
 				if (CollectionUtils.isNotEmpty(defaultValue)) {
 					for (String value : defaultValue.toJavaList(String.class)) {

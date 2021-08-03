@@ -90,7 +90,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY)
+            @Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
@@ -112,7 +113,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         if (CollectionUtils.isEmpty(columnList)) {
             throw new ParamIrregularException("columnList");
         }
-        List<String> searchColumnList = JSONObject.parseArray(jsonObj.getString("searchColumnList"), String.class);
+        JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
         String type = matrixVo.getType();
         if (MatrixType.CUSTOM.getValue().equals(type)) {
             Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
@@ -138,8 +139,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(matrixAttributeList, dataMapList);
             returnObj.put("tbodyList", tbodyList);
 
-            if (CollectionUtils.isNotEmpty(searchColumnList)) {
+            if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                 JSONArray searchColumnDetailList = new JSONArray();
+                List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
                 for (String column : searchColumnList) {
                     MatrixAttributeVo attribute = attributeMap.get(column);
                     if (attribute != null) {
@@ -189,8 +191,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
             }
 
-            if (CollectionUtils.isNotEmpty(searchColumnList)) {
+            if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                 JSONArray searchColumnDetailList = new JSONArray();
+                List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
                 for (String column : searchColumnList) {
                     MatrixAttributeVo attribute = attributeMap.get(column);
                     if (attribute != null) {
@@ -251,8 +254,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 List<Map<String, Object>> tbodyList = matrixService.matrixTableDataValueHandle(matrixAttributeList, dataMapList);
                 returnObj.put("tbodyList", tbodyList);
 
-                if (CollectionUtils.isNotEmpty(searchColumnList)) {
+                if (CollectionUtils.isNotEmpty(searchColumnArray)) {
                     JSONArray searchColumnDetailList = new JSONArray();
+                    List<String> searchColumnList = searchColumnDetailList.toJavaList(String.class);
                     for (String column : searchColumnList) {
                         MatrixAttributeVo attribute = attributeMap.get(column);
                         if (attribute != null) {
