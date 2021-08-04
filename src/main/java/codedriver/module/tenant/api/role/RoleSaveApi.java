@@ -67,9 +67,9 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 			@Param(name = "userUuidList",
 					type = ApiParamType.JSONARRAY,
 					desc = "用户uuid集合"),
-			@Param(name = "teamUuidList",
+			@Param(name = "teamList",
 					type = ApiParamType.JSONARRAY,
-					desc = "分组uuid集合"),
+					desc = "分组集合，[{\"uuid\":\"aaaaaaaaaa\", \"checkedChildren\":1}]"),
 			@Param( name= "roleAuthList",
 					desc = "角色权限集合",
 					type = ApiParamType.JSONOBJECT)})
@@ -102,15 +102,17 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 					}
 				}
 			}
-			JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
-			if (CollectionUtils.isNotEmpty(teamUuidArray)) {
+			JSONArray teamList = jsonObj.getJSONArray("teamList");
+			if (CollectionUtils.isNotEmpty(teamList)) {
 				List<RoleTeamVo> roleTeamList = new ArrayList<>(100);
-				List<String> teamUuidList = teamUuidArray.toJavaList(String.class);
-				for (String teamUuid : teamUuidList) {
-					roleTeamList.add(new RoleTeamVo(roleVo.getUuid(), teamUuid));
-					if (roleTeamList.size() >= 100) {
-						roleMapper.insertRoleTeamList(roleTeamList);
-						roleTeamList.clear();
+				for (int i = 0; i < teamList.size(); i++) {
+					JSONObject team = teamList.getJSONObject(i);
+					if (team != null) {
+						roleTeamList.add(new RoleTeamVo(roleVo.getUuid(), team.getString("uuid"), team.getInteger("checkedChildren")));
+						if (roleTeamList.size() >= 100) {
+							roleMapper.insertRoleTeamList(roleTeamList);
+							roleTeamList.clear();
+						}
 					}
 				}
 				if (CollectionUtils.isNotEmpty(roleTeamList)) {
