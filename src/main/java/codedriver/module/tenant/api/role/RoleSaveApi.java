@@ -105,7 +105,6 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 			JSONArray teamList = jsonObj.getJSONArray("teamList");
 			if (CollectionUtils.isNotEmpty(teamList)) {
 				List<RoleTeamVo> roleTeamList = new ArrayList<>(100);
-//				List<String> teamUuidList = teamArray.toJavaList(String.class);
 				for (int i = 0; i < teamList.size(); i++) {
 					JSONObject team = teamList.getJSONObject(i);
 					if (team != null) {
@@ -116,13 +115,6 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 						}
 					}
 				}
-//				for (String teamUuid : teamUuidList) {
-//					roleTeamList.add(new RoleTeamVo(roleVo.getUuid(), teamUuid));
-//					if (roleTeamList.size() >= 100) {
-//						roleMapper.insertRoleTeamList(roleTeamList);
-//						roleTeamList.clear();
-//					}
-//				}
 				if (CollectionUtils.isNotEmpty(roleTeamList)) {
 					roleMapper.insertRoleTeamList(roleTeamList);
 				}
