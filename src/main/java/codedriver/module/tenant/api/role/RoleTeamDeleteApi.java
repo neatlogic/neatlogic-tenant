@@ -25,20 +25,20 @@ import java.util.List;
 @Service
 @Transactional
 @AuthAction(action = ROLE_MODIFY.class)
-@OperationType(type = OperationTypeEnum.CREATE)
-public class RoleTeamSaveApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.DELETE)
+public class RoleTeamDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
-        return "role/team/save";
+        return "role/team/delete";
     }
 
     @Override
     public String getName() {
-        return "角色分组添加接口";
+        return "删除角色分组接口";
     }
 
     @Override
@@ -48,40 +48,20 @@ public class RoleTeamSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "roleUuid", type = ApiParamType.STRING, isRequired = true, desc = "角色uuid"),
-            @Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "分组集合，[{\"uuid\":\"aaaaaaaaaa\", \"checkedChildren\":1}]")
+            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid集合")
     })
-    @Description(desc = "角色分组添加接口")
+    @Description(desc = "删除角色分组接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String roleUuid = jsonObj.getString("roleUuid");
         if (roleMapper.checkRoleIsExists(roleUuid) == 0) {
             throw new RoleNotFoundException(roleUuid);
         }
-        roleMapper.deleteTeamRoleByRoleUuid(roleUuid);
-        JSONArray teamList = jsonObj.getJSONArray("teamList");
-        if (CollectionUtils.isNotEmpty(teamList)) {
-            List<RoleTeamVo> roleTeamList = new ArrayList<>(100);
-//            List<String> teamUuidList = teamList.toJavaList(String.class);
-            for (int i = 0; i < teamList.size(); i++) {
-                JSONObject team = teamList.getJSONObject(i);
-                if (team != null) {
-                    roleTeamList.add(new RoleTeamVo(roleUuid, team.getString("uuid"), team.getInteger("checkedChildren")));
-                    if (roleTeamList.size() >= 100) {
-                        roleMapper.insertRoleTeamList(roleTeamList);
-                        roleTeamList.clear();
-                    }
-                }
-            }
-//            for (String teamUuid : teamUuidList) {
-//                roleTeamList.add(new RoleTeamVo(roleUuid, teamUuid));
-//                if (roleTeamList.size() >= 100) {
-//                    roleMapper.insertRoleTeamList(roleTeamList);
-//                    roleTeamList.clear();
-//                }
-//            }
-            if (CollectionUtils.isNotEmpty(roleTeamList)) {
-                roleMapper.insertRoleTeamList(roleTeamList);
-            }
+
+        JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
+        if (CollectionUtils.isNotEmpty(teamUuidArray)) {
+            List<String> teamUuidList = teamUuidArray.toJavaList(String.class);
+            roleMapper.deleteTeamRoleByRoleUuidAndTeamUuidList(roleUuid, teamUuidList);
         }
         return null;
     }

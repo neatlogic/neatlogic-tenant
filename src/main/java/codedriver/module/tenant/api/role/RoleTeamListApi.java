@@ -8,7 +8,7 @@ package codedriver.module.tenant.api.role;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.RoleMapper;
 import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleTeamVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.role.RoleNotFoundException;
@@ -41,7 +41,7 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 
 	@Override
 	public String getName() {
-		return "获取角色分组列表";
+		return "查询角色分组列表";
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 	@Output({
 		@Param(name = "tbodyList", explode = UserVo[].class, desc = "角色用户成员列表")
 	})
-	@Description( desc = "获取角色分组列表")
+	@Description( desc = "查询角色分组列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String roleUuid = jsonObj.getString("roleUuid");
@@ -66,6 +66,10 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 		List<String> teamUuidList = roleMapper.getTeamUuidListByRoleUuid(roleUuid);
 		if (CollectionUtils.isNotEmpty(teamUuidList)) {
 			List<TeamVo> teamList = teaMapper.getTeamByUuidList(teamUuidList);
+			for (TeamVo teamVo : teamList) {
+				List<String> teamNameList = teaMapper.getUpwardTeamNameListByLftRht(teamVo.getLft(), teamVo.getRht());
+				teamVo.setPathNameList(teamNameList);
+			}
 			resultObj.put("tbodyList", teamList);
 		} else {
 			resultObj.put("tbodyList", new ArrayList<>());
