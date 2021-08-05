@@ -13,6 +13,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,10 +77,13 @@ public class TeamGetApi extends PrivateApiComponentBase {
         teamVo.setUserCount(userCount);
         int isEdit = jsonObj.getIntValue("isEdit");
         List<String> pathNameList = new ArrayList<>();
-        List<TeamVo> ancestorsAndSelf = teamMapper.getAncestorsAndSelfByLftRht(teamVo.getLft(), teamVo.getRht(), null);
-        for (TeamVo ancestor : ancestorsAndSelf) {
-            if (isEdit == 0 || !teamVo.getUuid().equals(ancestor.getUuid())) {
-                pathNameList.add(ancestor.getName());
+        String upwardNamePath = teamVo.getUpwardNamePath();
+        if (StringUtils.isNotBlank(upwardNamePath)) {
+            String[] upwardNameArray = upwardNamePath.split("/");
+            for (String upwardName : upwardNameArray) {
+                if (isEdit == 0 || !upwardName.equals(teamVo.getName())) {
+                    pathNameList.add(upwardName);
+                }
             }
         }
         teamVo.setPathNameList(pathNameList);

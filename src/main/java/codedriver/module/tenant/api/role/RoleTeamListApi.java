@@ -66,10 +66,6 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 		List<String> teamUuidList = roleMapper.getTeamUuidListByRoleUuid(roleUuid);
 		if (CollectionUtils.isNotEmpty(teamUuidList)) {
 			List<TeamVo> teamList = teaMapper.getTeamByUuidList(teamUuidList);
-			for (TeamVo teamVo : teamList) {
-				List<String> teamNameList = teaMapper.getUpwardTeamNameListByLftRht(teamVo.getLft(), teamVo.getRht());
-				teamVo.setPathNameList(teamNameList);
-			}
 			resultObj.put("tbodyList", teamList);
 		} else {
 			resultObj.put("tbodyList", new ArrayList<>());
