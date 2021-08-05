@@ -88,7 +88,11 @@ public class TeamMoveApi extends PrivateApiComponentBase {
                 }
             }
         }
-        LRCodeManager.moveTreeNode("team", "uuid", "parent_uuid", uuid, moveType, targetUuid);
+        int[] lftRht = LRCodeManager.moveTreeNode("team", "uuid", "parent_uuid", uuid, moveType, targetUuid);
+        if (!parentUuid.equals(team.getParentUuid()) && lftRht != null) {
+            teamMapper.updateUpwardUuidPathByLftRht(lftRht[0], lftRht[1]);
+            teamMapper.updateUpwardNamePathByLftRht(lftRht[0], lftRht[1]);
+        }
         return null;
     }
 

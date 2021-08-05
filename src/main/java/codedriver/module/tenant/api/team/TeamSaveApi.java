@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AuthAction(action = TEAM_MODIFY.class)
@@ -110,6 +107,17 @@ public class TeamSaveApi extends PrivateApiComponentBase {
             teamVo.setLft(lft);
             teamVo.setRht(lft + 1);
 
+            List<String> upwardTeamUuidList = new ArrayList<>();
+            List<String> upwardTeamNameList = new ArrayList<>();
+            List<TeamVo> upwardTeamList = teamMapper.getAncestorsAndSelfByLftRht(lft, lft + 1, null);
+            for (TeamVo upwardTeam : upwardTeamList) {
+                upwardTeamUuidList.add(upwardTeam.getUuid());
+                upwardTeamNameList.add(upwardTeam.getName());
+            }
+            upwardTeamUuidList.add(teamVo.getUuid());
+            upwardTeamNameList.add(teamVo.getName());
+            teamVo.setUpwardUuidPath(String.join(",", upwardTeamUuidList));
+            teamVo.setUpwardNamePath(String.join("/", upwardTeamNameList));
             teamMapper.insertTeam(teamVo);
             List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
             List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
