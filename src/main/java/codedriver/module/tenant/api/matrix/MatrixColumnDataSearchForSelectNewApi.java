@@ -252,9 +252,9 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                     matrixColumnVo.setColumn(keywordColumn);
                     matrixColumnVo.setExpression(Expression.LIKE.getExpression());
                     matrixColumnVo.setValue(dataVo.getKeyword());
-                    sourceColumnList = dataVo.getSourceColumnList();
+//                    sourceColumnList = dataVo.getSourceColumnList();
                     sourceColumnList.add(matrixColumnVo);
-                    jsonObj.put("sourceColumnList", sourceColumnList);
+//                    jsonObj.put("sourceColumnList", sourceColumnList);
                 }
                 integrationVo.getParamObj().putAll(jsonObj);
                 IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
