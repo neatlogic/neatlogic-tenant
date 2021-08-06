@@ -204,8 +204,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
                 returnObj.put("searchColumnDetailList", searchColumnDetailList);
             }
-            List<MatrixColumnVo> sourceColumnList = new ArrayList<>();
-            jsonObj.put("sourceColumnList", sourceColumnList); //防止集成管理 js length 异常
+            jsonObj.put("sourceColumnList", dataVo.getSourceColumnList()); //防止集成管理 js length 异常
             integrationVo.getParamObj().putAll(jsonObj);
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
             if (StringUtils.isNotBlank(resultVo.getError())) {
