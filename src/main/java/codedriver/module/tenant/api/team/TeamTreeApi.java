@@ -103,11 +103,22 @@ public class TeamTreeApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(tbodyList)) {
                 Integer isActive = jsonObj.getInteger("isActive");
                 List<String> teamUuidList = tbodyList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
-                List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList, isActive);
-                Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
-                for (TeamVo team : teamUserCountAndChildCountList) {
-                    teamUserCountAndChildCountMap.put(team.getUuid(), team);
+//                List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList, isActive);
+//                Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
+//                for (TeamVo team : teamUserCountAndChildCountList) {
+//                    teamUserCountAndChildCountMap.put(team.getUuid(), team);
+//                }
+                List<TeamVo> childCountList = teamMapper.getChildCountListByUuidList(teamUuidList);
+                Map<String, Integer> childCountMap = new HashMap<>();
+                for (TeamVo team : childCountList) {
+                    childCountMap.put(team.getUuid(), team.getChildCount());
                 }
+                List<TeamVo> teamUserCountList = teamMapper.getTeamUserCountListByUuidList(teamUuidList, isActive);
+                Map<String, Integer> teamUserCountMap = new HashMap<>();
+                for (TeamVo team : teamUserCountList) {
+                    teamUserCountMap.put(team.getUuid(), team.getUserCount());
+                }
+
                 Map<String, RoleTeamVo> roleTeamMap = new HashMap<>();
                 String roleUuid = jsonObj.getString("roleUuid");
                 if (StringUtils.isNotBlank(roleUuid)) {
@@ -118,11 +129,13 @@ public class TeamTreeApi extends PrivateApiComponentBase {
                 }
 
                 for (TeamVo team : tbodyList) {
-                    TeamVo teamUserCountAndChildCount = teamUserCountAndChildCountMap.get(team.getUuid());
-                    if (teamUserCountAndChildCount != null) {
-                        team.setChildCount(teamUserCountAndChildCount.getChildCount());
-                        team.setUserCount(teamUserCountAndChildCount.getUserCount());
-                    }
+//                    TeamVo teamUserCountAndChildCount = teamUserCountAndChildCountMap.get(team.getUuid());
+//                    if (teamUserCountAndChildCount != null) {
+//                        team.setChildCount(teamUserCountAndChildCount.getChildCount());
+//                        team.setUserCount(teamUserCountAndChildCount.getUserCount());
+//                    }
+                    team.setChildCount(childCountMap.get(team.getUuid()));
+                    team.setUserCount(teamUserCountMap.get(team.getUuid()));
                     if (StringUtils.isNotBlank(roleUuid)) {
                         RoleTeamVo roleTeamVo = roleTeamMap.get(team.getUuid());
                         if (roleTeamVo != null) {

@@ -105,21 +105,33 @@ public class TeamTreeSearchApi extends PrivateApiComponentBase {
     		rootTeam.setName("root");
     		rootTeam.setParentUuid(TeamVo.ROOT_PARENTUUID);
     		teamMap.put(TeamVo.ROOT_UUID, rootTeam);
-        	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList,null);
-        	Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
-        	for(TeamVo team : teamUserCountAndChildCountList) {
-        		teamUserCountAndChildCountMap.put(team.getUuid(), team);
-        	}
+//        	List<TeamVo> teamUserCountAndChildCountList = teamMapper.getTeamUserCountAndChildCountListByUuidList(teamUuidList,null);
+//        	Map<String, TeamVo> teamUserCountAndChildCountMap = new HashMap<>();
+//        	for(TeamVo team : teamUserCountAndChildCountList) {
+//        		teamUserCountAndChildCountMap.put(team.getUuid(), team);
+//        	}
+			List<TeamVo> childCountList = teamMapper.getChildCountListByUuidList(teamUuidList);
+			Map<String, Integer> childCountMap = new HashMap<>();
+			for (TeamVo team : childCountList) {
+				childCountMap.put(team.getUuid(), team.getChildCount());
+			}
+			List<TeamVo> teamUserCountList = teamMapper.getTeamUserCountListByUuidList(teamUuidList, null);
+			Map<String, Integer> teamUserCountMap = new HashMap<>();
+			for (TeamVo team : teamUserCountList) {
+				teamUserCountMap.put(team.getUuid(), team.getUserCount());
+			}
         	for(TeamVo team : teamList) {
         		TeamVo parentTeam = teamMap.get(team.getParentUuid());
         		if(parentTeam != null) {
         			team.setParent(parentTeam);
         		}
-        		TeamVo teamUserCountAndChildCount = teamUserCountAndChildCountMap.get(team.getUuid());
-        		if(teamUserCountAndChildCount != null) {
-            		team.setChildCount(teamUserCountAndChildCount.getChildCount());
-            		team.setUserCount(teamUserCountAndChildCount.getUserCount());
-        		}
+//        		TeamVo teamUserCountAndChildCount = teamUserCountAndChildCountMap.get(team.getUuid());
+//        		if(teamUserCountAndChildCount != null) {
+//            		team.setChildCount(teamUserCountAndChildCount.getChildCount());
+//            		team.setUserCount(teamUserCountAndChildCount.getUserCount());
+//        		}
+				team.setChildCount(childCountMap.get(team.getUuid()));
+				team.setUserCount(teamUserCountMap.get(team.getUuid()));
         	}
         	resultObj.put("children", rootTeam.getChildren());
     	}
