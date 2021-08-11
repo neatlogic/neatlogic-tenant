@@ -13,8 +13,11 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,6 +66,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
             @Param(name = "column3", type = ApiParamType.STRING, desc = "第三列"),
             @Param(name = "column4", type = ApiParamType.STRING, desc = "第四列"),
             @Param(name = "column5", type = ApiParamType.STRING, desc = "第五列"),
+            @Param(name = "filterList", type = ApiParamType.JSONARRAY, desc = "过滤参数列表"),
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
             @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
@@ -81,6 +85,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
         String column3 = paramObj.getString("column3");
         String column4 = paramObj.getString("column4");
         String column5 = paramObj.getString("column5");
+        JSONArray filterList = paramObj.getJSONArray("filterList");
         BasePageVo basePageVo = JSONObject.toJavaObject(paramObj, BasePageVo.class);
         for (TbodyVo tbodyVo : staticTbodyList) {
             if (StringUtils.isNotBlank(column1)) {
@@ -108,22 +113,70 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
                     continue;
                 }
             }
+            if (CollectionUtils.isNotEmpty(filterList)) {
+                boolean flag = true;
+                for (int i = 0; i < filterList.size(); i++) {
+                    JSONObject filterObj = filterList.getJSONObject(i);
+                    String uuid = filterObj.getString("uuid");
+                    JSONArray valueArray = filterObj.getJSONArray("valueList");
+                    if (StringUtils.isNotBlank(uuid) && CollectionUtils.isNotEmpty(valueArray)) {
+                        List<String> valueList = valueArray.toJavaList(String.class);
+                        if ("column1".equals(uuid)) {
+                            if (!valueList.contains(tbodyVo.getColumn1())) {
+                                flag = false;
+                                break;
+                            }
+                        } else if ("column2".equals(uuid)) {
+                            if (!valueList.contains(tbodyVo.getColumn2())) {
+                                flag = false;
+                                break;
+                            }
+                        } else if ("column3".equals(uuid)) {
+                            if (!valueList.contains(tbodyVo.getColumn3())) {
+                                flag = false;
+                                break;
+                            }
+                        } else if ("column4".equals(uuid)) {
+                            if (!valueList.contains(tbodyVo.getColumn4())) {
+                                flag = false;
+                                break;
+                            }
+                        } else if ("column5".equals(uuid)) {
+                            if (!valueList.contains(tbodyVo.getColumn5())) {
+                                flag = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!flag) {
+                    continue;
+                }
+            }
             tbodyVoList.add(tbodyVo);
         }
-        int rowNum = tbodyVoList.size();
-        basePageVo.setRowNum(rowNum);
-        int fromIndex = basePageVo.getStartNum();
-        if(fromIndex < rowNum) {
-            int toIndex = fromIndex + basePageVo.getPageSize();
-            toIndex = toIndex > rowNum ? rowNum : toIndex;
-            resultObj.put("tbodyList", tbodyVoList.subList(fromIndex, toIndex));
-        }else{
-            resultObj.put("tbodyList", new ArrayList<>());
+        Boolean needPage = paramObj.getBoolean("needPage");
+        if (needPage == null || needPage){
+            int rowNum = tbodyVoList.size();
+            basePageVo.setRowNum(rowNum);
+            int fromIndex = basePageVo.getStartNum();
+            if(fromIndex < rowNum) {
+                int toIndex = fromIndex + basePageVo.getPageSize();
+                toIndex = toIndex > rowNum ? rowNum : toIndex;
+                resultObj.put("tbodyList", tbodyVoList.subList(fromIndex, toIndex));
+            }else{
+                resultObj.put("tbodyList", new ArrayList<>());
+            }
+            resultObj.put("currentPage", basePageVo.getCurrentPage());
+            resultObj.put("pageSize", basePageVo.getPageSize());
+            resultObj.put("pageCount", basePageVo.getPageCount());
+            resultObj.put("rowNum", basePageVo.getRowNum());
+            resultObj.put("needPage", true);
+        } else {
+            resultObj.put("tbodyList", tbodyVoList);
+            resultObj.put("needPage", false);
         }
-        resultObj.put("currentPage", basePageVo.getCurrentPage());
-        resultObj.put("pageSize", basePageVo.getPageSize());
-        resultObj.put("pageCount", basePageVo.getPageCount());
-        resultObj.put("rowNum", basePageVo.getRowNum());
+
         return resultObj;
     }
 }
