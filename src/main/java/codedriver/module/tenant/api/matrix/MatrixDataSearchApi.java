@@ -23,6 +23,7 @@ import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.*;
 import codedriver.framework.matrix.dto.*;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
+import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.matrix.exception.MatrixViewNotFoundException;
 import codedriver.framework.restful.annotation.*;
@@ -157,38 +158,34 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
             }
         } else if (MatrixType.EXTERNAL.getValue().equals(type)) {
             MatrixExternalVo externalVo = externalMapper.getMatrixExternalByMatrixUuid(dataVo.getMatrixUuid());
-            if (externalVo != null) {
-                IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
-                IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-                if (handler == null) {
-                    throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
-                }
+            if (externalVo == null) {
+                throw new MatrixExternalNotFoundException(matrixVo.getName());
+            }
+            IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(externalVo.getIntegrationUuid());
+            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+            if (handler == null) {
+                throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+            }
 
-                integrationVo.getParamObj().putAll(jsonObj);
-                IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
-                if (StringUtils.isNotBlank(resultVo.getError())) {
-                    logger.error(resultVo.getError());
-                    throw new MatrixExternalAccessException();
-                }
-                handler.validate(resultVo);
-                JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
-                returnObj.putAll(transformedResult);
-                JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
-                if (CollectionUtils.isNotEmpty(tbodyArray)) {
-                    for (int i = 0; i < tbodyArray.size(); i++) {
-                        JSONObject rowData = tbodyArray.getJSONObject(i);
-                        Integer pageSize = jsonObj.getInteger("pageSize");
-                        pageSize = pageSize == null ? 10 : pageSize;
-                        if (MapUtils.isNotEmpty(rowData)) {
-                            Map<String, Object> rowDataMap = new HashMap<>();
-                            for (Entry<String, Object> entry : rowData.entrySet()) {
-                                rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
-                            }
-                            tbodyList.add(rowDataMap);
-                            if (tbodyList.size() >= pageSize) {
-                                break;
-                            }
+            integrationVo.getParamObj().putAll(jsonObj);
+            IntegrationResultVo resultVo = handler.sendRequest(integrationVo, RequestFrom.MATRIX);
+            if (StringUtils.isNotBlank(resultVo.getError())) {
+                logger.error(resultVo.getError());
+                throw new MatrixExternalAccessException();
+            }
+            handler.validate(resultVo);
+            JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
+            returnObj.putAll(transformedResult);
+            JSONArray tbodyArray = transformedResult.getJSONArray("tbodyList");
+            if (CollectionUtils.isNotEmpty(tbodyArray)) {
+                for (int i = 0; i < tbodyArray.size(); i++) {
+                    JSONObject rowData = tbodyArray.getJSONObject(i);
+                    if (MapUtils.isNotEmpty(rowData)) {
+                        Map<String, Object> rowDataMap = new HashMap<>();
+                        for (Entry<String, Object> entry : rowData.entrySet()) {
+                            rowDataMap.put(entry.getKey(), matrixService.matrixAttributeValueHandle(entry.getValue()));
                         }
+                        tbodyList.add(rowDataMap);
                     }
                 }
             }
