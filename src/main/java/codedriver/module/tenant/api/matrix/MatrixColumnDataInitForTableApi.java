@@ -196,7 +196,7 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
                     if (StringUtils.isNotBlank(resultVo.getError())) {
                         throw new MatrixExternalAccessException();
                     } else {
-                        resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), null));
+                        resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), null));
                     }
                 }
                 returnObj.put("tbodyList", resultList);
@@ -206,7 +206,7 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
                     logger.error(resultVo.getError());
                     throw new MatrixExternalAccessException();
                 } else {
-                    matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), dataVo.getPageSize(), returnObj);
+                    matrixService.getExternalDataTbodyList(resultVo, dataVo.getColumnList(), returnObj);
                 }
             }
             /** 将arrayColumnList包含的属性值转成数组 **/

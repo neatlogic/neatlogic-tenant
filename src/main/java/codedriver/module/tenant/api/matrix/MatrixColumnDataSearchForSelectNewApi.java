@@ -237,7 +237,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                             logger.error(resultVo.getError());
                             throw new MatrixExternalAccessException();
                         } else {
-                            resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null));
+                            resultList.addAll(matrixService.getExternalDataTbodyList(resultVo, columnList, null));
                         }
                     }
                 }
@@ -262,7 +262,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                     logger.error(resultVo.getError());
                     throw new MatrixExternalAccessException();
                 } else {
-                    resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, dataVo.getPageSize(), null);
+                    resultList = matrixService.getExternalDataTbodyList(resultVo, columnList, null);
                 }
             }
         } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
