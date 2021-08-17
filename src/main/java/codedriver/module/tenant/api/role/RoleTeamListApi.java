@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 
@@ -63,9 +65,21 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 			throw new RoleNotFoundException(roleUuid);
 		}
 		JSONObject resultObj = new JSONObject();
-		List<String> teamUuidList = roleMapper.getTeamUuidListByRoleUuid(roleUuid);
-		if (CollectionUtils.isNotEmpty(teamUuidList)) {
+		List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuid(roleUuid, null);
+		if (CollectionUtils.isNotEmpty(roleTeamList)) {
+			List<String> teamUuidList = new ArrayList<>();
+			Map<String, Integer> checkedChildrenMap = new HashMap<>();
+			for (RoleTeamVo roleTeamVo : roleTeamList) {
+				teamUuidList.add(roleTeamVo.getTeamUuid());
+				checkedChildrenMap.put(roleTeamVo.getTeamUuid(), roleTeamVo.getCheckedChildren());
+			}
 			List<TeamVo> teamList = teaMapper.getTeamByUuidList(teamUuidList);
+			for (TeamVo teamVo : teamList) {
+				Integer checkedChildren = checkedChildrenMap.get(teamVo.getUuid());
+				if (checkedChildren != null) {
+					teamVo.setCheckedChildren(checkedChildren);
+				}
+			}
 			resultObj.put("tbodyList", teamList);
 		} else {
 			resultObj.put("tbodyList", new ArrayList<>());
