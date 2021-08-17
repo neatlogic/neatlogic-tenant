@@ -60,19 +60,19 @@ public class RoleTeamSaveApi extends PrivateApiComponentBase {
         roleMapper.deleteTeamRoleByRoleUuid(roleUuid);
         JSONArray teamList = jsonObj.getJSONArray("teamList");
         if (CollectionUtils.isNotEmpty(teamList)) {
-            List<RoleTeamVo> roleTeamList = new ArrayList<>(100);
             for (int i = 0; i < teamList.size(); i++) {
                 JSONObject team = teamList.getJSONObject(i);
                 if (team != null) {
-                    roleTeamList.add(new RoleTeamVo(roleUuid, team.getString("uuid"), team.getInteger("checkedChildren")));
-                    if (roleTeamList.size() >= 100) {
-                        roleMapper.insertRoleTeamList(roleTeamList);
-                        roleTeamList.clear();
+                    RoleTeamVo roleTeamVo = new RoleTeamVo(roleUuid, team.getString("uuid"), team.getInteger("checkedChildren"));
+                    String operation = team.getString("operation");
+                    if ("checked".equals(operation)) {
+                        roleMapper.insertRoleTeam(roleTeamVo);
+                    } else if ("unchecked".equals(operation)) {
+                        roleMapper.deleteTeamRole(roleTeamVo);
+                    } else {
+                        roleMapper.updateTeamRole(roleTeamVo);
                     }
                 }
-            }
-            if (CollectionUtils.isNotEmpty(roleTeamList)) {
-                roleMapper.insertRoleTeamList(roleTeamList);
             }
         }
         return null;
