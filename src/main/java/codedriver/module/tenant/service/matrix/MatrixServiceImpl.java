@@ -212,7 +212,7 @@ public class MatrixServiceImpl implements MatrixService {
     }
 
     @Override
-    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj) {
+    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, JSONObject resultObj) {
         List<Map<String, JSONObject>> resultList = new ArrayList<>();
         if (resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
             JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
@@ -230,9 +230,6 @@ public class MatrixServiceImpl implements MatrixService {
                             resultMap.put(column, matrixAttributeValueHandle(columnValue));
                         }
                         resultList.add(resultMap);
-                        if (resultList.size() >= pageSize) {
-                            break;
-                        }
                     }
                     if (resultObj != null) {
                         resultObj.put("tbodyList", resultList);

@@ -25,7 +25,7 @@ public interface MatrixService {
     
     public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo matrixAttributeVo, MatrixDataVo dataVo);
     
-    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, int pageSize, JSONObject resultObj);
+    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, JSONObject resultObj);
     /**
      * 
     * @Time:2020年7月8日
