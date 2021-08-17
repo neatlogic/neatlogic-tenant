@@ -57,7 +57,6 @@ public class RoleTeamSaveApi extends PrivateApiComponentBase {
         if (roleMapper.checkRoleIsExists(roleUuid) == 0) {
             throw new RoleNotFoundException(roleUuid);
         }
-        roleMapper.deleteTeamRoleByRoleUuid(roleUuid);
         JSONArray teamList = jsonObj.getJSONArray("teamList");
         if (CollectionUtils.isNotEmpty(teamList)) {
             for (int i = 0; i < teamList.size(); i++) {
