@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.integration;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.integration.core.TestInvoker;
+import codedriver.module.framework.intergration.handler.TestInvoker;
 import codedriver.framework.integration.dto.IntegrationInvokeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
