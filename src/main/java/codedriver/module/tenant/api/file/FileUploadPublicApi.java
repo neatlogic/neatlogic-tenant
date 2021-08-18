@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
@@ -18,8 +19,8 @@ import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
-import codedriver.module.framework.file.handler.LocalFileSystemHandler;
-import codedriver.module.framework.file.handler.MinioFileSystemHandler;
+import codedriver.framework.file.core.LocalFileSystemHandler;
+import codedriver.framework.file.core.MinioFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileTypeVo;
 import codedriver.framework.file.dto.FileVo;
