@@ -4,22 +4,16 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
-import codedriver.framework.dto.UserVo;
-import codedriver.framework.notify.core.INotifyHandler;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
-import codedriver.framework.notify.dto.NotifyVo;
 import codedriver.framework.notify.exception.EmailServerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.notify.exception.NotifyNoReceiverException;
-import codedriver.framework.notify.handler.EmailNotifyHandler;
+import codedriver.module.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.tenant.auth.label.MAIL_SERVER_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,8 +54,8 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Description(desc = "测试邮件服务器能否正常发送邮件")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        if (NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getName()) == null) {
-            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getName());
+        if (NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getSimpleName()) == null) {
+            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getSimpleName());
         }
         MailServerVo mailServerVo = mailServerMapper.getActiveMailServer();
         if (mailServerVo == null || StringUtils.isBlank(mailServerVo.getHost()) || mailServerVo.getPort() == null) {

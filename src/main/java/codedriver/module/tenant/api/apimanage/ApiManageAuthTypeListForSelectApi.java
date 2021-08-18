@@ -19,7 +19,7 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.dto.ApiVo;
-import codedriver.framework.restful.web.core.ApiAuthFactory;
+import codedriver.framework.restful.auth.core.ApiAuthFactory;
 
 @Deprecated
 @Service
