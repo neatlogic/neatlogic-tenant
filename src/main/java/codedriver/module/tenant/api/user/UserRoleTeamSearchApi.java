@@ -76,7 +76,7 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
             }
             List<Object> dataList = null;
             boolean isMore = true;
-            if (jsonObj.containsKey("keyword")) {
+            if (!jsonObj.containsKey("valueList") || jsonObj.getJSONArray("valueList").isEmpty()) {
                 dataList = handler.search(jsonObj);
             } else {
                 isMore = false;
