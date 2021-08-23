@@ -10,11 +10,11 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.RoleMapper;
-import codedriver.framework.dao.mapper.TeamMapper;
+import codedriver.framework.dto.AuthenticationInfoVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.service.AuthenticationInfoService;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.util.HtmlUtil;
@@ -23,9 +23,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,17 +35,14 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SystemNoticePullApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private SystemNoticeService systemNoticeService;
 
-    @Autowired
+    @Resource
     private SystemNoticeMapper systemNoticeMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
-
-    @Autowired
-    private TeamMapper teamMapper;
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
 
     @Override
     public String getToken() {
@@ -81,10 +78,11 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
         SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
 
         List<String> uuidList = new ArrayList<>();
+        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
         uuidList.add(UserContext.get().getUserUuid(true));
         uuidList.add(UserType.ALL.getValue());
-        uuidList.addAll(teamMapper.getTeamUuidListByUserUuid(UserContext.get().getUserUuid(true)));
-        uuidList.addAll(roleMapper.getRoleUuidListByUserUuid(UserContext.get().getUserUuid(true)));
+        uuidList.addAll(authenticationInfoVo.getTeamUuidList());
+        uuidList.addAll(authenticationInfoVo.getRoleUuidList());
 
         systemNoticeService.clearSystemNoticeUser();
         systemNoticeService.stopExpiredSystemNotice();
