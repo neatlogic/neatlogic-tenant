@@ -7,7 +7,6 @@ import codedriver.framework.dto.MailServerVo;
 import codedriver.framework.notify.core.NotifyHandlerFactory;
 import codedriver.framework.notify.exception.EmailServerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.module.framework.notify.handler.EmailNotifyHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -54,8 +53,8 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Description(desc = "测试邮件服务器能否正常发送邮件")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        if (NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getSimpleName()) == null) {
-            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getSimpleName());
+        if (NotifyHandlerFactory.getHandler("EmailNotifyHandler") == null) {
+            throw new NotifyHandlerNotFoundException("EmailNotifyHandler");
         }
         MailServerVo mailServerVo = mailServerMapper.getActiveMailServer();
         if (mailServerVo == null || StringUtils.isBlank(mailServerVo.getHost()) || mailServerVo.getPort() == null) {
