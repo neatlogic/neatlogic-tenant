@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.notify;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
@@ -22,8 +21,8 @@ import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.usertype.UserTypeFactory;
 import codedriver.module.tenant.service.notify.NotifyPolicyService;
@@ -79,6 +78,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
         /** 获取工单干系人枚举 */
+        //TODO 没有兼容多模块
         Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
         UserTypeVo UsertypeVo = userTypeVoMap.get("process");
         Map<String, String> processUserType = UsertypeVo.getValues();

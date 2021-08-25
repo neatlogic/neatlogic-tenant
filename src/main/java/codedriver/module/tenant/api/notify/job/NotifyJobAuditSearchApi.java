@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.notify.job;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.RoleMapper;
@@ -23,8 +22,8 @@ import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyJobNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
@@ -132,6 +131,7 @@ public class NotifyJobAuditSearchApi extends PrivateApiComponentBase {
 								this.put("name",receiverVo.getReceiver());
 							}
 						});
+					//TODO 没有兼容多模块
 					}else if(NotifyRecipientType.PROCESSUSERTYPE.getValue().equals(receiverVo.getType())){
 						toArray.add(new JSONObject(){
 							{
