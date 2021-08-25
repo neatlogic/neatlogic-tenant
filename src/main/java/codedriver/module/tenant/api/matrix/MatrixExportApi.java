@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.util.PageUtil;
@@ -153,7 +152,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
                     dataVo.setCurrentPage(currentPage);
                     dataVo.setStartNum(null);
                     List<Map<String, String>> dataMapList = matrixDataMapper.searchDynamicTableData(dataVo);
-                    /** 转换用户、分组、角色字段值为用户名、分组名、角色名 **/
+                    /* 转换用户、分组、角色字段值为用户名、分组名、角色名 **/
                     if (CollectionUtils.isNotEmpty(dataMapList)) {
                         for (Map<String, String> map : dataMapList) {
                             for (MatrixAttributeVo attributeVo : attributeVoList) {
