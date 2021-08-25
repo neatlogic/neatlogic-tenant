@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.notify.job;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.common.util.PageUtil;
@@ -22,8 +21,8 @@ import codedriver.framework.notify.dto.job.NotifyJobReceiverVo;
 import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
@@ -131,6 +130,7 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 						}else if(NotifyRecipientType.PROCESSUSERTYPE.getValue().equals(receiverVo.getType())){
 							toArray.add(new JSONObject(){
 								{
+									//TODO 没有兼容多模块
 									this.put("initType",NotifyRecipientType.PROCESSUSERTYPE.getValue());
 									this.put("name",UserTypeFactory.getUserTypeMap().get("process").getValues().get(receiverVo.getReceiver()));
 								}

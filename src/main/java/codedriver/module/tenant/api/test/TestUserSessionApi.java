@@ -37,7 +37,7 @@ public class TestUserSessionApi extends PrivateApiComponentBase {
 				protected void execute() {
 					long s = System.currentTimeMillis();
 					for (int k = 0; k < 200; k++) {
-						userMapper.getUserSessionByUserUuid(Integer.toString(k));
+						userMapper.getUserSessionLockByUserUuid(Integer.toString(k));
 						userMapper.updateUserSession(Integer.toString(k));
 
 					}
