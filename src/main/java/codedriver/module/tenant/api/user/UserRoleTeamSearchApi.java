@@ -10,7 +10,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.service.UserRoleTeamService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -57,8 +56,7 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
     @Description(desc = "用户角色及组织架构查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray resultArray = userRoleTeamService.searchUserRoleTeam(jsonObj);
-        return resultArray;
+        return userRoleTeamService.searchUserRoleTeam(jsonObj);
     }
 
 }
