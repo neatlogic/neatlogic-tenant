@@ -6,8 +6,7 @@
 package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.message.constvalue.PopUpType;
 import codedriver.framework.message.core.MessageHandlerFactory;
@@ -119,15 +118,15 @@ public class MessageCountApi extends PrivateApiComponentBase {
         resultObj.put("unreadCount", unreadCount);
         resultObj.put("shortShowCount", shortShowCount);
         resultObj.put("longShowCount", longShowCount);
-        if(popUpCount > 0){
+        if (popUpCount > 0) {
             int shortShowTime = jsonObj.getIntValue("shortShowTime");
-            /** 计算临时弹窗失效时间 **/
+            /* 计算临时弹窗失效时间 **/
             Date expiredTime = null;
-            if(shortShowCount != 0){
+            if (shortShowCount != 0) {
                 expiredTime = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(shortShowTime));
             }
-            /** 异步处理消息状态is_show **/
-            CommonThreadPool.execute(new UpdateMessageUserIsShowThread(
+            /* 异步处理消息状态is_show **/
+            CachedThreadPool.execute(new UpdateMessageUserIsShowThread(
                     shortShowCount,
                     longShowCount,
                     popUpShortShowHandlerList,

@@ -1,7 +1,12 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.asynchronization.threadpool.CommonThreadPool;
+import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -15,18 +20,16 @@ import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeUserVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
-import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeExpiredTimeLessThanActiveTimeException;
+import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
 import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -34,16 +37,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-/**
- * @Title: SystemNoticeIssueApi
- * @Package: codedriver.module.tenant.api.systemnotice
- * @Description: 系统公告下发接口
- * @Author: laiwt
- * @Date: 2021/1/13 18:01
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 
 @AuthAction(action = SYSTEM_NOTICE_MODIFY.class)
 @Service
@@ -93,28 +86,28 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
         if (SystemNoticeVo.Status.ISSUED.getValue().equals(oldVo.getStatus())) {
             throw new SystemNoticeHasBeenIssuedException(oldVo.getTitle());
         }
-        if(vo.getStartTime() != null && vo.getEndTime() != null && vo.getEndTime().getTime() < vo.getStartTime().getTime()){
+        if (vo.getStartTime() != null && vo.getEndTime() != null && vo.getEndTime().getTime() < vo.getStartTime().getTime()) {
             throw new SystemNoticeExpiredTimeLessThanActiveTimeException();
         }
 
         long currentTimeMillis = System.currentTimeMillis();
-        /**
-         * 符合以下情形之一则立即下发给通知范围内的在线用户
-         * 1、没有设置生效与失效时间
-         * 2、没有设置生效时间且失效时间大于当前时间
-         * 3、生效时间小于等于当前时间且失效时间大于当前时间
-         * 4、生效时间小于等于当前时间且没有设置失效时间
-        **/
-        if((vo.getStartTime() == null || (vo.getStartTime() != null && currentTimeMillis >= vo.getStartTime().getTime()))
-                && (vo.getEndTime() == null || (vo.getEndTime() != null && currentTimeMillis < vo.getEndTime().getTime()))){
+        /*
+          符合以下情形之一则立即下发给通知范围内的在线用户
+          1、没有设置生效与失效时间
+          2、没有设置生效时间且失效时间大于当前时间
+          3、生效时间小于等于当前时间且失效时间大于当前时间
+          4、生效时间小于等于当前时间且没有设置失效时间
+        */
+        if ((vo.getStartTime() == null || (vo.getStartTime() != null && currentTimeMillis >= vo.getStartTime().getTime()))
+                && (vo.getEndTime() == null || (vo.getEndTime() != null && currentTimeMillis < vo.getEndTime().getTime()))) {
 
-            /** 立即更改公告状态为已下发 **/
+            /* 立即更改公告状态为已下发 **/
             vo.setStatus(SystemNoticeVo.Status.ISSUED.getValue());
             vo.setIssueTime(vo.getStartTime() == null ? new Date() : vo.getStartTime());
 
-            /** 如果没有忽略已读，则把system_notice_user中的is_read设为0 **/
-            if(vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0){
-                /** 经测试，该语句update 53万条数据耗时约1.2s，故不单独开线程执行 **/
+            /* 如果没有忽略已读，则把system_notice_user中的is_read设为0 **/
+            if (vo.getIgnoreRead() != null && vo.getIgnoreRead() == 0) {
+                /* 经测试，该语句update 53万条数据耗时约1.2s，故不单独开线程执行 **/
                 systemNoticeMapper.updateReadStatusToNotReadByNoticeId(vo.getId());
             }
 
@@ -122,19 +115,19 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(recipientList)) {
                 long expireTime = currentTimeMillis - TimeUnit.MINUTES.toMillis(Config.USER_EXPIRETIME());
                 if (recipientList.stream().anyMatch(o -> UserType.ALL.getValue().equals(o.getUuid()))) {
-                    /** 如果通知范围是所有人，那么找出当前所有的在线用户 **/
+                    /* 如果通知范围是所有人，那么找出当前所有的在线用户 **/
                     int allOnlineUserCount = userMapper.getAllOnlineUserCount(new Date(expireTime));
-                    if(allOnlineUserCount > 0){
-                        CommonThreadPool.execute(new CodeDriverThread() {
+                    if (allOnlineUserCount > 0) {
+                        CachedThreadPool.execute(new CodeDriverThread() {
                             @Override
                             protected void execute() {
                                 Date expireDate = new Date(expireTime);
-                                int count = allOnlineUserCount / PAGE_SIZE.intValue() + 1;
+                                int count = allOnlineUserCount / PAGE_SIZE + 1;
                                 List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
                                 for (int i = 0; i < count; i++) {
                                     List<String> allOnlineUser = userMapper.getAllOnlineUser(expireDate, i, PAGE_SIZE);
-                                    if(CollectionUtils.isNotEmpty(allOnlineUser)){
-                                        allOnlineUser.stream().forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
+                                    if (CollectionUtils.isNotEmpty(allOnlineUser)) {
+                                        allOnlineUser.forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
                                         systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList);
                                         noticeUserVoList.clear();
                                     }
@@ -156,19 +149,19 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                             .map(SystemNoticeRecipientVo::getUuid)
                             .collect(Collectors.toList());
                     int onlineUserCount = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTimeCount
-                                    (userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
+                            (userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
                     if(onlineUserCount > 0){
-                        CommonThreadPool.execute(new CodeDriverThread() {
+                        CachedThreadPool.execute(new CodeDriverThread() {
                             @Override
                             protected void execute() {
                                 Date expireDate = new Date(expireTime);
-                                int count = onlineUserCount / PAGE_SIZE.intValue() + 1;
+                                int count = onlineUserCount / PAGE_SIZE + 1;
                                 List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
                                 for (int i = 0; i < count; i++) {
                                     List<String> onlineUserList = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime
-                                            (userUuidList, teamUuidList, roleUuidList, expireDate,true,i,PAGE_SIZE);
-                                    if(CollectionUtils.isNotEmpty(onlineUserList)){
-                                        onlineUserList.stream().forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
+                                            (userUuidList, teamUuidList, roleUuidList, expireDate, true, i, PAGE_SIZE);
+                                    if (CollectionUtils.isNotEmpty(onlineUserList)) {
+                                        onlineUserList.forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
                                         systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList);
                                         noticeUserVoList.clear();
                                     }
