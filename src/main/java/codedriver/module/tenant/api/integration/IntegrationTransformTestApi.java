@@ -11,7 +11,7 @@ import codedriver.framework.exception.integration.ParamFormatInvalidException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.util.JavascriptUtil;
+import codedriver.framework.util.javascript.JavascriptUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

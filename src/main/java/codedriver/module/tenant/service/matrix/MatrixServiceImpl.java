@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.service.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
@@ -29,7 +34,7 @@ import codedriver.framework.matrix.exception.MatrixViewCreateSchemaException;
 import codedriver.framework.matrix.exception.MatrixViewSqlIrregularException;
 import codedriver.framework.matrix.view.MatrixViewSqlBuilder;
 import codedriver.framework.transaction.core.EscapeTransactionJob;
-import codedriver.framework.util.JavascriptUtil;
+import codedriver.framework.util.javascript.JavascriptUtil;
 import codedriver.framework.util.TimeUtil;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSON;

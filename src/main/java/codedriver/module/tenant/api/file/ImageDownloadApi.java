@@ -6,7 +6,6 @@
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -86,9 +85,7 @@ public class ImageDownloadApi extends PrivateBinaryStreamApiComponentBase {
 					os.flush();
 					os.close();
 				}
-				if (in != null) {
-					in.close();
-				}
+				in.close();
 			}
 		} else {
 			throw new FileNotFoundException(id);
