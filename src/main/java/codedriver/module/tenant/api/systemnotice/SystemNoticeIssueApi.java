@@ -12,6 +12,8 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.UserType;
+import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -122,10 +124,13 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                             @Override
                             protected void execute() {
                                 Date expireDate = new Date(expireTime);
-                                int count = allOnlineUserCount / PAGE_SIZE + 1;
+                                BasePageVo pageVo = new BasePageVo();
+                                pageVo.setPageSize(PAGE_SIZE);
+                                pageVo.setPageCount(PageUtil.getPageCount(allOnlineUserCount, pageVo.getPageSize()));
                                 List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
-                                for (int i = 0; i < count; i++) {
-                                    List<String> allOnlineUser = userMapper.getAllOnlineUser(expireDate, i, PAGE_SIZE);
+                                for (int i = 1; i <= pageVo.getPageCount(); i++) {
+                                    pageVo.setCurrentPage(i);
+                                    List<String> allOnlineUser = userMapper.getAllOnlineUser(expireDate, pageVo.getStartNum(), pageVo.getPageSize());
                                     if (CollectionUtils.isNotEmpty(allOnlineUser)) {
                                         allOnlineUser.forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
                                         systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList);
