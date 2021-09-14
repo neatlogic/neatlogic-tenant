@@ -5,7 +5,6 @@
 
 package codedriver.module.tenant.api.auth;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
@@ -14,14 +13,12 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @program: codedriver
@@ -52,6 +49,7 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
     }
 
     @Input( {
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
             @Param( name = "auth",  desc = "权限", type = ApiParamType.STRING, isRequired = true)
     })
 
@@ -64,27 +62,22 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        String auth = jsonObj.getString("auth");
-        List<UserVo> roleUserList = userMapper.searchRoleUserByAuth(auth);
-        Set<String> roleUserSet = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(roleUserList)){
-            for (UserVo user : roleUserList){
-                roleUserSet.add(user.getUuid());
-            }
-        }
-        List<UserVo> userList = userMapper.searchUserByAuth(auth);
-        if (CollectionUtils.isNotEmpty(userList)){
-            Iterator<UserVo> iterator = userList.iterator();
-            while (iterator.hasNext()){
-                UserVo userVo = iterator.next();
-                if (roleUserSet.contains(userVo.getUuid())){
-                    iterator.remove();
+        UserVo vo = JSONObject.toJavaObject(jsonObj, UserVo.class);
+        List<UserVo> roleUserList = new ArrayList<>();
+        int userCount = userMapper.searchRoleUserAndUserCountByAuth(vo);
+        if (vo != null) {
+            List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
+            for (int i = 0; i < uuidList.size(); i++) {
+                vo.setUuid(uuidList.get(i));
+                List<UserVo> userList = userMapper.searchRoleUserAndUserByAuth(vo);
+                if (!CollectionUtils.isEmpty(userList)) {
+                    roleUserList.addAll(userList);
                 }
             }
         }
+
         returnObj.put("roleUserList", roleUserList);
-        returnObj.put("userList", userList);
-        returnObj.put("userCount", roleUserList.size() + userList.size());
+        returnObj.put("userCount", userCount);
         return returnObj;
     }
 }
