@@ -47,21 +47,26 @@ public class RoleUserListApi extends PrivateApiComponentBase  {
 	}
 
 	@Input({
-        @Param(name = "roleUuid", type = ApiParamType.STRING, isRequired = true, desc = "角色uuid")
+        @Param(name = "roleUuid", type = ApiParamType.STRING, isRequired = true, desc = "角色uuid"),
+        @Param(name = "keyword", type = ApiParamType.STRING, isRequired = false, desc = "关键字")
 	})
 	@Output({
-		@Param(name = "tbodyList", explode = UserVo[].class, desc = "角色用户成员列表")
+		@Param(name = "tbodyList", explode = UserVo[].class, desc = "角色用户成员列表"),
+		@Param(name = "userCount", type = ApiParamType.INTEGER, desc = "用户总数")
 	})
 	@Description( desc = "获取角色用户成员列表")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String roleUuid = jsonObj.getString("roleUuid");
+		UserVo userVo = JSONObject.toJavaObject(jsonObj, UserVo.class);
 		if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
 		JSONObject resultObj = new JSONObject();
-		List<UserVo> roleUserList = userMapper.getUserListByRoleUuid(roleUuid);
+		int userCount = userMapper.searchUserCount(userVo);
+		List<UserVo> roleUserList = userMapper.getUserListByRoleUuid(userVo);
 		resultObj.put("tbodyList", roleUserList);
+		resultObj.put("userCount", userCount);
 		return resultObj;
 	}
 
