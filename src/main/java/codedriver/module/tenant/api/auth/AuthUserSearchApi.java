@@ -52,7 +52,6 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
     }
 
     @Input( {
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
             @Param( name = "auth",  desc = "权限", type = ApiParamType.STRING, isRequired = true)
     })
 
@@ -82,9 +81,6 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
                     iterator.remove();
                 }
             }
-        }
-        if (userList.size() < 100) {
-
         }
         returnObj.put("roleUserList", roleUserList);
         returnObj.put("userList", userList);
