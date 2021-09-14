@@ -63,17 +63,11 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         UserVo vo = JSONObject.toJavaObject(jsonObj, UserVo.class);
-        List<UserVo> roleUserList = new ArrayList<>();
+        List<UserVo> roleUserList = null;
         int userCount = userMapper.searchRoleUserAndUserCountByAuth(vo);
         if (vo != null) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-            for (int i = 0; i < uuidList.size(); i++) {
-                vo.setUuid(uuidList.get(i));
-                List<UserVo> userList = userMapper.searchRoleUserAndUserByAuth(vo);
-                if (!CollectionUtils.isEmpty(userList)) {
-                    roleUserList.addAll(userList);
-                }
-            }
+            roleUserList = userMapper.getUserByUserUuidList(uuidList);
         }
 
         returnObj.put("roleUserList", roleUserList);
