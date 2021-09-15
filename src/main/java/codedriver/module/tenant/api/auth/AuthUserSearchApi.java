@@ -67,7 +67,9 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
         int userCount = userMapper.searchRoleUserAndUserCountByAuth(vo);
         if (vo != null) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-            roleUserList = userMapper.getUserByUserUuidList(uuidList);
+            if (!CollectionUtils.isEmpty(uuidList)) {
+                roleUserList = userMapper.getUserByUserUuidList(uuidList);
+            }
         }
 
         returnObj.put("roleUserList", roleUserList);
