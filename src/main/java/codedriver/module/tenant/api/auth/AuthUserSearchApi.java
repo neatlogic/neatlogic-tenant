@@ -13,9 +13,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
         int userCount = userMapper.searchRoleUserAndUserCountByAuth(vo);
         if (vo != null) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-            if (!CollectionUtils.isEmpty(uuidList)) {
+            if (CollectionUtils.isNotEmpty(uuidList)) {
                 roleUserList = userMapper.getUserByUserUuidList(uuidList);
             }
         }
