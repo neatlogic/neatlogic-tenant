@@ -12,6 +12,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,30 +51,27 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
 
     @Input( {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param( name = "auth",  desc = "权限", type = ApiParamType.STRING, isRequired = true)
+            @Param( name = "auth",  desc = "权限", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
     })
 
     @Output({
-            @Param( name = "userList", desc = "用户列表", type = ApiParamType.JSONARRAY, explode = UserVo[].class),
-            @Param( name = "roleUserList", desc = "角色用户列表", type = ApiParamType.JSONARRAY, explode = UserVo[].class)
+            @Param( name = "userList", desc = "用户列表",explode = UserVo[].class),
     })
 
     @Description(desc = "权限用户查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
         UserVo vo = JSONObject.toJavaObject(jsonObj, UserVo.class);
-        List<UserVo> roleUserList = new ArrayList<>();
-        int userCount = userMapper.searchRoleUserAndUserCountByAuth(vo);
-        if (vo != null) {
+        List<UserVo> userList = new ArrayList<>();
+        int rowNum = userMapper.searchUserCountByAuth(vo);
+        if (rowNum > 0) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-            if (CollectionUtils.isNotEmpty(uuidList)) {
-                roleUserList = userMapper.getUserByUserUuidList(uuidList);
-            }
+                userList = userMapper.getUserByUserUuidList(uuidList);
         }
-
-        returnObj.put("roleUserList", roleUserList);
-        returnObj.put("userCount", userCount);
-        return returnObj;
+        vo.setRowNum(rowNum);
+        return TableResultUtil.getResult(userList, vo);
     }
 }

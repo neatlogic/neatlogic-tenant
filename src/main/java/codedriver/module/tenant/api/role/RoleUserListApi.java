@@ -14,6 +14,7 @@ import codedriver.framework.exception.role.RoleNotFoundException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,11 +49,13 @@ public class RoleUserListApi extends PrivateApiComponentBase  {
 
 	@Input({
         @Param(name = "roleUuid", type = ApiParamType.STRING, isRequired = true, desc = "角色uuid"),
-        @Param(name = "keyword", type = ApiParamType.STRING, isRequired = false, desc = "关键字")
+        @Param(name = "keyword", type = ApiParamType.STRING, isRequired = false, desc = "关键字"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
 	})
 	@Output({
-		@Param(name = "tbodyList", explode = UserVo[].class, desc = "角色用户成员列表"),
-		@Param(name = "userCount", type = ApiParamType.INTEGER, desc = "用户总数")
+		@Param(name = "userList", explode = UserVo[].class, desc = "角色用户成员列表")
 	})
 	@Description( desc = "获取角色用户成员列表")
 	@Override
@@ -62,12 +65,9 @@ public class RoleUserListApi extends PrivateApiComponentBase  {
 		if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
 			throw new RoleNotFoundException(roleUuid);
 		}
-		JSONObject resultObj = new JSONObject();
-		int userCount = userMapper.searchUserCount(userVo);
-		List<UserVo> roleUserList = userMapper.getUserListByRoleUuid(userVo);
-		resultObj.put("tbodyList", roleUserList);
-		resultObj.put("userCount", userCount);
-		return resultObj;
+		int rowNom = userMapper.searchUserCount(userVo);
+		userVo.setRowNum(rowNom);
+		return TableResultUtil.getResult(userMapper.getUserListByRoleUuid(userVo), userVo);
 	}
 
 }
