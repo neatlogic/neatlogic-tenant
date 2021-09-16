@@ -73,7 +73,6 @@ public class AuthUserSaveApi extends PrivateApiComponentBase {
         Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
 
         if(CollectionUtils.isNotEmpty(uuidList)){
-            userMapper.deleteUserAuth(new UserAuthVo(null, auth));
             for(String userUuid : uuidList) {
                 UserAuthVo userAuthVo = new UserAuthVo();
                 userAuthVo.setAuthGroup(authGroup);
