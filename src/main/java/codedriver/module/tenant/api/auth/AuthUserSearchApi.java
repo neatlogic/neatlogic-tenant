@@ -58,7 +58,7 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
     })
 
     @Output({
-            @Param( name = "userList", desc = "用户列表", type = ApiParamType.JSONARRAY, explode = UserVo[].class),
+            @Param( name = "userList", desc = "用户列表",explode = UserVo[].class),
     })
 
     @Description(desc = "权限用户查询接口")
@@ -67,11 +67,9 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
         UserVo vo = JSONObject.toJavaObject(jsonObj, UserVo.class);
         List<UserVo> userList = new ArrayList<>();
         int rowNum = userMapper.searchUserCountByAuth(vo);
-        if (vo != null) {
+        if (rowNum > 0) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-            if (CollectionUtils.isNotEmpty(uuidList)) {
                 userList = userMapper.getUserByUserUuidList(uuidList);
-            }
         }
         vo.setRowNum(rowNum);
         return TableResultUtil.getResult(userList, vo);
