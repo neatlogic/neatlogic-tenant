@@ -64,7 +64,8 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true), @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true)})
+    @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true)})
     @Output({@Param(explode = FileVo.class)})
     @Description(desc = "附件上传接口")
     @Override
