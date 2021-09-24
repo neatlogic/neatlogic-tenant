@@ -72,6 +72,7 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
         } else {
             resultList.addAll(staticSubSysList);
         }
+        Thread.sleep(5000);
         return resultList;
     }
 
