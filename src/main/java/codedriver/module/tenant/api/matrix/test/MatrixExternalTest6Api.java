@@ -35,7 +35,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
     private static List<TbodyVo> staticTbodyList = new ArrayList<>();
 
     {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 50; i++) {
             TbodyVo tbodyVo = new TbodyVo();
             tbodyVo.setColumn1("第一列" + i);
             tbodyVo.setColumn2("第二列" + i);
@@ -176,7 +176,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
             resultObj.put("tbodyList", tbodyVoList);
             resultObj.put("needPage", false);
         }
-
+        Thread.sleep(5000);
         return resultObj;
     }
 }
