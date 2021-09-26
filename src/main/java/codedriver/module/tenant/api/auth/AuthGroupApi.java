@@ -5,11 +5,12 @@
 
 package codedriver.module.tenant.api.auth;
 
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
@@ -18,11 +19,13 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -58,12 +61,17 @@ public class AuthGroupApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         JSONArray groupArray = new JSONArray();
         Map<String, List<AuthBase>> authGroupMap = AuthFactory.getAuthGroupMap();
-        Set<String> groupSet = authGroupMap.keySet();
-        for (String group : groupSet){
-            JSONObject groupObj = new JSONObject();
-            groupObj.put("value", group);
-            groupObj.put("text", ModuleUtil.getModuleGroup(group).getGroupName());
-            groupArray.add(groupObj);
+        List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
+        if(CollectionUtils.isNotEmpty(moduleGroupVos)) {
+            List<String> groupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+            Set<String> groupSet = authGroupMap.keySet();
+            groupSet.retainAll(groupList);
+            for (String group : groupSet) {
+                JSONObject groupObj = new JSONObject();
+                groupObj.put("value", group);
+                groupObj.put("text", ModuleUtil.getModuleGroup(group).getGroupName());
+                groupArray.add(groupObj);
+            }
         }
         returnObj.put("groupList", groupArray);
         return returnObj;
