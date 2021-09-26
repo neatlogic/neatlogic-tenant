@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 @Service
@@ -363,6 +360,22 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
             }
         }
 
+        //去重
+        List<String> exsited = new ArrayList<>();
+        Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
+        while (iterator.hasNext()) {
+            Map<String, JSONObject> resultObj = iterator.next();
+            JSONObject firstObj = resultObj.get(columnList.get(0));
+            String firstValue = firstObj.getString("compose");
+            if (StringUtils.isNotBlank(firstValue)) {
+                firstValue = firstObj.getString("value");
+            }
+            if (exsited.contains(firstValue)) {
+                iterator.remove();
+            } else {
+                exsited.add(firstValue);
+            }
+        }
         returnObj.put("columnDataList", resultList);
         return returnObj;
     }
