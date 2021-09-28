@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -77,10 +78,7 @@ public class MatrixDataGetApi extends PrivateApiComponentBase {
         if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
             List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
             if (CollectionUtils.isNotEmpty(attributeVoList)) {
-                List<String> columnList = new ArrayList<>();
-                for (MatrixAttributeVo attributeVo : attributeVoList) {
-                    columnList.add(attributeVo.getUuid());
-                }
+                List<String> columnList = attributeVoList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
                 dataVo.setColumnList(columnList);
                 Map<String, String> rowData = matrixDataMapper.getDynamicRowDataByUuid(dataVo);
                 for (MatrixAttributeVo attributeVo : attributeVoList) {

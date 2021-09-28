@@ -74,26 +74,26 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        String label = jsonObj.getString("label");
         MatrixVo sourceMatrix = matrixMapper.getMatrixByUuid(uuid);
         if (sourceMatrix == null) {
             throw new MatrixNotFoundException(uuid);
         }
         if (MatrixType.CUSTOM.getValue().equals(sourceMatrix.getType())) {
-            String name = jsonObj.getString("name");
-            //判断name是否存在
             String targetMatrixUuid = UuidUtil.randomUuid();
             while (matrixMapper.checkMatrixIsExists(targetMatrixUuid) > 0) {
                 targetMatrixUuid = UuidUtil.randomUuid();
             }
             sourceMatrix.setUuid(targetMatrixUuid);
+            String name = jsonObj.getString("name");
+            //判断name是否存在
             sourceMatrix.setName(name);
-            sourceMatrix.setLabel(label);
             if (matrixMapper.checkMatrixNameIsRepeat(sourceMatrix) > 0) {
                 throw new MatrixNameRepeatException(name);
             }
+            String label = jsonObj.getString("label");
+            sourceMatrix.setLabel(label);
             if (matrixMapper.checkMatrixLabelIsRepeat(sourceMatrix) > 0) {
-                throw new MatrixLabelRepeatException(sourceMatrix.getLabel());
+                throw new MatrixLabelRepeatException(label);
             }
             sourceMatrix.setFcu(UserContext.get().getUserUuid(true));
             sourceMatrix.setLcu(UserContext.get().getUserUuid(true));

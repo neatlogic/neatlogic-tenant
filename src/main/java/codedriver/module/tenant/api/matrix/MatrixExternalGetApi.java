@@ -57,10 +57,9 @@ public class MatrixExternalGetApi extends PrivateApiComponentBase {
             throw new MatrixNotFoundException(matrixUuid);
         }
 
-        if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-            return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
-        } else {
+        if (!MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
+        return externalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
     }
 }

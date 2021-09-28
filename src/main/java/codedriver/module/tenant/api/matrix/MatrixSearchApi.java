@@ -7,7 +7,6 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dependency.constvalue.CalleeType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
@@ -15,13 +14,13 @@ import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,35 +66,24 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
     @Description(desc = "数据源矩阵检索")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject returnObj = new JSONObject();
         MatrixVo matrix = JSONObject.toJavaObject(jsonObj, MatrixVo.class);
         JSONArray defaultValue = matrix.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
-            List<MatrixVo> tbodyList = new ArrayList<>();
-            for (int i = 0; i < defaultValue.size(); i++) {
-                String uuid = defaultValue.getString(i);
-                MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
-                if (matrixVo != null) {
-                    tbodyList.add(matrixVo);
-                }
-            }
+            List<String> uuidList = defaultValue.toJavaList(String.class);
+            List<MatrixVo> tbodyList = matrixMapper.getMatrixListByUuidList(uuidList);
+            JSONObject returnObj = new JSONObject();
             returnObj.put("tbodyList", tbodyList);
-        } else {
-            if (matrix.getNeedPage()) {
-                int rowNum = matrixMapper.searchMatrixCount(matrix);
-                matrix.setPageCount(PageUtil.getPageCount(rowNum, matrix.getPageSize()));
-                returnObj.put("pageCount", matrix.getPageCount());
-                returnObj.put("rowNum", rowNum);
-                returnObj.put("pageSize", matrix.getPageSize());
-                returnObj.put("currentPage", matrix.getCurrentPage());
-            }
-            List<MatrixVo> tbodyList = matrixMapper.searchMatrix(matrix);
-            for(MatrixVo matrixVo : tbodyList){
-                int count = DependencyManager.getDependencyCount(CalleeType.MATRIX, matrixVo.getUuid());
-                matrixVo.setReferenceCount(count);
-            }
-            returnObj.put("tbodyList", tbodyList);
+            return returnObj;
         }
-        return returnObj;
+        if (matrix.getNeedPage()) {
+            int rowNum = matrixMapper.searchMatrixCount(matrix);
+            matrix.setRowNum(rowNum);
+        }
+        List<MatrixVo> tbodyList = matrixMapper.searchMatrix(matrix);
+        for (MatrixVo matrixVo : tbodyList) {
+            int count = DependencyManager.getDependencyCount(CalleeType.MATRIX, matrixVo.getUuid());
+            matrixVo.setReferenceCount(count);
+        }
+        return TableResultUtil.getResult(tbodyList, matrix);
     }
 }

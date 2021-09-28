@@ -92,11 +92,7 @@ public class MatrixViewSaveApi extends PrivateApiComponentBase {
         JSONObject config = new JSONObject();
         config.put("attributeList", matrixAttributeVoList);
         matrixViewVo.setConfig(config.toJSONString());
-        if (viewMapper.checkMatrixViewIsExists(matrixVo.getUuid()) == 0) {
-            viewMapper.insertMatrixView(matrixViewVo);
-        } else {
-            viewMapper.updateMatrixView(matrixViewVo);
-        }
+        viewMapper.replaceMatrixView(matrixViewVo);
         return null;
     }
 

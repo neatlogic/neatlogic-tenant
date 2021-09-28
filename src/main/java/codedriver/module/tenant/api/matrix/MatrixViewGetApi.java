@@ -75,13 +75,11 @@ public class MatrixViewGetApi extends PrivateApiComponentBase {
             throw new MatrixViewNotFoundException(matrixVo.getName());
         }
         Long fileId = matrixViewVo.getFileId();
-        if (fileId != null) {
-            FileVo fileVo = fileMapper.getFileById(fileId);
-            if (fileVo == null) {
-                throw new FileNotFoundException(fileId);
-            }
-            matrixViewVo.setFileVo(fileVo);
+        FileVo fileVo = fileMapper.getFileById(fileId);
+        if (fileVo == null) {
+            throw new FileNotFoundException(fileId);
         }
+        matrixViewVo.setFileVo(fileVo);
         return matrixViewVo;
     }
 }

@@ -217,14 +217,11 @@ public class MatrixServiceImpl implements MatrixService {
     }
 
     @Override
-    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, JSONObject resultObj) {
+    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList) {
         List<Map<String, JSONObject>> resultList = new ArrayList<>();
         if (resultVo != null && StringUtils.isNotBlank(resultVo.getTransformedResult())) {
             JSONObject transformedResult = JSONObject.parseObject(resultVo.getTransformedResult());
             if (MapUtils.isNotEmpty(transformedResult)) {
-                if (resultObj != null) {
-                    resultObj.putAll(transformedResult);
-                }
                 JSONArray tbodyList = transformedResult.getJSONArray("tbodyList");
                 if (CollectionUtils.isNotEmpty(tbodyList)) {
                     for (int i = 0; i < tbodyList.size(); i++) {
@@ -236,9 +233,6 @@ public class MatrixServiceImpl implements MatrixService {
                         }
                         resultList.add(resultMap);
                     }
-                    if (resultObj != null) {
-                        resultObj.put("tbodyList", resultList);
-                    }
                 }
             }
         }
@@ -246,13 +240,12 @@ public class MatrixServiceImpl implements MatrixService {
     }
 
     @Override
-    public void arrayColumnDataConversion(List<String> arrayColumnList, JSONArray tbodyList) {
-        for (int i = 0; i < tbodyList.size(); i++) {
-            JSONObject rowData = tbodyList.getJSONObject(i);
-            for (Entry<String, Object> entry : rowData.entrySet()) {
+    public void arrayColumnDataConversion(List<String> arrayColumnList, List<Map<String, JSONObject>> tbodyList) {
+        for (Map<String, JSONObject> rowData : tbodyList) {
+            for (Entry<String, JSONObject> entry : rowData.entrySet()) {
                 if (arrayColumnList.contains(entry.getKey())) {
                     List<ValueTextVo> valueObjList = new ArrayList<>();
-                    JSONObject valueObj = (JSONObject) entry.getValue();
+                    JSONObject valueObj = entry.getValue();
                     String value = valueObj.getString("value");
                     if (StringUtils.isNotBlank(value)) {
                         if (value.startsWith("[") && value.endsWith("]")) {
@@ -352,7 +345,6 @@ public class MatrixServiceImpl implements MatrixService {
                     matrixAttributeList.add(matrixAttributeVo);
                 }
                 EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
-                    System.out.println(TenantContext.get().getDataDbName());
                     if (schemaMapper.checkSchemaIsExists(TenantContext.get().getDataDbName()) > 0) {
                         //创建配置项表
 //                        String viewSql = viewBuilder.getCreateViewSql();
