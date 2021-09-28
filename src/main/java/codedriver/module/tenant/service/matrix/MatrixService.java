@@ -25,7 +25,7 @@ public interface MatrixService {
     
     public List<Map<String, String>> matrixAttributeValueKeyWordSearch(MatrixAttributeVo matrixAttributeVo, MatrixDataVo dataVo);
     
-    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList, JSONObject resultObj);
+    public List<Map<String, JSONObject>> getExternalDataTbodyList(IntegrationResultVo resultVo, List<String> columnList);
     /**
      * 
     * @Time:2020年7月8日
@@ -34,7 +34,7 @@ public interface MatrixService {
     * @param tbodyList 表格数据
     * @return void
      */
-    public void arrayColumnDataConversion(List<String> arrayColumnList, JSONArray tbodyList);
+    public void arrayColumnDataConversion(List<String> arrayColumnList, List<Map<String, JSONObject>> tbodyList);
     /**
      * 
     * @Time:2020年12月1日

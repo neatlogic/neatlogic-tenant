@@ -176,7 +176,6 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
             resultObj.put("tbodyList", tbodyVoList);
             resultObj.put("needPage", false);
         }
-        Thread.sleep(5000);
         return resultObj;
     }
 }

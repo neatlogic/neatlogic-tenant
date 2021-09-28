@@ -80,17 +80,11 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(externalVo.getMatrixUuid());
         }
-
-        if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-            matrixService.validateMatrixExternalData(externalVo.getIntegrationUuid());
-            if (externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
-                externalMapper.insertMatrixExternal(externalVo);
-            } else {
-                externalMapper.updateMatrixExternal(externalVo);
-            }
-        } else {
+        if (!MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             throw new MatrixExternalNotFoundException(matrixVo.getName());
         }
+        matrixService.validateMatrixExternalData(externalVo.getIntegrationUuid());
+        externalMapper.replaceMatrixExternal(externalVo);
         return null;
     }
 

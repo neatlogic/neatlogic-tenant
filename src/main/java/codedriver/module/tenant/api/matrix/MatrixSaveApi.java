@@ -1,25 +1,20 @@
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
-import codedriver.framework.dao.mapper.SchemaMapper;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.exception.database.DataBaseNotFoundException;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.matrix.constvalue.MatrixAttributeType;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dao.mapper.MatrixViewMapper;
 import codedriver.framework.matrix.dto.*;
 import codedriver.framework.matrix.exception.*;
-import codedriver.framework.matrix.view.MatrixViewSqlBuilder;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
@@ -27,12 +22,10 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.transaction.core.EscapeTransactionJob;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
 import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -40,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,7 +76,8 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
+    @Input({
+            @Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
             @Param(name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true),
             @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
@@ -109,25 +102,20 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
             throw new MatrixLabelRepeatException(matrixVo.getLabel());
         }
-        if (!isUuidBlank) {
-            matrixMapper.updateMatrixNameAndLcu(matrixVo);
-        } else {
+        if (isUuidBlank) {
             matrixVo.setFcu(UserContext.get().getUserUuid(true));
             matrixMapper.insertMatrix(matrixVo);
+        } else {
+            matrixMapper.updateMatrixNameAndLcu(matrixVo);
         }
-        if(MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())){
+        if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
             String integrationUuid = jsonObj.getString("integrationUuid");
-            if(StringUtils.isNotBlank(integrationUuid)){
-                matrixService.validateMatrixExternalData(integrationUuid);
-                MatrixExternalVo externalVo = new MatrixExternalVo(matrixVo.getUuid(),integrationUuid);
-                if (externalMapper.getMatrixExternalIsExists(externalVo.getMatrixUuid()) == 0) {
-                    externalMapper.insertMatrixExternal(externalVo);
-                } else {
-                    externalMapper.updateMatrixExternal(externalVo);
-                }
-            }else{
+            if (StringUtils.isBlank(integrationUuid)) {
                 throw new ParamNotExistsException("integrationUuid");
             }
+            MatrixExternalVo externalVo = new MatrixExternalVo(matrixVo.getUuid(), integrationUuid);
+            matrixService.validateMatrixExternalData(integrationUuid);
+            externalMapper.replaceMatrixExternal(externalVo);
         } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
             Long fileId = jsonObj.getLong("fileId");
             if (fileId == null) {
@@ -149,11 +137,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             JSONObject config = new JSONObject();
             config.put("attributeList", matrixAttributeVoList);
             matrixViewVo.setConfig(config.toJSONString());
-            if (viewMapper.checkMatrixViewIsExists(matrixVo.getUuid()) == 0) {
-                viewMapper.insertMatrixView(matrixViewVo);
-            } else {
-                viewMapper.updateMatrixView(matrixViewVo);
-            }
+            viewMapper.replaceMatrixView(matrixViewVo);
         }
         returnObj.put("matrix", matrixVo);
         return returnObj;
