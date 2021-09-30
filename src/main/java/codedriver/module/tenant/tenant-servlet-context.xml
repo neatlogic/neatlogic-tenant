@@ -15,7 +15,7 @@
 		http://codedriver.techsure.com/schema/codedriver
 		http://codedriver.techsure.com/schema/codedriver.xsd">
 
-	<codedriver:module id="tenant" name="租户基础功能模块" group="framework" groupName="系统管理" groupSort="99" />
+	<codedriver:module id="tenant" name="租户基础功能模块" group="framework" groupName="系统配置" groupSort="99" />
 
 	<context:component-scan base-package="codedriver.module.tenant" />
 
