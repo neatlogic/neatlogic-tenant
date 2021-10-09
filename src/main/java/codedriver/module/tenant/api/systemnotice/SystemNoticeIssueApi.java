@@ -25,7 +25,7 @@ import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeExpiredTimeLessThanActiveTimeException;
 import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
-import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
+import codedriver.framework.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;

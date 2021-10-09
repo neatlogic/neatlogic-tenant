@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -8,22 +13,12 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeNotFoundException;
-import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
+import codedriver.framework.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
-/**
- * @Title: SystemNoticeDeleteApi
- * @Package: codedriver.module.tenant.api.systemnotice
- * @Description: 系统公告删除接口
- * @Author: laiwt
- * @Date: 2021/1/13 18:01
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 
 @AuthAction(action = SYSTEM_NOTICE_MODIFY.class)
 @Service

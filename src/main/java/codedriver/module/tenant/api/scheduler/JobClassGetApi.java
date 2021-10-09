@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.scheduler;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -9,7 +14,7 @@ import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobClassVo;
 import codedriver.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import codedriver.module.tenant.auth.label.SCHEDULE_JOB_MODIFY;
+import codedriver.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;

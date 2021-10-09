@@ -23,7 +23,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.UuidUtil;
-import codedriver.module.tenant.auth.label.MATRIX_MODIFY;
+import codedriver.framework.auth.label.MATRIX_MODIFY;
 import codedriver.module.tenant.service.matrix.MatrixService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;

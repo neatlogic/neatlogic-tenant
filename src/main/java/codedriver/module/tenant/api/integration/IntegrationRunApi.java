@@ -19,7 +19,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.auth.label.INTEGRATION_MODIFY;
+import codedriver.framework.auth.label.INTEGRATION_MODIFY;
 import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

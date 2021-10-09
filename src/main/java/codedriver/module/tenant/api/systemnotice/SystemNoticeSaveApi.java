@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.systemnotice;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -14,7 +19,7 @@ import codedriver.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import codedriver.framework.systemnotice.dto.SystemNoticeVo;
 import codedriver.framework.systemnotice.exception.SystemNoticeHasBeenIssuedException;
 import codedriver.framework.systemnotice.exception.SystemNoticeRepeatException;
-import codedriver.module.tenant.auth.label.SYSTEM_NOTICE_MODIFY;
+import codedriver.framework.auth.label.SYSTEM_NOTICE_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -26,16 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * @Title: SystemNoticeSaveApi
- * @Package: codedriver.module.tenant.api.systemnotice
- * @Description: 系统公告保存接口
- * @Author: laiwt
- * @Date: 2021/1/13 18:01
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
- * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
- **/
 
 @AuthAction(action = SYSTEM_NOTICE_MODIFY.class)
 @Service
