@@ -124,7 +124,7 @@ public class SystemNoticeSearchApi extends PrivateApiComponentBase {
                 /** 过滤掉内容中所有的HTML标签 **/
                 noticeVo.setContent(HtmlUtil.removeHtml(noticeVo.getContent(),null));
                 noticeVo.setStatusVo(SystemNoticeVo.Status.getStatus(noticeVo.getStatus()));
-                noticeVo.setFcuVo(userMapper.getUserBaseInfoByUuidWithoutCache(noticeVo.getFcu()));
+//                noticeVo.setFcuVo(userMapper.getUserBaseInfoByUuidWithoutCache(noticeVo.getFcu()));
             }
         }
         returnObj.put("tbodyList",noticeVoList);
