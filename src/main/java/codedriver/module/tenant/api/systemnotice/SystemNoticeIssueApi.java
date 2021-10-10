@@ -73,14 +73,15 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
             @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "公告ID"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "生效时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "失效时间"),
-            @Param(name = "popUp", type = ApiParamType.ENUM, rule = "longshow,close", desc = "是否弹窗(longshow:持续弹窗;close:不弹窗)",isRequired = true),
+            @Param(name = "popUp", type = ApiParamType.ENUM, rule = "longshow,close", desc = "是否弹窗(longshow:持续弹窗;close:不弹窗)", isRequired = true),
             @Param(name = "ignoreRead", type = ApiParamType.ENUM, rule = "0,1", desc = "1:忽略已读;0:不忽略已读")
     })
     @Output({})
     @Description(desc = "下发系统公告")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
+        SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {
+        });
         SystemNoticeVo oldVo = systemNoticeMapper.getSystemNoticeBaseInfoById(vo.getId());
         if (oldVo == null) {
             throw new SystemNoticeNotFoundException(vo.getId());
@@ -120,7 +121,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                     /* 如果通知范围是所有人，那么找出当前所有的在线用户 **/
                     int allOnlineUserCount = userMapper.getAllOnlineUserCount(new Date(expireTime));
                     if (allOnlineUserCount > 0) {
-                        CachedThreadPool.execute(new CodeDriverThread() {
+                        CachedThreadPool.execute(new CodeDriverThread("NOTICE-INSERTER") {
                             @Override
                             protected void execute() {
                                 Date expireDate = new Date(expireTime);
@@ -155,8 +156,8 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                             .collect(Collectors.toList());
                     int onlineUserCount = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTimeCount
                             (userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
-                    if(onlineUserCount > 0){
-                        CachedThreadPool.execute(new CodeDriverThread() {
+                    if (onlineUserCount > 0) {
+                        CachedThreadPool.execute(new CodeDriverThread("NOTICE-INSERTER") {
                             @Override
                             protected void execute() {
                                 Date expireDate = new Date(expireTime);
