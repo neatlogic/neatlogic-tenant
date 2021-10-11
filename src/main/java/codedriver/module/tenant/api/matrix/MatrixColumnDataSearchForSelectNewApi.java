@@ -287,12 +287,18 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                 if (CollectionUtils.isNotEmpty(defaultValue)) {
                     for (String value : defaultValue.toJavaList(String.class)) {
                         if (value.contains(SELECT_COMPOSE_JOINER)) {
-
                             String[] split = value.split(SELECT_COMPOSE_JOINER);
-                            for (int i = 0; i < split.length; i++) {
+                            List<String> splitList = new ArrayList<>();
+                            for (String str : split) {
+                                if (!splitList.contains(str)) {
+                                    splitList.add(str);
+                                }
+                            }
+                            int min = Math.min(splitList.size(), columnList.size());
+                            for (int i = 0; i < min; i++) {
                                 String column = columnList.get(i);
                                 if (StringUtils.isNotBlank(column)) {
-                                    MatrixColumnVo matrixColumnVo = new MatrixColumnVo(column, split[i]);
+                                    MatrixColumnVo matrixColumnVo = new MatrixColumnVo(column, splitList.get(i));
                                     matrixColumnVo.setExpression(Expression.EQUAL.getExpression());
                                     sourceColumnList.add(matrixColumnVo);
                                 }
