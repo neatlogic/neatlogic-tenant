@@ -15,7 +15,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
+import codedriver.framework.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 

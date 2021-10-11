@@ -5,14 +5,13 @@
 
 package codedriver.module.tenant.api.fulltextindex;
 
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.fulltextindex.core.FullTextIndexHandlerFactory;
+import codedriver.framework.fulltextindex.dao.mapper.FullTextIndexMapper;
 import codedriver.framework.fulltextindex.dao.mapper.FullTextIndexRebuildAuditMapper;
 import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexRebuildAuditVo;
 import codedriver.framework.fulltextindex.dto.fulltextindex.FullTextIndexTypeVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -27,6 +26,9 @@ import java.util.Optional;
 public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
     @Resource
     private FullTextIndexRebuildAuditMapper fullTextIndexRebuildAuditMapper;
+
+    @Resource
+    private FullTextIndexMapper fullTextIndexMapper;
 
     @Override
     public String getToken() {
@@ -43,11 +45,13 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
         return null;
     }
 
+    @Input({@Param(name = "typeList", type = ApiParamType.JSONARRAY, desc = "类型列表")})
     @Output({@Param(explode = FullTextIndexRebuildAuditVo[].class)})
     @Description(desc = "获取索引重建记录列表接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        List<FullTextIndexRebuildAuditVo> rebuildAuditList = fullTextIndexRebuildAuditMapper.searchFullTextIndexRebuildAudit();
+        FullTextIndexRebuildAuditVo audit = JSONObject.toJavaObject(paramObj, FullTextIndexRebuildAuditVo.class);
+        List<FullTextIndexRebuildAuditVo> rebuildAuditList = fullTextIndexRebuildAuditMapper.searchFullTextIndexRebuildAudit(audit);
         List<FullTextIndexTypeVo> fullTextIndexTypeList = FullTextIndexHandlerFactory.getAllTypeList();
         for (FullTextIndexTypeVo typeVo : fullTextIndexTypeList) {
             Optional<FullTextIndexRebuildAuditVo> op = rebuildAuditList.stream().filter(d -> d.getType().equals(typeVo.getType())).findFirst();
@@ -55,9 +59,11 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                 FullTextIndexRebuildAuditVo auditVo = new FullTextIndexRebuildAuditVo();
                 auditVo.setType(typeVo.getType());
                 auditVo.setTypeName(typeVo.getTypeName());
+                auditVo.setIndexCount(0);
                 rebuildAuditList.add(auditVo);
             } else {
                 op.get().setTypeName(typeVo.getTypeName());
+                op.get().setIndexCount(fullTextIndexMapper.getFullTextIndexCountByType(typeVo));
             }
         }
         return rebuildAuditList;
