@@ -288,6 +288,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                     for (String value : defaultValue.toJavaList(String.class)) {
                         if (value.contains(SELECT_COMPOSE_JOINER)) {
                             String[] split = value.split(SELECT_COMPOSE_JOINER);
+                            //当下拉框配置的值和显示文字列为同一列时，value值是这样的20210101&=&20210101，split数组第一和第二个元素相同，这时需要去重
                             List<String> splitList = new ArrayList<>();
                             for (String str : split) {
                                 if (!splitList.contains(str)) {
