@@ -11,6 +11,7 @@ import codedriver.framework.auth.init.MaintenanceMode;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 
@@ -64,6 +66,8 @@ public class UserGetApi extends PrivateApiComponentBase {
 		//维护模式下 获取厂商维护人员信息
 		if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
 			userVo = MaintenanceMode.getMaintenanceUser();
+		}else if(Objects.equals(SystemUser.SYSTEM.getUserUuid(),userUuid)){
+			userVo = SystemUser.SYSTEM.getUserVo();
 		} else {
 			userVo = userMapper.getUserByUuid(userUuid);
 			List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));

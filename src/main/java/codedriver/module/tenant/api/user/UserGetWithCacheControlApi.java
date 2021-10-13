@@ -10,6 +10,7 @@ import codedriver.framework.auth.init.MaintenanceMode;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
+import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 
@@ -60,7 +62,9 @@ public class UserGetWithCacheControlApi extends PrivateApiComponentBase {
 		//维护模式下 获取厂商维护人员信息
 		if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
 			userVo = MaintenanceMode.getMaintenanceUser();
-		} else {
+		}else if(Objects.equals(SystemUser.SYSTEM.getUserUuid(),userUuid)){
+			userVo = SystemUser.SYSTEM.getUserVo();
+		}else {
 			userVo = userMapper.getUserSimpleInfoByUuid(userUuid);
 		}
 		if (userVo == null) {
