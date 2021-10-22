@@ -84,14 +84,14 @@ public class JobSaveApi extends PrivateApiComponentBase {
 			throw new ScheduleIllegalParameterException(cron);
 		}
 
-		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {
-		});
+//		JobVo jobVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<JobVo>() {});
+		JobVo jobVo = JSONObject.toJavaObject(jsonObj, JobVo.class);
 		jobHandler.valid(jobVo.getPropList());
 		JobClassVo jobClassVo = SchedulerManager.getJobClassByClassName(handler);
 		if (jobClassVo == null) {
 			throw new ScheduleHandlerNotFoundException(handler);
 		}
-		saveJob(jobVo);
+		saveJob(jobVo, jobHandler);
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
 		if (jobVo.getIsActive().intValue() == 1) {
@@ -105,7 +105,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		return resultObj;
 	}
 	
-	private int saveJob(JobVo job) throws ScheduleJobNameRepeatException {
+	private int saveJob(JobVo job, IJob jobHandler) throws ScheduleJobNameRepeatException {
 		String uuid = job.getUuid();
 		if (schedulerMapper.checkJobNameIsExists(job) > 0) {
 			throw new ScheduleJobNameRepeatException(job.getName());
@@ -114,6 +114,10 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		if (oldJobVo == null) {
 			schedulerMapper.insertJob(job);
 		} else {
+			if (oldJobVo.getIsActive().intValue() == 1) {
+				JobObject jobObject = new JobObject.Builder(oldJobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).build();
+				schedulerManager.unloadJob(jobObject);
+			}
 			schedulerMapper.deleteJobPropByJobUuid(uuid);
 			schedulerMapper.updateJob(job);
 		}

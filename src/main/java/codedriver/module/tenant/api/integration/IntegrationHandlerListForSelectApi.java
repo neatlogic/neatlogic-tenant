@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationHandlerListForSelectApi extends PrivateApiComponentBase {
 

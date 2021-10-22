@@ -16,6 +16,7 @@ import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,19 +55,25 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
             @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "回显值"),
             @Param(name = "handler", type = ApiParamType.STRING, desc = "组件"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "启用"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量")})
     @Output({@Param(explode = BasePageVo.class), @Param(name = "integrationList", explode = IntegrationVo[].class, desc = "集成设置列表")})
     @Description(desc = "集成设置查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        List<IntegrationVo> integrationList = new ArrayList<>();
         IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
-        integrationVo.setIsActive(null);
-        List<IntegrationVo> integrationList = integrationMapper.searchIntegration(integrationVo);
-        if (integrationList.size() > 0) {
-            int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
-            integrationVo.setRowNum(rowNum);
-            integrationVo.setPageCount(PageUtil.getPageCount(rowNum, integrationVo.getPageSize()));
+        JSONArray defaultValue = integrationVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<String> uuidList = defaultValue.toJavaList(String.class);
+            integrationList = integrationMapper.getIntegrationListByUuidList(uuidList);
+        } else {
+            integrationList = integrationMapper.searchIntegration(integrationVo);
+            if (integrationList.size() > 0) {
+                int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
+                integrationVo.setRowNum(rowNum);
+            }
         }
         //补充类型对应表达式信息
         if (CollectionUtils.isNotEmpty(integrationList)) {
@@ -95,12 +103,6 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                 inte.setReferenceCount(count);
             }
         }
-        JSONObject returnObj = new JSONObject();
-        returnObj.put("pageSize", integrationVo.getPageSize());
-        returnObj.put("currentPage", integrationVo.getCurrentPage());
-        returnObj.put("rowNum", integrationVo.getRowNum());
-        returnObj.put("pageCount", integrationVo.getPageCount());
-        returnObj.put("tbodyList", integrationList);
-        return returnObj;
+        return TableResultUtil.getResult(integrationList, integrationVo);
     }
 }

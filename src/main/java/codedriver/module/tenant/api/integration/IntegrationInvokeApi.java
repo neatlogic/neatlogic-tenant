@@ -8,8 +8,6 @@ package codedriver.module.tenant.api.integration;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.module.framework.integration.handler.TestInvoker;
-import codedriver.framework.integration.dto.IntegrationInvokeVo;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -20,6 +18,7 @@ import codedriver.framework.auth.label.INTERFACE_MODIFY;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+@Deprecated
 @Service
 @AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -48,8 +47,9 @@ public class IntegrationInvokeApi extends PrivateApiComponentBase {
 		System.out.println(Config.ES_ENABLE());
 		String integrationUuid = jsonObj.getString("uuid");
 		String key = jsonObj.getString("key");
-		IntegrationInvokeVo integrationInvokeVo = new IntegrationInvokeVo(integrationUuid, new TestInvoker(key));
+//		IntegrationInvokeVo integrationInvokeVo = new IntegrationInvokeVo(integrationUuid, new TestInvoker(key));
 		//integrationMapper.replaceIntegrationInvoke(integrationInvokeVo);
-		return integrationInvokeVo.getDetail();
+//		return integrationInvokeVo.getDetail();
+		return null;
 	}
 }
