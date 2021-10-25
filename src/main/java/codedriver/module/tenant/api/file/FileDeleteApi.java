@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-
 @OperationType(type = OperationTypeEnum.DELETE)
 public class FileDeleteApi extends PrivateApiComponentBase {
 
@@ -65,21 +64,20 @@ public class FileDeleteApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(tenantUuid)) {
             throw new NoTenantException();
         }
-        if (fileVo != null) {
-            IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
-            if (fileTypeHandler != null) {
-                if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
-                    fileTypeHandler.afterDelete(paramObj);
-                    fileMapper.deleteFile(fileVo.getId());
-                    FileUtil.deleteData(fileVo.getPath());
-                } else {
-                    throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
-                }
-            } else {
-                throw new FileTypeHandlerNotFoundException(fileVo.getType());
+        if (fileVo == null) {
+            throw new FileNotFoundException(fileId);
+        }
+        IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
+        if (fileTypeHandler == null) {
+            throw new FileTypeHandlerNotFoundException(fileVo.getType());
+        }
+        if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
+            if (fileTypeHandler.beforeDelete(fileVo)) {
+                fileMapper.deleteFile(fileVo.getId());
+                FileUtil.deleteData(fileVo.getPath());
             }
         } else {
-            throw new FileNotFoundException(fileId);
+            throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
         }
         return null;
     }
