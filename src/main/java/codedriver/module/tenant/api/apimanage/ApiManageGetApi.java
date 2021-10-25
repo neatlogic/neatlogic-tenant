@@ -6,21 +6,21 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.auth.label.INTERFACE_MODIFY;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.ApiNotFoundException;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiMapper;
+import codedriver.framework.restful.dto.ApiVo;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.ApiNotFoundException;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.restful.dao.mapper.ApiMapper;
-import codedriver.framework.restful.dto.ApiVo;
 @Service
-
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageGetApi extends PrivateApiComponentBase {
 

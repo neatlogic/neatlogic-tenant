@@ -11,7 +11,7 @@ import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.exception.integration.HttpMethodNotFoundException;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.integration.IntegrationNameRepeatsException;
-import codedriver.framework.integration.authentication.costvalue.HttpMethod;
+import codedriver.framework.integration.authentication.enums.HttpMethod;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
