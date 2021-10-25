@@ -8,7 +8,7 @@ package codedriver.module.tenant.api.integration;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileNotUploadException;
-import codedriver.framework.integration.authentication.costvalue.HttpMethod;
+import codedriver.framework.integration.authentication.enums.HttpMethod;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
