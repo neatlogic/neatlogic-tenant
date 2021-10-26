@@ -6,9 +6,12 @@
 package codedriver.module.tenant.api.matrix.test;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -53,7 +56,10 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "sysName", type = ApiParamType.STRING, desc = "系统名")
+            @Param(name = "sysName", type = ApiParamType.STRING, desc = "系统名"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
     })
     @Output({
             @Param(explode = SubSysVo[].class, desc = "子系统列表")
@@ -72,10 +78,22 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
         } else {
             resultList.addAll(staticSubSysList);
         }
-        return resultList;
+        BasePageVo basePageVo = JSONObject.toJavaObject(paramObj, BasePageVo.class);
+        int rowNum = resultList.size();
+        if (rowNum > 0) {
+            basePageVo.setRowNum(rowNum);
+            if (basePageVo.getCurrentPage() <= basePageVo.getPageCount()) {
+                int fromIndex = basePageVo.getStartNum();
+                int toIndex = fromIndex + basePageVo.getPageSize();
+                toIndex = toIndex >  rowNum ? rowNum : toIndex;
+                resultList =  resultList.subList(fromIndex, toIndex);
+                return TableResultUtil.getResult(resultList, basePageVo);
+            }
+        }
+        return TableResultUtil.getResult(resultList, basePageVo);
     }
 
-    private static class SubSysVo {
+    private static class SubSysVo extends BasePageVo {
         private long subSysId;
         private String subSysName;
         private String subSysDesc;

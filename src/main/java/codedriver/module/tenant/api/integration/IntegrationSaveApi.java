@@ -76,6 +76,7 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         if (integrationVo.getUrl().contains("integration/run/")) {
             throw new IntegrationUrlIllegalException(integrationVo.getUrl());
         }
+        integrationVo.setIsActive(1);
         if (StringUtils.isNotBlank(jsonObj.getString("uuid"))) {
             integrationMapper.updateIntegration(integrationVo);
         } else {
