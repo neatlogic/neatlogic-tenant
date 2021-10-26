@@ -97,74 +97,75 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
             if (fileTypeHandler == null) {
                 throw new FileTypeHandlerNotFoundException(type);
             }
-
-            multipartFile.getName();
-            String userUuid = UserContext.get().getUserUuid(true);
-            String oldFileName = multipartFile.getOriginalFilename();
-            long size = multipartFile.getSize();
-            // 如果配置为空代表不受任何限制
-            if (fileTypeConfigVo != null) {
-                boolean isAllowed = false;
-                long maxSize = 0L;
-                String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
-                JSONObject configObj = fileTypeConfigVo.getConfigObj();
-                JSONArray whiteList = new JSONArray();
-                JSONArray blackList = new JSONArray();
-                if (size == 0) {
-                    throw new EmptyFileException();
-                }
-                if (configObj != null) {
-                    whiteList = configObj.getJSONArray("whiteList");
-                    blackList = configObj.getJSONArray("blackList");
-                    maxSize = configObj.getLongValue("maxSize");
-                }
-                if (whiteList != null && whiteList.size() > 0) {
-                    for (int i = 0; i < whiteList.size(); i++) {
-                        if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
-                            isAllowed = true;
-                            break;
-                        }
+            if (fileTypeHandler.beforeUpload(paramObj)) {
+                multipartFile.getName();
+                String userUuid = UserContext.get().getUserUuid(true);
+                String oldFileName = multipartFile.getOriginalFilename();
+                long size = multipartFile.getSize();
+                // 如果配置为空代表不受任何限制
+                if (fileTypeConfigVo != null) {
+                    boolean isAllowed = false;
+                    long maxSize = 0L;
+                    String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+                    JSONObject configObj = fileTypeConfigVo.getConfigObj();
+                    JSONArray whiteList = new JSONArray();
+                    JSONArray blackList = new JSONArray();
+                    if (size == 0) {
+                        throw new EmptyFileException();
                     }
-                } else if (blackList != null && blackList.size() > 0) {
-                    isAllowed = true;
-                    for (int i = 0; i < blackList.size(); i++) {
-                        if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
-                            isAllowed = false;
-                            break;
-                        }
+                    if (configObj != null) {
+                        whiteList = configObj.getJSONArray("whiteList");
+                        blackList = configObj.getJSONArray("blackList");
+                        maxSize = configObj.getLongValue("maxSize");
                     }
-                } else {
-                    isAllowed = true;
+                    if (whiteList != null && whiteList.size() > 0) {
+                        for (int i = 0; i < whiteList.size(); i++) {
+                            if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
+                                isAllowed = true;
+                                break;
+                            }
+                        }
+                    } else if (blackList != null && blackList.size() > 0) {
+                        isAllowed = true;
+                        for (int i = 0; i < blackList.size(); i++) {
+                            if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
+                                isAllowed = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        isAllowed = true;
+                    }
+                    if (!isAllowed) {
+                        throw new FileExtNotAllowedException(fileExt);
+                    }
+                    if (maxSize > 0 && size > maxSize) {
+                        throw new FileTooLargeException(size, maxSize);
+                    }
                 }
-                if (!isAllowed) {
-                    throw new FileExtNotAllowedException(fileExt);
-                }
-                if (maxSize > 0 && size > maxSize) {
-                    throw new FileTooLargeException(size, maxSize);
-                }
-            }
 
 
-            FileVo fileVo = new FileVo();
-            fileVo.setName(oldFileName);
-            fileVo.setSize(size);
-            fileVo.setUserUuid(userUuid);
-            fileVo.setType(type);
-            fileVo.setContentType(multipartFile.getContentType());
-            String filePath = null;
-            try {
-                filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-            } catch (Exception ex) {
-                // 如果minio出现异常，则上传到本地
-                logger.error(ex.getMessage(), ex);
-                filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                FileVo fileVo = new FileVo();
+                fileVo.setName(oldFileName);
+                fileVo.setSize(size);
+                fileVo.setUserUuid(userUuid);
+                fileVo.setType(type);
+                fileVo.setContentType(multipartFile.getContentType());
+                String filePath = null;
+                try {
+                    filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                } catch (Exception ex) {
+                    // 如果minio出现异常，则上传到本地
+                    logger.error(ex.getMessage(), ex);
+                    filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                }
+                fileVo.setPath(filePath);
+                fileMapper.insertFile(fileVo);
+                fileTypeHandler.afterUpload(fileVo, paramObj);
+                FileVo file = fileMapper.getFileById(fileVo.getId());
+                file.setUrl("api/binary/file/download?id=" + fileVo.getId());
+                return file;
             }
-            fileVo.setPath(filePath);
-            fileMapper.insertFile(fileVo);
-            fileTypeHandler.afterUpload(fileVo, paramObj);
-            FileVo file = fileMapper.getFileById(fileVo.getId());
-            file.setUrl("api/binary/file/download?id=" + fileVo.getId());
-            return file;
         }
         return null;
     }
