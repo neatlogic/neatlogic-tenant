@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.integration.table;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
+import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.exception.integration.IntegrationSendRequestException;
 import codedriver.framework.exception.integration.IntegrationTableColumnNotFoundException;
 import codedriver.framework.exception.type.ParamIrregularException;
@@ -16,7 +17,6 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.table.ColumnVo;
-import codedriver.framework.integration.dto.table.DataSearchVo;
 import codedriver.framework.integration.dto.table.SourceColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -85,13 +85,15 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         List<Map<String, Object>> resultList = new ArrayList<>();
 
-        DataSearchVo dataVo = JSONObject.toJavaObject(jsonObj, DataSearchVo.class);
-
-        List<String> columnList = dataVo.getColumnList();
-        if (CollectionUtils.isEmpty(columnList)) {
+        JSONArray columnArray = jsonObj.getJSONArray("columnList");
+        if (CollectionUtils.isEmpty(columnArray)) {
             throw new ParamIrregularException("columnList");
         }
-        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(dataVo.getIntegrationUuid());
+        String integrationUuid = jsonObj.getString("integrationUuid");
+        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
+        if (integrationVo == null) {
+            throw new IntegrationNotFoundException(integrationUuid);
+        }
         IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
         if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
@@ -102,13 +104,14 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
         }
         /** 属性集合去重 **/
         List<String> distinctColumList = new ArrayList<>();
+        List<String> columnList = columnArray.toJavaList(String.class);
         for (String column : columnList) {
             if (!distinctColumList.contains(column)) {
                 distinctColumList.add(column);
             }
         }
         columnList = distinctColumList;
-        dataVo.setColumnList(distinctColumList);
+//        dataVo.setColumnList(distinctColumList);
 
         List<String> columnUuidList = columnVoList.stream().map(ColumnVo::getUuid).collect(Collectors.toList());
         for (String column : columnList) {
@@ -117,7 +120,7 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
             }
         }
 
-        JSONArray defaultValue = dataVo.getDefaultValue();
+        JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             for (String value : defaultValue.toJavaList(String.class)) {
                 if (value.contains(SELECT_COMPOSE_JOINER)) {
@@ -152,13 +155,14 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
             }
         } else {
             String keywordColumn = jsonObj.getString("keywordColumn");
-            if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(dataVo.getKeyword())) {
+            String keyword = jsonObj.getString("keyword");
+            if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(keyword)) {
                 if (!columnUuidList.contains(keywordColumn)) {
                     throw new IntegrationTableColumnNotFoundException(integrationVo.getName(), keywordColumn);
                 }
                 SourceColumnVo sourceColumnVo = new SourceColumnVo();
                 sourceColumnVo.setColumn(keywordColumn);
-                sourceColumnVo.setValue(dataVo.getKeyword());
+                sourceColumnVo.setValue(keyword);
                 List<SourceColumnVo> sourceColumnList = new ArrayList<>();
                 sourceColumnList.add(sourceColumnVo);
                 jsonObj.put("sourceColumnList", sourceColumnList);

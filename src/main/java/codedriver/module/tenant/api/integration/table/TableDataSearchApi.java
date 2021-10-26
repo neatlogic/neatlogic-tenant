@@ -15,7 +15,6 @@ import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.table.ColumnVo;
-import codedriver.framework.integration.dto.table.DataSearchVo;
 import codedriver.framework.integration.dto.table.SourceColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -81,14 +80,14 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
-        DataSearchVo searchVo = JSONObject.toJavaObject(jsonObj, DataSearchVo.class);
-        List<String> columnList = searchVo.getColumnList();
-        if (CollectionUtils.isEmpty(columnList)) {
+        JSONArray columnArray = jsonObj.getJSONArray("columnList");
+        if (CollectionUtils.isEmpty(columnArray)) {
             throw new ParamIrregularException("columnList");
         }
-        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(searchVo.getIntegrationUuid());
+        String integrationUuid = jsonObj.getString("integrationUuid");
+        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(integrationUuid);
         if (integrationVo == null) {
-            throw new IntegrationNotFoundException(searchVo.getIntegrationUuid());
+            throw new IntegrationNotFoundException(integrationUuid);
         }
         IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
         if (handler == null) {
@@ -96,10 +95,11 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
         }
         List<ColumnVo> columnVoList = integrationService.getColumnList(integrationVo);
         if (CollectionUtils.isNotEmpty(columnVoList)) {
+            List<String> columnList = columnArray.toJavaList(String.class);
             JSONArray theadList = integrationService.getTheadList(integrationVo, columnList);
             returnObj.put("theadList", theadList);
             integrationVo.getParamObj().putAll(jsonObj);
-            JSONArray defaultValue = searchVo.getDefaultValue();
+            JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
             if (CollectionUtils.isNotEmpty(defaultValue)) {
                 String uuidColumn = null;
                 for (int i = 0; i < theadList.size(); i++) {
@@ -128,7 +128,7 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
                     handler.validate(resultVo);
-                    List<Map<String, Object>> tbodyList = integrationService.getTbodyList(resultVo, searchVo.getColumnList());
+                    List<Map<String, Object>> tbodyList = integrationService.getTbodyList(resultVo, columnList);
                     for (Map<String, Object> tbodyObj : tbodyList) {
                         if (Objects.equals(uuidValue, tbodyObj.get(uuidColumn))) {
                             tbodyArray.add(tbodyObj);
