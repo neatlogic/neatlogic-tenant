@@ -6,14 +6,13 @@
 package codedriver.module.tenant.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dto.runner.RunnerGroupVo;
+import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.TagentMapper;
-import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -22,12 +21,12 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@AuthAction(action = TAGENT_BASE.class)
+@AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class RunnerGroupListApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentMapper tagentMapper;
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -55,11 +54,11 @@ public class RunnerGroupListApi extends PrivateApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentVo tagentVo =JSONObject.toJavaObject(paramObj, TagentVo.class);
-        int rowNum =tagentMapper.searchTagentRunnerCount();
-        tagentVo.setRowNum(rowNum);
-        List<RunnerGroupVo> runnerGroupVoList =tagentMapper.searchTagentRunnerGroup();
-        return TableResultUtil.getResult(runnerGroupVoList, tagentVo);
+        RunnerGroupVo runnerGroupVo =JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
+        int rowNum =runnerMapper.searchRunnerGroupCount();
+        runnerGroupVo.setRowNum(rowNum);
+        List<RunnerGroupVo> runnerGroupVoList =runnerMapper.searchRunnerGroupDetail(runnerGroupVo);
+        return TableResultUtil.getResult(runnerGroupVoList, runnerGroupVo);
     }
 
 

@@ -58,7 +58,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
         groupVo.setRowNum(rowNum);
         if (rowNum > 0) {
-            runnerGroupVoList = runnerMapper.searchRunnerGroup(groupVo);
+            runnerGroupVoList = runnerMapper.searchRunnerGroupDetail(groupVo);
         }
         return TableResultUtil.getResult(runnerGroupVoList, groupVo);
     }
