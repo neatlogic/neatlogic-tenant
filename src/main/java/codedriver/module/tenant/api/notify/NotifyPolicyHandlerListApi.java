@@ -70,6 +70,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
                     JSONObject child = new JSONObject();
                     child.put("value", notifyPolicyHandlerVo.getHandler());
                     child.put("text", notifyPolicyHandlerVo.getName());
+                    child.put("isAllowMultiPolicy", notifyPolicyHandlerVo.getIsAllowMultiPolicy());
                     children.add(child);
                 }
                 JSONObject moduleGroupObj = new JSONObject();
