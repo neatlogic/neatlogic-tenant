@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.matrix.test;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -33,10 +34,14 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
     static {
         for (int i = 0; i < 100; i++) {
             SubSysVo subSysVo = new SubSysVo();
-            subSysVo.setSubSysId(i);
+            subSysVo.setSubSysId(Long.valueOf(i));
             subSysVo.setSubSysName("子系统名_" + i);
             subSysVo.setSubSysDesc("子系统描述_" + i);
             subSysVo.setSysName("系统名_" + i/10);
+            subSysVo.setRadio1(getValueTextVoList("单选", i, 3));
+            subSysVo.setCheckbox2(getValueTextVoList("多选", i, 3));
+            subSysVo.setSelect3(getValueTextVoList("下拉单选", i, 3));
+            subSysVo.setSelect4(getValueTextVoList("下拉多选", i, 3));
             staticSubSysList.add(subSysVo);
         }
     }
@@ -57,6 +62,9 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "sysName", type = ApiParamType.STRING, desc = "系统名"),
+            @Param(name = "subSysId", type = ApiParamType.LONG, desc = "子系统id"),
+            @Param(name = "subSysName", type = ApiParamType.STRING, desc = "子系统名"),
+            @Param(name = "subSysDesc", type = ApiParamType.STRING, desc = "子系统描述"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
@@ -68,44 +76,69 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<SubSysVo> resultList = new ArrayList<>();
-        String sysName = paramObj.getString("sysName");
-        if (StringUtils.isNotBlank(sysName)) {
-            for (SubSysVo subSysVo : staticSubSysList) {
-                if (subSysVo.sysName.contains(sysName)) {
-                    resultList.add(subSysVo);
+        SubSysVo searchVo = JSONObject.toJavaObject(paramObj, SubSysVo.class);
+        for (SubSysVo subSysVo : staticSubSysList) {
+            if (searchVo.getSubSysId() != null) {
+                if (!Objects.equals(searchVo.getSubSysId(), subSysVo.getSubSysId())) {
+                    continue;
                 }
             }
-        } else {
-            resultList.addAll(staticSubSysList);
+            if (StringUtils.isNotBlank(searchVo.getSubSysName())) {
+                if (!Objects.equals(searchVo.getSubSysName(), subSysVo.getSubSysName())) {
+                    continue;
+                }
+            }
+            if (StringUtils.isNotBlank(searchVo.getSubSysDesc())) {
+                if (!Objects.equals(searchVo.getSubSysDesc(), subSysVo.getSubSysDesc())) {
+                    continue;
+                }
+            }
+            if (StringUtils.isNotBlank(searchVo.getSysName())) {
+                if (!Objects.equals(searchVo.getSysName(), subSysVo.getSysName())) {
+                    continue;
+                }
+            }
+            resultList.add(subSysVo);
         }
-        BasePageVo basePageVo = JSONObject.toJavaObject(paramObj, BasePageVo.class);
         int rowNum = resultList.size();
         if (rowNum > 0) {
-            basePageVo.setRowNum(rowNum);
-            if (basePageVo.getCurrentPage() <= basePageVo.getPageCount()) {
-                int fromIndex = basePageVo.getStartNum();
-                int toIndex = fromIndex + basePageVo.getPageSize();
+            searchVo.setRowNum(rowNum);
+            if (searchVo.getCurrentPage() <= searchVo.getPageCount()) {
+                int fromIndex = searchVo.getStartNum();
+                int toIndex = fromIndex + searchVo.getPageSize();
                 toIndex = toIndex >  rowNum ? rowNum : toIndex;
                 resultList =  resultList.subList(fromIndex, toIndex);
-                return TableResultUtil.getResult(resultList, basePageVo);
+                return TableResultUtil.getResult(resultList, searchVo);
             }
         }
-        return TableResultUtil.getResult(resultList, basePageVo);
+        return TableResultUtil.getResult(resultList, searchVo);
+    }
+
+    private static List<ValueTextVo> getValueTextVoList(String prefix, int startIndex, int count) {
+        List<ValueTextVo> resultList = new ArrayList<>();
+        int rowNum = startIndex + count;
+        for (; startIndex < rowNum; startIndex++) {
+            resultList.add(new ValueTextVo(startIndex, prefix + startIndex));
+        }
+        return resultList;
     }
 
     private static class SubSysVo extends BasePageVo {
-        private long subSysId;
+        private Long subSysId;
         private String subSysName;
         private String subSysDesc;
         private String sysName;
-
+        private List<ValueTextVo> radio1;
+        private List<ValueTextVo> checkbox2;
+        private List<ValueTextVo> select3;
+        private List<ValueTextVo> select4;
         public SubSysVo(){}
 
-        public long getSubSysId() {
+        public Long getSubSysId() {
             return subSysId;
         }
 
-        public void setSubSysId(long subSysId) {
+        public void setSubSysId(Long subSysId) {
             this.subSysId = subSysId;
         }
 
@@ -131,6 +164,38 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
 
         public void setSysName(String sysName) {
             this.sysName = sysName;
+        }
+
+        public List<ValueTextVo> getRadio1() {
+            return radio1;
+        }
+
+        public void setRadio1(List<ValueTextVo> radio1) {
+            this.radio1 = radio1;
+        }
+
+        public List<ValueTextVo> getCheckbox2() {
+            return checkbox2;
+        }
+
+        public void setCheckbox2(List<ValueTextVo> checkbox2) {
+            this.checkbox2 = checkbox2;
+        }
+
+        public List<ValueTextVo> getSelect3() {
+            return select3;
+        }
+
+        public void setSelect3(List<ValueTextVo> select3) {
+            this.select3 = select3;
+        }
+
+        public List<ValueTextVo> getSelect4() {
+            return select4;
+        }
+
+        public void setSelect4(List<ValueTextVo> select4) {
+            this.select4 = select4;
         }
     }
 }
