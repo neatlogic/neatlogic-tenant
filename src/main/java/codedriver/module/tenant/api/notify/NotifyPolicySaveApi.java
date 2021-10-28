@@ -10,6 +10,7 @@ import java.util.List;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
+import codedriver.framework.notify.exception.NotifyPolicyMoreThanOneException;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.core.IValid;
@@ -17,7 +18,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import codedriver.framework.auth.label.NOTIFY_POLICY_MODIFY;
 import com.alibaba.fastjson.JSON;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,13 +36,15 @@ import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundExceptio
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
 
+import javax.annotation.Resource;
+
 @Service
 @Transactional
 @AuthAction(action = NOTIFY_POLICY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class NotifyPolicySaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private NotifyMapper notifyMapper;
 
     @Override
@@ -61,9 +63,9 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
-        @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$",
-            isRequired = true, desc = "策略名"),
-        @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")})
+            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$",
+                    isRequired = true, desc = "策略名"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")})
     @Output({@Param(explode = NotifyPolicyVo.class, desc = "策略信息")})
     @Description(desc = "通知策略信息保存接口")
     @Override
@@ -75,8 +77,9 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
         }
         Long id = jsonObj.getLong("id");
         String name = jsonObj.getString("name");
+        NotifyPolicyVo notifyPolicyVo;
         if (id != null) {
-            NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
+            notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
             if (notifyPolicyVo == null) {
                 throw new NotifyPolicyNotFoundException(id.toString());
             }
@@ -90,9 +93,11 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             List<ConditionParamVo> paramList = config.getParamList();
             paramList.addAll(notifyPolicyHandler.getSystemParamList());
             paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-            return notifyPolicyVo;
         } else {
-            NotifyPolicyVo notifyPolicyVo = new NotifyPolicyVo(name, handler);
+            if (notifyMapper.getNotifyPolicyByHandlerLimitOne(handler) != null && notifyPolicyHandler.isAllowMultiPolicy() == 0) {
+                throw new NotifyPolicyMoreThanOneException(notifyPolicyHandler.getName());
+            }
+            notifyPolicyVo = new NotifyPolicyVo(name, handler);
             if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
                 throw new NotifyPolicyNameRepeatException(name);
             }
@@ -117,13 +122,13 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
             configObj.put("paramList", paramList);
             notifyPolicyVo.setConfig(configObj.toJSONString());
-            return notifyPolicyVo;
         }
+        return notifyPolicyVo;
     }
 
-    public IValid name(){
+    public IValid name() {
         return value -> {
-            NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(value,NotifyPolicyVo.class);
+            NotifyPolicyVo notifyPolicyVo = JSON.toJavaObject(value, NotifyPolicyVo.class);
             if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
                 return new FieldValidResultVo(new NotifyPolicyNameRepeatException(notifyPolicyVo.getName()));
             }
