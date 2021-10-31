@@ -17,18 +17,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MongoDbDataSourceGetPublicApi extends PublicApiComponentBase {
+public class MongoDbDataSourceListPublicApi extends PublicApiComponentBase {
     @Autowired
     CodedriverMapper codedriverMapper;
 
     @Override
     public String getToken() {
-        return "/public/mongodb/datasource/get";
+        return "/public/mongodb/datasource/list";
     }
 
     @Override
     public String getName() {
-        return "获取对应租户的mongodb连接信息";
+        return "获取所有mongodb连接信息";
     }
 
     @Override
@@ -39,14 +39,14 @@ public class MongoDbDataSourceGetPublicApi extends PublicApiComponentBase {
     @Input({
     })
     @Output({
-            @Param(name = "mongoVo", explode = MongoDbVo.class, desc = "mongodb数据库")
+            @Param(name = "mongoVo", explode = MongoDbVo[].class, desc = "mongodb数据库")
     })
-    @Description(desc = "获取对应租户的mongodb连接信息接口")
+    @Description(desc = "获取所有mongodb连接信息接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String tenant = TenantContext.get().getTenantUuid();
         TenantContext.get().setUseDefaultDatasource(true);
-        MongoDbVo mongodbVo = codedriverMapper.getMongodbByTenant(tenant);
+        MongoDbVo mongodbVo = codedriverMapper.getMongodbList();
         TenantContext.get().switchTenant(tenant);
         TenantContext.get().setUseDefaultDatasource(false);
         return mongodbVo;
