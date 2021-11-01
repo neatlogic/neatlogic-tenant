@@ -72,7 +72,7 @@ public class FileDeleteApi extends PrivateApiComponentBase {
             throw new FileTypeHandlerNotFoundException(fileVo.getType());
         }
         if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
-            if (fileTypeHandler.beforeDelete(fileVo)) {
+            if (fileTypeHandler.beforeDelete(fileVo, paramObj)) {
                 fileMapper.deleteFile(fileVo.getId());
                 FileUtil.deleteData(fileVo.getPath());
             }
