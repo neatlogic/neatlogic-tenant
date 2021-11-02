@@ -8,7 +8,6 @@ package codedriver.module.tenant.api.file;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.file.FileAccessDeniedException;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
@@ -72,10 +71,7 @@ public class FileDeleteApi extends PrivateApiComponentBase {
             throw new FileTypeHandlerNotFoundException(fileVo.getType());
         }
         if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
-            if (fileTypeHandler.beforeDelete(fileVo, paramObj)) {
-                fileMapper.deleteFile(fileVo.getId());
-                FileUtil.deleteData(fileVo.getPath());
-            }
+            fileTypeHandler.deleteFile(fileVo, paramObj);
         } else {
             throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
         }

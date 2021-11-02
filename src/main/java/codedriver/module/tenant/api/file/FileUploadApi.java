@@ -151,20 +151,25 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setUserUuid(userUuid);
                 fileVo.setType(type);
                 fileVo.setContentType(multipartFile.getContentType());
-                String filePath = null;
-                try {
-                    filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-                } catch (Exception ex) {
-                    // 如果minio出现异常，则上传到本地
-                    logger.error(ex.getMessage(), ex);
-                    filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                if (fileTypeHandler.needSave()) {
+                    String filePath = null;
+                    try {
+                        filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                    } catch (Exception ex) {
+                        // 如果minio出现异常，则上传到本地
+                        logger.error(ex.getMessage(), ex);
+                        filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                    }
+                    fileVo.setPath(filePath);
+                    fileMapper.insertFile(fileVo);
+                    fileTypeHandler.afterUpload(fileVo, paramObj);
+                    FileVo file = fileMapper.getFileById(fileVo.getId());
+                    file.setUrl("api/binary/file/download?id=" + fileVo.getId());
+                    return file;
+                } else {
+                    fileTypeHandler.analyze(multipartFile);
+                    return fileVo;
                 }
-                fileVo.setPath(filePath);
-                fileMapper.insertFile(fileVo);
-                fileTypeHandler.afterUpload(fileVo, paramObj);
-                FileVo file = fileMapper.getFileById(fileVo.getId());
-                file.setUrl("api/binary/file/download?id=" + fileVo.getId());
-                return file;
             }
         }
         return null;
