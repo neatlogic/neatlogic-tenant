@@ -6,16 +6,13 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.file.FileNotFoundException;
-import codedriver.framework.file.dao.mapper.FileMapper;
-import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.matrix.constvalue.MatrixType;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixViewMapper;
 import codedriver.framework.matrix.dto.MatrixViewVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
-import codedriver.framework.matrix.exception.MatrixViewNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -23,19 +20,13 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
+@Deprecated
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixViewGetApi extends PrivateApiComponentBase {
 
     @Resource
-    private MatrixViewMapper viewMapper;
-
-    @Resource
     private MatrixMapper matrixMapper;
-
-    @Resource
-    private FileMapper fileMapper;
 
     @Override
     public String getToken() {
@@ -66,20 +57,25 @@ public class MatrixViewGetApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(matrixUuid);
         }
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        if (matrixDataSourceHandler == null) {
+            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+        }
+        return matrixDataSourceHandler.getMatrix(matrixVo.getUuid());
 
-        if (!MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-            throw new MatrixViewNotFoundException(matrixVo.getName());
-        }
-        MatrixViewVo matrixViewVo = viewMapper.getMatrixViewByMatrixUuid(matrixUuid);
-        if (matrixViewVo == null) {
-            throw new MatrixViewNotFoundException(matrixVo.getName());
-        }
-        Long fileId = matrixViewVo.getFileId();
-        FileVo fileVo = fileMapper.getFileById(fileId);
-        if (fileVo == null) {
-            throw new FileNotFoundException(fileId);
-        }
-        matrixViewVo.setFileVo(fileVo);
-        return matrixViewVo;
+//        if (!MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixViewNotFoundException(matrixVo.getName());
+//        }
+//        MatrixViewVo matrixViewVo = viewMapper.getMatrixViewByMatrixUuid(matrixUuid);
+//        if (matrixViewVo == null) {
+//            throw new MatrixViewNotFoundException(matrixVo.getName());
+//        }
+//        Long fileId = matrixViewVo.getFileId();
+//        FileVo fileVo = fileMapper.getFileById(fileId);
+//        if (fileVo == null) {
+//            throw new FileNotFoundException(fileId);
+//        }
+//        matrixViewVo.setFileVo(fileVo);
+//        return matrixViewVo;
     }
 }

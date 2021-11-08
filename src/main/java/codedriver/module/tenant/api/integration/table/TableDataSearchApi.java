@@ -19,7 +19,7 @@ import codedriver.framework.integration.dto.table.SourceColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
+import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
 import codedriver.module.tenant.service.integration.IntegrationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
