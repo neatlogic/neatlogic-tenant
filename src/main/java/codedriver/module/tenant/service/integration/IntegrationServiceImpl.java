@@ -59,6 +59,9 @@ public class IntegrationServiceImpl implements IntegrationService {
                                     Integer isSearchable = theadObj.getInteger("isSearchable");
                                     isSearchable = (isSearchable == null || isSearchable.intValue() != 1) ? 0 : 1;
                                     columnVo.setIsSearchable(isSearchable);
+                                    Integer isSearch = theadObj.getInteger("isSearch");
+                                    isSearch = (isSearch == null || isSearch.intValue() != 1) ? 0 : 1;
+                                    columnVo.setIsSearch(isSearch);
                                     columnVo.setSort(i);
                                     columnVo.setIsRequired(0);
                                     resultList.add(columnVo);
