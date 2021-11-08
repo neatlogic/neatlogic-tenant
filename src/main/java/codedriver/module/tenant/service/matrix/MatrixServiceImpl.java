@@ -36,7 +36,7 @@ import codedriver.framework.matrix.view.MatrixViewSqlBuilder;
 import codedriver.framework.transaction.core.EscapeTransactionJob;
 import codedriver.framework.util.javascript.JavascriptUtil;
 import codedriver.framework.util.TimeUtil;
-import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
+import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -60,6 +60,7 @@ import java.util.Map.Entry;
  * @description:
  * @since 2020-03-27 11:35
  **/
+@Deprecated
 @Service
 @Transactional
 public class MatrixServiceImpl implements MatrixService {

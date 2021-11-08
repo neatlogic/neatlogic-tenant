@@ -6,15 +6,12 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.matrix.constvalue.MatrixAttributeType;
-import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixExternalExportTemplateException;
+import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
-import codedriver.framework.matrix.exception.MatrixViewExportTemplateException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -25,7 +22,7 @@ import codedriver.framework.util.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,9 +45,6 @@ public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBas
 
 	@Resource
 	private MatrixMapper matrixMapper;
-
-	@Resource
-	private MatrixAttributeMapper attributeMapper;
 
 	@Override
 	public String getToken() {
@@ -76,54 +70,87 @@ public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBas
 		if (matrixVo == null) {
 			throw new MatrixNotFoundException(matrixUuid);
 		}
-
-		if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-			List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-			if (CollectionUtils.isNotEmpty(attributeVoList)) {
-				List<String> headerList = new ArrayList<>();
-				List<List<String>> columnSelectValueList = new ArrayList<>();
-				headerList.add("uuid");
-				columnSelectValueList.add(new ArrayList<>());
-				for (MatrixAttributeVo attributeVo : attributeVoList) {
-					headerList.add(attributeVo.getName());
-					List<String> selectValueList = new ArrayList<>();
-					decodeDataConfig(attributeVo, selectValueList);
-					columnSelectValueList.add(selectValueList);
-				}
-				String fileNameEncode = matrixVo.getName() + "_模板.xls";
-				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-				if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-					fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-				} else {
-					fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-				}
-				response.setContentType("application/vnd.ms-excel;charset=utf-8");
-				response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-				ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
-			}
-		} else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType()))  {
-			throw new MatrixExternalExportTemplateException();
-		} else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-			throw new MatrixViewExportTemplateException();
+		IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+		if (matrixDataSourceHandler == null) {
+			throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
 		}
+		JSONObject resultObj = matrixDataSourceHandler.exportAttribute(matrixVo);
+		if (MapUtils.isEmpty(resultObj)) {
+			return null;
+		}
+		JSONArray headerArray = resultObj.getJSONArray("headerList");
+		if (CollectionUtils.isEmpty(headerArray)) {
+			return null;
+		}
+		List<String> headerList = headerArray.toJavaList(String.class);
+		JSONArray columnSelectValueArray = resultObj.getJSONArray("columnSelectValueList");
+		if (CollectionUtils.isEmpty(columnSelectValueArray)) {
+			return null;
+		}
+		List<List<String>> columnSelectValueList = new ArrayList<>();
+		for (int i = 0; i < columnSelectValueArray.size(); i++) {
+			JSONArray columnSelectValue = columnSelectValueArray.getJSONArray(i);
+			if (columnSelectValue != null) {
+				columnSelectValueList.add(columnSelectValue.toJavaList(String.class));
+			}
+		}
+		String fileNameEncode = matrixVo.getName() + "_模板.xls";
+		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+		} else {
+			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+		}
+		response.setContentType("application/vnd.ms-excel;charset=utf-8");
+		response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
+		ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
+//		if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+//			List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+//			if (CollectionUtils.isNotEmpty(attributeVoList)) {
+//				List<String> headerList = new ArrayList<>();
+//				List<List<String>> columnSelectValueList = new ArrayList<>();
+//				headerList.add("uuid");
+//				columnSelectValueList.add(new ArrayList<>());
+//				for (MatrixAttributeVo attributeVo : attributeVoList) {
+//					headerList.add(attributeVo.getName());
+//					List<String> selectValueList = new ArrayList<>();
+//					decodeDataConfig(attributeVo, selectValueList);
+//					columnSelectValueList.add(selectValueList);
+//				}
+//				String fileNameEncode = matrixVo.getName() + "_模板.xls";
+//				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+//				if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+//					fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
+//				} else {
+//					fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+//				}
+//				response.setContentType("application/vnd.ms-excel;charset=utf-8");
+//				response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
+//				ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
+//			}
+//		} else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType()))  {
+//			throw new MatrixExternalExportTemplateException();
+//		} else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+//			throw new MatrixViewExportTemplateException();
+//		}
 
 		return null;
 	}
 
 	// 解析config，抽取属性下拉框值
-	private void decodeDataConfig(MatrixAttributeVo attributeVo, List<String> selectValueList) {
-		if (StringUtils.isNotBlank(attributeVo.getConfig())) {
-			String config = attributeVo.getConfig();
-			JSONObject configObj = JSONObject.parseObject(config);
-			if (MatrixAttributeType.SELECT.getValue().equals(configObj.getString("handler"))) {
-				if (configObj.containsKey("config")) {
-					JSONArray configArray = configObj.getJSONArray("config");
-					for (int i = 0; i < configArray.size(); i++) {
-						JSONObject param = configArray.getJSONObject(i);
-						selectValueList.add(param.getString("value"));
-					}
-				}
-			}
-		}
-	}
+//	private void decodeDataConfig(MatrixAttributeVo attributeVo, List<String> selectValueList) {
+//		if (StringUtils.isNotBlank(attributeVo.getConfig())) {
+//			String config = attributeVo.getConfig();
+//			JSONObject configObj = JSONObject.parseObject(config);
+//			if (MatrixAttributeType.SELECT.getValue().equals(configObj.getString("handler"))) {
+//				if (configObj.containsKey("config")) {
+//					JSONArray configArray = configObj.getJSONArray("config");
+//					for (int i = 0; i < configArray.size(); i++) {
+//						JSONObject param = configArray.getJSONObject(i);
+//						selectValueList.add(param.getString("value"));
+//					}
+//				}
+//			}
+//		}
+//	}
 }

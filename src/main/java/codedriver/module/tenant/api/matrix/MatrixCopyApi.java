@@ -5,16 +5,12 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.Description;
@@ -27,13 +23,10 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.framework.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @program: codedriver
@@ -48,12 +41,6 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixMapper matrixMapper;
-
-    @Resource
-    private MatrixAttributeMapper matrixAttributeMapper;
-
-    @Resource
-    private MatrixDataMapper matrixDataMapper;
 
     @Override
     public String getToken() {
@@ -79,55 +66,60 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        MatrixVo sourceMatrix = matrixMapper.getMatrixByUuid(uuid);
-        if (sourceMatrix == null) {
+        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
+        if (matrixVo == null) {
             throw new MatrixNotFoundException(uuid);
         }
-        if (MatrixType.CUSTOM.getValue().equals(sourceMatrix.getType())) {
-            String targetMatrixUuid = UuidUtil.randomUuid();
-            while (matrixMapper.checkMatrixIsExists(targetMatrixUuid) > 0) {
-                targetMatrixUuid = UuidUtil.randomUuid();
-            }
-            sourceMatrix.setUuid(targetMatrixUuid);
-            String name = jsonObj.getString("name");
-            //判断name是否存在
-            sourceMatrix.setName(name);
-            if (matrixMapper.checkMatrixNameIsRepeat(sourceMatrix) > 0) {
-                throw new MatrixNameRepeatException(name);
-            }
-            String label = jsonObj.getString("label");
-            sourceMatrix.setLabel(label);
-            if (matrixMapper.checkMatrixLabelIsRepeat(sourceMatrix) > 0) {
-                throw new MatrixLabelRepeatException(label);
-            }
-            sourceMatrix.setFcu(UserContext.get().getUserUuid(true));
-            sourceMatrix.setLcu(UserContext.get().getUserUuid(true));
-            matrixMapper.insertMatrix(sourceMatrix);
-
-            List<MatrixAttributeVo> attributeVoList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(uuid);
-            if (CollectionUtils.isNotEmpty(attributeVoList)) {
-                //属性拷贝
-                List<String> sourceColumnList = new ArrayList<>();
-                List<String> targetColumnList = new ArrayList<>();
-                for (MatrixAttributeVo attributeVo : attributeVoList) {
-                    String sourceAttributeUuid = attributeVo.getUuid();
-                    String targetAttributeUuid = UuidUtil.randomUuid();
-                    sourceColumnList.add(sourceAttributeUuid);
-                    targetColumnList.add(targetAttributeUuid);
-                    attributeVo.setMatrixUuid(targetMatrixUuid);
-                    attributeVo.setUuid(targetAttributeUuid);
-                    matrixAttributeMapper.insertMatrixAttribute(attributeVo);
-                }
-                String schemaName = TenantContext.get().getDataDbName();
-                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, schemaName);
-                //数据拷贝
-                matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, schemaName);
-            }
-        } else if (MatrixType.EXTERNAL.getValue().equals(sourceMatrix.getType())) {
-            throw new MatrixExternalCopyException();
-        } else if (MatrixType.VIEW.getValue().equals(sourceMatrix.getType())) {
-            throw new MatrixViewCopyException();
+        String targetMatrixUuid = UuidUtil.randomUuid();
+        while (matrixMapper.checkMatrixIsExists(targetMatrixUuid) > 0) {
+            targetMatrixUuid = UuidUtil.randomUuid();
         }
+        matrixVo.setUuid(targetMatrixUuid);
+        String name = jsonObj.getString("name");
+        //判断name是否存在
+        matrixVo.setName(name);
+        if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+            throw new MatrixNameRepeatException(name);
+        }
+        String label = jsonObj.getString("label");
+        matrixVo.setLabel(label);
+        if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
+            throw new MatrixLabelRepeatException(label);
+        }
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        if (matrixDataSourceHandler == null) {
+            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+        }
+        matrixDataSourceHandler.copyMatrix(uuid, matrixVo);
+//        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+//            matrixVo.setFcu(UserContext.get().getUserUuid(true));
+//            matrixVo.setLcu(UserContext.get().getUserUuid(true));
+//            matrixMapper.insertMatrix(matrixVo);
+//
+//            List<MatrixAttributeVo> attributeVoList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(uuid);
+//            if (CollectionUtils.isNotEmpty(attributeVoList)) {
+//                //属性拷贝
+//                List<String> sourceColumnList = new ArrayList<>();
+//                List<String> targetColumnList = new ArrayList<>();
+//                for (MatrixAttributeVo attributeVo : attributeVoList) {
+//                    String sourceAttributeUuid = attributeVo.getUuid();
+//                    String targetAttributeUuid = UuidUtil.randomUuid();
+//                    sourceColumnList.add(sourceAttributeUuid);
+//                    targetColumnList.add(targetAttributeUuid);
+//                    attributeVo.setMatrixUuid(targetMatrixUuid);
+//                    attributeVo.setUuid(targetAttributeUuid);
+//                    matrixAttributeMapper.insertMatrixAttribute(attributeVo);
+//                }
+//                String schemaName = TenantContext.get().getDataDbName();
+//                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, schemaName);
+//                //数据拷贝
+//                matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, schemaName);
+//            }
+//        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixExternalCopyException();
+//        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixViewCopyException();
+//        }
 
         return null;
     }
