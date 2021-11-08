@@ -29,7 +29,6 @@ import codedriver.framework.restful.enums.ApiKind;
 import codedriver.framework.restful.enums.PublicApiAuthType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -82,8 +81,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
     @Description(desc = "接口配置信息保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ApiVo apiVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<ApiVo>() {
-        });
+        ApiVo apiVo = JSON.toJavaObject(jsonObj,ApiVo.class);
         String operationType = jsonObj.getString("operationType");
 
         ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
