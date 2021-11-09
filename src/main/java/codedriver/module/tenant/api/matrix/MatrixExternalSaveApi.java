@@ -15,13 +15,13 @@ import codedriver.framework.integration.core.IntegrationHandlerFactory;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
-import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixExternalVo;
 import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixExternalAccessException;
-import codedriver.framework.matrix.exception.MatrixExternalNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -31,15 +31,14 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.MATRIX_MODIFY;
-import codedriver.module.tenant.integration.handler.FrameworkRequestFrom;
-import codedriver.module.tenant.service.matrix.MatrixService;
+import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-
+@Deprecated
 @Service
 @Transactional
 @AuthAction(action = MATRIX_MODIFY.class)
@@ -47,16 +46,10 @@ import javax.annotation.Resource;
 public class MatrixExternalSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    private MatrixExternalMapper externalMapper;
-
-    @Resource
     private MatrixMapper matrixMapper;
 
     @Resource
     private IntegrationMapper integrationMapper;
-
-    @Resource
-    private MatrixService matrixService;
 
     @Override
     public String getToken() {
@@ -85,11 +78,17 @@ public class MatrixExternalSaveApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(externalVo.getMatrixUuid());
         }
-        if (!MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-            throw new MatrixExternalNotFoundException(matrixVo.getName());
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        if (matrixDataSourceHandler == null) {
+            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        matrixService.validateMatrixExternalData(externalVo.getIntegrationUuid());
-        externalMapper.replaceMatrixExternal(externalVo);
+        matrixVo.setIntegrationUuid(externalVo.getIntegrationUuid());
+        matrixDataSourceHandler.saveMatrix(matrixVo);
+//        if (!MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixExternalNotFoundException(matrixVo.getName());
+//        }
+//        matrixService.validateMatrixExternalData(externalVo.getIntegrationUuid());
+//        externalMapper.replaceMatrixExternal(externalVo);
         return null;
     }
 

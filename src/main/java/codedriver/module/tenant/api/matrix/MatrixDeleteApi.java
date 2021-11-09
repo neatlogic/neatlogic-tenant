@@ -5,19 +5,13 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.SchemaMapper;
-import codedriver.framework.dependency.constvalue.CalleeType;
-import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixExternalMapper;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixViewMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixReferencedCannotBeDeletedException;
+import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -45,18 +39,6 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
-    @Resource
-    private MatrixExternalMapper matrixExternalMapper;
-
-    @Resource
-    private MatrixViewMapper matrixViewMapper;
-
-    @Resource
-    private MatrixAttributeMapper matrixAttributeMapper;
-
-    @Resource
-    private SchemaMapper schemaMapper;
-
     @Override
     public String getToken() {
         return "matrix/delete";
@@ -79,19 +61,24 @@ public class MatrixDeleteApi extends PrivateApiComponentBase {
         String uuid = jsonObj.getString("uuid");
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
         if (matrixVo != null) {
-            if (DependencyManager.getDependencyCount(CalleeType.MATRIX, uuid) > 0) {
-                throw new MatrixReferencedCannotBeDeletedException(uuid);
+            IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+            if (matrixDataSourceHandler == null) {
+                throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
             }
-            matrixMapper.deleteMatrixByUuid(uuid);
-            if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-                matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
-                matrixAttributeMapper.dropMatrixDynamicTable(uuid, TenantContext.get().getDataDbName());
-            } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-                matrixExternalMapper.deleteMatrixExternalByMatrixUuid(uuid);
-            } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-                matrixViewMapper.deleteMatrixViewByMatrixUuid(uuid);
-                schemaMapper.deleteView(TenantContext.get().getDataDbName() + ".matrix_" + uuid);
-            }
+            matrixDataSourceHandler.deleteMatrix(uuid);
+//            if (DependencyManager.getDependencyCount(CalleeType.MATRIX, uuid) > 0) {
+//                throw new MatrixReferencedCannotBeDeletedException(uuid);
+//            }
+//            matrixMapper.deleteMatrixByUuid(uuid);
+//            if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+//                matrixAttributeMapper.deleteAttributeByMatrixUuid(uuid);
+//                matrixAttributeMapper.dropMatrixDynamicTable(uuid, TenantContext.get().getDataDbName());
+//            } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+//                matrixExternalMapper.deleteMatrixExternalByMatrixUuid(uuid);
+//            } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+//                matrixViewMapper.deleteMatrixViewByMatrixUuid(uuid);
+//                schemaMapper.deleteView(TenantContext.get().getDataDbName() + ".matrix_" + uuid);
+//            }
         }
         return null;
     }

@@ -5,16 +5,12 @@
 
 package codedriver.module.tenant.api.matrix;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.matrix.constvalue.MatrixAttributeType;
-import codedriver.framework.matrix.constvalue.MatrixType;
-import codedriver.framework.matrix.dao.mapper.MatrixAttributeMapper;
-import codedriver.framework.matrix.dao.mapper.MatrixDataMapper;
+import codedriver.framework.exception.type.ParamNotExistsException;
+import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
+import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixAttributeVo;
-import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.Description;
@@ -23,17 +19,13 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.util.UuidUtil;
 import codedriver.framework.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -48,12 +40,6 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixMapper matrixMapper;
-
-    @Resource
-    private MatrixAttributeMapper matrixAttributeMapper;
-
-    @Resource
-    private MatrixDataMapper matrixDataMapper;
 
     @Override
     public String getToken() {
@@ -83,52 +69,61 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(matrixUuid);
         }
-        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-            List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-            List<String> attributeUuidList = attributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-            JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
-            for (String columnUuid : rowDataObj.keySet()) {
-                if (!"uuid".equals(columnUuid) && !"id".equals(columnUuid) && !attributeUuidList.contains(columnUuid)) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, columnUuid);
-                }
-            }
-
-            boolean hasData = false;
-            List<MatrixColumnVo> rowData = new ArrayList<>();
-            for (MatrixAttributeVo matrixAttributeVo : attributeList) {
-                String value = rowDataObj.getString(matrixAttributeVo.getUuid());
-                if (StringUtils.isNotBlank(value)) {
-                    hasData = true;
-                    if (MatrixAttributeType.USER.getValue().equals(matrixAttributeVo.getType())) {
-                        value = value.split("#")[1];
-                    } else if (MatrixAttributeType.TEAM.getValue().equals(matrixAttributeVo.getType())) {
-                        value = value.split("#")[1];
-                    } else if (MatrixAttributeType.ROLE.getValue().equals(matrixAttributeVo.getType())) {
-                        value = value.split("#")[1];
-                    }
-                }
-                rowData.add(new MatrixColumnVo(matrixAttributeVo.getUuid(), value));
-            }
-            String schemaName = TenantContext.get().getDataDbName();
-            String uuidValue = rowDataObj.getString("uuid");
-            if (uuidValue == null) {
-                if (hasData) {
-                    rowData.add(new MatrixColumnVo("uuid", UuidUtil.randomUuid()));
-                    matrixDataMapper.insertDynamicTableData(rowData, matrixUuid, schemaName);
-                }
-            } else {
-                if (hasData) {
-                    MatrixColumnVo uuidColumn = new MatrixColumnVo("uuid", uuidValue);
-                    matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, schemaName);
-                } else {
-                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, schemaName);
-                }
-            }
-        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-            throw new MatrixExternalEditRowDataException();
-        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-            throw new MatrixViewEditRowDataException();
+        JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
+        if (MapUtils.isEmpty(rowDataObj)) {
+            throw new ParamNotExistsException("rowData");
         }
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        if (matrixDataSourceHandler == null) {
+            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+        }
+        matrixDataSourceHandler.saveTableRowData(matrixUuid, rowDataObj);
+//        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
+//            List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
+//            List<String> attributeUuidList = attributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
+////            JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
+//            for (String columnUuid : rowDataObj.keySet()) {
+//                if (!"uuid".equals(columnUuid) && !"id".equals(columnUuid) && !attributeUuidList.contains(columnUuid)) {
+//                    throw new MatrixAttributeNotFoundException(matrixUuid, columnUuid);
+//                }
+//            }
+//
+//            boolean hasData = false;
+//            List<MatrixColumnVo> rowData = new ArrayList<>();
+//            for (MatrixAttributeVo matrixAttributeVo : attributeList) {
+//                String value = rowDataObj.getString(matrixAttributeVo.getUuid());
+//                if (StringUtils.isNotBlank(value)) {
+//                    hasData = true;
+//                    if (MatrixAttributeType.USER.getValue().equals(matrixAttributeVo.getType())) {
+//                        value = value.split("#")[1];
+//                    } else if (MatrixAttributeType.TEAM.getValue().equals(matrixAttributeVo.getType())) {
+//                        value = value.split("#")[1];
+//                    } else if (MatrixAttributeType.ROLE.getValue().equals(matrixAttributeVo.getType())) {
+//                        value = value.split("#")[1];
+//                    }
+//                }
+//                rowData.add(new MatrixColumnVo(matrixAttributeVo.getUuid(), value));
+//            }
+//            String schemaName = TenantContext.get().getDataDbName();
+//            String uuidValue = rowDataObj.getString("uuid");
+//            if (uuidValue == null) {
+//                if (hasData) {
+//                    rowData.add(new MatrixColumnVo("uuid", UuidUtil.randomUuid()));
+//                    matrixDataMapper.insertDynamicTableData(rowData, matrixUuid, schemaName);
+//                }
+//            } else {
+//                if (hasData) {
+//                    MatrixColumnVo uuidColumn = new MatrixColumnVo("uuid", uuidValue);
+//                    matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, schemaName);
+//                } else {
+//                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, schemaName);
+//                }
+//            }
+//        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixExternalEditRowDataException();
+//        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
+//            throw new MatrixViewEditRowDataException();
+//        }
 
         return null;
     }

@@ -12,7 +12,7 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
-
+@Deprecated
 public interface MatrixService {
 
 	public List<MatrixAttributeVo> getExternalMatrixAttributeList(String matrixUuid, IntegrationVo integrationVo) throws FreemarkerTransformException;
