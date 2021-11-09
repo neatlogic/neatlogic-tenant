@@ -117,7 +117,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
         List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
-        resultObj.put("processMatrixAttributeList", matrixAttributeList);
+//        resultObj.put("processMatrixAttributeList", matrixAttributeList);
         resultObj.put("tbodyList", matrixAttributeList);
         return resultObj;
     }
