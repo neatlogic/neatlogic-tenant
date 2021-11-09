@@ -22,12 +22,14 @@ import codedriver.framework.exception.runner.*;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@Transactional
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class RunnerGroupSaveApi extends PrivateApiComponentBase {
