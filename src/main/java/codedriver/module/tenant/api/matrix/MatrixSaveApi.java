@@ -60,9 +60,9 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", isRequired = true, xss = true),
+            @Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", xss = true),
             @Param(name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", xss = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型", isRequired = true),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"),
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
             @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
             @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id")
@@ -79,12 +79,25 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             if (StringUtils.isBlank(matrixVo.getLabel())) {
                 throw new ParamNotExistsException("label");
             }
+            if (StringUtils.isBlank(matrixVo.getName())) {
+                throw new ParamNotExistsException("name");
+            }
+            if (StringUtils.isBlank(matrixVo.getType())) {
+                throw new ParamNotExistsException("type");
+            }
             if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
                 throw new MatrixLabelRepeatException(matrixVo.getLabel());
             }
-        }
-        if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-            throw new MatrixNameRepeatException(matrixVo.getName());
+            if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
+                throw new MatrixNameRepeatException(matrixVo.getName());
+            }
+        } else {
+            MatrixVo oldMatrix = matrixMapper.getMatrixByUuid(matrixVo.getUuid());
+            if (oldMatrix == null) {
+                throw new MatrixNotFoundException(matrixVo.getUuid());
+            }
+            matrixVo.setName(oldMatrix.getName());
+            matrixVo.setType(oldMatrix.getType());
         }
 
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
