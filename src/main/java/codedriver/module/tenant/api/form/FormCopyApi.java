@@ -139,7 +139,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
         formVersionVo.setUuid(null);
         formVersionVo.setFormUuid(newFormUuid);
         formVersionVo.setFormConfig(content);
-        formVersionVo.setEditor(UserContext.get().getUserUuid(true));
+//        formVersionVo.setEditor(UserContext.get().getUserUuid(true));
         formMapper.insertFormVersion(formVersionVo);
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
         if (formAttributeList != null && formAttributeList.size() > 0) {
