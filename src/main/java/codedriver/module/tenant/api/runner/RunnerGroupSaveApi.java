@@ -12,21 +12,24 @@ import codedriver.framework.common.util.IpUtil;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
+import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.exception.runner.*;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.exception.runner.*;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -39,7 +42,7 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "runner组保存接口";
+        return "保存runner组";
     }
 
     @Override
@@ -57,7 +60,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "id"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 分组名"),
             @Param(name = "description", type = ApiParamType.STRING, isRequired = false, desc = "描述"),
-            @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner 分组网段列表"),
+            @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner组 网段列表"),
+            @Param(name = "runnerList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "关联的runner列表"),
     })
     @Output({
     })
@@ -67,9 +71,11 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
+
         if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
             throw new RunnerGroupNetworkNameRepeatsException(name);
         }
+
         if (id != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
@@ -98,14 +104,27 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         } else {
             runnerMapper.insertRunnerGroup(runnerGroupVo);
         }
-        runnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
+
+        Long groupId = runnerGroupVo.getId();
+        //组网段
+        runnerMapper.deleteGroupNetWork(groupId);
         if (groupNetworkList != null && groupNetworkList.size() > 0) {
             for (GroupNetworkVo networkVo : groupNetworkList) {
-                networkVo.setGroupId(runnerGroupVo.getId());
+                networkVo.setGroupId(groupId);
                 runnerMapper.insertNetwork(networkVo);
             }
         }
 
+        //关联runner
+        JSONArray runnerArray = paramObj.getJSONArray("runnerList");
+        List<RunnerVo> runnerVoList = null;
+        if (CollectionUtils.isNotEmpty(runnerArray)) {
+            runnerVoList = runnerArray.toJavaList(RunnerVo.class);
+        }
+        List<Long> runnerIdList = runnerVoList.stream().map(RunnerVo::getId).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(runnerVoList)) {
+            runnerMapper.insertRunnerGroupRunnerByRunnerIdListAndGroupId(runnerIdList, groupId);
+        }
 
         return null;
     }

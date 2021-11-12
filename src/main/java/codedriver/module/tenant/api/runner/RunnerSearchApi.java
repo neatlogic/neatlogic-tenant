@@ -9,7 +9,8 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
-import codedriver.framework.dto.runner.RunnerGroupVo;
+import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.exception.runner.RunnerGroupIdNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -18,25 +19,23 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class RunnerGroupSearchApi extends PrivateApiComponentBase {
+public class RunnerSearchApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
-        return "查询runner组信息";
+        return "查询runner信息";
     }
 
     @Override
     public String getToken() {
-        return "runnergroup/search";
+        return "runner/search";
     }
 
     @Override
@@ -44,27 +43,33 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取runner组信息")
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词"),
+            @Param(name = "groupId", type = ApiParamType.LONG, desc = "runner组id"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字（ip或者名称）"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
-            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "所有tagent runner组")
+            @Param(name = "tbodyList", desc = "runner列表")
     })
+    @Description(desc = "用于runner管理页面的查询和runner组管理页面的runner列表查询")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
-        int rowNum = runnerMapper.searchRunnerGroupCount(groupVo);
-        List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
-        groupVo.setRowNum(rowNum);
-        if (rowNum > 0) {
-            runnerGroupVoList = runnerMapper.searchRunnerGroupDetail(groupVo);
+        Long groupId = paramObj.getLong("groupId");
+        RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        int rowNum = 0;
+        if (groupId != null) {
+            if (runnerMapper.checkRunnerGroupIdIsExist(groupId) == 0) {
+                throw new RunnerGroupIdNotFoundException(groupId);
+            }
+            rowNum = runnerMapper.searchRunnerCountByGroupId(groupId);
+        } else {
+            rowNum = runnerMapper.searchRunnerCount(runnerVo);
         }
-        return TableResultUtil.getResult(runnerGroupVoList, groupVo);
+        runnerVo.setRowNum(rowNum);
+        return TableResultUtil.getResult(runnerMapper.searchRunner(runnerVo), runnerVo);
+
+
     }
-
-
 }

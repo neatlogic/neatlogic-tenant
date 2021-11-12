@@ -9,16 +9,19 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.exception.runner.RunnerIdNotFoundException;
+import codedriver.framework.exception.runner.RunnerIsUsedException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
+@Transactional
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RunnerDeleteApi extends PrivateApiComponentBase {
@@ -28,7 +31,7 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "runner 删除接口";
+        return "删除runner";
     }
 
     @Override
@@ -53,6 +56,10 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
         if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
+        if (runnerMapper.checkRunnerIsUsed(id) > 0) {
+            throw new RunnerIsUsedException();
+        }
+        runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
         runnerMapper.deleteRunnerById(id);
         return null;
     }

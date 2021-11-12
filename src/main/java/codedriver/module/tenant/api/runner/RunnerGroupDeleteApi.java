@@ -30,7 +30,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "runner组删除接口";
+        return "删除runner组";
     }
 
     @Override
@@ -48,7 +48,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "tagent runner组删除接口")
+    @Description(desc = " runner组删除接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
@@ -58,6 +58,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
             }
             runnerMapper.deleteRunnerGroupById(id);
             runnerMapper.deleteGroupNetWork(id);
+            runnerMapper.deleteRunnerGroupRunnerByGroupId(id);
         }
         return null;
     }
