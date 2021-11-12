@@ -84,6 +84,11 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
         JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
+        JSONArray dafaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isEmpty(dafaultValue)) {
+            JSONArray uuidList = jsonObj.getJSONArray("uuidList");
+            dataVo.setDefaultValue(uuidList);
+        }
         String type = matrixVo.getType();
 //        if (MatrixType.CUSTOM.getValue().equals(type)) {
 //            List<MatrixAttributeVo> matrixAttributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
@@ -159,9 +164,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 //                returnObj.put("searchColumnDetailList", getSearchColumnDetailList(dataVo.getMatrixUuid(), matrixAttributeList, searchColumnArray));
 //            }
 //        }
-        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(type);
         if (matrixDataSourceHandler == null) {
-            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+            throw new MatrixDataSourceHandlerNotFoundException(type);
         }
         JSONObject returnObj = matrixDataSourceHandler.TableDataSearch(dataVo);
         List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
