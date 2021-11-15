@@ -75,30 +75,29 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
             throw new RunnerGroupNetworkNameRepeatsException(name);
         }
-
+        if (!CollectionUtils.isEmpty(groupNetworkList)) {
+            String checkIpMask = StringUtils.EMPTY;
+            for (int i = 0; i < groupNetworkList.size(); i++) {
+                String ip = groupNetworkList.get(i).getNetworkIp();
+                Integer mask = groupNetworkList.get(i).getMask();
+                if (!IpUtil.checkIp(ip) || StringUtils.isBlank(ip)) {
+                    throw new IPIsIncorrectException(ip);
+                }
+                if (mask == null || !IpUtil.checkMask(mask)) {
+                    throw new MaskIsIncorrectException(ip);
+                }
+                if (i == 0) {
+                    checkIpMask = ip + ":" + mask;
+                    continue;
+                }
+                if (checkIpMask.equals(ip + ":" + mask)) {
+                    throw new RunnerGroupNetworkSameException(checkIpMask);//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
+                }
+            }
+        }
         if (id != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
-            }
-            if (!CollectionUtils.isEmpty(groupNetworkList)) {
-                String checkIpMask = StringUtils.EMPTY;
-                for (int i = 0; i < groupNetworkList.size(); i++) {
-                    String ip = groupNetworkList.get(i).getNetworkIp();
-                    Integer mask = groupNetworkList.get(i).getMask();
-                    if (!IpUtil.checkIp(ip) || StringUtils.isBlank(ip)) {
-                        throw new IPIsIncorrectException(ip);
-                    }
-                    if (mask == null || !IpUtil.checkMask(mask)) {
-                        throw new MaskIsIncorrectException(ip);
-                    }
-                    if (i == 0) {
-                        checkIpMask = ip + ":" + mask;
-                        continue;
-                    }
-                    if (checkIpMask.equals(ip + ":" + mask)) {
-                        throw new RunnerGroupNetworkSameException(checkIpMask);//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
-                    }
-                }
             }
             runnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
@@ -120,14 +119,12 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         List<RunnerVo> runnerVoList = null;
         if (CollectionUtils.isNotEmpty(runnerArray)) {
             runnerVoList = runnerArray.toJavaList(RunnerVo.class);
+            List<Long> runnerIdList = runnerVoList.stream().map(RunnerVo::getId).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(runnerIdList)) {
+                runnerMapper.deleteRunnerGroupRunnerByGroupId(id);
+                runnerMapper.insertRunnerGroupRunnerByRunnerIdListAndGroupId(runnerIdList, groupId);
+            }
         }
-        List<Long> runnerIdList = runnerVoList.stream().map(RunnerVo::getId).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(runnerVoList)) {
-            runnerMapper.insertRunnerGroupRunnerByRunnerIdListAndGroupId(runnerIdList, groupId);
-        }
-
         return null;
     }
-
-
 }

@@ -44,7 +44,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "id")
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "runner组 id")
     })
     @Output({
     })

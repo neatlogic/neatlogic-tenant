@@ -59,7 +59,6 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
         if (runnerMapper.checkRunnerIsUsed(id) > 0) {
             throw new RunnerIsUsedException();
         }
-        runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
         runnerMapper.deleteRunnerById(id);
         return null;
     }
