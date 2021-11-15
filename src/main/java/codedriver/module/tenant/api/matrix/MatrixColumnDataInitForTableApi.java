@@ -16,6 +16,7 @@ import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
-
+@Deprecated //这个接口被MatrixColumnDataSearchForTableApi替代
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
 
@@ -77,6 +78,11 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+        }
+        JSONArray dafaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isEmpty(dafaultValue)) {
+            JSONArray uuidList = jsonObj.getJSONArray("uuidList");
+            dataVo.setDefaultValue(uuidList);
         }
         String type = matrixVo.getType();
 //        if (MatrixType.CUSTOM.getValue().equals(type)) {
@@ -182,9 +188,9 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
 //                }
 //            }
 //        }
-        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(type);
         if (matrixDataSourceHandler == null) {
-            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
+            throw new MatrixDataSourceHandlerNotFoundException(type);
         }
         JSONObject returnObj = matrixDataSourceHandler.TableDataSearch(dataVo);
         returnObj.put("type", type);
