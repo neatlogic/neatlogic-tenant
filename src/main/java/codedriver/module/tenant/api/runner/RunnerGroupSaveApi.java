@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,7 +79,7 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         }
         if (!CollectionUtils.isEmpty(groupNetworkList)) {
 
-            List<String> iPMaskList = new ArrayList<>();
+            Set<String> iPMaskSet = new HashSet<>();
             for (int i = 0; i < groupNetworkList.size(); i++) {
                 String ip = groupNetworkList.get(i).getNetworkIp();
                 Integer mask = groupNetworkList.get(i).getMask();
@@ -89,11 +89,9 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                 if (mask == null || !IpUtil.checkMask(mask)) {
                     throw new MaskIsIncorrectException(ip);
                 }
-                iPMaskList.add(ip + ":" + mask);
+                iPMaskSet.add(ip + ":" + mask);
             }
-
-            Set<String> ipMaskSet = iPMaskList.stream().collect(Collectors.toSet());
-            if (iPMaskList.size() != ipMaskSet.size()) {
+            if (iPMaskSet.size() != groupNetworkList.size()) {
                 throw new RunnerGroupNetworkSameException();//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
             }
 
