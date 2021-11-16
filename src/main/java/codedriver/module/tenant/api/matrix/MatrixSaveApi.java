@@ -76,7 +76,8 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"),
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
             @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
-            @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id")
+            @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id"),
+            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id")
     })
     @Output({
             @Param(name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")
