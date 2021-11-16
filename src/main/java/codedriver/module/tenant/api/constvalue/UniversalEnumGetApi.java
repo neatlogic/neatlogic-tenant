@@ -50,7 +50,13 @@ public class UniversalEnumGetApi extends PrivateApiComponentBase {
             throw new EnumNotFoundException(enumClass);
         }
         Class<? extends IEnum> aClass = EnumFactory.getEnumClass(enumClass);
+        Object instance = null;
         Object[] objects = aClass.getEnumConstants();
-        return aClass.getMethod("getValueTextList").invoke(objects[0]);
+        if (objects != null && objects.length > 0) {
+            instance = objects[0];
+        } else {
+            instance = aClass.newInstance();
+        }
+        return aClass.getMethod("getValueTextList").invoke(instance);
     }
 }
