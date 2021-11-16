@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,7 +78,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
             throw new RunnerGroupNetworkNameRepeatsException(name);
         }
         if (!CollectionUtils.isEmpty(groupNetworkList)) {
-            String checkIpMask = StringUtils.EMPTY;
+
+            List<String> iPMaskList = new ArrayList<>();
             for (int i = 0; i < groupNetworkList.size(); i++) {
                 String ip = groupNetworkList.get(i).getNetworkIp();
                 Integer mask = groupNetworkList.get(i).getMask();
@@ -86,14 +89,14 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                 if (mask == null || !IpUtil.checkMask(mask)) {
                     throw new MaskIsIncorrectException(ip);
                 }
-                if (i == 0) {
-                    checkIpMask = ip + ":" + mask;
-                    continue;
-                }
-                if (checkIpMask.equals(ip + ":" + mask)) {
-                    throw new RunnerGroupNetworkSameException(checkIpMask);//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
-                }
+                iPMaskList.add(ip + ":" + mask);
             }
+
+            Set<String> ipMaskSet = iPMaskList.stream().collect(Collectors.toSet());
+            if (iPMaskList.size() != ipMaskSet.size()) {
+                throw new RunnerGroupNetworkSameException();//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
+            }
+
         }
         if (id != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
