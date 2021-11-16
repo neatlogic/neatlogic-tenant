@@ -44,7 +44,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取runner组信息")
+    @Description(desc = "获取runner组列表")
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
