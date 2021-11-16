@@ -120,11 +120,11 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         //关联runner
         JSONArray runnerArray = paramObj.getJSONArray("runnerList");
         List<RunnerVo> runnerVoList = null;
+        runnerMapper.deleteRunnerGroupRunnerByGroupId(id);
         if (CollectionUtils.isNotEmpty(runnerArray)) {
             runnerVoList = runnerArray.toJavaList(RunnerVo.class);
             List<Long> runnerIdList = runnerVoList.stream().map(RunnerVo::getId).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(runnerIdList)) {
-                runnerMapper.deleteRunnerGroupRunnerByGroupId(id);
                 runnerMapper.insertRunnerGroupRunnerByRunnerIdListAndGroupId(runnerIdList, groupId);
             }
         }
