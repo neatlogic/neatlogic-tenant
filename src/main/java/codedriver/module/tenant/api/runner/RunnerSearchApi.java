@@ -30,7 +30,7 @@ public class RunnerSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询runner信息";
+        return "查询runner列表";
     }
 
     @Override
