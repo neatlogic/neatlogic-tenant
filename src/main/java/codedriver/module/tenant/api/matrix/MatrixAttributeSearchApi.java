@@ -40,9 +40,6 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
-    @Resource
-    private MatrixExternalMapper matrixExternalMapper;
-
     @Override
     public String getToken() {
         return "matrix/attribute/search";
@@ -129,7 +126,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
             String matrixUuid = value.getString("matrixUuid");
             MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
             if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-                MatrixExternalVo externalVo = matrixExternalMapper.getMatrixExternalByMatrixUuid(matrixUuid);
+                MatrixExternalVo externalVo = matrixMapper.getMatrixExternalByMatrixUuid(matrixUuid);
                 if (externalVo == null) {
                     return new FieldValidResultVo(new MatrixExternalNotFoundException(matrixVo.getName()));
                 }
