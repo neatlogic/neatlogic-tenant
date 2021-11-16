@@ -31,7 +31,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "runner组查询接口";
+        return "查询runner组信息";
     }
 
     @Override
@@ -44,21 +44,24 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取runner组信息")
+    @Description(desc = "获取runner组列表")
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
-            @Param(name = "tagentRunnerGroupInformation", explode = RunnerGroupVo[].class, desc = "所有tagent runner组")
+            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "所有tagent runner组")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
-        int rowNum = runnerMapper.searchRunnerGroupCount();
+        int rowNum = runnerMapper.searchRunnerGroupCount(groupVo);
         List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
         groupVo.setRowNum(rowNum);
         if (rowNum > 0) {
-            runnerGroupVoList = runnerMapper.searchRunnerGroupDetail(groupVo);
+            runnerGroupVoList = runnerMapper.searchRunnerGroup(groupVo);
         }
         return TableResultUtil.getResult(runnerGroupVoList, groupVo);
     }

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -18,20 +23,19 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class RunnerListApi extends PrivateApiComponentBase {
+public class RunnerSearchApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
 
-
     @Override
     public String getName() {
-        return "查询未关联的runner列表";
+        return "查询runner列表";
     }
 
     @Override
     public String getToken() {
-        return "runner/list";
+        return "runner/search";
     }
 
     @Override
@@ -50,20 +54,23 @@ public class RunnerListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tbodyList", desc = "runner列表")
     })
-    @Description(desc = "用于创建和编辑runner组的时候，供选择做关联的runner列表")
+    @Description(desc = "用于runner管理页面的查询和runner组管理页面的runner列表查询")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-
-        RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long groupId = paramObj.getLong("groupId");
-
+        RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        int rowNum = 0;
         if (groupId != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(groupId) == 0) {
                 throw new RunnerGroupIdNotFoundException(groupId);
             }
+            rowNum = runnerMapper.searchRunnerCountByGroupId(groupId);
+        } else {
+            rowNum = runnerMapper.searchRunnerCount(runnerVo);
         }
-        int rowNum = runnerMapper.searchRunnerCount(runnerVo);
         runnerVo.setRowNum(rowNum);
         return TableResultUtil.getResult(runnerMapper.searchRunner(runnerVo), runnerVo);
+
+
     }
 }
