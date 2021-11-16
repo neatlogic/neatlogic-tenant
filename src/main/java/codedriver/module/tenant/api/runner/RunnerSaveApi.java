@@ -67,15 +67,17 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
         if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
             throw new RunnerNameRepeatsException(runnerVo.getName());
         }
+
+        if (runnerMapper.checkRunnerIsExistByIdAndIpAndPort(runnerVo.getId(),runnerVo.getHost(), runnerVo.getPort()) > 0) {
+            throw new RunnerIsExistException(runnerVo.getHost(), runnerVo.getPort());
+        }
+
         if (id != null) {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
             runnerMapper.updateRunner(runnerVo);
         } else {
-            if (runnerMapper.checkRunnerIsExistByIpAndPort(runnerVo.getHost(), runnerVo.getPort()) > 0) {
-                throw new RunnerIsExistException(runnerVo.getHost(), runnerVo.getPort());
-            }
             runnerMapper.insertRunner(runnerVo);
         }
         return null;

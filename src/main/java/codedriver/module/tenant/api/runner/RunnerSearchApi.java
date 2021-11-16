@@ -45,7 +45,7 @@ public class RunnerSearchApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "groupId", type = ApiParamType.LONG, desc = "runner组id"),
-            @Param(name = "isFilterGroup", type = ApiParamType.INTEGER, desc = "是否为runner组"),
+            @Param(name = "isFilterGroup", type = ApiParamType.INTEGER, desc = "是否过滤runner组"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字（ip或者名称）"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
