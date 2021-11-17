@@ -9,7 +9,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
-import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -28,7 +27,7 @@ public class RunnerGroupRunnerDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除runner";
+        return "删除runner组和runner的关系";
     }
 
     @Override
@@ -46,13 +45,10 @@ public class RunnerGroupRunnerDeleteApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "用于runner组管理页面关联的runner页面，runner删除接口（删除runner组和runner的关联）")
+    @Description(desc = "用于runner组管理页面关联的runner页面，runner删除接口（删除runner组和runner的关系）")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
-            throw new RunnerIdNotFoundException(id);
-        }
         runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
         return null;
     }
