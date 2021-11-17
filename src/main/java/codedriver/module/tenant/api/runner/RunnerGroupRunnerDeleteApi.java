@@ -10,7 +10,6 @@ import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerIsUsedException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -22,7 +21,7 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
-public class RunnerDeleteApi extends PrivateApiComponentBase {
+public class RunnerGroupRunnerDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
@@ -34,7 +33,7 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "runner/delete";
+        return "runnergroup/runner/delete";
     }
 
     @Override
@@ -43,21 +42,18 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "runner id")
+            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "id")
     })
     @Output({
     })
-    @Description(desc = "用于runner管理页面，runner删除接口")
+    @Description(desc = "用于runner组管理页面关联的runner页面，runner删除接口（删除runner组和runner的关联）")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
         if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
-        if (runnerMapper.checkRunnerIsUsed(id) > 0) {
-            throw new RunnerIsUsedException();
-        }
-        runnerMapper.deleteRunnerById(id);
+        runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
         return null;
     }
 
