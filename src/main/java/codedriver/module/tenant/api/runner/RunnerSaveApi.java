@@ -68,8 +68,8 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             throw new RunnerNameRepeatsException(runnerVo.getName());
         }
 
-        if (runnerMapper.checkRunnerIsExistByIdAndIpAndPort(runnerVo.getId(),runnerVo.getHost(), runnerVo.getPort()) > 0) {
-            throw new RunnerIsExistException(runnerVo.getHost(), runnerVo.getPort());
+        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(),runnerVo.getHost()) > 0) {
+            throw new RunnerIsExistException(runnerVo.getHost());
         }
 
         if (id != null) {

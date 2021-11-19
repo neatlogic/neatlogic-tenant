@@ -10,7 +10,8 @@ import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerIsUsedException;
+import codedriver.framework.exception.runner.RunnerIsUsedByJobException;
+import codedriver.framework.exception.runner.RunnerIsUsedByRunnerGroupException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -54,8 +55,11 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
         if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
-        if (runnerMapper.checkRunnerIsUsed(id) > 0) {
-            throw new RunnerIsUsedException();
+        if (runnerMapper.checkRunnerIsUsedByJob(id) > 0) {
+            throw new RunnerIsUsedByJobException();
+        }
+        if (runnerMapper.checkRunnerIsUsedByRunnerGroup(id) > 0) {
+            throw new RunnerIsUsedByRunnerGroupException();
         }
         runnerMapper.deleteRunnerById(id);
         return null;
