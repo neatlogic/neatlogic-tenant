@@ -127,11 +127,12 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         }
         return null;
     }
+
     public IValid name() {
         return value -> {
             RunnerGroupVo vo = JSON.toJavaObject(value, RunnerGroupVo.class);
             if (runnerMapper.checkGroupNameIsRepeats(vo) > 0) {
-                throw new RunnerGroupNetworkNameRepeatsException(vo.getName());
+                return new FieldValidResultVo(new RunnerGroupNetworkNameRepeatsException(vo.getName()));
             }
             return new FieldValidResultVo();
         };
