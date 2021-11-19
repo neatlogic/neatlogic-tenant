@@ -10,6 +10,7 @@ import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -19,7 +20,9 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -71,12 +74,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerGroupVo runnerGroupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
         Long id = paramObj.getLong("id");
-        String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
 
-        if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
-            throw new RunnerGroupNetworkNameRepeatsException(name);
-        }
         if (!CollectionUtils.isEmpty(groupNetworkList)) {
 
             Set<String> iPMaskSet = new HashSet<>();
@@ -127,5 +126,14 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
             }
         }
         return null;
+    }
+    public IValid name() {
+        return value -> {
+            RunnerGroupVo vo = JSON.toJavaObject(value, RunnerGroupVo.class);
+            if (runnerMapper.checkGroupNameIsRepeats(vo) > 0) {
+                throw new RunnerGroupNetworkNameRepeatsException(vo.getName());
+            }
+            return new FieldValidResultVo();
+        };
     }
 }
