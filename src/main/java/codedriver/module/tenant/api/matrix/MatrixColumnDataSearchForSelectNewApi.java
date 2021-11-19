@@ -69,7 +69,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
             @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY)
     })
     @Output({
-            @Param(name = "columnDataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
     })
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Override
@@ -354,7 +354,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
             }
         }
 
-        returnObj.put("columnDataList", resultList);
+        returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
         returnObj.put("tbodyList", resultList);
         return returnObj;
     }
