@@ -38,10 +38,15 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
         for (int i = 0; i < 50; i++) {
             TbodyVo tbodyVo = new TbodyVo();
             tbodyVo.setColumn1("第一列" + i);
-            tbodyVo.setColumn2("第二列" + i);
-            tbodyVo.setColumn3("第三列" + i);
-            tbodyVo.setColumn4("第四列" + i);
-            tbodyVo.setColumn5("第五列" + i);
+            tbodyVo.setColumn2("第二列" + i/2);
+            tbodyVo.setColumn3("第三列" + i/3);
+            tbodyVo.setColumn4("第四列" + i/4);
+            List<String> columnList = new ArrayList<>();
+            int columnIndex = i/5;
+            columnList.add("第五列" + columnIndex++);
+            columnList.add("第五列" + columnIndex++);
+            columnList.add("第五列" + columnIndex++);
+            tbodyVo.setColumn5(JSONObject.toJSONString(columnList));
             staticTbodyList.add(tbodyVo);
         }
     }
