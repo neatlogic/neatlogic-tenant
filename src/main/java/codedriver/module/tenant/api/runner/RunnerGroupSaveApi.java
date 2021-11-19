@@ -76,7 +76,10 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
 
-        if (!CollectionUtils.isEmpty(groupNetworkList)) {
+        if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+            throw new RunnerGroupNetworkNameRepeatsException(runnerGroupVo.getName());
+        }
+            if (!CollectionUtils.isEmpty(groupNetworkList)) {
 
             Set<String> iPMaskSet = new HashSet<>();
             for (int i = 0; i < groupNetworkList.size(); i++) {
