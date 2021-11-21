@@ -59,7 +59,7 @@ public class searchSqlAuditApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         //复制一个新列表，不改变原来的列表
         List<SqlAuditVo> sqlAuditList = new ArrayList<>(SqlAuditManager.getSqlAuditList());
-        String orderBy = paramObj.getString("orderBy");
+        String orderBy = StringUtils.isNotBlank(paramObj.getString("orderBy")) ? paramObj.getString("orderBy") : "runtime";
         String id = paramObj.getString("id");
         int pageSize = 20;
         int currentPage = paramObj.getIntValue("currentPage");
@@ -69,6 +69,8 @@ public class searchSqlAuditApi extends PrivateApiComponentBase {
         if (StringUtils.isNotBlank(orderBy)) {
             if (orderBy.equals("timecost")) {
                 sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getTimeCost().compareTo(o1.getTimeCost())).collect(Collectors.toList());
+            } else {
+                sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getRunTime().compareTo(o1.getRunTime())).collect(Collectors.toList());
             }
         }
         long maxTimeCost = 0;
