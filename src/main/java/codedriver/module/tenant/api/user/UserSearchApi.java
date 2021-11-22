@@ -13,10 +13,13 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 
@@ -51,7 +54,8 @@ public class UserSearchApi extends PrivateApiComponentBase {
             @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "角色uuid"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认0"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值列表")
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = UserVo[].class, desc = "table数据列表"),
@@ -66,6 +70,13 @@ public class UserSearchApi extends PrivateApiComponentBase {
 
         JSONObject resultObj = new JSONObject();
         UserVo userVo = JSON.toJavaObject(jsonObj, UserVo.class);
+        JSONArray defaultValue = userVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<String> uuidList = defaultValue.toJavaList(String.class);
+            List<UserVo> userList = userMapper.getUserByUserUuidList(uuidList);
+            resultObj.put("tbodyList", userMapper.searchUser(userVo));
+            return resultObj;
+        }
         userVo.setIsDelete(0);
         if (userVo.getNeedPage()) {
             int rowNum = userMapper.searchUserCount(userVo);
