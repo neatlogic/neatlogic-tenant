@@ -62,6 +62,7 @@ public class RunnerListApi extends PrivateApiComponentBase {
                 throw new RunnerGroupIdNotFoundException(groupId);
             }
         }
+        runnerVo.setIsDelete(0);
         int rowNum = runnerMapper.searchRunnerCount(runnerVo);
         runnerVo.setRowNum(rowNum);
         return TableResultUtil.getResult(runnerMapper.searchRunner(runnerVo), runnerVo);

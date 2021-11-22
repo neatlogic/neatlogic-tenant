@@ -59,26 +59,49 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "runner 保存接口,ip:port确定一个runner")
+    @Description(desc = "runner 保存接口,直接由ip确定一个runner")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = paramObj.getLong("id");
+
+        RunnerVo runnerNameTmp = new RunnerVo();
+        RunnerVo runnerIpTmp = new RunnerVo();
         if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
-            throw new RunnerNameRepeatsException(runnerVo.getName());
+            runnerNameTmp = runnerMapper.getRunnerByName(runnerVo.getName());
+            if (runnerNameTmp.getIsDelete() != null && runnerNameTmp != null) {
+                if (runnerNameTmp.getIsDelete() == 0) {
+                    throw new RunnerNameRepeatsException(runnerVo.getName());
+                }
+            }
         }
 
-        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(),runnerVo.getHost()) > 0) {
-            throw new RunnerIsExistException(runnerVo.getHost());
+        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(), runnerVo.getHost()) > 0) {
+            runnerIpTmp = runnerMapper.getRunnerByIp(runnerVo.getHost());
+            if (runnerIpTmp != null) {
+                if (runnerIpTmp.getIsDelete() != null&&runnerIpTmp.getIsDelete() == 0) {
+                    throw new RunnerIsExistException(runnerVo.getHost());
+                }
+            }
         }
 
         if (id != null) {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
-            runnerMapper.updateRunner(runnerVo);
+            runnerMapper.replaceRunner(runnerVo);
         } else {
-            runnerMapper.insertRunner(runnerVo);
+            if (runnerIpTmp != null && runnerIpTmp.getIsDelete() != null && runnerIpTmp.getIsDelete() == 1) {
+                runnerVo.setId(runnerIpTmp.getId());
+                if ((runnerVo.getName()).equals(runnerNameTmp.getName())) {
+                    runnerMapper.deleteRuunerByName(runnerVo.getName());
+                }
+            } else if (runnerNameTmp != null && runnerNameTmp.getIsDelete() != null&& runnerNameTmp.getIsDelete() == 1) {
+                runnerVo.setId(runnerNameTmp.getId());
+            }
+
+            runnerMapper.replaceRunner(runnerVo);
+
         }
         return null;
     }
