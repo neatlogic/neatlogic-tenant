@@ -74,7 +74,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> uuidList = defaultValue.toJavaList(String.class);
             List<UserVo> userList = userMapper.getUserByUserUuidList(uuidList);
-            resultObj.put("tbodyList", userMapper.searchUser(userVo));
+            resultObj.put("tbodyList", userList);
             return resultObj;
         }
         userVo.setIsDelete(0);
