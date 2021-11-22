@@ -41,15 +41,17 @@ public class RunnerGroupRunnerDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "id")
+            @Param(name = "groupId", type = ApiParamType.LONG, isRequired = true, desc = "groupId"),
+            @Param(name = "runnerId", type = ApiParamType.LONG, isRequired = true, desc = "runnerId")
     })
     @Output({
     })
     @Description(desc = "用于runner组管理页面关联的runner页面，runner删除接口（删除runner组和runner的关系）")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Long id = paramObj.getLong("id");
-        runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
+        Long groupId = paramObj.getLong("groupId");
+        Long runnerId = paramObj.getLong("runnerId");
+        runnerMapper.deleteRunnerGroupRunnerByGroupIdAndRunnerId(groupId,runnerId);
         return null;
     }
 
