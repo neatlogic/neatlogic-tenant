@@ -12,7 +12,7 @@ import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerAuthVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerIsExistException;
+import codedriver.framework.exception.runner.RunnerIpIsExistException;
 import codedriver.framework.exception.runner.RunnerNameRepeatsException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -65,43 +65,34 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = paramObj.getLong("id");
 
-        RunnerVo runnerNameTmp = new RunnerVo();
-        RunnerVo runnerIpTmp = new RunnerVo();
-        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
-            runnerNameTmp = runnerMapper.getRunnerByName(runnerVo.getName());
-            if (runnerNameTmp.getIsDelete() != null && runnerNameTmp != null) {
-                if (runnerNameTmp.getIsDelete() == 0) {
-                    throw new RunnerNameRepeatsException(runnerVo.getName());
-                }
-            }
+        RunnerVo runnerNameTmp = runnerMapper.getRunnerByName(runnerVo.getName());
+        RunnerVo runnerIpTmp = runnerMapper.getRunnerByIp(runnerVo.getHost());
+
+        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0 && runnerNameTmp != null && runnerNameTmp.getIsDelete() == 0) {
+            throw new RunnerNameRepeatsException(runnerVo.getName());
+        }
+        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(), runnerVo.getHost()) > 0 && runnerIpTmp != null && runnerIpTmp.getIsDelete() == 0) {
+            throw new RunnerIpIsExistException(runnerVo.getHost());
         }
 
-        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(), runnerVo.getHost()) > 0) {
-            runnerIpTmp = runnerMapper.getRunnerByIp(runnerVo.getHost());
-            if (runnerIpTmp != null) {
-                if (runnerIpTmp.getIsDelete() != null&&runnerIpTmp.getIsDelete() == 0) {
-                    throw new RunnerIsExistException(runnerVo.getHost());
-                }
-            }
-        }
-
+        //再次编辑
         if (id != null) {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
             runnerMapper.replaceRunner(runnerVo);
         } else {
-            if (runnerIpTmp != null && runnerIpTmp.getIsDelete() != null && runnerIpTmp.getIsDelete() == 1) {
+            //覆盖或新增
+            //如果覆盖时发现需存runner的ip和name分别和另外两个已删runner相同，则优先覆盖ip相同的runner，删除name相同的runner
+            if (runnerIpTmp != null) {
                 runnerVo.setId(runnerIpTmp.getId());
-                if ((runnerVo.getName()).equals(runnerNameTmp.getName())) {
+                if (runnerNameTmp != null && (runnerVo.getName()).equals(runnerNameTmp.getName())) {
                     runnerMapper.deleteRuunerByName(runnerVo.getName());
                 }
-            } else if (runnerNameTmp != null && runnerNameTmp.getIsDelete() != null&& runnerNameTmp.getIsDelete() == 1) {
+            } else if (runnerNameTmp != null) {
                 runnerVo.setId(runnerNameTmp.getId());
             }
-
             runnerMapper.replaceRunner(runnerVo);
-
         }
         return null;
     }
