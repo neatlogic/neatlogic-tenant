@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -62,17 +63,18 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Description(desc = "runner 保存接口,直接由ip确定一个runner")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        RunnerVo searchVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = paramObj.getLong("id");
+        RunnerVo runnerVo = null;
 
-        RunnerVo runnerNameTmp = runnerMapper.getRunnerByName(runnerVo.getName());
-        RunnerVo runnerIpTmp = runnerMapper.getRunnerByIp(runnerVo.getHost());
+        RunnerVo oldNameRunner = runnerMapper.getRunnerByName(searchVo.getName());
+        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
 
-        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0 && runnerNameTmp != null && runnerNameTmp.getIsDelete() == 0) {
-            throw new RunnerNameRepeatsException(runnerVo.getName());
+        if (oldNameRunner != null && ((id == null && Objects.equals(oldNameRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldNameRunner.getId(), id)))) {
+            throw new RunnerNameRepeatsException(searchVo.getName());
         }
-        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(), runnerVo.getHost()) > 0 && runnerIpTmp != null && runnerIpTmp.getIsDelete() == 0) {
-            throw new RunnerIpIsExistException(runnerVo.getHost());
+        if (oldIpRunner != null && ((id == null && Objects.equals(oldIpRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldIpRunner.getId(), id)))) {
+            throw new RunnerIpIsExistException(searchVo.getHost());
         }
 
         //再次编辑
@@ -80,20 +82,26 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
-            runnerMapper.replaceRunner(runnerVo);
-        } else {
-            //覆盖或新增
-            //如果覆盖时发现需存runner的ip和name分别和另外两个已删runner相同，则优先覆盖ip相同的runner，删除name相同的runner
-            if (runnerIpTmp != null) {
-                runnerVo.setId(runnerIpTmp.getId());
-                if (runnerNameTmp != null && (runnerVo.getName()).equals(runnerNameTmp.getName())) {
-                    runnerMapper.deleteRuunerByName(runnerVo.getName());
-                }
-            } else if (runnerNameTmp != null) {
-                runnerVo.setId(runnerNameTmp.getId());
-            }
-            runnerMapper.replaceRunner(runnerVo);
+            runnerVo = searchVo;
         }
+        //ip相同，覆盖ip的runner，id不变，若发现当前runner的name已存在库里且isDelete为1，则删除name相同的runner
+        if (runnerVo == null && oldIpRunner != null) {
+            searchVo.setId(oldIpRunner.getId());
+            runnerVo = searchVo;
+            if (oldNameRunner != null && oldNameRunner.getIsDelete() == 1) {
+                runnerMapper.deleteRuunerByName(searchVo.getName());
+            }
+        }
+        //name相同，覆盖，id不变
+        if (runnerVo == null && oldNameRunner != null) {
+            searchVo.setId(oldNameRunner.getId());
+            runnerVo = searchVo;
+        }
+        //新增runner
+        if (runnerVo == null) {
+            runnerVo = searchVo;
+        }
+        runnerMapper.replaceRunner(runnerVo);
         return null;
     }
 }
