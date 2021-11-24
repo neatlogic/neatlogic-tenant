@@ -12,7 +12,7 @@ import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerAuthVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerIsExistException;
+import codedriver.framework.exception.runner.RunnerIpIsExistException;
 import codedriver.framework.exception.runner.RunnerNameRepeatsException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -59,27 +60,48 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "runner 保存接口,ip:port确定一个runner")
+    @Description(desc = "runner 保存接口,直接由ip确定一个runner")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        RunnerVo searchVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = paramObj.getLong("id");
-        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
-            throw new RunnerNameRepeatsException(runnerVo.getName());
+        RunnerVo runnerVo = null;
+
+        RunnerVo oldNameRunner = runnerMapper.getRunnerByName(searchVo.getName());
+        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
+
+        if (oldNameRunner != null && ((id == null && Objects.equals(oldNameRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldNameRunner.getId(), id)))) {
+            throw new RunnerNameRepeatsException(searchVo.getName());
+        }
+        if (oldIpRunner != null && ((id == null && Objects.equals(oldIpRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldIpRunner.getId(), id)))) {
+            throw new RunnerIpIsExistException(searchVo.getHost());
         }
 
-        if (runnerMapper.checkRunnerIsExistByIdAndIp(runnerVo.getId(),runnerVo.getHost()) > 0) {
-            throw new RunnerIsExistException(runnerVo.getHost());
-        }
-
+        //再次编辑
         if (id != null) {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
-            runnerMapper.updateRunner(runnerVo);
-        } else {
-            runnerMapper.insertRunner(runnerVo);
+            runnerVo = searchVo;
         }
+        //ip相同，覆盖ip的runner，id不变，若发现当前runner的name已存在库里且isDelete为1，则删除name相同的runner
+        if (runnerVo == null && oldIpRunner != null) {
+            searchVo.setId(oldIpRunner.getId());
+            runnerVo = searchVo;
+            if (oldNameRunner != null && oldNameRunner.getIsDelete() == 1) {
+                runnerMapper.deleteRuunerByName(searchVo.getName());
+            }
+        }
+        //name相同，覆盖，id不变
+        if (runnerVo == null && oldNameRunner != null) {
+            searchVo.setId(oldNameRunner.getId());
+            runnerVo = searchVo;
+        }
+        //新增runner
+        if (runnerVo == null) {
+            runnerVo = searchVo;
+        }
+        runnerMapper.replaceRunner(runnerVo);
         return null;
     }
 }

@@ -9,18 +9,19 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.RUNNER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerIsUsedByJobException;
-import codedriver.framework.exception.runner.RunnerIsUsedByRunnerGroupException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
+@Transactional
 @AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RunnerDeleteApi extends PrivateApiComponentBase {
@@ -51,17 +52,16 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
     @Description(desc = "用于runner管理页面，runner删除接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+
         Long id = paramObj.getLong("id");
         if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
-        if (runnerMapper.checkRunnerIsUsedByJob(id) > 0) {
-            throw new RunnerIsUsedByJobException();
-        }
-        if (runnerMapper.checkRunnerIsUsedByRunnerGroup(id) > 0) {
-            throw new RunnerIsUsedByRunnerGroupException();
-        }
-        runnerMapper.deleteRunnerById(id);
+
+        RunnerVo runnerVo = runnerMapper.getRunnerById(id);
+        runnerVo.setIsDelete(1);
+        runnerMapper.updateRunner(runnerVo);
+        runnerMapper.deleteRunnerGroupRunnerByRunnerId(id);
         return null;
     }
 

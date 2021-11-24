@@ -59,6 +59,7 @@ public class RunnerSearchApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long groupId = paramObj.getLong("groupId");
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        runnerVo.setIsDelete(0);
         int rowNum = 0;
         if (groupId != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(groupId) == 0) {

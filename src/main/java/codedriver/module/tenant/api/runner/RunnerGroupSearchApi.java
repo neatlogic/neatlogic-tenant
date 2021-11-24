@@ -52,11 +52,12 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数")
     })
     @Output({
-            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "所有tagent runner组")
+            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "所有runner组")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
+        groupVo.setIsRunnerDelete(0);
         int rowNum = runnerMapper.searchRunnerGroupCount(groupVo);
         List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
         groupVo.setRowNum(rowNum);
