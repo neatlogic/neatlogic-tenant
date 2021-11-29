@@ -57,7 +57,6 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
-        groupVo.setIsRunnerDelete(0);
         int rowNum = runnerMapper.searchRunnerGroupCount(groupVo);
         List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
         groupVo.setRowNum(rowNum);
