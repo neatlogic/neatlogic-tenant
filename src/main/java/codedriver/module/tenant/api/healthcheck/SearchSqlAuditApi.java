@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class searchSqlAuditApi extends PrivateApiComponentBase {
+public class SearchSqlAuditApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
