@@ -67,7 +67,7 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
 		if(PrivateApiComponentFactory.getApiByToken(apiAuditVo.getToken()) == null){
 			ApiVo api = ApiMapper.getApiByToken(apiAuditVo.getToken());
 			if(api == null) {
-				throw new ApiNotFoundException("token为'" + apiAuditVo.getToken() + "'的接口不存在");
+				throw new ApiNotFoundException(apiAuditVo.getToken());
 			}
 		}
 		
