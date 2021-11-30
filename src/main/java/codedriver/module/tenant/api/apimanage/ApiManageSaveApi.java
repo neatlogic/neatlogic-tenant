@@ -147,7 +147,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
             return null;
         } else if (ApiKind.SYSTEM.getValue().equals(apiVo.getApiType())) {
             if (ramApiVo == null) {
-                throw new ApiNotFoundException("此接口不存在");
+                throw new ApiNotFoundException(apiVo.getToken());
             }
             if (ramApiVo.equals(apiVo)) {
                 //如果接口配置信息与内存中接口配置信息一致，删除数据库中该接口的配置数据

@@ -60,7 +60,7 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 		if(apiVo != null) {
 			return apiVo;
 		}
-		throw new ApiNotFoundException("token为'" + token + "'的接口不存在");		
+		throw new ApiNotFoundException(token);
 	}
 
 }

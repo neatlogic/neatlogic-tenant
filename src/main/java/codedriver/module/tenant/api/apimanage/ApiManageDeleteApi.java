@@ -64,7 +64,7 @@ public class ApiManageDeleteApi extends PrivateApiComponentBase {
 		}
 		apiVo = ApiMapper.getApiByToken(token);
 		if(apiVo == null) {
-			throw new ApiNotFoundException("token为'" + token + "'的接口不存在");
+			throw new ApiNotFoundException(token);
 		}
 		ApiMapper.deleteApiByToken(token);
 		return null;
