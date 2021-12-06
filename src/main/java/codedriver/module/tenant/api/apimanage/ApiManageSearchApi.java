@@ -5,10 +5,12 @@
 
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.INTERFACE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = INTERFACE_MODIFY.class)
@@ -50,26 +53,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-            @Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"),
-            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"),
-            @Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"),
-            @Param(name = "apiType", type = ApiParamType.STRING, desc = "接口类型(system|custom)"),
-            @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")
-
-    })
-    @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-            @Param(name = "tbodyList", explode = ApiVo[].class, isRequired = true, desc = "接口配置信息列表")
-    })
+    @Input({@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"), @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"), @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"), @Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"), @Param(name = "apiType", type = ApiParamType.STRING, desc = "接口类型(system|custom)"), @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"), @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"), @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")})
+    @Output({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"), @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"), @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"), @Param(name = "tbodyList", explode = ApiVo[].class, isRequired = true, desc = "接口配置信息列表")})
     @Description(desc = "接口配置信息列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -87,7 +72,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 //				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
 //			}
 //		}
-        List<ApiVo> dbAllApiList = ApiMapper.getAllApi();
+        List<ApiVo> dbAllApiList = ApiMapper.getAllApiByModuleId(TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList()));
         List<ApiVo> ramApiList = new ArrayList<>();
         List<String> tokenList = new ArrayList<>();
         List<String> ramTokenList = new ArrayList<>();
@@ -124,15 +109,14 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 
             }
             if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword()))
-                        && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
                     continue;
                 }
             }
             // 系统接口默认关闭审计，开启审计的接口会在数据库有记录，所以先从数据库看是否有记录
             if (apiVo.getNeedAudit() != null) {
                 Optional<ApiVo> first = dbAllApiList.stream().filter(o -> Objects.equals(o.getToken(), api.getToken())).findFirst();
-                if (first != null && first.isPresent()) {
+                if (first.isPresent()) {
                     if (!Objects.equals(apiVo.getNeedAudit(), first.get().getNeedAudit())) {
                         continue;
                     }
@@ -184,8 +168,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 }
             }
             if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword()))
-                        && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
                     continue;
                 }
             }
@@ -221,7 +204,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
             int fromIndex = apiVo.getStartNum();
             if (fromIndex < rowNum) {
                 int toIndex = fromIndex + apiVo.getPageSize();
-                toIndex = toIndex > rowNum ? rowNum : toIndex;
+                toIndex = Math.min(toIndex, rowNum);
                 tokenList = tokenList.subList(fromIndex, toIndex);
             } else {
                 tokenList = new ArrayList<>();
@@ -269,11 +252,11 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
          * 根据token获取每个API的访问次数，并保存在ApiVo的visitTimes字段中
          */
         List<String> apiTokenList = new ArrayList<>();
-        apiList.stream().forEach(vo -> apiTokenList.add(vo.getToken()));
+        apiList.forEach(vo -> apiTokenList.add(vo.getToken()));
         if (!apiTokenList.isEmpty()) {
             List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
             if (!apiVisitTimesList.isEmpty()) {
-                apiList.stream().forEach(api -> {
+                apiList.forEach(api -> {
                     for (ApiVo vo : apiVisitTimesList) {
                         if (api.getToken().equals(vo.getToken())) {
                             api.setVisitTimes(vo.getVisitTimes());
