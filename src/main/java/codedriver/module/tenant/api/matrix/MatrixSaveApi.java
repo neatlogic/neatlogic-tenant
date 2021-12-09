@@ -184,24 +184,24 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
         };
     }
 
-    public IValid integrationUuid(){
-        return value -> {
-            IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(value.getString("integrationUuid"));
-            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-            if (handler == null) {
-                return new FieldValidResultVo(new IntegrationHandlerNotFoundException(integrationVo.getHandler()));
-            }
-            IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
-            if(StringUtils.isNotBlank(resultVo.getError())){
-                return new FieldValidResultVo(new MatrixExternalAccessException());
-            }
-            try{
-                handler.validate(resultVo);
-            }catch (ApiRuntimeException ex){
-                return new FieldValidResultVo(new ApiRuntimeException(ex.getMessage()));
-            }
-            return new FieldValidResultVo();
-        };
-    }
+//    public IValid integrationUuid(){
+//        return value -> {
+//            IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(value.getString("integrationUuid"));
+//            IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+//            if (handler == null) {
+//                return new FieldValidResultVo(new IntegrationHandlerNotFoundException(integrationVo.getHandler()));
+//            }
+//            IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
+//            if(StringUtils.isNotBlank(resultVo.getError())){
+//                return new FieldValidResultVo(new MatrixExternalAccessException());
+//            }
+//            try{
+//                handler.validate(resultVo);
+//            }catch (ApiRuntimeException ex){
+//                return new FieldValidResultVo(new ApiRuntimeException(ex.getMessage()));
+//            }
+//            return new FieldValidResultVo();
+//        };
+//    }
 
 }
