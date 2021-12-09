@@ -51,7 +51,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
+//            @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING), 页面上没有搜索框，所以后端不需要支持关键字搜索
             @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
