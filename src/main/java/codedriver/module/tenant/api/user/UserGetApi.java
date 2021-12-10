@@ -74,8 +74,6 @@ public class UserGetApi extends PrivateApiComponentBase {
 			if (userVo == null) {
 				throw new UserNotFoundException(userUuid);
 			}
-			UserVo user = new UserVo();
-			BeanUtils.copyProperties(userVo, user);
 			List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
 			if (CollectionUtils.isNotEmpty(userAuthVoList)) {
 				AuthActionChecker.getAuthList(userAuthVoList);
