@@ -60,17 +60,18 @@ public class AuthGroupApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         JSONArray groupArray = new JSONArray();
-        Map<String, List<AuthBase>> authGroupMap = AuthFactory.getAuthGroupMap();
         List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
         if(CollectionUtils.isNotEmpty(moduleGroupVos)) {
-            List<String> groupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+            Map<String, List<AuthBase>> authGroupMap = AuthFactory.getAuthGroupMap();
             Set<String> groupSet = authGroupMap.keySet();
-            groupSet.retainAll(groupList);
-            for (String group : groupSet) {
-                JSONObject groupObj = new JSONObject();
-                groupObj.put("value", group);
-                groupObj.put("text", ModuleUtil.getModuleGroup(group).getGroupName());
-                groupArray.add(groupObj);
+            for (ModuleGroupVo moduleGroupVo : moduleGroupVos) {
+                String group = moduleGroupVo.getGroup();
+                if (groupSet.contains(group)) {
+                    JSONObject groupObj = new JSONObject();
+                    groupObj.put("value", group);
+                    groupObj.put("text", moduleGroupVo.getGroupName());
+                    groupArray.add(groupObj);
+                }
             }
         }
         returnObj.put("groupList", groupArray);
