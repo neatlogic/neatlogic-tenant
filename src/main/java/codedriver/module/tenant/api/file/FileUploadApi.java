@@ -106,7 +106,10 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
                 if (fileTypeConfigVo != null) {
                     boolean isAllowed = false;
                     long maxSize = 0L;
-                    String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+                    String fileExt = "";
+                    if (StringUtils.isNotBlank(oldFileName)) {
+                        fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+                    }
                     JSONObject configObj = fileTypeConfigVo.getConfigObj();
                     JSONArray whiteList = new JSONArray();
                     JSONArray blackList = new JSONArray();
@@ -152,7 +155,7 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setType(type);
                 fileVo.setContentType(multipartFile.getContentType());
                 if (fileTypeHandler.needSave()) {
-                    String filePath = null;
+                    String filePath;
                     try {
                         filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
                     } catch (Exception ex) {
@@ -167,7 +170,7 @@ public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
                     file.setUrl("api/binary/file/download?id=" + fileVo.getId());
                     return file;
                 } else {
-                    fileTypeHandler.analyze(multipartFile);
+                    fileTypeHandler.analyze(multipartFile, paramObj);
                     return fileVo;
                 }
             }
