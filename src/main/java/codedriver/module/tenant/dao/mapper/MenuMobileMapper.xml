@@ -3,7 +3,7 @@
 <mapper namespace="codedriver.module.tenant.dao.mapper.MenuMobileMapper">
     <cache type="codedriver.framework.dao.cache.CodeDriverCache" flushInterval="30000" size="100"/>
     <select id="getMenuMobileList" resultType="codedriver.module.tenant.dto.MenuMobileVo">
-        select name, label, icon, config
+        select name, label, icon, config as configStr
         from menu_mobile
     </select>
 </mapper>
