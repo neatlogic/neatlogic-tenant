@@ -21,8 +21,10 @@ public class MenuMobileVo implements Serializable {
     private String label;
     @EntityField(name = "图标", type = ApiParamType.STRING)
     private String icon;
-    @EntityField(name = "其他配置", type = ApiParamType.STRING)
+    @EntityField(name = "其他配置", type = ApiParamType.JSONOBJECT)
     private JSONObject config;
+    @EntityField(name = "排序", type = ApiParamType.INTEGER)
+    private Integer sort;
     @JSONField(serialize = false)
     private String configStr;
 
@@ -61,4 +63,11 @@ public class MenuMobileVo implements Serializable {
         return configStr;
     }
 
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
 }
