@@ -91,36 +91,6 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
         matrixDataSourceHandler.copyMatrix(uuid, matrixVo);
-//        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-//            matrixVo.setFcu(UserContext.get().getUserUuid(true));
-//            matrixVo.setLcu(UserContext.get().getUserUuid(true));
-//            matrixMapper.insertMatrix(matrixVo);
-//
-//            List<MatrixAttributeVo> attributeVoList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(uuid);
-//            if (CollectionUtils.isNotEmpty(attributeVoList)) {
-//                //属性拷贝
-//                List<String> sourceColumnList = new ArrayList<>();
-//                List<String> targetColumnList = new ArrayList<>();
-//                for (MatrixAttributeVo attributeVo : attributeVoList) {
-//                    String sourceAttributeUuid = attributeVo.getUuid();
-//                    String targetAttributeUuid = UuidUtil.randomUuid();
-//                    sourceColumnList.add(sourceAttributeUuid);
-//                    targetColumnList.add(targetAttributeUuid);
-//                    attributeVo.setMatrixUuid(targetMatrixUuid);
-//                    attributeVo.setUuid(targetAttributeUuid);
-//                    matrixAttributeMapper.insertMatrixAttribute(attributeVo);
-//                }
-//                String schemaName = TenantContext.get().getDataDbName();
-//                matrixAttributeMapper.createMatrixDynamicTable(attributeVoList, targetMatrixUuid, schemaName);
-//                //数据拷贝
-//                matrixDataMapper.insertDynamicTableDataForCopy(uuid, sourceColumnList, targetMatrixUuid, targetColumnList, schemaName);
-//            }
-//        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixExternalCopyException();
-//        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixViewCopyException();
-//        }
-
         return null;
     }
 
