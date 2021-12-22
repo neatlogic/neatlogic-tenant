@@ -122,7 +122,7 @@ public class TeamTreeApi extends PrivateApiComponentBase {
                 Map<String, RoleTeamVo> roleTeamMap = new HashMap<>();
                 String roleUuid = jsonObj.getString("roleUuid");
                 if (StringUtils.isNotBlank(roleUuid)) {
-                    List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuid(roleUuid, teamUuidList);
+                    List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuidAndTeamUuidList(roleUuid, teamUuidList);
                     for (RoleTeamVo roleTeamVo : roleTeamList) {
                         roleTeamMap.put(roleTeamVo.getTeamUuid(), roleTeamVo);
                     }
