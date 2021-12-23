@@ -22,6 +22,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -60,20 +61,27 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
         return true;
     }
     @Input({
-            @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)
+            @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING),
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci"),
+            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id")
     })
     @Output({
             @Param(name = "tbodyList", desc = "矩阵属性集合", explode = MatrixAttributeVo[].class),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view")
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci")
     })
     @Description(desc = "矩阵属性检索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
+        MatrixVo matrixVo = null;
         String matrixUuid = jsonObj.getString("matrixUuid");
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-        if (matrixVo == null) {
-            throw new MatrixNotFoundException(matrixUuid);
+        if (StringUtils.isNotBlank(matrixUuid)) {
+            matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(matrixUuid);
+            }
+        } else {
+            matrixVo = jsonObj.toJavaObject(MatrixVo.class);
         }
         String type = matrixVo.getType();
 //        if (MatrixType.CUSTOM.getValue().equals(type)) {
