@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.matrix.constvalue.MatrixType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -81,6 +82,10 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
                 throw new MatrixNotFoundException(matrixUuid);
             }
         } else {
+            String type = jsonObj.getString("type");
+            if (StringUtils.isBlank(type)) {
+                throw new ParamNotExistsException("matrixUuid", "type");
+            }
             matrixVo = jsonObj.toJavaObject(MatrixVo.class);
         }
         String type = matrixVo.getType();

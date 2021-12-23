@@ -44,9 +44,6 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
-//    @Resource
-//    private IntegrationMapper integrationMapper;
-
     @Override
     public String getToken() {
         return "matrix/save";
