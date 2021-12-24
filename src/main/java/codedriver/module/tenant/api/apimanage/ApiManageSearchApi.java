@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,7 +66,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         }
         String keyword = jsonObj.getString("keyword");
         if (StringUtils.isNotBlank(keyword)) {
-            if (keyword.startsWith(File.separator)) {
+            if (keyword.startsWith("/")) {
                 keyword = keyword.substring(1);
             }
         }
