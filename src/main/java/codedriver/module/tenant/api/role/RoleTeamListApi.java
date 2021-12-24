@@ -65,7 +65,7 @@ public class RoleTeamListApi extends PrivateApiComponentBase  {
 			throw new RoleNotFoundException(roleUuid);
 		}
 		JSONObject resultObj = new JSONObject();
-		List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuid(roleUuid, null);
+		List<RoleTeamVo> roleTeamList = roleMapper.getRoleTeamListByRoleUuid(roleUuid);
 		if (CollectionUtils.isNotEmpty(roleTeamList)) {
 			List<String> teamUuidList = new ArrayList<>();
 			Map<String, Integer> checkedChildrenMap = new HashMap<>();
