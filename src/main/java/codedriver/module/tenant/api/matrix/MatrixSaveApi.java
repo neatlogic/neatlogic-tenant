@@ -8,14 +8,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.exception.core.ApiRuntimeException;
-import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.type.ParamNotExistsException;
-import codedriver.framework.integration.core.IIntegrationHandler;
-import codedriver.framework.integration.core.IntegrationHandlerFactory;
-import codedriver.framework.integration.dao.mapper.IntegrationMapper;
-import codedriver.framework.integration.dto.IntegrationResultVo;
-import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
@@ -30,7 +23,6 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.UuidUtil;
 import codedriver.framework.auth.label.MATRIX_MODIFY;
-import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -51,9 +43,6 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixMapper matrixMapper;
-
-    @Resource
-    private IntegrationMapper integrationMapper;
 
     @Override
     public String getToken() {
@@ -77,7 +66,8 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
             @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
             @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id"),
-            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id")
+            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
     })
     @Output({
             @Param(name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")

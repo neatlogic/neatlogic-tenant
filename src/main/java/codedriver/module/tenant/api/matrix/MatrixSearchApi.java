@@ -53,7 +53,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view"),
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci"),
             @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
             @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
             @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
