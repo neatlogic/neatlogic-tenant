@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,12 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         Integer needAudit = jsonObj.getInteger("needAudit");
         if (needAudit == null) {
             apiVo.setNeedAudit(null);
+        }
+        String keyword = jsonObj.getString("keyword");
+        if (StringUtils.isNotBlank(keyword)) {
+            if (keyword.startsWith(File.separator)) {
+                keyword = keyword.substring(1);
+            }
         }
 //		String handler = apiVo.getHandler();
 //		
@@ -108,8 +115,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 }
 
             }
-            if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+            if (StringUtils.isNotBlank(keyword)) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(keyword)) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(keyword))) {
                     continue;
                 }
             }
@@ -167,8 +174,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+            if (StringUtils.isNotBlank(keyword)) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(keyword)) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(keyword))) {
                     continue;
                 }
             }
