@@ -64,6 +64,12 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         if (needAudit == null) {
             apiVo.setNeedAudit(null);
         }
+        String keyword = jsonObj.getString("keyword");
+        if (StringUtils.isNotBlank(keyword)) {
+            if (keyword.startsWith("/")) {
+                keyword = keyword.substring(1);
+            }
+        }
 //		String handler = apiVo.getHandler();
 //		
 //		if(handler != null) {
@@ -108,8 +114,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 }
 
             }
-            if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+            if (StringUtils.isNotBlank(keyword)) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(keyword)) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(keyword))) {
                     continue;
                 }
             }
@@ -167,8 +173,8 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            if (StringUtils.isNotBlank(apiVo.getKeyword())) {
-                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(apiVo.getKeyword())) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(apiVo.getKeyword()))) {
+            if (StringUtils.isNotBlank(keyword)) {
+                if (!(StringUtils.isNotBlank(api.getName()) && api.getName().contains(keyword)) && !(StringUtils.isNotBlank(api.getToken()) && api.getToken().contains(keyword))) {
                     continue;
                 }
             }
