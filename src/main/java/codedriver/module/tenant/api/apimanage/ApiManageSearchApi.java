@@ -53,7 +53,16 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"), @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"), @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"), @Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"), @Param(name = "apiType", type = ApiParamType.STRING, desc = "接口类型(system|custom)"), @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"), @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"), @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"), @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")})
+    @Input({@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"),
+            @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"),
+            @Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"),
+            @Param(name = "apiType", type = ApiParamType.STRING, desc = "接口类型(system|custom)"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "是否激活"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页，默认值true")})
     @Output({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"), @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"), @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"), @Param(name = "tbodyList", explode = ApiVo[].class, isRequired = true, desc = "接口配置信息列表")})
     @Description(desc = "接口配置信息列表接口")
     @Override
