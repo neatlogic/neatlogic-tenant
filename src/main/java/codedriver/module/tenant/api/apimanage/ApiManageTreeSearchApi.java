@@ -96,7 +96,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             apiList = apiAuditService.getApiListForTree();
         }
         if (CollectionUtils.isNotEmpty(apiList)) {
-            for (Map.Entry<String, ModuleGroupVo> vo : activeModuleGroupVoMap.entrySet()) {//所有的启动的模块组
+            for (Map.Entry<String, ModuleGroupVo> vo : activeModuleGroupVoMap.entrySet()) {
                 Map<String, Object> moduleMap = new HashMap<>();
                 moduleMap.put("moduleGroup", vo.getKey());
                 moduleMap.put("moduleGroupName", vo.getValue().getGroupName());
@@ -119,13 +119,13 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
                             if (slashSplit.length > 2) {
                                 funcSet.forEach(func1 -> {
                                     if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
-                                        func1.setIsHasChild(1);//前面路由相同的设1
+                                        func1.setIsHasChild(1);
                                     }
                                 });
                             }
                         } else {
                             if (slashSplit.length > 2) {
-                                func.setIsHasChild(1);//新增 设1
+                                func.setIsHasChild(1);
                             }
                             funcSet.add(func);
                         }
