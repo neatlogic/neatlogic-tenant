@@ -73,8 +73,8 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 
         List<ApiVo> apiList = null;
         //获取系统中所有的模块
-        List<ModuleGroupVo> allModuleGroupList = TenantContext.get().getActiveModuleGroupList();
-        Map<String, ModuleGroupVo> moduleGroupVoMap = allModuleGroupList.stream().collect(Collectors.toMap(ModuleGroupVo::getGroup, e -> e));
+        List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
+        Map<String, ModuleGroupVo> activeModuleGroupVoMap = activeModuleGroupList.stream().collect(Collectors.toMap(ModuleGroupVo::getGroup, e -> e));
 
         if (TreeMenuType.SYSTEM.getValue().equals(menuType)) {
             apiList = PrivateApiComponentFactory.getApiList();
@@ -96,7 +96,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             apiList = apiAuditService.getApiListForTree();
         }
         if (CollectionUtils.isNotEmpty(apiList)) {
-            for (Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()) {//所有的启动的模块组
+            for (Map.Entry<String, ModuleGroupVo> vo : activeModuleGroupVoMap.entrySet()) {//所有的启动的模块组
                 Map<String, Object> moduleMap = new HashMap<>();
                 moduleMap.put("moduleGroup", vo.getKey());
                 moduleMap.put("moduleGroupName", vo.getValue().getGroupName());
