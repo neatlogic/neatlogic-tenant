@@ -76,11 +76,9 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
         } else if (TreeMenuType.CUSTOM.getValue().equals(type)) {
             //获取数据库中所有的API
             List<String> activeModuleIdList = TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList());
-            List<ApiVo> dbApiList = apiMapper.getAllApiByModuleId(activeModuleIdList);
-
-            List<ApiVo> activeDbApiVoList = dbApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList());
+            List<ApiVo> activeDbApiVoList = apiMapper.getAllApiByModuleId(activeModuleIdList);
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
-            //与系统中的API匹配token，如果匹配不上则表示是自定义API
+            //如果外部API的token与内部的相同，就跳过此API
             for (ApiVo vo : activeDbApiVoList) {
                 if (ramApiMap.get(vo.getToken()) == null) {
                     if (vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")) {
