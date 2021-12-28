@@ -5,8 +5,8 @@
 
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 接口管理页-左侧目录树接口
@@ -72,7 +73,9 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 
         List<ApiVo> apiList = null;
         //获取系统中所有的模块
-        Map<String, ModuleGroupVo> moduleGroupVoMap = ModuleUtil.getModuleGroupMap();
+        List<ModuleGroupVo> allModuleGroupList = TenantContext.get().getActiveModuleGroupList();
+        Map<String, ModuleGroupVo> moduleGroupVoMap = allModuleGroupList.stream().collect(Collectors.toMap(ModuleGroupVo::getGroup, e -> e));
+
         if (TreeMenuType.SYSTEM.getValue().equals(menuType)) {
             apiList = PrivateApiComponentFactory.getApiList();
         } else if (TreeMenuType.CUSTOM.getValue().equals(menuType)) {
@@ -93,7 +96,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             apiList = apiAuditService.getApiListForTree();
         }
         if (CollectionUtils.isNotEmpty(apiList)) {
-            for (Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()) {
+            for (Map.Entry<String, ModuleGroupVo> vo : moduleGroupVoMap.entrySet()) {//所有的启动的模块组
                 Map<String, Object> moduleMap = new HashMap<>();
                 moduleMap.put("moduleGroup", vo.getKey());
                 moduleMap.put("moduleGroupName", vo.getValue().getGroupName());
@@ -116,13 +119,13 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
                             if (slashSplit.length > 2) {
                                 funcSet.forEach(func1 -> {
                                     if (func1.getFuncId().equals(func.funcId) && func1.getIsHasChild() == 0) {
-                                        func1.setIsHasChild(1);
+                                        func1.setIsHasChild(1);//前面路由相同的设1
                                     }
                                 });
                             }
                         } else {
                             if (slashSplit.length > 2) {
-                                func.setIsHasChild(1);
+                                func.setIsHasChild(1);//新增 设1
                             }
                             funcSet.add(func);
                         }

@@ -5,7 +5,9 @@
 
 package codedriver.module.tenant.api.apimanage;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.ModuleVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -73,9 +76,12 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
         } else if (TreeMenuType.CUSTOM.getValue().equals(type)) {
             //获取数据库中所有的API
             List<ApiVo> dbApiList = apiMapper.getAllApi();
+            List<String> activeModuleIdList = TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList());
+
+            List<ApiVo> activeApiVoList = dbApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList());
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
             //与系统中的API匹配token，如果匹配不上则表示是自定义API
-            for (ApiVo vo : dbApiList) {
+            for (ApiVo vo : activeApiVoList) {
                 if (ramApiMap.get(vo.getToken()) == null) {
                     if (vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")) {
                         tokenList.add(vo.getToken());
