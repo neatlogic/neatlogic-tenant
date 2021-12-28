@@ -78,10 +78,10 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
             List<ApiVo> dbApiList = apiMapper.getAllApi();
             List<String> activeModuleIdList = TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList());
 
-            List<ApiVo> activeApiVoList = dbApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList());
+            List<ApiVo> activeDbApiVoList = dbApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList());
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
             //与系统中的API匹配token，如果匹配不上则表示是自定义API
-            for (ApiVo vo : activeApiVoList) {
+            for (ApiVo vo : activeDbApiVoList) {
                 if (ramApiMap.get(vo.getToken()) == null) {
                     if (vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")) {
                         tokenList.add(vo.getToken());

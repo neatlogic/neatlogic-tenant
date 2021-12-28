@@ -72,7 +72,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
         List<Map<String, Object>> menuMapList = new ArrayList<>();
 
         List<ApiVo> apiList = null;
-        //获取系统中所有的模块
+        //获取系统中成功启动的所有模块
         List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
         Map<String, ModuleGroupVo> activeModuleGroupVoMap = activeModuleGroupList.stream().collect(Collectors.toMap(ModuleGroupVo::getGroup, e -> e));
 
