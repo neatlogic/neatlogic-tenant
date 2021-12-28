@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 接口管理页-左侧目录树接口
@@ -72,10 +71,6 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
         List<Map<String, Object>> menuMapList = new ArrayList<>();
 
         List<ApiVo> apiList = null;
-        //获取系统中成功启动的所有模块
-        List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
-        Map<String, ModuleGroupVo> activeModuleGroupVoMap = activeModuleGroupList.stream().collect(Collectors.toMap(ModuleGroupVo::getGroup, e -> e));
-
         if (TreeMenuType.SYSTEM.getValue().equals(menuType)) {
             apiList = PrivateApiComponentFactory.getApiList();
         } else if (TreeMenuType.CUSTOM.getValue().equals(menuType)) {
@@ -83,7 +78,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             List<ApiVo> dbApiList = apiMapper.getAllApi();
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
             apiList = new ArrayList<>();
-            //与系统中的API匹配token，如果匹配不上则表示是自定义API
+            //与系统中的API的token相同，则不归类为自定义API，如果匹配不上则表示是自定义API
             for (ApiVo vo : dbApiList) {
                 if (ramApiMap.get(vo.getToken()) == null) {
                     apiList.add(vo);
@@ -96,15 +91,15 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             apiList = apiAuditService.getApiListForTree();
         }
         if (CollectionUtils.isNotEmpty(apiList)) {
-            for (Map.Entry<String, ModuleGroupVo> vo : activeModuleGroupVoMap.entrySet()) {
+            for ( ModuleGroupVo vo : TenantContext.get().getActiveModuleGroupList()) {
                 Map<String, Object> moduleMap = new HashMap<>();
-                moduleMap.put("moduleGroup", vo.getKey());
-                moduleMap.put("moduleGroupName", vo.getValue().getGroupName());
+                moduleMap.put("moduleGroup", vo.getGroup());
+                moduleMap.put("moduleGroupName", vo.getGroupName());
                 //多个token的第一个单词相同，用Set可以去重
                 Set<Func> funcSet = new HashSet<>(16);
                 for (ApiVo apiVo : apiList) {
                     String moduleGroup = apiVo.getModuleGroup();
-                    if (vo.getKey().equals(moduleGroup)) {
+                    if (vo.getGroup().equals(moduleGroup)) {
                         String token = apiVo.getToken();
                         Func func = new Func();
                         //有些API的token没有“/”，比如登出接口
