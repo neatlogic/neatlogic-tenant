@@ -87,14 +87,12 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 //				throw new ComponentNotFoundException("接口组件:" + handler + "不存在");
 //			}
 //		}
-        List<String> activeModuleIdList = TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList());
         List<ApiVo> dbAllApiList = ApiMapper.getAllApiByModuleId(TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList()));
         List<ApiVo> ramApiList = new ArrayList<>();
         List<String> tokenList = new ArrayList<>();
         List<String> ramTokenList = new ArrayList<>();
         //从内存中取出符合搜索条件的api、token数据
-        List<ApiVo> privateApiList = PrivateApiComponentFactory.getApiList();
-        for (ApiVo api : privateApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList())) {
+        for (ApiVo api : PrivateApiComponentFactory.getTenantActiveApiList()) {
             if (apiVo.getIsActive() != null && !apiVo.getIsActive().equals(api.getIsActive())) {
                 continue;
             }

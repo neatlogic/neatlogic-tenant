@@ -67,7 +67,7 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
         String type = jsonObj.getString("type");
         List<String> tokenList = new ArrayList<>();
         if (TreeMenuType.SYSTEM.getValue().equals(type)) {
-            List<ApiVo> ramApiList = PrivateApiComponentFactory.getApiList();
+            List<ApiVo> ramApiList = PrivateApiComponentFactory.getTenantActiveApiList();
             for (ApiVo vo : ramApiList) {
                 if (vo.getModuleGroup().equals(moduleGroup) && vo.getToken().startsWith(funcId + "/")) {
                     tokenList.add(vo.getToken());
@@ -75,8 +75,8 @@ public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
             }
         } else if (TreeMenuType.CUSTOM.getValue().equals(type)) {
             //获取数据库中所有的API
-            List<ApiVo> dbApiList = apiMapper.getAllApi();
             List<String> activeModuleIdList = TenantContext.get().getActiveModuleList().stream().map(ModuleVo::getId).collect(Collectors.toList());
+            List<ApiVo> dbApiList = apiMapper.getAllApiByModuleId(activeModuleIdList);
 
             List<ApiVo> activeDbApiVoList = dbApiList.stream().filter(e -> activeModuleIdList.contains(e.getModuleId())).collect(Collectors.toList());
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
