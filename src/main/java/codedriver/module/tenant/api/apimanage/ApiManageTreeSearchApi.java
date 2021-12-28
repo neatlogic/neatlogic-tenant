@@ -78,7 +78,7 @@ public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
             List<ApiVo> dbApiList = apiMapper.getAllApi();
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
             apiList = new ArrayList<>();
-            //与系统中的API的token相同，则不归类为自定义API，如果匹配不上则表示是自定义API
+            //如果外部API的token与内部的相同，就跳过此API
             for (ApiVo vo : dbApiList) {
                 if (ramApiMap.get(vo.getToken()) == null) {
                     apiList.add(vo);
