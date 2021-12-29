@@ -13,6 +13,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
 import codedriver.framework.exception.user.UserNotFoundException;
@@ -22,7 +23,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -80,6 +80,13 @@ public class UserGetApi extends PrivateApiComponentBase {
 				userVo.setUserAuthList(userAuthVoList);
 			}
 			List<String> teamUuidList = userVo.getTeamUuidList();
+//			补充分组角色信息
+			List<TeamVo> roleTeamList =userMapper.getUserTeamRoleMapByTeamUuidList(teamUuidList);
+			if (CollectionUtils.isNotEmpty(roleTeamList)) {
+				userVo.setTeamList(roleTeamList);
+			}
+			//补充用户的资源权限（包括个人权限和角色权限）
+
 			if (CollectionUtils.isNotEmpty(teamUuidList)) {
 				for (int i = 0; i < teamUuidList.size(); i++) {
 					String teamUuid = teamUuidList.get(i);
