@@ -92,7 +92,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         List<String> tokenList = new ArrayList<>();
         List<String> ramTokenList = new ArrayList<>();
         //从内存中取出符合搜索条件的api、token数据
-        for (ApiVo api : PrivateApiComponentFactory.getApiList()) {
+        for (ApiVo api : PrivateApiComponentFactory.getTenantActiveApiList()) {
             if (apiVo.getIsActive() != null && !apiVo.getIsActive().equals(api.getIsActive())) {
                 continue;
             }
