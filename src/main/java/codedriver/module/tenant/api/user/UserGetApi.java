@@ -85,7 +85,6 @@ public class UserGetApi extends PrivateApiComponentBase {
 			if (CollectionUtils.isNotEmpty(roleTeamList)) {
 				userVo.setTeamList(roleTeamList);
 			}
-			//补充用户的资源权限（包括个人权限和角色权限）
 
 			if (CollectionUtils.isNotEmpty(teamUuidList)) {
 				for (int i = 0; i < teamUuidList.size(); i++) {
