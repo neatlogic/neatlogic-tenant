@@ -99,8 +99,8 @@ public class UserGetApi extends PrivateApiComponentBase {
             List<RoleVo> teamRoleList = new ArrayList<>();
             Map<String, RoleVo> roleVoTeamVoMap = new HashMap<>();
             for (TeamVo teamVo : teamList) {
-                List<RoleVo> parentTeamRoleList = roleMapper.getUserParentTeamRoleListWithCheckedChildrenByTeam(teamVo);
-                List<RoleVo> ownTeamRoleList = roleMapper.getUserTeamRoleListByTeamUuid(teamVo.getUuid());
+                List<RoleVo> parentTeamRoleList = roleMapper.getUserParentTeamRoleMapWithCheckedChildrenByTeam(teamVo);
+                List<RoleVo> ownTeamRoleList = roleMapper.getUserTeamRoleMapByTeamUuid(teamVo.getUuid());
                 teamRoleList.addAll(parentTeamRoleList);
                 teamRoleList.addAll(ownTeamRoleList);
             }
