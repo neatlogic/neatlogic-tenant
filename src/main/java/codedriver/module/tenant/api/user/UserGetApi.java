@@ -12,7 +12,10 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.common.constvalue.SystemUser;
+import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dto.RoleVo;
 import codedriver.framework.dto.TeamVo;
 import codedriver.framework.dto.UserAuthVo;
 import codedriver.framework.dto.UserVo;
@@ -26,83 +29,114 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserGetApi extends PrivateApiComponentBase {
 
-	@Resource
-	private UserMapper userMapper;
+    @Resource
+    private UserMapper userMapper;
 
-	@Override
-	public String getToken() {
-		return "user/get";
-	}
+    @Resource
+    private TeamMapper teamMapper;
 
-	@Override
-	public String getName() {
-		return "根据用户id查询用户详情接口";
-	}
+    @Resource
+    private RoleMapper roleMapper;
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getToken() {
+        return "user/get";
+    }
 
-	@Input({ @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = false) })
-	@Output({ @Param(name = "Return", explode = UserVo.class, desc = "用户详情") })
-	@Description(desc = "根据用户Id查询用户详情")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String userUuid = jsonObj.getString("userUuid");
-		if (StringUtils.isBlank(userUuid)) {
-			userUuid = UserContext.get().getUserUuid(true);
-		}
-		UserVo userVo = null;
-		//维护模式下 获取厂商维护人员信息
-		if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
-			userVo = MaintenanceMode.getMaintenanceUser();
-			//告诉前端是否为维护模式
-			userVo.setIsMaintenanceMode(1);
-		}else if(Objects.equals(SystemUser.SYSTEM.getUserUuid(),userUuid)){
-			userVo = SystemUser.SYSTEM.getUserVo();
-		} else {
-			userVo = userMapper.getUserByUuid(userUuid);
-			if (userVo == null) {
-				throw new UserNotFoundException(userUuid);
-			}
-			List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
-			if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-				AuthActionChecker.getAuthList(userAuthVoList);
-				userVo.setUserAuthList(userAuthVoList);
-			}
-			List<String> teamUuidList = userVo.getTeamUuidList();
-//			补充分组角色信息
-			List<TeamVo> roleTeamList =userMapper.getUserTeamRoleMapByTeamUuidList(teamUuidList);
-			if (CollectionUtils.isNotEmpty(roleTeamList)) {
-				userVo.setTeamList(roleTeamList);
-			}
+    @Override
+    public String getName() {
+        return "根据用户id查询用户详情接口";
+    }
 
-			if (CollectionUtils.isNotEmpty(teamUuidList)) {
-				for (int i = 0; i < teamUuidList.size(); i++) {
-					String teamUuid = teamUuidList.get(i);
-					teamUuid = GroupSearch.TEAM.getValuePlugin() + teamUuid;
-					teamUuidList.set(i, teamUuid);
-				}
-			}
-			List<String> roleUuidList = userVo.getRoleUuidList();
-			if (CollectionUtils.isNotEmpty(roleUuidList)) {
-				for (int i = 0; i < roleUuidList.size(); i++) {
-					String roleUuid = roleUuidList.get(i);
-					roleUuid = GroupSearch.ROLE.getValuePlugin() + roleUuid;
-					roleUuidList.set(i, roleUuid);
-				}
-			}
-		}
-		return userVo;
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = false)})
+    @Output({@Param(name = "Return", explode = UserVo.class, desc = "用户详情")})
+    @Description(desc = "根据用户Id查询用户详情")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String userUuid = jsonObj.getString("userUuid");
+        if (StringUtils.isBlank(userUuid)) {
+            userUuid = UserContext.get().getUserUuid(true);
+        }
+        UserVo userVo = null;
+        //维护模式下 获取厂商维护人员信息
+        if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
+            userVo = MaintenanceMode.getMaintenanceUser();
+            //告诉前端是否为维护模式
+            userVo.setIsMaintenanceMode(1);
+        } else if (Objects.equals(SystemUser.SYSTEM.getUserUuid(), userUuid)) {
+            userVo = SystemUser.SYSTEM.getUserVo();
+        } else {
+            userVo = userMapper.getUserByUuid(userUuid);
+            if (userVo == null) {
+                throw new UserNotFoundException(userUuid);
+            }
+            List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
+            if (CollectionUtils.isNotEmpty(userAuthVoList)) {
+                AuthActionChecker.getAuthList(userAuthVoList);
+                userVo.setUserAuthList(userAuthVoList);
+            }
+            List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
+            List<String> teamUuidList = teamList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
+            /**
+             * 补充分组角色信息,以用户的一个分组为例
+             * 1、找到父节点的需要穿透的parentTeamRoleList
+             * 2、找到自己的分组的ownTeamRoleList
+             * 3、一起合并在一个List<RoleVo>里面
+             */
+            List<RoleVo> teamRoleList = new ArrayList<>();
+            Map<String, RoleVo> roleVoTeamVoMap = new HashMap<>();
+            for (TeamVo teamVo : teamList) {
+                List<RoleVo> parentTeamRoleList = roleMapper.getUserParentTeamRoleListWithCheckedChildrenByTeam(teamVo);
+                List<RoleVo> ownTeamRoleList = roleMapper.getUserTeamRoleListByTeamUuid(teamVo.getUuid());
+                teamRoleList.addAll(parentTeamRoleList);
+                teamRoleList.addAll(ownTeamRoleList);
+            }
+            for (RoleVo roleVo : teamRoleList) {
+                String uuid = roleVo.getUuid();
+                if (!roleVoTeamVoMap.containsKey(uuid)) {
+                    roleVoTeamVoMap.put(uuid, roleVo);
+                } else {
+                    roleVoTeamVoMap.get(uuid).getUserRoleTeamList().addAll(roleVo.getUserRoleTeamList());
+                }
+            }
+
+            List<RoleVo> roleVoList = new ArrayList<>();
+            for (Map.Entry<String, RoleVo> entry : roleVoTeamVoMap.entrySet()) {
+                roleVoList.add(entry.getValue());
+            }
+            userVo.getUserTeamRoleList().addAll(roleVoList);
+
+            if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                for (int i = 0; i < teamUuidList.size(); i++) {
+                    String teamUuid = teamUuidList.get(i);
+                    teamUuid = GroupSearch.TEAM.getValuePlugin() + teamUuid;
+                    teamUuidList.set(i, teamUuid);
+                }
+            }
+            List<String> roleUuidList = userVo.getRoleUuidList();
+            if (CollectionUtils.isNotEmpty(roleUuidList)) {
+                for (int i = 0; i < roleUuidList.size(); i++) {
+                    String roleUuid = roleUuidList.get(i);
+                    roleUuid = GroupSearch.ROLE.getValuePlugin() + roleUuid;
+                    roleUuidList.set(i, roleUuid);
+
+                }
+            }
+        }
+        return userVo;
 //		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);// 防止修改cache vo
 //		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
 //			List<String> teamUuidList = new ArrayList<>();
@@ -118,11 +152,11 @@ public class UserGetApi extends PrivateApiComponentBase {
 //			}
 //			userJson.put("roleUuidList", roleUuidList);
 //		}
-		//告诉前端是否为维护模式
+        //告诉前端是否为维护模式
 //		userJson.put("isMaintenanceMode", 0);
 //		if (Config.ENABLE_SUPERADMIN()) {
 //			userJson.put("isMaintenanceMode", 1);
 //		}
 //		return userJson;
-	}
+    }
 }
