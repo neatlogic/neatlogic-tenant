@@ -109,7 +109,7 @@ public class UserGetApi extends PrivateApiComponentBase {
                 }
             }
 
-            userVo.setTeamRoleList(new ArrayList<RoleVo>(roleVoMap.values()));
+            userVo.setTeamRoleList(new ArrayList<>(roleVoMap.values()));
 
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 for (int i = 0; i < teamUuidList.size(); i++) {
