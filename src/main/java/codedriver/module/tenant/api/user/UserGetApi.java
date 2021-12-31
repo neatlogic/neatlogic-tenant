@@ -100,7 +100,7 @@ public class UserGetApi extends PrivateApiComponentBase {
             Map<String, RoleVo> roleVoMap = new HashMap<>();
             teamList.forEach(e -> teamRoleList.addAll(roleMapper.getParentTeamRoleListWithCheckedChildrenByTeam(e)));
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                teamRoleList.addAll( roleMapper.getRoleListByTeamUuidList(teamUuidList));
+                teamRoleList.addAll(roleMapper.getRoleListByTeamUuidList(teamUuidList));
             }
             for (RoleVo roleVo : teamRoleList) {
                 String uuid = roleVo.getUuid();
