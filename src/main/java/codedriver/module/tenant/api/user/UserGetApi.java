@@ -92,9 +92,9 @@ public class UserGetApi extends PrivateApiComponentBase {
             List<String> teamUuidList = teamList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
             /**
              * 补充分组角色信息,以用户的a分组为例
-             * 1、根据a分组的父节点（需要穿透）找到parentTeamRoleList
-             * 2、根据a分组找到ownTeamRoleList
-             * 3、将以上两点找到的以role的uuid为唯一键合并
+             * 1、根据a分组的父节点（需要穿透）找到roleList
+             * 2、根据a分组找到roleList
+             * 3、将以上两点找到的roleList 以role的uuid为唯一键合并
              */
             List<RoleVo> teamRoleList = new ArrayList<>();
             Map<String, RoleVo> roleVoMap = new HashMap<>();
