@@ -91,33 +91,29 @@ public class UserGetApi extends PrivateApiComponentBase {
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
             List<String> teamUuidList = teamList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
             /**
-             * 补充分组角色信息,以用户的一个分组为例
-             * 1、找到父节点的需要穿透的parentTeamRoleList
-             * 2、找到自己的分组的ownTeamRoleList
-             * 3、一起合并在一个List<RoleVo>里面
+             * 补充分组角色信息,以用户的a分组为例
+             * 1、根据a分组的父节点（需要穿透）找到parentTeamRoleList
+             * 2、根据a分组找到ownTeamRoleList
+             * 3、将以上两点找到的以role的uuid为唯一键合并
              */
             List<RoleVo> teamRoleList = new ArrayList<>();
-            Map<String, RoleVo> roleVoTeamVoMap = new HashMap<>();
+            Map<String, RoleVo> roleVoMap = new HashMap<>();
             for (TeamVo teamVo : teamList) {
-                List<RoleVo> parentTeamRoleList = roleMapper.getUserParentTeamRoleMapWithCheckedChildrenByTeam(teamVo);
+                List<RoleVo> parentTeamRoleList = roleMapper.getParentTeamRoleListWithCheckedChildrenByTeam(teamVo);
                 List<RoleVo> ownTeamRoleList = roleMapper.getUserTeamRoleMapByTeamUuid(teamVo.getUuid());
                 teamRoleList.addAll(parentTeamRoleList);
                 teamRoleList.addAll(ownTeamRoleList);
             }
             for (RoleVo roleVo : teamRoleList) {
                 String uuid = roleVo.getUuid();
-                if (!roleVoTeamVoMap.containsKey(uuid)) {
-                    roleVoTeamVoMap.put(uuid, roleVo);
+                if (!roleVoMap.containsKey(uuid)) {
+                    roleVoMap.put(uuid, roleVo);
                 } else {
-                    roleVoTeamVoMap.get(uuid).getUserRoleTeamList().addAll(roleVo.getUserRoleTeamList());
+                    roleVoMap.get(uuid).getTeamList().addAll(roleVo.getTeamList());
                 }
             }
 
-            List<RoleVo> roleVoList = new ArrayList<>();
-            for (Map.Entry<String, RoleVo> entry : roleVoTeamVoMap.entrySet()) {
-                roleVoList.add(entry.getValue());
-            }
-            userVo.getUserTeamRoleList().addAll(roleVoList);
+            userVo.setUserTeamRoleList(new ArrayList<RoleVo>(roleVoMap.values()));
 
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 for (int i = 0; i < teamUuidList.size(); i++) {
