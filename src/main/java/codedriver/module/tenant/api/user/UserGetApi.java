@@ -112,8 +112,9 @@ public class UserGetApi extends PrivateApiComponentBase {
                     roleVoMap.get(uuid).getTeamList().addAll(roleVo.getTeamList());
                 }
             }
+            teamRoleList.stream().filter(e -> !roleVoMap.containsKey(e.getUuid()));
 
-            userVo.setUserTeamRoleList(new ArrayList<RoleVo>(roleVoMap.values()));
+            userVo.setTeamRoleList(new ArrayList<RoleVo>(roleVoMap.values()));
 
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 for (int i = 0; i < teamUuidList.size(); i++) {
