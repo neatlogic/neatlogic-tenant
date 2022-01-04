@@ -122,12 +122,6 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
     }
     private static JSONObject getDataObj(String prefix, int startIndex, int count, boolean multiple) {
         JSONObject resultObj = new JSONObject();
-        List<ValueTextVo> dataList = new ArrayList<>();
-        int rowNum = startIndex + count;
-        for (; startIndex < rowNum; startIndex++) {
-            dataList.add(new ValueTextVo(startIndex, prefix + startIndex));
-        }
-        resultObj.put("dataList", dataList);
         if (multiple) {
             JSONArray value = new JSONArray();
             value.add(startIndex);
@@ -135,6 +129,12 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
         } else {
             resultObj.put("value", startIndex);
         }
+        List<ValueTextVo> dataList = new ArrayList<>();
+        int rowNum = startIndex + count;
+        for (; startIndex < rowNum; startIndex++) {
+            dataList.add(new ValueTextVo(startIndex, prefix + startIndex));
+        }
+        resultObj.put("dataList", dataList);
         return resultObj;
     }
 
