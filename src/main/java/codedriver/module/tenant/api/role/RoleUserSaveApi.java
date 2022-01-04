@@ -69,9 +69,9 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String roleUuid = jsonObj.getString("roleUuid");
-        if(roleMapper.checkRoleIsExists(roleUuid) == 0) {
-			throw new RoleNotFoundException(roleUuid);
-		}
+        if (roleMapper.checkRoleIsExists(roleUuid) == 0) {
+            throw new RoleNotFoundException(roleUuid);
+        }
 //        List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
 //        List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
 //        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
@@ -82,13 +82,12 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
 //            }
 //        }
         JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
-        if (CollectionUtils.isNotEmpty(userUuidArray)){
-            roleMapper.deleteRoleUser(new RoleUserVo(roleUuid));
+        if (CollectionUtils.isNotEmpty(userUuidArray)) {
             List<String> userUuidList = userUuidArray.toJavaList(String.class);
-            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
-            if(CollectionUtils.isNotEmpty(existUserUuidList)){
-                for (String userUuid : existUserUuidList){
-                    roleMapper.insertRoleUser(new RoleUserVo(roleUuid,userUuid));
+            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList, 1);
+            if (CollectionUtils.isNotEmpty(existUserUuidList)) {
+                for (String userUuid : existUserUuidList) {
+                    roleMapper.replaceRoleUser(new RoleUserVo(roleUuid, userUuid));
                 }
             }
         }

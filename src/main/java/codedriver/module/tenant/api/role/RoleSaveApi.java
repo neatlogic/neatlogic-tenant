@@ -98,7 +98,7 @@ public class RoleSaveApi extends PrivateApiComponentBase {
 				List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList,1);
 				if(CollectionUtils.isNotEmpty(existUserUuidList)){
 					for (String userUuid : existUserUuidList){
-						roleMapper.insertRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
+						roleMapper.replaceRoleUser(new RoleUserVo(roleVo.getUuid(),userUuid));
 					}
 				}
 			}
