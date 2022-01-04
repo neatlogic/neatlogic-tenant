@@ -38,10 +38,11 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
             subSysVo.setSubSysName("子系统名_" + i);
             subSysVo.setSubSysDesc("子系统描述_" + i);
             subSysVo.setSysName("系统名_" + i/10);
-            subSysVo.setRadio1(getValueTextVoList("单选", i, 3));
-            subSysVo.setCheckbox2(getValueTextVoList("多选", i, 3));
-            subSysVo.setSelect3(getValueTextVoList("下拉单选", i, 3));
-            subSysVo.setSelect4(getValueTextVoList("下拉多选", i, 3));
+            subSysVo.setRadio1(getDataObj("单选", i, 3, false));
+            subSysVo.setCheckbox2(getDataObj("多选", i, 3, true));
+            subSysVo.setSelect3(getDataObj("下拉单选", i, 3, false));
+            subSysVo.setSelect4(getDataObj("下拉多选", i, 3, true));
+            subSysVo.setText5(getDataObj("可编辑文本框", i));
             staticSubSysList.add(subSysVo);
         }
     }
@@ -114,13 +115,27 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
         return TableResultUtil.getResult(resultList, searchVo);
     }
 
-    private static List<ValueTextVo> getValueTextVoList(String prefix, int startIndex, int count) {
-        List<ValueTextVo> resultList = new ArrayList<>();
+    private static JSONObject getDataObj(String prefix, int startIndex) {
+        JSONObject resultObj = new JSONObject();
+        resultObj.put("value",prefix + startIndex);
+        return resultObj;
+    }
+    private static JSONObject getDataObj(String prefix, int startIndex, int count, boolean multiple) {
+        JSONObject resultObj = new JSONObject();
+        List<ValueTextVo> dataList = new ArrayList<>();
         int rowNum = startIndex + count;
         for (; startIndex < rowNum; startIndex++) {
-            resultList.add(new ValueTextVo(startIndex, prefix + startIndex));
+            dataList.add(new ValueTextVo(startIndex, prefix + startIndex));
         }
-        return resultList;
+        resultObj.put("dataList", dataList);
+        if (multiple) {
+            JSONArray value = new JSONArray();
+            value.add(startIndex);
+            resultObj.put("value", value);
+        } else {
+            resultObj.put("value", startIndex);
+        }
+        return resultObj;
     }
 
     private static class SubSysVo extends BasePageVo {
@@ -128,10 +143,11 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
         private String subSysName;
         private String subSysDesc;
         private String sysName;
-        private List<ValueTextVo> radio1;
-        private List<ValueTextVo> checkbox2;
-        private List<ValueTextVo> select3;
-        private List<ValueTextVo> select4;
+        private JSONObject radio1;
+        private JSONObject checkbox2;
+        private JSONObject select3;
+        private JSONObject select4;
+        private JSONObject text5;
         public SubSysVo(){}
 
         public Long getSubSysId() {
@@ -166,36 +182,44 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
             this.sysName = sysName;
         }
 
-        public List<ValueTextVo> getRadio1() {
+        public JSONObject getRadio1() {
             return radio1;
         }
 
-        public void setRadio1(List<ValueTextVo> radio1) {
+        public void setRadio1(JSONObject radio1) {
             this.radio1 = radio1;
         }
 
-        public List<ValueTextVo> getCheckbox2() {
+        public JSONObject getCheckbox2() {
             return checkbox2;
         }
 
-        public void setCheckbox2(List<ValueTextVo> checkbox2) {
+        public void setCheckbox2(JSONObject checkbox2) {
             this.checkbox2 = checkbox2;
         }
 
-        public List<ValueTextVo> getSelect3() {
+        public JSONObject getSelect3() {
             return select3;
         }
 
-        public void setSelect3(List<ValueTextVo> select3) {
+        public void setSelect3(JSONObject select3) {
             this.select3 = select3;
         }
 
-        public List<ValueTextVo> getSelect4() {
+        public JSONObject getSelect4() {
             return select4;
         }
 
-        public void setSelect4(List<ValueTextVo> select4) {
+        public void setSelect4(JSONObject select4) {
             this.select4 = select4;
+        }
+
+        public JSONObject getText5() {
+            return text5;
+        }
+
+        public void setText5(JSONObject text5) {
+            this.text5 = text5;
         }
     }
 }
