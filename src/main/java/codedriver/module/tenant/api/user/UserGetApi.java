@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -89,7 +88,7 @@ public class UserGetApi extends PrivateApiComponentBase {
                 userVo.setUserAuthList(userAuthVoList);
             }
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
-            List<String> teamUuidList = teamList.stream().map(TeamVo::getUuid).collect(Collectors.toList());
+            List<String> teamUuidList = userVo.getTeamUuidList();
             /**
              * 补充分组角色信息,以用户的a分组为例
              * 1、根据a分组的父节点（需要穿透）找到roleList
@@ -112,7 +111,6 @@ public class UserGetApi extends PrivateApiComponentBase {
             }
 
             userVo.setTeamRoleList(new ArrayList<>(roleVoMap.values()));
-
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 for (int i = 0; i < teamUuidList.size(); i++) {
                     String teamUuid = teamUuidList.get(i);
@@ -120,6 +118,7 @@ public class UserGetApi extends PrivateApiComponentBase {
                     teamUuidList.set(i, teamUuid);
                 }
             }
+
             List<String> roleUuidList = userVo.getRoleUuidList();
             if (CollectionUtils.isNotEmpty(roleUuidList)) {
                 for (int i = 0; i < roleUuidList.size(); i++) {
