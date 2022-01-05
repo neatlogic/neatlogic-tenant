@@ -6,7 +6,6 @@
 package codedriver.module.tenant.api.message;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -14,8 +13,8 @@ import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageSearchVo;
 import codedriver.framework.message.dto.MessageVo;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TimeUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -91,18 +90,21 @@ public class MessageHistoryListApi extends PrivateApiComponentBase {
         }
 
         JSONArray messageTypePath = jsonObj.getJSONArray("messageTypePath");
-        if(CollectionUtils.isNotEmpty(messageTypePath)){
-            if(messageTypePath.size() == 1){
+        List<String> triggerList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(messageTypePath)) {
+            if (messageTypePath.size() == 1) {
                 searchVo.setTriggerList(NotifyPolicyHandlerFactory.getTriggerList(messageTypePath.getString(0)));
-            }else if(messageTypePath.size() == 2){
+            } else if (messageTypePath.size() == 2) {
                 searchVo.setNotifyPolicyHandler(messageTypePath.getString(1));
-            }else if(messageTypePath.size() == 3){
+            } else if (messageTypePath.size() == 3) {
                 searchVo.setNotifyPolicyHandler(messageTypePath.getString(1));
-                List<String> triggerList = new ArrayList<>();
                 triggerList.add(messageTypePath.getString(2));
-                searchVo.setTriggerList(triggerList);
             }
+        } else {
+            triggerList = NotifyPolicyHandlerFactory.getAllActiveTriggerList();
         }
+        searchVo.setTriggerList(triggerList);
+
         searchVo.setUserUuid(UserContext.get().getUserUuid(true));
         int unreadCount = 0;
         int pageCount = 0;

@@ -5,8 +5,8 @@
 
 package codedriver.module.tenant.api.message;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.message.dao.mapper.MessageMapper;
 import codedriver.framework.message.dto.MessageSearchVo;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -63,7 +64,8 @@ public class MessageHistoryTreeApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = UserContext.get().getUserUuid(true);
         List<NotifyTreeVo> moduleTreeVoList = NotifyPolicyHandlerFactory.getModuleTreeVoList();
-
+        //仅展示该租户已激活的模块组
+        moduleTreeVoList = moduleTreeVoList.stream().filter(t->TenantContext.get().getActiveModuleList().stream().anyMatch(o->Objects.equals(o.getGroup(),t.getUuid()))).collect(Collectors.toList());
         MessageSearchVo searchVo = JSONObject.toJavaObject(jsonObj, MessageSearchVo.class);
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = jsonObj.getInteger("timeRange");
