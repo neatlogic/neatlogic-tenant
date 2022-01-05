@@ -5,9 +5,10 @@
 
 package codedriver.module.tenant.api.notify;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.label.NOTIFY_JOB_MODIFY;
 import codedriver.framework.common.dto.ValueTextVo;
-import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.exception.type.PermissionDeniedException;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -18,13 +19,15 @@ import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.auth.label.NOTIFY_JOB_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 
@@ -61,7 +64,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
             }
         }
         JSONArray resultTree = new JSONArray();
-        List<ModuleGroupVo> moduleGroupList = ModuleUtil.getAllModuleGroupList();
+        List<ModuleGroupVo> moduleGroupList = TenantContext.get().getActiveModuleGroupList();
         for (ModuleGroupVo moduleGroupVo : moduleGroupList) {
             List<NotifyPolicyHandlerVo> notifyPolicyHandlerVoList = moduleGroupNotifyPolicyHandlerListMap.get(moduleGroupVo.getGroup());
             if (CollectionUtils.isNotEmpty(notifyPolicyHandlerVoList)) {
