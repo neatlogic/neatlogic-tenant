@@ -69,9 +69,10 @@ public class FileDownloadApi extends PrivateBinaryStreamApiComponentBase {
             throw new NoTenantException();
         }
         if (fileVo != null) {
+            String userUuid = UserContext.get().getUserUuid();
             IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
             if (fileTypeHandler != null) {
-                if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
+                if (StringUtils.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
                     ServletOutputStream os;
                     InputStream in;
                     in = FileUtil.getData(fileVo.getPath());
