@@ -95,7 +95,7 @@ public class RoleSearchApi extends PrivateApiComponentBase {
             returnObj.put("pageCount", PageUtil.getPageCount(rowNum, roleVo.getPageSize()));
         }
         List<RoleVo> roleList = roleMapper.searchRole(roleVo);
-        roleService.getRoleTeamAndRoleUser(roleList);
+        roleService.getRoleTeamCountAndRoleUserCount(roleList);
         returnObj.put("tbodyList", roleList);
         return returnObj;
     }
