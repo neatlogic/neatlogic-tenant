@@ -107,7 +107,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
             List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 for (FormAttributeVo formAttributeVo : formAttributeList) {
-//                    GlobalRelationManager.delete(MatrixAttributeToFormAttributeRelationHandler.class, formAttributeVo.getUuid());
                     DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
                 }
             }
@@ -148,7 +147,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 Set<String> integrationUuidSet = formAttributeVo.getIntegrationUuidSet();
                 if (CollectionUtils.isNotEmpty(integrationUuidSet)) {
                     for (String integrationUuid : integrationUuidSet) {
-
+                        //TODO linbq 插入集成与表单属性的关系
                     }
                 }
 
@@ -163,7 +162,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         Set<String> attributeUuidSet = entry.getValue();
                         if (CollectionUtils.isNotEmpty(attributeUuidSet)) {
                             for (String attributeUuid : attributeUuidSet) {
-//                                GlobalRelationManager.insert(MatrixAttributeToFormAttributeRelationHandler.class, attributeUuid, formAttributeVo.getUuid());
                                 DependencyManager.insert(MatrixAttr2FormAttrDependencyHandler.class, attributeUuid, formAttributeVo.getUuid(), config);
                             }
                         }
@@ -171,13 +169,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 }
             }
         }
-//        List<FormAttributeMatrixVo> processMatrixFormComponentList = formVersionVo.getProcessMatrixFormComponentList();
-//        formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
-//        if (CollectionUtils.isNotEmpty(processMatrixFormComponentList)) {
-//            for (FormAttributeMatrixVo formAttributeMatrixVo : processMatrixFormComponentList) {
-//                formMapper.insertFormAttributeMatrix(formAttributeMatrixVo);
-//            }
-//        }
         JSONObject resultObj = new JSONObject();
         resultObj.put("uuid", formVo.getUuid());
         resultObj.put("currentVersionUuid", formVersionVo.getUuid());
