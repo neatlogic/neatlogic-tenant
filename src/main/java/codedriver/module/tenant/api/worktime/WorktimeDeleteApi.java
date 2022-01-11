@@ -9,7 +9,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.WORKTIME_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -67,10 +67,10 @@ public class WorktimeDeleteApi extends PrivateApiComponentBase {
             throw new WorktimeNotFoundException(uuid);
         }
         WorktimeVo worktime = worktimeMapper.getWorktimeByUuid(uuid);
-        if (DependencyManager.getDependencyCount(CalleeType.WORKTIME, uuid) > 0) {
+        if (DependencyManager.getDependencyCount(FromType.WORKTIME, uuid) > 0) {
             throw new WorktimeHasBeenRelatedByChannelException(worktime.getName());
         }
-        if (DependencyManager.getDependencyCount(CalleeType.WORKTIME, uuid, false) > 0) {
+        if (DependencyManager.getDependencyCount(FromType.WORKTIME, uuid, false) > 0) {
             worktime.setIsDelete(1);
             worktime.setLcu(UserContext.get().getUserUuid());
             worktimeMapper.updateWorktimeDeleteStatus(worktime);

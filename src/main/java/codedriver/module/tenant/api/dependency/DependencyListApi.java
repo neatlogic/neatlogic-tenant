@@ -5,14 +5,14 @@
 
 package codedriver.module.tenant.api.dependency;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dependency.core.CalleeTypeFactory;
 import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.dependency.core.ICalleeType;
+import codedriver.framework.dependency.core.FromTypeFactory;
+import codedriver.framework.dependency.core.IFromType;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.restful.annotation.*;
@@ -96,9 +96,9 @@ public class DependencyListApi extends PrivateApiComponentBase {
                 throw new ParamNotExistsException("id", "uuid");
             }
         }
-        ICalleeType calleeType = CalleeTypeFactory.getCalleeType(jsonObj.getString("calleeType"));
+        IFromType calleeType = FromTypeFactory.getCalleeType(jsonObj.getString("calleeType"));
         if (calleeType == null) {
-            throw new ParamIrregularException("calleeType（被调用者类型）", CalleeTypeFactory.getAllCalleeTypeToString());
+            throw new ParamIrregularException("calleeType（被调用者类型）", FromTypeFactory.getAllCalleeTypeToString());
         }
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         JSONObject resultObj = new JSONObject();
@@ -106,7 +106,7 @@ public class DependencyListApi extends PrivateApiComponentBase {
         int rowNum = DependencyManager.getDependencyCount(calleeType, callee);
         if (rowNum > 0) {
             pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
-            List<ValueTextVo> list = DependencyManager.getDependencyList(calleeType, callee, basePageVo);
+            List<DependencyInfoVo> list = DependencyManager.getDependencyList(calleeType, callee, basePageVo);
             resultObj.put("list", list);
         } else {
             resultObj.put("list", new ArrayList<>());

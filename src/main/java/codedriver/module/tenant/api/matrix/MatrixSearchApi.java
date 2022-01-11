@@ -7,7 +7,7 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
@@ -81,7 +81,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
         }
         List<MatrixVo> tbodyList = matrixMapper.searchMatrix(matrix);
         for (MatrixVo matrixVo : tbodyList) {
-            int count = DependencyManager.getDependencyCount(CalleeType.MATRIX, matrixVo.getUuid());
+            int count = DependencyManager.getDependencyCount(FromType.MATRIX, matrixVo.getUuid());
             matrixVo.setReferenceCount(count);
         }
         return TableResultUtil.getResult(tbodyList, matrix);
