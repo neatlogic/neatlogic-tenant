@@ -5,19 +5,18 @@
 
 package codedriver.module.tenant.api.test;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.asynchronization.threadpool.CachedThreadPool;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dao.mapper.UserSessionMapper;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
+
+import javax.annotation.Resource;
 
 public class TestUserSessionApi extends PrivateApiComponentBase {
 
-    @Autowired
-    private UserMapper userMapper;
+    @Resource
+    private UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -42,8 +41,8 @@ public class TestUserSessionApi extends PrivateApiComponentBase {
                 protected void execute() {
                     long s = System.currentTimeMillis();
                     for (int k = 0; k < 200; k++) {
-                        userMapper.getUserSessionByUserUuid(Integer.toString(k));
-                        userMapper.updateUserSession(Integer.toString(k));
+                        userSessionMapper.getUserSessionByUserUuid(Integer.toString(k));
+                        userSessionMapper.updateUserSession(Integer.toString(k));
 
                     }
                     System.out.println("耗时：" + (System.currentTimeMillis() - s) / 1000);

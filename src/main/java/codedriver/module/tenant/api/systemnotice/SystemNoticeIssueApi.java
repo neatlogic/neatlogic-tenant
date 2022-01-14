@@ -15,6 +15,7 @@ import codedriver.framework.common.constvalue.UserType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dao.mapper.UserSessionMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -53,6 +54,9 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -119,7 +123,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                 long expireTime = currentTimeMillis - TimeUnit.MINUTES.toMillis(Config.USER_EXPIRETIME());
                 if (recipientList.stream().anyMatch(o -> UserType.ALL.getValue().equals(o.getUuid()))) {
                     /* 如果通知范围是所有人，那么找出当前所有的在线用户 **/
-                    int allOnlineUserCount = userMapper.getAllOnlineUserCount(new Date(expireTime));
+                    int allOnlineUserCount = userSessionMapper.getAllOnlineUserCount(new Date(expireTime));
                     if (allOnlineUserCount > 0) {
                         CachedThreadPool.execute(new CodeDriverThread("NOTICE-INSERTER") {
                             @Override
@@ -131,7 +135,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                                 List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
                                 for (int i = 1; i <= pageVo.getPageCount(); i++) {
                                     pageVo.setCurrentPage(i);
-                                    List<String> allOnlineUser = userMapper.getAllOnlineUser(expireDate, pageVo.getStartNum(), pageVo.getPageSize());
+                                    List<String> allOnlineUser = userSessionMapper.getAllOnlineUser(expireDate, pageVo.getStartNum(), pageVo.getPageSize());
                                     if (CollectionUtils.isNotEmpty(allOnlineUser)) {
                                         allOnlineUser.forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));
                                         systemNoticeMapper.batchInsertSystemNoticeUser(noticeUserVoList);
@@ -154,7 +158,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                             .filter(o -> GroupSearch.ROLE.getValue().equals(o.getType()))
                             .map(SystemNoticeRecipientVo::getUuid)
                             .collect(Collectors.toList());
-                    int onlineUserCount = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTimeCount
+                    int onlineUserCount = userSessionMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTimeCount
                             (userUuidList, teamUuidList, roleUuidList, new Date(expireTime));
                     if (onlineUserCount > 0) {
                         CachedThreadPool.execute(new CodeDriverThread("NOTICE-INSERTER") {
@@ -164,7 +168,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                                 int count = onlineUserCount / PAGE_SIZE + 1;
                                 List<SystemNoticeUserVo> noticeUserVoList = new ArrayList<>();
                                 for (int i = 0; i < count; i++) {
-                                    List<String> onlineUserList = userMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime
+                                    List<String> onlineUserList = userSessionMapper.getOnlineUserUuidListByUserUuidListAndTeamUuidListAndRoleUuidListAndGreaterThanSessionTime
                                             (userUuidList, teamUuidList, roleUuidList, expireDate, true, i, PAGE_SIZE);
                                     if (CollectionUtils.isNotEmpty(onlineUserList)) {
                                         onlineUserList.forEach(o -> noticeUserVoList.add(new SystemNoticeUserVo(vo.getId(), o)));

@@ -1,20 +1,21 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.USER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.dao.mapper.UserSessionMapper;
 import codedriver.framework.dto.UserAuthVo;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.auth.label.USER_MODIFY;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @AuthAction(action = USER_MODIFY.class)
@@ -23,8 +24,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.DELETE)
 public class UserDeleteApi extends PrivateApiComponentBase{
 	
-	@Autowired
+	@Resource
 	private UserMapper userMapper;
+
+	@Resource
+	UserSessionMapper userSessionMapper;
 	
 	@Override
 	public String getToken() {
@@ -50,7 +54,7 @@ public class UserDeleteApi extends PrivateApiComponentBase{
 		List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
     	if(CollectionUtils.isNotEmpty(userUuidList)) {
     		for(String userUuid : userUuidList) {
-    			userMapper.deleteUserSessionByUserUuid(userUuid);
+    			userSessionMapper.deleteUserSessionByUserUuid(userUuid);
     			userMapper.deleteUserAuth(new UserAuthVo(userUuid));
     			userMapper.deleteUserRoleByUserUuid(userUuid);
     			userMapper.deleteUserTeamByUserUuid(userUuid);
