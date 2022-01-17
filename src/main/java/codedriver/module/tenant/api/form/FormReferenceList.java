@@ -5,13 +5,13 @@
 
 package codedriver.module.tenant.api.form;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.DependencyManager;
+import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.exception.FormNotFoundException;
 import codedriver.framework.restful.annotation.*;
@@ -57,7 +57,7 @@ public class FormReferenceList extends PrivateApiComponentBase {
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "list", explode = ValueTextVo[].class, desc = "引用列表")
+            @Param(name = "list", explode = DependencyInfoVo[].class, desc = "引用列表")
     })
     @Description(desc = "表单引用列表接口")
     @Override
@@ -69,10 +69,10 @@ public class FormReferenceList extends PrivateApiComponentBase {
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         JSONObject resultObj = new JSONObject();
         int pageCount = 0;
-        int rowNum = DependencyManager.getDependencyCount(CalleeType.FORM, formUuid);
+        int rowNum = DependencyManager.getDependencyCount(FromType.FORM, formUuid);
         if(rowNum > 0){
             pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
-            List<ValueTextVo> list = DependencyManager.getDependencyList(CalleeType.FORM, formUuid, basePageVo);
+            List<DependencyInfoVo> list = DependencyManager.getDependencyList(FromType.FORM, formUuid, basePageVo);
             resultObj.put("list", list);
         }else {
             resultObj.put("list", new ArrayList<>());

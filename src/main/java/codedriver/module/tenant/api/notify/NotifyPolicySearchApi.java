@@ -7,8 +7,7 @@ package codedriver.module.tenant.api.notify;
 
 import java.util.List;
 
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
@@ -68,7 +67,7 @@ public class NotifyPolicySearchApi extends PrivateApiComponentBase {
         List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
 
         for (NotifyPolicyVo notifyPolicy : tbodyList) {
-            int count = DependencyManager.getDependencyCount(CalleeType.NOTIFY_POLICY, notifyPolicy.getId());
+            int count = DependencyManager.getDependencyCount(FromType.NOTIFY_POLICY, notifyPolicy.getId());
             notifyPolicy.setReferenceCount(count);
         }
         resultObj.put("tbodyList", tbodyList);

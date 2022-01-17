@@ -6,7 +6,7 @@
 package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.CalleeType;
+import codedriver.framework.dependency.constvalue.FromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
@@ -46,7 +46,7 @@ public class IntegrationGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
-		int count = DependencyManager.getDependencyCount(CalleeType.INTEGRATION, integrationVo.getUuid());
+		int count = DependencyManager.getDependencyCount(FromType.INTEGRATION, integrationVo.getUuid());
 		integrationVo.setReferenceCount(count);
 		return integrationVo;
 	}
