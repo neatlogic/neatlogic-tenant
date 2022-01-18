@@ -6,13 +6,16 @@
 package codedriver.module.tenant.api.integration.table;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.exception.integration.IntegrationSendRequestException;
 import codedriver.framework.exception.integration.IntegrationTableColumnNotFoundException;
 import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.crossover.IntegrationCrossoverService;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
@@ -22,7 +25,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
-import codedriver.module.tenant.service.integration.IntegrationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,12 +43,6 @@ import java.util.stream.Collectors;
 public class TableColumnDataSearchApi extends PrivateApiComponentBase {
 
     private final static Logger logger = LoggerFactory.getLogger(TableColumnDataSearchApi.class);
-    /**
-     * 下拉列表value和text列的组合连接符
-     **/
-    private final static String SELECT_COMPOSE_JOINER = "&=&";
-    @Resource
-    private IntegrationService integrationService;
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -98,7 +94,8 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
         if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         }
-        List<ColumnVo> columnVoList = integrationService.getColumnList(integrationVo);
+        IntegrationCrossoverService integrationCrossoverService = CrossoverServiceFactory.getApi(IntegrationCrossoverService.class);
+        List<ColumnVo> columnVoList = integrationCrossoverService.getColumnList(integrationVo);
         if (CollectionUtils.isEmpty(columnVoList)) {
             return returnObj;
         }
@@ -123,8 +120,8 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             for (String value : defaultValue.toJavaList(String.class)) {
-                if (value.contains(SELECT_COMPOSE_JOINER)) {
-                    String[] split = value.split(SELECT_COMPOSE_JOINER);
+                if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+                    String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
                     //当下拉框配置的值和显示文字列为同一列时，value值是这样的20210101&=&20210101，split数组第一和第二个元素相同，这时需要去重
                     List<String> splitList = new ArrayList<>();
                     for (String str : split) {
@@ -150,7 +147,7 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                         logger.error(resultVo.getError());
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
-                    resultList.addAll(integrationService.getTbodyList(resultVo, columnList));
+                    resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
                 }
             }
         } else {
@@ -173,7 +170,7 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 logger.error(resultVo.getError());
                 throw new IntegrationSendRequestException(integrationVo.getName());
             }
-            resultList = integrationService.getTbodyList(resultVo, columnList);
+            resultList = integrationCrossoverService.getTbodyList(resultVo, columnList);
         }
 
         //去重

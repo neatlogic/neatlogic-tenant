@@ -6,17 +6,18 @@
 package codedriver.module.tenant.api.integration.table;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.exception.integration.IntegrationHandlerNotFoundException;
 import codedriver.framework.exception.integration.IntegrationNotFoundException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.crossover.IntegrationCrossoverService;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.table.ColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.service.integration.IntegrationService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +35,6 @@ public class TableColumnListApi extends PrivateApiComponentBase {
 
     @Resource
     private IntegrationMapper integrationMapper;
-
-    @Resource
-    private IntegrationService integrationService;
 
     @Override
     public String getToken() {
@@ -73,7 +71,8 @@ public class TableColumnListApi extends PrivateApiComponentBase {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         }
 
-        resultObj.put("tbodyList", integrationService.getColumnList(integrationVo));
+        IntegrationCrossoverService integrationCrossoverService = CrossoverServiceFactory.getApi(IntegrationCrossoverService.class);
+        resultObj.put("tbodyList", integrationCrossoverService.getColumnList(integrationVo));
         return resultObj;
     }
 }
