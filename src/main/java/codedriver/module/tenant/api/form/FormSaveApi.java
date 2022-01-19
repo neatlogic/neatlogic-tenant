@@ -104,13 +104,13 @@ public class FormSaveApi extends PrivateApiComponentBase {
             if (formVersion == null) {
                 throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
             }
+            formVersionVo.setUuid(formVo.getCurrentVersionUuid());
             List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 for (FormAttributeVo formAttributeVo : formAttributeList) {
                     DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
                 }
             }
-            formVersionVo.setUuid(formVo.getCurrentVersionUuid());
             formVersionVo.setIsActive(formVersion.getIsActive());
             formMapper.updateFormVersion(formVersionVo);
         }
