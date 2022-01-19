@@ -5,30 +5,26 @@
 
 package codedriver.module.tenant.api.team;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.dao.mapper.RoleMapper;
+import codedriver.framework.dao.mapper.TeamMapper;
 import codedriver.framework.dto.RoleTeamVo;
+import codedriver.framework.dto.TeamVo;
+import codedriver.framework.exception.team.TeamNotFoundException;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-
-import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dao.mapper.TeamMapper;
-import codedriver.framework.dto.TeamVo;
-import codedriver.framework.exception.team.TeamNotFoundException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -93,10 +89,6 @@ public class TeamTreeApi extends PrivateApiComponentBase {
         if (rowNum > 0) {
             if (teamVo.getNeedPage()) {
                 teamVo.setRowNum(rowNum);
-                returnObj.put("currentPage", teamVo.getCurrentPage());
-                returnObj.put("pageCount", teamVo.getPageCount());
-                returnObj.put("pageSize", teamVo.getPageSize());
-                returnObj.put("rowNum", rowNum);
             }
             List<TeamVo> tbodyList = teamMapper.searchTeam(teamVo);
             /** 查出分组用户数量和子分组数量 **/
@@ -146,7 +138,13 @@ public class TeamTreeApi extends PrivateApiComponentBase {
                 }
             }
             returnObj.put("tbodyList", tbodyList);
+        } else {
+            returnObj.put("tbodyList", CollectionUtils.EMPTY_COLLECTION);
         }
+        returnObj.put("currentPage", teamVo.getCurrentPage());
+        returnObj.put("pageCount", teamVo.getPageCount());
+        returnObj.put("pageSize", teamVo.getPageSize());
+        returnObj.put("rowNum", rowNum);
 
         return returnObj;
     }
