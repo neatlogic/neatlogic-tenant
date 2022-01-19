@@ -61,7 +61,7 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
 		try {
 			handler.validate(resultVo);
 		}catch (ApiRuntimeException ex){
-			resultVo.appendError(ex.getMessage(true));
+			resultVo.appendError(ex.getMessage());
 		}
 		return resultVo;
 	}

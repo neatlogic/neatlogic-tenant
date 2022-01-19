@@ -66,7 +66,7 @@ public class IntegrationTransformTestApi extends PrivateApiComponentBase {
             returnObj.put("result", returnStr);
             returnObj.put("output", sw.toString());
         } catch (ApiRuntimeException e) {
-            returnObj.put("error", e.getMessage(true));
+            returnObj.put("error", e.getMessage());
         } catch (Exception e) {
             returnObj.put("error", e.getMessage());
         }
