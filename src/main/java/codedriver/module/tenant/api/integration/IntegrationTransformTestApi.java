@@ -6,7 +6,6 @@
 package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.exception.integration.ParamFormatInvalidException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -65,8 +64,6 @@ public class IntegrationTransformTestApi extends PrivateApiComponentBase {
             returnStr = JavascriptUtil.transform(object, template, sw);
             returnObj.put("result", returnStr);
             returnObj.put("output", sw.toString());
-        } catch (ApiRuntimeException e) {
-            returnObj.put("error", e.getMessage());
         } catch (Exception e) {
             returnObj.put("error", e.getMessage());
         }
