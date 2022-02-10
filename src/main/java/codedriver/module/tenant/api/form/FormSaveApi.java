@@ -19,6 +19,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
 import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -104,13 +105,14 @@ public class FormSaveApi extends PrivateApiComponentBase {
             if (formVersion == null) {
                 throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
             }
+            formVersionVo.setUuid(formVo.getCurrentVersionUuid());
             List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 for (FormAttributeVo formAttributeVo : formAttributeList) {
                     DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+                    DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
                 }
             }
-            formVersionVo.setUuid(formVo.getCurrentVersionUuid());
             formVersionVo.setIsActive(formVersion.getIsActive());
             formMapper.updateFormVersion(formVersionVo);
         }
@@ -146,8 +148,13 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
                 Set<String> integrationUuidSet = formAttributeVo.getIntegrationUuidSet();
                 if (CollectionUtils.isNotEmpty(integrationUuidSet)) {
+                    JSONObject config = new JSONObject();
+                    config.put("formUuid", formVo.getUuid());
+                    config.put("formVersionUuid", formVersionVo.getUuid());
+                    config.put("formAttributeUuid", formAttributeVo.getUuid());
                     for (String integrationUuid : integrationUuidSet) {
-                        //TODO linbq 插入集成与表单属性的关系
+                        config.put("integrationUuid", integrationUuid);
+                        DependencyManager.insert(Integration2FormAttrDependencyHandler.class, integrationUuid, formAttributeVo.getUuid(), config);
                     }
                 }
 
