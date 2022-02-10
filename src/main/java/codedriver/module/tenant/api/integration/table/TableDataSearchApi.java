@@ -7,10 +7,12 @@ package codedriver.module.tenant.api.integration.table;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.exception.integration.*;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.integration.core.IIntegrationHandler;
 import codedriver.framework.integration.core.IntegrationHandlerFactory;
+import codedriver.framework.integration.crossover.IntegrationCrossoverService;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
@@ -20,7 +22,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.module.framework.integration.handler.FrameworkRequestFrom;
-import codedriver.module.tenant.service.integration.IntegrationService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,9 +39,6 @@ import java.util.*;
 public class TableDataSearchApi extends PrivateApiComponentBase {
 
     private final static Logger logger = LoggerFactory.getLogger(TableDataSearchApi.class);
-
-    @Resource
-    private IntegrationService integrationService;
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -93,10 +91,11 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
         if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         }
-        List<ColumnVo> columnVoList = integrationService.getColumnList(integrationVo);
+        IntegrationCrossoverService integrationCrossoverService = CrossoverServiceFactory.getApi(IntegrationCrossoverService.class);
+        List<ColumnVo> columnVoList = integrationCrossoverService.getColumnList(integrationVo);
         if (CollectionUtils.isNotEmpty(columnVoList)) {
             List<String> columnList = columnArray.toJavaList(String.class);
-            JSONArray theadList = integrationService.getTheadList(integrationVo, columnList);
+            JSONArray theadList = integrationCrossoverService.getTheadList(integrationVo, columnList);
             returnObj.put("theadList", theadList);
             integrationVo.getParamObj().putAll(jsonObj);
             JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
@@ -128,7 +127,7 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
                     handler.validate(resultVo);
-                    List<Map<String, Object>> tbodyList = integrationService.getTbodyList(resultVo, columnList);
+                    List<Map<String, Object>> tbodyList = integrationCrossoverService.getTbodyList(resultVo, columnList);
                     for (Map<String, Object> tbodyObj : tbodyList) {
                         if (Objects.equals(uuidValue, tbodyObj.get(uuidColumn))) {
                             tbodyArray.add(tbodyObj);
@@ -149,7 +148,7 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                 returnObj.put("pageSize", transformedResult.get("pageSize"));
                 returnObj.put("pageCount", transformedResult.get("pageCount"));
                 returnObj.put("rowNum", transformedResult.get("rowNum"));
-                List<Map<String, Object>> tbodyList = integrationService.getTbodyList(resultVo, columnList);
+                List<Map<String, Object>> tbodyList = integrationCrossoverService.getTbodyList(resultVo, columnList);
                 returnObj.put("tbodyList", tbodyList);
                 JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
                 if (CollectionUtils.isNotEmpty(searchColumnArray)) {
