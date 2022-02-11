@@ -94,24 +94,26 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
         IntegrationCrossoverService integrationCrossoverService = CrossoverServiceFactory.getApi(IntegrationCrossoverService.class);
         List<ColumnVo> columnVoList = integrationCrossoverService.getColumnList(integrationVo);
         if (CollectionUtils.isNotEmpty(columnVoList)) {
+            String uuidColumn = null;
+            for (ColumnVo columnVo : columnVoList) {
+                Integer primaryKey = columnVo.getPrimaryKey();
+                if (Objects.equals(primaryKey, 1)) {
+                    uuidColumn = columnVo.getUuid();
+                    break;
+                }
+            }
+            if (uuidColumn == null) {
+                throw new IntegrationTablePrimaryKeyColumnNotFoundException(integrationVo.getName());
+            }
             List<String> columnList = columnArray.toJavaList(String.class);
             JSONArray theadList = integrationCrossoverService.getTheadList(integrationVo, columnList);
             returnObj.put("theadList", theadList);
+            if (!columnList.contains(uuidColumn)) {
+                columnList.add(uuidColumn);
+            }
             integrationVo.getParamObj().putAll(jsonObj);
             JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
             if (CollectionUtils.isNotEmpty(defaultValue)) {
-                String uuidColumn = null;
-                for (int i = 0; i < theadList.size(); i++) {
-                    JSONObject theadObj = theadList.getJSONObject(i);
-                    Integer primaryKey = theadObj.getInteger("primaryKey");
-                    if (Objects.equals(primaryKey, 1)) {
-                        uuidColumn = theadObj.getString("key");
-                        break;
-                    }
-                }
-                if (uuidColumn == null) {
-                    throw new IntegrationTablePrimaryKeyColumnNotFoundException(integrationVo.getName());
-                }
                 List<SourceColumnVo> sourceColumnList = new ArrayList<>();
                 SourceColumnVo sourceColumnVo = new SourceColumnVo();
                 sourceColumnVo.setColumn(uuidColumn);
