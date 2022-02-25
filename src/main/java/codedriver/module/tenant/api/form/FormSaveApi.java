@@ -8,13 +8,14 @@ import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
 import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeMatrixVo;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.form.exception.FormAttributeHandlerNotFoundException;
+import codedriver.framework.form.exception.FormAttributeNameIsRepeatException;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
-import codedriver.framework.form.dto.FormAttributeMatrixVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
@@ -31,9 +32,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -76,6 +79,26 @@ public class FormSaveApi extends PrivateApiComponentBase {
         if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
             throw new FormNameRepeatException(formVo.getName());
         }
+        //判断组件名是否重复
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setFormConfig(formVo.getFormConfig());
+        formVersionVo.setFormUuid(formVo.getUuid());
+        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            List<String> attributeNameList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
+            List<String> nameList = new ArrayList<>();
+            for (int i = 0; i < attributeNameList.size(); i++) {
+                String name = attributeNameList.get(i);
+                if (i == 0) {
+                    nameList.add(name);
+                    continue;
+                }
+                if (nameList.contains(name)) {
+                    throw new FormAttributeNameIsRepeatException(name);
+                }
+                nameList.add(name);
+            }
+        }
         //判断表单是否存在
         if (formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
             //插入表单信息
@@ -86,9 +109,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
         }
 
         //插入表单版本信息
-        FormVersionVo formVersionVo = new FormVersionVo();
-        formVersionVo.setFormConfig(formVo.getFormConfig());
-        formVersionVo.setFormUuid(formVo.getUuid());
         if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
             Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
             if (version == null) {//如果表单没有激活版本时，设置当前版本号为1，且为激活版本
@@ -106,7 +126,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
             }
             formVersionVo.setUuid(formVo.getCurrentVersionUuid());
-            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 for (FormAttributeVo formAttributeVo : formAttributeList) {
                     DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
@@ -117,8 +136,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
             formMapper.updateFormVersion(formVersionVo);
         }
         formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
-
-        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             //保存激活版本时，更新表单属性信息
             if (Objects.equal(formVersionVo.getIsActive(), 1)) {
