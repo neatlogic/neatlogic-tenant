@@ -6,6 +6,7 @@
 package codedriver.module.tenant.api.apiaudit;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -59,6 +60,8 @@ public class ApiAuditSearchApi extends PrivateApiComponentBase {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "搜索关键词")
     })
     @Output({
+            @Param(explode = BasePageVo.class),
+            @Param(name = "tbodyList", desc = "数据列表", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "查询操作审计")
     @Override
