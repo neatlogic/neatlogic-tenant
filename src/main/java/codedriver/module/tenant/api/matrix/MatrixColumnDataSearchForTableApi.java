@@ -96,7 +96,7 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(type);
         }
-        JSONObject returnObj = matrixDataSourceHandler.TableDataSearch(dataVo);
+        JSONObject returnObj = matrixDataSourceHandler.searchTableData(dataVo);
         List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
         returnObj.put("searchColumnDetailList", getSearchColumnDetailList(dataVo.getMatrixUuid(), matrixAttributeList, searchColumnArray));
         returnObj.put("type", type);

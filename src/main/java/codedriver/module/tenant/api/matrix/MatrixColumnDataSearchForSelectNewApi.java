@@ -76,7 +76,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.TableColumnDataSearch(dataVo);
+        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
         JSONObject returnObj = new JSONObject();
         returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
         returnObj.put("tbodyList", resultList);
