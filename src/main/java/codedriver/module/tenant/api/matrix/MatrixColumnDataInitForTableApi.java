@@ -192,7 +192,7 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(type);
         }
-        JSONObject returnObj = matrixDataSourceHandler.TableDataSearch(dataVo);
+        JSONObject returnObj = matrixDataSourceHandler.searchTableData(dataVo);
         returnObj.put("type", type);
         return returnObj;
     }
