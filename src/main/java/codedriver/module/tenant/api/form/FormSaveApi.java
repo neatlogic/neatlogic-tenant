@@ -144,6 +144,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
             for (FormAttributeVo formAttributeVo : formAttributeList) {
                 //保存激活版本时，更新表单属性信息
                 if (Objects.equal(formVersionVo.getIsActive(), 1)) {
+                    formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
                     formMapper.insertFormAttribute(formAttributeVo);
                 }
                 IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
