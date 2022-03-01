@@ -68,12 +68,18 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
         RunnerVo runnerVo = null;
 
         RunnerVo oldNameRunner = runnerMapper.getRunnerByName(searchVo.getName());
-        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
-
-        if (oldNameRunner != null && ((id == null && Objects.equals(oldNameRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldNameRunner.getId(), id)))) {
+        //下列情景抛异常：
+        //情景一：新增runner时，已存在（正在使用的）同名runner
+        //情景二：修改runner时，已存在（正在使用的）并且id不相等的runner
+        if (oldNameRunner != null && Objects.equals(oldNameRunner.getIsDelete(), 0) && (id == null || !Objects.equals(oldNameRunner.getId(), id))) {
             throw new RunnerNameRepeatsException(searchVo.getName());
         }
-        if (oldIpRunner != null && ((id == null && Objects.equals(oldIpRunner.getIsDelete(), 0)) || (id != null && !Objects.equals(oldIpRunner.getId(), id)))) {
+
+        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
+        //下列情景抛异常：
+        //情景一：新增runner时，已存在（正在使用的）同ip的runner
+        //情景二：修改runner时，已存在（正在使用的）并且id不相等的同ip的runner
+        if (oldIpRunner != null && Objects.equals(oldIpRunner.getIsDelete(), 0) && ((id == null || !Objects.equals(oldIpRunner.getId(), id)))) {
             throw new RunnerIpIsExistException(searchVo.getHost());
         }
 
@@ -83,13 +89,26 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 throw new RunnerIdNotFoundException(id);
             }
             runnerVo = searchVo;
+            //情景：修改runner1的ip改为runner2的ip
+            //      runner1  ip为1.1.1.1 name为 1 （使用中）
+            //      runner2  ip为2.2.2.2 name为 2 （已删除）
+            //需要删除runner2，并使用原来runner2的id
+            if (oldIpRunner != null) {
+                runnerVo.setId(oldIpRunner.getId());
+                if (oldIpRunner.getIsDelete() == 1) {
+                    runnerMapper.deleteRunnerById(oldIpRunner.getId());
+                }
+            }
         }
-        //ip相同，覆盖ip的runner，id不变，若发现当前runner的name已存在库里且isDelete为1，则删除name相同的runner
         if (runnerVo == null && oldIpRunner != null) {
             searchVo.setId(oldIpRunner.getId());
             runnerVo = searchVo;
+            //情景：新增runner3 ip为1.1.1.1 name为 2
+            //      runner1  ip为1.1.1.1 name为 1 （已删除）
+            //      runner2  ip为2.2.2.2 name为 2 （已删除）
+            //需要删除runner2，重新启用runner1,id不变
             if (oldNameRunner != null && oldNameRunner.getIsDelete() == 1) {
-                runnerMapper.deleteRuunerByName(searchVo.getName());
+                runnerMapper.deleteRunnerById(oldNameRunner.getId());
             }
         }
         //name相同，覆盖，id不变
