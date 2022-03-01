@@ -96,7 +96,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 //需要删除runner2，并使用原来runner2的id
                 runnerVo.setId(oldIpRunner.getId());
                 if (Objects.equals(oldIpRunner.getIsDelete(), 1)) {
-                    runnerMapper.deleteRunnerById(oldIpRunner.getId());
+                    runnerMapper.deleteRunnerById(id);
                 }
                 //情景：修改runner1的ip改为2.2.2.2 name为2
                 //      runner1  ip为1.1.1.1 name为 1 （使用中）
@@ -104,6 +104,15 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 //需要删除runner2，并使用原来runner2的id
                 if (oldIpRunner.equals(oldNameRunner) && !Objects.equals(id, oldIpRunner.getId())) {
                     runnerMapper.deleteRunnerById(id);
+                }
+            }
+            if (oldNameRunner != null) {
+                //情景：修改runner1的name改为2
+                //      runner1  ip为1.1.1.1 name为 1 （使用中）
+                //      runner2  ip为2.2.2.2 name为 2 （已删除）
+                //需要删除runner2，继续使用原来runner1的id
+                if (Objects.equals(oldNameRunner.getIsDelete(), 1)) {
+                    runnerMapper.deleteRunnerById(oldNameRunner.getId());
                 }
             }
         }
