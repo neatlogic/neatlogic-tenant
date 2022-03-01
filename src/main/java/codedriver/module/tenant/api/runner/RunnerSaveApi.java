@@ -116,6 +116,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 }
             }
         }
+        //新增ip相同，覆盖，id不变
         if (runnerVo == null && oldIpRunner != null) {
             searchVo.setId(oldIpRunner.getId());
             runnerVo = searchVo;
@@ -127,7 +128,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 runnerMapper.deleteRunnerById(oldNameRunner.getId());
             }
         }
-        //name相同，覆盖，id不变
+        //新增name相同，覆盖，id不变
         if (runnerVo == null && oldNameRunner != null) {
             searchVo.setId(oldNameRunner.getId());
             runnerVo = searchVo;
