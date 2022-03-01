@@ -90,7 +90,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             }
             runnerVo = searchVo;
             if (oldIpRunner != null) {
-                //情景：修改runner1的ip改为runner2的ip
+                //情景：修改runner1的ip改为2.2.2.2
                 //      runner1  ip为1.1.1.1 name为 1 （使用中）
                 //      runner2  ip为2.2.2.2 name为 2 （已删除）
                 //需要删除runner2，并使用原来runner2的id
