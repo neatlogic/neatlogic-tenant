@@ -69,16 +69,16 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
 
         RunnerVo oldNameRunner = runnerMapper.getRunnerByName(searchVo.getName());
         //下列情景抛异常：
-        //情景一：新增runner时，已存在（正在使用的）同名runner
-        //情景二：修改runner时，已存在（正在使用的）并且id不相等的runner
+        //情景一：新增runner时，已存在（使用中）同名runner
+        //情景二：修改runner时，已存在（使用中）并且id不相等的同名的runner
         if (oldNameRunner != null && Objects.equals(oldNameRunner.getIsDelete(), 0) && (id == null || !Objects.equals(oldNameRunner.getId(), id))) {
             throw new RunnerNameRepeatsException(searchVo.getName());
         }
 
         RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
         //下列情景抛异常：
-        //情景一：新增runner时，已存在（正在使用的）同ip的runner
-        //情景二：修改runner时，已存在（正在使用的）并且id不相等的同ip的runner
+        //情景一：新增runner时，已存在（使用中）同ip的runner
+        //情景二：修改runner时，已存在（使用中）并且id不相等的同ip的runner
         if (oldIpRunner != null && Objects.equals(oldIpRunner.getIsDelete(), 0) && ((id == null || !Objects.equals(oldIpRunner.getId(), id)))) {
             throw new RunnerIpIsExistException(searchVo.getHost());
         }
@@ -89,14 +89,21 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
                 throw new RunnerIdNotFoundException(id);
             }
             runnerVo = searchVo;
-            //情景：修改runner1的ip改为runner2的ip
-            //      runner1  ip为1.1.1.1 name为 1 （使用中）
-            //      runner2  ip为2.2.2.2 name为 2 （已删除）
-            //需要删除runner2，并使用原来runner2的id
             if (oldIpRunner != null) {
+                //情景：修改runner1的ip改为runner2的ip
+                //      runner1  ip为1.1.1.1 name为 1 （使用中）
+                //      runner2  ip为2.2.2.2 name为 2 （已删除）
+                //需要删除runner2，并使用原来runner2的id
                 runnerVo.setId(oldIpRunner.getId());
-                if (oldIpRunner.getIsDelete() == 1) {
+                if (Objects.equals(oldIpRunner.getIsDelete(), 1)) {
                     runnerMapper.deleteRunnerById(oldIpRunner.getId());
+                }
+                //情景：修改runner1的ip改为2.2.2.2 name为2
+                //      runner1  ip为1.1.1.1 name为 1 （使用中）
+                //      runner2  ip为2.2.2.2 name为 2 （已删除）
+                //需要删除runner2，并使用原来runner2的id
+                if (oldIpRunner.equals(oldNameRunner) && !Objects.equals(id, oldIpRunner.getId())) {
+                    runnerMapper.deleteRunnerById(id);
                 }
             }
         }
