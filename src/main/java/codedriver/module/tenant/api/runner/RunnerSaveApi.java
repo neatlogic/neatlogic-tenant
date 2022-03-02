@@ -63,24 +63,24 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Description(desc = "runner 保存接口,直接由ip确定一个runner")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerVo searchVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
+        RunnerVo paramRunnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = paramObj.getLong("id");
         RunnerVo runnerVo = null;
 
-        RunnerVo oldNameRunner = runnerMapper.getRunnerByName(searchVo.getName());
+        RunnerVo oldNameRunner = runnerMapper.getRunnerByName(paramRunnerVo.getName());
         //下列情景抛异常：
         //情景一：新增runner时，已存在（使用中）同名runner
         //情景二：修改runner时，已存在（使用中）并且id不相等的同名的runner
         if (oldNameRunner != null && Objects.equals(oldNameRunner.getIsDelete(), 0) && (id == null || !Objects.equals(oldNameRunner.getId(), id))) {
-            throw new RunnerNameRepeatsException(searchVo.getName());
+            throw new RunnerNameRepeatsException(paramRunnerVo.getName());
         }
 
-        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(searchVo.getHost());
+        RunnerVo oldIpRunner = runnerMapper.getRunnerByIp(paramRunnerVo.getHost());
         //下列情景抛异常：
         //情景一：新增runner时，已存在（使用中）同ip的runner
         //情景二：修改runner时，已存在（使用中）并且id不相等的同ip的runner
         if (oldIpRunner != null && Objects.equals(oldIpRunner.getIsDelete(), 0) && ((id == null || !Objects.equals(oldIpRunner.getId(), id)))) {
-            throw new RunnerIpIsExistException(searchVo.getHost());
+            throw new RunnerIpIsExistException(paramRunnerVo.getHost());
         }
 
         //再次编辑
@@ -88,54 +88,43 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
                 throw new RunnerIdNotFoundException(id);
             }
-            runnerVo = searchVo;
-            if (oldIpRunner != null) {
-                //情景：修改runner1的ip改为2.2.2.2
-                //      runner1  ip为1.1.1.1 name为 1 （使用中）
-                //      runner2  ip为2.2.2.2 name为 2 （已删除）
-                //需要删除runner2，并使用原来runner2的id
+            runnerVo = paramRunnerVo;
+            //情景：修改runner1的ip改为2.2.2.2
+            //      runner1  ip为1.1.1.1 name为 1 （使用中）
+            //      runner2  ip为2.2.2.2 name为 2 （已删除）
+            //需要删除runner2，并使用原来runner2的id
+            if (oldIpRunner != null && Objects.equals(oldIpRunner.getIsDelete(), 1)) {
                 runnerVo.setId(oldIpRunner.getId());
-                if (Objects.equals(oldIpRunner.getIsDelete(), 1)) {
-                    runnerMapper.deleteRunnerById(id);
-                }
-                //情景：修改runner1的ip改为2.2.2.2 name为2
-                //      runner1  ip为1.1.1.1 name为 1 （使用中）
-                //      runner2  ip为2.2.2.2 name为 2 （已删除）
-                //需要删除runner2，并使用原来runner2的id
-                if (oldIpRunner.equals(oldNameRunner) && !Objects.equals(id, oldIpRunner.getId())) {
-                    runnerMapper.deleteRunnerById(id);
-                }
+                runnerMapper.deleteRunnerById(id);
             }
-            if (oldNameRunner != null) {
-                //情景：修改runner1的name改为2
-                //      runner1  ip为1.1.1.1 name为 1 （使用中）
-                //      runner2  ip为2.2.2.2 name为 2 （已删除）
-                //需要删除runner2，继续使用原来runner1的id
-                if (Objects.equals(oldNameRunner.getIsDelete(), 1)) {
-                    runnerMapper.deleteRunnerById(oldNameRunner.getId());
-                }
+            //情景：修改runner1的name改为2
+            //      runner1  ip为1.1.1.1 name为 1 （使用中）
+            //      runner2  ip为2.2.2.2 name为 2 （已删除）
+            //需要删除runner2，继续使用原来runner1的id（但修改自身name时，无需进行删除操作）
+            if (oldNameRunner != null && Objects.equals(oldNameRunner.getIsDelete(), 1)) {
+                runnerMapper.deleteRunnerById(oldNameRunner.getId());
             }
         }
-        //新增ip相同，覆盖，id不变
+        //新增runner的ip相同时，重启之前的runner，id不变
         if (runnerVo == null && oldIpRunner != null) {
-            searchVo.setId(oldIpRunner.getId());
-            runnerVo = searchVo;
+            paramRunnerVo.setId(oldIpRunner.getId());
+            runnerVo = paramRunnerVo;
             //情景：新增runner3 ip为1.1.1.1 name为 2
             //      runner1  ip为1.1.1.1 name为 1 （已删除）
             //      runner2  ip为2.2.2.2 name为 2 （已删除）
             //需要删除runner2，重新启用runner1,id不变
-            if (oldNameRunner != null && oldNameRunner.getIsDelete() == 1) {
+            if (oldNameRunner != null) {
                 runnerMapper.deleteRunnerById(oldNameRunner.getId());
             }
         }
-        //新增name相同，覆盖，id不变
+        //新增runner的name相同时，重启之前的runner，id不变
         if (runnerVo == null && oldNameRunner != null) {
-            searchVo.setId(oldNameRunner.getId());
-            runnerVo = searchVo;
+            paramRunnerVo.setId(oldNameRunner.getId());
+            runnerVo = paramRunnerVo;
         }
         //新增runner
         if (runnerVo == null) {
-            runnerVo = searchVo;
+            runnerVo = paramRunnerVo;
         }
         runnerMapper.replaceRunner(runnerVo);
         return null;
