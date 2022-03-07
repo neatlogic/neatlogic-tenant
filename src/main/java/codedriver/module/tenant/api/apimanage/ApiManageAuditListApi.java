@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.apimanage;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.exception.type.ApiNotFoundException;
+import codedriver.framework.exception.util.StartTimeAndEndTimeCanNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -88,7 +89,7 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
         }
 
         if (apiAuditVo.getStartTime() == null || apiAuditVo.getEndTime() == null) {
-            return TableResultUtil.getResult(apiAuditList, apiAuditVo);
+            throw new StartTimeAndEndTimeCanNotFoundException();
         }
 
         int rowNum = ApiMapper.getApiAuditCount(apiAuditVo);
