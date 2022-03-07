@@ -25,6 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -78,7 +79,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        HSSFWorkbook workbook = matrixDataSourceHandler.exportMatrix(matrixVo);
+        Workbook workbook = matrixDataSourceHandler.exportMatrix(matrixVo);
 //        HSSFWorkbook workbook = null;
 //        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
 //            List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
