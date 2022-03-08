@@ -82,24 +82,23 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        try (OutputStream os = response.getOutputStream()) {
-            if (ExportFileType.CSV.getValue().equals(fileType)) {
-                String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
-                response.setContentType("application/text;charset=GBK");
-                response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-                matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
-            } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
-                Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
-                if (workbook == null) {
-                    workbook = new HSSFWorkbook();
-                }
-                String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".xls");
-                response.setContentType("application/vnd.ms-excel;charset=utf-8");
-                response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-                workbook.write(os);
+        OutputStream os = response.getOutputStream();
+        if (ExportFileType.CSV.getValue().equals(fileType)) {
+            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
+            response.setContentType("application/text;charset=GBK");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
+            os.flush();
+        } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
+            Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
+            if (workbook == null) {
+                workbook = new HSSFWorkbook();
             }
-        } catch (Exception e) {
-            throw e;
+            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".xls");
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+            workbook.write(os);
+            os.flush();
         }
 
 //        HSSFWorkbook workbook = null;
