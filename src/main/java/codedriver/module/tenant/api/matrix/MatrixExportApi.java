@@ -6,6 +6,7 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.ExportFileType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
@@ -25,11 +26,14 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -75,13 +79,25 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
+        String exportFileType = matrixDataSourceHandler.getExportFileType();
         try (OutputStream os = response.getOutputStream()) {
-            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
-            response.setContentType("application/text;charset=GBK");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-            matrixDataSourceHandler.exportMatrix(matrixVo, os);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            if (ExportFileType.CSV.getValue().equals(exportFileType)) {
+                String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
+                response.setContentType("application/text;charset=GBK");
+                response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+                matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
+            } else if (ExportFileType.EXCEL.getValue().equals(exportFileType)) {
+                Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
+                if (workbook == null) {
+                    workbook = new HSSFWorkbook();
+                }
+                String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".xls");
+                response.setContentType("application/vnd.ms-excel;charset=utf-8");
+                response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+                workbook.write(os);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
 //        HSSFWorkbook workbook = null;
