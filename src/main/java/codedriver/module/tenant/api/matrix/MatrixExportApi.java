@@ -6,6 +6,7 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.ExportFileType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
@@ -19,21 +20,20 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.util.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -65,11 +65,15 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @SuppressWarnings({"unchecked"})
-    @Input({@Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)})
+    @Input({
+            @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "fileType", desc = "文件类型", type = ApiParamType.ENUM, rule = "excel,csv", isRequired = true)
+    })
     @Description(desc = "矩阵导出接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String matrixUuid = paramObj.getString("matrixUuid");
+        String fileType = paramObj.getString("fileType");
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if (matrixVo == null) {
             throw new MatrixNotFoundException(matrixUuid);
@@ -78,7 +82,25 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        HSSFWorkbook workbook = matrixDataSourceHandler.exportMatrix(matrixVo);
+        OutputStream os = response.getOutputStream();
+        if (ExportFileType.CSV.getValue().equals(fileType)) {
+            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
+            response.setContentType("application/text;charset=GBK");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
+            os.flush();
+        } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
+            Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
+            if (workbook == null) {
+                workbook = new HSSFWorkbook();
+            }
+            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".xls");
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+            workbook.write(os);
+            os.flush();
+        }
+
 //        HSSFWorkbook workbook = null;
 //        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
 //            List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
@@ -171,25 +193,6 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 //                }
 //            }
 //        }
-
-        if (workbook == null) {
-            workbook = new HSSFWorkbook();
-        }
-        String fileNameEncode = matrixVo.getName() + ".xls";
-        Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-            fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-        } else {
-            fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-        }
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-
-        try (OutputStream os = response.getOutputStream();) {
-            workbook.write(os);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return null;
     }
 
