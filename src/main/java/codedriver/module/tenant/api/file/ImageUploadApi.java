@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
 @Service
 
@@ -73,7 +74,7 @@ public class ImageUploadApi extends PrivateBinaryStreamApiComponentBase {
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
-			if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
+			if (multipartFile != null && Objects.requireNonNull(multipartFile.getContentType()).startsWith("image")) {
 				String userUuid = UserContext.get().getUserUuid(true);
 				String oldFileName = multipartFile.getOriginalFilename();
 				Long size = multipartFile.getSize();
