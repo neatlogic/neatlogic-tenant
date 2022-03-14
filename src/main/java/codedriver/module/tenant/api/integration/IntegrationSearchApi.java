@@ -8,7 +8,7 @@ package codedriver.module.tenant.api.integration;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.ParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
 import codedriver.framework.integration.dto.IntegrationVo;
@@ -98,7 +98,7 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                         }
                     }
                 }
-                int count = DependencyManager.getDependencyCount(FromType.INTEGRATION, inte.getUuid());
+                int count = DependencyManager.getDependencyCount(FrameworkFromType.INTEGRATION, inte.getUuid());
                 inte.setReferenceCount(count);
             }
         }

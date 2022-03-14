@@ -5,11 +5,9 @@
 
 package codedriver.module.tenant.api.form;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -73,7 +71,7 @@ public class FormGetApi extends PrivateApiComponentBase {
             formVo.setFormConfig(formVersion.getFormConfig());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(formVersion.getFormUuid());
             formVo.setVersionList(formVersionList);
-            int count = DependencyManager.getDependencyCount(FromType.FORM, formVo.getUuid());
+            int count = DependencyManager.getDependencyCount(FrameworkFromType.FORM, formVo.getUuid());
             formVo.setReferenceCount(count);
             return formVo;
         } else if(StringUtils.isNotBlank(uuid)) {
@@ -89,7 +87,7 @@ public class FormGetApi extends PrivateApiComponentBase {
             formVo.setFormConfig(formVersion.getFormConfig());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
             formVo.setVersionList(formVersionList);
-            int count = DependencyManager.getDependencyCount(FromType.FORM, formVo.getUuid());
+            int count = DependencyManager.getDependencyCount(FrameworkFromType.FORM, formVo.getUuid());
     		formVo.setReferenceCount(count);
             return formVo;
         } else {

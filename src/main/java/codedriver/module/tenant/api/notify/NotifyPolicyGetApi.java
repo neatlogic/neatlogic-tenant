@@ -8,7 +8,7 @@ package codedriver.module.tenant.api.notify;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.GroupSearch;
 import codedriver.framework.dao.mapper.UserMapper;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserTypeVo;
@@ -136,7 +136,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                 config.setUserList(list);
             }
         }
-        int count = DependencyManager.getDependencyCount(FromType.NOTIFY_POLICY, id);
+        int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
         return notifyPolicyVo;
     }
