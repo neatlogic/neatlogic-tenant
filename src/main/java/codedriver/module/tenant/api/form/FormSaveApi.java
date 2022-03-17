@@ -20,9 +20,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.UuidUtil;
 import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
 import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
@@ -75,7 +75,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
     })
     @Description(desc = "表单保存接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
+        FormVo formVo = jsonObj.toJavaObject(FormVo.class);
         if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
             throw new FormNameRepeatException(formVo.getName());
         }
@@ -117,6 +117,18 @@ public class FormSaveApi extends PrivateApiComponentBase {
             } else {
                 version += 1;
                 formVersionVo.setIsActive(0);
+                //另存为新版时，需要对表单组件的uuid重新生成新值，既同一个表单的不同版本中组件uuid不同
+                if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                    String formConfig = formVersionVo.getFormConfig();
+                    for (FormAttributeVo formAttributeVo : formAttributeList) {
+                        String oldUuid = formAttributeVo.getUuid();
+                        String newUuid = UuidUtil.randomUuid();
+                        formConfig = formConfig.replace(oldUuid, newUuid);
+                    }
+                    formVersionVo.setFormConfig(formConfig);
+                    formVersionVo.setFormAttributeList(null);
+                    formAttributeList = formVersionVo.getFormAttributeList();
+                }
             }
             formVersionVo.setVersion(version);
             formMapper.insertFormVersion(formVersionVo);
@@ -203,7 +215,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     public IValid name() {
         return value -> {
-            FormVo formVo = JSON.toJavaObject(value, FormVo.class);
+            FormVo formVo = value.toJavaObject(FormVo.class);
             if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
                 return new FieldValidResultVo(new FormNameRepeatException(formVo.getName()));
             }
