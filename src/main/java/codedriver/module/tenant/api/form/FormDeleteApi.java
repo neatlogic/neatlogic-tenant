@@ -3,7 +3,7 @@ package codedriver.module.tenant.api.form;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormVersionVo;
@@ -54,7 +54,7 @@ public class FormDeleteApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
         if (formMapper.checkFormIsExists(uuid) > 0) {
-            int count = DependencyManager.getDependencyCount(FromType.FORM, uuid);
+            int count = DependencyManager.getDependencyCount(FrameworkFromType.FORM, uuid);
             if (count > 0) {
                 throw new FormReferencedCannotBeDeletedException(uuid);
             }

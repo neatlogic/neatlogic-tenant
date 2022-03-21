@@ -7,7 +7,7 @@ package codedriver.module.tenant.api.integration;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.exception.integration.IntegrationReferencedCannotBeDeletedException;
 import codedriver.framework.integration.dao.mapper.IntegrationMapper;
@@ -50,7 +50,7 @@ public class IntegrationDeleteApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String uuid = jsonObj.getString("uuid");
-		if(DependencyManager.getDependencyCount(FromType.INTEGRATION, uuid) > 0){
+		if(DependencyManager.getDependencyCount(FrameworkFromType.INTEGRATION, uuid) > 0){
 			throw new IntegrationReferencedCannotBeDeletedException(uuid);
 		}
 		integrationMapper.deleteIntegrationByUuid(uuid);

@@ -7,7 +7,7 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -154,7 +154,7 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
 //            }
 //            returnObj.put("tbodyList", tbodyList);
 //        }
-        int count = DependencyManager.getDependencyCount(FromType.MATRIX, dataVo.getMatrixUuid());
+        int count = DependencyManager.getDependencyCount(FrameworkFromType.MATRIX, dataVo.getMatrixUuid());
         returnObj.put("referenceCount", count);
         return returnObj;
     }

@@ -5,11 +5,10 @@
 
 package codedriver.module.tenant.api.worktime;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -109,7 +108,7 @@ public class WorktimeSearchApi extends PrivateApiComponentBase {
                 }
                 worktime.setWorkingHoursSet(workingHoursSet);
                 worktime.setConfig(null);
-                int count = DependencyManager.getDependencyCount(FromType.WORKTIME, worktime.getUuid());
+                int count = DependencyManager.getDependencyCount(FrameworkFromType.WORKTIME, worktime.getUuid());
                 worktime.setReferenceCount(count);
             }
         }

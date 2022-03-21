@@ -7,9 +7,8 @@ package codedriver.module.tenant.api.form;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dependency.dto.DependencyInfoVo;
 import codedriver.framework.form.dao.mapper.FormMapper;
@@ -69,10 +68,10 @@ public class FormReferenceList extends PrivateApiComponentBase {
         BasePageVo basePageVo = JSON.toJavaObject(jsonObj, BasePageVo.class);
         JSONObject resultObj = new JSONObject();
         int pageCount = 0;
-        int rowNum = DependencyManager.getDependencyCount(FromType.FORM, formUuid);
+        int rowNum = DependencyManager.getDependencyCount(FrameworkFromType.FORM, formUuid);
         if(rowNum > 0){
             pageCount = PageUtil.getPageCount(rowNum, basePageVo.getPageSize());
-            List<DependencyInfoVo> list = DependencyManager.getDependencyList(FromType.FORM, formUuid, basePageVo);
+            List<DependencyInfoVo> list = DependencyManager.getDependencyList(FrameworkFromType.FORM, formUuid, basePageVo);
             resultObj.put("list", list);
         }else {
             resultObj.put("list", new ArrayList<>());

@@ -5,25 +5,22 @@
 
 package codedriver.module.tenant.api.notify;
 
-import java.util.List;
-
-import codedriver.framework.dependency.constvalue.FromType;
-import codedriver.framework.dependency.core.DependencyManager;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 
@@ -67,7 +64,7 @@ public class NotifyPolicySearchApi extends PrivateApiComponentBase {
         List<NotifyPolicyVo> tbodyList = notifyMapper.getNotifyPolicyList(notifyPolicyVo);
 
         for (NotifyPolicyVo notifyPolicy : tbodyList) {
-            int count = DependencyManager.getDependencyCount(FromType.NOTIFY_POLICY, notifyPolicy.getId());
+            int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, notifyPolicy.getId());
             notifyPolicy.setReferenceCount(count);
         }
         resultObj.put("tbodyList", tbodyList);

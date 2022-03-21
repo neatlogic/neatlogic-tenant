@@ -5,9 +5,8 @@
 
 package codedriver.module.tenant.api.worktime;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dependency.constvalue.FromType;
+import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -57,7 +56,7 @@ public class WorktimeGetApi extends PrivateApiComponentBase {
         if (worktime == null) {
             throw new WorktimeNotFoundException(uuid);
         }
-        int count = DependencyManager.getDependencyCount(FromType.WORKTIME, uuid);
+        int count = DependencyManager.getDependencyCount(FrameworkFromType.WORKTIME, uuid);
         worktime.setReferenceCount(count);
         return worktime;
     }
