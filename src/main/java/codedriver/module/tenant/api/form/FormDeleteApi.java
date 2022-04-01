@@ -6,11 +6,14 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormReferencedCannotBeDeletedException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
+import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -58,10 +61,17 @@ public class FormDeleteApi extends PrivateApiComponentBase {
             if (count > 0) {
                 throw new FormReferencedCannotBeDeletedException(uuid);
             }
-            List<FormVersionVo> formVersionList = formMapper.getFormVersionSimpleByFormUuid(uuid);
+            List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             if (CollectionUtils.isNotEmpty(formVersionList)) {
                 for (FormVersionVo formVersionVo : formVersionList) {
                     formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
+                    List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                        for (FormAttributeVo formAttributeVo : formAttributeList) {
+                            DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+                            DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+                        }
+                    }
                 }
             }
             formMapper.deleteFormByUuid(uuid);
