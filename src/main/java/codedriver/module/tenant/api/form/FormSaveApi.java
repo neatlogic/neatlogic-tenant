@@ -3,19 +3,17 @@ package codedriver.module.tenant.api.form;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.form.dto.FormAttributeMatrixVo;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
-import codedriver.framework.form.exception.FormAttributeHandlerNotFoundException;
 import codedriver.framework.form.exception.FormAttributeNameIsRepeatException;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
+import codedriver.framework.form.service.IFormCrossoverService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
@@ -26,7 +24,6 @@ import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDepende
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -153,57 +148,15 @@ public class FormSaveApi extends PrivateApiComponentBase {
             if (Objects.equal(formVersionVo.getIsActive(), 1)) {
                 formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
             }
+
+            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
             for (FormAttributeVo formAttributeVo : formAttributeList) {
                 //保存激活版本时，更新表单属性信息
                 if (Objects.equal(formVersionVo.getIsActive(), 1)) {
                     formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
                     formMapper.insertFormAttribute(formAttributeVo);
                 }
-                IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (formAttributeHandler == null) {
-                    throw new FormAttributeHandlerNotFoundException(formAttributeVo.getHandler());
-                }
-                formAttributeHandler.makeupFormAttribute(formAttributeVo);
-                Set<String> matrixUuidSet = formAttributeVo.getMatrixUuidSet();
-                if (CollectionUtils.isNotEmpty(matrixUuidSet)) {
-                    for (String matrixUuid : matrixUuidSet) {
-                        FormAttributeMatrixVo formAttributeMatrixVo = new FormAttributeMatrixVo();
-                        formAttributeMatrixVo.setMatrixUuid(matrixUuid);
-                        formAttributeMatrixVo.setFormVersionUuid(formVersionVo.getUuid());
-                        formAttributeMatrixVo.setFormAttributeLabel(formAttributeVo.getLabel());
-                        formAttributeMatrixVo.setFormAttributeUuid(formAttributeVo.getUuid());
-                        formMapper.insertFormAttributeMatrix(formAttributeMatrixVo);
-                    }
-                }
-
-                Set<String> integrationUuidSet = formAttributeVo.getIntegrationUuidSet();
-                if (CollectionUtils.isNotEmpty(integrationUuidSet)) {
-                    JSONObject config = new JSONObject();
-                    config.put("formUuid", formVo.getUuid());
-                    config.put("formVersionUuid", formVersionVo.getUuid());
-                    config.put("formAttributeUuid", formAttributeVo.getUuid());
-                    for (String integrationUuid : integrationUuidSet) {
-                        config.put("integrationUuid", integrationUuid);
-                        DependencyManager.insert(Integration2FormAttrDependencyHandler.class, integrationUuid, formAttributeVo.getUuid(), config);
-                    }
-                }
-
-                Map<String, Set<String>> matrixUuidAttributeUuidSetMap = formAttributeVo.getMatrixUuidAttributeUuidSetMap();
-                if (MapUtils.isNotEmpty(matrixUuidAttributeUuidSetMap)) {
-                    JSONObject config = new JSONObject();
-                    config.put("formUuid", formVo.getUuid());
-                    config.put("formVersionUuid", formVersionVo.getUuid());
-                    for (Map.Entry<String, Set<String>> entry : matrixUuidAttributeUuidSetMap.entrySet()) {
-                        String matrixUuid = entry.getKey();
-                        config.put("matrixUuid", matrixUuid);
-                        Set<String> attributeUuidSet = entry.getValue();
-                        if (CollectionUtils.isNotEmpty(attributeUuidSet)) {
-                            for (String attributeUuid : attributeUuidSet) {
-                                DependencyManager.insert(MatrixAttr2FormAttrDependencyHandler.class, attributeUuid, formAttributeVo.getUuid(), config);
-                            }
-                        }
-                    }
-                }
+                formCrossoverService.saveDependency(formAttributeVo);
             }
         }
         JSONObject resultObj = new JSONObject();
