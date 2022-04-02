@@ -112,9 +112,11 @@ public class FormSaveApi extends PrivateApiComponentBase {
         }
         if (!updateName && !updateFormConfig) {
             //如果表单名和配置信息都没有更新，就直接返回
+            return resultObj;
         } else if (!updateFormConfig) {
             //只更新表单名信息
             formMapper.updateForm(formVo);
+            return resultObj;
         } else {
             FormVersionVo formVersionVo = new FormVersionVo();
             formVersionVo.setFormConfig(formVo.getFormConfig());
@@ -194,8 +196,8 @@ public class FormSaveApi extends PrivateApiComponentBase {
                     formCrossoverService.saveDependency(formAttributeVo);
                 }
             }
+            return resultObj;
         }
-        return resultObj;
     }
 
     public IValid name() {
