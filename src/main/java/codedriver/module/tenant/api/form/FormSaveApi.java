@@ -3,19 +3,17 @@ package codedriver.module.tenant.api.form;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.form.attribute.core.FormAttributeHandlerFactory;
-import codedriver.framework.form.attribute.core.IFormAttributeHandler;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.form.dto.FormAttributeMatrixVo;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
-import codedriver.framework.form.exception.FormAttributeHandlerNotFoundException;
 import codedriver.framework.form.exception.FormAttributeNameIsRepeatException;
 import codedriver.framework.form.exception.FormNameRepeatException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
+import codedriver.framework.form.service.IFormCrossoverService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
@@ -24,9 +22,7 @@ import codedriver.framework.util.UuidUtil;
 import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
 import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,142 +70,134 @@ public class FormSaveApi extends PrivateApiComponentBase {
     })
     @Description(desc = "表单保存接口")
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        JSONObject resultObj = new JSONObject();
         FormVo formVo = jsonObj.toJavaObject(FormVo.class);
-        if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
-            throw new FormNameRepeatException(formVo.getName());
-        }
-        //判断组件名是否重复
-        FormVersionVo formVersionVo = new FormVersionVo();
-        formVersionVo.setFormConfig(formVo.getFormConfig());
-        formVersionVo.setFormUuid(formVo.getUuid());
-        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-        if (CollectionUtils.isNotEmpty(formAttributeList)) {
-            List<String> attributeNameList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
-            List<String> nameList = new ArrayList<>();
-            for (int i = 0; i < attributeNameList.size(); i++) {
-                String name = attributeNameList.get(i);
-                if (i == 0) {
-                    nameList.add(name);
-                    continue;
-                }
-                if (nameList.contains(name)) {
-                    throw new FormAttributeNameIsRepeatException(name);
-                }
-                nameList.add(name);
+        String formUuid = formVo.getUuid();
+        String currentVersionUuid = formVo.getCurrentVersionUuid();
+        resultObj.put("uuid", formUuid);
+        boolean updateName = true;
+        boolean updateFormConfig = true;
+        boolean formIsExists = false;
+        Integer oldFormVersionIsActive = 0;
+        FormVo oldFormVo = formMapper.getFormByUuid(formUuid);
+        if (oldFormVo != null) {
+            formIsExists = true;
+            if (Objects.equals(oldFormVo.getName(), formVo.getName())) {
+                updateName = false;
             }
-        }
-        //判断表单是否存在
-        if (formMapper.checkFormIsExists(formVo.getUuid()) == 0) {
-            //插入表单信息
-            formMapper.insertForm(formVo);
-        } else {
-            //更新表单信息
-            formMapper.updateForm(formVo);
-        }
-
-        //插入表单版本信息
-        if (StringUtils.isBlank(formVo.getCurrentVersionUuid())) {
-            Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());
-            if (version == null) {//如果表单没有激活版本时，设置当前版本号为1，且为激活版本
-                version = 1;
-                formVersionVo.setIsActive(1);
-            } else {
-                version += 1;
-                formVersionVo.setIsActive(0);
-                //另存为新版时，需要对表单组件的uuid重新生成新值，既同一个表单的不同版本中组件uuid不同
-                if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                    String formConfig = formVersionVo.getFormConfig();
-                    for (FormAttributeVo formAttributeVo : formAttributeList) {
-                        String oldUuid = formAttributeVo.getUuid();
-                        String newUuid = UuidUtil.randomUuid();
-                        formConfig = formConfig.replace(oldUuid, newUuid);
-                    }
-                    formVersionVo.setFormConfig(formConfig);
-                    formVersionVo.setFormAttributeList(null);
-                    formAttributeList = formVersionVo.getFormAttributeList();
+            if (StringUtils.isNotBlank(currentVersionUuid)) {
+                FormVersionVo oldFormVersionVo = formMapper.getFormVersionByUuid(currentVersionUuid);
+                if (oldFormVersionVo == null) {
+                    throw new FormVersionNotFoundException(currentVersionUuid);
                 }
-            }
-            formVersionVo.setVersion(version);
-            formMapper.insertFormVersion(formVersionVo);
-        } else {
-            FormVersionVo formVersion = formMapper.getFormVersionByUuid(formVo.getCurrentVersionUuid());
-            if (formVersion == null) {
-                throw new FormVersionNotFoundException(formVo.getCurrentVersionUuid());
-            }
-            formVersionVo.setUuid(formVo.getCurrentVersionUuid());
-            if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                for (FormAttributeVo formAttributeVo : formAttributeList) {
-                    DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                    DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                }
-            }
-            formVersionVo.setIsActive(formVersion.getIsActive());
-            formMapper.updateFormVersion(formVersionVo);
-        }
-        formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
-        if (CollectionUtils.isNotEmpty(formAttributeList)) {
-            //保存激活版本时，更新表单属性信息
-            if (Objects.equal(formVersionVo.getIsActive(), 1)) {
-                formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
-            }
-            for (FormAttributeVo formAttributeVo : formAttributeList) {
-                //保存激活版本时，更新表单属性信息
-                if (Objects.equal(formVersionVo.getIsActive(), 1)) {
-                    formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
-                    formMapper.insertFormAttribute(formAttributeVo);
-                }
-                IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
-                if (formAttributeHandler == null) {
-                    throw new FormAttributeHandlerNotFoundException(formAttributeVo.getHandler());
-                }
-                formAttributeHandler.makeupFormAttribute(formAttributeVo);
-                Set<String> matrixUuidSet = formAttributeVo.getMatrixUuidSet();
-                if (CollectionUtils.isNotEmpty(matrixUuidSet)) {
-                    for (String matrixUuid : matrixUuidSet) {
-                        FormAttributeMatrixVo formAttributeMatrixVo = new FormAttributeMatrixVo();
-                        formAttributeMatrixVo.setMatrixUuid(matrixUuid);
-                        formAttributeMatrixVo.setFormVersionUuid(formVersionVo.getUuid());
-                        formAttributeMatrixVo.setFormAttributeLabel(formAttributeVo.getLabel());
-                        formAttributeMatrixVo.setFormAttributeUuid(formAttributeVo.getUuid());
-                        formMapper.insertFormAttributeMatrix(formAttributeMatrixVo);
-                    }
-                }
-
-                Set<String> integrationUuidSet = formAttributeVo.getIntegrationUuidSet();
-                if (CollectionUtils.isNotEmpty(integrationUuidSet)) {
-                    JSONObject config = new JSONObject();
-                    config.put("formUuid", formVo.getUuid());
-                    config.put("formVersionUuid", formVersionVo.getUuid());
-                    config.put("formAttributeUuid", formAttributeVo.getUuid());
-                    for (String integrationUuid : integrationUuidSet) {
-                        config.put("integrationUuid", integrationUuid);
-                        DependencyManager.insert(Integration2FormAttrDependencyHandler.class, integrationUuid, formAttributeVo.getUuid(), config);
-                    }
-                }
-
-                Map<String, Set<String>> matrixUuidAttributeUuidSetMap = formAttributeVo.getMatrixUuidAttributeUuidSetMap();
-                if (MapUtils.isNotEmpty(matrixUuidAttributeUuidSetMap)) {
-                    JSONObject config = new JSONObject();
-                    config.put("formUuid", formVo.getUuid());
-                    config.put("formVersionUuid", formVersionVo.getUuid());
-                    for (Map.Entry<String, Set<String>> entry : matrixUuidAttributeUuidSetMap.entrySet()) {
-                        String matrixUuid = entry.getKey();
-                        config.put("matrixUuid", matrixUuid);
-                        Set<String> attributeUuidSet = entry.getValue();
-                        if (CollectionUtils.isNotEmpty(attributeUuidSet)) {
-                            for (String attributeUuid : attributeUuidSet) {
-                                DependencyManager.insert(MatrixAttr2FormAttrDependencyHandler.class, attributeUuid, formAttributeVo.getUuid(), config);
-                            }
+                oldFormVersionIsActive = oldFormVersionVo.getIsActive();
+                resultObj.put("currentVersionUuid", oldFormVersionVo.getUuid());
+                resultObj.put("currentVersion", oldFormVersionVo.getVersion());
+                if (Objects.equals(oldFormVersionVo.getFormConfig(), formVo.getFormConfig())) {
+                    updateFormConfig = false;
+                } else {
+                    formMapper.deleteFormAttributeMatrixByFormVersionUuid(currentVersionUuid);
+                    List<FormAttributeVo> formAttributeList = oldFormVersionVo.getFormAttributeList();
+                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                        for (FormAttributeVo formAttributeVo : formAttributeList) {
+                            DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+                            DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
                         }
                     }
                 }
             }
         }
-        JSONObject resultObj = new JSONObject();
-        resultObj.put("uuid", formVo.getUuid());
-        resultObj.put("currentVersionUuid", formVersionVo.getUuid());
-        resultObj.put("currentVersion", formVersionVo.getVersion());
-        return resultObj;
+        if (updateName && formMapper.checkFormNameIsRepeat(formVo) > 0) {
+            throw new FormNameRepeatException(formVo.getName());
+        }
+        if (!updateName && !updateFormConfig) {
+            //如果表单名和配置信息都没有更新，就直接返回
+            return resultObj;
+        } else if (!updateFormConfig) {
+            //只更新表单名信息
+            formMapper.updateForm(formVo);
+            return resultObj;
+        } else {
+            FormVersionVo formVersionVo = new FormVersionVo();
+            formVersionVo.setFormConfig(formVo.getFormConfig());
+            formVersionVo.setFormUuid(formUuid);
+            if (StringUtils.isNotBlank(currentVersionUuid)) {
+                formVersionVo.setUuid(currentVersionUuid);
+                formVersionVo.setIsActive(oldFormVersionIsActive);
+            } else {
+                formVersionVo.getUuid();
+            }
+            List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
+            if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                //判断组件名是否重复
+                List<String> attributeNameList = formAttributeList.stream().map(FormAttributeVo::getLabel).collect(Collectors.toList());
+                List<String> nameList = new ArrayList<>();
+                for (int i = 0; i < attributeNameList.size(); i++) {
+                    String name = attributeNameList.get(i);
+                    if (i == 0) {
+                        nameList.add(name);
+                        continue;
+                    }
+                    if (nameList.contains(name)) {
+                        throw new FormAttributeNameIsRepeatException(name);
+                    }
+                    nameList.add(name);
+                }
+            }
+            //判断表单是否存在
+            if (!formIsExists) {
+                //插入表单信息
+                formMapper.insertForm(formVo);
+            } else {
+                //更新表单信息
+                formMapper.updateForm(formVo);
+            }
+
+            //插入表单版本信息
+            if (StringUtils.isBlank(currentVersionUuid)) {
+                Integer version = formMapper.getMaxVersionByFormUuid(formUuid);
+                if (version == null) {//如果表单没有激活版本时，设置当前版本号为1，且为激活版本
+                    version = 1;
+                    formVersionVo.setIsActive(1);
+                } else {
+                    version += 1;
+                    formVersionVo.setIsActive(0);
+                    //另存为新版时，需要对表单组件的uuid重新生成新值，既同一个表单的不同版本中组件uuid不同
+                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                        String formConfig = formVersionVo.getFormConfig();
+                        for (FormAttributeVo formAttributeVo : formAttributeList) {
+                            String oldUuid = formAttributeVo.getUuid();
+                            String newUuid = UuidUtil.randomUuid();
+                            formConfig = formConfig.replace(oldUuid, newUuid);
+                        }
+                        formVersionVo.setFormConfig(formConfig);
+                        formVersionVo.setFormAttributeList(null);
+                        formAttributeList = formVersionVo.getFormAttributeList();
+                    }
+                }
+                formVersionVo.setVersion(version);
+                formMapper.insertFormVersion(formVersionVo);
+                resultObj.put("currentVersionUuid", formVersionVo.getUuid());
+                resultObj.put("currentVersion", formVersionVo.getVersion());
+            } else {
+                formMapper.updateFormVersion(formVersionVo);
+            }
+            //保存激活版本时，更新表单属性信息
+            if (Objects.equals(formVersionVo.getIsActive(), 1)) {
+                formMapper.deleteFormAttributeByFormUuid(formUuid);
+            }
+            if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+                for (FormAttributeVo formAttributeVo : formAttributeList) {
+                    //保存激活版本时，更新表单属性信息
+                    if (Objects.equals(formVersionVo.getIsActive(), 1)) {
+                        formMapper.insertFormAttribute(formAttributeVo);
+                    }
+                    formCrossoverService.saveDependency(formAttributeVo);
+                }
+            }
+            return resultObj;
+        }
     }
 
     public IValid name() {

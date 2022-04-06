@@ -1,30 +1,32 @@
 package codedriver.module.tenant.api.form;
 
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.dto.FormVo;
 import codedriver.framework.form.exception.*;
+import codedriver.framework.form.service.IFormCrossoverService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.UuidUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -131,20 +133,26 @@ public class FormCopyApi extends PrivateApiComponentBase {
         String content = formVersionVo.getFormConfig();
         content = content.replace(formVersionVo.getFormUuid(), newFormUuid);
         content = content.replace(oldName, newName);
-        List<FormAttributeVo> oldFormAttributeList = formMapper.getFormAttributeList(new FormAttributeVo(newFormUuid, formVersionVo.getUuid()));
-        for (FormAttributeVo formAttributeVo : oldFormAttributeList) {
-            String newFormAttributeUuid = UUID.randomUUID().toString().replace("-", "");
-            content = content.replace(formAttributeVo.getUuid(), newFormAttributeUuid);
-        }
-        formVersionVo.setUuid(null);
-        formVersionVo.setFormUuid(newFormUuid);
-        formVersionVo.setFormConfig(content);
-//        formVersionVo.setEditor(UserContext.get().getUserUuid(true));
-        formMapper.insertFormVersion(formVersionVo);
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-        if (formAttributeList != null && formAttributeList.size() > 0) {
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
             for (FormAttributeVo formAttributeVo : formAttributeList) {
-                formMapper.insertFormAttribute(formAttributeVo);
+                String newFormAttributeUuid = UuidUtil.randomUuid();
+                content = content.replace(formAttributeVo.getUuid(), newFormAttributeUuid);
+            }
+            formVersionVo.setUuid(null);
+            formVersionVo.setFormUuid(newFormUuid);
+            formVersionVo.setFormConfig(content);
+    //        formVersionVo.setEditor(UserContext.get().getUserUuid(true));
+            formMapper.insertFormVersion(formVersionVo);
+            formVersionVo.setFormAttributeList(null);
+            formAttributeList = formVersionVo.getFormAttributeList();
+            for (FormAttributeVo formAttributeVo : formAttributeList) {
+                //保存激活版本时，插入表单属性信息
+                if (Objects.equal(formVersionVo.getIsActive(), 1)) {
+                    formMapper.insertFormAttribute(formAttributeVo);
+                }
+                formCrossoverService.saveDependency(formAttributeVo);
             }
         }
     }

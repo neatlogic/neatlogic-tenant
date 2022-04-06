@@ -3,7 +3,9 @@ package codedriver.module.tenant.api.form;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.form.dto.FormAttributeVo;
 import codedriver.framework.form.dto.FormVersionVo;
 import codedriver.framework.form.exception.FormActiveVersionCannotBeDeletedException;
 import codedriver.framework.form.exception.FormVersionNotFoundException;
@@ -13,9 +15,14 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
+import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
@@ -57,6 +64,13 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
         //删除表单版本
         formMapper.deleteFormVersionByUuid(uuid);
         formMapper.deleteFormAttributeMatrixByFormVersionUuid(uuid);
+        List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
+        if (CollectionUtils.isNotEmpty(formAttributeList)) {
+            for (FormAttributeVo formAttributeVo : formAttributeList) {
+                DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+                DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
+            }
+        }
         return null;
     }
 
