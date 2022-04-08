@@ -1,9 +1,8 @@
 package codedriver.module.tenant.api.topic;
 
 import codedriver.framework.dao.mapper.TopicMapper;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.dto.TopicVo;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -38,6 +37,9 @@ public class TopicGetApi extends PrivateApiComponentBase {
     }
 
     @Input({})
+    @Output({
+            @Param(explode = TopicVo.class)
+    })
     @Description(desc = "获取主题配置接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

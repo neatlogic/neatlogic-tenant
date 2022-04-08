@@ -2,11 +2,13 @@ package codedriver.module.tenant.api.topic;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.TOPIC_MODIFY;
+import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.TopicMapper;
 import codedriver.framework.dto.TopicVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -43,8 +45,10 @@ public class TopicSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({})
-    @Description(desc = "保存主题配置接口")
+    @Input({
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置")
+    })
+    @Description(desc = "用于保存主题配置、还原主题配置")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TopicVo topicVo = paramObj.toJavaObject(TopicVo.class);
