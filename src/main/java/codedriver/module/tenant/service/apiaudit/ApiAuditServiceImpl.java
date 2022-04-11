@@ -30,7 +30,6 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     @Autowired
     private ApiMapper apiMapper;
 
-
     @Autowired
     private ApiAuditMapper apiAuditMapper;
 
