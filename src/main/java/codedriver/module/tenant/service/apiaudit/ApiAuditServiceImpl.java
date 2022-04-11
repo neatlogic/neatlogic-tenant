@@ -5,6 +5,7 @@ import codedriver.framework.restful.annotation.ExcelField;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -29,6 +30,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     @Autowired
     private ApiMapper apiMapper;
 
+    @Autowired
+    private ApiAuditMapper apiAuditMapper;
+
     @Override
     public List<ApiAuditVo> searchApiAuditVo(ApiAuditVo apiAuditVo) throws ClassNotFoundException {
         List<ApiVo> apiList = new ArrayList<>();
@@ -36,9 +40,9 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         if(CollectionUtils.isEmpty(apiAuditVo.getTokenList())){
             return null;
         }
-        List<ApiAuditVo> apiAuditVoList = apiMapper.searchApiAuditList(apiAuditVo);
+        List<ApiAuditVo> apiAuditVoList = apiAuditMapper.searchApiAuditList(apiAuditVo);
         if(apiAuditVo.getNeedPage()){
-            apiAuditVo.setRowNum(apiMapper.searchApiAuditListCount(apiAuditVo));
+            apiAuditVo.setRowNum(apiAuditMapper.searchApiAuditListCount(apiAuditVo));
         }
         /**
          * 补充从数据库无法获取的字段
@@ -69,13 +73,13 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         stream.write(sb.toString().getBytes("GBK"));
         stream.flush();
 
-        int count = apiMapper.searchApiAuditListCount(apiAuditVo);
+        int count = apiAuditMapper.searchApiAuditListCount(apiAuditVo);
         if(count > 0){
             apiAuditVo.setPageCount(PageUtil.getPageCount(count, apiAuditVo.getPageSize()));
             List<ApiAuditVo> list = null;
             for(int i = 1;i <= apiAuditVo.getPageCount();i++){
                 apiAuditVo.setCurrentPage(i);
-                list = apiMapper.searchApiAuditForExport(apiAuditVo);
+                list = apiAuditMapper.searchApiAuditForExport(apiAuditVo);
                 if(CollectionUtils.isNotEmpty(list)){
                     StringBuilder contentSb = new StringBuilder();
                     /*读取文件中的参数/结果/错误**/
@@ -186,7 +190,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
         if(CollectionUtils.isEmpty(vo.getTokenList())){
             return 0;
         }
-        int apiAuditVoCount = apiMapper.searchApiAuditListCount(vo);
+        int apiAuditVoCount = apiAuditMapper.searchApiAuditListCount(vo);
         return apiAuditVoCount;
 
     }
@@ -197,7 +201,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
      */
     @Override
     public List<ApiVo> getApiListForTree() {
-        List<String> distinctTokenInApiAudit = apiMapper.getDistinctTokenInApiAudit();
+        List<String> distinctTokenInApiAudit = apiAuditMapper.getDistinctTokenInApiAudit();
         List<ApiVo> apiList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(distinctTokenInApiAudit)){
             Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();

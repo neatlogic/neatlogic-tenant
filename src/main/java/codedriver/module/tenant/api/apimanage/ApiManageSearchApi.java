@@ -16,6 +16,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiHandlerVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -37,6 +38,10 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 
     @Autowired
     private ApiMapper ApiMapper;
+
+
+    @Autowired
+    private ApiAuditMapper apiAuditMapper;
 
     @Override
     public String getToken() {
@@ -269,7 +274,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         List<String> apiTokenList = new ArrayList<>();
         apiList.forEach(vo -> apiTokenList.add(vo.getToken()));
         if (!apiTokenList.isEmpty()) {
-            List<ApiVo> apiVisitTimesList = ApiMapper.getApiAccessCountByTokenList(apiTokenList);
+            List<ApiVo> apiVisitTimesList = apiAuditMapper.getApiAccessCountByTokenList(apiTokenList);
             if (!apiVisitTimesList.isEmpty()) {
                 apiList.forEach(api -> {
                     for (ApiVo vo : apiVisitTimesList) {

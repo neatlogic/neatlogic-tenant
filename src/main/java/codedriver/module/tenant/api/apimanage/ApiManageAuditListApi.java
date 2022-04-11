@@ -13,6 +13,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
@@ -34,6 +35,9 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
 
     @Autowired
     private ApiMapper ApiMapper;
+
+    @Autowired
+    private ApiAuditMapper apiAuditMapper;
 
     @Override
     public String getToken() {
@@ -92,11 +96,11 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
             throw new StartTimeAndEndTimeCanNotFoundException();
         }
 
-        int rowNum = ApiMapper.getApiAuditCount(apiAuditVo);
+        int rowNum = apiAuditMapper.getApiAuditCount(apiAuditVo);
         if (rowNum > 0) {
             apiAuditVo.setRowNum(rowNum);
             apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
-            apiAuditList = ApiMapper.getApiAuditList(apiAuditVo);
+            apiAuditList = apiAuditMapper.getApiAuditList(apiAuditVo);
         }
         return TableResultUtil.getResult(apiAuditList, apiAuditVo);
     }
