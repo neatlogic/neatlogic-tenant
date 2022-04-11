@@ -13,6 +13,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Objects;
@@ -24,6 +25,7 @@ import java.util.Objects;
 
 @AuthAction(action = TOPIC_MODIFY.class)
 @Service
+@Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 public class TopicSaveApi extends PrivateApiComponentBase {
 
@@ -47,7 +49,8 @@ public class TopicSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, desc = "主键id"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置")
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置"),
+            @Param(name = "logoFileId", type = ApiParamType.LONG, desc = "logo 图片文件id")
     })
     @Description(desc = "用于保存主题配置、还原主题配置")
     @Override
