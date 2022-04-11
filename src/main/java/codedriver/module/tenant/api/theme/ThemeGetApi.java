@@ -1,7 +1,7 @@
-package codedriver.module.tenant.api.topic;
+package codedriver.module.tenant.api.theme;
 
-import codedriver.framework.dao.mapper.TopicMapper;
-import codedriver.framework.dto.TopicVo;
+import codedriver.framework.dao.mapper.ThemeMapper;
+import codedriver.framework.dto.ThemeVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -16,10 +16,10 @@ import javax.annotation.Resource;
  */
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TopicGetApi extends PrivateApiComponentBase {
+public class ThemeGetApi extends PrivateApiComponentBase {
 
     @Resource
-    TopicMapper topicMapper;
+    ThemeMapper themeMapper;
 
     @Override
     public String getName() {
@@ -28,7 +28,7 @@ public class TopicGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "topic/get";
+        return "theme/get";
     }
 
     @Override
@@ -38,11 +38,11 @@ public class TopicGetApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({
-            @Param(explode = TopicVo.class)
+            @Param(explode = ThemeVo.class)
     })
     @Description(desc = "获取主题配置接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return topicMapper.getTopic();
+        return themeMapper.getTheme();
     }
 }

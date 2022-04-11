@@ -1,10 +1,10 @@
-package codedriver.module.tenant.api.topic;
+package codedriver.module.tenant.api.theme;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.TOPIC_MODIFY;
+import codedriver.framework.auth.label.THEME_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.dao.mapper.TopicMapper;
-import codedriver.framework.dto.TopicVo;
+import codedriver.framework.dao.mapper.ThemeMapper;
+import codedriver.framework.dto.ThemeVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -23,14 +23,14 @@ import java.util.Objects;
  * @date 2022/4/8 3:53 下午
  */
 
-@AuthAction(action = TOPIC_MODIFY.class)
+@AuthAction(action = THEME_MODIFY.class)
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class TopicSaveApi extends PrivateApiComponentBase {
+public class ThemeSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    TopicMapper topicMapper;
+    ThemeMapper themeMapper;
 
     @Override
     public String getName() {
@@ -39,7 +39,7 @@ public class TopicSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "topic/save";
+        return "theme/save";
     }
 
     @Override
@@ -48,16 +48,15 @@ public class TopicSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置"),
-            @Param(name = "logoFileId", type = ApiParamType.LONG, desc = "logo 图片文件id")
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置")
     })
     @Description(desc = "用于保存主题配置、还原主题配置")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TopicVo topicVo = paramObj.toJavaObject(TopicVo.class);
-        topicMapper.deleteTopic();
-        if (!Objects.isNull(topicVo.getConfig())) {
-            topicMapper.insertTopic(topicVo);
+        ThemeVo themeVo = paramObj.toJavaObject(ThemeVo.class);
+        themeMapper.deleteTheme();
+        if (!Objects.isNull(themeVo.getConfig())) {
+            themeMapper.insertTheme(themeVo);
         }
         return null;
     }
