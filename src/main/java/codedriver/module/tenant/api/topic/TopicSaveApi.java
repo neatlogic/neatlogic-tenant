@@ -46,6 +46,7 @@ public class TopicSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "id", type = ApiParamType.LONG, desc = "主键id"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置")
     })
     @Description(desc = "用于保存主题配置、还原主题配置")
