@@ -50,14 +50,14 @@ public class IntegrationAuditSearchApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
-            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid"),
+            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
             @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位"),
-            @Param(name = "status", type = ApiParamType.STRING, desc = "状态"),
+            @Param(name = "statusList", type = ApiParamType.JSONARRAY, desc = "状态"),
     })
     @Output({
             @Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = IntegrationAuditVo[].class)
