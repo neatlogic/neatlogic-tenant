@@ -14,6 +14,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
+import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import com.alibaba.fastjson.JSONObject;
@@ -29,6 +30,9 @@ public class ApiManageNeedAuditUpdateApi extends PrivateApiComponentBase {
 
     @Autowired
     private ApiMapper ApiMapper;
+
+    @Autowired
+    private ApiAuditMapper apiAuditMapper;
 
     @Override
     public String getToken() {
@@ -54,7 +58,7 @@ public class ApiManageNeedAuditUpdateApi extends PrivateApiComponentBase {
         String token = jsonObj.getString("token");
         ApiVo apiVo = ApiMapper.getApiByToken(token);
         if (apiVo != null) {
-            ApiMapper.updateApiNeedAuditByToken(token);
+            apiAuditMapper.updateApiNeedAuditByToken(token);
             return 1 - apiVo.getNeedAudit();
         } else {
             ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
