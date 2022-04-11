@@ -48,7 +48,6 @@ public class TopicSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "主键id"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "主题配置"),
             @Param(name = "logoFileId", type = ApiParamType.LONG, desc = "logo 图片文件id")
     })
