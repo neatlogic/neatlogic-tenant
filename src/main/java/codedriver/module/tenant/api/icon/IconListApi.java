@@ -82,10 +82,8 @@ public class IconListApi extends PrivateApiComponentBase {
                 "tsfont-kafka",
                 "tsfont-hadoop",
                 "tsfont-mesos",
-                "tsfont-mysql",
                 "tsfont-linux",
                 "tsfont-lun",
-                "tsfont-postgresql",
                 "tsfont-location-o",
                 "tsfont-nginx",
                 "tsfont-netarea",
@@ -96,6 +94,7 @@ public class IconListApi extends PrivateApiComponentBase {
                 "tsfont-resin",
                 "tsfont-redis",
                 "tsfont-spark",
+                "tsfont-ibm",
                 "tsfont-tencentcloud",
                 "tsfont-virtualmachine",
                 "tsfont-tomcat",
@@ -115,12 +114,18 @@ public class IconListApi extends PrivateApiComponentBase {
                 "tsfont-pulse",
                 "tsfont-techsure",
                 "tsfont-vm",
+                "tsfont-vmware-cluster",
                 "tsfont-windows",
-                "tsfont-ibm",
                 "tsfont-cluster-mode",
                 "tsfont-cluster-software",
                 "tsfont-ip-list",
                 "tsfont-db-cluster",
+                "tsfont-oracle",
+                "tsfont-mssqlserver",
+                "tsfont-sybase",
+                "tsfont-postgresql",
+                "tsfont-informix",
+                "tsfont-mysql",
                 "tsfont-net-area",
                 "tsfont-userinfo",
                 "tsfont-os-cluster",
@@ -146,7 +151,10 @@ public class IconListApi extends PrivateApiComponentBase {
                 "tsfont-hardware",
                 "tsfont-port",
                 "tsfont-f5",
-                "tsfont-console"});
+                "tsfont-console",
+                "tsfont-zookeeper",
+                "tsfont-application"
+        });
         List<String> iconList = new ArrayList<>();
         JSONArray typeList = jsonObj.getJSONArray("type");
         if (!typeList.isEmpty()) {
