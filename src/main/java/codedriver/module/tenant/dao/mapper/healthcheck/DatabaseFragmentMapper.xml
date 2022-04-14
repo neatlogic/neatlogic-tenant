@@ -19,9 +19,9 @@
         SELECT table_name AS `name`,
         `engine` AS `engine`,
         table_rows AS dataRows,
-        ROUND(data_length / 1024 / 1024, 2) AS dataSize,
-        ROUND(index_length / 1024 / 1024, 2) AS indexSize,
-        ROUND(data_free / 1024 / 1024, 2) AS dataFree
+        data_length AS dataSize,
+        index_length AS indexSize,
+        data_free AS dataFree
         FROM information_schema.TABLES
         <include refid="searchDatabaseFragmentCondition"></include>
         <choose>
