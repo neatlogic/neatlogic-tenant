@@ -30,7 +30,7 @@ public class UniversalEnumGetBatchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "根据枚举类名获取枚举值";
+        return "根据多个枚举类名获取枚举值";
     }
 
     @Override
@@ -44,7 +44,7 @@ public class UniversalEnumGetBatchApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "Return", type = ApiParamType.JSONOBJECT)
     })
-    @Description(desc = "根据枚举类名获取枚举值")
+    @Description(desc = "根据多个枚举类名获取枚举值")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray enumClassArray = jsonObj.getJSONArray("enumClassList");
@@ -54,9 +54,9 @@ public class UniversalEnumGetBatchApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         List<String> enumClassList = enumClassArray.toJavaList(String.class);
         for (String enumClass : enumClassList) {
-            try{
+            try {
                 Class.forName(enumClass);
-            }catch (ClassNotFoundException ex){
+            } catch (ClassNotFoundException ex) {
                 throw new EnumNotFoundException(enumClass);
             }
             Class<? extends IEnum> aClass = EnumFactory.getEnumClass(enumClass);
