@@ -198,21 +198,20 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 
     //解析config，抽取属性下拉框值
     private void decodeDataConfig(MatrixAttributeVo attributeVo, List<String> selectValueList) {
-        if (StringUtils.isNotBlank(attributeVo.getConfig())) {
-            String config = attributeVo.getConfig();
-            JSONObject configObj = JSONObject.parseObject(config);
-            JSONArray dataList = configObj.getJSONArray("dataList");
-            if (CollectionUtils.isNotEmpty(dataList)) {
-                for (int i = 0; i < dataList.size(); i++) {
-                    JSONObject dataObj = dataList.getJSONObject(i);
-                    if (MapUtils.isNotEmpty(dataObj)) {
-                        String value = dataObj.getString("value");
-                        if (StringUtils.isNotBlank(value)) {
-                            selectValueList.add(value);
+            JSONObject config = attributeVo.getConfig();
+            if (MapUtils.isNotEmpty(config)) {
+                JSONArray dataList = config.getJSONArray("dataList");
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    for (int i = 0; i < dataList.size(); i++) {
+                        JSONObject dataObj = dataList.getJSONObject(i);
+                        if (MapUtils.isNotEmpty(dataObj)) {
+                            String value = dataObj.getString("value");
+                            if (StringUtils.isNotBlank(value)) {
+                                selectValueList.add(value);
+                            }
                         }
                     }
                 }
-            }
 //            if (AttributeHandler.SELECT.getValue().equals(configObj.getString("handler"))){
 //                if (configObj.containsKey("config")){
 //                    JSONArray configArray = configObj.getJSONArray("config");
