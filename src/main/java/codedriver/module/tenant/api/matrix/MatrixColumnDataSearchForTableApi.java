@@ -66,7 +66,10 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             @Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY),
             @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY),
             @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
-            @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY)
+            @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
+            @Param(name = "filterCiEntityId", desc = "配置项矩阵id过滤条件", type = ApiParamType.LONG),
+            @Param(name = "filterCiId", desc = "配置项矩阵子模型过滤条件", type = ApiParamType.LONG),
+            @Param(name = "groupId", desc = "配置项矩阵团体id过滤条件", type = ApiParamType.LONG)
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
