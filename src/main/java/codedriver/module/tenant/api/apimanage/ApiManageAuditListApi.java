@@ -63,7 +63,7 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
             @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位"),
             @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid列表"),
-            @Param(name = "statusList", type = ApiParamType.STRING, desc = "状态列表"),
+            @Param(name = "statusList", type = ApiParamType.JSONARRAY, desc = "状态列表"),
     })
     @Output({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
