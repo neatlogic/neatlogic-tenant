@@ -196,31 +196,4 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    //解析config，抽取属性下拉框值
-    private void decodeDataConfig(MatrixAttributeVo attributeVo, List<String> selectValueList) {
-            JSONObject config = attributeVo.getConfig();
-            if (MapUtils.isNotEmpty(config)) {
-                JSONArray dataList = config.getJSONArray("dataList");
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    for (int i = 0; i < dataList.size(); i++) {
-                        JSONObject dataObj = dataList.getJSONObject(i);
-                        if (MapUtils.isNotEmpty(dataObj)) {
-                            String value = dataObj.getString("value");
-                            if (StringUtils.isNotBlank(value)) {
-                                selectValueList.add(value);
-                            }
-                        }
-                    }
-                }
-//            if (AttributeHandler.SELECT.getValue().equals(configObj.getString("handler"))){
-//                if (configObj.containsKey("config")){
-//                    JSONArray configArray = configObj.getJSONArray("config");
-//                    for (int i = 0; i < configArray.size(); i++){
-//                        JSONObject param = configArray.getJSONObject(i);
-//                        selectValueList.add(param.getString("value"));
-//                    }
-//                }
-//            }
-        }
-    }
 }
