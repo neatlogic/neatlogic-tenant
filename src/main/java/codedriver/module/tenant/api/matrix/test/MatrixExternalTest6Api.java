@@ -71,7 +71,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
             @Param(name = "column3", type = ApiParamType.STRING, desc = "第三列"),
             @Param(name = "column4", type = ApiParamType.STRING, desc = "第四列"),
             @Param(name = "column5", type = ApiParamType.STRING, desc = "第五列"),
-            @Param(name = "filterList", type = ApiParamType.JSONARRAY, desc = "过滤参数列表"),
+//            @Param(name = "filterList", type = ApiParamType.JSONARRAY, desc = "过滤参数列表"),
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
             @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
@@ -90,7 +90,7 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
         String column3 = paramObj.getString("column3");
         String column4 = paramObj.getString("column4");
         String column5 = paramObj.getString("column5");
-        JSONArray filterList = paramObj.getJSONArray("filterList");
+//        JSONArray filterList = paramObj.getJSONArray("filterList");
         BasePageVo basePageVo = JSONObject.toJavaObject(paramObj, BasePageVo.class);
         for (TbodyVo tbodyVo : staticTbodyList) {
             if (StringUtils.isNotBlank(column1)) {
@@ -118,46 +118,46 @@ public class MatrixExternalTest6Api extends PrivateApiComponentBase {
                     continue;
                 }
             }
-            if (CollectionUtils.isNotEmpty(filterList)) {
-                boolean flag = true;
-                for (int i = 0; i < filterList.size(); i++) {
-                    JSONObject filterObj = filterList.getJSONObject(i);
-                    String uuid = filterObj.getString("uuid");
-                    JSONArray valueArray = filterObj.getJSONArray("valueList");
-                    if (StringUtils.isNotBlank(uuid) && CollectionUtils.isNotEmpty(valueArray)) {
-                        List<String> valueList = valueArray.toJavaList(String.class);
-                        if ("column1".equals(uuid)) {
-                            if (!valueList.contains(tbodyVo.getColumn1())) {
-                                flag = false;
-                                break;
-                            }
-                        } else if ("column2".equals(uuid)) {
-                            if (!valueList.contains(tbodyVo.getColumn2())) {
-                                flag = false;
-                                break;
-                            }
-                        } else if ("column3".equals(uuid)) {
-                            if (!valueList.contains(tbodyVo.getColumn3())) {
-                                flag = false;
-                                break;
-                            }
-                        } else if ("column4".equals(uuid)) {
-                            if (!valueList.contains(tbodyVo.getColumn4())) {
-                                flag = false;
-                                break;
-                            }
-                        } else if ("column5".equals(uuid)) {
-                            if (!valueList.contains(tbodyVo.getColumn5())) {
-                                flag = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!flag) {
-                    continue;
-                }
-            }
+//            if (CollectionUtils.isNotEmpty(filterList)) {
+//                boolean flag = true;
+//                for (int i = 0; i < filterList.size(); i++) {
+//                    JSONObject filterObj = filterList.getJSONObject(i);
+//                    String uuid = filterObj.getString("uuid");
+//                    JSONArray valueArray = filterObj.getJSONArray("valueList");
+//                    if (StringUtils.isNotBlank(uuid) && CollectionUtils.isNotEmpty(valueArray)) {
+//                        List<String> valueList = valueArray.toJavaList(String.class);
+//                        if ("column1".equals(uuid)) {
+//                            if (!valueList.contains(tbodyVo.getColumn1())) {
+//                                flag = false;
+//                                break;
+//                            }
+//                        } else if ("column2".equals(uuid)) {
+//                            if (!valueList.contains(tbodyVo.getColumn2())) {
+//                                flag = false;
+//                                break;
+//                            }
+//                        } else if ("column3".equals(uuid)) {
+//                            if (!valueList.contains(tbodyVo.getColumn3())) {
+//                                flag = false;
+//                                break;
+//                            }
+//                        } else if ("column4".equals(uuid)) {
+//                            if (!valueList.contains(tbodyVo.getColumn4())) {
+//                                flag = false;
+//                                break;
+//                            }
+//                        } else if ("column5".equals(uuid)) {
+//                            if (!valueList.contains(tbodyVo.getColumn5())) {
+//                                flag = false;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                if (!flag) {
+//                    continue;
+//                }
+//            }
             tbodyVoList.add(tbodyVo);
         }
         Boolean needPage = paramObj.getBoolean("needPage");
