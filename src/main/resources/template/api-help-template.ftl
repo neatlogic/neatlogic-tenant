@@ -3,6 +3,9 @@
 <head lang="en">
     <meta charset="UTF-8"/>
     <style>
+        body {
+            font-family: "SimSun";
+        }
         .innerTable {
             width: 100%;
             text-align: center;
