@@ -22,7 +22,7 @@
     </style>
 </head>
 
-<body>
+<body style = "font-family: SimSun;">
 <p>${DATA.description}</p>
 <#--正文-->
 
