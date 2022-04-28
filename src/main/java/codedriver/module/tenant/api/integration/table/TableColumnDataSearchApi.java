@@ -148,6 +148,25 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
                     resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
+                } else {
+                    List<SourceColumnVo> sourceColumnList = new ArrayList<>();
+                    String column = columnList.get(0);
+                    if (StringUtils.isNotBlank(column)) {
+                        SourceColumnVo sourceColumnVo = new SourceColumnVo();
+                        sourceColumnVo.setColumn(column);
+                        List<String> valueList = new ArrayList<>();
+                        valueList.add(value);
+                        sourceColumnVo.setValueList(valueList);
+                        sourceColumnList.add(sourceColumnVo);
+                    }
+                    jsonObj.put("sourceColumnList", sourceColumnList);
+                    integrationVo.getParamObj().putAll(jsonObj);
+                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
+                    if (StringUtils.isNotBlank(resultVo.getError())) {
+                        logger.error(resultVo.getError());
+                        throw new IntegrationSendRequestException(integrationVo.getName());
+                    }
+                    resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
                 }
             }
         } else {
@@ -167,8 +186,8 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 sourceColumnVo.setValue(keyword);
                 sourceColumnList.add(sourceColumnVo);
             }
-            integrationVo.getParamObj().putAll(jsonObj);
             jsonObj.put("sourceColumnList", sourceColumnList);
+            integrationVo.getParamObj().putAll(jsonObj);
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
             if (StringUtils.isNotBlank(resultVo.getError())) {
                 logger.error(resultVo.getError());
