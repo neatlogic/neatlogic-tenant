@@ -18,6 +18,7 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.table.ColumnVo;
 import codedriver.framework.integration.dto.table.SourceColumnVo;
+import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -65,7 +66,6 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-//            @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY),
             @Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
             @Param(name = "sourceColumnList ", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
     })
@@ -95,6 +95,7 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
         IntegrationCrossoverService integrationCrossoverService = CrossoverServiceFactory.getApi(IntegrationCrossoverService.class);
         List<ColumnVo> columnVoList = integrationCrossoverService.getColumnList(integrationVo);
         if (CollectionUtils.isNotEmpty(columnVoList)) {
+
             String uuidColumn = null;
             for (ColumnVo columnVo : columnVoList) {
                 Integer primaryKey = columnVo.getPrimaryKey();
@@ -112,7 +113,6 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
             if (!columnList.contains(uuidColumn)) {
                 columnList.add(uuidColumn);
             }
-            integrationVo.getParamObj().putAll(jsonObj);
             JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
             if (CollectionUtils.isNotEmpty(defaultValue)) {
                 List<SourceColumnVo> sourceColumnList = new ArrayList<>();
@@ -140,6 +140,27 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                 }
                 returnObj.put("tbodyList", tbodyArray);
             } else {
+                List<SourceColumnVo> sourceColumnList = new ArrayList<>();
+                JSONArray sourceColumnArray = jsonObj.getJSONArray("sourceColumnList");
+                if (CollectionUtils.isNotEmpty(sourceColumnArray)) {
+                    sourceColumnList = sourceColumnArray.toJavaList(SourceColumnVo.class);
+                    Iterator<SourceColumnVo> iterator = sourceColumnList.iterator();
+                    while (iterator.hasNext()) {
+                        SourceColumnVo sourceColumnVo = iterator.next();
+                        if (StringUtils.isBlank(sourceColumnVo.getColumn())) {
+                            iterator.remove();
+                        } else if (CollectionUtils.isEmpty(sourceColumnVo.getValueList())) {
+                            iterator.remove();
+                        }
+                    }
+                }
+                JSONObject paramObj = new JSONObject();
+                paramObj.put("currentPage", jsonObj.getInteger("currentPage"));
+                paramObj.put("pageSize", jsonObj.getInteger("pageSize"));
+                paramObj.put("needPage", jsonObj.getBoolean("needPage"));
+                paramObj.put("sourceColumnList", sourceColumnList);
+                integrationVo.setParamObj(paramObj);
+//                integrationVo.getParamObj().putAll(jsonObj);
                 IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
                 if (StringUtils.isNotBlank(resultVo.getError())) {
                     logger.error(resultVo.getError());

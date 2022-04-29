@@ -12,6 +12,7 @@ import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
+import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
@@ -23,13 +24,11 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -64,7 +63,6 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY),
-            @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY),
             @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
             @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
             @Param(name = "filterCiEntityId", desc = "配置项矩阵id过滤条件", type = ApiParamType.LONG),
@@ -99,6 +97,18 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(type);
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(type);
+        }
+        List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
+        if (CollectionUtils.isNotEmpty(sourceColumnList)) {
+            Iterator<MatrixColumnVo> iterator = sourceColumnList.iterator();
+            while (iterator.hasNext()) {
+                MatrixColumnVo matrixColumnVo = iterator.next();
+                if (StringUtils.isBlank(matrixColumnVo.getColumn())) {
+                    iterator.remove();
+                } else if (CollectionUtils.isEmpty(matrixColumnVo.getValueList())) {
+                    iterator.remove();
+                }
+            }
         }
         JSONObject returnObj = matrixDataSourceHandler.searchTableData(dataVo);
         List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
