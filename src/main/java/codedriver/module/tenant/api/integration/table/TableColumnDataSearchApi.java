@@ -67,10 +67,10 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
             @Param(name = "integrationUuid", desc = "集成Uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
-//            @Param(name = "sourceColumnList", desc = "源属性集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
-            @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY)
+//            @Param(name = "filterList", desc = "根据列头uuid,搜索具体的列值，支持多个列分别搜索，注意仅支持静态列表  [{uuid:***,valueList:[]},{uuid:***,valueList:[]}]", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
@@ -148,9 +148,33 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
                     resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
+                } else {
+                    List<SourceColumnVo> sourceColumnList = new ArrayList<>();
+                    String column = columnList.get(0);
+                    if (StringUtils.isNotBlank(column)) {
+                        SourceColumnVo sourceColumnVo = new SourceColumnVo();
+                        sourceColumnVo.setColumn(column);
+                        List<String> valueList = new ArrayList<>();
+                        valueList.add(value);
+                        sourceColumnVo.setValueList(valueList);
+                        sourceColumnList.add(sourceColumnVo);
+                    }
+                    jsonObj.put("sourceColumnList", sourceColumnList);
+                    integrationVo.getParamObj().putAll(jsonObj);
+                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
+                    if (StringUtils.isNotBlank(resultVo.getError())) {
+                        logger.error(resultVo.getError());
+                        throw new IntegrationSendRequestException(integrationVo.getName());
+                    }
+                    resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
                 }
             }
         } else {
+            List<SourceColumnVo> sourceColumnList = new ArrayList<>();
+            JSONArray sourceColumnArray = jsonObj.getJSONArray("sourceColumnList");
+            if (CollectionUtils.isNotEmpty(sourceColumnArray)) {
+                sourceColumnList = sourceColumnArray.toJavaList(SourceColumnVo.class);
+            }
             String keywordColumn = jsonObj.getString("keywordColumn");
             String keyword = jsonObj.getString("keyword");
             if (StringUtils.isNotBlank(keywordColumn) && StringUtils.isNotBlank(keyword)) {
@@ -160,10 +184,9 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 SourceColumnVo sourceColumnVo = new SourceColumnVo();
                 sourceColumnVo.setColumn(keywordColumn);
                 sourceColumnVo.setValue(keyword);
-                List<SourceColumnVo> sourceColumnList = new ArrayList<>();
                 sourceColumnList.add(sourceColumnVo);
-                jsonObj.put("sourceColumnList", sourceColumnList);
             }
+            jsonObj.put("sourceColumnList", sourceColumnList);
             integrationVo.getParamObj().putAll(jsonObj);
             IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
             if (StringUtils.isNotBlank(resultVo.getError())) {
