@@ -52,11 +52,11 @@ public class GlobalLockPublicApi extends PublicApiComponentBase {
         Long lockId = jsonObj.getLong("lockId");
         IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
         switch (action){
-            case "lock": globalLockHandler.getLock(jsonObj);break;
+            case "lock": return globalLockHandler.getLock(jsonObj);
             case "unlock":
             case "cancel":
-                globalLockHandler.cancelLock(lockId,jsonObj);break;
-            case "retry": globalLockHandler.retryNotify(lockId,jsonObj);break;
+                return globalLockHandler.cancelLock(lockId,jsonObj);
+            case "retry": globalLockHandler.retryLock(lockId,jsonObj);break;
         }
         return null;
     }
