@@ -64,7 +64,8 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
             @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
-            @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY)
+            @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
+            @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")

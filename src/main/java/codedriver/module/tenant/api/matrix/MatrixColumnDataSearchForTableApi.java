@@ -66,7 +66,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
             @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
             @Param(name = "filterCiEntityId", desc = "配置项矩阵id过滤条件", type = ApiParamType.LONG),
-            @Param(name = "filterCiId", desc = "配置项矩阵子模型过滤条件", type = ApiParamType.LONG)
+            @Param(name = "filterCiId", desc = "配置项矩阵子模型过滤条件", type = ApiParamType.LONG),
+            @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
