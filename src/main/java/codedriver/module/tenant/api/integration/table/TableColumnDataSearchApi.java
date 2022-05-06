@@ -193,6 +193,12 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 sourceColumnVo.setValue(keyword);
                 sourceColumnList.add(sourceColumnVo);
             }
+            JSONArray filterList = jsonObj.getJSONArray("filterList");
+            if (CollectionUtils.isNotEmpty(filterList)) {
+                if (!integrationCrossoverService.mergeFilterListAndSourceColumnList(filterList, sourceColumnList)) {
+                    return returnObj;
+                }
+            }
             JSONObject paramObj = new JSONObject();
             paramObj.put("currentPage", jsonObj.getInteger("currentPage"));
             paramObj.put("pageSize", jsonObj.getInteger("pageSize"));
