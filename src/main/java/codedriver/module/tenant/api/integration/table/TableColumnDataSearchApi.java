@@ -69,7 +69,8 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "columnList", desc = "属性uuid列表", type = ApiParamType.JSONARRAY, isRequired = true),
             @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
-            @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
+            @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
+            @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合")
@@ -192,6 +193,12 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 sourceColumnVo.setColumn(keywordColumn);
                 sourceColumnVo.setValue(keyword);
                 sourceColumnList.add(sourceColumnVo);
+            }
+            JSONArray filterList = jsonObj.getJSONArray("filterList");
+            if (CollectionUtils.isNotEmpty(filterList)) {
+                if (!integrationCrossoverService.mergeFilterListAndSourceColumnList(filterList, sourceColumnList)) {
+                    return returnObj;
+                }
             }
             JSONObject paramObj = new JSONObject();
             paramObj.put("currentPage", jsonObj.getInteger("currentPage"));

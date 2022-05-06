@@ -18,7 +18,6 @@ import codedriver.framework.integration.dto.IntegrationResultVo;
 import codedriver.framework.integration.dto.IntegrationVo;
 import codedriver.framework.integration.dto.table.ColumnVo;
 import codedriver.framework.integration.dto.table.SourceColumnVo;
-import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -68,6 +67,7 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
             @Param(name = "sourceColumnList ", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
     @Description(desc = "集成属性数据查询-table接口")
     @Output({
@@ -154,6 +154,12 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                         }
                     }
                 }
+                JSONArray filterList = jsonObj.getJSONArray("filterList");
+                if (CollectionUtils.isNotEmpty(filterList)) {
+                    if (!integrationCrossoverService.mergeFilterListAndSourceColumnList(filterList, sourceColumnList)) {
+                        return returnObj;
+                    }
+                }
                 JSONObject paramObj = new JSONObject();
                 paramObj.put("currentPage", jsonObj.getInteger("currentPage"));
                 paramObj.put("pageSize", jsonObj.getInteger("pageSize"));
@@ -199,4 +205,5 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
         }
         return searchColumnDetailList;
     }
+
 }
