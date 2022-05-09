@@ -140,6 +140,10 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                 }
                 returnObj.put("tbodyList", tbodyArray);
             } else {
+                JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
+                if (CollectionUtils.isNotEmpty(searchColumnArray)) {
+                    returnObj.put("searchColumnDetailList", getSearchColumnDetailList(integrationVo.getName(), columnVoList, searchColumnArray));
+                }
                 List<SourceColumnVo> sourceColumnList = new ArrayList<>();
                 JSONArray sourceColumnArray = jsonObj.getJSONArray("sourceColumnList");
                 if (CollectionUtils.isNotEmpty(sourceColumnArray)) {
@@ -180,10 +184,6 @@ public class TableDataSearchApi extends PrivateApiComponentBase {
                 returnObj.put("rowNum", transformedResult.get("rowNum"));
                 List<Map<String, Object>> tbodyList = integrationCrossoverService.getTbodyList(resultVo, columnList);
                 returnObj.put("tbodyList", tbodyList);
-                JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
-                if (CollectionUtils.isNotEmpty(searchColumnArray)) {
-                    returnObj.put("searchColumnDetailList", getSearchColumnDetailList(integrationVo.getName(), columnVoList, searchColumnArray));
-                }
             }
         }
         return returnObj;
