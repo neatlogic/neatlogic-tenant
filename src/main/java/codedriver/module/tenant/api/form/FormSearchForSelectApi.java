@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FormSearchForSelectApi extends PrivateApiComponentBase {
 

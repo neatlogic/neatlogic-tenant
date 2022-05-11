@@ -15,7 +15,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,20 +50,28 @@ public class FormSearchApi extends PrivateApiComponentBase {
             @Param(name = "isActive", type = ApiParamType.ENUM, desc = "是否激活", rule = "0,1"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值")
     })
     @Output({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = true, desc = "页大小"),
             @Param(name = "pageCount", type = ApiParamType.INTEGER, isRequired = true, desc = "总页数"),
             @Param(name = "rowNum", type = ApiParamType.INTEGER, isRequired = true, desc = "总行数"),
-            @Param(name = "formList", explode = FormVo[].class, desc = "表单列表")
+            @Param(name = "tbodyList", explode = FormVo[].class, desc = "表单列表")
     })
     @Description(desc = "表单列表搜索接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FormVo formVo = JSON.toJavaObject(jsonObj, FormVo.class);
         JSONObject resultObj = new JSONObject();
+        FormVo formVo = jsonObj.toJavaObject(FormVo.class);
+        JSONArray defaultValue = formVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<String> uuidList = defaultValue.toJavaList(String.class);
+            List<FormVo> formList = formMapper.getFormListByUuidList(uuidList);
+            resultObj.put("tbodyList", formList);
+            return resultObj;
+        }
         if (formVo.getNeedPage()) {
             int rowNum = formMapper.searchFormCount(formVo);
             int pageCount = PageUtil.getPageCount(rowNum, formVo.getPageSize());
@@ -76,7 +86,7 @@ public class FormSearchApi extends PrivateApiComponentBase {
             int count = DependencyManager.getDependencyCount(FrameworkFromType.FORM, form.getUuid());
 			form.setReferenceCount(count);
 		}
-        resultObj.put("formList", formList);
+        resultObj.put("tbodyList", formList);
         return resultObj;
     }
 
