@@ -96,6 +96,12 @@ public class ImportReportDataSourceApi extends PrivateApiComponentBase {
         if (id == null) {
             newDataSourceVo.setFieldList(dataSourceVo.getFieldList());
             dataSourceMapper.insertDataSource(newDataSourceVo);
+            if (CollectionUtils.isNotEmpty(newDataSourceVo.getFieldList())) {
+                for (DataSourceFieldVo field : newDataSourceVo.getFieldList()) {
+                    field.setDataSourceId(newDataSourceVo.getId());
+                    dataSourceMapper.insertDataSourceField(field);
+                }
+            }
         } else {
             DataSourceVo oldDatasourceVo = dataSourceMapper.getDataSourceById(id);
             //比较新老数据，找出需要新增、修改和删除的属性，这样做的目的是为了保留条件配置
