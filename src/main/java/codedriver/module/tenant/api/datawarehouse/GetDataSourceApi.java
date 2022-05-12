@@ -9,7 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -21,10 +21,10 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = DATA_WAREHOUSE_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class GetReportDataSourceApi extends PrivateApiComponentBase {
+public class GetDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
+    private DataWarehouseDataSourceMapper dataSourceMapper;
 
     @Override
     public String getToken() {
@@ -42,12 +42,12 @@ public class GetReportDataSourceApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id", isRequired = true)})
-    @Output({@Param(explode = ReportDataSourceVo.class)})
+    @Output({@Param(explode = DataSourceVo.class)})
     @Description(desc = "获取数据仓库数据源接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
-        return reportDataSourceMapper.getReportDataSourceById(id);
+        return dataSourceMapper.getDataSourceById(id);
     }
 
 }

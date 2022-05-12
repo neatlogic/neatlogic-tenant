@@ -11,9 +11,8 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceSchemaMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceConditionVo;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceFieldVo;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.exceptions.CreateDataSourceSchemaException;
 import codedriver.framework.datawarehouse.exceptions.DataSourceFileIsNotFoundException;
 import codedriver.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
@@ -36,6 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
@@ -44,11 +46,11 @@ import java.nio.charset.StandardCharsets;
 public class ImportReportDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
+    private DataWarehouseDataSourceMapper dataSourceMapper;
 
 
     @Resource
-    private DataWarehouseDataSourceSchemaMapper reportDataSourceSchemaMapper;
+    private DataWarehouseDataSourceSchemaMapper dataSourceSchemaMapper;
 
     @Resource
     private FileMapper fileMapper;
@@ -75,52 +77,73 @@ public class ImportReportDataSourceApi extends PrivateApiComponentBase {
     @Description(desc = "导入数据仓库数据源接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ReportDataSourceVo reportDataSourceVo = JSONObject.toJavaObject(jsonObj, ReportDataSourceVo.class);
-        if (reportDataSourceMapper.checkDataSourceNameIsExists(reportDataSourceVo) > 0) {
-            throw new DataSourceNameIsExistsException(reportDataSourceVo.getName());
+        DataSourceVo newDataSourceVo = JSONObject.toJavaObject(jsonObj, DataSourceVo.class);
+        if (dataSourceMapper.checkDataSourceNameIsExists(newDataSourceVo) > 0) {
+            throw new DataSourceNameIsExistsException(newDataSourceVo.getName());
         }
-        FileVo fileVo = fileMapper.getFileById(reportDataSourceVo.getFileId());
+        FileVo fileVo = fileMapper.getFileById(newDataSourceVo.getFileId());
         if (fileVo == null) {
             throw new DataSourceFileIsNotFoundException();
         }
         String xml = IOUtils.toString(FileUtil.getData(fileVo.getPath()), StandardCharsets.UTF_8);
-        ReportDataSourceVo dataSourceVo = ReportXmlUtil.generateDataSourceFromXml(xml);
-        reportDataSourceVo.setXml(xml);
-        reportDataSourceVo.setIsActive(0);
-        reportDataSourceVo.setDataCount(0);
-        reportDataSourceVo.setFieldList(dataSourceVo.getFieldList());
-        reportDataSourceVo.setConditionList(dataSourceVo.getConditionList());
+        DataSourceVo dataSourceVo = ReportXmlUtil.generateDataSourceFromXml(xml);
+        newDataSourceVo.setXml(xml);
+        newDataSourceVo.setIsActive(0);
+        newDataSourceVo.setDataCount(0);
+
+        //reportDataSourceVo.setConditionList(dataSourceVo.getConditionList());
         Long id = jsonObj.getLong("id");
         if (id == null) {
-            reportDataSourceMapper.insertReportDataSource(reportDataSourceVo);
+            dataSourceMapper.insertDataSource(newDataSourceVo);
         } else {
-            if (reportDataSourceMapper.getReportDataSourceById(id) == null) {
+            DataSourceVo oldDatasourceVo = dataSourceMapper.getDataSourceById(id);
+            //比较新老数据，找出需要新增、修改和删除的属性，这样做的目的是为了保留条件配置
+            if (oldDatasourceVo == null) {
                 throw new DataSourceIsNotFoundException(id);
             }
+            List<DataSourceFieldVo> deleteList = oldDatasourceVo.getFieldList().stream().filter(d -> !dataSourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            List<DataSourceFieldVo> updateList = dataSourceVo.getFieldList().stream().filter(d -> oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            List<DataSourceFieldVo> insertList = dataSourceVo.getFieldList().stream().filter(d -> !oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            //用回旧的fieldId
+            if (CollectionUtils.isNotEmpty(updateList)) {
+                for (DataSourceFieldVo field : updateList) {
+                    Optional<DataSourceFieldVo> op = oldDatasourceVo.getFieldList().stream().filter(d -> d.equals(field)).findFirst();
+                    op.ifPresent(dataSourceFieldVo -> field.setId(dataSourceFieldVo.getId()));
+                }
+            }
+            newDataSourceVo.setFieldList(null);//清空旧数据
+            newDataSourceVo.addField(insertList);
+            newDataSourceVo.addField(updateList);
             //FIXME 检查数据源是否被使用
-            reportDataSourceMapper.updateReportDataSource(reportDataSourceVo);
-            reportDataSourceMapper.deleteReportDataSourceFieldByDataSourceId(reportDataSourceVo.getId());
-            reportDataSourceMapper.deleteReportDataSourceConditionByDataSourceId(reportDataSourceVo.getId());
-        }
-        if (CollectionUtils.isNotEmpty(reportDataSourceVo.getFieldList())) {
-            for (ReportDataSourceFieldVo field : reportDataSourceVo.getFieldList()) {
-                field.setDataSourceId(reportDataSourceVo.getId());
-                reportDataSourceMapper.insertReportDataSourceField(field);
+            dataSourceMapper.updateDataSource(newDataSourceVo);
+
+            if (CollectionUtils.isNotEmpty(deleteList)) {
+                for (DataSourceFieldVo field : deleteList) {
+                    dataSourceMapper.deleteDataSourceFieldById(field.getId());
+                }
             }
-        }
-        if (CollectionUtils.isNotEmpty(reportDataSourceVo.getConditionList())) {
-            for (ReportDataSourceConditionVo condition : reportDataSourceVo.getConditionList()) {
-                condition.setDataSourceId(reportDataSourceVo.getId());
-                reportDataSourceMapper.insertReportDataSourceCondition(condition);
+
+            if (CollectionUtils.isNotEmpty(updateList)) {
+                for (DataSourceFieldVo field : updateList) {
+                    dataSourceMapper.updateDataSourceField(field);
+                }
             }
+
+            if (CollectionUtils.isNotEmpty(insertList)) {
+                for (DataSourceFieldVo field : insertList) {
+                    field.setDataSourceId(newDataSourceVo.getId());
+                    dataSourceMapper.insertDataSourceField(field);
+                }
+            }
+
         }
         //由于以下操作是DDL操作，所以需要使用EscapeTransactionJob避开当前事务，否则在进行DDL操作之前事务就会提交，如果DDL出错，则上面的事务就无法回滚了
         EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
-            reportDataSourceSchemaMapper.deleteDataSourceTable(reportDataSourceVo);
-            reportDataSourceSchemaMapper.createDataSourceTable(reportDataSourceVo);
+            dataSourceSchemaMapper.deleteDataSourceTable(newDataSourceVo);
+            dataSourceSchemaMapper.createDataSourceTable(newDataSourceVo);
         }).execute();
         if (!s.isSucceed()) {
-            throw new CreateDataSourceSchemaException(reportDataSourceVo);
+            throw new CreateDataSourceSchemaException(newDataSourceVo);
         }
 
         return null;

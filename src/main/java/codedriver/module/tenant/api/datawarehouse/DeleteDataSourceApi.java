@@ -9,7 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
 import codedriver.framework.datawarehouse.service.ReportDataSourceService;
 import codedriver.framework.restful.annotation.Description;
@@ -28,7 +28,7 @@ import javax.annotation.Resource;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 @Transactional
-public class DeleteReportDataSourceApi extends PrivateApiComponentBase {
+public class DeleteDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
     private DataWarehouseDataSourceMapper reportDataSourceMapper;
@@ -58,7 +58,7 @@ public class DeleteReportDataSourceApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
-        ReportDataSourceVo reportDataSourceVo = reportDataSourceMapper.getReportDataSourceById(id);
+        DataSourceVo reportDataSourceVo = reportDataSourceMapper.getDataSourceById(id);
         if (reportDataSourceVo == null) {
             throw new DataSourceIsNotFoundException(id);
         }

@@ -11,9 +11,7 @@ import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceConditionVo;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
-import codedriver.framework.datawarehouse.exceptions.DataSourceConditionRequiredValueIsEmptyException;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -22,7 +20,6 @@ import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.module.framework.scheduler.datawarehouse.ReportDataSourceJob;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +30,7 @@ import javax.annotation.Resource;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class SaveReportDataSourceApi extends PrivateApiComponentBase {
+public class SaveDataSourceApi extends PrivateApiComponentBase {
     @Resource
     private SchedulerManager schedulerManager;
 
@@ -56,20 +53,20 @@ public class SaveReportDataSourceApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id，不存在代表添加"), @Param(name = "label", type = ApiParamType.STRING, desc = "名称", maxLength = 50, isRequired = true, xss = true), @Param(name = "description", type = ApiParamType.STRING, desc = "说明", xss = true, maxLength = 500), @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"), @Param(name = "cronExpression", type = ApiParamType.STRING, desc = "定时策略")})
-    @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = ReportDataSourceVo[].class)})
+    @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = DataSourceVo[].class)})
     @Description(desc = "保存数据仓库数据源接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ReportDataSourceVo reportDataSourceVo = JSONObject.toJavaObject(jsonObj, ReportDataSourceVo.class);
-        reportDataSourceMapper.updateReportDataSource(reportDataSourceVo);
-        if (CollectionUtils.isNotEmpty(reportDataSourceVo.getConditionList())) {
-            for (ReportDataSourceConditionVo condition : reportDataSourceVo.getConditionList()) {
+        DataSourceVo reportDataSourceVo = JSONObject.toJavaObject(jsonObj, DataSourceVo.class);
+        reportDataSourceMapper.updateDataSource(reportDataSourceVo);
+       /* if (CollectionUtils.isNotEmpty(reportDataSourceVo.getConditionList())) {
+            for (DataSourceConditionVo condition : reportDataSourceVo.getConditionList()) {
                 if (condition.getIsRequired() == 1 && StringUtils.isBlank(condition.getValue())) {
                     throw new DataSourceConditionRequiredValueIsEmptyException(condition);
                 }
                 reportDataSourceMapper.updateReportDataSourceConditionValue(condition);
             }
-        }
+        }*/
 
         String tenantUuid = TenantContext.get().getTenantUuid();
         IJob jobHandler = SchedulerManager.getHandler(ReportDataSourceJob.class.getName());

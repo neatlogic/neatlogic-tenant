@@ -9,15 +9,16 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
-import codedriver.framework.datawarehouse.service.ReportDataSourceService;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,26 +26,21 @@ import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
-@OperationType(type = OperationTypeEnum.OPERATE)
+@OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class ExecuteReportDataSourceApi extends PrivateApiComponentBase {
+public class SaveDataSourceFieldsApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
-
-
-    @Resource
-    private ReportDataSourceService reportDataSourceService;
-
+    private DataWarehouseDataSourceMapper dataSourceMapper;
 
     @Override
     public String getToken() {
-        return "datawarehouse/datasource/execute";
+        return "datawarehouse/datasource/fields/save";
     }
 
     @Override
     public String getName() {
-        return "执行数据仓库数据源数据同步";
+        return "保存数据仓库数据源字段设置";
     }
 
     @Override
@@ -52,14 +48,19 @@ public class ExecuteReportDataSourceApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id", isRequired = true)})
-    @Description(desc = "执行数据仓库数据源数据同步接口")
+    @Input({@Param(name = "fieldList", type = ApiParamType.JSONARRAY, desc = "字段列表", isRequired = true)})
+    @Description(desc = "保存数据仓库数据源字段设置接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        Long id = jsonObj.getLong("id");
-        ReportDataSourceVo dataSourceVo = reportDataSourceMapper.getReportDataSourceById(id);
-        reportDataSourceService.executeReportDataSource(dataSourceVo);
+        JSONArray fieldList = jsonObj.getJSONArray("fieldList");
+        if (CollectionUtils.isNotEmpty(fieldList)) {
+            for (int i = 0; i < fieldList.size(); i++) {
+                DataSourceFieldVo dataSourceFieldVo = JSONObject.toJavaObject(fieldList.getJSONObject(i), DataSourceFieldVo.class);
+                dataSourceMapper.updateDataSourceFieldCondition(dataSourceFieldVo);
+            }
+        }
         return null;
+
     }
 
 }

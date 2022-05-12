@@ -9,7 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceAuditMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceAuditVo;
+import codedriver.framework.datawarehouse.dto.DataSourceAuditVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -27,7 +27,7 @@ import java.util.List;
 @Service
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class SearchReportDataSourceAuditApi extends PrivateApiComponentBase {
+public class SearchDataSourceAuditApi extends PrivateApiComponentBase {
 
     @Resource
     private DataWarehouseDataSourceAuditMapper reportDataSourceAuditMapper;
@@ -51,8 +51,8 @@ public class SearchReportDataSourceAuditApi extends PrivateApiComponentBase {
     @Description(desc = "搜索数据源同步审计信息接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ReportDataSourceAuditVo reportDataSourceAuditVo = JSONObject.toJavaObject(jsonObj, ReportDataSourceAuditVo.class);
-        List<ReportDataSourceAuditVo> auditList = reportDataSourceAuditMapper.searchReportDataSourceAudit(reportDataSourceAuditVo);
+        DataSourceAuditVo reportDataSourceAuditVo = JSONObject.toJavaObject(jsonObj, DataSourceAuditVo.class);
+        List<DataSourceAuditVo> auditList = reportDataSourceAuditMapper.searchReportDataSourceAudit(reportDataSourceAuditVo);
         if (CollectionUtils.isNotEmpty(auditList)) {
             int rowNum = reportDataSourceAuditMapper.searchReportDataSourceAuditCount(reportDataSourceAuditVo);
             reportDataSourceAuditVo.setRowNum(rowNum);

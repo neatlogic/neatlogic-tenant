@@ -11,9 +11,9 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceDataMapper;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceDataVo;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceFieldVo;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
+import codedriver.framework.datawarehouse.dto.DataSourceDataVo;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -29,7 +29,7 @@ import java.util.List;
 @Service
 @AuthAction(action = DATA_WAREHOUSE_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class SearchReportDataSourceDataApi extends PrivateApiComponentBase {
+public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
     @Resource
     private DataWarehouseDataSourceMapper reportDataSourceMapper;
@@ -53,13 +53,16 @@ public class SearchReportDataSourceDataApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "dataSourceId", type = ApiParamType.LONG, desc = "数据源id", isRequired = true),
+            @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"),
             @Param(name = "isExpired", type = ApiParamType.INTEGER, desc = "是否过期，0未过期，1已过期")})
     @Output({@Param(explode = BasePageVo.class)})
     @Description(desc = "查询数据源数据接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ReportDataSourceDataVo reportDataSourceDataVo = JSONObject.toJavaObject(jsonObj, ReportDataSourceDataVo.class);
-        ReportDataSourceVo reportDataSourceVo = reportDataSourceMapper.getReportDataSourceById(reportDataSourceDataVo.getDataSourceId());
+        DataSourceDataVo reportDataSourceDataVo = JSONObject.toJavaObject(jsonObj, DataSourceDataVo.class);
+        //去掉没有值的条件
+        //reportDataSourceDataVo.getConditionList().removeIf(d -> d.getValue() == null || StringUtils.isBlank(d.getValue().toString()));
+        DataSourceVo reportDataSourceVo = reportDataSourceMapper.getDataSourceById(reportDataSourceDataVo.getDataSourceId());
         JSONObject returnObj = new JSONObject();
         if (CollectionUtils.isNotEmpty(reportDataSourceVo.getFieldList())) {
             reportDataSourceDataVo.setFieldList(reportDataSourceVo.getFieldList());
@@ -73,7 +76,7 @@ public class SearchReportDataSourceDataApi extends PrivateApiComponentBase {
             idHeadObj.put("title", "#");
             headerList.add(idHeadObj);*/
 
-            for (ReportDataSourceFieldVo fieldVo : reportDataSourceVo.getFieldList()) {
+            for (DataSourceFieldVo fieldVo : reportDataSourceVo.getFieldList()) {
                 JSONObject headObj = new JSONObject();
                 headObj.put("key", "field_" + fieldVo.getId());
                 headObj.put("title", fieldVo.getLabel());

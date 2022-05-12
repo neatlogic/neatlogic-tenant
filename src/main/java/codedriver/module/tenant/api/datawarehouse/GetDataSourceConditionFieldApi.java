@@ -9,34 +9,33 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_BASE;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
-import codedriver.framework.datawarehouse.dto.ReportDataSourceVo;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
+import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class GetReportDataSourceStatusApi extends PrivateApiComponentBase {
+public class GetDataSourceConditionFieldApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
+    private DataWarehouseDataSourceMapper dataSourceMapper;
 
     @Override
     public String getToken() {
-        return "datawarehouse/datasource/status/get";
+        return "datawarehouse/datasource/condition/get";
     }
 
     @Override
     public String getName() {
-        return "获取数据仓库数据源状态";
+        return "获取数据仓库数据源条件字段";
     }
 
     @Override
@@ -44,19 +43,14 @@ public class GetReportDataSourceStatusApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "idList", type = ApiParamType.JSONARRAY, desc = "idl列表", isRequired = true)})
-    @Output({@Param(explode = ReportDataSourceVo[].class)})
-    @Description(desc = "获取数据仓库数据源状态接口")
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "数据源id", isRequired = true)})
+    @Output({@Param(explode = DataSourceFieldVo[].class)})
+    @Description(desc = "获取数据仓库数据源条件字段接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<Long> idList = new ArrayList<>();
-        for (int i = 0; i < jsonObj.getJSONArray("idList").size(); i++) {
-            idList.add(jsonObj.getJSONArray("idList").getLong(i));
-        }
-        if (CollectionUtils.isNotEmpty(idList)) {
-            return reportDataSourceMapper.getReportDataSourceByIdList(idList);
-        }
-        return null;
+        Long id = jsonObj.getLong("id");
+        DataSourceVo dataSourceVo = dataSourceMapper.getDataSourceById(id);
+        return dataSourceVo.getFieldList().stream().filter(d -> d.getIsCondition() == 1).collect(Collectors.toList());
     }
 
 }
