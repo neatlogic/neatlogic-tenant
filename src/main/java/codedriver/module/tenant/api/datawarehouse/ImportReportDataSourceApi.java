@@ -94,6 +94,7 @@ public class ImportReportDataSourceApi extends PrivateApiComponentBase {
         //reportDataSourceVo.setConditionList(dataSourceVo.getConditionList());
         Long id = jsonObj.getLong("id");
         if (id == null) {
+            newDataSourceVo.setFieldList(dataSourceVo.getFieldList());
             dataSourceMapper.insertDataSource(newDataSourceVo);
         } else {
             DataSourceVo oldDatasourceVo = dataSourceMapper.getDataSourceById(id);
