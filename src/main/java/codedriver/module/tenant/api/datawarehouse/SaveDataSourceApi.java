@@ -52,7 +52,11 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id，不存在代表添加"), @Param(name = "label", type = ApiParamType.STRING, desc = "名称", maxLength = 50, isRequired = true, xss = true), @Param(name = "description", type = ApiParamType.STRING, desc = "说明", xss = true, maxLength = 500), @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"), @Param(name = "cronExpression", type = ApiParamType.STRING, desc = "定时策略")})
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id，不存在代表添加"),
+            @Param(name = "label", type = ApiParamType.STRING, desc = "名称", maxLength = 50, isRequired = true, xss = true),
+            @Param(name = "description", type = ApiParamType.STRING, desc = "说明", xss = true, maxLength = 500),
+            @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"),
+            @Param(name = "cronExpression", type = ApiParamType.STRING, desc = "定时策略")})
     @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = DataSourceVo[].class)})
     @Description(desc = "保存数据仓库数据源接口")
     @Override

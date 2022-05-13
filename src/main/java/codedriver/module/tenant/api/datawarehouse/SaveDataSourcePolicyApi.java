@@ -56,7 +56,7 @@ public class SaveDataSourcePolicyApi extends PrivateApiComponentBase {
             @Param(name = "label", type = ApiParamType.STRING, desc = "显示名", isRequired = true),
             @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "是否激活", isRequired = true),
             @Param(name = "expireCount", type = ApiParamType.INTEGER, desc = "有效时间数值"),
-            @Param(name = "expireUnit", type = ApiParamType.INTEGER, desc = "有效时间单位"),
+            @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day,month,year", desc = "有效时间单位"),
             @Param(name = "mode", type = ApiParamType.ENUM, desc = "同步模式", rule = "replace,append", isRequired = true),
             @Param(name = "cronExpression", type = ApiParamType.STRING, desc = "定时策略"),
     })
