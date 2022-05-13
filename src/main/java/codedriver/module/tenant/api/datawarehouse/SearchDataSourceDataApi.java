@@ -54,6 +54,8 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "dataSourceId", type = ApiParamType.LONG, desc = "数据源id", isRequired = true),
             @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"),
+            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序"),
+            @Param(name = "limit", type = ApiParamType.INTEGER, desc = "返回数据限制"),
             @Param(name = "isExpired", type = ApiParamType.INTEGER, desc = "是否过期，0未过期，1已过期")})
     @Output({@Param(explode = BasePageVo.class)})
     @Description(desc = "查询数据源数据接口")
