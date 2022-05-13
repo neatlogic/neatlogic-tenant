@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 @Transactional
-public class ImportReportDataSourceApi extends PrivateApiComponentBase {
+public class ImportDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
     private DataWarehouseDataSourceMapper dataSourceMapper;

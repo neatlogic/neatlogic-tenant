@@ -10,7 +10,7 @@ import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
-import codedriver.framework.datawarehouse.service.ReportDataSourceService;
+import codedriver.framework.datawarehouse.service.DataSourceService;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -34,7 +34,7 @@ public class ExecuteDataSourceApi extends PrivateApiComponentBase {
 
 
     @Resource
-    private ReportDataSourceService reportDataSourceService;
+    private DataSourceService reportDataSourceService;
 
 
     @Override

@@ -11,7 +11,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
-import codedriver.framework.datawarehouse.service.ReportDataSourceService;
+import codedriver.framework.datawarehouse.service.DataSourceService;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -35,7 +35,7 @@ public class DeleteDataSourceApi extends PrivateApiComponentBase {
 
 
     @Resource
-    private ReportDataSourceService reportDataSourceService;
+    private DataSourceService reportDataSourceService;
 
 
     @Override
