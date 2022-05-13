@@ -135,7 +135,9 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                         if (StringUtils.isNotBlank(column)) {
                             SourceColumnVo sourceColumnVo = new SourceColumnVo();
                             sourceColumnVo.setColumn(column);
-                            sourceColumnVo.setValue(splitList.get(i));
+                            List<String> valueList = new ArrayList<>();
+                            valueList.add(splitList.get(i));
+                            sourceColumnVo.setValueList(valueList);
                             sourceColumnList.add(sourceColumnVo);
                         }
                     }
@@ -191,7 +193,9 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                 }
                 SourceColumnVo sourceColumnVo = new SourceColumnVo();
                 sourceColumnVo.setColumn(keywordColumn);
-                sourceColumnVo.setValue(keyword);
+                List<String> valueList = new ArrayList<>();
+                valueList.add(keyword);
+                sourceColumnVo.setValueList(valueList);
                 sourceColumnList.add(sourceColumnVo);
             }
             JSONArray filterList = jsonObj.getJSONArray("filterList");
