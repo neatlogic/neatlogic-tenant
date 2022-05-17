@@ -12,6 +12,7 @@ import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceSchemaMapper;
 import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
+import codedriver.framework.datawarehouse.dto.DataSourceParamVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.exceptions.CreateDataSourceSchemaException;
 import codedriver.framework.datawarehouse.exceptions.DataSourceFileIsNotFoundException;
@@ -102,44 +103,84 @@ public class ImportDataSourceApi extends PrivateApiComponentBase {
                     dataSourceMapper.insertDataSourceField(field);
                 }
             }
+            if (CollectionUtils.isNotEmpty(newDataSourceVo.getParamList())) {
+                for (DataSourceParamVo param : newDataSourceVo.getParamList()) {
+                    param.setDataSourceId(newDataSourceVo.getId());
+                    dataSourceMapper.insertDataSourceParam(param);
+                }
+            }
         } else {
             DataSourceVo oldDatasourceVo = dataSourceMapper.getDataSourceById(id);
             //比较新老数据，找出需要新增、修改和删除的属性，这样做的目的是为了保留条件配置
             if (oldDatasourceVo == null) {
                 throw new DataSourceIsNotFoundException(id);
             }
-            List<DataSourceFieldVo> deleteList = oldDatasourceVo.getFieldList().stream().filter(d -> !dataSourceVo.getFieldList().contains(d)).collect(Collectors.toList());
-            List<DataSourceFieldVo> updateList = dataSourceVo.getFieldList().stream().filter(d -> oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
-            List<DataSourceFieldVo> insertList = dataSourceVo.getFieldList().stream().filter(d -> !oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            List<DataSourceFieldVo> deleteFieldList = oldDatasourceVo.getFieldList().stream().filter(d -> !dataSourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            List<DataSourceFieldVo> updateFieldList = dataSourceVo.getFieldList().stream().filter(d -> oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
+            List<DataSourceFieldVo> insertFieldList = dataSourceVo.getFieldList().stream().filter(d -> !oldDatasourceVo.getFieldList().contains(d)).collect(Collectors.toList());
             //用回旧的fieldId
-            if (CollectionUtils.isNotEmpty(updateList)) {
-                for (DataSourceFieldVo field : updateList) {
+            if (CollectionUtils.isNotEmpty(updateFieldList)) {
+                for (DataSourceFieldVo field : updateFieldList) {
                     Optional<DataSourceFieldVo> op = oldDatasourceVo.getFieldList().stream().filter(d -> d.equals(field)).findFirst();
                     op.ifPresent(dataSourceFieldVo -> field.setId(dataSourceFieldVo.getId()));
                 }
             }
             newDataSourceVo.setFieldList(null);//清空旧数据
-            newDataSourceVo.addField(insertList);
-            newDataSourceVo.addField(updateList);
+            newDataSourceVo.addField(insertFieldList);
+            newDataSourceVo.addField(updateFieldList);
+
+            List<DataSourceParamVo> deleteParamList = oldDatasourceVo.getParamList().stream().filter(d -> !dataSourceVo.getParamList().contains(d)).collect(Collectors.toList());
+            List<DataSourceParamVo> updateParamList = dataSourceVo.getParamList().stream().filter(d -> oldDatasourceVo.getParamList().contains(d)).collect(Collectors.toList());
+            List<DataSourceParamVo> insertParamList = dataSourceVo.getParamList().stream().filter(d -> !oldDatasourceVo.getParamList().contains(d)).collect(Collectors.toList());
+            //用回旧的paramId
+            if (CollectionUtils.isNotEmpty(updateParamList)) {
+                for (DataSourceParamVo param : updateParamList) {
+                    Optional<DataSourceParamVo> op = oldDatasourceVo.getParamList().stream().filter(d -> d.equals(param)).findFirst();
+                    op.ifPresent(dataSourceParamVo -> param.setId(dataSourceParamVo.getId()));
+                }
+            }
+            newDataSourceVo.setParamList(null);//清空旧数据
+            newDataSourceVo.addParam(insertParamList);
+            newDataSourceVo.addParam(updateParamList);
+
             //FIXME 检查数据源是否被使用
             dataSourceMapper.updateDataSource(newDataSourceVo);
 
-            if (CollectionUtils.isNotEmpty(deleteList)) {
-                for (DataSourceFieldVo field : deleteList) {
+            if (CollectionUtils.isNotEmpty(deleteFieldList)) {
+                for (DataSourceFieldVo field : deleteFieldList) {
                     dataSourceMapper.deleteDataSourceFieldById(field.getId());
                 }
             }
 
-            if (CollectionUtils.isNotEmpty(updateList)) {
-                for (DataSourceFieldVo field : updateList) {
+            if (CollectionUtils.isNotEmpty(updateFieldList)) {
+                for (DataSourceFieldVo field : updateFieldList) {
                     dataSourceMapper.updateDataSourceField(field);
                 }
             }
 
-            if (CollectionUtils.isNotEmpty(insertList)) {
-                for (DataSourceFieldVo field : insertList) {
+            if (CollectionUtils.isNotEmpty(insertFieldList)) {
+                for (DataSourceFieldVo field : insertFieldList) {
                     field.setDataSourceId(newDataSourceVo.getId());
                     dataSourceMapper.insertDataSourceField(field);
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(deleteParamList)) {
+                for (DataSourceParamVo param : deleteParamList) {
+                    dataSourceMapper.deleteDataSourceParamById(param.getId());
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(updateParamList)) {
+                for (DataSourceParamVo param : updateParamList) {
+                    dataSourceMapper.updateDataSourceParam(param);
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(insertParamList)) {
+                for (DataSourceParamVo param : insertParamList) {
+                    param.setDataSourceId(newDataSourceVo.getId());
+                    dataSourceMapper.insertDataSourceParam(param);
                 }
             }
 
