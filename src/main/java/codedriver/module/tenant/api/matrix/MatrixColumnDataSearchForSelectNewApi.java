@@ -74,6 +74,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
+        Integer pageSize = dataVo.getPageSize();
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
@@ -98,6 +99,11 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
         JSONObject returnObj = new JSONObject();
         returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
         returnObj.put("tbodyList", resultList);
+        if (resultList.size() < pageSize) {
+            returnObj.put("rowNum", resultList.size());
+        } else {
+            returnObj.put("rowNum", pageSize + 1);
+        }
         return returnObj;
     }
 }
