@@ -56,6 +56,10 @@ public class SaveDataSourceFieldsApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(fieldList)) {
             for (int i = 0; i < fieldList.size(); i++) {
                 DataSourceFieldVo dataSourceFieldVo = JSONObject.toJavaObject(fieldList.getJSONObject(i), DataSourceFieldVo.class);
+                if (dataSourceFieldVo.getIsCondition() == 0) {
+                    dataSourceFieldVo.setInputType(null);
+                    dataSourceFieldVo.setConfig(null);
+                }
                 dataSourceMapper.updateDataSourceFieldCondition(dataSourceFieldVo);
             }
         }
