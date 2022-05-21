@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -30,17 +30,17 @@ import java.io.InputStream;
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ImageDownloadApi extends PrivateBinaryStreamApiComponentBase {
+public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
 
-	@Autowired
-	private FileMapper fileMapper;
+    @Autowired
+    private FileMapper fileMapper;
 
-	@Override
-	public String getToken() {
-		return "image/download";
-	}
+    @Override
+    public String getToken() {
+        return "image/download";
+    }
 
-	@Override
+    @Override
 	public String getName() {
 		return "图片下载接口";
 	}

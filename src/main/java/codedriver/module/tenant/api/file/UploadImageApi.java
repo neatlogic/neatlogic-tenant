@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -13,9 +13,12 @@ import codedriver.module.framework.file.handler.LocalFileSystemHandler;
 import codedriver.module.framework.file.handler.MinioFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.publicapi.PublicBinaryStreamApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,19 +30,25 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ImageUploadPublicApi extends PublicBinaryStreamApiComponentBase {
-	static Logger logger = LoggerFactory.getLogger(ImageUploadPublicApi.class);
+public class UploadImageApi extends PrivateBinaryStreamApiComponentBase {
+	static Logger logger = LoggerFactory.getLogger(UploadImageApi.class);
 
 	@Autowired
 	private FileMapper fileMapper;
 
 	@Override
+	public String getToken() {
+		return "image/upload";
+	}
+
+	@Override
 	public String getName() {
-		return "图片上传接口(供第三方使用)";
+		return "图片上传接口";
 	}
 
 	@Override
@@ -52,9 +61,8 @@ public class ImageUploadPublicApi extends PublicBinaryStreamApiComponentBase {
 		return true;
 	}
 
-	@Input({})
 	@Output({ @Param(explode = FileVo.class) })
-	@Description(desc = "图片上传接口(供第三方使用)")
+	@Description(desc = "图片上传接口")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String tenantUuid = TenantContext.get().getTenantUuid();
@@ -66,7 +74,7 @@ public class ImageUploadPublicApi extends PublicBinaryStreamApiComponentBase {
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
-			if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
+			if (multipartFile != null && Objects.requireNonNull(multipartFile.getContentType()).startsWith("image")) {
 				String userUuid = UserContext.get().getUserUuid(true);
 				String oldFileName = multipartFile.getOriginalFilename();
 				Long size = multipartFile.getSize();

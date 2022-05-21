@@ -1,12 +1,11 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
 package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
@@ -31,17 +30,17 @@ import java.io.InputStream;
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ImageDownloadPublicApi extends PublicBinaryStreamApiComponentBase {
+public class DownloadImagePublicApi extends PublicBinaryStreamApiComponentBase {
 
-	@Autowired
-	private FileMapper fileMapper;
+    @Autowired
+    private FileMapper fileMapper;
 
-	@Override
-	public String getName() {
-		return "图片下载接口(供第三方使用)";
-	}
+    @Override
+    public String getName() {
+        return "图片下载接口(供第三方使用)";
+    }
 
-	@Override
+    @Override
 	public String getConfig() {
 		return null;
 	}

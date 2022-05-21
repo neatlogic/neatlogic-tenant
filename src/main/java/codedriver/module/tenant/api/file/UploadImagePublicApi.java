@@ -13,12 +13,9 @@ import codedriver.module.framework.file.handler.LocalFileSystemHandler;
 import codedriver.module.framework.file.handler.MinioFileSystemHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicBinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,28 +27,22 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Objects;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.CREATE)
-public class ImageUploadApi extends PrivateBinaryStreamApiComponentBase {
-	static Logger logger = LoggerFactory.getLogger(ImageUploadApi.class);
+public class UploadImagePublicApi extends PublicBinaryStreamApiComponentBase {
+    static Logger logger = LoggerFactory.getLogger(UploadImagePublicApi.class);
 
-	@Autowired
-	private FileMapper fileMapper;
+    @Autowired
+    private FileMapper fileMapper;
 
-	@Override
-	public String getToken() {
-		return "image/upload";
-	}
+    @Override
+    public String getName() {
+        return "图片上传接口(供第三方使用)";
+    }
 
-	@Override
-	public String getName() {
-		return "图片上传接口";
-	}
-
-	@Override
+    @Override
 	public String getConfig() {
 		return null;
 	}
@@ -61,8 +52,9 @@ public class ImageUploadApi extends PrivateBinaryStreamApiComponentBase {
 		return true;
 	}
 
+	@Input({})
 	@Output({ @Param(explode = FileVo.class) })
-	@Description(desc = "图片上传接口")
+	@Description(desc = "图片上传接口(供第三方使用)")
 	@Override
 	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String tenantUuid = TenantContext.get().getTenantUuid();
@@ -74,7 +66,7 @@ public class ImageUploadApi extends PrivateBinaryStreamApiComponentBase {
 		JSONObject returnObj = new JSONObject();
 		try {
 			MultipartFile multipartFile = multipartRequest.getFile(paramName);
-			if (multipartFile != null && Objects.requireNonNull(multipartFile.getContentType()).startsWith("image")) {
+			if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
 				String userUuid = UserContext.get().getUserUuid(true);
 				String oldFileName = multipartFile.getOriginalFilename();
 				Long size = multipartFile.getSize();

@@ -42,8 +42,8 @@ import java.util.List;
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
-public class FileUploadApi extends PrivateBinaryStreamApiComponentBase {
-    static Logger logger = LoggerFactory.getLogger(FileUploadApi.class);
+public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
+    static Logger logger = LoggerFactory.getLogger(UploadFileApi.class);
 
 
     @Autowired
