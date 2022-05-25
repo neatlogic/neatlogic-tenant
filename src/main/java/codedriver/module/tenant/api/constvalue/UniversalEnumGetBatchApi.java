@@ -54,12 +54,10 @@ public class UniversalEnumGetBatchApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         List<String> enumClassList = enumClassArray.toJavaList(String.class);
         for (String enumClass : enumClassList) {
-            try {
-                Class.forName(enumClass);
-            } catch (ClassNotFoundException ex) {
+            Class<? extends IEnum> aClass = EnumFactory.getEnumClass(enumClass);
+            if (aClass == null) {
                 throw new EnumNotFoundException(enumClass);
             }
-            Class<? extends IEnum> aClass = EnumFactory.getEnumClass(enumClass);
             Object instance = null;
             Object[] objects = aClass.getEnumConstants();
             if (objects != null && objects.length > 0) {
