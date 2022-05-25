@@ -84,7 +84,7 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
         JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
         if (CollectionUtils.isNotEmpty(userUuidArray)) {
             List<String> userUuidList = userUuidArray.toJavaList(String.class);
-            List<String> existUserUuidList = userMapper.checkUserUuidListIsExists(userUuidList, 1);
+            List<String> existUserUuidList = userMapper.getUserUuidListByUuidListAndIsActive(userUuidList, 1);
             if (CollectionUtils.isNotEmpty(existUserUuidList)) {
                 for (String userUuid : existUserUuidList) {
                     roleMapper.replaceRoleUser(new RoleUserVo(roleUuid, userUuid));
