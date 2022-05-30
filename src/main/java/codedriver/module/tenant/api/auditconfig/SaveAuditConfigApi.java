@@ -17,6 +17,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auditconfig.dao.mapper.AuditConfigMapper;
 import codedriver.framework.auditconfig.dto.AuditConfigVo;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,12 +46,16 @@ public class SaveAuditConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置", isRequired = true)})
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置")})
     @Description(desc = "保存审计配置接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         AuditConfigVo auditConfigVo = JSONObject.toJavaObject(jsonObj, AuditConfigVo.class);
-        auditConfigMapper.saveAuditConfig(auditConfigVo);
+        if (MapUtils.isNotEmpty(auditConfigVo.getConfig())) {
+            auditConfigMapper.saveAuditConfig(auditConfigVo);
+        } else {
+            auditConfigMapper.deleteAuditConfig(auditConfigVo.getName());
+        }
         return null;
     }
 
