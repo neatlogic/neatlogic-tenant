@@ -6,24 +6,22 @@
 package codedriver.module.tenant.api.mailserver;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
 import codedriver.framework.auth.label.MAIL_SERVER_MODIFY;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.MailServerMapper;
 import codedriver.framework.dto.MailServerVo;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import codedriver.module.tenant.exception.mailserver.MailServerNameRepeatException;
 import codedriver.module.tenant.exception.mailserver.MailServerNotFoundException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @AuthAction(action = MAIL_SERVER_MODIFY.class)
@@ -50,7 +48,7 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 
 	@Input({
 		@Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired= true, maxLength = 50, desc = "名称"),
+		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "名称"),
 		@Param(name = "host", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "smtp主机"),
 		@Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "smtp端口"),
 		@Param(name = "userName", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "用户"),

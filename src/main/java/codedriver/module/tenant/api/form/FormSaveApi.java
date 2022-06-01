@@ -18,6 +18,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import codedriver.framework.util.UuidUtil;
 import codedriver.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
 import codedriver.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
@@ -60,7 +61,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
     @Override
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50, desc = "表单名称"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "表单名称"),
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
             @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true)
     })

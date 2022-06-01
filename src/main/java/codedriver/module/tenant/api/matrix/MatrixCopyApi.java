@@ -20,6 +20,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import codedriver.framework.util.UuidUtil;
 import codedriver.framework.auth.label.MATRIX_MODIFY;
 import com.alibaba.fastjson.JSONObject;
@@ -60,7 +61,7 @@ public class MatrixCopyApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", desc = "矩阵数据源uuid", isRequired = true, type = ApiParamType.STRING),
             @Param(name = "name", desc = "矩阵名称", isRequired = true, type = ApiParamType.STRING),
-            @Param(name = "label", type = ApiParamType.REGEX, rule = "^[A-Za-z]+$", desc = "矩阵唯一标识", isRequired = true, xss = true)
+            @Param(name = "label", type = ApiParamType.REGEX, rule = RegexUtils.ENGLISH_NAME, desc = "矩阵唯一标识", isRequired = true, xss = true)
     })
     @Description(desc = "矩阵数据源复制接口")
     @Override

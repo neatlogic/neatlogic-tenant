@@ -17,6 +17,7 @@ import codedriver.framework.restful.core.publicapi.PublicApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class ApiManageNeedAuditUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "token", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\{\\}\\d/]+$", isRequired = true, desc = "token")
+            @Param(name = "token", type = ApiParamType.REGEX, rule = RegexUtils.API_TOKEN, isRequired = true, desc = "token")
     })
     @Description(desc = "接口启用审计接口")
     @Override

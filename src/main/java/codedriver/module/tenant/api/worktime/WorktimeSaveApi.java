@@ -14,6 +14,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import codedriver.framework.worktime.exception.WorktimeConfigIllegalException;
@@ -58,7 +59,7 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "工作时间窗口uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50, desc = "工作时间窗口名称"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "工作时间窗口名称"),
             @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "每周工作时段的定义")
     })

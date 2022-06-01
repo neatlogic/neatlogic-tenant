@@ -5,38 +5,35 @@
 
 package codedriver.module.tenant.api.notify;
 
-import java.util.List;
-
-import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.dto.FieldValidResultVo;
-import codedriver.framework.notify.dto.NotifyTriggerVo;
-import codedriver.framework.notify.exception.NotifyPolicyMoreThanOneException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.core.IValid;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import codedriver.framework.auth.label.NOTIFY_POLICY_MODIFY;
-import com.alibaba.fastjson.JSON;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NOTIFY_POLICY_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.ConditionParamVo;
+import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
+import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
+import codedriver.framework.notify.exception.NotifyPolicyMoreThanOneException;
 import codedriver.framework.notify.exception.NotifyPolicyNameRepeatException;
 import codedriver.framework.notify.exception.NotifyPolicyNotFoundException;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.core.IValid;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @Transactional
@@ -63,7 +60,7 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]{1,50}$",
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, maxLength = 50,
                     isRequired = true, desc = "策略名"),
             @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")})
     @Output({@Param(explode = NotifyPolicyVo.class, desc = "策略信息")})

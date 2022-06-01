@@ -23,6 +23,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.auth.label.INTERFACE_MODIFY;
+import codedriver.framework.util.RegexUtils;
 import codedriver.module.tenant.exception.integration.IntegrationUrlIllegalException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,7 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid，为空代表新增"),
             @Param(name = "name", type = ApiParamType.STRING, desc = "名称", isRequired = true, xss = true),
-            @Param(name = "url", type = ApiParamType.REGEX, desc = "目标地址", isRequired = true, rule = "^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?"),
+            @Param(name = "url", type = ApiParamType.REGEX, desc = "目标地址", isRequired = true, rule = RegexUtils.CONNECT_URL),
             @Param(name = "handler", type = ApiParamType.STRING, desc = "组件", isRequired = true, xss = true),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置，json格式", isRequired = true)
     })

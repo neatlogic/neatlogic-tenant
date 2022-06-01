@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.MATRIX_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
@@ -20,7 +21,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.auth.label.MATRIX_MODIFY;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,7 @@ public class MatrixNameUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", desc = "矩阵名称", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, maxLength = 50),
+            @Param(name = "name", desc = "矩阵名称", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50),
             @Param(name = "uuid", desc = "uuid", type = ApiParamType.STRING, isRequired = true)
     })
     @Description(desc = "矩阵名称变更接口")

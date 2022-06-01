@@ -5,13 +5,13 @@
 
 package codedriver.module.tenant.api.test;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 
 public class ParamTypeValidateApi extends PrivateApiComponentBase {
@@ -40,7 +40,7 @@ public class ParamTypeValidateApi extends PrivateApiComponentBase {
 		@Param(name = "arrayParam", type = ApiParamType.JSONARRAY, isRequired = true, desc = "json数组类型"),
 		@Param(name = "objectParam", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "json对象类型"),
 		@Param(name = "longParam", type = ApiParamType.LONG, isRequired = true, desc = "long类型"),
-		@Param(name = "regexParam", type = ApiParamType.REGEX, isRequired = true, desc = "正则表达式类型只能输入英文字母", rule = "^[A-Za-z]+$"),
+		@Param(name = "regexParam", type = ApiParamType.REGEX, isRequired = true, desc = "正则表达式类型只能输入英文字母", rule = RegexUtils.ENGLISH_NAME),
 		@Param(name = "stringParam", type = ApiParamType.STRING, isRequired = true, desc = "字符串类型")
 	})
 	@Output({

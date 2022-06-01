@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.notify.job;
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.NOTIFY_JOB_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.FieldValidResultVo;
 import codedriver.framework.notify.constvalue.NotifyRecipientType;
@@ -21,16 +22,16 @@ import codedriver.framework.notify.dto.job.NotifyJobVo;
 import codedriver.framework.notify.exception.NotifyContentHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyHandlerNotFoundException;
 import codedriver.framework.notify.exception.NotifyJobNameRepeatException;
-import codedriver.module.framework.notify.schedule.handler.NotifyContentJob;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.core.IJob;
 import codedriver.framework.scheduler.core.SchedulerManager;
 import codedriver.framework.scheduler.dto.JobObject;
 import codedriver.framework.scheduler.exception.ScheduleIllegalParameterException;
-import codedriver.framework.auth.label.NOTIFY_JOB_MODIFY;
+import codedriver.framework.util.RegexUtils;
+import codedriver.module.framework.notify.schedule.handler.NotifyContentJob;
 import com.alibaba.fastjson.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.CronExpression;
@@ -70,7 +71,7 @@ public class NotifyJobSaveApi extends PrivateApiComponentBase {
 
 	@Input({
 			@Param(name = "id", type = ApiParamType.LONG, desc = "定时任务ID"),
-			@Param(name = "name", type = ApiParamType.REGEX, rule = "^[A-Za-z_\\d\\u4e00-\\u9fa5]+$", isRequired = true, xss = true, desc = "名称"),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, xss = true, desc = "名称"),
 			@Param(name = "handler", type = ApiParamType.STRING, isRequired = true,desc = "插件"),
 			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "插件自带参数"),
 			@Param(name = "notifyHandler", type = ApiParamType.STRING, isRequired = true, desc = "通知方式插件"),

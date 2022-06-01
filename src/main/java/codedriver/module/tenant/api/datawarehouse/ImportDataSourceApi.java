@@ -28,6 +28,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.transaction.core.EscapeTransactionJob;
+import codedriver.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -72,7 +73,7 @@ public class ImportDataSourceApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id，存在代表需要替换"),
-            @Param(name = "name", type = ApiParamType.REGEX, desc = "唯一标识", rule = "^[A-Za-z_]+$", maxLength = 50, isRequired = true, xss = true),
+            @Param(name = "name", type = ApiParamType.REGEX, desc = "唯一标识", rule = RegexUtils.ENGLISH_NAME, maxLength = 50, isRequired = true, xss = true),
             @Param(name = "label", type = ApiParamType.STRING, desc = "名称", maxLength = 50, isRequired = true, xss = true),
             @Param(name = "fileId", type = ApiParamType.LONG, desc = "配置文件id", isRequired = true)})
     @Description(desc = "导入数据仓库数据源接口")
