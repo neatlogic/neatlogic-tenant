@@ -100,11 +100,16 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
         JSONObject returnObj = new JSONObject();
         returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
         returnObj.put("tbodyList", resultList);
-        if (resultList.size() < pageSize) {
-            returnObj.put("rowNum", resultList.size());
-        } else {
-            returnObj.put("rowNum", pageSize + 1);
-        }
+        returnObj.put("currentPage", dataVo.getCurrentPage());
+        returnObj.put("pageSize", dataVo.getPageSize());
+        returnObj.put("pageCount", dataVo.getPageCount());
+        returnObj.put("rowNum", dataVo.getRowNum());
+
+//        if (resultList.size() < pageSize) {
+//            returnObj.put("rowNum", resultList.size());
+//        } else {
+//            returnObj.put("rowNum", pageSize + 1);
+//        }
         return returnObj;
     }
 }
