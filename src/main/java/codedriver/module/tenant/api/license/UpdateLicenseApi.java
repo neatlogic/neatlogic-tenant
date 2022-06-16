@@ -63,9 +63,9 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
         } else {
             licenseStr = licenseMapper.getTenantLicenseByTenantUuid(tenantVo.getUuid());
         }
-        LicenseManager.getLicenseVo(tenantVo.getUuid(), licenseStr);
+        String errLog = LicenseManager.getLicenseVo(tenantVo.getUuid(), licenseStr);
         TenantContext.get().setUseDefaultDatasource(false);
-        return null;
+        return errLog;
     }
 
 }
