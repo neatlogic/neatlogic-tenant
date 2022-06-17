@@ -75,7 +75,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
     public Object myDoService(JSONObject jsonObj) throws Exception {
         jsonObj.remove("needPage");
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
-        Integer pageSize = dataVo.getPageSize();
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
@@ -104,11 +103,6 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
         returnObj.put("pageSize", dataVo.getPageSize());
         returnObj.put("pageCount", dataVo.getPageCount());
         returnObj.put("rowNum", dataVo.getRowNum());
-//        if (resultList.size() < pageSize) {
-//            returnObj.put("rowNum", resultList.size());
-//        } else {
-//            returnObj.put("rowNum", pageSize + 1);
-//        }
         return returnObj;
     }
 }
