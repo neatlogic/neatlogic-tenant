@@ -60,7 +60,7 @@ public class UserGetWithCacheControlApi extends PrivateApiComponentBase {
 		}
 		UserVo userVo = null;
 		//维护模式下 获取厂商维护人员信息
-		if (Config.ENABLE_SUPERADMIN() && MaintenanceMode.MAINTENANCE_USER.equals(UserContext.get().getUserId())) {
+		if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
 			userVo = MaintenanceMode.getMaintenanceUser();
 		}else if(Objects.equals(SystemUser.SYSTEM.getUserUuid(),userUuid)){
 			userVo = SystemUser.SYSTEM.getUserVo();
