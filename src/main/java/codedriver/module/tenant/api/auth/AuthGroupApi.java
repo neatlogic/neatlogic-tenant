@@ -58,6 +58,11 @@ public class AuthGroupApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         JSONArray groupArray = new JSONArray();
+        groupArray.add(new JSONObject() {
+            {
+                this.put("text", "所有");
+            }
+        });
         List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
         if (CollectionUtils.isNotEmpty(moduleGroupVos)) {
             Map<String, List<AuthBase>> authGroupMap = AuthFactory.getAuthGroupMap();
@@ -72,11 +77,6 @@ public class AuthGroupApi extends PrivateApiComponentBase {
                 }
             }
         }
-        groupArray.add(new JSONObject() {
-            {
-                this.put("text", "所有");
-            }
-        });
         returnObj.put("groupList", groupArray);
         return returnObj;
     }
