@@ -14,6 +14,7 @@ import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapp
 import codedriver.framework.datawarehouse.dto.DataSourceDataVo;
 import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
+import codedriver.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -65,6 +66,9 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
         //去掉没有值的条件
         //reportDataSourceDataVo.getConditionList().removeIf(d -> d.getValue() == null || StringUtils.isBlank(d.getValue().toString()));
         DataSourceVo reportDataSourceVo = reportDataSourceMapper.getDataSourceById(reportDataSourceDataVo.getDataSourceId());
+        if (reportDataSourceVo == null) {
+            throw new DataSourceIsNotFoundException(reportDataSourceDataVo.getDataSourceId());
+        }
         JSONObject returnObj = new JSONObject();
         if (CollectionUtils.isNotEmpty(reportDataSourceVo.getFieldList())) {
             reportDataSourceDataVo.setFieldList(reportDataSourceVo.getFieldList());
