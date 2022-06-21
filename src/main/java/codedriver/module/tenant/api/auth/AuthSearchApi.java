@@ -89,7 +89,8 @@ public class AuthSearchApi extends PrivateApiComponentBase {
             }
             AuthGroupVo authGroupVo = new AuthGroupVo();
             authGroupVo.setName(authGroupName);
-            authGroupVo.setDisplayName(ModuleUtil.getModuleGroup(authGroupName).getGroupName());
+            String displayName = ModuleUtil.getModuleGroup(authGroupName).getGroupName();
+            authGroupVo.setDisplayName(displayName);
             List<AuthBase> authList = authGroupMap.get(authGroupName);
             if (authList != null && authList.size() > 0) {
                 List<AuthVo> authArray = new ArrayList<>();
@@ -100,7 +101,7 @@ public class AuthSearchApi extends PrivateApiComponentBase {
                         authVo.setDisplayName(authBase.getAuthDisplayName());
                         authVo.setDescription(authBase.getAuthIntroduction());
                         authVo.setSort(authBase.getSort());
-                        authVo.setAuthGroupName(authGroupName);
+                        authVo.setAuthGroupName(displayName);
                         if (roleAuthMap.containsKey(authVo.getName())) {
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
                         }
