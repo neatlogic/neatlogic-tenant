@@ -27,7 +27,7 @@ import java.util.*;
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class AuthMangeSearchApi extends PrivateApiComponentBase {
+public class AuthManageSearchApi extends PrivateApiComponentBase {
 
     @Resource
     private RoleMapper roleMapper;
