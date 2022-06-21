@@ -9,7 +9,6 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -53,7 +51,7 @@ public class AuthGroupApi extends PrivateApiComponentBase {
     }
 
     @Output({
-            @Param( name = "groupList", type = ApiParamType.JSONARRAY, desc = "权限组列表")
+            @Param(name = "groupList", type = ApiParamType.JSONARRAY, desc = "权限组列表")
     })
     @Description(desc = "权限组列表获取接口")
     @Override
@@ -61,7 +59,7 @@ public class AuthGroupApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         JSONArray groupArray = new JSONArray();
         List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
-        if(CollectionUtils.isNotEmpty(moduleGroupVos)) {
+        if (CollectionUtils.isNotEmpty(moduleGroupVos)) {
             Map<String, List<AuthBase>> authGroupMap = AuthFactory.getAuthGroupMap();
             Set<String> groupSet = authGroupMap.keySet();
             for (ModuleGroupVo moduleGroupVo : moduleGroupVos) {
@@ -74,6 +72,11 @@ public class AuthGroupApi extends PrivateApiComponentBase {
                 }
             }
         }
+        groupArray.add(new JSONObject() {
+            {
+                this.put("text", "所有");
+            }
+        });
         returnObj.put("groupList", groupArray);
         return returnObj;
     }
