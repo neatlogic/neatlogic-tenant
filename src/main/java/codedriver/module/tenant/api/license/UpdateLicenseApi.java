@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.LicenseMapper;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
+import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.license.LicenseManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -56,16 +57,26 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         String licenseStr = paramObj.getString("license");
         String tenantUuid = TenantContext.get().getTenantUuid();
+        String errLog = null;
         TenantContext.get().setUseDefaultDatasource(true);
         TenantVo tenantVo = tenantMapper.getTenantByUuid(tenantUuid);
-        if (StringUtils.isNotBlank(licenseStr)) {
-            licenseMapper.insertLicenseByTenantUuid(tenantVo.getId(), tenantVo.getUuid(), licenseStr);
-        } else {
+        if(StringUtils.isNotBlank(licenseStr)){
+            errLog = LicenseManager.getLicenseVo(tenantUuid, licenseStr);
+            if(StringUtils.isBlank(errLog)) {
+                licenseMapper.insertLicenseByTenantUuid(tenantVo.getId(), tenantVo.getUuid(), licenseStr);
+            }else{
+                throw new ApiRuntimeException(errLog);
+            }
+        }else{
             licenseStr = licenseMapper.getTenantLicenseByTenantUuid(tenantVo.getUuid());
+            errLog = LicenseManager.getLicenseVo(tenantVo.getUuid(), licenseStr);
         }
-        String errLog = LicenseManager.getLicenseVo(tenantVo.getUuid(), licenseStr);
         TenantContext.get().setUseDefaultDatasource(false);
         return errLog;
     }
 
+    @Override
+    public boolean supportAnonymousAccess() {
+        return true;
+    }
 }
