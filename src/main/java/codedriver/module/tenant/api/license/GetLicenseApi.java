@@ -73,8 +73,10 @@ public class GetLicenseApi extends PrivateApiComponentBase {
         String tenant = TenantContext.get().getTenantUuid();
         TenantContext.get().setUseDefaultDatasource(true);
         TenantVo tenantVo = tenantMapper.getTenantByUuid(tenant);
+        result.put("purchaser",licenseVo.getPurchaser());
         result.put("tenantUuid",tenant);
         result.put("tenant",tenantVo.getName());
+        result.put("issueTime", TimeUtil.convertDateToString(licenseVo.getIssueTime(), TimeUtil.YYYY_MM_DD));
         result.put("expiredTime", TimeUtil.convertDateToString(licenseVo.getExpireTime(), TimeUtil.YYYY_MM_DD));
         result.put("stopServiceTime", TimeUtil.addDateByDay(licenseVo.getExpireTime(), licenseVo.getExpiredDay(), TimeUtil.YYYY_MM_DD));
         LicenseAuthVo licenseAuthVo = licenseVo.getAuth();
@@ -86,6 +88,7 @@ public class GetLicenseApi extends PrivateApiComponentBase {
             JSONObject moduleGroupJson = new JSONObject();
             moduleGroupJson.put("moduleGroup","ALL");
             moduleGroupJson.put("moduleGroupName","所有模块权限");
+            moduleGroupJson.put("authList",JSONArray.parseArray("[\"ALL\"]"));
             JSONArray operationArray = new JSONArray();
             moduleGroupJson.put("operationList",operationArray);
             List<String> operationList = allModuleOptional.get().getOperationTypeList();
