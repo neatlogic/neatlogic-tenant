@@ -57,7 +57,7 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         String licenseStr = paramObj.getString("license");
         String tenantUuid = TenantContext.get().getTenantUuid();
-        String errLog = null;
+        String errLog;
         TenantContext.get().setUseDefaultDatasource(true);
         TenantVo tenantVo = tenantMapper.getTenantByUuid(tenantUuid);
         if(StringUtils.isNotBlank(licenseStr)){
