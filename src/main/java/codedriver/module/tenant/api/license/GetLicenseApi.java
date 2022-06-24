@@ -87,56 +87,77 @@ public class GetLicenseApi extends PrivateApiComponentBase {
         if (allModuleOptional.isPresent()) {
             JSONObject moduleGroupJson = new JSONObject();
             moduleGroupJson.put("moduleGroup","ALL");
-            moduleGroupJson.put("moduleGroupName","所有模块权限");
-            moduleGroupJson.put("authList",JSONArray.parseArray("[\"ALL\"]"));
-            JSONArray operationArray = new JSONArray();
-            moduleGroupJson.put("operationList",operationArray);
-            List<String> operationList = allModuleOptional.get().getOperationTypeList();
-            for (String operation : operationList){
-                JSONObject operationJson = new JSONObject();
-                operationJson.put("name",operation);
-                operationJson.put("displayName",OperationTypeEnum.getText(operation));
-                operationArray.add(operationJson);
-            }
+            moduleGroupJson.put("moduleGroupName","所有");
             moduleGroupArray.add(moduleGroupJson);
+            initAuth( new ArrayList<>(), moduleGroupJson,true);
+            List<String> operationList = allModuleOptional.get().getOperationTypeList();
+            initOperation( operationList, moduleGroupJson);
         }else{
             for(LicenseAuthModuleGroupVo licenseAuthModuleGroupVo : licenseAuthModuleGroupVoList){
                 JSONObject moduleGroupJson = new JSONObject();
                 moduleGroupJson.put("moduleGroup",licenseAuthModuleGroupVo.getName());
                 moduleGroupJson.put("moduleGroupName",moduleGroupMap.get(licenseAuthModuleGroupVo.getName().toUpperCase(Locale.ROOT)));
-                JSONArray authArray = new JSONArray();
-                moduleGroupJson.put("authList",authArray);
-                if(licenseAuthModuleGroupVo.getAuthList().stream().anyMatch(o -> Objects.equals("ALL", o.toUpperCase(Locale.ROOT)))){
-                    JSONObject authJson = new JSONObject();
-                    authJson.put("name", "ALL");
-                    authJson.put("displayName", "'"+moduleGroupMap.get(licenseAuthModuleGroupVo.getName().toUpperCase(Locale.ROOT))+"' 模块所有权限");
-                    authArray.add(authJson);
-                }else {
-                    for (String auth : licenseAuthModuleGroupVo.getAuthList()) {
-                        JSONObject authJson = new JSONObject();
-                        AuthBase authBase = AuthFactory.getAuthInstance(auth.toUpperCase(Locale.ROOT));
-                        authJson.put("name", auth.toUpperCase(Locale.ROOT));
-                        if(authBase != null) {
-                            authJson.put("displayName", authBase.getAuthDisplayName());
-                            authJson.put("desc", authBase.getAuthIntroduction());
-                        }
-                        authArray.add(authJson);
-                    }
-                }
+                initAuth( licenseAuthModuleGroupVo.getAuthList(), moduleGroupJson,false);
                 List<String> operationList = licenseAuthModuleGroupVo.getOperationTypeList();
-                JSONArray operationArray = new JSONArray();
-                moduleGroupJson.put("operationList",operationArray);
-                for (String operation : operationList){
-                    JSONObject operationJson = new JSONObject();
-                    operationJson.put("name",operation);
-                    operationJson.put("displayName",OperationTypeEnum.getText(operation));
-                    operationArray.add(operationJson);
-                }
+                initOperation( operationList, moduleGroupJson);
                 moduleGroupArray.add(moduleGroupJson);
             }
         }
         result.put("license",licenseMapper.getTenantLicenseByTenantUuid(tenant));
         TenantContext.get().setUseDefaultDatasource(false);
         return result;
+    }
+
+    /**
+     * 初始化操作
+     * @param operationList 操作列表
+     * @param moduleGroupJson 模块组
+     */
+    private void initOperation( List<String> operationList,JSONObject moduleGroupJson){
+        Optional<String> allOperationOptional = operationList.stream().filter(o -> Objects.equals("ALL", o.toUpperCase(Locale.ROOT))).findFirst();
+        JSONArray operationArray = new JSONArray();
+        moduleGroupJson.put("operationList", operationArray);
+        if(allOperationOptional.isPresent()){
+            JSONObject operationJson = new JSONObject();
+            operationJson.put("name", "ALL");
+            operationJson.put("displayName", "所有");
+            operationJson.put("desc", "拥有此模块所有操作");
+            operationArray.add(operationJson);
+        }else {
+            for (String operation : operationList) {
+                JSONObject operationJson = new JSONObject();
+                operationJson.put("name", operation);
+                operationJson.put("displayName", OperationTypeEnum.getText(operation));
+                operationArray.add(operationJson);
+            }
+        }
+    }
+
+    /**
+     * 初始化操作
+     * @param authList 权限列表
+     * @param moduleGroupJson 模块组
+     */
+    private void initAuth( List<String> authList,JSONObject moduleGroupJson, boolean isAllModule){
+        JSONArray authArray = new JSONArray();
+        moduleGroupJson.put("authList",authArray);
+        if(isAllModule || authList.stream().anyMatch(o -> Objects.equals("ALL", o.toUpperCase(Locale.ROOT)))){
+            JSONObject authJson = new JSONObject();
+            authJson.put("name", "ALL");
+            authJson.put("displayName", "所有");
+            authJson.put("desc", "拥有此模块所有权限");
+            authArray.add(authJson);
+        }else {
+            for (String auth : authList) {
+                JSONObject authJson = new JSONObject();
+                AuthBase authBase = AuthFactory.getAuthInstance(auth.toUpperCase(Locale.ROOT));
+                authJson.put("name", auth.toUpperCase(Locale.ROOT));
+                if(authBase != null) {
+                    authJson.put("displayName", authBase.getAuthDisplayName());
+                    authJson.put("desc", authBase.getAuthIntroduction());
+                }
+                authArray.add(authJson);
+            }
+        }
     }
 }
