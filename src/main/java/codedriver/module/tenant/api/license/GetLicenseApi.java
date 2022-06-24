@@ -11,6 +11,7 @@ import codedriver.framework.auth.core.AuthBase;
 import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.auth.label.LICENSE_MODIFY;
 import codedriver.framework.common.util.ModuleUtil;
+import codedriver.framework.dao.mapper.LicenseMapper;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.ModuleGroupVo;
 import codedriver.framework.dto.TenantVo;
@@ -39,6 +40,9 @@ public class GetLicenseApi extends PrivateApiComponentBase {
 
     @Resource
     TenantMapper tenantMapper;
+
+    @Resource
+    LicenseMapper licenseMapper;
 
     @Override
     public String getName() {
@@ -108,9 +112,11 @@ public class GetLicenseApi extends PrivateApiComponentBase {
                     for (String auth : licenseAuthModuleGroupVo.getAuthList()) {
                         JSONObject authJson = new JSONObject();
                         AuthBase authBase = AuthFactory.getAuthInstance(auth.toUpperCase(Locale.ROOT));
-                        authJson.put("name", authBase.getAuthName());
-                        authJson.put("displayName", authBase.getAuthDisplayName());
-                        authJson.put("desc", authBase.getAuthIntroduction());
+                        authJson.put("name", auth.toUpperCase(Locale.ROOT));
+                        if(authBase != null) {
+                            authJson.put("displayName", authBase.getAuthDisplayName());
+                            authJson.put("desc", authBase.getAuthIntroduction());
+                        }
                         authArray.add(authJson);
                     }
                 }
@@ -126,6 +132,7 @@ public class GetLicenseApi extends PrivateApiComponentBase {
                 moduleGroupArray.add(moduleGroupJson);
             }
         }
+        result.put("license",licenseMapper.getTenantLicenseByTenantUuid(tenant));
         TenantContext.get().setUseDefaultDatasource(false);
         return result;
     }
