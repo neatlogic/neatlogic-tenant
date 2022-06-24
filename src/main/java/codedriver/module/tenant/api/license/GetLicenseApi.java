@@ -124,7 +124,7 @@ public class GetLicenseApi extends PrivateApiComponentBase {
             operationJson.put("name", "ALL");
             operationJson.put("displayName", "所有");
             if (isAllModule) {
-                operationJson.put("desc", "拥有所有模块所有操作");
+                operationJson.put("desc", "拥有所有操作");
             } else {
                 operationJson.put("desc", "拥有此模块所有操作");
             }
