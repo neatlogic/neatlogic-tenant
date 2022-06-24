@@ -1,5 +1,5 @@
 /*
- * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -12,10 +12,8 @@ import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.license.LicenseManager;
-import codedriver.framework.restful.annotation.Description;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class UpdateLicenseApi extends PrivateApiComponentBase {
 
     @Resource
@@ -34,7 +33,7 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "跟新license";
+        return "更新许可";
     }
 
     @Override
@@ -48,11 +47,11 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "license", type = ApiParamType.STRING, desc = "license 串")
+            @Param(name = "license", type = ApiParamType.STRING, desc = "许可密钥")
     })
     @Output({
     })
-    @Description(desc = "跟新license接口,不存在则会insert")
+    @Description(desc = "更新许可接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String licenseStr = paramObj.getString("license");
@@ -60,14 +59,14 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
         String errLog;
         TenantContext.get().setUseDefaultDatasource(true);
         TenantVo tenantVo = tenantMapper.getTenantByUuid(tenantUuid);
-        if(StringUtils.isNotBlank(licenseStr)){
+        if (StringUtils.isNotBlank(licenseStr)) {
             errLog = LicenseManager.getLicenseVo(tenantUuid, licenseStr);
-            if(StringUtils.isBlank(errLog)) {
+            if (StringUtils.isBlank(errLog)) {
                 licenseMapper.insertLicenseByTenantUuid(tenantVo.getId(), tenantVo.getUuid(), licenseStr);
-            }else{
+            } else {
                 throw new ApiRuntimeException(errLog);
             }
-        }else{
+        } else {
             licenseStr = licenseMapper.getTenantLicenseByTenantUuid(tenantVo.getUuid());
             errLog = LicenseManager.getLicenseVo(tenantVo.getUuid(), licenseStr);
         }
