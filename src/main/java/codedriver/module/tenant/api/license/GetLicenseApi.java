@@ -1,5 +1,5 @@
 /*
- * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -124,9 +124,9 @@ public class GetLicenseApi extends PrivateApiComponentBase {
             operationJson.put("name", "ALL");
             operationJson.put("displayName", "所有");
             if (isAllModule) {
-                operationJson.put("desc", "拥有所有操作");
+                operationJson.put("desc", "允许进行所有操作");
             } else {
-                operationJson.put("desc", "拥有此模块所有操作");
+                operationJson.put("desc", "允许进行所有操作");
             }
             operationArray.add(operationJson);
         } else {
