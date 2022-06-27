@@ -11,8 +11,10 @@ import codedriver.framework.dao.mapper.LicenseMapper;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.license.LicenseManager;
-import codedriver.framework.restful.annotation.*;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.Output;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-@OperationType(type = OperationTypeEnum.UPDATE)
 public class UpdateLicenseApi extends PrivateApiComponentBase {
 
     @Resource
