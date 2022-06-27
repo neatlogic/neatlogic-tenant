@@ -10,6 +10,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.LicenseMapper;
 import codedriver.framework.dao.mapper.TenantMapper;
 import codedriver.framework.dto.TenantVo;
+import codedriver.framework.exception.core.LicenseInvalidException;
 import codedriver.framework.license.LicenseManager;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -63,7 +64,13 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
         }
         LicenseManager.initLicenseVo(tenantVo.getUuid(), licenseStr);
         if (StringUtils.isNotBlank(paramObj.getString("license"))) {
-            LicenseManager.initLicenseVo(tenantVo.getUuid(), licenseStr);
+            if (TenantContext.get().getLicenseVo() != null) {
+                long diffTime = TenantContext.get().getLicenseVo().getExpireTime().getTime() - System.currentTimeMillis();
+                if (TenantContext.get().getLicenseVo().isExpiredOutOfDay(diffTime)) {
+                    throw new LicenseInvalidException(tenantUuid, "license is expired", StringUtils.EMPTY);
+                }
+                licenseMapper.insertLicenseByTenantUuid(tenantVo.getId(), tenantVo.getUuid(), licenseStr);
+            }
         }
         TenantContext.get().setUseDefaultDatasource(false);
         return null;
