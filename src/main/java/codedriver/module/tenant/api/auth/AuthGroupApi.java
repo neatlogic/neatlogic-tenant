@@ -61,6 +61,7 @@ public class AuthGroupApi extends PrivateApiComponentBase {
         groupArray.add(new JSONObject() {
             {
                 this.put("text", "所有");
+                this.put("value", "all");
             }
         });
         List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();

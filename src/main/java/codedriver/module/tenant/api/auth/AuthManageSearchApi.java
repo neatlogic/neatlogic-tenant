@@ -63,6 +63,9 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
         List<AuthVo> authVoList = new ArrayList<>();
         String groupName = jsonObj.getString("groupName");
         String keyword = jsonObj.getString("keyword");
+        if ("all".equals(groupName)) {
+            groupName = null;
+        }
         List<AuthVo> roleAuthList = roleMapper.getRoleCountByAuth();
         Map<String, Integer> roleAuthMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(roleAuthList)) {
