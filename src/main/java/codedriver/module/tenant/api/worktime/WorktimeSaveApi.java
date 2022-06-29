@@ -16,10 +16,14 @@ import codedriver.framework.restful.core.IValid;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.RegexUtils;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
+import codedriver.framework.worktime.dto.WorktimeConfigVo;
+import codedriver.framework.worktime.dto.WorktimePeriodVo;
+import codedriver.framework.worktime.dto.WorktimeRangeVo;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import codedriver.framework.worktime.exception.WorktimeConfigIllegalException;
 import codedriver.framework.worktime.exception.WorktimeNameRepeatException;
 import codedriver.framework.worktime.exception.WorktimeStartTimeGreaterThanOrEqualToEndTimeException;
+import codedriver.module.tenant.service.WorktimeService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,9 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.time.DateTimeException;
-import java.time.DayOfWeek;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 @Service
@@ -41,6 +46,9 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private WorktimeMapper worktimeMapper;
+
+    @Resource
+    private WorktimeService worktimeService;
 
     @Override
     public String getToken() {
@@ -69,13 +77,13 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
     @Description(desc = "工作时间窗口信息保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        WorktimeVo worktimeVo = JSON.toJavaObject(jsonObj, WorktimeVo.class);
+        WorktimeVo worktimeVo = JSONObject.toJavaObject(jsonObj, WorktimeVo.class);
         if (worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
             throw new WorktimeNameRepeatException(worktimeVo.getName());
         }
         //验证config
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
-        JSONObject configJson = JSON.parseObject(worktimeVo.getConfig());
+        JSONObject configJson = jsonObj.getJSONObject("config");
         for (Entry<String, Object> entry : configJson.entrySet()) {
             try {
                 DayOfWeek.valueOf(entry.getKey().toUpperCase());
@@ -124,12 +132,20 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             worktimeMapper.updateWorktime(worktimeVo);
         }
 
+        List<Integer> yearList = worktimeMapper.getYearListByWorktimeUuid(uuid);
+        WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+        worktimeRangeVo.setWorktimeUuid(uuid);
+        for (Integer year : yearList) {
+            worktimeRangeVo.setYear(year);
+            List<String> dateList = worktimeMapper.getWorktimeDateList(worktimeRangeVo);
+            worktimeService.saveWorktimeRange(worktimeVo, year, dateList);
+        }
         return uuid;
     }
 
     public IValid name() {
         return value -> {
-            WorktimeVo worktimeVo = JSON.toJavaObject(value, WorktimeVo.class);
+            WorktimeVo worktimeVo = JSONObject.toJavaObject(value, WorktimeVo.class);
             if (worktimeMapper.checkWorktimeNameIsRepeat(worktimeVo) > 0) {
                 return new FieldValidResultVo(new WorktimeNameRepeatException(worktimeVo.getName()));
             }

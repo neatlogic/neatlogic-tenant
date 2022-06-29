@@ -15,9 +15,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.worktime.dao.mapper.WorktimeMapper;
+import codedriver.framework.worktime.dto.WorktimeConfigVo;
 import codedriver.framework.worktime.dto.WorktimeRangeVo;
 import codedriver.framework.worktime.dto.WorktimeVo;
 import codedriver.framework.worktime.exception.WorktimeNotFoundException;
+import codedriver.module.tenant.service.WorktimeService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -40,6 +42,9 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 
 	@Resource
 	private WorktimeMapper worktimeMapper;
+
+	@Resource
+	private WorktimeService worktimeService;
 	
 	@Override
 	public String getToken() {
@@ -69,51 +74,53 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 		if(worktimeVo == null) {
 			throw new WorktimeNotFoundException(worktimeUuid);
 		}
-		JSONObject config = JSON.parseObject(worktimeVo.getConfig());
-		
-		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
-		worktimeRangeVo.setWorktimeUuid(worktimeUuid);
+
 		Integer year = jsonObj.getInteger("year");
-		worktimeRangeVo.setYear(year);
-		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
-		
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm");
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-		WorktimeRangeVo worktimeRange = null;
-		JSONArray defineList = null;
-		List<WorktimeRangeVo> worktimeRangeList = new ArrayList<>();
 		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
-		List<String> dateList = generateDateList(calendarList);
-		for(String workDate : dateList) {
-			LocalDate localDate= LocalDate.from(dateFormatter.parse(workDate));
-			defineList = config.getJSONArray(localDate.getDayOfWeek().name().toLowerCase());
-			if(defineList == null) {
-				continue;
-			}
-
-			for(int i = 0; i < defineList.size(); i++) {
-				JSONObject define = defineList.getJSONObject(i);
-				worktimeRange = new WorktimeRangeVo();
-				worktimeRange.setWorktimeUuid(worktimeUuid);
-				worktimeRange.setYear(worktimeRangeVo.getYear());
-				worktimeRange.setDate(workDate);
-				LocalDateTime startLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("startTime")));
-				LocalDateTime endLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("endTime")));
-				long startTime = startLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
-				long endTime = endLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
-				worktimeRange.setStartTime(startTime);
-				worktimeRange.setEndTime(endTime);
-				worktimeRangeList.add(worktimeRange);
-				if(worktimeRangeList.size() > 1000) {
-					worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
-					worktimeRangeList.clear();
-				}
-			}	
-		}
-		if(worktimeRangeList.size() > 0) {
-			worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
-		}
+		worktimeService.saveWorktimeRange(worktimeVo, year, generateDateList(calendarList));
+//		JSONObject config = JSON.parseObject(worktimeVo.getConfig());
+//		WorktimeRangeVo worktimeRangeVo = new WorktimeRangeVo();
+//		worktimeRangeVo.setWorktimeUuid(worktimeUuid);
+//		worktimeRangeVo.setYear(year);
+//		worktimeMapper.deleteWorktimeRange(worktimeRangeVo);
+//
+//		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm");
+//		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//
+//		WorktimeRangeVo worktimeRange = null;
+//		JSONArray defineList = null;
+//		List<WorktimeRangeVo> worktimeRangeList = new ArrayList<>();
+//		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
+//		List<String> dateList = generateDateList(calendarList);
+//		for(String workDate : dateList) {
+//			LocalDate localDate= LocalDate.from(dateFormatter.parse(workDate));
+//			defineList = config.getJSONArray(localDate.getDayOfWeek().name().toLowerCase());
+//			if(defineList == null) {
+//				continue;
+//			}
+//
+//			for(int i = 0; i < defineList.size(); i++) {
+//				JSONObject define = defineList.getJSONObject(i);
+//				worktimeRange = new WorktimeRangeVo();
+//				worktimeRange.setWorktimeUuid(worktimeUuid);
+//				worktimeRange.setYear(worktimeRangeVo.getYear());
+//				worktimeRange.setDate(workDate);
+//				LocalDateTime startLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("startTime")));
+//				LocalDateTime endLocalDateTime = LocalDateTime.from(dateTimeFormatter.parse(workDate + " " + define.getString("endTime")));
+//				long startTime = startLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+//				long endTime = endLocalDateTime.toInstant(OffsetDateTime.now().getOffset()).toEpochMilli();
+//				worktimeRange.setStartTime(startTime);
+//				worktimeRange.setEndTime(endTime);
+//				worktimeRangeList.add(worktimeRange);
+//				if(worktimeRangeList.size() > 1000) {
+//					worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
+//					worktimeRangeList.clear();
+//				}
+//			}
+//		}
+//		if(worktimeRangeList.size() > 0) {
+//			worktimeMapper.insertBatchWorktimeRange(worktimeRangeList);
+//		}
 		return null;
 	}
 
