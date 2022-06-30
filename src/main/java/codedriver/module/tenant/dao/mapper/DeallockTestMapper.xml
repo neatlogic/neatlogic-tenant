@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+  ~ 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.module.tenant.dao.mapper.DeallockTestMapper">
+    <select id="getLockById" parameterType="java.lang.Long" resultType="codedriver.module.tenant.dto.DeallockTestVo">
+        SELECT `id`, `name` FROM `deallock_test` WHERE `id` = #{value} FOR UPDATE
+    </select>
+
+    <insert id="insert" parameterType="codedriver.module.tenant.dto.DeallockTestVo">
+        INSERT IGNORE INTO `deallock_test` (`id`, `name`) VALUES (#{id}, #{name})
+    </insert>
+
+    <update id="update" parameterType="codedriver.module.tenant.dto.DeallockTestVo">
+        UPDATE  `deallock_test` SET `name` = #{name} WHERE `id` = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM `deallock_test` WHERE `id` = #{value}
+    </delete>
+</mapper>
+
