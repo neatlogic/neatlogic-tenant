@@ -13,11 +13,9 @@ import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.constvalue.SystemUser;
 import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dto.UserVo;
-import codedriver.framework.exception.user.UserNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -68,9 +66,9 @@ public class UserGetWithCacheControlApi extends PrivateApiComponentBase {
 			userVo = userMapper.getUserSimpleInfoByUuid(userUuid);
 		}
 		if (userVo == null) {
-			throw new UserNotFoundException(userUuid);
+			return null;
 		}
-		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);// 防止修改cache vo
+		JSONObject userJson = JSONObject.parseObject(JSONObject.toJSONString(userVo));
 		//告诉前端是否为维护模式
 		userJson.put("isMaintenanceMode", 0);
 		if (Config.ENABLE_SUPERADMIN()) {
