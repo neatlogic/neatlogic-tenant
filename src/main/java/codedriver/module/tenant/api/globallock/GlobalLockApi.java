@@ -6,7 +6,7 @@ import codedriver.framework.globallock.core.GlobalLockHandlerFactory;
 import codedriver.framework.globallock.core.IGlobalLockHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class GlobalLockPublicApi extends PublicApiComponentBase {
+public class GlobalLockApi extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
