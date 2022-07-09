@@ -13,7 +13,7 @@ import codedriver.framework.auth.label.LICENSE_MODIFY;
 import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dao.mapper.LicenseMapper;
 import codedriver.framework.dao.mapper.TenantMapper;
-import codedriver.framework.dto.ModuleGroupVo;
+import codedriver.framework.dto.module.ModuleGroupVo;
 import codedriver.framework.dto.TenantVo;
 import codedriver.framework.dto.license.LicenseAuthModuleGroupVo;
 import codedriver.framework.dto.license.LicenseAuthVo;

@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tenant.api.theme;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -12,11 +17,11 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Objects;
 
 /**
  * @author longrf
@@ -55,7 +60,7 @@ public class ThemeSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         ThemeVo themeVo = paramObj.toJavaObject(ThemeVo.class);
         themeMapper.deleteTheme();
-        if (!Objects.isNull(themeVo.getConfig())) {
+        if (MapUtils.isNotEmpty(themeVo.getConfig())) {
             themeMapper.insertTheme(themeVo);
         }
         return null;
