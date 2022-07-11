@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.module;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.MODULE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.initialdata.core.InitialDataManager;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -41,9 +42,8 @@ public class ValidModuleInitialDataApi extends PrivateBinaryStreamApiComponentBa
         return null;
     }
 
-    @Input({
-            @Param(name = "file", type = ApiParamType.FILE, isRequired = true, desc = "导入文件")})
-    @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "数据表清单")})
+    @Input({@Param(name = "file", type = ApiParamType.FILE, isRequired = true, desc = "导入文件")})
+    @Output({@Param(name = "Return", explode = ValueTextVo[].class, type = ApiParamType.STRING, desc = "数据表清单")})
     @Description(desc = "校验模块初始化数据接口")
     @Override
     public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -51,7 +51,7 @@ public class ValidModuleInitialDataApi extends PrivateBinaryStreamApiComponentBa
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         MultipartFile multipartFile = multipartRequest.getFile("file");
         if (multipartFile != null) {
-            return InitialDataManager.validData(multipartFile.getInputStream());
+            return InitialDataManager.validData(moduleId, multipartFile.getInputStream());
         }
         return null;
     }
