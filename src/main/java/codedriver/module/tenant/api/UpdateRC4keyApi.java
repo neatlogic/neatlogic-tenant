@@ -9,10 +9,12 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.AUTHORITY_MODIFY;
 import codedriver.framework.autoexec.crossover.IAutoexecGlobalParamCrossoverMapper;
+import codedriver.framework.autoexec.crossover.IAutoexecProfileCrossoverMapper;
 import codedriver.framework.autoexec.dao.mapper.AutoexecCombopMapper;
 import codedriver.framework.autoexec.dao.mapper.AutoexecScriptMapper;
 import codedriver.framework.autoexec.dto.combop.AutoexecCombopParamVo;
 import codedriver.framework.autoexec.dto.global.param.AutoexecGlobalParamVo;
+import codedriver.framework.autoexec.dto.profile.AutoexecProfileParamVo;
 import codedriver.framework.autoexec.dto.script.AutoexecScriptVersionParamVo;
 import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
@@ -144,6 +146,16 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
                 String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
                 autoexecScriptMapper.updateScriptVersionParamPassword(autoexecScriptVersionParamVo, newPassword);
+            }
+        }
+        //autoexec_profile_param
+        IAutoexecProfileCrossoverMapper autoexecProfileCrossoverMapper = CrossoverServiceFactory.getApi(IAutoexecProfileCrossoverMapper.class);
+        List<AutoexecProfileParamVo> autoexecProfileParamVos = autoexecProfileCrossoverMapper.getAllProfileParamList();
+        for (AutoexecProfileParamVo autoexecProfileParamVo : autoexecProfileParamVos) {
+            String oldPassword = autoexecProfileParamVo.getDefaultValueStr();
+            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
+                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
+                autoexecProfileCrossoverMapper.updateProfileParamPassword(autoexecProfileParamVo, newPassword);
             }
         }
         return null;
