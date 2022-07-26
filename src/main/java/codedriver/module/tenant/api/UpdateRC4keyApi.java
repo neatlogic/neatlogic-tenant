@@ -14,7 +14,7 @@ import codedriver.framework.autoexec.dao.mapper.AutoexecScriptMapper;
 import codedriver.framework.autoexec.dto.combop.AutoexecCombopParamVo;
 import codedriver.framework.autoexec.dto.global.param.AutoexecGlobalParamVo;
 import codedriver.framework.autoexec.dto.script.AutoexecScriptVersionParamVo;
-import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.RC4Util;
@@ -49,8 +49,6 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
     MongoDbMapper mongoDbMapper;
     @Resource
     ApiMapper apiMapper;
-    @Resource
-    ResourceCenterMapper resourceCenterMapper;
     @Resource
     AutoexecScriptMapper autoexecScriptMapper;
     @Resource
@@ -109,13 +107,14 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
                 apiMapper.updatePasswordByToken(apiVo.getToken(), newPassword);
             }
         }
+        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         //cmdb account
-        List<AccountVo> accounts = resourceCenterMapper.getAllAccountList();
+        List<AccountVo> accounts = resourceAccountCrossoverMapper.getAllAccountList();
         for (AccountVo account : accounts) {
             String oldPassword = account.getPasswordCipher();
             if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
                 String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
-                resourceCenterMapper.updateAccountPasswordById(account.getId(), newPassword);
+                resourceAccountCrossoverMapper.updateAccountPasswordById(account.getId(), newPassword);
             }
         }
         //autoexec global param
