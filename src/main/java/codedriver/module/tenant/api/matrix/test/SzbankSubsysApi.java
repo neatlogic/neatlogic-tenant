@@ -14,6 +14,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +67,7 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
             @Param(name = "subSysId", type = ApiParamType.LONG, desc = "子系统id"),
             @Param(name = "subSysName", type = ApiParamType.STRING, desc = "子系统名"),
             @Param(name = "subSysDesc", type = ApiParamType.STRING, desc = "子系统描述"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "唯一标识数组"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
@@ -78,6 +80,16 @@ public class SzbankSubsysApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<SubSysVo> resultList = new ArrayList<>();
         SubSysVo searchVo = JSONObject.toJavaObject(paramObj, SubSysVo.class);
+        JSONArray defaultValue = searchVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<Long> idList = defaultValue.toJavaList(Long.class);
+            for (SubSysVo subSysVo : staticSubSysList) {
+                if (idList.contains(subSysVo.getSubSysId())) {
+                    resultList.add(subSysVo);
+                }
+            }
+            return TableResultUtil.getResult(resultList, searchVo);
+        }
         for (SubSysVo subSysVo : staticSubSysList) {
             if (searchVo.getSubSysId() != null) {
                 if (!Objects.equals(searchVo.getSubSysId(), subSysVo.getSubSysId())) {
