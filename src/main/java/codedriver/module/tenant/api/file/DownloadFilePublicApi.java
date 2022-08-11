@@ -7,10 +7,12 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicBinaryStreamApiComponentBase;
-import codedriver.framework.service.FileService;
+import codedriver.module.framework.service.FileService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadFilePublicApi extends PublicBinaryStreamApiComponentBase {
-
-    @Resource
-    private FileService fileService;
 
     @Override
     public String getName() {
@@ -41,7 +40,8 @@ public class DownloadFilePublicApi extends PublicBinaryStreamApiComponentBase {
     @Description(desc = "附件下载接口(供第三方使用)")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        fileService.downloadFile(paramObj, request, response);
+        IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+        fileCrossoverService.downloadFile(paramObj, request, response);
         return null;
     }
 
