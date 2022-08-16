@@ -7,6 +7,7 @@ package codedriver.module.tenant.api.file;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.file.EmptyFileException;
@@ -159,8 +160,11 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                     try {
                         filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
                     } catch (Exception ex) {
+                        //如果没有配置minioUrl，则表示不使用minio，无需抛异常
+                        if (StringUtils.isNotBlank(Config.MINIO_URL())) {
+                            logger.error(ex.getMessage(), ex);
+                        }
                         // 如果minio出现异常，则上传到本地
-                        logger.error(ex.getMessage(), ex);
                         filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
                     }
                     fileVo.setPath(filePath);
