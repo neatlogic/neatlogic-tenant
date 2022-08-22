@@ -128,14 +128,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         config.setParamList(systemParamList);
         config.setConditionOptionList(systemConditionOptionList);
-        List<String> adminUserUuidList = config.getAdminUserUuidList();
-        if (CollectionUtils.isNotEmpty(adminUserUuidList)) {
-            List<UserVo> userList = userMapper.getUserByUserUuidList(adminUserUuidList);
-            if(CollectionUtils.isNotEmpty(userList)){
-                List<String> list = userList.stream().map(o -> GroupSearch.USER.getValuePlugin() + o.getUuid()).collect(Collectors.toList());
-                config.setUserList(list);
-            }
-        }
+
         int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
         return notifyPolicyVo;
