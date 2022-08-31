@@ -55,7 +55,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,fixed"),
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private"),
             @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
             @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
             @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
@@ -100,9 +100,9 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             return returnObj;
         }
 
-        int fixedCount = MatrixPrivateDataSourceHandlerFactory.getCount(searchVo);
+        int privateCount = MatrixPrivateDataSourceHandlerFactory.getCount(searchVo);
         int dynamicCount = matrixMapper.searchMatrixCount(searchVo);
-        int rowNum = dynamicCount + fixedCount;
+        int rowNum = dynamicCount + privateCount;
         searchVo.setRowNum(rowNum);
         int currentPage = searchVo.getCurrentPage();
         int pageCount = searchVo.getPageCount();
@@ -114,18 +114,18 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
         int fromIndex = searchVo.getStartNum();
         int toIndex = fromIndex + searchVo.getPageSize();
         toIndex = toIndex >  rowNum ? rowNum : toIndex;
-        if (fromIndex < fixedCount && toIndex <= fixedCount) {
+        if (fromIndex < privateCount && toIndex <= privateCount) {
             //当前页数据全部在内存中
             tbodyList = MatrixPrivateDataSourceHandlerFactory.getList(searchVo);
-        } else if (fromIndex < fixedCount && toIndex > fixedCount) {
+        } else if (fromIndex < privateCount && toIndex > privateCount) {
             //当前页数据有部分在内存中，有部分在数据库中
-            List<MatrixVo> fixedList = MatrixPrivateDataSourceHandlerFactory.getList(searchVo);
-            tbodyList.addAll(fixedList);
-            List<MatrixVo> dynamicList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), 0, pageSize - fixedList.size());
+            List<MatrixVo> privateList = MatrixPrivateDataSourceHandlerFactory.getList(searchVo);
+            tbodyList.addAll(privateList);
+            List<MatrixVo> dynamicList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), 0, pageSize - privateList.size());
             tbodyList.addAll(dynamicList);
         } else {
             //当前页数据全部在数据库中
-            tbodyList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), fromIndex - fixedCount, pageSize);
+            tbodyList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), fromIndex - privateCount, pageSize);
         }
         for (MatrixVo matrixVo : tbodyList) {
             int referenceCount = DependencyManager.getDependencyCount(FrameworkFromType.MATRIX, matrixVo.getUuid());

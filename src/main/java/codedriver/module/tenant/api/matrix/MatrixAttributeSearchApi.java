@@ -64,12 +64,12 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
     }
     @Input({
             @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,fixed"),
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private"),
             @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id")
     })
     @Output({
             @Param(name = "tbodyList", desc = "矩阵属性集合", explode = MatrixAttributeVo[].class),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,fixed")
+            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private")
     })
     @Description(desc = "矩阵属性检索接口")
     @Override
