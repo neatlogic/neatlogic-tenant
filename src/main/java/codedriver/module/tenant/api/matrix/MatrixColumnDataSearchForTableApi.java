@@ -10,6 +10,7 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
+import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
@@ -84,13 +85,16 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         if (CollectionUtils.isEmpty(columnList)) {
             throw new ParamIrregularException("columnList");
         }
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
         if (matrixVo == null) {
-            throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            }
         }
         JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
-        JSONArray dafaultValue = dataVo.getDefaultValue();
-        if (CollectionUtils.isEmpty(dafaultValue)) {
+        JSONArray defaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isEmpty(defaultValue)) {
             JSONArray uuidList = jsonObj.getJSONArray("uuidList");
             dataVo.setDefaultValue(uuidList);
         }

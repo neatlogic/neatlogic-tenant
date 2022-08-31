@@ -63,7 +63,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", xss = true),
             @Param(name = "label", type = ApiParamType.REGEX, rule = RegexUtils.ENGLISH_NAME, desc = "矩阵唯一标识", xss = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci", desc = "矩阵类型"),
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
             @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
             @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id"),

@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
+import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixVo;
 import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
@@ -52,14 +53,17 @@ public class MatrixGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
+        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(uuid);
         if (matrixVo == null) {
-            throw new MatrixNotFoundException(uuid);
+            matrixVo = matrixMapper.getMatrixByUuid(uuid);
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(uuid);
+            }
         }
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        return matrixDataSourceHandler.getMatrix(matrixVo.getUuid());
+        return matrixDataSourceHandler.getMatrix(matrixVo);
     }
 }
