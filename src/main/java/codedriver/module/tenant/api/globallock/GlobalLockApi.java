@@ -1,16 +1,20 @@
 package codedriver.module.tenant.api.globallock;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.form.dao.mapper.FormMapper;
+import codedriver.framework.globallock.GlobalLockManager;
 import codedriver.framework.globallock.core.GlobalLockHandlerFactory;
 import codedriver.framework.globallock.core.IGlobalLockHandler;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
@@ -35,7 +39,7 @@ public class GlobalLockApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "operType", type = ApiParamType.ENUM, rule = "auto,deploy", isRequired = true, desc = "来源类型"),
+            @Param(name = "operType", type = ApiParamType.ENUM, rule = "auto,deploy", desc = "来源类型"),
             @Param(name = "action", type = ApiParamType.ENUM, rule = "lock,unlock,cancel,retry", isRequired = true, desc = "执行动作"),
             @Param(name = "lockId", type = ApiParamType.LONG, desc = "锁id")
     })
@@ -48,15 +52,25 @@ public class GlobalLockApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String action = jsonObj.getString("action");
-        String handler = jsonObj.getString("operType");
         Long lockId = jsonObj.getLong("lockId");
-        IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
-        switch (action){
-            case "lock": return globalLockHandler.getLock(jsonObj);
-            case "unlock":
-            case "cancel":
-                return globalLockHandler.cancelLock(lockId,jsonObj);
-            case "retry": globalLockHandler.retryLock(lockId,jsonObj);break;
+        String handler = jsonObj.getString("operType");
+        if (StringUtils.isBlank(handler)) {
+            if (Objects.equals(action, "cancel")) {
+                GlobalLockManager.cancelLock(lockId);
+            } else {
+                throw new ParamIrregularException("operType");
+            }
+        } else {
+            IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
+            switch (action) {
+                case "lock":
+                    return globalLockHandler.getLock(jsonObj);
+                case "unlock":
+                    return globalLockHandler.unLock(lockId, jsonObj);
+                case "retry":
+                    globalLockHandler.retryLock(lockId, jsonObj);
+                    break;
+            }
         }
         return null;
     }
