@@ -93,8 +93,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             }
         }
         JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
-        JSONArray dafaultValue = dataVo.getDefaultValue();
-        if (CollectionUtils.isEmpty(dafaultValue)) {
+        JSONArray defaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isEmpty(defaultValue)) {
             JSONArray uuidList = jsonObj.getJSONArray("uuidList");
             dataVo.setDefaultValue(uuidList);
         }

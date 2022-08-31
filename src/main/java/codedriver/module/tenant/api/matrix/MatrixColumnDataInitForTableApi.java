@@ -79,8 +79,8 @@ public class MatrixColumnDataInitForTableApi extends PrivateApiComponentBase {
         if (matrixVo == null) {
             throw new MatrixNotFoundException(dataVo.getMatrixUuid());
         }
-        JSONArray dafaultValue = dataVo.getDefaultValue();
-        if (CollectionUtils.isEmpty(dafaultValue)) {
+        JSONArray defaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isEmpty(defaultValue)) {
             JSONArray uuidList = jsonObj.getJSONArray("uuidList");
             dataVo.setDefaultValue(uuidList);
         }
