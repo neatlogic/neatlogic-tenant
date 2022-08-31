@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
+import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
@@ -75,9 +76,12 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
     public Object myDoService(JSONObject jsonObj) throws Exception {
         jsonObj.remove("needPage");
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
         if (matrixVo == null) {
-            throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            }
         }
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {

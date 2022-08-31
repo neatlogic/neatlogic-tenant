@@ -8,6 +8,7 @@ package codedriver.module.tenant.api.matrix;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
+import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
@@ -55,52 +56,18 @@ public class MatrixDataGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MatrixDataVo dataVo = JSONObject.toJavaObject(jsonObj, MatrixDataVo.class);
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
         if (matrixVo == null) {
-            throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+            if (matrixVo == null) {
+                throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+            }
         }
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
         return matrixDataSourceHandler.getTableRowData(dataVo);
-//        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-//            List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(dataVo.getMatrixUuid());
-//            if (CollectionUtils.isNotEmpty(attributeVoList)) {
-//                List<String> columnList = attributeVoList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-//                dataVo.setColumnList(columnList);
-//                Map<String, String> rowData = matrixDataMapper.getDynamicRowDataByUuid(dataVo);
-//                for (MatrixAttributeVo attributeVo : attributeVoList) {
-//                    if (MatrixAttributeType.USER.getValue().equals(attributeVo.getType())) {
-//                        String value = rowData.get(attributeVo.getUuid());
-//                        if (value != null) {
-//                            value = GroupSearch.USER.getValuePlugin() + value;
-//                            rowData.put(attributeVo.getUuid(), value);
-//                        }
-//                    } else if (MatrixAttributeType.TEAM.getValue().equals(attributeVo.getType())) {
-//                        String value = rowData.get(attributeVo.getUuid());
-//                        if (value != null) {
-//                            value = GroupSearch.TEAM.getValuePlugin() + value;
-//                            rowData.put(attributeVo.getUuid(), value);
-//                        }
-//                    } else if (MatrixAttributeType.ROLE.getValue().equals(attributeVo.getType())) {
-//                        String value = rowData.get(attributeVo.getUuid());
-//                        if (value != null) {
-//                            value = GroupSearch.ROLE.getValuePlugin() + value;
-//                            rowData.put(attributeVo.getUuid(), value);
-//                        }
-//                    }
-//                }
-//                return rowData;
-//            }
-//        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixExternalEditRowDataException();
-//        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixViewEditRowDataException();
-//        }
-
-
-//        return null;
     }
 
 }
