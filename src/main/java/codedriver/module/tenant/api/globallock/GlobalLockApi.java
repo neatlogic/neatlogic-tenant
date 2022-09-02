@@ -1,7 +1,6 @@
 package codedriver.module.tenant.api.globallock;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.globallock.GlobalLockManager;
 import codedriver.framework.globallock.core.GlobalLockHandlerFactory;
@@ -10,7 +9,6 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -54,12 +52,9 @@ public class GlobalLockApi extends PrivateApiComponentBase {
         String action = jsonObj.getString("action");
         Long lockId = jsonObj.getLong("lockId");
         String handler = jsonObj.getString("operType");
-        if (StringUtils.isBlank(handler)) {
-            if (Objects.equals(action, "cancel")) {
-                GlobalLockManager.cancelLock(lockId);
-            } else {
-                throw new ParamIrregularException("operType");
-            }
+
+        if (Objects.equals(action, "cancel")) {
+            GlobalLockManager.cancelLock(lockId);
         } else {
             IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
             switch (action) {
