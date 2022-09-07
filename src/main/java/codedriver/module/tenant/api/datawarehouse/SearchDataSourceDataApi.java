@@ -85,6 +85,7 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
             for (DataSourceFieldVo fieldVo : reportDataSourceVo.getFieldList()) {
                 JSONObject headObj = new JSONObject();
                 headObj.put("key", "field_" + fieldVo.getId());
+                headObj.put("name", fieldVo.getName());
                 headObj.put("title", fieldVo.getLabel());
                 headerList.add(headObj);
             }
