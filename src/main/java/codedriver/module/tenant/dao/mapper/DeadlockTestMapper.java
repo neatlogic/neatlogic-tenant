@@ -5,15 +5,15 @@
 
 package codedriver.module.tenant.dao.mapper;
 
-import codedriver.module.tenant.dto.DeallockTestVo;
+import codedriver.module.tenant.dto.DeadlockTestVo;
 
-public interface DeallockTestMapper {
+public interface DeadlockTestMapper {
 
-    DeallockTestVo getLockById(Long id);
+    DeadlockTestVo getLockById(Long id);
 
-    int insert(DeallockTestVo deallockTestVo);
+    int insert(DeadlockTestVo deadlockTestVo);
 
-    int update(DeallockTestVo deallockTestVo);
+    int update(DeadlockTestVo deadlockTestVo);
 
     int delete(Long id);
 }
