@@ -72,6 +72,6 @@ public class UpdateLicenseApi extends PrivateApiComponentBase {
 
     @Override
     public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
-        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITH_ENCRYPTION;
+        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITHOUT_ENCRYPTION;
     }
 }
