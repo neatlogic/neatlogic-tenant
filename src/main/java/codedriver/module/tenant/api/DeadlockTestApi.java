@@ -10,8 +10,8 @@ import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.module.tenant.dao.mapper.DeallockTestMapper;
-import codedriver.module.tenant.dto.DeallockTestVo;
+import codedriver.module.tenant.dao.mapper.DeadlockTestMapper;
+import codedriver.module.tenant.dto.DeadlockTestVo;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +22,15 @@ import javax.annotation.Resource;
 
 @Service
 @Transactional
-public class DeallockTestApi extends PrivateApiComponentBase {
+public class DeadlockTestApi extends PrivateApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(DeallockTestApi.class);
+    private final static Logger logger = LoggerFactory.getLogger(DeadlockTestApi.class);
     @Resource
-    private DeallockTestMapper deallockTestMapper;
+    private DeadlockTestMapper deadlockTestMapper;
 
     @Override
     public String getToken() {
-        return "deallock/test";
+        return "deadlock/test";
     }
 
     @Override
@@ -57,32 +57,32 @@ public class DeallockTestApi extends PrivateApiComponentBase {
         Long id1 = paramObj.getLong("id1");
         Long id2 = paramObj.getLong("id2");
         if ("select".equals(action)) {
-            DeallockTestVo deallockTest1 = deallockTestMapper.getLockById(id1);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest1));
+            DeadlockTestVo deadlockTest1 = deadlockTestMapper.getLockById(id1);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest1));
             Thread.sleep(5000);
-            DeallockTestVo deallockTest2 = deallockTestMapper.getLockById(id2);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest2));
+            DeadlockTestVo deadlockTest2 = deadlockTestMapper.getLockById(id2);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest2));
         } else if ("insert".equals(action)) {
-            DeallockTestVo deallockTest1 = new DeallockTestVo(id1);
-            deallockTestMapper.insert(deallockTest1);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest1));
+            DeadlockTestVo deadlockTest1 = new DeadlockTestVo(id1);
+            deadlockTestMapper.insert(deadlockTest1);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest1));
             Thread.sleep(5000);
-            DeallockTestVo deallockTest2 = new DeallockTestVo(id2);
-            deallockTestMapper.insert(deallockTest2);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest2));
+            DeadlockTestVo deadlockTest2 = new DeadlockTestVo(id2);
+            deadlockTestMapper.insert(deadlockTest2);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest2));
         } else if ("update".equals(action)) {
-            DeallockTestVo deallockTest1 = new DeallockTestVo(id1);
-            deallockTestMapper.update(deallockTest1);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest1));
+            DeadlockTestVo deadlockTest1 = new DeadlockTestVo(id1);
+            deadlockTestMapper.update(deadlockTest1);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest1));
             Thread.sleep(5000);
-            DeallockTestVo deallockTest2 = new DeallockTestVo(id2);
-            deallockTestMapper.update(deallockTest2);
-            logger.error(label + "=" + JSONObject.toJSONString(deallockTest2));
+            DeadlockTestVo deadlockTest2 = new DeadlockTestVo(id2);
+            deadlockTestMapper.update(deadlockTest2);
+            logger.error(label + "=" + JSONObject.toJSONString(deadlockTest2));
         } else if ("delete".equals(action)) {
-            deallockTestMapper.delete(id1);
+            deadlockTestMapper.delete(id1);
             logger.error(label + "=" + JSONObject.toJSONString(id1));
             Thread.sleep(5000);
-            deallockTestMapper.delete(id2);
+            deadlockTestMapper.delete(id2);
             logger.error(label + "=" + JSONObject.toJSONString(id2));
         }
         return null;

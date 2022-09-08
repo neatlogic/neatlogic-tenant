@@ -5,16 +5,16 @@
 
 package codedriver.module.tenant.dto;
 
-public class DeallockTestVo {
+public class DeadlockTestVo {
 
     private Long id;
 
     private String name;
 
-    public DeallockTestVo() {
+    public DeadlockTestVo() {
 
     }
-    public DeallockTestVo(Long id) {
+    public DeadlockTestVo(Long id) {
         this.id = id;
         this.name = "name_" + id;
     }
