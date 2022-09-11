@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -33,44 +33,46 @@ import org.springframework.transaction.annotation.Transactional;
 @OperationType(type = OperationTypeEnum.DELETE)
 public class JobDeleteApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private SchedulerManager schedulerManager;
+    @Autowired
+    private SchedulerManager schedulerManager;
 
-	@Autowired
-	private SchedulerMapper schedulerMapper;
+    @Autowired
+    private SchedulerMapper schedulerMapper;
 
-	@Override
-	public String getToken() {
-		return "job/delete";
-	}
+    @Override
+    public String getToken() {
+        return "job/delete";
+    }
 
-	@Override
-	public String getName() {
-		return "删除定时作业";
-	}
+    @Override
+    public String getName() {
+        return "删除定时作业";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid") })
-	@Description(desc = "删除定时作业")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String jobUuid = jsonObj.getString("uuid");
-		JobVo job = schedulerMapper.getJobBaseInfoByUuid(jobUuid);
-		if (job == null) {
-			throw new ScheduleJobNotFoundException(jobUuid);
-		}
-		String tenantUuid = TenantContext.get().getTenantUuid();
-		IJob jobHandler = SchedulerManager.getHandler(job.getHandler());
-		JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
-		schedulerManager.unloadJob(jobObject);
-		schedulerMapper.deleteJobAuditByJobUuid(jobUuid);
-		schedulerMapper.deleteJobPropByJobUuid(jobUuid);
-		schedulerMapper.deleteJobByUuid(jobUuid);
-		return null;
-	}
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid")})
+    @Description(desc = "删除定时作业")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String jobUuid = jsonObj.getString("uuid");
+        JobVo job = schedulerMapper.getJobBaseInfoByUuid(jobUuid);
+        if (job == null) {
+            throw new ScheduleJobNotFoundException(jobUuid);
+        }
+        String tenantUuid = TenantContext.get().getTenantUuid();
+        IJob jobHandler = SchedulerManager.getHandler(job.getHandler());
+        if (jobHandler != null) {
+            JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
+            schedulerManager.unloadJob(jobObject);
+        }
+        schedulerMapper.deleteJobAuditByJobUuid(jobUuid);
+        schedulerMapper.deleteJobPropByJobUuid(jobUuid);
+        schedulerMapper.deleteJobByUuid(jobUuid);
+        return null;
+    }
 
 }
