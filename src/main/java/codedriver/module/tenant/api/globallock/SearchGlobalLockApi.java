@@ -35,7 +35,7 @@ public class SearchGlobalLockApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词", xss = true),
+            @Param(name = "keywordParam", type = ApiParamType.JSONOBJECT, desc = "过滤关键词", xss = true),
             @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器", xss = true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
