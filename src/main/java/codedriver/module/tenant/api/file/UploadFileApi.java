@@ -10,10 +10,7 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
-import codedriver.framework.exception.file.EmptyFileException;
-import codedriver.framework.exception.file.FileExtNotAllowedException;
-import codedriver.framework.exception.file.FileTooLargeException;
-import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
+import codedriver.framework.exception.file.*;
 import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
@@ -66,7 +63,8 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true)})
+            @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
+            @Param(name = "uniqueKey", type = ApiParamType.STRING, desc = "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复")})
     @Output({@Param(explode = FileVo.class)})
     @Description(desc = "附件上传接口")
     @Override
@@ -78,6 +76,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         String paramName = paramObj.getString("param");
         String type = paramObj.getString("type");
+        String uniqueKey = paramObj.getString("uniqueKey");
         List<FileTypeVo> fileTypeList = FileTypeHandlerFactory.getActiveFileTypeHandler();
         FileTypeVo fileTypeVo = null;
         for (FileTypeVo f : fileTypeList) {
@@ -97,6 +96,9 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
             IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(type);
             if (fileTypeHandler == null) {
                 throw new FileTypeHandlerNotFoundException(type);
+            }
+            if (fileTypeHandler.needSave() && fileTypeHandler.isUnique() && StringUtils.isBlank(uniqueKey)) {
+                throw new FileUniqueKeyEmptyException();
             }
             if (fileTypeHandler.beforeUpload(paramObj)) {
                 multipartFile.getName();
@@ -156,6 +158,12 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setType(type);
                 fileVo.setContentType(multipartFile.getContentType());
                 if (fileTypeHandler.needSave()) {
+                    FileVo oldFileVo = null;
+                    if (fileTypeHandler.isUnique()) {
+                        String uk = fileTypeHandler.getUniqueKey(uniqueKey);
+                        fileVo.setUniqueKey(uk);
+                        oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), uk);
+                    }
                     String filePath;
                     try {
                         filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
@@ -168,10 +176,17 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
                     }
                     fileVo.setPath(filePath);
-                    fileMapper.insertFile(fileVo);
+                    if (oldFileVo == null) {
+                        fileMapper.insertFile(fileVo);
+                    } else {
+                        FileUtil.deleteData(oldFileVo.getPath());
+                        fileVo.setId(oldFileVo.getId());
+                        fileMapper.updateFile(fileVo);
+                    }
                     fileTypeHandler.afterUpload(fileVo, paramObj);
                     FileVo file = fileMapper.getFileById(fileVo.getId());
                     file.setUrl("api/binary/file/download?id=" + fileVo.getId());
+
                     return file;
                 } else {
                     fileTypeHandler.analyze(multipartFile, paramObj);
