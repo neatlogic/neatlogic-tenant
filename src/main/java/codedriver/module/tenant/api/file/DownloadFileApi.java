@@ -101,10 +101,8 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                         response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
                         os = response.getOutputStream();
                         IOUtils.copyLarge(in, os);
-                        if (os != null) {
-                            os.flush();
-                            os.close();
-                        }
+                        os.flush();
+                        os.close();
                         in.close();
                     }
                 } else {
