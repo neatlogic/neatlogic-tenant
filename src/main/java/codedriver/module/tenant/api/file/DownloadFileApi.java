@@ -31,6 +31,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -58,58 +59,74 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "附件id", isRequired = true)})
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "附件id", isRequired = true),
+            @Param(name = "lastModified", type = ApiParamType.DOUBLE, desc = "最后修改时间（秒，支持小数位）")})
     @Description(desc = "附件下载接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long id = paramObj.getLong("id");
+        long lastModifiedLong = 0L;
+        boolean isNeedDownLoad = false;
         FileVo fileVo = fileMapper.getFileById(id);
         String tenantUuid = TenantContext.get().getTenantUuid();
         if (StringUtils.isBlank(tenantUuid)) {
             throw new NoTenantException();
         }
         if (fileVo != null) {
-            String userUuid = UserContext.get().getUserUuid();
-            IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
-            if (fileTypeHandler != null) {
-                if (StringUtils.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
-                    ServletOutputStream os;
-                    InputStream in;
-                    in = FileUtil.getData(fileVo.getPath());
-                    if (in != null) {
-                        String fileNameEncode;
-                        boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-                        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                            fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
-                            /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
-                            fileNameEncode = fileNameEncode.replace("%40", "@");
-                            fileNameEncode = fileNameEncode.replace("%23", "#");
-                            fileNameEncode = fileNameEncode.replace("%24", "$");
-                            fileNameEncode = fileNameEncode.replace("%26", "&");
-                            fileNameEncode = fileNameEncode.replace("%2B", "+");
-                            fileNameEncode = fileNameEncode.replace("%3D", "=");
-                            fileNameEncode = fileNameEncode.replace("%3B", ";");
-                        } else {
-                            fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-                        }
+            if (paramObj.getDouble("lastModified") != null) {
+                BigDecimal lastModifiedDec = new BigDecimal(Double.toString(paramObj.getDouble("lastModified")));
+                lastModifiedLong = lastModifiedDec.multiply(new BigDecimal("1000")).longValue();
+            }
+            if (lastModifiedLong == 0L || lastModifiedLong < fileVo.getUploadTime().getTime()) {
+                String userUuid = UserContext.get().getUserUuid();
+                IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
+                if (fileTypeHandler != null) {
+                    if (StringUtils.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
+                        ServletOutputStream os;
+                        InputStream in;
+                        in = FileUtil.getData(fileVo.getPath());
+                        if (in != null) {
+                            String fileNameEncode;
+                            boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+                            if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+                                fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
+                                /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
+                                fileNameEncode = fileNameEncode.replace("%40", "@");
+                                fileNameEncode = fileNameEncode.replace("%23", "#");
+                                fileNameEncode = fileNameEncode.replace("%24", "$");
+                                fileNameEncode = fileNameEncode.replace("%26", "&");
+                                fileNameEncode = fileNameEncode.replace("%2B", "+");
+                                fileNameEncode = fileNameEncode.replace("%3D", "=");
+                                fileNameEncode = fileNameEncode.replace("%3B", ";");
+                            } else {
+                                fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+                            }
 
-                        if (StringUtils.isBlank(fileVo.getContentType())) {
-                            response.setContentType("application/octet-stream");
-                        } else {
-                            response.setContentType(fileVo.getContentType());
+                            if (StringUtils.isBlank(fileVo.getContentType())) {
+                                response.setContentType("application/octet-stream");
+                            } else {
+                                response.setContentType(fileVo.getContentType());
+                            }
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
+                            os = response.getOutputStream();
+                            IOUtils.copyLarge(in, os);
+                            os.flush();
+                            os.close();
+                            in.close();
                         }
-                        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-                        os = response.getOutputStream();
-                        IOUtils.copyLarge(in, os);
-                        os.flush();
-                        os.close();
-                        in.close();
+                        isNeedDownLoad = true;
+                    } else {
+                        throw new FileAccessDeniedException(fileVo.getName(), "下载");
                     }
                 } else {
-                    throw new FileAccessDeniedException(fileVo.getName(), "下载");
+                    throw new FileTypeHandlerNotFoundException(fileVo.getType());
                 }
-            } else {
-                throw new FileTypeHandlerNotFoundException(fileVo.getType());
+            }
+            if (!isNeedDownLoad) {
+                if (response != null) {
+                    response.setStatus(204);
+                    response.getWriter().print(StringUtils.EMPTY);
+                }
             }
         } else {
             throw new FileNotFoundException(id);
