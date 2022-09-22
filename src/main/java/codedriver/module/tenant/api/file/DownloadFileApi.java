@@ -31,6 +31,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -86,28 +87,12 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                         InputStream in;
                         in = FileUtil.getData(fileVo.getPath());
                         if (in != null) {
-                            String fileNameEncode;
-                            boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-                            if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-                                fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
-                                /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
-                                fileNameEncode = fileNameEncode.replace("%40", "@");
-                                fileNameEncode = fileNameEncode.replace("%23", "#");
-                                fileNameEncode = fileNameEncode.replace("%24", "$");
-                                fileNameEncode = fileNameEncode.replace("%26", "&");
-                                fileNameEncode = fileNameEncode.replace("%2B", "+");
-                                fileNameEncode = fileNameEncode.replace("%3D", "=");
-                                fileNameEncode = fileNameEncode.replace("%3B", ";");
-                            } else {
-                                fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-                            }
-
                             if (StringUtils.isBlank(fileVo.getContentType())) {
                                 response.setContentType("application/octet-stream");
                             } else {
                                 response.setContentType(fileVo.getContentType());
                             }
-                            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + getFileNameEncode(request,fileVo) + "\"");
                             os = response.getOutputStream();
                             IOUtils.copyLarge(in, os);
                             os.flush();
@@ -124,6 +109,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             }
             if (!isNeedDownLoad) {
                 if (response != null) {
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + getFileNameEncode(request,fileVo) + "\"");
                     response.setStatus(204);
                     response.getWriter().print(StringUtils.EMPTY);
                 }
@@ -132,5 +118,30 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             throw new FileNotFoundException(id);
         }
         return null;
+    }
+
+    /**
+     * 获取encode文件名
+     * @param request 请求
+     * @param fileVo 文件
+     * @return 文件名
+     */
+    private String getFileNameEncode(HttpServletRequest request,FileVo fileVo) throws UnsupportedEncodingException {
+        String fileNameEncode;
+        boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
+        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
+            fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
+            /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
+            fileNameEncode = fileNameEncode.replace("%40", "@");
+            fileNameEncode = fileNameEncode.replace("%23", "#");
+            fileNameEncode = fileNameEncode.replace("%24", "$");
+            fileNameEncode = fileNameEncode.replace("%26", "&");
+            fileNameEncode = fileNameEncode.replace("%2B", "+");
+            fileNameEncode = fileNameEncode.replace("%3D", "=");
+            fileNameEncode = fileNameEncode.replace("%3B", ";");
+        } else {
+            fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+        }
+        return fileNameEncode;
     }
 }
