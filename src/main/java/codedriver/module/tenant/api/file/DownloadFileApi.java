@@ -10,6 +10,8 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
 import codedriver.framework.exception.file.FileAccessDeniedException;
 import codedriver.framework.exception.file.FileNotFoundException;
 import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
@@ -78,6 +80,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                 BigDecimal lastModifiedDec = new BigDecimal(Double.toString(paramObj.getDouble("lastModified")));
                 lastModifiedLong = lastModifiedDec.multiply(new BigDecimal("1000")).longValue();
             }
+            IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
             if (lastModifiedLong == 0L || lastModifiedLong < fileVo.getUploadTime().getTime()) {
                 String userUuid = UserContext.get().getUserUuid();
                 IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
@@ -92,7 +95,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                             } else {
                                 response.setContentType(fileVo.getContentType());
                             }
-                            response.setHeader("Content-Disposition", " attachment; filename=\"" + getFileNameEncode(request,fileVo) + "\"");
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileCrossoverService.getFileNameEncode(request, fileVo.getName()) + "\"");
                             os = response.getOutputStream();
                             IOUtils.copyLarge(in, os);
                             os.flush();
@@ -109,7 +112,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             }
             if (!isNeedDownLoad) {
                 if (response != null) {
-                    response.setHeader("Content-Disposition", " attachment; filename=\"" + getFileNameEncode(request,fileVo) + "\"");
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + fileCrossoverService.getFileNameEncode(request, fileVo.getName()) + "\"");
                     response.setStatus(204);
                     response.getWriter().print(StringUtils.EMPTY);
                 }
@@ -118,30 +121,5 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             throw new FileNotFoundException(id);
         }
         return null;
-    }
-
-    /**
-     * 获取encode文件名
-     * @param request 请求
-     * @param fileVo 文件
-     * @return 文件名
-     */
-    private String getFileNameEncode(HttpServletRequest request,FileVo fileVo) throws UnsupportedEncodingException {
-        String fileNameEncode;
-        boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-            fileNameEncode = URLEncoder.encode(fileVo.getName(), "UTF-8");// IE浏览器
-            /* chrome、firefox、edge浏览器下载文件时，文件名包含~@#$&+=;这八个英文字符时会变成乱码_%40%23%24%26%2B%3D%3B，下面是对@#$&+=;这七个字符做特殊处理，对于~这个字符还是会出现乱码，暂无法处理 **/
-            fileNameEncode = fileNameEncode.replace("%40", "@");
-            fileNameEncode = fileNameEncode.replace("%23", "#");
-            fileNameEncode = fileNameEncode.replace("%24", "$");
-            fileNameEncode = fileNameEncode.replace("%26", "&");
-            fileNameEncode = fileNameEncode.replace("%2B", "+");
-            fileNameEncode = fileNameEncode.replace("%3D", "=");
-            fileNameEncode = fileNameEncode.replace("%3B", ";");
-        } else {
-            fileNameEncode = new String(fileVo.getName().replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-        }
-        return fileNameEncode;
     }
 }
