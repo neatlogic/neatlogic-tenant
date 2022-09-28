@@ -19,6 +19,7 @@ import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.util.FileUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
@@ -67,9 +68,8 @@ public class MatrixViewXmlFileDownloadApi extends PrivateBinaryStreamApiComponen
         if (matrixViewVo == null) {
             throw new MatrixViewNotFoundException(matrixVo.getName());
         }
-        IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
         response.setContentType("text/xml");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileCrossoverService.getFileNameEncode(request, matrixViewVo.getFileName()) + "\"");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixViewVo.getFileName()) + "\"");
         try (InputStream in = IOUtils.toInputStream(matrixViewVo.getXml(), StandardCharsets.UTF_8);
              ServletOutputStream os = response.getOutputStream()) {
             IOUtils.copyLarge(in, os);

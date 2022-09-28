@@ -33,10 +33,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Service
 
@@ -80,7 +77,6 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                 BigDecimal lastModifiedDec = new BigDecimal(Double.toString(paramObj.getDouble("lastModified")));
                 lastModifiedLong = lastModifiedDec.multiply(new BigDecimal("1000")).longValue();
             }
-            IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
             if (lastModifiedLong == 0L || lastModifiedLong < fileVo.getUploadTime().getTime()) {
                 String userUuid = UserContext.get().getUserUuid();
                 IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
@@ -95,7 +91,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                             } else {
                                 response.setContentType(fileVo.getContentType());
                             }
-                            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileCrossoverService.getFileNameEncode(request, fileVo.getName()) + "\"");
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(request.getHeader("User-Agent"), fileVo.getName()) + "\"");
                             os = response.getOutputStream();
                             IOUtils.copyLarge(in, os);
                             os.flush();
@@ -112,7 +108,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             }
             if (!isNeedDownLoad) {
                 if (response != null) {
-                    response.setHeader("Content-Disposition", " attachment; filename=\"" + fileCrossoverService.getFileNameEncode(request, fileVo.getName()) + "\"");
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(request.getHeader("User-Agent"), fileVo.getName()) + "\"");
                     response.setStatus(204);
                     response.getWriter().print(StringUtils.EMPTY);
                 }
