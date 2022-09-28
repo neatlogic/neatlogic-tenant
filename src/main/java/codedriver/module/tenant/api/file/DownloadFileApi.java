@@ -91,7 +91,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                             } else {
                                 response.setContentType(fileVo.getContentType());
                             }
-                            response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(request.getHeader("User-Agent"), fileVo.getName()) + "\"");
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(fileVo.getName()) + "\"");
                             os = response.getOutputStream();
                             IOUtils.copyLarge(in, os);
                             os.flush();
@@ -108,7 +108,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
             }
             if (!isNeedDownLoad) {
                 if (response != null) {
-                    response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(request.getHeader("User-Agent"), fileVo.getName()) + "\"");
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + codedriver.framework.util.FileUtil.getEncodedFileName(fileVo.getName()) + "\"");
                     response.setStatus(204);
                     response.getWriter().print(StringUtils.EMPTY);
                 }

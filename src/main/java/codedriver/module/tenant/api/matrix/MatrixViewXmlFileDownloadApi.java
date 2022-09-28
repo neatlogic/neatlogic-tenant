@@ -6,8 +6,6 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.crossover.CrossoverServiceFactory;
-import codedriver.framework.crossover.IFileCrossoverService;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
 import codedriver.framework.matrix.dto.MatrixViewVo;
 import codedriver.framework.matrix.dto.MatrixVo;
@@ -69,7 +67,7 @@ public class MatrixViewXmlFileDownloadApi extends PrivateBinaryStreamApiComponen
             throw new MatrixViewNotFoundException(matrixVo.getName());
         }
         response.setContentType("text/xml");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixViewVo.getFileName()) + "\"");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(matrixViewVo.getFileName()) + "\"");
         try (InputStream in = IOUtils.toInputStream(matrixViewVo.getXml(), StandardCharsets.UTF_8);
              ServletOutputStream os = response.getOutputStream()) {
             IOUtils.copyLarge(in, os);

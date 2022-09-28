@@ -62,8 +62,7 @@ public class IntegrationExportApi extends PrivateBinaryStreamApiComponentBase {
         if (CollectionUtils.isNotEmpty(uuidList)) {
             throw new IntegrationNotFoundException(uuidList);
         }
-        String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"),
-                "集成配置." + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".pak");
+        String fileName = FileUtil.getEncodedFileName("集成配置." + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".pak");
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
         try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream())) {

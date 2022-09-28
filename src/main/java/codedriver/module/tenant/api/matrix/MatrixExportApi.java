@@ -78,7 +78,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         }
         OutputStream os = response.getOutputStream();
         if (ExportFileType.CSV.getValue().equals(fileType)) {
-            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".csv");
+            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".csv");
             response.setContentType("application/text;charset=GBK");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
@@ -88,7 +88,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             if (workbook == null) {
                 workbook = new HSSFWorkbook();
             }
-            String fileName = FileUtil.getEncodedFileName(request.getHeader("User-Agent"), matrixVo.getName() + ".xls");
+            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xls");
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             workbook.write(os);
