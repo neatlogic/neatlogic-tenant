@@ -130,20 +130,18 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
      */
     private JSONObject readRemoteFile(JSONObject paramObj, Integer serverId) {
         JSONObject resultObj = new JSONObject();
-        String ip = null;
-        Integer port = null;
+        String host = null;
         TenantContext.get().setUseDefaultDatasource(true);
         ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
         if (serverClusterVo != null) {
-            ip = serverClusterVo.getIp();
-            port = serverClusterVo.getPort();
+            host = serverClusterVo.getHost();
         }
         TenantContext.get().setUseDefaultDatasource(false);
-        if (StringUtils.isBlank(ip) || port == null) {
+        if (StringUtils.isBlank(host)) {
             return resultObj;
         }
         HttpServletRequest request = RequestContext.get().getRequest();
-        String url = "https://" + ip + ":" + port + request.getRequestURI();
+        String url = host + request.getRequestURI();
         HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
                 .setPayload(paramObj.toJSONString())
                 .setAuthType(AuthenticateType.BUILDIN)
