@@ -34,7 +34,7 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ReadFileContentApi extends PrivateApiComponentBase {
 
-    private Logger logger = LoggerFactory.getLogger(ReadFileContentApi.class);
+    private final Logger logger = LoggerFactory.getLogger(ReadFileContentApi.class);
 
     @Resource
     private ServerMapper serverMapper;
@@ -81,25 +81,24 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
     /**
      * 读取服务器本地文件内容
      * @param paramObj 入参
-     * @return
+     * @return 文件内容
      */
     private JSONObject readLocalFile(JSONObject paramObj) {
         String path = paramObj.getString("path");
         Integer startIndex = paramObj.getInteger("startIndex");
         Integer offset = paramObj.getInteger("offset");
         JSONObject resultObj = new JSONObject();
+        boolean hasMore = false;
+        /*
+         * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
+         */
+        if (offset > MAX_FILE_SIZE) {
+            offset = MAX_FILE_SIZE;
+            hasMore = true;
+        }
+        resultObj.put("hasMore", hasMore);
         try (InputStream in = FileUtil.getData(path)) {
             if (in != null) {
-                /*
-                 * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
-                 */
-                if (offset > MAX_FILE_SIZE) {
-                    offset = MAX_FILE_SIZE;
-                    resultObj.put("hasMore", true);
-                } else {
-                    resultObj.put("hasMore", false);
-                }
-
                 in.skip(startIndex);
                 byte[] buff = new byte[1024];
                 StringBuilder sb = new StringBuilder();
@@ -127,22 +126,24 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
      * 读取其他服务器文件内容
      * @param paramObj 入参
      * @param serverId 服务器ID
-     * @return
+     * @return 文件内容
      */
     private JSONObject readRemoteFile(JSONObject paramObj, Integer serverId) {
         JSONObject resultObj = new JSONObject();
         String ip = null;
+        Integer port = null;
         TenantContext.get().setUseDefaultDatasource(true);
         ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
         if (serverClusterVo != null) {
             ip = serverClusterVo.getIp();
+            port = serverClusterVo.getPort();
         }
         TenantContext.get().setUseDefaultDatasource(false);
-        if (StringUtils.isBlank(ip)) {
+        if (StringUtils.isBlank(ip) || port == null) {
             return resultObj;
         }
         HttpServletRequest request = RequestContext.get().getRequest();
-        String url = request.getScheme() + "://" + ip + ":" + request.getLocalPort() + request.getRequestURI();
+        String url = request.getScheme() + "://" + ip + ":" + port + request.getRequestURI();
         HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
                 .setPayload(paramObj.toJSONString())
                 .setAuthType(AuthenticateType.BUILDIN)
