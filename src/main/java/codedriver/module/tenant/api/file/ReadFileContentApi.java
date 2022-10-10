@@ -149,8 +149,9 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
                 .setConnectTimeout(5000)
                 .setReadTimeout(5000)
                 .sendRequest();
-        if(StringUtils.isNotBlank(httpRequestUtil.getError())){
-            throw new RuntimeException(httpRequestUtil.getError());
+        String error = httpRequestUtil.getError();
+        if(StringUtils.isNotBlank(error)){
+            throw new RuntimeException(error);
         }
         JSONObject resultJson = httpRequestUtil.getResultJson();
         if (MapUtils.isNotEmpty(resultJson)) {
