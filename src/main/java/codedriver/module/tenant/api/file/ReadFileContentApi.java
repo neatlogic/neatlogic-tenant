@@ -143,7 +143,7 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
             return resultObj;
         }
         HttpServletRequest request = RequestContext.get().getRequest();
-        String url = request.getScheme() + "://" + ip + ":" + port + request.getRequestURI();
+        String url = "https://" + ip + ":" + port + request.getRequestURI();
         HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
                 .setPayload(paramObj.toJSONString())
                 .setAuthType(AuthenticateType.BUILDIN)
