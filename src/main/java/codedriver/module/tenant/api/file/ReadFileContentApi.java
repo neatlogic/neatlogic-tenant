@@ -85,6 +85,9 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
      */
     private JSONObject readLocalFile(JSONObject paramObj) {
         String path = paramObj.getString("path");
+        if (!path.startsWith("file:")) {
+            path = path + "file:";
+        }
         Integer startIndex = paramObj.getInteger("startIndex");
         Integer offset = paramObj.getInteger("offset");
         JSONObject resultObj = new JSONObject();

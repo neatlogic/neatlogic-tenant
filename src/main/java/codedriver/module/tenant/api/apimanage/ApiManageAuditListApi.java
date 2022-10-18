@@ -15,6 +15,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import codedriver.framework.restful.dao.mapper.ApiAuditMapper;
 import codedriver.framework.restful.dao.mapper.ApiMapper;
+import codedriver.framework.restful.dto.ApiAuditPathVo;
 import codedriver.framework.restful.dto.ApiAuditVo;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.util.TableResultUtil;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -102,6 +105,47 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
             apiAuditVo.setRowNum(rowNum);
             apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
             apiAuditList = apiAuditMapper.getApiAuditList(apiAuditVo);
+            // 补充paramPath、resultPath、errorPath字段数据
+            List<Long> pathIdList = new ArrayList<>();
+            for (ApiAuditVo auditVo : apiAuditList) {
+                Long paramPathId = auditVo.getParamPathId();
+                Long resultPathId = auditVo.getResultPathId();
+                Long errorPathId = auditVo.getErrorPathId();
+                if (paramPathId != null) {
+                    pathIdList.add(paramPathId);
+                }
+                if (resultPathId != null) {
+                    pathIdList.add(resultPathId);
+                }
+                if (errorPathId != null) {
+                    pathIdList.add(errorPathId);
+                }
+            }
+            List<ApiAuditPathVo> auditPathList = apiAuditMapper.getApiAuditPathListByIdList(pathIdList);
+            Map<Long, ApiAuditPathVo> apiAuditPathMap = auditPathList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
+            for (ApiAuditVo auditVo : apiAuditList) {
+                Long paramPathId = auditVo.getParamPathId();
+                Long resultPathId = auditVo.getResultPathId();
+                Long errorPathId = auditVo.getErrorPathId();
+                if (paramPathId != null) {
+                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(paramPathId);
+                    if (apiAuditPathVo != null) {
+                        auditVo.setParamPath(apiAuditPathVo);
+                    }
+                }
+                if (resultPathId != null) {
+                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(resultPathId);
+                    if (apiAuditPathVo != null) {
+                        auditVo.setResultPath(apiAuditPathVo);
+                    }
+                }
+                if (errorPathId != null) {
+                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(errorPathId);
+                    if (apiAuditPathVo != null) {
+                        auditVo.setErrorPath(apiAuditPathVo);
+                    }
+                }
+            }
         }
         return TableResultUtil.getResult(apiAuditList, apiAuditVo);
     }
