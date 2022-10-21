@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -64,8 +64,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
             @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
-            @Param(name = "value", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "text", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
@@ -142,23 +142,23 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
         }
 
-        String value = jsonObj.getString("value");
-        String text = jsonObj.getString("text");
+        String valueField = jsonObj.getString("valueField");
+        String textField = jsonObj.getString("textField");
         List<String> columnList = new ArrayList<>();
-        columnList.add(value);
-        columnList.add(text);
+        columnList.add(valueField);
+        columnList.add(textField);
         dataVo.setColumnList(columnList);
         List<ValueTextVo> dataList = new ArrayList<>();
         List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
         if (CollectionUtils.isNotEmpty(resultList)) {
             for (Map<String, JSONObject> result : resultList) {
                 String valueStr = null;
-                JSONObject valueObj = result.get(value);
+                JSONObject valueObj = result.get(valueField);
                 if (MapUtils.isNotEmpty(valueObj)) {
                     valueStr = valueObj.getString("value");
                 }
                 String textStr = null;
-                JSONObject textObj = result.get(text);
+                JSONObject textObj = result.get(textField);
                 if (MapUtils.isNotEmpty(textObj)) {
                     textStr = textObj.getString("value");
                 }
