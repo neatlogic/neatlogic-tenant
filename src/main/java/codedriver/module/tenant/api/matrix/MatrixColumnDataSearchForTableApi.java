@@ -78,6 +78,43 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"),
             @Param(explode = BasePageVo.class)
     })
+    @Example(example = "" +
+            "{" +
+            "\"matrixUuid(矩阵uuid，必填)\": \"825e6ba09050406eb0de8c4bdcd4e27c\"," +
+            "\"uuidColumn(uuid对应的属性，选填)\": \"uuid\"," +
+            "\"columnList(需要返回数据的字段列表，必填)\": [" +
+            "\"92196814d8da4ad9bed63e1d650d7e98\"," +
+            "\"a4e9978fd06d46d78b13f947a2b1b188\"," +
+            "\"cf2c2677c18540a79e60cfd9d531b50c\"," +
+            "\"b5d685e9e5fb4ce0baa0604de812e93b\"," +
+            "\"6e4abb9b532b49139cec798a3828c7cd\"," +
+            "\"3d2f5475138744938f0bb1da1f82002c\"," +
+            "\"96d449a58b664a31b32bb1c28090aeee\"" +
+            "]," +
+            "\"searchColumnList(可搜索字段列表，选填)\": [" +
+            "\"92196814d8da4ad9bed63e1d650d7e98\"," +
+            "\"a4e9978fd06d46d78b13f947a2b1b188\"" +
+            "\t]," +
+            "\"currentPage\": 1," +
+            "\"pageSize\": 10," +
+            "\"sourceColumnList(过滤条件列表，选填)\": [" +
+            "{" +
+            "\"column(字段uuid，必填)\": \"a4e9978fd06d46d78b13f947a2b1b188\"," +
+            "\"expression(过滤表达式，必填)\": \"like|notlike|equal|unequal|include|exclude|between|greater-than|less-than|is-null|match|is-not-null\"," +
+            "\"valueList(过滤值列表，必填)\": [" +
+            "\"1\"" +
+            "]" +
+            "}" +
+            "]," +
+            "\"filterList(联动过滤条件列表，选填)\": [" +
+            "{" +
+            "\"uuid(字段uuid，必填)\": \"92196814d8da4ad9bed63e1d650d7e98\"," +
+            "\"valueList(过滤值列表，必填)\": [" +
+            "\"2\"" +
+            "]" +
+            "}" +
+            "]" +
+            "}")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
