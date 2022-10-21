@@ -74,7 +74,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
     @Output({
-            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
+            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合，value值的格式是value&=&text，适配value相同，text不同的场景"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
