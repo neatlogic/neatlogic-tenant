@@ -57,7 +57,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
 
     @Override
     public boolean disableReturnCircularReferenceDetect() {
-       return true;
+        return true;
     }
 
     @Input({
@@ -162,7 +162,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 if (MapUtils.isNotEmpty(textObj)) {
                     textStr = textObj.getString("value");
                 }
-                dataList.add(new ValueTextVo(valueStr, textStr));
+                dataList.add(new ValueTextVo(valueStr + "&=&" + textStr, textStr));
             }
         }
         JSONObject returnObj = new JSONObject();
