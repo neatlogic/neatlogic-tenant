@@ -105,47 +105,6 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
             apiAuditVo.setRowNum(rowNum);
             apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
             apiAuditList = apiAuditMapper.getApiAuditList(apiAuditVo);
-            // 补充paramPath、resultPath、errorPath字段数据
-            List<Long> pathIdList = new ArrayList<>();
-            for (ApiAuditVo auditVo : apiAuditList) {
-                Long paramPathId = auditVo.getParamPathId();
-                Long resultPathId = auditVo.getResultPathId();
-                Long errorPathId = auditVo.getErrorPathId();
-                if (paramPathId != null) {
-                    pathIdList.add(paramPathId);
-                }
-                if (resultPathId != null) {
-                    pathIdList.add(resultPathId);
-                }
-                if (errorPathId != null) {
-                    pathIdList.add(errorPathId);
-                }
-            }
-            List<ApiAuditPathVo> auditPathList = apiAuditMapper.getApiAuditPathListByIdList(pathIdList);
-            Map<Long, ApiAuditPathVo> apiAuditPathMap = auditPathList.stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
-            for (ApiAuditVo auditVo : apiAuditList) {
-                Long paramPathId = auditVo.getParamPathId();
-                Long resultPathId = auditVo.getResultPathId();
-                Long errorPathId = auditVo.getErrorPathId();
-                if (paramPathId != null) {
-                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(paramPathId);
-                    if (apiAuditPathVo != null) {
-                        auditVo.setParamPath(apiAuditPathVo);
-                    }
-                }
-                if (resultPathId != null) {
-                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(resultPathId);
-                    if (apiAuditPathVo != null) {
-                        auditVo.setResultPath(apiAuditPathVo);
-                    }
-                }
-                if (errorPathId != null) {
-                    ApiAuditPathVo apiAuditPathVo = apiAuditPathMap.get(errorPathId);
-                    if (apiAuditPathVo != null) {
-                        auditVo.setErrorPath(apiAuditPathVo);
-                    }
-                }
-            }
         }
         return TableResultUtil.getResult(apiAuditList, apiAuditVo);
     }
