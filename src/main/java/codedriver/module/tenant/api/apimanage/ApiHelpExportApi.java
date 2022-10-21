@@ -105,7 +105,7 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                     helpJson.put("token",interfaceVo.getToken());
                     helpJson.put("name",interfaceVo.getName());
                     apiHelpJsonArray.add(helpJson);
-                } else if (interfaceVo.getType().equals(ApiType.BINARY.getValue())) {
+                 } else if (interfaceVo.getType().equals(ApiType.BINARY.getValue())) {
                     IBinaryStreamApiComponent restComponent = PrivateApiComponentFactory.getBinaryInstance(interfaceVo.getHandler());
                     JSONObject helpJson = restComponent.help();
                     helpJson.put("token",interfaceVo.getToken());
@@ -146,11 +146,36 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+
+
+//        // 1) Load DOCX into XWPFDocument
+//        XWPFDocument document = new XWPFDocument();
+//        document.createStyles();
+//        XWPFParagraph paragraph = document.createParagraph();
+//        XWPFRun run = paragraph.createRun();
+//        run.setText("123213");
+//        // 2) Prepare Pdf options
+//        PdfOptions options = PdfOptions.create();
+//
+//        // 3) Convert XWPFDocument to Pdf
+//        OutputStream out = new FileOutputStream(new File(OUTPUT_DESKTOP_PATH + "HelloWord.pdf"));
+//        PdfConverter.getInstance().convert(document, out, options);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         return null;
-    }
-
-    static {
-
     }
 
 }
