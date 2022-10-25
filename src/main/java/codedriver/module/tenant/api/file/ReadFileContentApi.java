@@ -113,8 +113,9 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
      */
     private JSONObject readLocalFile(String path, int startIndex, int offset) {
         String dataHome = Config.DATA_HOME() + TenantContext.get().getTenantUuid();
-        if (path.startsWith("${home}")) {
-            path = path.substring(11);
+        String prefix = "${home}";
+        if (path.startsWith(prefix)) {
+            path = path.substring(prefix.length());
             path = dataHome + path;
         }
         if (!path.startsWith("file:")) {
