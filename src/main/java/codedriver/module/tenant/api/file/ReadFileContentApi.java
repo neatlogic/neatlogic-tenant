@@ -28,6 +28,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -58,10 +60,7 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "path", type = ApiParamType.STRING, isRequired = true, desc = "文件路径"),
-            @Param(name = "startIndex", type = ApiParamType.INTEGER, isRequired = true, desc = "开始下标"),
-            @Param(name = "offset", type = ApiParamType.INTEGER, isRequired = true, desc = "偏移量"),
-            @Param(name = "serverId", type = ApiParamType.INTEGER, isRequired = true, desc = "服务器ID"),
+            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文件路径")
     })
     @Output({
             @Param(name = "content", type = ApiParamType.STRING, desc = "内容"),
@@ -70,9 +69,36 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
     @Description(desc = "读取文件内容")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Integer serverId = paramObj.getInteger("serverId");
+        Map<String, String> paramMap = new HashMap<>();
+        String filePath = paramObj.getString("filePath");
+        String[] split = filePath.split("\\?");
+        String path = split[0];
+        if (split.length >= 2) {
+            String[] paramArray = split[1].split("&");
+            for (String param : paramArray) {
+                if (param.contains("=")) {
+                    String[] paramKeyValue = param.split("=");
+                    paramMap.put(paramKeyValue[0], paramKeyValue[1]);
+                }
+            }
+        }
+        int startIndex = 0;
+        int offset = 0;
+        int serverId = 0;
+        String startIndexStr = paramMap.get("startIndex");
+        if (StringUtils.isNotBlank(startIndexStr)) {
+            startIndex = Integer.parseInt(startIndexStr);
+        }
+        String offsetStr = paramMap.get("offset");
+        if (StringUtils.isNotBlank(offsetStr)) {
+            offset = Integer.parseInt(offsetStr);
+        }
+        String serverIdStr = paramMap.get("serverId");
+        if (StringUtils.isNotBlank(serverIdStr)) {
+            serverId = Integer.parseInt(serverIdStr);
+        }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            return readLocalFile(paramObj);
+            return readLocalFile(path, startIndex, offset);
         } else {
             return readRemoteFile(paramObj, serverId);
         }
@@ -80,13 +106,20 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
 
     /**
      * 读取服务器本地文件内容
-     * @param paramObj 入参
+     * @param path 路径
+     * @param startIndex 开始下标
+     * @param offset 读取内容字节数
      * @return 文件内容
      */
-    private JSONObject readLocalFile(JSONObject paramObj) {
-        String path = paramObj.getString("path");
-        Integer startIndex = paramObj.getInteger("startIndex");
-        Integer offset = paramObj.getInteger("offset");
+    private JSONObject readLocalFile(String path, int startIndex, int offset) {
+        String dataHome = Config.DATA_HOME() + TenantContext.get().getTenantUuid();
+        if (path.startsWith("${home}")) {
+            path = path.substring(11);
+            path = dataHome + path;
+        }
+        if (!path.startsWith("file:")) {
+            path = "file:" + path;
+        }
         JSONObject resultObj = new JSONObject();
         boolean hasMore = false;
         /*

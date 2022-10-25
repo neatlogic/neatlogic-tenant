@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -7,45 +7,47 @@ package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
-import codedriver.framework.exception.type.ParamIrregularException;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixAttributeVo;
 import codedriver.framework.matrix.dto.MatrixColumnVo;
 import codedriver.framework.matrix.dto.MatrixDataVo;
 import codedriver.framework.matrix.dto.MatrixVo;
-import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
 import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 @Service
+
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
+public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase {
 
     @Resource
     private MatrixMapper matrixMapper;
 
     @Override
     public String getToken() {
-        return "matrix/column/data/search/fortable";
+        return "matrix/column/data/search/forselect";
     }
 
     @Override
     public String getName() {
-        return "矩阵属性数据查询-table接口";
+        return "矩阵属性数据查询-下拉接口";
     }
 
     @Override
@@ -53,35 +55,32 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
         return null;
     }
 
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
     @Input({
+            @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
             @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "defaultValue", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY),
-            @Param(name = "uuidColumn", desc = "uuid对应的属性", type = ApiParamType.STRING),
-            @Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true),
-            @Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
-            @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),//TODO 前端传入是List<String>，而MatrixDataVo对象中sourceColumnList是List<MatrixColumnVo>
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "arrayColumnList", desc = "需要将值转化成数组的属性集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
+            @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+            @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
             @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
             @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
-            @Param(name = "filterCiEntityId", desc = "配置项矩阵id过滤条件", type = ApiParamType.LONG),
-            @Param(name = "filterCiId", desc = "配置项矩阵子模型过滤条件", type = ApiParamType.LONG),
             @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
     })
-    @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
-            @Param(name = "theadList", type = ApiParamType.JSONARRAY, desc = "属性列名集合"),
-            @Param(name = "searchColumnDetailList", type = ApiParamType.JSONARRAY, desc = "搜索属性详情集合"),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "矩阵类型"),
+            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合，value值的格式是value&=&text，适配value相同，text不同的场景"),
             @Param(explode = BasePageVo.class)
     })
+    @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Example(example = "" +
             "{" +
             "\"matrixUuid(矩阵uuid，必填)\": \"825e6ba09050406eb0de8c4bdcd4e27c\"," +
-            "\"uuidColumn(uuid对应的属性，选填)\": \"uuid\"," +
             "\"columnList(需要返回数据的字段列表，必填)\": [" +
             "\"92196814d8da4ad9bed63e1d650d7e98\"," +
             "\"a4e9978fd06d46d78b13f947a2b1b188\"," +
@@ -117,11 +116,8 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
             "}")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        jsonObj.remove("needPage");
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
-        List<String> columnList = dataVo.getColumnList();
-        if (CollectionUtils.isEmpty(columnList)) {
-            throw new ParamIrregularException("columnList");
-        }
         MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
         if (matrixVo == null) {
             matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
@@ -129,16 +125,9 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 throw new MatrixNotFoundException(dataVo.getMatrixUuid());
             }
         }
-        JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
-        JSONArray defaultValue = dataVo.getDefaultValue();
-        if (CollectionUtils.isEmpty(defaultValue)) {
-            JSONArray uuidList = jsonObj.getJSONArray("uuidList");
-            dataVo.setDefaultValue(uuidList);
-        }
-        String type = matrixVo.getType();
-        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(type);
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
-            throw new MatrixDataSourceHandlerNotFoundException(type);
+            throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
         List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
         if (CollectionUtils.isNotEmpty(sourceColumnList)) {
@@ -152,30 +141,36 @@ public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
                 }
             }
         }
-        JSONObject returnObj = matrixDataSourceHandler.searchTableData(dataVo);
-        List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
-        returnObj.put("searchColumnDetailList", getSearchColumnDetailList(dataVo.getMatrixUuid(), matrixAttributeList, searchColumnArray));
-        returnObj.put("type", type);
-        return returnObj;
-    }
 
-    private List<MatrixAttributeVo> getSearchColumnDetailList(String matrixUuid, List<MatrixAttributeVo> attributeList, JSONArray searchColumnArray) {
-        if (CollectionUtils.isNotEmpty(searchColumnArray)) {
-            Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
-            for (MatrixAttributeVo attribute : attributeList) {
-                attributeMap.put(attribute.getUuid(), attribute);
-            }
-            List<MatrixAttributeVo> searchColumnDetailList = new ArrayList<>();
-            List<String> searchColumnList = searchColumnArray.toJavaList(String.class);
-            for (String column : searchColumnList) {
-                MatrixAttributeVo attribute = attributeMap.get(column);
-                if (attribute == null) {
-                    throw new MatrixAttributeNotFoundException(matrixUuid, column);
+        String valueField = jsonObj.getString("valueField");
+        String textField = jsonObj.getString("textField");
+        List<String> columnList = new ArrayList<>();
+        columnList.add(valueField);
+        columnList.add(textField);
+        dataVo.setColumnList(columnList);
+        List<ValueTextVo> dataList = new ArrayList<>();
+        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
+        if (CollectionUtils.isNotEmpty(resultList)) {
+            for (Map<String, JSONObject> result : resultList) {
+                String valueStr = null;
+                JSONObject valueObj = result.get(valueField);
+                if (MapUtils.isNotEmpty(valueObj)) {
+                    valueStr = valueObj.getString("value");
                 }
-                searchColumnDetailList.add(attribute);
+                String textStr = null;
+                JSONObject textObj = result.get(textField);
+                if (MapUtils.isNotEmpty(textObj)) {
+                    textStr = textObj.getString("value");
+                }
+                dataList.add(new ValueTextVo(valueStr + "&=&" + textStr, textStr));
             }
-            return searchColumnDetailList;
         }
-        return null;
+        JSONObject returnObj = new JSONObject();
+        returnObj.put("dataList", dataList);
+        returnObj.put("currentPage", dataVo.getCurrentPage());
+        returnObj.put("pageSize", dataVo.getPageSize());
+        returnObj.put("pageCount", dataVo.getPageCount());
+        returnObj.put("rowNum", dataVo.getRowNum());
+        return returnObj;
     }
 }
