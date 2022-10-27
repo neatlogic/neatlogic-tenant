@@ -169,30 +169,25 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                 //接口token
                 builder.addParagraph(tokenParagraph);
                 builder.addParagraph(new ParagraphBuilder(jsonObject.getString("token"), normalFont).builder());
-
                 //接口名称
                 builder.addParagraph(nameParagraph);
                 builder.addParagraph(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder());
-
                 //接口描述
                 if (StringUtils.isNotBlank(jsonObject.getString("description"))) {
                     builder.addParagraph(descriptionParagraph);
                     builder.addParagraph(new ParagraphBuilder(jsonObject.getString("description"), normalFont).builder());
                 }
-
                 //输入参数
                 if (CollectionUtils.isNotEmpty(jsonObject.getJSONArray("input"))) {
                     builder.addParagraph(inputParagraph);
                     builder.addTable(addTableData(jsonObject.getJSONArray("input"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
                 }
-
                 //输出参数
                 JSONArray outputArray = jsonObject.getJSONArray("output");
                 if (CollectionUtils.isNotEmpty(outputArray)) {
                     builder.addParagraph(outputParagraph);
                     builder.addTable(addTableData(jsonObject.getJSONArray("output"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
                 }
-
                 //分割线
                 builder.addParagraph("-------------------------------------------------------------------------------------------------------------------------------------");
             }
