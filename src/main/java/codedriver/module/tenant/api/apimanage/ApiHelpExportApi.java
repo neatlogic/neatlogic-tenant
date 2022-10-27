@@ -25,10 +25,12 @@ import codedriver.framework.util.pdf.ParagraphBuilder;
 import codedriver.framework.util.pdf.TableBuilder;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -140,111 +142,58 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
             PDFBuilder pdfBuilder = new PDFBuilder();
             PdfWriter.getInstance(pdfBuilder.builder(), os);
 
-            //粗体
+            //自定义字体
             BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
             Font boldFont = new Font(bfChinese, 8, Font.BOLD);
             Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
 
+            //创建文档、设置页面设置、打开文档
             PDFBuilder.Builder builder = pdfBuilder.setPageSizeVertical().setMargins(30f, 30f, 30f, 30f).open();
 
-            //标题
-            ParagraphBuilder tokenParagraphBuilder = new ParagraphBuilder();
-            Paragraph tokenParagraph = tokenParagraphBuilder.setFont(boldFont).addText("接口token").setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-            ParagraphBuilder nameParagraphBuilder = new ParagraphBuilder();
-            Paragraph nameParagraph = nameParagraphBuilder.setFont(boldFont).addText("接口名称").setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-            ParagraphBuilder descriptionParagraphBuilder = new ParagraphBuilder();
-            Paragraph descriptionParagraph = descriptionParagraphBuilder.setFont(boldFont).addText("描述").setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-            ParagraphBuilder inputParagraphBuilder = new ParagraphBuilder();
-            Paragraph inputParagraph = inputParagraphBuilder.setFont(boldFont).addText("输入参数").setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-            ParagraphBuilder outputParagraphBuilder = new ParagraphBuilder();
-            Paragraph outputParagraph = outputParagraphBuilder.setFont(boldFont).addText("输出参数").setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
+            //定义标题
+            Paragraph tokenParagraph = new ParagraphBuilder("接口token", boldFont).builder();
+            Paragraph nameParagraph = new ParagraphBuilder("接口名称", boldFont).builder();
+            Paragraph descriptionParagraph = new ParagraphBuilder("描述", boldFont).builder();
+            Paragraph inputParagraph = new ParagraphBuilder("输入参数", boldFont).builder();
+            Paragraph outputParagraph = new ParagraphBuilder("输出参数", boldFont).builder();
 
-            //表头
-            ParagraphBuilder tableNameParagraphBuilder = new ParagraphBuilder();
-            Paragraph tableNameParagraph = tableNameParagraphBuilder.setFont(normalFont).addText("名称").setAlignment(Element.ALIGN_CENTER).builder();
-            ParagraphBuilder tableTypeParagraphBuilder = new ParagraphBuilder();
-            Paragraph tableTypeParagraph = tableTypeParagraphBuilder.setFont(normalFont).addText("类型").setAlignment(Element.ALIGN_CENTER).builder();
-            ParagraphBuilder tableIsRequiredParagraphBuilder = new ParagraphBuilder();
-            Paragraph tableIsRequiredParagraph = tableIsRequiredParagraphBuilder.setFont(normalFont).addText("是否必填").setAlignment(Element.ALIGN_CENTER).builder();
-            ParagraphBuilder tableDescriptionParagraphBuilder = new ParagraphBuilder();
-            Paragraph tableDescriptionParagraph = tableDescriptionParagraphBuilder.setFont(normalFont).addText("说明").setAlignment(Element.ALIGN_CENTER).builder();
+            //定义表头
+            Paragraph tableNameParagraph = new ParagraphBuilder("名称", normalFont).builder();
+            Paragraph tableTypeParagraph = new ParagraphBuilder("类型", normalFont).builder();
+            Paragraph tableIsRequiredParagraph = new ParagraphBuilder("是否必填", normalFont).builder();
+            Paragraph tableDescriptionParagraph = new ParagraphBuilder("说明", normalFont).builder();
 
             for (Object object : apiHelpJsonArray) {
                 JSONObject jsonObject = (JSONObject) object;
 
                 //接口token
                 builder.addParagraph(tokenParagraph);
-                ParagraphBuilder tokenTextParagraphBuilder = new ParagraphBuilder();
-                Paragraph tokenTextParagraph = tokenTextParagraphBuilder.setFont(normalFont).addText(jsonObject.getString("token")).setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-                builder.addParagraph(tokenTextParagraph);
+                builder.addParagraph(new ParagraphBuilder(jsonObject.getString("token"), normalFont).builder());
 
                 //接口名称
                 builder.addParagraph(nameParagraph);
-                ParagraphBuilder nameTextParagraphBuilder = new ParagraphBuilder();
-                Paragraph nameTextParagraph = nameTextParagraphBuilder.setFont(normalFont).addText(jsonObject.getString("name")).setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-                builder.addParagraph(nameTextParagraph);
+                builder.addParagraph(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder());
 
                 //接口描述
                 if (StringUtils.isNotBlank(jsonObject.getString("description"))) {
                     builder.addParagraph(descriptionParagraph);
-                    ParagraphBuilder descriptionTextParagraphBuilder = new ParagraphBuilder();
-                    Paragraph descriptionTextParagraph = descriptionTextParagraphBuilder.setFont(normalFont).addText(jsonObject.getString("description")).setAlignment(Element.ALIGN_LEFT).setSpacingAfter(3).builder();
-                    builder.addParagraph(descriptionTextParagraph);
+                    builder.addParagraph(new ParagraphBuilder(jsonObject.getString("description"), normalFont).builder());
                 }
 
                 //输入参数
-                JSONArray inputArray = jsonObject.getJSONArray("input");
-                if (CollectionUtils.isNotEmpty(inputArray)) {
-
+                if (CollectionUtils.isNotEmpty(jsonObject.getJSONArray("input"))) {
                     builder.addParagraph(inputParagraph);
-                    TableBuilder inputTableBuilder = new TableBuilder(16, 4);
-                    inputTableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F).addCell(tableNameParagraph).addCell(tableTypeParagraph).addCell(tableIsRequiredParagraph).addCell(tableDescriptionParagraph);
-
-                    //输入参数值
-                    for (Object inputObject : inputArray) {
-                        JSONObject inputJSONObject = (JSONObject) inputObject;
-
-                        ParagraphBuilder tableNameTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableNameTextParagraph = tableNameTextParagraphBuilder.setFont(normalFont).addText(inputJSONObject.getString("name")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableTypeTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableTypeTextParagraph = tableTypeTextParagraphBuilder.setFont(normalFont).addText(inputJSONObject.getString("type")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableIsRequiredTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableIsRequiredTextParagraph = tableIsRequiredTextParagraphBuilder.setFont(normalFont).addText(inputJSONObject.getString("isRequired")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableDescriptionTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableDescriptionTextParagraph = tableDescriptionTextParagraphBuilder.setFont(normalFont).addText(inputJSONObject.getString("description")).setAlignment(Element.ALIGN_CENTER).builder();
-
-                        inputTableBuilder.addCell(tableNameTextParagraph).addCell(tableTypeTextParagraph).addCell(tableIsRequiredTextParagraph).addCell(tableDescriptionTextParagraph);
-                    }
-
-                    builder.addTable(inputTableBuilder.builder(), false);
-
+                    builder.addTable(addTableData(jsonObject.getJSONArray("input"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
                 }
 
                 //输出参数
                 JSONArray outputArray = jsonObject.getJSONArray("output");
                 if (CollectionUtils.isNotEmpty(outputArray)) {
-
                     builder.addParagraph(outputParagraph);
-                    TableBuilder outputTableBuilder = new TableBuilder(16, 4);
-                    outputTableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F).addCell(tableNameParagraph).addCell(tableTypeParagraph).addCell(tableIsRequiredParagraph).addCell(tableDescriptionParagraph);
-
-                    //输出参数值
-                    for (Object outputObject : outputArray) {
-                        JSONObject outputJSONObject = (JSONObject) outputObject;
-
-                        ParagraphBuilder tableNameTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableNameTextParagraph = tableNameTextParagraphBuilder.setFont(normalFont).addText(outputJSONObject.getString("name")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableTypeTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableTypeTextParagraph = tableTypeTextParagraphBuilder.setFont(normalFont).addText(outputJSONObject.getString("type")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableIsRequiredTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableIsRequiredTextParagraph = tableIsRequiredTextParagraphBuilder.setFont(normalFont).addText(outputJSONObject.getString("isRequired")).setAlignment(Element.ALIGN_CENTER).builder();
-                        ParagraphBuilder tableDescriptionTextParagraphBuilder = new ParagraphBuilder();
-                        Paragraph tableDescriptionTextParagraph = tableDescriptionTextParagraphBuilder.setFont(normalFont).addText(outputJSONObject.getString("description")).setAlignment(Element.ALIGN_CENTER).builder();
-
-                        outputTableBuilder.addCell(tableNameTextParagraph).addCell(tableTypeTextParagraph).addCell(tableIsRequiredTextParagraph).addCell(tableDescriptionTextParagraph);
-                    }
-                    builder.addTable(outputTableBuilder.builder(), false);
+                    builder.addTable(addTableData(jsonObject.getJSONArray("output"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
                 }
+
+                //分割线
                 builder.addParagraph("-------------------------------------------------------------------------------------------------------------------------------------");
             }
             builder.close();
@@ -255,5 +204,42 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 添加表格数据
+     *
+     * @param dataArray                 数据数组
+     * @param tableNameParagraph        表头：名称
+     * @param tableTypeParagraph        表头：类型
+     * @param tableIsRequiredParagraph  表头：是否必填
+     * @param tableDescriptionParagraph 表头：描述
+     * @return PdfPTable
+     * @throws IOException       e
+     * @throws DocumentException e
+     */
+    private PdfPTable addTableData(JSONArray dataArray, Paragraph tableNameParagraph, Paragraph tableTypeParagraph, Paragraph tableIsRequiredParagraph, Paragraph tableDescriptionParagraph) throws IOException, DocumentException {
+
+        //自定义字体
+        BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+        Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
+
+        //创建表格、输入参数表头
+        TableBuilder tableBuilder = new TableBuilder(16, 4);
+        tableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F)
+                .addCell(tableNameParagraph)
+                .addCell(tableTypeParagraph)
+                .addCell(tableIsRequiredParagraph)
+                .addCell(tableDescriptionParagraph);
+
+        //输入参数值
+        for (Object object : dataArray) {
+            JSONObject jsonObject = (JSONObject) object;
+            tableBuilder.addCell(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder())
+                    .addCell(new ParagraphBuilder(jsonObject.getString("type"), normalFont).builder())
+                    .addCell(new ParagraphBuilder(jsonObject.getString("isRequired"), normalFont).builder())
+                    .addCell(new ParagraphBuilder(jsonObject.getString("description"), normalFont).builder());
+        }
+        return tableBuilder.builder();
     }
 }
