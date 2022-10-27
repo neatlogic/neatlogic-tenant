@@ -224,7 +224,7 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
         BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
         Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
 
-        //创建表格、输入参数表头
+        //创建表格、添加表头
         TableBuilder tableBuilder = new TableBuilder(16, 4);
         tableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F)
                 .addCell(tableNameParagraph)
@@ -232,7 +232,7 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                 .addCell(tableIsRequiredParagraph)
                 .addCell(tableDescriptionParagraph);
 
-        //输入参数值
+        //添加数据
         for (Object object : dataArray) {
             JSONObject jsonObject = (JSONObject) object;
             tableBuilder.addCell(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder())
