@@ -135,13 +135,10 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
         }
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         response.setHeader("Content-Disposition", "attachment; filename=" + FileUtil.getEncodedFileName("codedriver接口帮助.pdf") + "\"");
-
+        OutputStream os = response.getOutputStream();
         try {
-            OutputStream os = response.getOutputStream();
-
             PDFBuilder pdfBuilder = new PDFBuilder();
             PdfWriter.getInstance(pdfBuilder.builder(), os);
-
             //自定义字体
             BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
             Font boldFont = new Font(bfChinese, 8, Font.BOLD);
@@ -149,14 +146,12 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
 
             //创建文档、设置页面设置、打开文档
             PDFBuilder.Builder builder = pdfBuilder.setPageSizeVertical().setMargins(30f, 30f, 30f, 30f).open();
-
             //定义标题
             Paragraph tokenParagraph = new ParagraphBuilder("接口token", boldFont).builder();
             Paragraph nameParagraph = new ParagraphBuilder("接口名称", boldFont).builder();
             Paragraph descriptionParagraph = new ParagraphBuilder("描述", boldFont).builder();
             Paragraph inputParagraph = new ParagraphBuilder("输入参数", boldFont).builder();
             Paragraph outputParagraph = new ParagraphBuilder("输出参数", boldFont).builder();
-
             //定义表头
             Paragraph tableNameParagraph = new ParagraphBuilder("名称", normalFont).builder();
             Paragraph tableTypeParagraph = new ParagraphBuilder("类型", normalFont).builder();
@@ -165,7 +160,6 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
 
             for (Object object : apiHelpJsonArray) {
                 JSONObject jsonObject = (JSONObject) object;
-
                 //接口token
                 builder.addParagraph(tokenParagraph);
                 builder.addParagraph(new ParagraphBuilder(jsonObject.getString("token"), normalFont).builder());
@@ -194,9 +188,14 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
             builder.close();
             os.flush();
             os.close();
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
+            logger.error(e.getMessage(), e);
+        } finally {
+            if (os != null) {
+                os.flush();
+                os.close();
+            }
         }
         return null;
     }
@@ -214,7 +213,6 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
      * @throws DocumentException e
      */
     private PdfPTable addTableData(JSONArray dataArray, Paragraph tableNameParagraph, Paragraph tableTypeParagraph, Paragraph tableIsRequiredParagraph, Paragraph tableDescriptionParagraph) throws IOException, DocumentException {
-
         //自定义字体
         BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
         Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
@@ -226,7 +224,6 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                 .addCell(tableTypeParagraph)
                 .addCell(tableIsRequiredParagraph)
                 .addCell(tableDescriptionParagraph);
-
         //添加数据
         for (Object object : dataArray) {
             JSONObject jsonObject = (JSONObject) object;
