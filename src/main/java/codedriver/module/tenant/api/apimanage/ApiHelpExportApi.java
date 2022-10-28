@@ -20,17 +20,13 @@ import codedriver.framework.restful.dao.mapper.ApiMapper;
 import codedriver.framework.restful.dto.ApiVo;
 import codedriver.framework.restful.enums.ApiType;
 import codedriver.framework.util.FileUtil;
+import codedriver.framework.util.pdf.FontVo;
 import codedriver.framework.util.pdf.PDFBuilder;
-import codedriver.framework.util.pdf.ParagraphBuilder;
-import codedriver.framework.util.pdf.TableBuilder;
+import codedriver.framework.util.pdf.ParagraphVo;
+import codedriver.framework.util.pdf.TableVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -140,54 +139,52 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
             PDFBuilder pdfBuilder = new PDFBuilder();
             PdfWriter.getInstance(pdfBuilder.builder(), os);
             //自定义字体
-            BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
-            Font boldFont = new Font(bfChinese, 8, Font.BOLD);
-            Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
+            FontVo boldFontVo = new FontVo(8, true);
+            FontVo normalFontVo = new FontVo(8);
 
             //创建文档、设置页面设置、打开文档
             PDFBuilder.Builder builder = pdfBuilder.setPageSizeVertical().setMargins(30f, 30f, 30f, 30f).open();
             //定义标题
-            Paragraph tokenParagraph = new ParagraphBuilder("接口token", boldFont).builder();
-            Paragraph nameParagraph = new ParagraphBuilder("接口名称", boldFont).builder();
-            Paragraph descriptionParagraph = new ParagraphBuilder("描述", boldFont).builder();
-            Paragraph inputParagraph = new ParagraphBuilder("输入参数", boldFont).builder();
-            Paragraph outputParagraph = new ParagraphBuilder("输出参数", boldFont).builder();
+            ParagraphVo tokenParagraphVo = new ParagraphVo("接口token", boldFontVo);
+            ParagraphVo nameParagraphVo = new ParagraphVo("接口名称", boldFontVo);
+            ParagraphVo descriptionParagraphVo = new ParagraphVo("描述", boldFontVo);
+            ParagraphVo inputParagraphVo = new ParagraphVo("输入参数", boldFontVo);
+            ParagraphVo outputParagraphVo = new ParagraphVo("输出参数", boldFontVo);
             //定义表头
-            Paragraph tableNameParagraph = new ParagraphBuilder("名称", normalFont).builder();
-            Paragraph tableTypeParagraph = new ParagraphBuilder("类型", normalFont).builder();
-            Paragraph tableIsRequiredParagraph = new ParagraphBuilder("是否必填", normalFont).builder();
-            Paragraph tableDescriptionParagraph = new ParagraphBuilder("说明", normalFont).builder();
+            Map<Integer, ParagraphVo> headerMap = new HashMap<>();
+            headerMap.put(1, new ParagraphVo("名称", normalFontVo));
+            headerMap.put(2, new ParagraphVo("类型", normalFontVo));
+            headerMap.put(3, new ParagraphVo("是否必填", normalFontVo));
+            headerMap.put(4, new ParagraphVo("说明", normalFontVo));
 
             for (Object object : apiHelpJsonArray) {
                 JSONObject jsonObject = (JSONObject) object;
                 //接口token
-                builder.addParagraph(tokenParagraph);
-                builder.addParagraph(new ParagraphBuilder(jsonObject.getString("token"), normalFont).builder());
+                builder.addParagraph(tokenParagraphVo)
+                        .addParagraph(new ParagraphVo(jsonObject.getString("token"), normalFontVo));
                 //接口名称
-                builder.addParagraph(nameParagraph);
-                builder.addParagraph(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder());
+                builder.addParagraph(nameParagraphVo)
+                        .addParagraph(new ParagraphVo(jsonObject.getString("name"), normalFontVo));
                 //接口描述
                 if (StringUtils.isNotBlank(jsonObject.getString("description"))) {
-                    builder.addParagraph(descriptionParagraph);
-                    builder.addParagraph(new ParagraphBuilder(jsonObject.getString("description"), normalFont).builder());
+                    builder.addParagraph(descriptionParagraphVo)
+                            .addParagraph(new ParagraphVo(jsonObject.getString("description"), normalFontVo));
                 }
                 //输入参数
                 if (CollectionUtils.isNotEmpty(jsonObject.getJSONArray("input"))) {
-                    builder.addParagraph(inputParagraph);
-                    builder.addTable(addTableData(jsonObject.getJSONArray("input"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
+                    builder.addParagraph(inputParagraphVo)
+                            .addTable(new TableVo(normalFontVo, 4, 16, 100.0F, headerMap, getDataList(jsonObject.getJSONArray("input"))), false);
                 }
                 //输出参数
                 JSONArray outputArray = jsonObject.getJSONArray("output");
                 if (CollectionUtils.isNotEmpty(outputArray)) {
-                    builder.addParagraph(outputParagraph);
-                    builder.addTable(addTableData(jsonObject.getJSONArray("output"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
+                    builder.addParagraph(outputParagraphVo)
+                            .addTable(new TableVo(normalFontVo, 4, 16, 100.0F, headerMap, getDataList(jsonObject.getJSONArray("output"))), false);
                 }
                 //分割线
-                builder.addParagraph("-------------------------------------------------------------------------------------------------------------------------------------");
+                builder.addParagraph(new ParagraphVo("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------", normalFontVo));
             }
             builder.close();
-            os.flush();
-            os.close();
         } catch (IOException e) {
             e.printStackTrace();
             logger.error(e.getMessage(), e);
@@ -201,37 +198,27 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     /**
-     * 添加表格数据
+     * 封装表格数据
      *
-     * @param dataArray                 数据数组
-     * @param tableNameParagraph        表头：名称
-     * @param tableTypeParagraph        表头：类型
-     * @param tableIsRequiredParagraph  表头：是否必填
-     * @param tableDescriptionParagraph 表头：描述
-     * @return PdfPTable
-     * @throws IOException       e
+     * @param dataArray 数据array
+     * @return 数据list
      * @throws DocumentException e
+     * @throws IOException       e
      */
-    private PdfPTable addTableData(JSONArray dataArray, Paragraph tableNameParagraph, Paragraph tableTypeParagraph, Paragraph tableIsRequiredParagraph, Paragraph tableDescriptionParagraph) throws IOException, DocumentException {
-        //自定义字体
-        BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
-        Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
-
-        //创建表格、添加表头
-        TableBuilder tableBuilder = new TableBuilder(16, 4);
-        tableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F)
-                .addCell(tableNameParagraph)
-                .addCell(tableTypeParagraph)
-                .addCell(tableIsRequiredParagraph)
-                .addCell(tableDescriptionParagraph);
-        //添加数据
-        for (Object object : dataArray) {
-            JSONObject jsonObject = (JSONObject) object;
-            tableBuilder.addCell(new ParagraphBuilder(jsonObject.getString("name"), normalFont).builder())
-                    .addCell(new ParagraphBuilder(jsonObject.getString("type"), normalFont).builder())
-                    .addCell(new ParagraphBuilder(jsonObject.getString("isRequired"), normalFont).builder())
-                    .addCell(new ParagraphBuilder(jsonObject.getString("description"), normalFont).builder());
+    private List<Map<Integer, ParagraphVo>> getDataList(JSONArray dataArray) throws DocumentException, IOException {
+        List<Map<Integer, ParagraphVo>> returnList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(dataArray)) {
+            FontVo fontVo = new FontVo(8);
+            for (Object object : dataArray) {
+                JSONObject jsonObject = (JSONObject) object;
+                Map<Integer, ParagraphVo> dataMap = new HashMap<>();
+                dataMap.put(1, new ParagraphVo(jsonObject.getString("name"), fontVo));
+                dataMap.put(2, new ParagraphVo(jsonObject.getString("type"), fontVo));
+                dataMap.put(3, new ParagraphVo(jsonObject.getString("isRequired"), fontVo));
+                dataMap.put(4, new ParagraphVo(jsonObject.getString("description"), fontVo));
+                returnList.add(dataMap);
+            }
         }
-        return tableBuilder.builder();
+        return returnList;
     }
 }
