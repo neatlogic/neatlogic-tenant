@@ -174,13 +174,13 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                 //输入参数
                 if (CollectionUtils.isNotEmpty(jsonObject.getJSONArray("input"))) {
                     builder.addParagraph(inputParagraph);
-                    builder.addTable(addTableData(jsonObject.getJSONArray("input"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
+                    builder.addTable(addTableData(jsonObject.getJSONArray("input"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph));
                 }
                 //输出参数
                 JSONArray outputArray = jsonObject.getJSONArray("output");
                 if (CollectionUtils.isNotEmpty(outputArray)) {
                     builder.addParagraph(outputParagraph);
-                    builder.addTable(addTableData(jsonObject.getJSONArray("output"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph), false);
+                    builder.addTable(addTableData(jsonObject.getJSONArray("output"), tableNameParagraph, tableTypeParagraph, tableIsRequiredParagraph, tableDescriptionParagraph));
                 }
                 //分割线
                 builder.addParagraph("-------------------------------------------------------------------------------------------------------------------------------------");
@@ -218,7 +218,7 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
         Font normalFont = new Font(bfChinese, 8, Font.NORMAL);
 
         //创建表格、添加表头
-        TableBuilder tableBuilder = new TableBuilder(16, 4);
+        TableBuilder tableBuilder = new TableBuilder(4);
         tableBuilder.setHorizontalAlignment(Element.ALIGN_CENTER).setWidthPercentage(100.0F)
                 .addCell(tableNameParagraph)
                 .addCell(tableTypeParagraph)
