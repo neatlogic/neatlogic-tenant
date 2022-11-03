@@ -47,7 +47,7 @@ import java.util.zip.ZipInputStream;
 public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper dataSourceMapper;
+    DataWarehouseDataSourceMapper dataSourceMapper;
 
     @Resource
     DataSourceService dataSourceService;
@@ -122,42 +122,52 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
     private JSONObject save(DataSourceVo vo) {
         List<String> failReasonList = new ArrayList<>();
         String name = vo.getName();
-        if (StringUtils.isNotBlank(name)) {
-            if (StringUtils.isBlank(vo.getLabel())) {
-                failReasonList.add("缺少名称");
+        String label = vo.getLabel();
+        if (StringUtils.isBlank(name) && StringUtils.isBlank(label)) {
+            return null;
+        }
+        if (StringUtils.isBlank(name)) {
+            failReasonList.add("缺少唯一标识");
+        } else if (StringUtils.isBlank(label)) {
+            failReasonList.add("缺少名称");
+        }
+        if (StringUtils.isBlank(vo.getXml())) {
+            failReasonList.add("缺少配置xml");
+        }
+        if (StringUtils.isBlank(vo.getMode())) {
+            failReasonList.add("缺少同步模式");
+        }
+        if (CollectionUtils.isEmpty(failReasonList)) {
+            DataSourceVo xmlConfig = null;
+            try {
+                xmlConfig = ReportXmlUtil.generateDataSourceFromXml(vo.getXml());
+            } catch (DocumentException e) {
+                failReasonList.add("配置xml格式错误");
             }
-            if (StringUtils.isBlank(vo.getXml())) {
-                failReasonList.add("缺少配置xml");
-            }
-            if (StringUtils.isBlank(vo.getMode())) {
-                failReasonList.add("缺少同步模式");
-            }
-            if (CollectionUtils.isEmpty(failReasonList)) {
-                DataSourceVo xmlConfig = null;
-                try {
-                    xmlConfig = ReportXmlUtil.generateDataSourceFromXml(vo.getXml());
-                } catch (DocumentException e) {
-                    failReasonList.add("配置xml格式错误");
-                }
-                if (xmlConfig != null) {
-                    vo.setDataCount(0);
-                    DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
-                    if (oldVo == null) {
-                        vo.setId(null);
-                        vo.setFieldList(xmlConfig.getFieldList());
-                        dataSourceService.insertDataSource(vo);
-                    } else {
-                        vo.setId(oldVo.getId());
-                        dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
+            if (xmlConfig != null) {
+                vo.setDataCount(0);
+                DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
+                if (oldVo == null) {
+                    vo.setId(null);
+                    if (vo.getIsActive() == null) {
+                        vo.setIsActive(1);
                     }
-                    dataSourceService.createDataSourceTSchema(vo);
-                    dataSourceService.loadOrUnloadReportDataSourceJob(vo);
+                    vo.setFieldList(xmlConfig.getFieldList());
+                    dataSourceService.insertDataSource(vo);
+                } else {
+                    vo.setId(oldVo.getId());
+                    if (vo.getIsActive() == null) {
+                        vo.setIsActive(oldVo.getIsActive());
+                    }
+                    dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
+                dataSourceService.createDataSourceTSchema(vo);
+                dataSourceService.loadOrUnloadReportDataSourceJob(vo);
             }
         }
         if (CollectionUtils.isNotEmpty(failReasonList)) {
             JSONObject result = new JSONObject();
-            result.put("item", "导入：" + name + "时出现如下问题：");
+            result.put("item", "导入：" + (StringUtils.isNotBlank(name) ? name : label) + "时出现如下问题：");
             result.put("list", failReasonList);
             return result;
         }
