@@ -92,7 +92,7 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             }
             dataSourceService.updateDataSource(newDataSourceVo, dataSourceVo, oldDatasourceVo);
         }
-        dataSourceService.createDataSourceTSchema(newDataSourceVo);
+        dataSourceService.createDataSourceSchema(newDataSourceVo);
         dataSourceService.loadOrUnloadReportDataSourceJob(newDataSourceVo);
 
         return null;

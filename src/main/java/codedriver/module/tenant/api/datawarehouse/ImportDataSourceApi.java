@@ -161,7 +161,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     }
                     dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
-                dataSourceService.createDataSourceTSchema(vo);
+                dataSourceService.createDataSourceSchema(vo);
                 dataSourceService.loadOrUnloadReportDataSourceJob(vo);
             }
         }
