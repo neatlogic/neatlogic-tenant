@@ -17,6 +17,7 @@ import codedriver.framework.exception.file.FileNotUploadException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.transaction.util.TransactionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -25,7 +26,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -41,7 +42,6 @@ import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 @Service
-@Transactional
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
@@ -98,7 +98,14 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     }
                     DataSourceVo dataSourceVo = JSONObject.parseObject(new String(out.toByteArray(), StandardCharsets.UTF_8), new TypeReference<DataSourceVo>() {
                     });
-                    JSONObject result = save(dataSourceVo);
+                    JSONObject result = null;
+                    TransactionStatus tx = TransactionUtil.openTx();
+                    try {
+                        result = save(dataSourceVo);
+                        TransactionUtil.commitTx(tx);
+                    } catch (Exception ex) {
+                        TransactionUtil.rollbackTx(tx);
+                    }
                     if (MapUtils.isNotEmpty(result)) {
                         resultList.add(result);
                         failureCount++;
