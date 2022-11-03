@@ -8,7 +8,10 @@ package codedriver.module.tenant.api.datawarehouse;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
+import codedriver.framework.datawarehouse.service.DataSourceService;
+import codedriver.framework.datawarehouse.utils.ReportXmlUtil;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileNotUploadException;
 import codedriver.framework.restful.annotation.*;
@@ -19,16 +22,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.DocumentException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
@@ -37,6 +45,12 @@ import java.util.zip.ZipInputStream;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
+
+    @Resource
+    private DataWarehouseDataSourceMapper dataSourceMapper;
+
+    @Resource
+    DataSourceService dataSourceService;
 
     @Override
     public String getToken() {
@@ -106,6 +120,47 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     private JSONObject save(DataSourceVo vo) {
+        List<String> failReasonList = new ArrayList<>();
+        String name = vo.getName();
+        if (StringUtils.isNotBlank(name)) {
+            if (StringUtils.isBlank(vo.getLabel())) {
+                failReasonList.add("缺少名称");
+            }
+            if (StringUtils.isBlank(vo.getXml())) {
+                failReasonList.add("缺少配置xml");
+            }
+            if (StringUtils.isBlank(vo.getMode())) {
+                failReasonList.add("缺少同步模式");
+            }
+            if (CollectionUtils.isEmpty(failReasonList)) {
+                DataSourceVo xmlConfig = null;
+                try {
+                    xmlConfig = ReportXmlUtil.generateDataSourceFromXml(vo.getXml());
+                } catch (DocumentException e) {
+                    failReasonList.add("配置xml格式错误");
+                }
+                if (xmlConfig != null) {
+                    vo.setDataCount(0);
+                    DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
+                    if (oldVo == null) {
+                        vo.setId(null);
+                        vo.setFieldList(xmlConfig.getFieldList());
+                        dataSourceService.insertDataSource(vo);
+                    } else {
+                        vo.setId(oldVo.getId());
+                        dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
+                    }
+                    dataSourceService.createDataSourceTSchema(vo);
+                    dataSourceService.loadOrUnloadReportDataSourceJob(vo);
+                }
+            }
+        }
+        if (CollectionUtils.isNotEmpty(failReasonList)) {
+            JSONObject result = new JSONObject();
+            result.put("item", "导入：" + name + "时出现如下问题：");
+            result.put("list", failReasonList);
+            return result;
+        }
         return null;
     }
 
