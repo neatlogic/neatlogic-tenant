@@ -62,7 +62,8 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             @Param(name = "mode", type = ApiParamType.ENUM, rule = "append,replace", desc = "同步模式", isRequired = true),
             @Param(name = "expireCount", type = ApiParamType.INTEGER, desc = "有效期时间"),
             @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
-            @Param(name = "cronExpression", type = ApiParamType.STRING, desc = "定时策略")})
+            @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
+            @Param(name = "dbType", type = ApiParamType.STRING, isRequired = true, desc = "数据库类型")})
     @Description(desc = "保存数据仓库数据源接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
