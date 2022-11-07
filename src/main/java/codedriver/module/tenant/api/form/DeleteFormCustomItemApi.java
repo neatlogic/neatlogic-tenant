@@ -9,8 +9,10 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.form.dao.mapper.FormMapper;
-import codedriver.framework.form.dto.FormCustomItemVo;
-import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.annotation.Description;
+import codedriver.framework.restful.annotation.Input;
+import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -20,14 +22,14 @@ import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = FORM_MODIFY.class)
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class SaveFromCustomItemApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.DELETE)
+public class DeleteFormCustomItemApi extends PrivateApiComponentBase {
     @Resource
     private FormMapper formMapper;
 
     @Override
     public String getName() {
-        return "保存表单自定义组件";
+        return "删除表单自定义组件";
     }
 
     @Override
@@ -35,24 +37,17 @@ public class SaveFromCustomItemApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "组件id"),
-            @Param(name = "name", type = ApiParamType.STRING, desc = "组件唯一标识")})
-    @Output({@Param(explode = FormCustomItemVo.class)})
-    @Description(desc = "保存表单自定义组件接口")
+    @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "组件id")
+    })
+    @Description(desc = "删除表单自定义组件接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Long id = paramObj.getLong("id");
-        FormCustomItemVo formCustomItemVo = JSONObject.toJavaObject(paramObj, FormCustomItemVo.class);
-        if (id == null) {
-            formMapper.insertFormCustomItem(formCustomItemVo);
-        } else {
-            formMapper.updateFormCustomItem(formCustomItemVo);
-        }
+        formMapper.deleteFormCustomItem(paramObj.getLong("id"));
         return null;
     }
 
     @Override
     public String getToken() {
-        return "/form/customitem/save";
+        return "/form/customitem/delete";
     }
 }

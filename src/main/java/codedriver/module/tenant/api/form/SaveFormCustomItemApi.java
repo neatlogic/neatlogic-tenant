@@ -5,28 +5,30 @@
 
 package codedriver.module.tenant.api.form;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.FORM_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.ParamNotExistsException;
+import codedriver.framework.exception.form.FormCustomItemNameExistsException;
 import codedriver.framework.form.dao.mapper.FormMapper;
 import codedriver.framework.form.dto.FormCustomItemVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class GetFromCustomItemApi extends PrivateApiComponentBase {
+@AuthAction(action = FORM_MODIFY.class)
+@OperationType(type = OperationTypeEnum.UPDATE)
+public class SaveFormCustomItemApi extends PrivateApiComponentBase {
     @Resource
     private FormMapper formMapper;
 
     @Override
     public String getName() {
-        return "获取表单自定义组件";
+        return "保存表单自定义组件";
     }
 
     @Override
@@ -37,23 +39,24 @@ public class GetFromCustomItemApi extends PrivateApiComponentBase {
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "组件id"),
             @Param(name = "name", type = ApiParamType.STRING, desc = "组件唯一标识")})
     @Output({@Param(explode = FormCustomItemVo.class)})
-    @Description(desc = "获取表单自定义组件接口")
+    @Description(desc = "保存表单自定义组件接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        String name = paramObj.getString("name");
-        if (id == null && StringUtils.isBlank(name)) {
-            throw new ParamNotExistsException("id", "name");
+        FormCustomItemVo formCustomItemVo = JSONObject.toJavaObject(paramObj, FormCustomItemVo.class);
+        if (formMapper.checkFormCustomItemNameIsExists(formCustomItemVo) > 0) {
+            throw new FormCustomItemNameExistsException(formCustomItemVo.getName());
         }
-        if (id != null) {
-            return formMapper.getFormCustomItemById(paramObj.getLong("id"));
+        if (id == null) {
+            formMapper.insertFormCustomItem(formCustomItemVo);
         } else {
-            return formMapper.getFormCustomItemByName(name);
+            formMapper.updateFormCustomItem(formCustomItemVo);
         }
+        return null;
     }
 
     @Override
     public String getToken() {
-        return "/form/customitem/get";
+        return "/form/customitem/save";
     }
 }

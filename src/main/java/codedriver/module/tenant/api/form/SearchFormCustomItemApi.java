@@ -22,7 +22,7 @@ import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class SearchFromCustomItemApi extends PrivateApiComponentBase {
+public class SearchFormCustomItemApi extends PrivateApiComponentBase {
     @Resource
     private FormMapper formMapper;
 
