@@ -9,6 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.service.DataSourceService;
 import codedriver.framework.datawarehouse.utils.ReportXmlUtil;
@@ -36,9 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipInputStream;
 
 @Service
@@ -130,6 +129,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
         List<String> failReasonList = new ArrayList<>();
         String name = vo.getName();
         String label = vo.getLabel();
+        List<DataSourceFieldVo> fieldList = vo.getFieldList();
         if (StringUtils.isBlank(name) && StringUtils.isBlank(label)) {
             return null;
         }
@@ -159,7 +159,20 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(1);
                     }
-                    vo.setFieldList(xmlConfig.getFieldList());
+                    List<DataSourceFieldVo> newFieldList = xmlConfig.getFieldList();
+                    if (CollectionUtils.isNotEmpty(newFieldList) && CollectionUtils.isNotEmpty(fieldList)) {
+                        for (DataSourceFieldVo fieldVo : newFieldList) {
+                            Optional<DataSourceFieldVo> opt = fieldList.stream()
+                                    .filter(o -> Objects.equals(fieldVo.getName(), o.getName()) && Objects.equals(o.getIsCondition(), 1)).findFirst();
+                            if (opt.isPresent()) {
+                                DataSourceFieldVo oldField = opt.get();
+                                fieldVo.setIsCondition(1);
+                                fieldVo.setInputType(oldField.getInputType());
+                                fieldVo.setConfig(oldField.getConfig());
+                            }
+                        }
+                    }
+                    vo.setFieldList(newFieldList);
                     dataSourceService.insertDataSource(vo);
                 } else {
                     vo.setId(oldVo.getId());
