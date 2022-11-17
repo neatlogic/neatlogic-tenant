@@ -9,6 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.service.DataSourceService;
 import codedriver.framework.datawarehouse.utils.ReportXmlUtil;
@@ -130,6 +131,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
         List<String> failReasonList = new ArrayList<>();
         String name = vo.getName();
         String label = vo.getLabel();
+        List<DataSourceFieldVo> fieldList = vo.getFieldList();
         if (StringUtils.isBlank(name) && StringUtils.isBlank(label)) {
             return null;
         }
@@ -154,17 +156,24 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
             if (xmlConfig != null) {
                 vo.setDataCount(0);
                 DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
+                // 还原条件设置
+                List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(xmlConfig.getFieldList(), vo.getFieldList());
                 if (oldVo == null) {
                     vo.setId(null);
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(1);
                     }
-                    vo.setFieldList(xmlConfig.getFieldList());
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        vo.setFieldList(newFieldList);
+                    }
                     dataSourceService.insertDataSource(vo);
                 } else {
                     vo.setId(oldVo.getId());
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(oldVo.getIsActive());
+                    }
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        xmlConfig.setFieldList(newFieldList);
                     }
                     dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
