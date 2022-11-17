@@ -154,23 +154,24 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
             if (xmlConfig != null) {
                 vo.setDataCount(0);
                 DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
+                // 还原条件设置
+                List<DataSourceFieldVo> newFieldList = xmlConfig.getFieldList();
+                if (CollectionUtils.isNotEmpty(newFieldList) && CollectionUtils.isNotEmpty(fieldList)) {
+                    for (DataSourceFieldVo fieldVo : newFieldList) {
+                        Optional<DataSourceFieldVo> opt = fieldList.stream()
+                                .filter(o -> Objects.equals(fieldVo.getName(), o.getName()) && Objects.equals(o.getIsCondition(), 1)).findFirst();
+                        if (opt.isPresent()) {
+                            DataSourceFieldVo oldField = opt.get();
+                            fieldVo.setIsCondition(1);
+                            fieldVo.setInputType(oldField.getInputType());
+                            fieldVo.setConfig(oldField.getConfig());
+                        }
+                    }
+                }
                 if (oldVo == null) {
                     vo.setId(null);
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(1);
-                    }
-                    List<DataSourceFieldVo> newFieldList = xmlConfig.getFieldList();
-                    if (CollectionUtils.isNotEmpty(newFieldList) && CollectionUtils.isNotEmpty(fieldList)) {
-                        for (DataSourceFieldVo fieldVo : newFieldList) {
-                            Optional<DataSourceFieldVo> opt = fieldList.stream()
-                                    .filter(o -> Objects.equals(fieldVo.getName(), o.getName()) && Objects.equals(o.getIsCondition(), 1)).findFirst();
-                            if (opt.isPresent()) {
-                                DataSourceFieldVo oldField = opt.get();
-                                fieldVo.setIsCondition(1);
-                                fieldVo.setInputType(oldField.getInputType());
-                                fieldVo.setConfig(oldField.getConfig());
-                            }
-                        }
                     }
                     vo.setFieldList(newFieldList);
                     dataSourceService.insertDataSource(vo);
@@ -179,6 +180,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(oldVo.getIsActive());
                     }
+                    xmlConfig.setFieldList(newFieldList);
                     dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
                 dataSourceService.createDataSourceSchema(vo);
