@@ -37,7 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 @Service
@@ -155,32 +157,24 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                 vo.setDataCount(0);
                 DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
                 // 还原条件设置
-                List<DataSourceFieldVo> newFieldList = xmlConfig.getFieldList();
-                if (CollectionUtils.isNotEmpty(newFieldList) && CollectionUtils.isNotEmpty(fieldList)) {
-                    for (DataSourceFieldVo fieldVo : newFieldList) {
-                        Optional<DataSourceFieldVo> opt = fieldList.stream()
-                                .filter(o -> Objects.equals(fieldVo.getName(), o.getName()) && Objects.equals(o.getIsCondition(), 1)).findFirst();
-                        if (opt.isPresent()) {
-                            DataSourceFieldVo oldField = opt.get();
-                            fieldVo.setIsCondition(1);
-                            fieldVo.setInputType(oldField.getInputType());
-                            fieldVo.setConfig(oldField.getConfig());
-                        }
-                    }
-                }
+                List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(xmlConfig.getFieldList(), vo.getFieldList());
                 if (oldVo == null) {
                     vo.setId(null);
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(1);
                     }
-                    vo.setFieldList(newFieldList);
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        vo.setFieldList(newFieldList);
+                    }
                     dataSourceService.insertDataSource(vo);
                 } else {
                     vo.setId(oldVo.getId());
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(oldVo.getIsActive());
                     }
-                    xmlConfig.setFieldList(newFieldList);
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        xmlConfig.setFieldList(newFieldList);
+                    }
                     dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
                 dataSourceService.createDataSourceSchema(vo);
