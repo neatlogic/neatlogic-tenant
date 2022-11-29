@@ -26,6 +26,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +37,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.zip.ZipInputStream;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
-
+    static Logger logger = LoggerFactory.getLogger(ImportDataSourceApi.class);
     @Resource
     DataWarehouseDataSourceMapper dataSourceMapper;
 
@@ -105,7 +106,9 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                         result = save(dataSourceVo);
                         TransactionUtil.commitTx(tx);
                     } catch (Exception ex) {
+                        logger.error(ex.getMessage(),ex);
                         TransactionUtil.rollbackTx(tx);
+                        throw new Exception(ex.getMessage(),ex);
                     }
                     if (MapUtils.isNotEmpty(result)) {
                         resultList.add(result);
@@ -115,7 +118,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     }
                     out.reset();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
             }
         }
