@@ -9,6 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
 import codedriver.framework.datawarehouse.exceptions.DataSourceNameIsExistsException;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
@@ -91,6 +93,9 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             if (oldDatasourceVo == null) {
                 throw new DataSourceIsNotFoundException(id);
             }
+            // 还原条件设置
+            List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(dataSourceVo.getFieldList(), oldDatasourceVo.getFieldList());
+            dataSourceVo.setFieldList(newFieldList);
             dataSourceService.updateDataSource(newDataSourceVo, dataSourceVo, oldDatasourceVo);
         }
         dataSourceService.createDataSourceSchema(newDataSourceVo);

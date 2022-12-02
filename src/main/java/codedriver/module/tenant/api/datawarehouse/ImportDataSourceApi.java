@@ -9,6 +9,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
+import codedriver.framework.datawarehouse.dto.DataSourceFieldVo;
 import codedriver.framework.datawarehouse.dto.DataSourceVo;
 import codedriver.framework.datawarehouse.service.DataSourceService;
 import codedriver.framework.datawarehouse.utils.ReportXmlUtil;
@@ -25,6 +26,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.DocumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +37,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,7 @@ import java.util.zip.ZipInputStream;
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
-
+    static Logger logger = LoggerFactory.getLogger(ImportDataSourceApi.class);
     @Resource
     DataWarehouseDataSourceMapper dataSourceMapper;
 
@@ -104,7 +106,9 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                         result = save(dataSourceVo);
                         TransactionUtil.commitTx(tx);
                     } catch (Exception ex) {
+                        logger.error(ex.getMessage(),ex);
                         TransactionUtil.rollbackTx(tx);
+                        throw new Exception(ex.getMessage(),ex);
                     }
                     if (MapUtils.isNotEmpty(result)) {
                         resultList.add(result);
@@ -114,7 +118,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
                     }
                     out.reset();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
             }
         }
@@ -130,6 +134,7 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
         List<String> failReasonList = new ArrayList<>();
         String name = vo.getName();
         String label = vo.getLabel();
+        List<DataSourceFieldVo> fieldList = vo.getFieldList();
         if (StringUtils.isBlank(name) && StringUtils.isBlank(label)) {
             return null;
         }
@@ -154,17 +159,24 @@ public class ImportDataSourceApi extends PrivateBinaryStreamApiComponentBase {
             if (xmlConfig != null) {
                 vo.setDataCount(0);
                 DataSourceVo oldVo = dataSourceMapper.getDataSourceDetailByName(name);
+                // 还原条件设置
+                List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(xmlConfig.getFieldList(), vo.getFieldList());
                 if (oldVo == null) {
                     vo.setId(null);
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(1);
                     }
-                    vo.setFieldList(xmlConfig.getFieldList());
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        vo.setFieldList(newFieldList);
+                    }
                     dataSourceService.insertDataSource(vo);
                 } else {
                     vo.setId(oldVo.getId());
                     if (vo.getIsActive() == null) {
                         vo.setIsActive(oldVo.getIsActive());
+                    }
+                    if (CollectionUtils.isNotEmpty(newFieldList)) {
+                        xmlConfig.setFieldList(newFieldList);
                     }
                     dataSourceService.updateDataSource(vo, xmlConfig, oldVo);
                 }
