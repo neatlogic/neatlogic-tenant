@@ -6,20 +6,21 @@
 package codedriver.module.tenant.api.matrix;
 
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.constvalue.Expression;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.matrix.core.IMatrixDataSourceHandler;
 import codedriver.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import codedriver.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import codedriver.framework.matrix.dao.mapper.MatrixMapper;
-import codedriver.framework.matrix.dto.MatrixColumnVo;
-import codedriver.framework.matrix.dto.MatrixDataVo;
-import codedriver.framework.matrix.dto.MatrixVo;
+import codedriver.framework.matrix.dto.*;
+import codedriver.framework.matrix.exception.MatrixAttributeNotFoundException;
 import codedriver.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
 import codedriver.framework.matrix.exception.MatrixNotFoundException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -27,16 +28,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase {
 
+    private String SELECT_COMPOSE_JOINER = "&=&";
     @Resource
     private MatrixMapper matrixMapper;
 
@@ -66,12 +66,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
             @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "sourceColumnList", desc = "搜索过滤值集合", type = ApiParamType.JSONARRAY),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
-            @Param(name = "attrFilterList", desc = "配置项矩阵属性过滤条件", type = ApiParamType.JSONARRAY),
-            @Param(name = "relFilterList", desc = "配置项矩阵关系过滤条件", type = ApiParamType.JSONARRAY),
-            @Param(name = "filterList", desc = "联动过滤数据集合", type = ApiParamType.JSONARRAY)
+            @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合，value值的格式是value&=&text，适配value相同，text不同的场景"),
@@ -129,27 +126,60 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        List<MatrixColumnVo> sourceColumnList = dataVo.getSourceColumnList();
-        if (CollectionUtils.isNotEmpty(sourceColumnList)) {
-            Iterator<MatrixColumnVo> iterator = sourceColumnList.iterator();
+
+        List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
+        if (CollectionUtils.isEmpty(matrixAttributeList)) {
+            return new JSONObject();
+        }
+        List<MatrixFilterVo> filterList = dataVo.getFilterList();
+        if (CollectionUtils.isNotEmpty(filterList)) {
+            Iterator<MatrixFilterVo> iterator = filterList.iterator();
             while (iterator.hasNext()) {
-                MatrixColumnVo matrixColumnVo = iterator.next();
-                if (StringUtils.isBlank(matrixColumnVo.getColumn())) {
+                MatrixFilterVo matrixFilterVo = iterator.next();
+                if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
                     iterator.remove();
-                } else if (CollectionUtils.isEmpty(matrixColumnVo.getValueList())) {
+                } else if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())) {
                     iterator.remove();
                 }
             }
         }
-
+        Set<String> notNullColumnSet = new HashSet<>();
+        List<String> attributeList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
         String valueField = jsonObj.getString("valueField");
+        if (!attributeList.contains(valueField)) {
+            throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueField);
+        }
+        notNullColumnSet.add(valueField);
         String textField = jsonObj.getString("textField");
+        if (!attributeList.contains(textField)) {
+            throw new MatrixAttributeNotFoundException(matrixVo.getName(), textField);
+        }
+        dataVo.setKeywordColumn(textField);
+        notNullColumnSet.add(textField);
         List<String> columnList = new ArrayList<>();
         columnList.add(valueField);
         columnList.add(textField);
         dataVo.setColumnList(columnList);
+        dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
+        JSONArray defaultValue = dataVo.getDefaultValue();
+        if (CollectionUtils.isNotEmpty(defaultValue)) {
+            List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
+            for (String value : defaultValue.toJavaList(String.class)) {
+                if (!value.contains(SELECT_COMPOSE_JOINER)) {
+                    continue;
+                }
+                String[] split = value.split(SELECT_COMPOSE_JOINER);
+                MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                        new MatrixKeywordFilterVo(valueField, Expression.EQUAL.getExpression(), split[0]),
+                        new MatrixKeywordFilterVo(textField, Expression.EQUAL.getExpression(), split[1])
+                );
+                defaultValueFilterList.add(matrixDefaultValueFilterVo);
+            }
+            dataVo.setDefaultValueFilterList(defaultValueFilterList);
+            dataVo.setDefaultValue(null);
+        }
         List<ValueTextVo> dataList = new ArrayList<>();
-        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
+        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
         if (CollectionUtils.isNotEmpty(resultList)) {
             for (Map<String, JSONObject> result : resultList) {
                 String valueStr = null;
