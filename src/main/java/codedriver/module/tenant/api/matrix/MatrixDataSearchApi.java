@@ -18,10 +18,15 @@ import codedriver.framework.matrix.exception.*;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.util.TableResultUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @program: codedriver
@@ -79,9 +84,35 @@ public class MatrixDataSearchApi extends PrivateApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        JSONObject returnObj = matrixDataSourceHandler.getTableData(dataVo);
+        List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
+        List<String> columnList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
+        dataVo.setColumnList(columnList);
+        List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+        JSONArray theadList = getTheadList(matrixAttributeList);
+        JSONObject returnObj = TableResultUtil.getResult(theadList, tbodyList, dataVo);
         int count = DependencyManager.getDependencyCount(FrameworkFromType.MATRIX, dataVo.getMatrixUuid());
         returnObj.put("referenceCount", count);
         return returnObj;
+    }
+
+    private JSONArray getTheadList(List<MatrixAttributeVo> attributeList) {
+        JSONArray theadList = new JSONArray();
+        JSONObject selectionObj = new JSONObject();
+        selectionObj.put("key", "selection");
+        selectionObj.put("width", 60);
+        theadList.add(selectionObj);
+        for (MatrixAttributeVo attributeVo : attributeList) {
+            JSONObject columnObj = new JSONObject();
+            columnObj.put("title", attributeVo.getName());
+            columnObj.put("key", attributeVo.getUuid());
+            theadList.add(columnObj);
+        }
+        JSONObject actionObj = new JSONObject();
+        actionObj.put("title", "");
+        actionObj.put("key", "action");
+        actionObj.put("align", "right");
+        actionObj.put("width", 10);
+        theadList.add(actionObj);
+        return theadList;
     }
 }
