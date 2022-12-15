@@ -6,18 +6,15 @@
 package codedriver.module.tenant.api.scheduler;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.scheduler.dao.mapper.SchedulerMapper;
 import codedriver.framework.scheduler.dto.JobAuditVo;
-import codedriver.framework.scheduler.dto.JobVo;
-import codedriver.framework.scheduler.exception.ScheduleJobNotFoundException;
-import codedriver.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +47,7 @@ public class JobAuditSearchApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "jobUuid", type = ApiParamType.STRING, desc = "定时作业uuid，不提供则搜索所有作业的执行记录")})
+            @Param(name = "jobUuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid，不提供则搜索所有作业的执行记录")})
     @Description(desc = "查询定时作业执行记录列表")
     @Output({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
@@ -62,12 +59,13 @@ public class JobAuditSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JobAuditVo jobAuditVo = JSONObject.toJavaObject(jsonObj, JobAuditVo.class);
-        if (StringUtils.isNotBlank(jobAuditVo.getJobUuid())) {
+        //通用接口无需校验
+        /*if (StringUtils.isNotBlank(jobAuditVo.getJobUuid())) {
             JobVo job = schedulerMapper.getJobByUuid(jobAuditVo.getJobUuid());
             if (job == null) {
                 throw new ScheduleJobNotFoundException(jobAuditVo.getJobUuid());
             }
-        }
+        }*/
         int rowNum = schedulerMapper.searchJobAuditCount(jobAuditVo);
         int pageCount = PageUtil.getPageCount(rowNum, jobAuditVo.getPageSize());
         jobAuditVo.setPageCount(pageCount);
