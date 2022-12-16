@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -28,8 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 @Service
-
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBase {
 
@@ -53,7 +53,7 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
 
     @Override
     public boolean disableReturnCircularReferenceDetect() {
-       return true;
+        return true;
     }
 
     @Input({
