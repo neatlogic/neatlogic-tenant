@@ -180,6 +180,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         }
         List<ValueTextVo> dataList = new ArrayList<>();
         List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+        deduplicateData(valueField, textField, resultList);
         if (CollectionUtils.isNotEmpty(resultList)) {
             for (Map<String, JSONObject> result : resultList) {
                 String valueStr = null;
@@ -202,5 +203,31 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         returnObj.put("pageCount", dataVo.getPageCount());
         returnObj.put("rowNum", dataVo.getRowNum());
         return returnObj;
+    }
+
+    private void deduplicateData(String valueField, String textField, List<Map<String, JSONObject>> resultList) {
+        List<String> exsited = new ArrayList<>();
+        Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
+        while (iterator.hasNext()) {
+            Map<String, JSONObject> resultObj = iterator.next();
+            JSONObject firstObj = resultObj.get(valueField);
+            if (MapUtils.isEmpty(firstObj)) {
+                iterator.remove();
+                continue;
+            }
+            JSONObject secondObj = resultObj.get(textField);
+            if (MapUtils.isEmpty(secondObj)) {
+                iterator.remove();
+                continue;
+            }
+            String firstValue = firstObj.getString("value");
+            String secondText = secondObj.getString("text");
+            String compose = firstValue + SELECT_COMPOSE_JOINER + secondText;
+            if (exsited.contains(compose)) {
+                iterator.remove();
+            } else {
+                exsited.add(compose);
+            }
+        }
     }
 }
