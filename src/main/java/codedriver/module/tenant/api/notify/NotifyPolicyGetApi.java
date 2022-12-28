@@ -7,7 +7,6 @@ package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.ModuleUtil;
-import codedriver.framework.dao.mapper.UserMapper;
 import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dto.ConditionParamVo;
