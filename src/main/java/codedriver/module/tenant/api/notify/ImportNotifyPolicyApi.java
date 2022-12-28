@@ -56,7 +56,7 @@ public class ImportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
 
     @Input({})
     @Output({})
-    @Description(desc = "导出通知策略")
+    @Description(desc = "导入通知策略")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
