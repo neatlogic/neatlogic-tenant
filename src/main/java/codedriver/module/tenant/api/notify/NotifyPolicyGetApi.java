@@ -6,17 +6,17 @@
 package codedriver.module.tenant.api.notify;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.constvalue.GroupSearch;
-import codedriver.framework.dao.mapper.UserMapper;
+import codedriver.framework.common.util.ModuleUtil;
 import codedriver.framework.dependency.constvalue.FrameworkFromType;
 import codedriver.framework.dependency.core.DependencyManager;
 import codedriver.framework.dto.ConditionParamVo;
 import codedriver.framework.dto.UserTypeVo;
-import codedriver.framework.dto.UserVo;
+import codedriver.framework.dto.module.ModuleGroupVo;
 import codedriver.framework.notify.core.INotifyPolicyHandler;
 import codedriver.framework.notify.core.NotifyPolicyHandlerFactory;
 import codedriver.framework.notify.dao.mapper.NotifyMapper;
 import codedriver.framework.notify.dto.NotifyPolicyConfigVo;
+import codedriver.framework.notify.dto.NotifyPolicyHandlerVo;
 import codedriver.framework.notify.dto.NotifyPolicyVo;
 import codedriver.framework.notify.dto.NotifyTriggerVo;
 import codedriver.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -41,9 +40,6 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
 
     @Autowired
     private NotifyMapper notifyMapper;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @Autowired
     private NotifyPolicyService notifyPolicyService;
@@ -131,6 +127,19 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
 
         int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
+
+        String moduleGroupName = "";
+        List<NotifyPolicyHandlerVo> notifyPolicyHandlerList = NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList();
+        for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : notifyPolicyHandlerList) {
+            if (Objects.equals(notifyPolicyHandlerVo.getHandler(), notifyPolicyVo.getHandler())) {
+                ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(notifyPolicyHandlerVo.getModuleGroup());
+                if (moduleGroupVo != null) {
+                    moduleGroupName = moduleGroupVo.getGroupName();
+                }
+            }
+        }
+        String handlerName = notifyPolicyHandler.getName();
+        notifyPolicyVo.setPath(moduleGroupName + "/" + handlerName + "/" + notifyPolicyVo.getName());
         return notifyPolicyVo;
     }
 
