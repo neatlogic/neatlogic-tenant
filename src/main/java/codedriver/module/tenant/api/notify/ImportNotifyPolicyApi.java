@@ -104,9 +104,8 @@ public class ImportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
             throw new NotifyPolicyMoreThanOneException(notifyPolicyHandler.getName());
         }
         int i = 1;
-        NotifyPolicyVo notifyPolicy = new NotifyPolicyVo(name, handler);
-        while (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicy) > 0) {
-            notifyPolicy.setName(name + "_" + i);
+        while (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
+            notifyPolicyVo.setName(name + "_" + i);
             i++;
         }
         if (notifyMapper.getNotifyPolicyById(id) != null) {
