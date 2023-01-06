@@ -7,6 +7,8 @@ package codedriver.module.tenant.api.user;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.auth.core.AuthBase;
+import codedriver.framework.auth.core.AuthFactory;
 import codedriver.framework.auth.init.MaintenanceMode;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -82,10 +84,20 @@ public class UserGetApi extends PrivateApiComponentBase {
             if (userVo == null) {
                 throw new UserNotFoundException(userUuid);
             }
-            List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
-            if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-                AuthActionChecker.getAuthList(userAuthVoList);
-                userVo.setUserAuthList(userAuthVoList);
+            //超级管理员拥有所有权限
+            if (userVo.getIsSuperAdmin()) {
+                List<AuthBase> authBaseList = AuthFactory.getAuthList();
+                List<UserAuthVo> userAuthVos = new ArrayList<>();
+                for (AuthBase authBase : authBaseList) {
+                    userAuthVos.add(new UserAuthVo(userUuid, authBase));
+                }
+                userVo.setUserAuthList(userAuthVos);
+            } else {
+                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
+                if (CollectionUtils.isNotEmpty(userAuthVoList)) {
+                    AuthActionChecker.getAuthList(userAuthVoList);
+                    userVo.setUserAuthList(userAuthVoList);
+                }
             }
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
             List<String> teamUuidList = userVo.getTeamUuidList();
