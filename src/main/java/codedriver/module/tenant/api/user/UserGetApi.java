@@ -85,7 +85,7 @@ public class UserGetApi extends PrivateApiComponentBase {
                 throw new UserNotFoundException(userUuid);
             }
             //超级管理员拥有所有权限
-            if (userVo.getIsSuperAdmin()) {
+            if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
                 List<AuthBase> authBaseList = AuthFactory.getAuthList();
                 List<UserAuthVo> userAuthVos = new ArrayList<>();
                 for (AuthBase authBase : authBaseList) {
