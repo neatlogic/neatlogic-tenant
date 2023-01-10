@@ -4,6 +4,7 @@
  */
 package codedriver.module.tenant.api.scheduler;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -101,6 +102,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
         resultObj.put("pageCount", PageUtil.getPageCount(returnList.size(), pageSize));
         resultObj.put("currentPage", currentPage);
         resultObj.put("pageSize", pageSize);
+        resultObj.put("tenant", TenantContext.get().getTenantUuid());
 
         for (int offset = 0; offset < returnList.size(); offset += pageSize) {
             if (offset == pageSize * (currentPage - 1)) {
