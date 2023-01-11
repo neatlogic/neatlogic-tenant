@@ -12,13 +12,13 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.scheduler.core.SchedulerManager;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author longrf
@@ -28,6 +28,10 @@ import java.util.Set;
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchSchedulerGroupNameMemoryApi extends PrivateApiComponentBase {
+
+    @Resource
+    private SchedulerFactoryBean schedulerFactoryBean;
+
     @Override
     public String getName() {
         return "获取所有定时作业组的组名列表";
@@ -47,11 +51,11 @@ public class SearchSchedulerGroupNameMemoryApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String keyword = paramObj.getString("keyword");
+        List<String> jobGroupNameList = schedulerFactoryBean.getScheduler().getJobGroupNames();
         List<ValueTextVo> returnList = new ArrayList<>();
-        Set<String> allGroupNameSet = SchedulerManager.getAllGroupNameSet();
         String tenantString = TenantContext.get().getTenantUuid();
         int length = tenantString.length();
-        for (String groupName : allGroupNameSet) {
+        for (String groupName : jobGroupNameList) {
             String text = groupName.substring(length + 1);
             if (text.contains(keyword)) {
                 returnList.add(new ValueTextVo(groupName, text));

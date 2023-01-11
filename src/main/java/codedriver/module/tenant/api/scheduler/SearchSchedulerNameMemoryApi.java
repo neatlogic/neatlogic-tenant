@@ -12,10 +12,8 @@ import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.scheduler.dto.JobObject;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -65,21 +63,16 @@ public class SearchSchedulerNameMemoryApi extends PrivateApiComponentBase {
         String tenantString = TenantContext.get().getTenantUuid();
         int length = tenantString.length();
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
-        for (String groupName : scheduler.getJobGroupNames()) {
-            if (StringUtils.equals(jobGroupName, groupName)) {
-                for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
-                    JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-                    JobObject jobObject = (JobObject) jobDetail.getJobDataMap().get("jobObject");
-                    if (jobObject != null && jobObject.getJobName() != null) {
-                        if (StringUtils.isNotEmpty(keyword)) {
-                            if (jobObject.getJobName().contains(keyword)) {
-                                returnList.add(new ValueTextVo(jobObject.getJobName(),jobObject.getJobName().startsWith(tenantString)? jobObject.getJobName().substring(length + 1):jobObject.getJobName()));
-                            }
-                        } else {
-                            returnList.add(new ValueTextVo(jobObject.getJobName(),jobObject.getJobName().startsWith(tenantString)? jobObject.getJobName().substring(length + 1):jobObject.getJobName()));
-                        }
+        for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroupName))) {
+            if (jobKey.getName() != null) {
+                if (StringUtils.isNotEmpty(keyword)) {
+                    if (jobKey.getName().contains(keyword)) {
+                        returnList.add(new ValueTextVo(jobKey.getName(), jobKey.getName().startsWith(tenantString) ? jobKey.getName().substring(length + 1) : jobKey.getName()));
                     }
+                } else {
+                    returnList.add(new ValueTextVo(jobKey.getName(), jobKey.getName().startsWith(tenantString) ? jobKey.getName().substring(length + 1) : jobKey.getName()));
                 }
+                break;
             }
         }
         return returnList;
