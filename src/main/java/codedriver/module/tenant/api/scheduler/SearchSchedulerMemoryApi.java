@@ -103,12 +103,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
         resultObj.put("currentPage", currentPage);
         resultObj.put("pageSize", pageSize);
         resultObj.put("tenant", TenantContext.get().getTenantUuid());
-
-        returnList = returnList.stream()
-                .skip((long) pageSize * (currentPage - 1))
-                .limit(pageSize)
-                .collect(Collectors.toList());
-        resultObj.put("tbodyList", returnList);
+        resultObj.put("tbodyList", returnList.stream().skip((long) pageSize * (currentPage - 1)).limit(pageSize).collect(Collectors.toList()));
         return resultObj;
     }
 
