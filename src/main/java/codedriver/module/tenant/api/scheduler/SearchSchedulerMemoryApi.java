@@ -89,7 +89,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
             }
         } else if (StringUtils.isNotEmpty(jobGroupName)) {
             returnList = matchJobObject(scheduler, jobGroupName);
-        } else if (StringUtils.isEmpty(jobGroupName)) {
+        } else {
             for (String groupName : scheduler.getJobGroupNames()) {
                 returnList.addAll(matchJobObject(scheduler, groupName));
             }
