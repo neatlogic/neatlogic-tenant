@@ -13,7 +13,6 @@ import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.scheduler.dto.JobAuditVo;
 import codedriver.framework.scheduler.dto.JobObject;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +64,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
             @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
             @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-            @Param(name = "tbodyList", explode = JobAuditVo[].class, desc = "内存的定时作业列表")
+            @Param(name = "tbodyList", explode = JobObject[].class, desc = "内存的定时作业列表")
     })
     @Description(desc = "查询内存的定时作业列表")
     @Override
