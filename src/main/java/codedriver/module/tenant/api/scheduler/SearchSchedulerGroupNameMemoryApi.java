@@ -51,11 +51,9 @@ public class SearchSchedulerGroupNameMemoryApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String keyword = paramObj.getString("keyword");
-        List<String> jobGroupNameList = schedulerFactoryBean.getScheduler().getJobGroupNames();
         List<ValueTextVo> returnList = new ArrayList<>();
-        String tenantString = TenantContext.get().getTenantUuid();
-        int length = tenantString.length();
-        for (String groupName : jobGroupNameList) {
+        int length = TenantContext.get().getTenantUuid().length();
+        for (String groupName : schedulerFactoryBean.getScheduler().getJobGroupNames()) {
             String text = groupName.substring(length + 1);
             if (text.contains(keyword)) {
                 returnList.add(new ValueTextVo(groupName, text));
