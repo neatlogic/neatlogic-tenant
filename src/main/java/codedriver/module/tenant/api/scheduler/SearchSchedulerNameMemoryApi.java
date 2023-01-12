@@ -64,7 +64,7 @@ public class SearchSchedulerNameMemoryApi extends PrivateApiComponentBase {
         int length = tenantString.length();
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
         for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroupName))) {
-            if (jobKey.getName() != null) {
+            if (StringUtils.isNotEmpty(jobKey.getName())) {
                 if (StringUtils.isNotEmpty(keyword)) {
                     if (jobKey.getName().contains(keyword)) {
                         returnList.add(new ValueTextVo(jobKey.getName(), jobKey.getName().startsWith(tenantString) ? jobKey.getName().substring(length + 1) : jobKey.getName()));
@@ -72,7 +72,6 @@ public class SearchSchedulerNameMemoryApi extends PrivateApiComponentBase {
                 } else {
                     returnList.add(new ValueTextVo(jobKey.getName(), jobKey.getName().startsWith(tenantString) ? jobKey.getName().substring(length + 1) : jobKey.getName()));
                 }
-                break;
             }
         }
         return returnList;
