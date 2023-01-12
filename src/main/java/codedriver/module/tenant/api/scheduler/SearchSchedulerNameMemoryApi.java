@@ -72,7 +72,6 @@ public class SearchSchedulerNameMemoryApi extends PrivateApiComponentBase {
                 } else {
                     returnList.add(new ValueTextVo(jobKey.getName(), jobKey.getName().startsWith(tenantString) ? jobKey.getName().substring(length + 1) : jobKey.getName()));
                 }
-                break;
             }
         }
         return returnList;
