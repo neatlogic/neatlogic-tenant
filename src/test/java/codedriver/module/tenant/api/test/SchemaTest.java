@@ -1,4 +1,4 @@
-package codedriver.module.tenant.api.test;
+package neatlogic.module.tenant.api.test;
 
 public class SchemaTest {
    /* @Test

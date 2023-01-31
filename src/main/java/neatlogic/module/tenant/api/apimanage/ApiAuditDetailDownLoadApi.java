@@ -1,0 +1,53 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
+package neatlogic.module.tenant.api.apimanage;
+
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.AuditUtil;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@Service
+
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class ApiAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
+
+	@Override
+	public String getToken() {
+		return "apimanage/audit/detail/download";
+	}
+
+	@Override
+	public String getName() {
+		return "下载接口调用记录";
+	}
+
+	@Override
+	public String getConfig() {
+		return null;
+	}
+
+	@Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true)})
+	@Output({})
+	@Description(desc = "下载接口调用记录")
+	@Override
+	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		String filePath = jsonObj.getString("filePath");
+
+		AuditUtil.downLoadAuditDetail(request, response, filePath);
+
+		return null;
+	}
+
+}

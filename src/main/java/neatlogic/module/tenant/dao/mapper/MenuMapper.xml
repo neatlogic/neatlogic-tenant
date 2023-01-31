@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.tenant.dao.mapper.MenuMapper">
+	<resultMap type="neatlogic.module.tenant.dto.MenuVo" id="menuByIdMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="icon" property="icon" />
+		<result column="parentId" property="parentId" />
+		<result column="parentName" property="parentName" />
+		<result column="url" property="url" />
+		<result column="sort" property="sort" />
+		<result column="isActive" property="isActive" />
+		<result column="description" property="description" />
+		<result column="module" property="module" />
+		<result column="openMode" property="openMode" />
+		<result column="isAuto" property="isAuto" />
+		<collection property="roleList" ofType="neatlogic.framework.dto.RoleVo">
+			<id column="roleUuid" property="uuid" />
+		</collection>
+		<collection property="childMenuList" ofType="neatlogic.module.tenant.dto.MenuVo">
+			<id column="childId" property="id" />
+			<result column="childName" property="name" />
+			<result column="childIcon" property="icon" />
+			<result column="childParentId" property="parentId" />
+			<result column="childParentName" property="parentName" />
+			<result column="childUrl" property="url" />
+			<result column="childSort" property="sort" />
+			<result column="childIsActive" property="isActive" />
+			<result column="childDescription" property="description" />
+			<result column="childModule" property="module" />
+			<result column="childIsAuto" property="isAuto" />
+			<result column="childOpenMode" property="openMode" />
+			<collection property="roleList" ofType="neatlogic.framework.dto.RoleVo">
+				<id column="childRoleUuid" property="uuid" />
+			</collection>
+		</collection>
+	</resultMap>
+	<select id="getMenuList" parameterType="neatlogic.module.tenant.dto.MenuVo" resultMap="menuByIdMap">
+		SELECT
+		a.id,
+		a.name,
+		a.icon AS icon,
+		a.parent_id AS parentId,
+		e.name AS parentName,
+		a.url,
+		a.sort,
+		a.is_active as isActive,
+		c.role_uuid as roleUuid, 
+		a.description,
+		a.module,
+		a.is_auto AS isAuto,
+		a.open_mode openMode ,
+		b.id AS childId,
+		b.name AS childName,
+		b.icon AS childIcon,
+		b.parent_id AS childParentId,
+		b.url AS childUrl,
+		b.sort AS childSort,
+		b.is_active AS childIsActive,
+		d.role_uuid AS childRoleUuid,
+		b.description AS childDescription,
+		b.module AS childModule,
+		b.open_mode AS childOpenMode,
+		b.is_auto AS childIsAuto
+		FROM menu a
+		LEFT JOIN menu b ON b.`parent_id` = a.`id`
+		LEFT JOIN menu e ON a.`parent_id` = e.`id`
+		LEFT JOIN menu_role c ON a.id = c.menu_id
+		LEFT JOIN menu_role d ON b.id = d.menu_id
+
+		WHERE 
+		1=1 
+		<choose>
+			<when test="parentId !=null">
+				AND a.parent_id = #{parentId}
+			</when>
+			<otherwise>
+				AND a.parent_id != 0		
+			</otherwise>
+		</choose>
+		<if test="isActive != null">
+			and a.is_active = #{isActive}
+		</if>
+		<if test="module!=null and module != ''">
+			AND a.module = #{module}
+		</if>
+		<if test="id!=null and id != ''">
+			AND a.id = #{id}
+		</if>
+		<if test="roleUuidList != null and roleUuidList.size() > 0 ">
+			AND (c.role_uuid IN
+			<foreach collection="roleUuidList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			or c.role_uuid is null)
+			
+			AND (d.role_uuid IN
+			<foreach collection="roleUuidList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			or d.role_uuid is null)
+		</if>
+		ORDER BY b.parent_id, b.sort
+	</select>
+
+	<select id="getParentIdMaxSort" parameterType="neatlogic.module.tenant.dto.MenuVo" resultType="java.lang.Integer">
+		SELECT IFNULL(MAX(sort)+ 1, 1) FROM menu WHERE parent_id = #{parentId}
+	</select>
+	
+	<select id="checkIsChaildern" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM menu WHERE parent_id = #{value}
+	</select>
+	
+	<insert id="insertMenu" parameterType="neatlogic.module.tenant.dto.MenuVo">
+		<selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+			select LAST_INSERT_ID() as id
+		</selectKey>
+		INSERT INTO menu
+		(
+		NAME,
+		parent_id,
+		url,
+		icon,
+		sort,
+		is_active,
+		description,
+		module,
+		is_auto,
+		open_mode
+		)
+		VALUES
+		(
+		#{name},
+		#{parentId},
+		#{url},
+		#{icon},
+		#{sort},
+		#{isActive},
+		#{description},
+		#{module},
+		#{isAuto},
+		#{openMode}
+		)
+	</insert>
+	
+	<insert id="insertMenuRole">
+		REPLACE INTO menu_role
+		(menu_id,
+		role_uuid
+		)
+		VALUES
+		(#{menuId},
+		#{roleUuid}
+		)
+	</insert>
+	
+	<update id="updateMenu" parameterType="neatlogic.module.tenant.dto.MenuVo">
+		UPDATE menu
+		SET
+		NAME = #{name},
+		parent_id = #{parentId},
+		url = #{url},
+		icon = #{icon},
+		is_active = #{isActive},
+		description = #{description},
+		module = #{module},
+		is_auto = #{isAuto},
+		open_mode = #{openMode}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="deleteMenuRoleByMenuId" parameterType="java.lang.Long">
+		DELETE
+		FROM menu_role
+		WHERE menu_id = #{value}
+	</delete>
+	
+	<delete id="deleteMenu" parameterType="java.lang.Long">
+		DELETE FROM menu WHERE id = #{value}
+	</delete>
+
+
+</mapper>
+
