@@ -9,10 +9,10 @@ neatlogic-tenant是neatlogic-framework的业务逻辑模块，提供neatlogic各
 自定义表单目前主要是neatlogic-process的itsm功能使用，可以通过零代码的方式实现大部分复杂的表单应用场景。
 
 - 原生支持多种表单组件。
-  ![img1](https://github.com/neatlogic/.github/blob/main/images/form/img.png?raw=true)
+  ![img1](README_IMAGES/form/img.png?raw=true)
 
 - 支持通过配置方式实现控件之间交互联动
-  ![img1](https://github.com/neatlogic/.github/blob/main/images/form/img_1.png?raw=true)
+  ![img1](README_IMAGES/form/img_1.png?raw=true)
 - 支持多场景，每个场景可以重新设置表单组件的配置，结合工作流引擎，可以实现不同流程步骤关联不同的表单场景。
 - 支持低代码方式配置自定义组件。
   ![img1](README_IMAGES/form/img_2.png)
