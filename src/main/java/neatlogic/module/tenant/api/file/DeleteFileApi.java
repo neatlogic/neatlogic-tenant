@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.file;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -23,6 +24,7 @@ import neatlogic.framework.exception.file.FileAccessDeniedException;
 import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
 import neatlogic.framework.exception.user.NoTenantException;
+import neatlogic.framework.file.core.FileOperationType;
 import neatlogic.framework.file.core.FileTypeHandlerFactory;
 import neatlogic.framework.file.core.IFileTypeHandler;
 import neatlogic.framework.file.dao.mapper.FileMapper;
@@ -33,7 +35,6 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,7 @@ public class DeleteFileApi extends PrivateApiComponentBase {
         if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
             fileTypeHandler.deleteFile(fileVo, paramObj);
         } else {
-            throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
+            throw new FileAccessDeniedException(fileVo.getName(), FileOperationType.DELETE.getText());
         }
         return null;
     }
