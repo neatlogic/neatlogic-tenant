@@ -1,12 +1,24 @@
 package neatlogic.module.tenant.api.user;
 
-import java.util.List;
-import java.util.Set;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.FieldValidResultVo;
+import neatlogic.framework.dto.UserAuthVo;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.exception.user.UserIdRepeatException;
+import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,26 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.dao.mapper.TeamMapper;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserAuthVo;
-import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.exception.user.UserIdRepeatException;
-import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.UuidUtil;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -65,9 +59,7 @@ public class UserSaveApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "uuid",
 				type = ApiParamType.STRING,
-				desc = "用户uuid", 
-				maxLength = 32,
-				minLength = 32),
+				desc = "用户uuid"),
 			@Param(name = "userId",
 					type = ApiParamType.STRING,
 					desc = "用户Id",
