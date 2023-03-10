@@ -63,7 +63,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "runner id"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 名"),
             @Param(name = "protocol", type = ApiParamType.ENUM, isRequired = true, rule = "http,https", desc = "协议"),
-            @Param(name = "host", type = ApiParamType.STRING, desc = "runner ip"),
+            @Param(name = "host", type = ApiParamType.STRING, desc = "runner host",xss = true),
             @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口"),
             @Param(name = "isAuth", type = ApiParamType.INTEGER, desc = "是否认证"),
