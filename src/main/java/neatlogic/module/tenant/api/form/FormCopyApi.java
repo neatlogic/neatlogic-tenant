@@ -1,5 +1,6 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -133,20 +134,32 @@ public class FormCopyApi extends PrivateApiComponentBase {
     }
 
     private void saveFormVersion(FormVersionVo formVersionVo, String newFormUuid, String oldName, String newName) {
-        String content = formVersionVo.getFormConfig().toJSONString();
+        JSONObject formConfig = formVersionVo.getFormConfig();
+        // 更新各种唯一标识uuid，防止不同表单版本之间唯一标识uuid相同
+        // 更新场景uuid
+        formConfig.put("uuid", UuidUtil.randomUuid());
+        JSONArray sceneList = formConfig.getJSONArray("sceneList");
+        if (CollectionUtils.isNotEmpty(sceneList)) {
+            for (int i = 0; i < sceneList.size(); i++) {
+                JSONObject scene = sceneList.getJSONObject(i);
+                scene.put("uuid", UuidUtil.randomUuid());
+            }
+        }
+        String content = formConfig.toJSONString();
+        // 更新表单uuid
         content = content.replace(formVersionVo.getFormUuid(), newFormUuid);
+        // 更新表单名称
         content = content.replace(oldName, newName);
         List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
             for (FormAttributeVo formAttributeVo : formAttributeList) {
-                String newFormAttributeUuid = UuidUtil.randomUuid();
-                content = content.replace(formAttributeVo.getUuid(), newFormAttributeUuid);
+                // 更新表单属性uuid
+                content = content.replace(formAttributeVo.getUuid(), UuidUtil.randomUuid());
             }
             formVersionVo.setUuid(null);
             formVersionVo.setFormUuid(newFormUuid);
             formVersionVo.setFormConfig(JSONObject.parseObject(content));
-    //        formVersionVo.setEditor(UserContext.get().getUserUuid(true));
             formMapper.insertFormVersion(formVersionVo);
             formVersionVo.setFormAttributeList(null);
             formAttributeList = formVersionVo.getFormAttributeList();
