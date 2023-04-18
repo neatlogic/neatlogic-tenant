@@ -36,16 +36,17 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 @Service
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class DeleteFileApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
 
     @Override
