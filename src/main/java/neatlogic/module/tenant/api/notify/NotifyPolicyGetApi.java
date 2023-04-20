@@ -109,6 +109,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                 if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
                     /** 补充通知对象详细信息 */
                     notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
+                    triggerObj.setTriggerName(notifyTrigger.getTriggerName());
                     triggerObj.setDescription(notifyTrigger.getDescription());
                     triggerArray.add(triggerObj);
                     existed = true;
