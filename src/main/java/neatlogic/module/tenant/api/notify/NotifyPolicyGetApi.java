@@ -97,9 +97,9 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         /** 矫正旧配置数据中的触发点 */
         /** 多删 -- 删除已经不存在的触发点 */
         Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             NotifyTriggerVo next = iterator.next();
-            if(!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))){
+            if (!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))) {
                 iterator.remove();
             }
         }
@@ -119,6 +119,8 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
             }
             /** 少补 -- 新增老数据中没有而现在有的触发点 */
             if (!existed) {
+                notifyTrigger.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
+                notifyTrigger.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
                 triggerArray.add(notifyTrigger);
             }
         }
