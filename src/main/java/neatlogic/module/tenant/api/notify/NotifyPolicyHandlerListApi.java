@@ -23,7 +23,9 @@ import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
+import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.NotifyPolicyHandlerVo;
+import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
@@ -37,15 +39,20 @@ import neatlogic.framework.util.I18nUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
+
+    @Resource
+    private NotifyMapper notifyMapper;
 
     @Override
     public String getToken() {
@@ -68,6 +75,8 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
     @Description(desc = "通知策略分类列表接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        List<NotifyPolicyVo> notifyPolicyList = notifyMapper.getAllDefaultNotifyPolicyList();
+        Map<String, Long> handlerToIdMap = notifyPolicyList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e.getId()));
         Map<String, List<NotifyPolicyHandlerVo>> moduleGroupNotifyPolicyHandlerListMap = new HashMap<>();
         List<NotifyPolicyHandlerVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
         for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : list) {
@@ -86,6 +95,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
                     JSONObject child = new JSONObject();
                     child.put("value", notifyPolicyHandlerVo.getHandler());
                     child.put("text", notifyPolicyHandlerVo.getName());
+                    child.put("defaultNotifyPolicyId", handlerToIdMap.get(notifyPolicyHandlerVo.getHandler()));
                     child.put("isAllowMultiPolicy", notifyPolicyHandlerVo.getIsAllowMultiPolicy());
                     children.add(child);
                 }
