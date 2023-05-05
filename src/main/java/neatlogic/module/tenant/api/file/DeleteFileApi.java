@@ -83,7 +83,7 @@ public class DeleteFileApi extends PrivateApiComponentBase {
         if (fileTypeHandler == null) {
             throw new FileTypeHandlerNotFoundException(fileVo.getType());
         }
-        if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
+        if (fileTypeHandler.validDeleteFile(fileVo)) {
             fileTypeHandler.deleteFile(fileVo, paramObj);
         } else {
             throw new FileAccessDeniedException(fileVo.getName(), FileOperationType.DELETE.getText());
