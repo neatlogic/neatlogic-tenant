@@ -40,6 +40,7 @@ import neatlogic.framework.util.RegexUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,19 +113,22 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
             JSONObject configObj = new JSONObject();
             JSONArray triggerList = new JSONArray();
-            for (NotifyTriggerVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
-                JSONObject triggerObj = new JSONObject();
-                triggerObj.put("trigger", notifyTrigger.getTrigger());
-                triggerObj.put("triggerName", notifyTrigger.getTriggerName());
-                triggerObj.put("description", notifyTrigger.getDescription());
-                triggerObj.put("notifyList", new JSONArray());
-                triggerList.add(triggerObj);
+            if (CollectionUtils.isNotEmpty(notifyPolicyHandler.getNotifyTriggerList())) {
+                for (NotifyTriggerVo notifyTrigger : notifyPolicyHandler.getNotifyTriggerList()) {
+                    JSONObject triggerObj = new JSONObject();
+                    triggerObj.put("trigger", notifyTrigger.getTrigger());
+                    triggerObj.put("triggerName", notifyTrigger.getTriggerName());
+                    triggerObj.put("description", notifyTrigger.getDescription());
+                    triggerObj.put("notifyList", new JSONArray());
+                    triggerList.add(triggerObj);
+                }
             }
             configObj.put("triggerList", triggerList);
             configObj.put("paramList", new JSONArray());
             configObj.put("templateList", new JSONArray());
             configObj.put("adminUserUuidList", new JSONArray());
             notifyPolicyVo.setConfig(configObj.toJSONString());
+            notifyPolicyVo.setIsDefault(0);
             notifyMapper.insertNotifyPolicy(notifyPolicyVo);
             List<ConditionParamVo> paramList = notifyPolicyHandler.getSystemParamList();
             paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
