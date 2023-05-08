@@ -94,52 +94,55 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-        /** 矫正旧配置数据中的触发点 */
-        /** 多删 -- 删除已经不存在的触发点 */
-        Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
-        while (iterator.hasNext()) {
-            NotifyTriggerVo next = iterator.next();
-            if (!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))) {
-                iterator.remove();
-            }
-        }
-        List<NotifyTriggerVo> triggerArray = new ArrayList<>();
-        for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
-            boolean existed = false;
-            for (NotifyTriggerVo triggerObj : triggerList) {
-                if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
-                    /** 补充通知对象详细信息 */
-                    notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
-                    triggerObj.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
-                    triggerObj.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
-                    triggerArray.add(triggerObj);
-                    existed = true;
-                    break;
+        if (CollectionUtils.isNotEmpty(notifyTriggerList)) {
+            /** 矫正旧配置数据中的触发点 */
+            /** 多删 -- 删除已经不存在的触发点 */
+            Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
+            while (iterator.hasNext()) {
+                NotifyTriggerVo next = iterator.next();
+                if (!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))) {
+                    iterator.remove();
                 }
             }
-            /** 少补 -- 新增老数据中没有而现在有的触发点 */
-            if (!existed) {
-                notifyTrigger.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
-                notifyTrigger.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
-                triggerArray.add(notifyTrigger);
+            List<NotifyTriggerVo> triggerArray = new ArrayList<>();
+            for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
+                boolean existed = false;
+                for (NotifyTriggerVo triggerObj : triggerList) {
+                    if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
+                        /** 补充通知对象详细信息 */
+                        notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
+                        triggerObj.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
+                        triggerObj.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
+                        triggerArray.add(triggerObj);
+                        existed = true;
+                        break;
+                    }
+                }
+                /** 少补 -- 新增老数据中没有而现在有的触发点 */
+                if (!existed) {
+                    notifyTrigger.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
+                    notifyTrigger.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
+                    triggerArray.add(notifyTrigger);
+                }
             }
+            config.setTriggerList(triggerArray);
         }
-        config.setTriggerList(triggerArray);
         List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
         List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
-        List<ConditionParamVo> paramList = config.getParamList();
-        if (CollectionUtils.isNotEmpty(paramList)) {
-            for (ConditionParamVo param : paramList) {
-                systemParamList.add(param);
-                systemConditionOptionList.add(new ConditionParamVo(param));
+        if (CollectionUtils.isNotEmpty(systemConditionOptionList)) {
+            List<ConditionParamVo> paramList = config.getParamList();
+            if (CollectionUtils.isNotEmpty(paramList)) {
+                for (ConditionParamVo param : paramList) {
+                    systemParamList.add(param);
+                    systemConditionOptionList.add(new ConditionParamVo(param));
+                }
             }
+
+            systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+            systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+            config.setParamList(systemParamList);
+            config.setConditionOptionList(systemConditionOptionList);
         }
-
-        systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-        systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-        config.setParamList(systemParamList);
-        config.setConditionOptionList(systemConditionOptionList);
-
         int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
 
