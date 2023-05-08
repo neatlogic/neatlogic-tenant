@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -56,6 +57,9 @@ public class UpdateIsDefaultNotifyPolicyApi extends PrivateApiComponentBase {
         NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
         if (notifyPolicyVo == null) {
             throw new NotifyPolicyNotFoundException(id.toString());
+        }
+        if (Objects.equals(notifyPolicyVo.getIsDefault(), 1)) {
+            return null;
         }
         INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
         if (notifyPolicyHandler == null) {
