@@ -36,7 +36,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.usertype.UserTypeFactory;
-import neatlogic.framework.util.I18nUtils;
 import neatlogic.module.tenant.service.notify.NotifyPolicyService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -111,8 +110,8 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                     if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
                         /** 补充通知对象详细信息 */
                         notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
-                        triggerObj.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
-                        triggerObj.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
+                        triggerObj.setTriggerName(notifyTrigger.getTriggerName());
+                        triggerObj.setDescription(notifyTrigger.getDescription());
                         triggerArray.add(triggerObj);
                         existed = true;
                         break;
@@ -120,8 +119,6 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                 }
                 /** 少补 -- 新增老数据中没有而现在有的触发点 */
                 if (!existed) {
-                    notifyTrigger.setTriggerName(I18nUtils.getMessage(notifyTrigger.getTriggerName()));
-                    notifyTrigger.setDescription(I18nUtils.getMessage(notifyTrigger.getDescription()));
                     triggerArray.add(notifyTrigger);
                 }
             }
