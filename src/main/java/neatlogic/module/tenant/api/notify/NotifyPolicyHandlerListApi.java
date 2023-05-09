@@ -76,7 +76,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<NotifyPolicyVo> notifyPolicyList = notifyMapper.getAllDefaultNotifyPolicyList();
-        Map<String, Long> handlerToIdMap = notifyPolicyList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e.getId()));
+        Map<String, NotifyPolicyVo> handlerToNotifyPolicyMap = notifyPolicyList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
         Map<String, List<NotifyPolicyHandlerVo>> moduleGroupNotifyPolicyHandlerListMap = new HashMap<>();
         List<NotifyPolicyHandlerVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
         for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : list) {
@@ -95,7 +95,11 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
                     JSONObject child = new JSONObject();
                     child.put("value", notifyPolicyHandlerVo.getHandler());
                     child.put("text", notifyPolicyHandlerVo.getName());
-                    child.put("defaultNotifyPolicyId", handlerToIdMap.get(notifyPolicyHandlerVo.getHandler()));
+                    NotifyPolicyVo notifyPolicyVo = handlerToNotifyPolicyMap.get(notifyPolicyHandlerVo.getHandler());
+                    if (notifyPolicyVo != null) {
+                        child.put("defaultNotifyPolicyId", notifyPolicyVo.getId());
+                        child.put("defaultNotifyPolicyName", notifyPolicyVo.getName());
+                    }
                     child.put("isAllowMultiPolicy", notifyPolicyHandlerVo.getIsAllowMultiPolicy());
                     children.add(child);
                 }
