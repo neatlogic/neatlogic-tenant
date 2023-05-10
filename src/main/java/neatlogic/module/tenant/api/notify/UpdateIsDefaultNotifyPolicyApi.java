@@ -47,26 +47,33 @@ public class UpdateIsDefaultNotifyPolicyApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "策略id")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "策略类型"),
     })
     @Output({})
     @Description(desc = "设置默认通知策略")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        String handler = paramObj.getString("handler");
         Long id = paramObj.getLong("id");
-        NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
-        if (notifyPolicyVo == null) {
-            throw new NotifyPolicyNotFoundException(id.toString());
+        if (id != null) {
+            NotifyPolicyVo notifyPolicyVo = notifyMapper.getNotifyPolicyById(id);
+            if (notifyPolicyVo == null) {
+                throw new NotifyPolicyNotFoundException(id.toString());
+            }
+            if (Objects.equals(notifyPolicyVo.getIsDefault(), 1)) {
+                return null;
+            }
+            handler = notifyPolicyVo.getHandler();
         }
-        if (Objects.equals(notifyPolicyVo.getIsDefault(), 1)) {
-            return null;
-        }
-        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(notifyPolicyVo.getHandler());
+        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
         if (notifyPolicyHandler == null) {
-            throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
+            throw new NotifyPolicyHandlerNotFoundException(handler);
         }
-        notifyMapper.resetNotifyPolicyIsDefaultByHandler(notifyPolicyVo.getHandler());
-        notifyMapper.updateNotifyPolicyIsDefaultById(id);
+        notifyMapper.resetNotifyPolicyIsDefaultByHandler(handler);
+        if (id != null) {
+            notifyMapper.updateNotifyPolicyIsDefaultById(id);
+        }
         return null;
     }
 
