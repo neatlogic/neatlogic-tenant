@@ -65,7 +65,7 @@ public class IconListApi extends PrivateApiComponentBase {
         iconMap.put("file", new String[]{"ts-mm-css", "ts-mm-bat", "ts-mm-cls", "ts-mm-cnf", "ts-mm-bmp", "ts-mm-cmd", "ts-mm-gzip", "ts-mm-doc", "ts-mm-exe", "ts-mm-gif", "ts-mm-mov", "ts-mm-html", "ts-mm-mp4", "ts-mm-java", "ts-mm-jpg", "ts-mm-png", "ts-mm-pdf", "ts-mm-py", "ts-mm-pptx", "ts-mm-ppt", "ts-mm-js", "ts-mm-rar", "ts-mm-rtf", "ts-mm-docx", "ts-mm-rpm", "ts-mm-unknown", "ts-mm-txt", "ts-mm-jpeg", "ts-mm-sql", "ts-mm-sh", "ts-mm-zip", "ts-mm-tar", "ts-mm-vbs", "ts-mm-xls",
                 "ts-mm-xlsm", "ts-mm-xml", "ts-mm-xlsx", "ts-mm-svg", "ts-folder", "ts-folder-open", "ts-folder-add"});
         iconMap.put("logo", new String[]{"ts-centos", "ts-cisco", "ts-dev-nutanix", "ts-openstack", "ts-dev-apache", "ts-dev-aix", "ts-dev-alicloud", "ts-dev-apple", "ts-dev-aws", "ts-dev-dell", "ts-dev-docker", "ts-dev-db2", "ts-dev-freebsd", "ts-dev-firewall", "ts-dev-hadoop", "ts-dev-ibm", "ts-dev-huawei", "ts-dev-java", "ts-dev-hp", "ts-dev-jboss", "ts-dev-juniper", "ts-dev-lighttpd", "ts-dev-kafka", "ts-dev-inspur", "ts-dev-mysql", "ts-dev-linux", "ts-dev-mesos", "ts-dev-nginx",
-                "ts-dev-redis", "ts-dev-postgresql", "ts-dev-redhat", "ts-dev-spark", "ts-dev-tomcat", "ts-dev-vsphere", "ts-dev-windows", "ts-dev-resin", "ts-dev-zookeeper", "ts-tencentcloud", "ts-icon-techsure"});
+                "ts-dev-redis", "ts-dev-postgresql", "ts-dev-redhat", "ts-dev-spark", "ts-dev-tomcat", "ts-dev-vsphere", "ts-dev-windows", "ts-dev-resin", "ts-dev-zookeeper", "ts-tencentcloud"});
         iconMap.put("orientation", new String[]{"ts-angle-double-down", "ts-angle-double-up", "ts-angle-double-left", "ts-angle-double-right", "ts-angle-right", "ts-angle-left", "ts-angle-down", "ts-angle-up", "ts-caret-left", "ts-caret-down", "ts-caret-up", "ts-caret-right", "ts-long-arrow-down", "ts-long-arrow-up", "ts-long-arrow-left", "ts-long-arrow-right", "ts-align-horizontal", "ts-align-vertical", "ts-dedent", "ts-indent", "ts-object-group", "ts-block", "ts-full", "ts-one-half",
                 "ts-one-quarter", "ts-one-third", "ts-three-quarter", "ts-two-third", "ts-innercurve", "ts-singlepoly", "ts-straightline", "ts-doublepoly", "ts-menuhide", "ts-menushow", "ts-vertical-middle", "ts-vertical-bottom", "ts-horizontal-center", "ts-vertical-top", "ts-horizontal-justify", "ts-horizontal-right", "ts-horizontal-left"});
         iconMap.put("status", new String[]{"ts-complete", "ts-check", "ts-finish", "ts-forbid", "ts-pending", "ts-dev-bin", "ts-circle", "ts-round", "ts-minus-square-s", "ts-check-square-o", "ts-minus-square", "ts-check-square", "ts-round-s", "ts-square-o", "ts-circle-fill"});
@@ -134,7 +134,6 @@ public class IconListApi extends PrivateApiComponentBase {
                 "tsfont-juniper",
                 "tsfont-nutanix",
                 "tsfont-pulse",
-                "tsfont-techsure",
                 "tsfont-vm",
                 "tsfont-vmware-cluster",
                 "tsfont-windows",
