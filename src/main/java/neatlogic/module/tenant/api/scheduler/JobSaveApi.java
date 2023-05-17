@@ -16,12 +16,15 @@
 
 package neatlogic.module.tenant.api.scheduler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.IJob;
@@ -34,10 +37,7 @@ import neatlogic.framework.scheduler.dto.JobVo;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.scheduler.exception.ScheduleIllegalParameterException;
 import neatlogic.framework.scheduler.exception.ScheduleJobNameRepeatException;
-import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -104,8 +104,20 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		}
 		saveJob(jobVo, jobHandler);
 		String tenantUuid = TenantContext.get().getTenantUuid();
-		JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).withCron(jobVo.getCron()).withBeginTime(jobVo.getBeginTime()).withEndTime(jobVo.getEndTime()).needAudit(jobVo.getNeedAudit()).setType("public").build();
-		if (jobVo.getIsActive().intValue() == 1) {
+		JobObject.Builder builder = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
+				.withCron(jobVo.getCron())
+				.withBeginTime(jobVo.getBeginTime())
+				.withEndTime(jobVo.getEndTime())
+				.needAudit(jobVo.getNeedAudit())
+				.setType("public");
+		if(CollectionUtils.isNotEmpty(jobVo.getPropList())){
+			jobVo.getPropList().forEach(p->{
+				builder.addData(p.getName(),p.getValue());
+			});
+		}
+		JobObject jobObject = builder.build();
+
+		if (jobVo.getIsActive() == 1) {
 			schedulerManager.loadJob(jobObject);
 		} else {
 			schedulerManager.unloadJob(jobObject);
@@ -116,7 +128,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		return resultObj;
 	}
 	
-	private int saveJob(JobVo job, IJob jobHandler) throws ScheduleJobNameRepeatException {
+	private void saveJob(JobVo job, IJob jobHandler) throws ScheduleJobNameRepeatException {
 		String uuid = job.getUuid();
 		if (schedulerMapper.checkJobNameIsExists(job) > 0) {
 			throw new ScheduleJobNameRepeatException(job.getName());
@@ -125,7 +137,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
 		if (oldJobVo == null) {
 			schedulerMapper.insertJob(job);
 		} else {
-			if (oldJobVo.getIsActive().intValue() == 1) {
+			if (oldJobVo.getIsActive() == 1) {
 				JobObject jobObject = new JobObject.Builder(oldJobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), TenantContext.get().getTenantUuid()).build();
 				schedulerManager.unloadJob(jobObject);
 			}
@@ -138,7 +150,6 @@ public class JobSaveApi extends PrivateApiComponentBase {
 				schedulerMapper.insertJobProp(jobProp);
 			}
 		}
-		return 1;
 	}
 
 	public IValid name() {
