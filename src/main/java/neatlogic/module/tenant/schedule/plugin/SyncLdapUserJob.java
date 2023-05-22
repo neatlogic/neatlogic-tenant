@@ -16,14 +16,15 @@
 
 package neatlogic.module.tenant.schedule.plugin;
 
+import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.lrcode.LRCodeManager;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
-import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -41,20 +42,29 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
-public class SyncLdapTeamJob extends PublicJobBase {
+public class SyncLdapUserJob extends PublicJobBase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Resource
     private TeamMapper teamMapper;
 
+    @Resource
+    private UserMapper userMapper ;
+
+    @Resource
+    private RoleMapper roleMapper;
+
     @Override
     public String getName() {
-        return "同步LDAP的组织架构";
+        return "同步LDAP的用户";
     }
 
     @Override
@@ -73,7 +83,7 @@ public class SyncLdapTeamJob extends PublicJobBase {
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true),
             @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit"),
-            @Param(name = "rootParentUUid", controlType = "text", description = "跟节点，默认：0")
+            @Param(name = "defaultRole", controlType = "text", description = "默认角色,多个,分隔，如：R_A,R_B"),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
@@ -84,18 +94,9 @@ public class SyncLdapTeamJob extends PublicJobBase {
         String userSecret = getPropValue(jobObject, "userSecret");
         String searchBase = getPropValue(jobObject, "searchBase"); //从xx顶层目录快速查找
         String searchFilter = getPropValue(jobObject, "searchFilter"); //LDAP搜索过滤器类
-        String rootParentUUid = getPropValue(jobObject, "rootParentUUid");
-        if(StringUtils.isBlank(rootParentUUid)){
-            rootParentUUid = TeamVo.ROOT_UUID;
-        }
-
+        String defaultRole = getPropValue(jobObject, "defaultRole");
         if (StringUtils.isBlank(searchFilter)) {
-            searchFilter = "objectclass=organizationalUnit";
-        }
-
-        //parent不存在
-        if(teamMapper.getTeamByUuid(rootParentUUid) == null ){
-            rootParentUUid = TeamVo.ROOT_UUID;
+            searchFilter = "objectclass=person";
         }
 
         if (StringUtils.isNotBlank(ldapUrl) && StringUtils.isNotBlank(userDn) && StringUtils.isNotBlank(userSecret)) {
@@ -113,28 +114,17 @@ public class SyncLdapTeamJob extends PublicJobBase {
                 // 创建搜索控制器
                 searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 // 对象的每个属性名
-                String[] returnedAtts = { "dn","entryUUID","description" };
+                String[] returnedAtts = { "entryUUID","uid","sAMAccountName","cn","mobile","mail" ,"telephoneNumber","description"};
                 searchCtls.setReturningAttributes(returnedAtts);
 
                 // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
                 NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
-                String rootDn = null ;
-                Map<String , String> uuidMap = new HashMap<>();
-                List<TeamVo> teamVoList = new ArrayList<>();
                 while (answer.hasMoreElements()) {
                     SearchResult sr = (SearchResult) answer.next();
-                    String name = sr.getName();
-                    String teamId = null, teamName = null ;
                     String fullName = sr.getNameInNamespace();
                     String parentName = getParentName(fullName);
-                    if (StringUtils.isNotBlank(name)) {
-                        teamName = getTeamName(name);
-                    }else{
-                        teamName = fullName.split(",")[0].split("ou=")[1];
-                    }
-                    if(StringUtils.isBlank(name)){
-                        rootDn = fullName;
-                    }
+                    String upwardTeamName = getUpwardTeamName(fullName);
+                    String uuid=null , userId = null , userName = null , email =null ,phone = null ;
                     Attributes Attrs = sr.getAttributes();
                     if (Attrs != null) {
                         try {
@@ -145,86 +135,72 @@ public class SyncLdapTeamJob extends PublicJobBase {
                                 for (NamingEnumeration e = Attr.getAll(); e.hasMore(); ) {
                                     attrValue = e.next().toString();
                                 }
-                                if (attrName.equals("entryUUID")) {
-                                    teamId = attrValue.replace("-", "");
+                                if (attrName.equals("uid") || attrName.equals("sAMAccountName")) {
+                                    userId = attrValue;
+                                }else if(attrName.equals("name") || attrName.equals("cn")){
+                                    userName = attrValue;
+                                }else if(attrName.equals("email") || attrName.equals("mail")){
+                                    email = attrValue;
+                                }else if(attrName.equals("telephoneNumber")){
+                                    phone = attrValue;
+                                }else if(attrName.equals("entryUUID")){
+                                    uuid = attrValue.replace("-", "");
                                 }
                             }
                         } catch (NamingException e) {
-                            logger.error("[Sync Ldap Team Error]:" + e.getMessage());
+                            logger.error("[Sync Ldap User Error]:" + e.getMessage());
                         }
                     }
-                    uuidMap.put(teamName,teamId);
-                    TeamVo teamVo = new TeamVo();
-                    teamVo.setUuid(teamId);
-                    teamVo.setName(teamName);
-                    teamVo.setParentName(parentName);
-                    setUpwardTeamName(teamVo , fullName , rootDn);
-                    teamVoList.add(teamVo);
-                }
-                ctx.close();
 
-                for (TeamVo teamVo: teamVoList) {
-                    //计算path
-                    setUpwardUuidPath(uuidMap ,teamVo);
-                    //parentUUid
-                    String parentName = uuidMap.get(teamVo.getParentName());
-                    teamVo.setParentUuid(parentName == null ? rootParentUUid : parentName);
-                    if(teamMapper.checkTeamIsExists(teamVo.getUuid()) == 0){
-                        teamMapper.insertTeam(teamVo);
-                    }else{
-                        teamMapper.updateTeamNameByUuid(teamVo);
+                    if(StringUtils.isNotBlank(userId)){
+
+                        String teamUuid = null ;
+                        TeamVo teamVo = new TeamVo();
+                        teamVo.setName(parentName);
+                        teamVo.setUpwardNamePath(upwardTeamName);
+                        List<String>  teamUUidList = this.teamMapper.getTeamUUIDbyNameAndUpwardNamePath(teamVo);
+                        if(teamUUidList != null && teamUUidList.size() > 0 ){
+                            teamUuid = teamUUidList.get(0);
+                        }
+
+                        UserVo userVo = new UserVo();
+                        userVo.setUuid(uuid);
+                        userVo.setUserId(userId);
+                        userVo.setUserName(userName);
+                        userVo.setEmail(email);
+                        userVo.setPhone(phone);
+                        if(this.userMapper.checkUserIsExists(uuid) == 0 ){
+                            this.userMapper.insertUser(userVo);
+                            if(StringUtils.isNotBlank(teamUuid)){
+                                this.userMapper.insertUserTeam(uuid , teamUuid);
+                            }
+                            //新加追加默認角色
+                            if(StringUtils.isNotBlank(defaultRole)){
+                                String[] roles = defaultRole.split(",");
+                                for (String role: roles) {
+                                    if(StringUtils.isNotBlank(role)){
+                                        List<String> roleList = this.roleMapper.getRoleUuidByName(role);
+                                        if(roleList != null && roleList.size() > 0){
+                                            this.userMapper.insertUserRole(uuid , roleList.get(0));
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            this.userMapper.updateUser(userVo);
+                            this.userMapper.deleteUserTeamByUserUuid(uuid);
+                            if(StringUtils.isNotBlank(teamUuid)){
+                                this.userMapper.insertUserTeam(uuid , teamUuid);
+                            }
+                        }
                     }
                 }
-                //重算左右编码
-                LRCodeManager.rebuildLeftRightCode("team", "uuid" , "parent_uuid" );
+                ctx.close();
             } catch (NamingException e) {
-                logger.error("[Sync Ldap Team Error]:" + e.getMessage());
+                logger.error("[Sync Ldap User Error]:" + e.getMessage());
             }
         }else{
-            logger.error("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
-        }
-    }
-
-    /**
-     * 计算检索的组 name层级
-     * @param teamVo
-     * @param fullName
-     * @param rootDn
-     */
-    private static void setUpwardTeamName(TeamVo teamVo ,String fullName , String rootDn){
-        String handleName = fullName.replace(rootDn,"");
-        if(StringUtils.isNotBlank(handleName)){
-            List<String> upwardTeamNameList = new ArrayList<>();
-            String[] dnNames = handleName.split(",");
-            for (String dnName : dnNames) {
-                if(StringUtils.isNotBlank(dnName)){
-                    upwardTeamNameList.add(getTeamName(dnName));
-                }
-            }
-            //补充根
-            String rootName = getTeamName(rootDn);
-            upwardTeamNameList.add(rootName);
-            Collections.reverse(upwardTeamNameList);
-            teamVo.setUpwardNamePath(String.join("/", upwardTeamNameList));
-        }
-    }
-
-    /**
-     * 计算检索的组uuid 层级 path
-     * @param uuidMap
-     * @param teamVo
-     */
-    private static void setUpwardUuidPath(Map<String,String> uuidMap , TeamVo teamVo){
-        String namePath = teamVo.getUpwardNamePath();
-        if(StringUtils.isNotBlank(namePath)){
-            String[] namePaths = namePath.split("/");
-            List<String> upwardTeamUuidList = new ArrayList<>();
-            for (String name : namePaths) {
-                if(StringUtils.isNotBlank(name) && uuidMap.containsKey(name)){
-                    upwardTeamUuidList.add(uuidMap.get(name));
-                }
-            }
-            teamVo.setUpwardUuidPath(String.join(",", upwardTeamUuidList));
+            logger.error("[Sync Ldap User Error]: Incomplete Plugin parameters.");
         }
     }
 
@@ -247,12 +223,7 @@ public class SyncLdapTeamJob extends PublicJobBase {
         if(StringUtils.isBlank(name)){
             return "";
         }
-        String groupName = name.split("ou=")[1].split(",")[0];
-        //去掉顶层结构
-        if("groups".equals(groupName)){
-            groupName = "";
-        }
-        return groupName;
+        return name.split("ou=")[1].split(",")[0];
     }
 
     private static String getParentName(String fullName) {
@@ -261,6 +232,24 @@ public class SyncLdapTeamJob extends PublicJobBase {
         }
         String parentFullName = fullName.substring(fullName.indexOf(",") + 1, fullName.length());
         return getTeamName(parentFullName);
+    }
+
+    private static String getUpwardTeamName(String fullName){
+        if(StringUtils.isNotBlank(fullName)){
+            String[] names = fullName.split(",");
+            List<String> upwardTeamNameList = new ArrayList<>();
+            for (String name: names) {
+                if(name.startsWith("ou=")){
+                    String[] ou = name.split("=");
+                    if(!"groups".equals(ou[1])){
+                        upwardTeamNameList.add(ou[1]);
+                    }
+                }
+            }
+            Collections.reverse(upwardTeamNameList);
+            return String.join("/", upwardTeamNameList);
+        }
+        return null ;
     }
 
 }
