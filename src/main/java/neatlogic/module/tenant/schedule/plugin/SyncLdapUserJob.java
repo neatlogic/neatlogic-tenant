@@ -64,7 +64,7 @@ public class SyncLdapUserJob extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "同步LDAP的用户";
+        return "同步LDAP的用户信息";
     }
 
     @Override
