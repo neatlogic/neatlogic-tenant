@@ -23,7 +23,6 @@ import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
-import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -72,8 +71,8 @@ public class SyncLdapTeamJob extends PublicJobBase {
             @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true),
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true),
-            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit"),
-            @Param(name = "rootParentUUid", controlType = "text", description = "跟节点，默认：0")
+            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit",required=false),
+            @Param(name = "rootParentUUid", controlType = "text", description = "跟节点，默认：0",required=false)
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
@@ -155,6 +154,7 @@ public class SyncLdapTeamJob extends PublicJobBase {
                     }
                     uuidMap.put(teamName,teamId);
                     TeamVo teamVo = new TeamVo();
+                    teamVo.setSource("ldap");
                     teamVo.setUuid(teamId);
                     teamVo.setName(teamName);
                     teamVo.setParentName(parentName);
@@ -177,6 +177,8 @@ public class SyncLdapTeamJob extends PublicJobBase {
                 }
                 //重算左右编码
                 LRCodeManager.rebuildLeftRightCode("team", "uuid" , "parent_uuid" );
+                //数据清理
+                this.teamMapper.updateTeamIsDeleteBySource("ldap");
             } catch (NamingException e) {
                 logger.error("[Sync Ldap Team Error]:" + e.getMessage());
             }
