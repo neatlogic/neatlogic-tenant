@@ -78,12 +78,12 @@ public class SyncLdapUserJob extends PublicJobBase {
     }
 
     @Prop({
-            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true),
-            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true),
-            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true),
-            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true),
-            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit",required=false),
-            @Param(name = "defaultRole", controlType = "text", description = "默认角色,多个,分隔，如：R_A,R_B",required=false),
+            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true,sort=0),
+            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true,sort=1),
+            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true,sort=2),
+            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true,sort=3),
+            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit",required=false,sort=4),
+            @Param(name = "defaultRole", controlType = "text", description = "默认角色,多个,分隔，如：R_A,R_B",required=false,sort=5),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
