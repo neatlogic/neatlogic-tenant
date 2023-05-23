@@ -72,7 +72,7 @@ public class SyncLdapTeamJob extends PublicJobBase {
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true,sort=2),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true,sort=3),
             @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit",required=false,sort=4),
-            @Param(name = "rootParentUUid", controlType = "text", description = "跟节点，默认：0",required=false,sort=5)
+            @Param(name = "rootParentUUid", controlType = "text", description = "根节点，默认：0",required=false,sort=5)
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {

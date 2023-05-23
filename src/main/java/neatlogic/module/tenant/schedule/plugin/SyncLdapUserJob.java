@@ -19,14 +19,19 @@ package neatlogic.module.tenant.schedule.plugin;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.RoleUserVo;
+import neatlogic.framework.dto.TeamUserVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
+import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
+import neatlogic.framework.scheduler.dto.JobAuditVo;
 import neatlogic.framework.scheduler.dto.JobObject;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +47,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 @Component
 @DisallowConcurrentExecution
@@ -82,13 +84,16 @@ public class SyncLdapUserJob extends PublicJobBase {
             @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true,sort=1),
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true,sort=2),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true,sort=3),
-            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认：objectclass=organizationalUnit",required=false,sort=4),
-            @Param(name = "defaultRole", controlType = "text", description = "默认角色,多个,分隔，如：R_A,R_B",required=false,sort=5),
+            @Param(name = "searchFilter", controlType = "text", description = "过滤类型，默认:objectclass=person",required=false,sort=4),
+            @Param(name = "defaultRole", controlType = "text", description = "默认角色,如：R_A,R_B",required=false,sort=5),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
 
-        String batchSize = "20000"; //分页数量，默认是1000
+        JobDetail jobDetail = context.getJobDetail();
+        String jobUuid = jobDetail.getKey().getName();
+
+        String batchSize = "2000"; //分页数量，默认是1000
         String ldapUrl = getPropValue(jobObject, "ldapUrl");
         String userDn = getPropValue(jobObject, "userDn");
         String userSecret = getPropValue(jobObject, "userSecret");
@@ -97,6 +102,15 @@ public class SyncLdapUserJob extends PublicJobBase {
         String defaultRole = getPropValue(jobObject, "defaultRole");
         if (StringUtils.isBlank(searchFilter)) {
             searchFilter = "objectclass=person";
+        }
+
+        //如果为空全量，不为空以上一次执行成功的作业开始时间检索
+        String lastStartTime = schedulerMapper.getJobLastExecAuditStartTime(jobUuid , JobAuditVo.Status.SUCCEED.getValue());
+        if(StringUtils.isNotBlank(lastStartTime)){
+            //查询格式:(&(objectClass=*)(modifyTimestamp>=20230523000000.0Z))
+            lastStartTime = lastStartTime.split(" ")[0].replace("-","").trim();
+            lastStartTime = lastStartTime+"000000.0Z";
+            searchFilter = "(&("+ searchFilter +")(modifyTimestamp>="+ lastStartTime +"))";
         }
 
         if (StringUtils.isNotBlank(ldapUrl) && StringUtils.isNotBlank(userDn) && StringUtils.isNotBlank(userSecret)) {
@@ -117,6 +131,8 @@ public class SyncLdapUserJob extends PublicJobBase {
                 String[] returnedAtts = { "entryUUID","uid","sAMAccountName","cn","mobile","mail" ,"telephoneNumber","description"};
                 searchCtls.setReturningAttributes(returnedAtts);
 
+                List<UserVo> userList = new ArrayList<>();
+                List<String> teamUpNamePathList = new ArrayList<>();
                 // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
                 NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
                 while (answer.hasMoreElements()) {
@@ -153,49 +169,57 @@ public class SyncLdapUserJob extends PublicJobBase {
                     }
 
                     if(StringUtils.isNotBlank(userId)){
-
-                        String teamUuid = null ;
-                        TeamVo teamVo = new TeamVo();
-                        teamVo.setName(parentName);
-                        teamVo.setUpwardNamePath(upwardTeamName);
-                        List<String>  teamUUidList = this.teamMapper.getTeamUUIDbyNameAndUpwardNamePath(teamVo);
-                        if(teamUUidList != null && teamUUidList.size() > 0 ){
-                            teamUuid = teamUUidList.get(0);
-                        }
-
                         UserVo userVo = new UserVo();
                         userVo.setUuid(uuid);
                         userVo.setUserId(userId);
                         userVo.setUserName(userName);
                         userVo.setEmail(email);
                         userVo.setPhone(phone);
-                        if(this.userMapper.checkUserIsExists(uuid) == 0 ){
-                            this.userMapper.insertUser(userVo);
-                            if(StringUtils.isNotBlank(teamUuid)){
-                                this.userMapper.insertUserTeam(uuid , teamUuid);
-                            }
-                            //新加追加默認角色
-                            if(StringUtils.isNotBlank(defaultRole)){
-                                String[] roles = defaultRole.split(",");
-                                for (String role: roles) {
-                                    if(StringUtils.isNotBlank(role)){
-                                        List<String> roleList = this.roleMapper.getRoleUuidByName(role);
-                                        if(roleList != null && roleList.size() > 0){
-                                            this.userMapper.insertUserRole(uuid , roleList.get(0));
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
-                            this.userMapper.updateUser(userVo);
-                            this.userMapper.deleteUserTeamByUserUuid(uuid);
-                            if(StringUtils.isNotBlank(teamUuid)){
-                                this.userMapper.insertUserTeam(uuid , teamUuid);
-                            }
-                        }
+                        //中转
+                        userVo.setTeamUuid(upwardTeamName);
+                        teamUpNamePathList.add(upwardTeamName);
+                        userList.add(userVo);
                     }
                 }
                 ctx.close();
+
+                Map<String , String> upNamePathMap = new HashMap<>();
+                List<TeamVo>  teamList = this.teamMapper.getTeamUuidbyUpwardNamePath(teamUpNamePathList);
+                for (TeamVo teamVo: teamList) {
+                    upNamePathMap.put(teamVo.getUpwardNamePath() , teamVo.getUuid());
+                }
+
+                List<String> roleUuidList = new ArrayList<>() ;
+                if(StringUtils.isNotBlank(defaultRole)){
+                    String[] roleNames = defaultRole.split(",");
+                    for (String roleName: roleNames) {
+                        if(StringUtils.isNotBlank(roleName)){
+                            roleUuidList.addAll(this.roleMapper.getRoleUuidByName(roleName));
+                        }
+                    }
+                }
+
+                List<RoleUserVo> userRoleList = new ArrayList<>();
+                List<TeamUserVo> userTeamList = new ArrayList<TeamUserVo>();
+                List<String> userUuidList = new ArrayList<>();
+                for (UserVo userVo: userList) {
+                    userUuidList.add(userVo.getUuid());
+
+                    //人与组织关系
+                    String teamUuid = upNamePathMap.get(userVo.getTeamUuid());
+                    if(StringUtils.isNotBlank(teamUuid)){
+                        userTeamList.add(new TeamUserVo(teamUuid , userVo.getUuid()));
+                    }
+
+                    //人员默认角色
+                    for (String roleUuid:roleUuidList) {
+                        userRoleList.add(new RoleUserVo(roleUuid , userVo.getUuid()));
+                    }
+                }
+                this.userMapper.bacthDeleteUserTeam(userUuidList , "ldap");
+                this.userMapper.batchInsertUser(userList);
+                this.userMapper.batchInsertUserRole(userRoleList);
+                this.userMapper.batchInsertUserTeam(userTeamList);
             } catch (NamingException e) {
                 logger.error("[Sync Ldap User Error]:" + e.getMessage());
             }
