@@ -26,9 +26,9 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
-import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.JobAuditVo;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDetail;
@@ -36,6 +36,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import javax.naming.Context;
@@ -51,7 +52,7 @@ import java.util.*;
 
 @Component
 @DisallowConcurrentExecution
-public class SyncLdapUserJob extends PublicJobBase {
+public class SyncLdapUserSchedule extends PublicJobBase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -114,6 +115,7 @@ public class SyncLdapUserJob extends PublicJobBase {
         }
 
         if (StringUtils.isNotBlank(ldapUrl) && StringUtils.isNotBlank(userDn) && StringUtils.isNotBlank(userSecret)) {
+            TransactionStatus transactionStatus = TransactionUtil.openTx();
             Hashtable<String, String> HashEnv = new Hashtable<String, String>();
             HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
             HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
@@ -138,7 +140,6 @@ public class SyncLdapUserJob extends PublicJobBase {
                 while (answer.hasMoreElements()) {
                     SearchResult sr = (SearchResult) answer.next();
                     String fullName = sr.getNameInNamespace();
-                    String parentName = getParentName(fullName);
                     String upwardTeamName = getUpwardTeamName(fullName);
                     String uuid=null , userId = null , userName = null , email =null ,phone = null ;
                     Attributes Attrs = sr.getAttributes();
@@ -189,13 +190,12 @@ public class SyncLdapUserJob extends PublicJobBase {
                     upNamePathMap.put(teamVo.getUpwardNamePath() , teamVo.getUuid());
                 }
 
-                List<String> roleUuidList = new ArrayList<>() ;
+                List<String> roleUuidList = null; ;
                 if(StringUtils.isNotBlank(defaultRole)){
                     String[] roleNames = defaultRole.split(",");
-                    for (String roleName: roleNames) {
-                        if(StringUtils.isNotBlank(roleName)){
-                            roleUuidList.addAll(this.roleMapper.getRoleUuidByName(roleName));
-                        }
+                    List<String> nameList = Arrays.asList(roleNames);
+                    if(nameList != null && nameList.size() > 0 ){
+                        roleUuidList = this.roleMapper.getRoleUuidByNameList(nameList);
                     }
                 }
 
@@ -212,16 +212,22 @@ public class SyncLdapUserJob extends PublicJobBase {
                     }
 
                     //人员默认角色
-                    for (String roleUuid:roleUuidList) {
-                        userRoleList.add(new RoleUserVo(roleUuid , userVo.getUuid()));
+                    if(roleUuidList != null ){
+                        for (String roleUuid:roleUuidList) {
+                            userRoleList.add(new RoleUserVo(roleUuid , userVo.getUuid()));
+                        }
                     }
                 }
                 this.userMapper.bacthDeleteUserTeam(userUuidList , "ldap");
                 this.userMapper.batchInsertUser(userList);
                 this.userMapper.batchInsertUserRole(userRoleList);
                 this.userMapper.batchInsertUserTeam(userTeamList);
+                TransactionUtil.commitTx(transactionStatus);
             } catch (NamingException e) {
                 logger.error("[Sync Ldap User Error]:" + e.getMessage());
+                TransactionUtil.rollbackTx(transactionStatus);
+            }finally {
+
             }
         }else{
             logger.error("[Sync Ldap User Error]: Incomplete Plugin parameters.");

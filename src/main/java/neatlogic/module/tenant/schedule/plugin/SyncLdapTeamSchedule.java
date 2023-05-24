@@ -23,12 +23,14 @@ import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import javax.naming.Context;
@@ -44,7 +46,7 @@ import java.util.*;
 
 @Component
 @DisallowConcurrentExecution
-public class SyncLdapTeamJob extends PublicJobBase {
+public class SyncLdapTeamSchedule extends PublicJobBase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -98,6 +100,7 @@ public class SyncLdapTeamJob extends PublicJobBase {
         }
 
         if (StringUtils.isNotBlank(ldapUrl) && StringUtils.isNotBlank(userDn) && StringUtils.isNotBlank(userSecret)) {
+            TransactionStatus transactionStatus = TransactionUtil.openTx();
             Hashtable<String, String> HashEnv = new Hashtable<String, String>();
             HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
             HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
@@ -164,23 +167,21 @@ public class SyncLdapTeamJob extends PublicJobBase {
                 ctx.close();
 
                 for (TeamVo teamVo: teamVoList) {
-                    //计算path
                     setUpwardUuidPath(uuidMap ,teamVo);
-                    //parentUUid
-                    String parentName = uuidMap.get(teamVo.getParentName());
-                    teamVo.setParentUuid(parentName == null ? rootParentUUid : parentName);
-                    if(teamMapper.checkTeamIsExists(teamVo.getUuid()) == 0){
-                        teamMapper.insertTeam(teamVo);
-                    }else{
-                        teamMapper.updateTeamNameByUuid(teamVo);
-                    }
+                    String parentUuid = uuidMap.get(teamVo.getParentName());
+                    teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
                 }
+
+                this.teamMapper.batchSaveTeam(teamVoList);
                 //重算左右编码
                 LRCodeManager.rebuildLeftRightCode("team", "uuid" , "parent_uuid" );
                 //数据清理
                 this.teamMapper.updateTeamIsDeleteBySource("ldap");
+                TransactionUtil.commitTx(transactionStatus);
+                teamVoList = null ;
             } catch (NamingException e) {
                 logger.error("[Sync Ldap Team Error]:" + e.getMessage());
+                TransactionUtil.rollbackTx(transactionStatus);
             }
         }else{
             logger.error("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
