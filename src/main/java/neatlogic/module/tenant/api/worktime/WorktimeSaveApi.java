@@ -25,6 +25,8 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.sla.core.SlaRecalculateManager;
+import neatlogic.framework.transaction.core.EscapeTransactionJob;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeRangeVo;
@@ -148,6 +150,11 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             List<String> dateList = worktimeMapper.getWorktimeDateList(worktimeRangeVo);
             worktimeService.saveWorktimeRange(worktimeVo, year, dateList);
         }
+        final String worktimeUuid = uuid;
+        EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
+            SlaRecalculateManager.execute(worktimeUuid);
+        }).execute();
+
         return uuid;
     }
 

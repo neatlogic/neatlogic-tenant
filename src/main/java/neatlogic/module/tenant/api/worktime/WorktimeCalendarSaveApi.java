@@ -26,6 +26,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.sla.core.SlaRecalculateManager;
+import neatlogic.framework.transaction.core.EscapeTransactionJob;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeVo;
 import neatlogic.framework.worktime.exception.WorktimeNotFoundException;
@@ -83,7 +84,10 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 		Integer year = jsonObj.getInteger("year");
 		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
 		worktimeService.saveWorktimeRange(worktimeVo, year, generateDateList(calendarList));
-		SlaRecalculateManager.execute(worktimeUuid);
+
+		EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
+			SlaRecalculateManager.execute(worktimeUuid);
+		}).execute();
 		return null;
 	}
 
