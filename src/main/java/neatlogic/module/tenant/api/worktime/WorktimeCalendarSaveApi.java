@@ -84,7 +84,7 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 		Integer year = jsonObj.getInteger("year");
 		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
 		worktimeService.saveWorktimeRange(worktimeVo, year, generateDateList(calendarList));
-
+		// 当服务窗口排班更新时，对与该服务窗口相关的未完成SLA进行耗时重算
 		EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
 			SlaRecalculateManager.execute(worktimeUuid);
 		}).execute();

@@ -150,6 +150,7 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             List<String> dateList = worktimeMapper.getWorktimeDateList(worktimeRangeVo);
             worktimeService.saveWorktimeRange(worktimeVo, year, dateList);
         }
+        // 当服务窗口排班更新时，对与该服务窗口相关的未完成SLA进行耗时重算
         final String worktimeUuid = uuid;
         EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
             SlaRecalculateManager.execute(worktimeUuid);
