@@ -25,6 +25,8 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.sla.core.SlaRecalculateManager;
+import neatlogic.framework.transaction.core.EscapeTransactionJob;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeRangeVo;
@@ -148,6 +150,12 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
             List<String> dateList = worktimeMapper.getWorktimeDateList(worktimeRangeVo);
             worktimeService.saveWorktimeRange(worktimeVo, year, dateList);
         }
+        // 当服务窗口排班更新时，对与该服务窗口相关的未完成SLA进行耗时重算
+        final String worktimeUuid = uuid;
+        EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
+            SlaRecalculateManager.execute(worktimeUuid);
+        }).execute();
+
         return uuid;
     }
 
