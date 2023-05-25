@@ -301,7 +301,6 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                 if (controls[i] instanceof PagedResultsResponseControl) {
                     PagedResultsResponseControl prrc = (PagedResultsResponseControl) controls[i];
                     cookie = prrc.getCookie();
-                    System.out.println(">>Next Page \n");
                 }
             }
         }
