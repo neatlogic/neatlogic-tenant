@@ -18,20 +18,14 @@ package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.notify.core.INotifyPolicyHandler;
-import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
-import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
-import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
