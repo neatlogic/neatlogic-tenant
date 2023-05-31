@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.notify;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.NOTIFY_JOB_MODIFY;
@@ -32,10 +34,7 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.util.I18n;
-import neatlogic.framework.util.I18nUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -111,7 +110,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
             }
         }
         if (AuthActionChecker.check(NOTIFY_JOB_MODIFY.class)) {
-            resultTree.add(new ValueTextVo("schedule", new I18n("const.schedule").toString()));
+            resultTree.add(new ValueTextVo("schedule", new I18n("common.scheduledtask").toString()));
         }
         if (CollectionUtils.isEmpty(resultTree)) {
             throw new PermissionDeniedException();
