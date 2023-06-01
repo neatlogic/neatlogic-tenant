@@ -6,7 +6,7 @@ public class EnumNotFoundException extends ApiRuntimeException {
     private static final long serialVersionUID = 7737513517395415836L;
 
     public EnumNotFoundException(String enumClass) {
-        super("exception.tenant.enumnotfoundexception", enumClass);
+        super("枚举：{0}不存在", enumClass);
     }
 
 }

@@ -7,6 +7,6 @@ public class ApiNotAllowedToDeleteException extends ApiRuntimeException {
     private static final long serialVersionUID = 3974228677209813097L;
 
     public ApiNotAllowedToDeleteException(String token) {
-        super("exception.tenant.apinotallowedtodeleteexception", token);
+        super("token为：“{0}”的接口不允许删除", token);
     }
 }

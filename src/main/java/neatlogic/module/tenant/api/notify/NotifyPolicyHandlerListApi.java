@@ -110,7 +110,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
             }
         }
         if (AuthActionChecker.check(NOTIFY_JOB_MODIFY.class)) {
-            resultTree.add(new ValueTextVo("schedule", new I18n("common.scheduledtask").toString()));
+            resultTree.add(new ValueTextVo("schedule", new I18n("定时任务").toString()));
         }
         if (CollectionUtils.isEmpty(resultTree)) {
             throw new PermissionDeniedException();

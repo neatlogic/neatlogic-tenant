@@ -7,6 +7,6 @@ public class MailServerNameRepeatException extends ApiRuntimeException {
     private static final long serialVersionUID = -2768806372998827228L;
 
     public MailServerNameRepeatException(String name) {
-        super("exception.tenant.mailservernamerepeatexception", name);
+        super("邮件服务器名称：“{0}”已存在", name);
     }
 }
