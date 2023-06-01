@@ -30,6 +30,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 @Service
@@ -80,8 +83,13 @@ public class JobClassGetApi extends PrivateApiComponentBase {
             paramObj.put("dataType", param.dataType());
             paramObj.put("description", param.description());
             paramObj.put("required", param.required());
+			paramObj.put("sort", param.sort());
             inputList.add(paramObj);
 		}
+		//排序
+		inputList.sort(Comparator.comparing(obj->((JSONObject)obj)
+				.getIntValue("sort"),Comparator.nullsFirst(Comparator.naturalOrder()))
+		);
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("jobClass", jobClass);
 		returnObj.put("inputList", inputList);
