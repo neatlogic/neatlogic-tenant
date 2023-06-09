@@ -24,6 +24,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -31,10 +32,14 @@ import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
+
+    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(documentonline_images/){1}(\\w+/)*\\w+\\.\\w+\\)");
 
     @Override
     public String getName() {
@@ -66,7 +71,7 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
         String content = writer.toString();
         DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
-        documentOnlineVo.setContent(content);
+        documentOnlineVo.setContent(replaceImagePath(content, filePath));
         documentOnlineVo.setFileName(filename);
         return documentOnlineVo;
     }
@@ -74,5 +79,70 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
     @Override
     public String getToken() {
         return "documentonline/get";
+    }
+
+    /**
+     * 将文档内容中图片相对路径转化为http请求url
+     * @param content 文档内容
+     * @param filePath 文档路径
+     * @return
+     */
+    private String replaceImagePath(String content, String filePath) {
+        StringBuilder stringBuilder = new StringBuilder();
+        int beginIndex = 0;
+        Matcher figureMatcher = PATTERN.matcher(content);
+        while (figureMatcher.find()) {
+            String group = figureMatcher.group();
+            int index = content.indexOf(group, beginIndex);
+            String subStr = content.substring(beginIndex, index);
+            stringBuilder.append(subStr);
+            int lightParenthesisIndex = group.lastIndexOf(")");
+            int leftParenthesisIndex = group.lastIndexOf("(", lightParenthesisIndex);
+            String relativePath = group.substring(leftParenthesisIndex + 1, lightParenthesisIndex);
+            String absolutePath = relativePathToAbsolutePath(relativePath, filePath);
+            String url = "api/binary/classpath/image/download?filePath=" + absolutePath;
+            stringBuilder.append(group.substring(0, leftParenthesisIndex + 1));
+            stringBuilder.append(url);
+            stringBuilder.append(group.substring(lightParenthesisIndex));
+            beginIndex = index + group.length();
+        }
+        stringBuilder.append(content.substring(beginIndex));
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 将图片地址的相对路径转化成绝对路径
+     * @param relativePath 相对路径
+     * @param filePath 文档路径
+     * @return 绝对路径
+     */
+    private String relativePathToAbsolutePath(String relativePath, String filePath) {
+        int returnParentCount = 0;
+        for (int i = 0; i < 100; i++) {
+            if (relativePath.startsWith("/")) {
+                relativePath = relativePath.substring(1);
+            } else if (relativePath.startsWith("..")) {
+                relativePath = relativePath.substring(2);
+                returnParentCount++;
+            } else if (relativePath.startsWith(".")) {
+                relativePath = relativePath.substring(1);
+            } else {
+                break;
+            }
+        }
+        int index = filePath.lastIndexOf("/");
+        filePath = filePath.substring(0, index);
+        for (int i = 0; i < returnParentCount; i++) {
+            index = filePath.lastIndexOf("/");
+            if (index == -1) {
+                filePath = "";
+                break;
+            }
+            filePath = filePath.substring(0, index);
+        }
+        if (StringUtils.isBlank(filePath)) {
+            return relativePath;
+        }
+        return filePath + "/" + relativePath;
     }
 }
