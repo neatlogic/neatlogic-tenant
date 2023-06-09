@@ -64,7 +64,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "关键字"),
             @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块组标识"),
-            @Param(name = "function", type = ApiParamType.STRING, desc = "功能标识"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
@@ -79,7 +79,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             throw new DocumentOnlineIndexDirNotSetException();
         }
         String moduleGroup = paramObj.getString("moduleGroup");
-        String function = paramObj.getString("function");
+        String menu = paramObj.getString("menu");
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         IndexReader indexReader = null;
         try {
@@ -107,9 +107,9 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                 Query query = queryParser.parse(moduleGroup);
                 builder.add(query, BooleanClause.Occur.MUST);
             }
-            if (StringUtils.isNotBlank(function)) {
-                QueryParser queryParser = new QueryParser("function", analyzer);
-                Query query = queryParser.parse(function);
+            if (StringUtils.isNotBlank(menu)) {
+                QueryParser queryParser = new QueryParser("menu", analyzer);
+                Query query = queryParser.parse(menu);
                 builder.add(query, BooleanClause.Occur.MUST);
             }
             // 7.搜索，并返回结果
@@ -131,9 +131,6 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                         continue;
                     }
                     DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
-//                    documentOnlineVo.setDocID(docId);
-//                    documentOnlineVo.setModuleGroup(doc.get("moduleGroup"));
-//                    documentOnlineVo.setFunction(doc.get("function"));
                     documentOnlineVo.setFileName(doc.get("fileName"));
                     documentOnlineVo.setFileName(doc.get("filePath"));
                     String content = doc.get("content");

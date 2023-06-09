@@ -41,7 +41,7 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
-            @Param(name = "function", type = ApiParamType.STRING, desc = "功能标识"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
@@ -53,8 +53,8 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         String moduleGroup = paramObj.getString("moduleGroup");
-        String function = paramObj.getString("function");
-        return InitializeIndexHandler.getDocumentOnlineList(moduleGroup, function, basePageVo);
+        String menu = paramObj.getString("menu");
+        return InitializeIndexHandler.getDocumentOnlineList(moduleGroup, menu, basePageVo);
     }
 
     @Override
