@@ -132,7 +132,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     }
                     DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
                     documentOnlineVo.setFileName(doc.get("fileName"));
-                    documentOnlineVo.setFileName(doc.get("filePath"));
+                    documentOnlineVo.setFilePath(doc.get("filePath"));
                     String content = doc.get("content");
                     documentOnlineVo.setContent(cutTwoLines(content, basePageVo.getKeyword()));
                     tbodyList.add(documentOnlineVo);
