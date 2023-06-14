@@ -17,13 +17,20 @@
 package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.InitializeIndexHandler;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -45,7 +52,14 @@ public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
     @Description(desc = "在线帮助文档目录")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return TableResultUtil.getResult(InitializeIndexHandler.getDocumentOnlineDirectory());
+        List<DocumentOnlineDirectoryVo> tbodyList = new ArrayList<>();
+        Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
+        for (DocumentOnlineDirectoryVo child : InitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+            if (Objects.equals(child.getName(), locale.getLanguage())) {
+                tbodyList = child.getChildren();
+            }
+        }
+        return TableResultUtil.getResult(tbodyList);
     }
 
     @Override

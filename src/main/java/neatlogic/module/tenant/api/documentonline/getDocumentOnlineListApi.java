@@ -16,14 +16,24 @@
 
 package neatlogic.module.tenant.api.documentonline;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.InitializeIndexHandler;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -40,8 +50,7 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
+            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, isRequired = true, minLength = 1, desc = "上层目录名称列表"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
@@ -52,13 +61,59 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
-        String moduleGroup = paramObj.getString("moduleGroup");
-        String menu = paramObj.getString("menu");
-        return InitializeIndexHandler.getDocumentOnlineList(moduleGroup, menu, basePageVo);
+        JSONArray upwardNameArray = paramObj.getJSONArray("upwardNameList");
+        List<String> upwardNameList = upwardNameArray.toJavaList(String.class);
+        List<JSONObject> tbodyList = new ArrayList<>();
+        Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
+        for (DocumentOnlineDirectoryVo localeLevel : InitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+            if (!Objects.equals(localeLevel.getName(), locale.getLanguage())) {
+                continue;
+            }
+            DocumentOnlineDirectoryVo directory = localeLevel;
+            for (String upwardName : upwardNameList) {
+                for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
+                    if (child.getIsFile()) {
+                        continue;
+                    }
+                    if (Objects.equals(upwardName, child.getName())) {
+                        directory = child;
+                        break;
+                    }
+                }
+                if (directory == null) {
+                    break;
+                }
+            }
+            if (directory != null) {
+                tbodyList = getAllFileList(directory);
+            }
+        }
+        basePageVo.setRowNum(tbodyList.size());
+        return TableResultUtil.getResult(PageUtil.subList(tbodyList, basePageVo), basePageVo);
     }
 
     @Override
     public String getToken() {
         return "documentonline/list";
+    }
+
+    /**
+     * 通过递归，获取某个目录下的所有文件
+     * @param directory
+     * @return
+     */
+    private List<JSONObject> getAllFileList(DocumentOnlineDirectoryVo directory) {
+        List<JSONObject> list = new ArrayList<>();
+        for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
+            if (child.getIsFile()) {
+                JSONObject fileInfo = new JSONObject();
+                fileInfo.put("filePath", child.getPath());
+                fileInfo.put("fileName", child.getName());
+                list.add(fileInfo);
+            } else {
+                list.addAll(getAllFileList(child));
+            }
+        }
+        return list;
     }
 }
