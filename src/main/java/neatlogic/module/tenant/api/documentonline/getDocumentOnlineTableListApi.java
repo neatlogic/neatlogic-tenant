@@ -58,7 +58,6 @@ public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
     @Description(desc = "查询在线帮助文档")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         JSONArray tableList = new JSONArray();
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
         for (DocumentOnlineDirectoryVo localeLevel : InitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
@@ -69,6 +68,7 @@ public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
                 JSONObject tableObj = new JSONObject();
                 tableObj.put("firstLevelDirectory", firstLevelDirectory.getName());
                 List<JSONObject> tbodyList = getAllFileList(firstLevelDirectory);
+                BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
                 basePageVo.setRowNum(tbodyList.size());
                 tableObj.put("currentPage", basePageVo.getCurrentPage());
                 tableObj.put("pageSize", basePageVo.getPageSize());
@@ -100,7 +100,8 @@ public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
         for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
             if (child.getIsFile()) {
                 JSONObject fileInfo = new JSONObject();
-                fileInfo.put("filePath", child.getPath());
+                fileInfo.put("upwardNameList", child.getUpwardNameList());
+                fileInfo.put("filePath", child.getFilePath());
                 fileInfo.put("fileName", child.getName());
                 list.add(fileInfo);
             } else {

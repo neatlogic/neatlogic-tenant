@@ -107,7 +107,8 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
             if (child.getIsFile()) {
                 JSONObject fileInfo = new JSONObject();
-                fileInfo.put("filePath", child.getPath());
+                fileInfo.put("upwardNameList", child.getUpwardNameList());
+                fileInfo.put("filePath", child.getFilePath());
                 fileInfo.put("fileName", child.getName());
                 list.add(fileInfo);
             } else {
