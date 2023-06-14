@@ -39,8 +39,8 @@ import java.util.regex.Pattern;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
 
-    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(\\w+/)*\\w+\\.\\w+\\)");
-
+//    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(\\w+/)*\\w+\\.\\w+\\)");
+    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*([\u4E00-\u9FA5_\\w]+/)*[\u4E00-\u9FA5_\\w]+\\.\\w+\\)");
     @Override
     public String getName() {
         return "获取单个在线帮助文档";

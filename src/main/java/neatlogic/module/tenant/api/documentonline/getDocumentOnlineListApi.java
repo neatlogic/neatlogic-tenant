@@ -28,16 +28,31 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.text.TextContentRenderer;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineListApi extends PrivateApiComponentBase {
+
+    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*([\u4E00-\u9FA5_\\w]+/)*[\u4E00-\u9FA5_\\w]+\\.\\w+\\)");
 
     @Override
     public String getName() {
@@ -89,7 +104,39 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
             }
         }
         basePageVo.setRowNum(tbodyList.size());
-        return TableResultUtil.getResult(PageUtil.subList(tbodyList, basePageVo), basePageVo);
+        tbodyList = PageUtil.subList(tbodyList, basePageVo);
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        for (JSONObject tbody : tbodyList) {
+            String filePath = tbody.getString("filePath");
+            Resource resource = resolver.getResource("classpath:" + filePath);
+            if (resource == null) {
+                continue;
+            }
+            StringBuilder stringBuilder = new StringBuilder(150);
+            InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            while(stringBuilder.length() < 120) {
+                String lineContent = bufferedReader.readLine();
+                if (StringUtils.isBlank(lineContent)) {
+                    continue;
+                }
+
+                lineContent = replaceImagePath(lineContent);
+                if (StringUtils.isBlank(lineContent)) {
+                    continue;
+                }
+                Parser parser = Parser.builder().build();
+                Node document = parser.parse(lineContent);
+                TextContentRenderer textContentRenderer = TextContentRenderer.builder().build();
+                lineContent = textContentRenderer.render(document);
+                if (StringUtils.isBlank(lineContent)) {
+                    continue;
+                }
+                stringBuilder.append(lineContent);
+            }
+            tbody.put("content", stringBuilder.toString());
+        }
+        return TableResultUtil.getResult(tbodyList, basePageVo);
     }
 
     @Override
@@ -116,5 +163,25 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
             }
         }
         return list;
+    }
+
+    /**
+     * 将文档内容中图片相对路径转化为http请求url
+     * @param content 文档内容
+     * @return
+     */
+    private String replaceImagePath(String content) {
+        StringBuilder stringBuilder = new StringBuilder();
+        int beginIndex = 0;
+        Matcher figureMatcher = PATTERN.matcher(content);
+        while (figureMatcher.find()) {
+            String group = figureMatcher.group();
+            int index = content.indexOf(group, beginIndex);
+            String subStr = content.substring(beginIndex, index);
+            stringBuilder.append(subStr);
+            beginIndex = index + group.length();
+        }
+        stringBuilder.append(content.substring(beginIndex));
+        return stringBuilder.toString();
     }
 }
