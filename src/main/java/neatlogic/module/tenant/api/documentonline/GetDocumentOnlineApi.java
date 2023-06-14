@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
 
-    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(documentonline_images/){1}(\\w+/)*\\w+\\.\\w+\\)");
+    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(\\w+/)*\\w+\\.\\w+\\)");
 
     @Override
     public String getName() {
