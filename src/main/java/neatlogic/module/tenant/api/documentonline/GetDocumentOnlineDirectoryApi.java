@@ -24,7 +24,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import neatlogic.module.framework.startup.InitializeIndexHandler;
+import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<DocumentOnlineDirectoryVo> tbodyList = new ArrayList<>();
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
-        for (DocumentOnlineDirectoryVo child : InitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+        for (DocumentOnlineDirectoryVo child : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
             if (Objects.equals(child.getName(), locale.getLanguage())) {
                 tbodyList = child.getChildren();
             }
