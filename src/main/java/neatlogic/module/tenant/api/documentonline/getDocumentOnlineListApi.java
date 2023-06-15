@@ -165,14 +165,15 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         List<JSONObject> list = new ArrayList<>();
         for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
             if (child.getIsFile()) {
-                if (StringUtils.isBlank(moduleGroup) || child.belongToModuleGroup(moduleGroup)) {
-                    if (StringUtils.isBlank(menu) || child.belongToMenu(menu)) {
-                        JSONObject fileInfo = new JSONObject();
-                        fileInfo.put("upwardNameList", child.getUpwardNameList());
-                        fileInfo.put("filePath", child.getFilePath());
-                        fileInfo.put("fileName", child.getName());
-                        list.add(fileInfo);
-                    }
+                JSONObject returnObj = new JSONObject();
+                if (StringUtils.isBlank(moduleGroup) || child.belongToOwner(moduleGroup, menu, returnObj)) {
+                    String anchorPoint = returnObj.getString("anchorPoint");
+                    JSONObject fileInfo = new JSONObject();
+                    fileInfo.put("upwardNameList", child.getUpwardNameList());
+                    fileInfo.put("filePath", child.getFilePath());
+                    fileInfo.put("fileName", child.getName());
+                    fileInfo.put("anchorPoint", anchorPoint);
+                    list.add(fileInfo);
                 }
             } else {
                 list.addAll(getAllFileList(child, moduleGroup, menu));
