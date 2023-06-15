@@ -22,36 +22,29 @@ import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.documentonline.crossover.DocumentOnlineServiceCrossoverService;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
+import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.text.TextContentRenderer;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineListApi extends PrivateApiComponentBase {
-
-    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*([\u4E00-\u9FA5_\\w]+/)*[\u4E00-\u9FA5_\\w]+\\.\\w+\\)");
 
     @Override
     public String getName() {
@@ -71,13 +64,14 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "文档列表")
+            @Param(explode = BasePageVo.class),
+            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
     })
     @Description(desc = "查询在线帮助文档")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
-        List<JSONObject> tbodyList = new ArrayList<>();
+        List<DocumentOnlineVo> tbodyList = new ArrayList<>();
         DocumentOnlineDirectoryVo directory = null;
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
         for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
@@ -111,42 +105,22 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         }
         String moduleGroup = paramObj.getString("moduleGroup");
         String menu = paramObj.getString("menu");
-        tbodyList = getAllFileList(directory, moduleGroup, menu);
+        DocumentOnlineServiceCrossoverService documentOnlineServiceCrossoverService = CrossoverServiceFactory.getApi(DocumentOnlineServiceCrossoverService.class);
+        tbodyList = documentOnlineServiceCrossoverService.getAllFileList(directory, moduleGroup, menu);
         if (tbodyList.size() == 0) {
             return TableResultUtil.getResult(tbodyList, basePageVo);
         }
         basePageVo.setRowNum(tbodyList.size());
         tbodyList = PageUtil.subList(tbodyList, basePageVo);
+        // 遍历当前页中列表的所有文档，加载文档前120个字符内容
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        for (JSONObject tbody : tbodyList) {
-            String filePath = tbody.getString("filePath");
-            Resource resource = resolver.getResource("classpath:" + filePath);
+        for (DocumentOnlineVo tbody : tbodyList) {
+            Resource resource = resolver.getResource("classpath:" + tbody.getFilePath());
             if (resource == null) {
                 continue;
             }
-            StringBuilder stringBuilder = new StringBuilder(150);
-            InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream());
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            while(stringBuilder.length() < 120) {
-                String lineContent = bufferedReader.readLine();
-                if (StringUtils.isBlank(lineContent)) {
-                    continue;
-                }
-
-                lineContent = replaceImagePath(lineContent);
-                if (StringUtils.isBlank(lineContent)) {
-                    continue;
-                }
-                Parser parser = Parser.builder().build();
-                Node document = parser.parse(lineContent);
-                TextContentRenderer textContentRenderer = TextContentRenderer.builder().build();
-                lineContent = textContentRenderer.render(document);
-                if (StringUtils.isBlank(lineContent)) {
-                    continue;
-                }
-                stringBuilder.append(lineContent);
-            }
-            tbody.put("content", stringBuilder.toString());
+            String content = documentOnlineServiceCrossoverService.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
+            tbody.setContent(content);
         }
         return TableResultUtil.getResult(tbodyList, basePageVo);
     }
@@ -156,49 +130,4 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         return "documentonline/list";
     }
 
-    /**
-     * 通过递归，获取某个目录下的所有文件
-     * @param directory
-     * @return
-     */
-    private List<JSONObject> getAllFileList(DocumentOnlineDirectoryVo directory, String moduleGroup, String menu) {
-        List<JSONObject> list = new ArrayList<>();
-        for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
-            if (child.getIsFile()) {
-                JSONObject returnObj = new JSONObject();
-                if (StringUtils.isBlank(moduleGroup) || child.belongToOwner(moduleGroup, menu, returnObj)) {
-                    String anchorPoint = returnObj.getString("anchorPoint");
-                    JSONObject fileInfo = new JSONObject();
-                    fileInfo.put("upwardNameList", child.getUpwardNameList());
-                    fileInfo.put("filePath", child.getFilePath());
-                    fileInfo.put("fileName", child.getName());
-                    fileInfo.put("anchorPoint", anchorPoint);
-                    list.add(fileInfo);
-                }
-            } else {
-                list.addAll(getAllFileList(child, moduleGroup, menu));
-            }
-        }
-        return list;
-    }
-
-    /**
-     * 将文档内容中图片相对路径转化为http请求url
-     * @param content 文档内容
-     * @return
-     */
-    private String replaceImagePath(String content) {
-        StringBuilder stringBuilder = new StringBuilder();
-        int beginIndex = 0;
-        Matcher figureMatcher = PATTERN.matcher(content);
-        while (figureMatcher.find()) {
-            String group = figureMatcher.group();
-            int index = content.indexOf(group, beginIndex);
-            String subStr = content.substring(beginIndex, index);
-            stringBuilder.append(subStr);
-            beginIndex = index + group.length();
-        }
-        stringBuilder.append(content.substring(beginIndex));
-        return stringBuilder.toString();
-    }
 }

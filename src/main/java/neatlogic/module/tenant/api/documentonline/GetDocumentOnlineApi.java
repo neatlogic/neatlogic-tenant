@@ -23,6 +23,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -33,14 +34,11 @@ import org.springframework.stereotype.Service;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
 
-//    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*(\\w+/)*\\w+\\.\\w+\\)");
-    private final Pattern PATTERN = Pattern.compile("!\\[\\w*\\]\\((\\.\\./)*([\u4E00-\u9FA5_\\w]+/)*[\u4E00-\u9FA5_\\w]+\\.\\w+\\)");
     @Override
     public String getName() {
         return "获取单个在线帮助文档";
@@ -90,7 +88,7 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
     private String replaceImagePath(String content, String filePath) {
         StringBuilder stringBuilder = new StringBuilder();
         int beginIndex = 0;
-        Matcher figureMatcher = PATTERN.matcher(content);
+        Matcher figureMatcher = DocumentOnlineInitializeIndexHandler.MARKDOWN_IMAGE_PATTERN.matcher(content);
         while (figureMatcher.find()) {
             String group = figureMatcher.group();
             int index = content.indexOf(group, beginIndex);

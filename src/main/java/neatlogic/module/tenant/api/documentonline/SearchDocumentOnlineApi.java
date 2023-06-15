@@ -21,6 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.documentonline.crossover.DocumentOnlineServiceCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,33 +87,13 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             // 1.创建分词器（对搜索的关键词进行分词使用）
             // 注意：分词器和创建索引的时候使用的分词器一模一样
             Analyzer analyzer = new IKAnalyzer(true);
-            // 4.创建Directory目标对象，指定索引库的位置
+            // 创建Directory目标对象，指定索引库的位置
             Directory directory = FSDirectory.open(Paths.get(Config.DOCUMENT_ONLINE_INDEX_DIR()));
-            // 5.创建输入流对象
+            // 创建输入流对象
             indexReader = DirectoryReader.open(directory);
-            // 6.创建搜索对象
+            // 创建搜索对象
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-//            BooleanQuery.Builder builder = new BooleanQuery.Builder();
-//            if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
-//                // 3.设置搜索关键字
-//                // 2.创建查询对象，
-//                // 第一个参数：默认查询域，如果查询的关键字中带搜索的域名，则从指定域中查询，如果不带域名则从默认搜索域中查询
-//                // 第二个参数：使用的分词器
-//                QueryParser queryParser = new MultiFieldQueryParser(new String[]{"content", "fileName"}, analyzer);
-//                Query query = queryParser.parse(basePageVo.getKeyword());
-//                builder.add(new BooleanClause(query, BooleanClause.Occur.MUST));
-//            }
-//            if (StringUtils.isNotBlank(moduleGroup)) {
-//                QueryParser queryParser = new QueryParser("moduleGroup", analyzer);
-//                Query query = queryParser.parse(moduleGroup);
-//                builder.add(query, BooleanClause.Occur.MUST);
-//            }
-//            if (StringUtils.isNotBlank(menu)) {
-//                QueryParser queryParser = new QueryParser("menu", analyzer);
-//                Query query = queryParser.parse(menu);
-//                builder.add(query, BooleanClause.Occur.MUST);
-//            }
-            // 7.搜索，并返回结果
+            // 搜索，并返回结果
             QueryParser queryParser = new MultiFieldQueryParser(new String[]{"content", "fileName"}, analyzer);
             Query query = queryParser.parse(basePageVo.getKeyword());
             // 第二个参数：是返回多少条数据用于展示，分页使用
@@ -119,10 +102,11 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
 //            basePageVo.setRowNum((int) topDocs.totalHits.value);
             basePageVo.setRowNum((int) topDocs.totalHits);
             List<DocumentOnlineVo> tbodyList = new ArrayList<>();
-            // 8.获取结果集
+            // 获取结果集
             ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-            // 9.遍历结果集
+            // 遍历结果集
             if (scoreDocs != null) {
+                DocumentOnlineServiceCrossoverService documentOnlineServiceCrossoverService = CrossoverServiceFactory.getApi(DocumentOnlineServiceCrossoverService.class);
                 for (; startNum < scoreDocs.length; startNum++) {
                     ScoreDoc scoreDoc = scoreDocs[startNum];
                     int docId = scoreDoc.doc;
@@ -137,7 +121,9 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     documentOnlineVo.setFileName(doc.get("fileName"));
                     documentOnlineVo.setFilePath(doc.get("filePath"));
                     String content = doc.get("content");
-                    documentOnlineVo.setContent(cutTwoLines(content, basePageVo.getKeyword()));
+                    int skip = keywordOnlineFirstCharacterIndex(content, basePageVo.getKeyword());
+                    String result = documentOnlineServiceCrossoverService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
+                    documentOnlineVo.setContent(result);
                     tbodyList.add(documentOnlineVo);
                 }
             }
@@ -147,7 +133,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             throw e;
         } finally {
             if (indexReader != null) {
-                // 10.关闭流
+                // 关闭流
                 indexReader.close();
             }
         }
@@ -158,39 +144,17 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
         return "documentonline/search";
     }
 
-    private String cutTwoLines(String content, String keyword) {
-        if (keyword == null) {
-            keyword = "";
-        }
+    private int keywordOnlineFirstCharacterIndex(String content, String keyword) {
         String lineWrapFlag = "\r\n";
         int keywordFirstIndex = content.indexOf(keyword);
         if (keywordFirstIndex == -1) {
-            int index = content.indexOf(lineWrapFlag);
-            if (index == -1) {
-                return content;
-            } else {
-                index = content.indexOf(lineWrapFlag, index + lineWrapFlag.length());
-                if (index == -1) {
-                    return content;
-                } else {
-                    return content.substring(0, index);
-                }
-            }
+            return 0;
         } else {
             int beginIndex = content.lastIndexOf(lineWrapFlag, keywordFirstIndex);
             if (beginIndex == -1) {
-                beginIndex = 0;
-            }
-            int index = content.indexOf(lineWrapFlag, keywordFirstIndex);
-            if (index == -1) {
-                return content.substring(beginIndex);
+                return 0;
             } else {
-                index = content.indexOf(lineWrapFlag, index + lineWrapFlag.length());
-                if (index == -1) {
-                    return content.substring(beginIndex);
-                } else {
-                    return content.substring(beginIndex, index);
-                }
+                return beginIndex + lineWrapFlag.length();
             }
         }
     }
