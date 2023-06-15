@@ -39,7 +39,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +64,9 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, isRequired = true, minLength = 1, desc = "上层目录名称列表"),
+            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, desc = "上层目录名称列表"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块组标识"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
@@ -76,15 +77,20 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
-        JSONArray upwardNameArray = paramObj.getJSONArray("upwardNameList");
-        List<String> upwardNameList = upwardNameArray.toJavaList(String.class);
         List<JSONObject> tbodyList = new ArrayList<>();
+        DocumentOnlineDirectoryVo directory = null;
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
         for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
-            if (!Objects.equals(localeLevel.getName(), locale.getLanguage())) {
-                continue;
+            if (Objects.equals(localeLevel.getName(), locale.getLanguage())) {
+                directory = localeLevel;
             }
-            DocumentOnlineDirectoryVo directory = localeLevel;
+        }
+        if (directory == null) {
+            return TableResultUtil.getResult(tbodyList, basePageVo);
+        }
+        JSONArray upwardNameArray = paramObj.getJSONArray("upwardNameList");
+        if (CollectionUtils.isNotEmpty(upwardNameArray)) {
+            List<String> upwardNameList = upwardNameArray.toJavaList(String.class);
             for (String upwardName : upwardNameList) {
                 for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
                     if (child.getIsFile()) {
@@ -99,9 +105,15 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
                     break;
                 }
             }
-            if (directory != null) {
-                tbodyList = getAllFileList(directory);
+            if (directory == null) {
+                return TableResultUtil.getResult(tbodyList, basePageVo);
             }
+        }
+        String moduleGroup = paramObj.getString("moduleGroup");
+        String menu = paramObj.getString("menu");
+        tbodyList = getAllFileList(directory, moduleGroup, menu);
+        if (tbodyList.size() == 0) {
+            return TableResultUtil.getResult(tbodyList, basePageVo);
         }
         basePageVo.setRowNum(tbodyList.size());
         tbodyList = PageUtil.subList(tbodyList, basePageVo);
@@ -149,17 +161,21 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
      * @param directory
      * @return
      */
-    private List<JSONObject> getAllFileList(DocumentOnlineDirectoryVo directory) {
+    private List<JSONObject> getAllFileList(DocumentOnlineDirectoryVo directory, String moduleGroup, String menu) {
         List<JSONObject> list = new ArrayList<>();
         for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
             if (child.getIsFile()) {
-                JSONObject fileInfo = new JSONObject();
-                fileInfo.put("upwardNameList", child.getUpwardNameList());
-                fileInfo.put("filePath", child.getFilePath());
-                fileInfo.put("fileName", child.getName());
-                list.add(fileInfo);
+                if (StringUtils.isBlank(moduleGroup) || child.belongToModuleGroup(moduleGroup)) {
+                    if (StringUtils.isBlank(menu) || child.belongToMenu(menu)) {
+                        JSONObject fileInfo = new JSONObject();
+                        fileInfo.put("upwardNameList", child.getUpwardNameList());
+                        fileInfo.put("filePath", child.getFilePath());
+                        fileInfo.put("fileName", child.getName());
+                        list.add(fileInfo);
+                    }
+                }
             } else {
-                list.addAll(getAllFileList(child));
+                list.addAll(getAllFileList(child, moduleGroup, menu));
             }
         }
         return list;

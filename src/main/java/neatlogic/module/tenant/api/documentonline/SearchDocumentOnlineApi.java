@@ -63,9 +63,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
+            @Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "关键字"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
     })
@@ -79,8 +77,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(Config.DOCUMENT_ONLINE_INDEX_DIR())) {
             throw new DocumentOnlineIndexDirNotSetException();
         }
-        String moduleGroup = paramObj.getString("moduleGroup");
-        String menu = paramObj.getString("menu");
+
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         IndexReader indexReader = null;
         try {
@@ -93,30 +90,32 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             indexReader = DirectoryReader.open(directory);
             // 6.创建搜索对象
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-            BooleanQuery.Builder builder = new BooleanQuery.Builder();
-            if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
-                // 3.设置搜索关键字
-                // 2.创建查询对象，
-                // 第一个参数：默认查询域，如果查询的关键字中带搜索的域名，则从指定域中查询，如果不带域名则从默认搜索域中查询
-                // 第二个参数：使用的分词器
-                QueryParser queryParser = new MultiFieldQueryParser(new String[]{"content", "fileName"}, analyzer);
-                Query query = queryParser.parse(basePageVo.getKeyword());
-                builder.add(new BooleanClause(query, BooleanClause.Occur.MUST));
-            }
-            if (StringUtils.isNotBlank(moduleGroup)) {
-                QueryParser queryParser = new QueryParser("moduleGroup", analyzer);
-                Query query = queryParser.parse(moduleGroup);
-                builder.add(query, BooleanClause.Occur.MUST);
-            }
-            if (StringUtils.isNotBlank(menu)) {
-                QueryParser queryParser = new QueryParser("menu", analyzer);
-                Query query = queryParser.parse(menu);
-                builder.add(query, BooleanClause.Occur.MUST);
-            }
+//            BooleanQuery.Builder builder = new BooleanQuery.Builder();
+//            if (StringUtils.isNotBlank(basePageVo.getKeyword())) {
+//                // 3.设置搜索关键字
+//                // 2.创建查询对象，
+//                // 第一个参数：默认查询域，如果查询的关键字中带搜索的域名，则从指定域中查询，如果不带域名则从默认搜索域中查询
+//                // 第二个参数：使用的分词器
+//                QueryParser queryParser = new MultiFieldQueryParser(new String[]{"content", "fileName"}, analyzer);
+//                Query query = queryParser.parse(basePageVo.getKeyword());
+//                builder.add(new BooleanClause(query, BooleanClause.Occur.MUST));
+//            }
+//            if (StringUtils.isNotBlank(moduleGroup)) {
+//                QueryParser queryParser = new QueryParser("moduleGroup", analyzer);
+//                Query query = queryParser.parse(moduleGroup);
+//                builder.add(query, BooleanClause.Occur.MUST);
+//            }
+//            if (StringUtils.isNotBlank(menu)) {
+//                QueryParser queryParser = new QueryParser("menu", analyzer);
+//                Query query = queryParser.parse(menu);
+//                builder.add(query, BooleanClause.Occur.MUST);
+//            }
             // 7.搜索，并返回结果
+            QueryParser queryParser = new MultiFieldQueryParser(new String[]{"content", "fileName"}, analyzer);
+            Query query = queryParser.parse(basePageVo.getKeyword());
             // 第二个参数：是返回多少条数据用于展示，分页使用
             int startNum = basePageVo.getStartNum();
-            TopDocs topDocs = indexSearcher.search(builder.build(), startNum + basePageVo.getPageSize());
+            TopDocs topDocs = indexSearcher.search(query, startNum + basePageVo.getPageSize());
 //            basePageVo.setRowNum((int) topDocs.totalHits.value);
             basePageVo.setRowNum((int) topDocs.totalHits);
             List<DocumentOnlineVo> tbodyList = new ArrayList<>();
