@@ -31,11 +31,11 @@ import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +45,7 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineListApi extends PrivateApiComponentBase {
 
-    @javax.annotation.Resource
+    @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override
@@ -116,7 +116,7 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         // 遍历当前页中列表的所有文档，加载文档前120个字符内容
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (DocumentOnlineVo tbody : tbodyList) {
-            Resource resource = resolver.getResource("classpath:" + tbody.getFilePath());
+            org.springframework.core.io.Resource resource = resolver.getResource("classpath:" + tbody.getFilePath());
             if (resource == null) {
                 continue;
             }
