@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 @Service
@@ -68,9 +70,23 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         StringWriter writer = new StringWriter();
         IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
         String content = writer.toString();
+        List<String> upwardNameList = new ArrayList<>();
+        String[] split = filePath.split("/");
+        for (int i = 0; i < split.length; i++) {
+            if (i == 0 || i == 1) {
+                continue;
+            }
+            String name = split[i];
+            int index = name.lastIndexOf(".");
+            if (i == split.length - 1) {
+                name = name.substring(0, index);
+            }
+            upwardNameList.add(name);
+        }
         DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
         documentOnlineVo.setContent(replaceImagePath(content, filePath));
         documentOnlineVo.setFileName(filename);
+        documentOnlineVo.setUpwardNameList(upwardNameList);
         return documentOnlineVo;
     }
 
