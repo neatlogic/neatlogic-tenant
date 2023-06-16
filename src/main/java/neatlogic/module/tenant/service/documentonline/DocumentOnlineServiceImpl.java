@@ -19,7 +19,7 @@ package neatlogic.module.tenant.service.documentonline;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import neatlogic.framework.util.RegexUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -81,7 +81,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
     private String removeImagePath(String content) {
         StringBuilder stringBuilder = new StringBuilder();
         int beginIndex = 0;
-        Matcher figureMatcher = DocumentOnlineInitializeIndexHandler.MARKDOWN_IMAGE_PATTERN.matcher(content);
+        Matcher figureMatcher = RegexUtils.getPattern(RegexUtils.MARKDOWN_LINK).matcher(content);
         while (figureMatcher.find()) {
             String group = figureMatcher.group();
             int index = content.indexOf(group, beginIndex);
