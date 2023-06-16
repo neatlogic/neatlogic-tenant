@@ -23,7 +23,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import neatlogic.framework.util.RegexUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -104,7 +104,7 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
     private String replaceImagePath(String content, String filePath) {
         StringBuilder stringBuilder = new StringBuilder();
         int beginIndex = 0;
-        Matcher figureMatcher = DocumentOnlineInitializeIndexHandler.MARKDOWN_IMAGE_PATTERN.matcher(content);
+        Matcher figureMatcher = RegexUtils.getPattern(RegexUtils.MARKDOWN_LINK).matcher(content);
         while (figureMatcher.find()) {
             String group = figureMatcher.group();
             int index = content.indexOf(group, beginIndex);
@@ -112,16 +112,24 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
             stringBuilder.append(subStr);
             int lightParenthesisIndex = group.lastIndexOf(")");
             int leftParenthesisIndex = group.lastIndexOf("(", lightParenthesisIndex);
+            // 截取出![xxx]部分，xxx可能存在图片格式或链接格式，需要继续解析
+            String squareBrackets = group.substring(0, leftParenthesisIndex);
+            stringBuilder.append(replaceImagePath(squareBrackets, filePath));
+            stringBuilder.append("(");
+            String url = null;
             String relativePath = group.substring(leftParenthesisIndex + 1, lightParenthesisIndex);
-            String absolutePath = relativePathToAbsolutePath(relativePath, filePath);
-            stringBuilder.append(group.substring(0, leftParenthesisIndex + 1));
-            if (group.startsWith("!")) {
-                String url = "api/binary/classpath/image/download?filePath=" + absolutePath;
-                stringBuilder.append(url);
+            String relativePathToLowerCase = relativePath.toLowerCase();
+            if (relativePathToLowerCase.startsWith("http://") || relativePathToLowerCase.startsWith("https://")) {
+                url = relativePath;
             } else {
-                String url = "documentonline.html#/documentonline-detail?filePath=" + absolutePath;
-                stringBuilder.append(url);
+                String absolutePath = relativePathToAbsolutePath(relativePath, filePath);
+                if (group.startsWith("!")) {
+                    url = "api/binary/classpath/image/download?filePath=" + absolutePath;
+                } else {
+                    url = "documentonline.html#/documentonline-detail?filePath=" + absolutePath;
+                }
             }
+            stringBuilder.append(url);
             stringBuilder.append(group.substring(lightParenthesisIndex));
             beginIndex = index + group.length();
         }
@@ -163,5 +171,31 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
             return relativePath;
         }
         return filePath + "/" + relativePath;
+    }
+
+    public static void main(String[] args) {
+        String content = "aaaaaaaae[aaa中](../../documentonline_images中/中ab-_!@#$%^&*+= 1c.jpg  \" title \"  )raaaaaaaaaaaaaaaa" + "\r\n"
+                + "bbbbbbbbe[![bb b](../../documentonline_images/bbb 中/a bc.jpg)](../../documentonline_images/ccc/ab c.jpg)rbbbbbbbbbbbbbbbb" + "\r\n"
+                + "cccccccce[ccc](../../documentonline_images/ccc/ab c.jpg)rcccccccccccccccc" + "\r\n"
+                + "dddddddde![ddd](../../documentonline_images/ddd/ab c.jpg)rddddddddddddddd" + "\r\n"
+                + "cccccccce![ccc](http://documentonline_images/ccc/a bc.jpg)rcccccccccccccccc" + "\r\n";
+
+        String content2 = "# 一级标题 #\n" +
+                "## 二级标题 ##\n" +
+                "### 三级标题 ###\n" +
+                "#### 四级标题 ####\n" +
+                "##### 五级标题 #####\n" +
+                "###### 六级标题 #####\n" +
+                "\n" +
+                "![a](../../abc.jpg)\n" +
+                "![d](abcd.jpg)\n" +
+                "\n" +
+                "形式一\n" +
+                "+ a\n" +
+                "+ b\n" +
+                "+ c";
+        GetDocumentOnlineApi getDocumentOnlineApi = new GetDocumentOnlineApi();
+        String newContent = getDocumentOnlineApi.replaceImagePath(content, "documentonline/zh/配置管理/cmdb.md");
+        System.out.println(newContent);
     }
 }
