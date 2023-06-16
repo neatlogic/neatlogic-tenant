@@ -22,14 +22,13 @@ import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.documentonline.crossover.DocumentOnlineServiceCrossoverService;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +38,9 @@ import java.util.Objects;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
+
+    @javax.annotation.Resource
+    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -66,11 +68,10 @@ public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
             if (!Objects.equals(localeLevel.getName(), locale.getLanguage())) {
                 continue;
             }
-            DocumentOnlineServiceCrossoverService documentOnlineServiceCrossoverService = CrossoverServiceFactory.getApi(DocumentOnlineServiceCrossoverService.class);
             for (DocumentOnlineDirectoryVo firstLevelDirectory : localeLevel.getChildren()) {
                 JSONObject tableObj = new JSONObject();
                 tableObj.put("firstLevelDirectory", firstLevelDirectory.getName());
-                List<DocumentOnlineVo> tbodyList = documentOnlineServiceCrossoverService.getAllFileList(firstLevelDirectory);
+                List<DocumentOnlineVo> tbodyList = documentOnlineService.getAllFileList(firstLevelDirectory);
                 BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
                 basePageVo.setRowNum(tbodyList.size());
                 tableObj.put("currentPage", basePageVo.getCurrentPage());

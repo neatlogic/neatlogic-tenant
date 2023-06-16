@@ -21,14 +21,13 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.documentonline.crossover.DocumentOnlineServiceCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineIndexDirNotSetException;
+import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -54,6 +53,9 @@ import java.util.List;
 public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
 
     private final Logger logger = LoggerFactory.getLogger(SearchDocumentOnlineApi.class);
+
+    @javax.annotation.Resource
+    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -106,7 +108,6 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             ScoreDoc[] scoreDocs = topDocs.scoreDocs;
             // 遍历结果集
             if (scoreDocs != null) {
-                DocumentOnlineServiceCrossoverService documentOnlineServiceCrossoverService = CrossoverServiceFactory.getApi(DocumentOnlineServiceCrossoverService.class);
                 for (; startNum < scoreDocs.length; startNum++) {
                     ScoreDoc scoreDoc = scoreDocs[startNum];
                     int docId = scoreDoc.doc;
@@ -122,7 +123,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     documentOnlineVo.setFilePath(doc.get("filePath"));
                     String content = doc.get("content");
                     int skip = keywordOnlineFirstCharacterIndex(content, basePageVo.getKeyword());
-                    String result = documentOnlineServiceCrossoverService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
+                    String result = documentOnlineService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
                     documentOnlineVo.setContent(result);
                     tbodyList.add(documentOnlineVo);
                 }

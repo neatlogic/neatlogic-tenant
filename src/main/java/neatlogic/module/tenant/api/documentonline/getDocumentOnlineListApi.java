@@ -22,8 +22,6 @@ import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.documentonline.crossover.DocumentOnlineServiceCrossoverService;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.restful.annotation.*;
@@ -31,6 +29,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -45,6 +44,9 @@ import java.util.Objects;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineListApi extends PrivateApiComponentBase {
+
+    @javax.annotation.Resource
+    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -105,8 +107,7 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         }
         String moduleGroup = paramObj.getString("moduleGroup");
         String menu = paramObj.getString("menu");
-        DocumentOnlineServiceCrossoverService documentOnlineServiceCrossoverService = CrossoverServiceFactory.getApi(DocumentOnlineServiceCrossoverService.class);
-        tbodyList = documentOnlineServiceCrossoverService.getAllFileList(directory, moduleGroup, menu);
+        tbodyList = documentOnlineService.getAllFileList(directory, moduleGroup, menu);
         if (tbodyList.size() == 0) {
             return TableResultUtil.getResult(tbodyList, basePageVo);
         }
@@ -119,7 +120,7 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
             if (resource == null) {
                 continue;
             }
-            String content = documentOnlineServiceCrossoverService.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
+            String content = documentOnlineService.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
             tbody.setContent(content);
         }
         return TableResultUtil.getResult(tbodyList, basePageVo);
