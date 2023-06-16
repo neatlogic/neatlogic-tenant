@@ -31,6 +31,7 @@ import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -39,7 +40,7 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
 
-    @javax.annotation.Resource
+    @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override

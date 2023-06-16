@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
 
     private final Logger logger = LoggerFactory.getLogger(SearchDocumentOnlineApi.class);
 
-    @javax.annotation.Resource
+    @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override
