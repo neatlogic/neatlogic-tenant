@@ -172,30 +172,4 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         }
         return filePath + "/" + relativePath;
     }
-
-    public static void main(String[] args) {
-        String content = "aaaaaaaae[aaa中](../../documentonline_images中/中ab-_!@#$%^&*+= 1c.jpg  \" title \"  )raaaaaaaaaaaaaaaa" + "\r\n"
-                + "bbbbbbbbe[![bb b](../../documentonline_images/bbb 中/a bc.jpg)](../../documentonline_images/ccc/ab c.jpg)rbbbbbbbbbbbbbbbb" + "\r\n"
-                + "cccccccce[ccc](../../documentonline_images/ccc/ab c.jpg)rcccccccccccccccc" + "\r\n"
-                + "dddddddde![ddd](../../documentonline_images/ddd/ab c.jpg)rddddddddddddddd" + "\r\n"
-                + "cccccccce![ccc](http://documentonline_images/ccc/a bc.jpg)rcccccccccccccccc" + "\r\n";
-
-        String content2 = "# 一级标题 #\n" +
-                "## 二级标题 ##\n" +
-                "### 三级标题 ###\n" +
-                "#### 四级标题 ####\n" +
-                "##### 五级标题 #####\n" +
-                "###### 六级标题 #####\n" +
-                "\n" +
-                "![a](../../abc.jpg)\n" +
-                "![d](abcd.jpg)\n" +
-                "\n" +
-                "形式一\n" +
-                "+ a\n" +
-                "+ b\n" +
-                "+ c";
-        GetDocumentOnlineApi getDocumentOnlineApi = new GetDocumentOnlineApi();
-        String newContent = getDocumentOnlineApi.replaceImagePath(content, "documentonline/zh/配置管理/cmdb.md");
-        System.out.println(newContent);
-    }
 }
