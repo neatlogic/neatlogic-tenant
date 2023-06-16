@@ -114,9 +114,14 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
             int leftParenthesisIndex = group.lastIndexOf("(", lightParenthesisIndex);
             String relativePath = group.substring(leftParenthesisIndex + 1, lightParenthesisIndex);
             String absolutePath = relativePathToAbsolutePath(relativePath, filePath);
-            String url = "api/binary/classpath/image/download?filePath=" + absolutePath;
             stringBuilder.append(group.substring(0, leftParenthesisIndex + 1));
-            stringBuilder.append(url);
+            if (group.startsWith("!")) {
+                String url = "api/binary/classpath/image/download?filePath=" + absolutePath;
+                stringBuilder.append(url);
+            } else {
+                String url = "documentonline.html#/documentonline-detail?filePath=" + absolutePath;
+                stringBuilder.append(url);
+            }
             stringBuilder.append(group.substring(lightParenthesisIndex));
             beginIndex = index + group.length();
         }
