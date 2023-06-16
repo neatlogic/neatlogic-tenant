@@ -100,7 +100,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             int startNum = basePageVo.getStartNum();
             TopDocs topDocs = indexSearcher.search(query, startNum + basePageVo.getPageSize());
 //            basePageVo.setRowNum((int) topDocs.totalHits.value);
-            basePageVo.setRowNum((int) topDocs.totalHits);
+            basePageVo.setRowNum((int) topDocs.totalHits.value);
             List<DocumentOnlineVo> tbodyList = new ArrayList<>();
             // 获取结果集
             ScoreDoc[] scoreDocs = topDocs.scoreDocs;
