@@ -18,7 +18,6 @@ package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.restful.annotation.*;
@@ -26,9 +25,8 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
-import neatlogic.framework.documentonline.exception.DocumentOnlineIndexDirNotSetException;
+import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -37,7 +35,7 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.MMapDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -80,9 +78,6 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
     @Description(desc = "查询在线帮助文档")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        if (StringUtils.isBlank(Config.DOCUMENT_ONLINE_INDEX_DIR())) {
-            throw new DocumentOnlineIndexDirNotSetException();
-        }
 
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         IndexReader indexReader = null;
@@ -91,7 +86,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             // 注意：分词器和创建索引的时候使用的分词器一模一样
             Analyzer analyzer = new IKAnalyzer(true);
             // 创建Directory目标对象，指定索引库的位置
-            Directory directory = FSDirectory.open(Paths.get(Config.DOCUMENT_ONLINE_INDEX_DIR()));
+            Directory directory = MMapDirectory.open(Paths.get(DocumentOnlineInitializeIndexHandler.INDEX_DIRECTORY));
             // 创建输入流对象
             indexReader = DirectoryReader.open(directory);
             // 创建搜索对象
