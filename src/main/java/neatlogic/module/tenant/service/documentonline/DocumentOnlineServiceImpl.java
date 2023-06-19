@@ -73,6 +73,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
+                stringBuilder.append(" ");
                 if (lineContent.length() > number - stringBuilder.length()) {
                     stringBuilder.append(lineContent.substring(0, number - stringBuilder.length()));
                 } else {
