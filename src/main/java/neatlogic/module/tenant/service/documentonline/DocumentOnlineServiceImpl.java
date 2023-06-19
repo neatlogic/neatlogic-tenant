@@ -19,11 +19,12 @@ package neatlogic.module.tenant.service.documentonline;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.util.HtmlUtil;
 import neatlogic.framework.util.RegexUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
-import org.commonmark.renderer.text.TextContentRenderer;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -39,6 +40,9 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
 
     @Override
     public String interceptsSpecifiedNumberOfCharacters(InputStream inputStream, int skip, int number) throws IOException {
+
+        Parser parser = Parser.builder().build();
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
@@ -56,10 +60,16 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
-                Parser parser = Parser.builder().build();
+                // 1.先把这行内容中HTML标签去掉
+                lineContent = HtmlUtil.removeHtml(lineContent);
+                if (StringUtils.isBlank(lineContent)) {
+                    continue;
+                }
+                // 2.把这行内容中markdown语法转换成HTML标签
                 Node document = parser.parse(lineContent);
-                TextContentRenderer textContentRenderer = TextContentRenderer.builder().build();
-                lineContent = textContentRenderer.render(document);
+                String html = renderer.render(document);
+                // 3.再次把这行内容中HTML标签去掉
+                lineContent = HtmlUtil.removeHtml(html);
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
