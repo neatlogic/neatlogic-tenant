@@ -37,14 +37,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public String getName() {
-        return null;
+        return "导出在线帮助文档配置文件";
     }
 
     @Override
@@ -53,17 +52,20 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
     }
 
     @Input({})
-    @Description(desc = "下载在线帮助文档配置文件")
+    @Description(desc = "导出在线帮助文档配置文件")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<DocumentOnlineConfigVo> allList = new ArrayList<>();
         IDocumentOnlineCrossoverMapper documentOnlineCrossoverMapper = CrossoverServiceFactory.getApi(IDocumentOnlineCrossoverMapper.class);
+        // 先查询出数据库中数据
         List<DocumentOnlineConfigVo> documentOnlineConfigList = documentOnlineCrossoverMapper.getAllDocumentOnlineConfigList();
         for (DocumentOnlineConfigVo documentOnlineConfigVo : documentOnlineConfigList) {
             documentOnlineConfigVo.setSource("database");
             allList.add(documentOnlineConfigVo);
         }
+        // 再查询出配置文件中数据
         for (DocumentOnlineConfigVo documentOnlineConfigVo : DocumentOnlineInitializeIndexHandler.getMappingConfigList()) {
+            // 如果配置文件中数据的主键与数据库中数据的主键相同，则数据库中数据优先级较高
             if (!allList.contains(documentOnlineConfigVo)) {
                 allList.add(documentOnlineConfigVo);
             }
