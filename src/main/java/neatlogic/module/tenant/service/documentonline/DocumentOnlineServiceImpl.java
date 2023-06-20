@@ -55,12 +55,9 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
-
-                lineContent = removeImagePath(lineContent);
-                if (StringUtils.isBlank(lineContent)) {
-                    continue;
-                }
-                // 1.先把这行内容中HTML标签去掉
+                // 1.先把这行内容中HTML标签去掉，因为第2步中将markdown语法转换成HTML标签时，会把原有的HTML标签中的尖括号转成实体字符
+                // 例如：<img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
+                // 转换成 <pre><code>    &lt;img src=&quot;https://img.shields.io/badge/License-Apache%202.0-blue.svg&quot; /&gt;&lt;/a&gt;</code></pre>
                 lineContent = HtmlUtil.removeHtml(lineContent);
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
@@ -81,26 +78,6 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 }
             }
         }
-        return stringBuilder.toString();
-    }
-
-    /**
-     * 将文档内容中图片删除
-     * @param content 文档内容
-     * @return
-     */
-    private String removeImagePath(String content) {
-        StringBuilder stringBuilder = new StringBuilder();
-        int beginIndex = 0;
-        Matcher figureMatcher = RegexUtils.getPattern(RegexUtils.MARKDOWN_LINK).matcher(content);
-        while (figureMatcher.find()) {
-            String group = figureMatcher.group();
-            int index = content.indexOf(group, beginIndex);
-            String subStr = content.substring(beginIndex, index);
-            stringBuilder.append(subStr);
-            beginIndex = index + group.length();
-        }
-        stringBuilder.append(content.substring(beginIndex));
         return stringBuilder.toString();
     }
 
