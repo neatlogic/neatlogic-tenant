@@ -19,11 +19,12 @@ package neatlogic.module.tenant.service.documentonline;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.util.HtmlUtil;
 import neatlogic.framework.util.RegexUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
-import org.commonmark.renderer.text.TextContentRenderer;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -39,6 +40,9 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
 
     @Override
     public String interceptsSpecifiedNumberOfCharacters(InputStream inputStream, int skip, int number) throws IOException {
+
+        Parser parser = Parser.builder().build();
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
@@ -51,18 +55,22 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
-
-                lineContent = removeImagePath(lineContent);
+                // 1.先把这行内容中HTML标签去掉，因为第2步中将markdown语法转换成HTML标签时，会把原有的HTML标签中的尖括号转成实体字符
+                // 例如：<img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
+                // 转换成 <pre><code>    &lt;img src=&quot;https://img.shields.io/badge/License-Apache%202.0-blue.svg&quot; /&gt;&lt;/a&gt;</code></pre>
+                lineContent = HtmlUtil.removeHtml(lineContent);
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
-                Parser parser = Parser.builder().build();
+                // 2.把这行内容中markdown语法转换成HTML标签
                 Node document = parser.parse(lineContent);
-                TextContentRenderer textContentRenderer = TextContentRenderer.builder().build();
-                lineContent = textContentRenderer.render(document);
+                String html = renderer.render(document);
+                // 3.再次把这行内容中HTML标签去掉
+                lineContent = HtmlUtil.removeHtml(html);
                 if (StringUtils.isBlank(lineContent)) {
                     continue;
                 }
+                stringBuilder.append(" ");
                 if (lineContent.length() > number - stringBuilder.length()) {
                     stringBuilder.append(lineContent.substring(0, number - stringBuilder.length()));
                 } else {
@@ -70,26 +78,6 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 }
             }
         }
-        return stringBuilder.toString();
-    }
-
-    /**
-     * 将文档内容中图片删除
-     * @param content 文档内容
-     * @return
-     */
-    private String removeImagePath(String content) {
-        StringBuilder stringBuilder = new StringBuilder();
-        int beginIndex = 0;
-        Matcher figureMatcher = RegexUtils.getPattern(RegexUtils.MARKDOWN_LINK).matcher(content);
-        while (figureMatcher.find()) {
-            String group = figureMatcher.group();
-            int index = content.indexOf(group, beginIndex);
-            String subStr = content.substring(beginIndex, index);
-            stringBuilder.append(subStr);
-            beginIndex = index + group.length();
-        }
-        stringBuilder.append(content.substring(beginIndex));
         return stringBuilder.toString();
     }
 
