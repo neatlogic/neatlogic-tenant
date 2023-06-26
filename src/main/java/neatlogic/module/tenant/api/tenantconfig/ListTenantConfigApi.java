@@ -18,7 +18,7 @@ package neatlogic.module.tenant.api.tenantconfig;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.TENANT_CONFIG_BASE;
+import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
@@ -26,10 +26,7 @@ import neatlogic.framework.config.ITenantConfig;
 import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dto.ConfigVo;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
@@ -43,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@AuthAction(action = TENANT_CONFIG_BASE.class)
+@AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ListTenantConfigApi extends PrivateApiComponentBase {
 
@@ -52,7 +49,7 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "搜索当前租户配置信息列表";
+        return "nmtat.listtenantconfigapi.getname";
     }
 
     @Override
@@ -60,13 +57,14 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = ConfigVo[].class, desc = "配置信息列表")
+            @Param(name = "tbodyList", explode = ConfigVo[].class, desc = "common.tbodylist")
     })
+    @Description(desc = "nmtat.listtenantconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);

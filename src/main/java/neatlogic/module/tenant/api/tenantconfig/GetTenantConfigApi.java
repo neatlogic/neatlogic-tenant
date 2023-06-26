@@ -18,17 +18,14 @@ package neatlogic.module.tenant.api.tenantconfig;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.TENANT_CONFIG_BASE;
+import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.config.ITenantConfig;
 import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dto.ConfigVo;
 import neatlogic.framework.exception.tenantconfig.TenantConfigNotFoundException;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
@@ -36,7 +33,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = TENANT_CONFIG_BASE.class)
+@AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetTenantConfigApi extends PrivateApiComponentBase {
 
@@ -45,7 +42,7 @@ public class GetTenantConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取当前租户配置信息";
+        return "nmtat.gettenantconfigapi.getname";
     }
 
     @Override
@@ -54,11 +51,12 @@ public class GetTenantConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "key", type = ApiParamType.STRING, isRequired = true, desc = "配置信息的唯一标识")
+            @Param(name = "key", type = ApiParamType.STRING, isRequired = true, desc = "common.key")
     })
     @Output({
           @Param(explode = ConfigVo.class)
     })
+    @Description(desc = "nmtat.gettenantconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String key = paramObj.getString("key");
