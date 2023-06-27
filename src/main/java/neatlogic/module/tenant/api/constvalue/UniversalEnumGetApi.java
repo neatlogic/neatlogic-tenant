@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.EnumFactory;
 import neatlogic.framework.common.constvalue.IEnum;
+import neatlogic.framework.reflection.ReflectionManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -62,7 +63,7 @@ public class UniversalEnumGetApi extends PrivateApiComponentBase {
         }
         if (aClass.isInterface()) {
             List<Object> valueTextList = new ArrayList<>();
-            Reflections reflections = new Reflections("neatlogic");
+            Reflections reflections = ReflectionManager.getInstance();
             for (Class<?> cls : reflections.getSubTypesOf(aClass)) {
                 if (!cls.isInterface()) {
                     Object instance;
