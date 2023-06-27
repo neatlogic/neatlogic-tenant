@@ -33,5 +33,9 @@ limitations under the License.
         REPLACE INTO test_content (id, content, compress_content)
         values (1, #{value}, #{value,typeHandler=CompressHandler})
     </insert>
+
+    <select id="getProcessTaskByIdForUpdate" parameterType="java.lang.Long" resultType="java.util.HashMap">
+        select `id` from `processtask` where `id` = #{value} for update
+    </select>
 </mapper>
 
