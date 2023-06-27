@@ -16,17 +16,18 @@
 
 package neatlogic.module.tenant.api.constvalue;
 
-import neatlogic.framework.auth.core.AuthAction;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.EnumFactory;
 import neatlogic.framework.common.constvalue.IEnum;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.exception.constvalue.EnumNotFoundException;
-import com.alibaba.fastjson.JSONObject;
+import org.reflections.Reflections;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,13 +60,32 @@ public class UniversalEnumGetApi extends PrivateApiComponentBase {
         if (aClass == null) {
             throw new EnumNotFoundException(enumClass);
         }
-        Object instance = null;
-        Object[] objects = aClass.getEnumConstants();
-        if (objects != null && objects.length > 0) {
-            instance = objects[0];
+        if (aClass.isInterface()) {
+            List<Object> valueTextList = new ArrayList<>();
+            Reflections reflections = new Reflections("neatlogic");
+            for (Class<?> cls : reflections.getSubTypesOf(aClass)) {
+                if (!cls.isInterface()) {
+                    Object instance;
+                    Object[] objects = cls.getEnumConstants();
+                    if (objects != null && objects.length > 0) {
+                        instance = objects[0];
+                    } else {
+                        instance = cls.newInstance();
+                    }
+                    List<?> list = (List<?>) cls.getMethod("getValueTextList").invoke(instance);
+                    valueTextList.addAll(list);
+                }
+            }
+            return valueTextList;
         } else {
-            instance = aClass.newInstance();
+            Object instance;
+            Object[] objects = aClass.getEnumConstants();
+            if (objects != null && objects.length > 0) {
+                instance = objects[0];
+            } else {
+                instance = aClass.newInstance();
+            }
+            return aClass.getMethod("getValueTextList").invoke(instance);
         }
-        return aClass.getMethod("getValueTextList").invoke(instance);
     }
 }
