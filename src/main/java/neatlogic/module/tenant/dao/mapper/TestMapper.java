@@ -18,6 +18,7 @@ package neatlogic.module.tenant.dao.mapper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface TestMapper {
     public List<HashMap> testBg();
@@ -26,4 +27,5 @@ public interface TestMapper {
 
     void insertContent(String content);
 
+    Map<String, Object> getProcessTaskByIdForUpdate(Long id);
 }
