@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -121,6 +122,10 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     int skip = keywordOnlineFirstCharacterIndex(content, basePageVo.getKeyword());
                     String result = documentOnlineService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
                     documentOnlineVo.setContent(result);
+                    DocumentOnlineDirectoryVo directoryVo = documentOnlineService.getDocumentOnlineDirectoryByFilePath(doc.get("filePath"));
+                    if (directoryVo != null) {
+                        documentOnlineVo.setConfigList(directoryVo.getConfigList());
+                    }
                     tbodyList.add(documentOnlineVo);
                 }
             }

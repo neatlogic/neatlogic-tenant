@@ -16,7 +16,6 @@
 
 package neatlogic.module.tenant.api.documentonline;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
@@ -28,27 +27,23 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Transactional
 @AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
+public class MoveToDocumentOnlineConfigApi extends PrivateApiComponentBase {
 
     @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
-        return "保存在线帮助文档与模块菜单的映射关系";
+        return "将在线帮助文档从某个模块菜单移动到另一个模块菜单";
     }
 
     @Override
@@ -57,56 +52,45 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "fromModuleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
+            @Param(name = "fromMenu", type = ApiParamType.STRING, desc = "菜单标识"),
             @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文档路径"),
-            @Param(name = "configList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "在线帮助文档与模块菜单的映射关系列表")
+            @Param(name = "toModuleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
+            @Param(name = "toMenu", type = ApiParamType.STRING, desc = "菜单标识"),
+            @Param(name = "toAnchorPoint", type = ApiParamType.STRING, desc = "锚点")
     })
     @Output({})
-    @Description(desc = "保存在线帮助文档与模块菜单的映射关系")
+    @Description(desc = "将在线帮助文档从某个模块菜单移动到另一个模块菜单")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        String fromModuleGroup = paramObj.getString("fromModuleGroup");
+        String fromMenu = paramObj.getString("fromMenu");
         String filePath = paramObj.getString("filePath");
+        String toModuleGroup = paramObj.getString("toModuleGroup");
+        String toMenu = paramObj.getString("toMenu");
+        String toAnchorPoint = paramObj.getString("toAnchorPoint");
+
+        // 根据文件路径在目录树中找到文件信息
         DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
         if (directory == null) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
-        // 操作前备份configList，如果发生异常，事务回滚，不改变configList
-        List<DocumentOnlineConfigVo> backupConfigList = new ArrayList<>();
-        for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
-            backupConfigList.add(new DocumentOnlineConfigVo(configVo));
-        }
-        try {
-            // 旧的映射关系列表
-            List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
-            JSONArray configArray = paramObj.getJSONArray("configList");
-            if (CollectionUtils.isEmpty(configArray)) {
-                // 遍历，删除所有旧的映射关系
-                for (DocumentOnlineConfigVo configVo : oldConfigList) {
-                    documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
-                }
-            } else {
-                // 新的映射关系列表
-                List<DocumentOnlineConfigVo> newConfigList = configArray.toJavaList(DocumentOnlineConfigVo.class);
-                // 需要删除的旧映射关系列表
-                List<DocumentOnlineConfigVo> needDeleteList = ListUtils.removeAll(oldConfigList, newConfigList);
-                // 遍历，删除
-                for (DocumentOnlineConfigVo configVo : needDeleteList) {
-                    documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
-                }
-                // 遍历，更新所有新的映射关系
-                for (DocumentOnlineConfigVo configVo : newConfigList) {
-                    documentOnlineService.saveDocumentOnlineConfig(directory, configVo);
-                }
-            }
-        } catch (Exception e) {
-            directory.getConfigList().clear();
-            directory.getConfigList().addAll(backupConfigList);
-            throw e;
-        }
+        DocumentOnlineConfigVo fromConfigVo = new DocumentOnlineConfigVo();
+        fromConfigVo.setFilePath(filePath);
+        fromConfigVo.setModuleGroup(fromModuleGroup);
+        fromConfigVo.setMenu(fromMenu);
+        documentOnlineService.deleteDocumentOnlineConfig(directory, fromConfigVo);
+        DocumentOnlineConfigVo toConfigVo = new DocumentOnlineConfigVo();
+        toConfigVo.setFilePath(filePath);
+        toConfigVo.setModuleGroup(toModuleGroup);
+        toConfigVo.setMenu(toMenu);
+        toConfigVo.setAnchorPoint(toAnchorPoint);
+        documentOnlineService.saveDocumentOnlineConfig(directory, toConfigVo);
         return null;
     }
 
     @Override
     public String getToken() {
-        return "documentonline/config/save";
+        return "documentonline/config/moveto";
     }
 }

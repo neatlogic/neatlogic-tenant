@@ -17,9 +17,10 @@
 package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.documentonline.crossover.IDocumentOnlineCrossoverMapper;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
+import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -27,9 +28,11 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
+import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,8 +42,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiComponentBase {
+    @Resource
+    private DocumentOnlineService documentOnlineService;
+
     @Override
     public String getName() {
         return "导出在线帮助文档配置文件";
@@ -56,18 +63,11 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<DocumentOnlineConfigVo> allList = new ArrayList<>();
-        IDocumentOnlineCrossoverMapper documentOnlineCrossoverMapper = CrossoverServiceFactory.getApi(IDocumentOnlineCrossoverMapper.class);
-        // 先查询出数据库中数据
-        List<DocumentOnlineConfigVo> documentOnlineConfigList = documentOnlineCrossoverMapper.getAllDocumentOnlineConfigList();
-        for (DocumentOnlineConfigVo documentOnlineConfigVo : documentOnlineConfigList) {
-            documentOnlineConfigVo.setSource("database");
-            allList.add(documentOnlineConfigVo);
-        }
-        // 再查询出配置文件中数据
-        for (DocumentOnlineConfigVo documentOnlineConfigVo : DocumentOnlineInitializeIndexHandler.getMappingConfigList()) {
-            // 如果配置文件中数据的主键与数据库中数据的主键相同，则数据库中数据优先级较高
-            if (!allList.contains(documentOnlineConfigVo)) {
-                allList.add(documentOnlineConfigVo);
+        List<DocumentOnlineVo> allFileList = documentOnlineService.getAllFileList(DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT);
+        for (DocumentOnlineVo documentOnlineVo : allFileList) {
+            List<DocumentOnlineConfigVo> configList = documentOnlineVo.getConfigList();
+            for (DocumentOnlineConfigVo configVo : configList) {
+                allList.add(configVo);
             }
         }
         response.setContentType("application/octet-stream");

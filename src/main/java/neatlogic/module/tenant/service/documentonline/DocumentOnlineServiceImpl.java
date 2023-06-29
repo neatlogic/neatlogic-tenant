@@ -17,10 +17,13 @@
 package neatlogic.module.tenant.service.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.documentonline.crossover.IDocumentOnlineCrossoverMapper;
+import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.util.HtmlUtil;
-import neatlogic.framework.util.RegexUtils;
+import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -32,8 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Objects;
 
 @Service
 public class DocumentOnlineServiceImpl implements DocumentOnlineService {
@@ -94,6 +98,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                     documentOnlineVo.setFilePath(child.getFilePath());
                     String anchorPoint = returnObj.getString("anchorPoint");
                     documentOnlineVo.setAnchorPoint(anchorPoint);
+                    documentOnlineVo.setConfigList(child.getConfigList());
                     list.add(documentOnlineVo);
                 }
             } else {
@@ -106,5 +111,79 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
     @Override
     public List<DocumentOnlineVo> getAllFileList(DocumentOnlineDirectoryVo directory) {
         return getAllFileList(directory, null, null);
+    }
+
+    @Override
+    public DocumentOnlineDirectoryVo getDocumentOnlineDirectoryByFilePath(String filePath) {
+        if (StringUtils.isBlank(filePath)) {
+            return null;
+        }
+        DocumentOnlineDirectoryVo directory = DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT;
+        String[] directoryNameList = filePath.split("/");
+        for (int i = 1; i < directoryNameList.length; i++) {
+            String directoryName = directoryNameList[i];
+            // 标记是否找到对应的目录
+            boolean flag = false;
+            for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
+                String childName = child.getName();
+                if (child.getIsFile()) {
+                    childName += ".md";
+                }
+                if (Objects.equals(childName, directoryName)) {
+                    directory = child;
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) {
+                return null;
+            }
+        }
+        return directory;
+    }
+
+    @Override
+    public void saveDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo newConfigVo) {
+        boolean needUpdateDataBaseTable = false;
+        boolean updateSuccessfully = false;
+        List<DocumentOnlineConfigVo> configList = directory.getConfigList();
+        Iterator<DocumentOnlineConfigVo> iterator = configList.iterator();
+        while (iterator.hasNext()) {
+            DocumentOnlineConfigVo configVo = iterator.next();
+            if (configVo.equals(newConfigVo)) {
+                if (!Objects.equals(configVo.getAnchorPoint(), newConfigVo.getAnchorPoint())) {
+                    configVo.setAnchorPoint(newConfigVo.getAnchorPoint());
+                    configVo.setSource("database");
+                    needUpdateDataBaseTable = true;
+                }
+                updateSuccessfully = true;
+                break;
+            }
+        }
+        if (!updateSuccessfully) {
+            configList.add(newConfigVo);
+            needUpdateDataBaseTable = true;
+        }
+        if (needUpdateDataBaseTable) {
+            IDocumentOnlineCrossoverMapper documentOnlineCrossoverMapper = CrossoverServiceFactory.getApi(IDocumentOnlineCrossoverMapper.class);
+            documentOnlineCrossoverMapper.insertDocumentOnlineConfig(newConfigVo);
+        }
+    }
+
+    @Override
+    public void deleteDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo oldConfigVo) {
+        List<DocumentOnlineConfigVo> configList = directory.getConfigList();
+        Iterator<DocumentOnlineConfigVo> iterator = configList.iterator();
+        while (iterator.hasNext()) {
+            DocumentOnlineConfigVo configVo = iterator.next();
+            if (configVo.equals(oldConfigVo)) {
+                if (Objects.equals(configVo.getSource(), "database")) {
+                    IDocumentOnlineCrossoverMapper documentOnlineCrossoverMapper = CrossoverServiceFactory.getApi(IDocumentOnlineCrossoverMapper.class);
+                    documentOnlineCrossoverMapper.deleteDocumentOnlineConfig(oldConfigVo);
+                }
+                iterator.remove();
+                break;
+            }
+        }
     }
 }
