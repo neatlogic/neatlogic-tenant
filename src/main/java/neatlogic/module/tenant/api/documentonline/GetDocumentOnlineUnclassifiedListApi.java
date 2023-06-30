@@ -58,7 +58,7 @@ public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBas
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
+            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "common.tbodylist")
     })
     @Description(desc = "nmtad.getdocumentonlineunclassifiedlistapi.getname")
     @Override
