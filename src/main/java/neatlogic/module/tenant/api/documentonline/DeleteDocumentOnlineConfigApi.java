@@ -45,7 +45,7 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除在线帮助文档与模块菜单的映射关系";
+        return "nmtad.deletedocumentonlineconfigapi.getname";
     }
 
     @Override
@@ -54,12 +54,12 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文档路径"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识")
+            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "common.filepath"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "common.modulegroup"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "common.menu")
     })
     @Output({})
-    @Description(desc = "删除在线帮助文档与模块菜单的映射关系")
+    @Description(desc = "nmtad.deletedocumentonlineconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         DocumentOnlineConfigVo documentOnlineConfigVo = paramObj.toJavaObject(DocumentOnlineConfigVo.class);

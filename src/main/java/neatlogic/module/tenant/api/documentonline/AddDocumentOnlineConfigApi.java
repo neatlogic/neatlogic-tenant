@@ -45,7 +45,7 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "添加在线帮助文档与模块菜单的映射关系";
+        return "nmtad.adddocumentonlineconfigapi.getname";
     }
 
     @Override
@@ -54,13 +54,13 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文档路径"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
-            @Param(name = "anchorPoint", type = ApiParamType.STRING, desc = "锚点")
+            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "common.filepath"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "common.modulegroup"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "common.menu"),
+            @Param(name = "anchorPoint", type = ApiParamType.STRING, desc = "common.anchorpoint")
     })
     @Output({})
-    @Description(desc = "添加在线帮助文档与模块菜单的映射关系")
+    @Description(desc = "nmtad.adddocumentonlineconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         DocumentOnlineConfigVo documentOnlineConfigVo = paramObj.toJavaObject(DocumentOnlineConfigVo.class);

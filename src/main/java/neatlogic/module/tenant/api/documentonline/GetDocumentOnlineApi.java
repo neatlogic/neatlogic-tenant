@@ -43,7 +43,7 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取单个在线帮助文档";
+        return "nmtad.getdocumentonlineapi.getname";
     }
 
     @Override
@@ -52,12 +52,12 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文档路径")
+            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "common.filepath")
     })
     @Output({
-            @Param(explode = DocumentOnlineVo.class, desc = "在线帮助文档详情")
+            @Param(explode = DocumentOnlineVo.class, desc = "term.framework.documentonlineinfo")
     })
-    @Description(desc = "获取单个在线帮助文档")
+    @Description(desc = "nmtad.getdocumentonlineapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String filePath = paramObj.getString("filePath");

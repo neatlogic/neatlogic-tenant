@@ -51,7 +51,7 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询在线帮助文档列表";
+        return "nmtad.getdocumentonlinelistapi.getname";
     }
 
     @Override
@@ -60,17 +60,17 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, desc = "上层目录名称列表"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, desc = "common.upwardnamelist"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "common.modulegroup"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "common.menu"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
+            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "查询在线帮助文档")
+    @Description(desc = "nmtad.getdocumentonlinelistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);

@@ -48,7 +48,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存在线帮助文档与模块菜单的映射关系";
+        return "nmtad.savedocumentonlineconfigapi.getname";
     }
 
     @Override
@@ -57,11 +57,11 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "文档路径"),
-            @Param(name = "configList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "在线帮助文档与模块菜单的映射关系列表")
+            @Param(name = "filePath", type = ApiParamType.STRING, isRequired = true, desc = "common.filepath"),
+            @Param(name = "configList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.configlist")
     })
     @Output({})
-    @Description(desc = "保存在线帮助文档与模块菜单的映射关系")
+    @Description(desc = "nmtad.savedocumentonlineconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String filePath = paramObj.getString("filePath");

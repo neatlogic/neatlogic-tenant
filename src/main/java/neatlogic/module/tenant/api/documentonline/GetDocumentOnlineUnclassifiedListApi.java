@@ -44,7 +44,7 @@ public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBas
 
     @Override
     public String getName() {
-        return "查询未分类的在线帮助文档列表";
+        return "nmtad.getdocumentonlineunclassifiedlistapi.getname";
     }
 
     @Override
@@ -53,14 +53,14 @@ public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBas
     }
 
     @Input({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
             @Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
     })
-    @Description(desc = "查询在线帮助文档")
+    @Description(desc = "nmtad.getdocumentonlineunclassifiedlistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);

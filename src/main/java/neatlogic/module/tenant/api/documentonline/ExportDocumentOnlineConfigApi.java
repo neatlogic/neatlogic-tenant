@@ -50,7 +50,7 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
 
     @Override
     public String getName() {
-        return "导出在线帮助文档配置文件";
+        return "nmtad.exportdocumentonlineconfigapi.getname";
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
     }
 
     @Input({})
-    @Description(desc = "导出在线帮助文档配置文件")
+    @Description(desc = "nmtad.exportdocumentonlineconfigapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<DocumentOnlineConfigVo> allList = new ArrayList<>();
