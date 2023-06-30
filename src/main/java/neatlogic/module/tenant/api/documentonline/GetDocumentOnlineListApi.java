@@ -43,7 +43,7 @@ import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class getDocumentOnlineListApi extends PrivateApiComponentBase {
+public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
 
     @Resource
     private DocumentOnlineService documentOnlineService;
