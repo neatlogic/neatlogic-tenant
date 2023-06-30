@@ -30,9 +30,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Component
-@Transactional(timeout = 10)
+@Transactional
 public class TestSqlTimeoutApi extends PrivateApiComponentBase {
 
     @Resource
@@ -50,7 +51,8 @@ public class TestSqlTimeoutApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id1", type = ApiParamType.LONG, isRequired = true, desc = "ID1"),
-            @Param(name = "id2", type = ApiParamType.LONG, isRequired = true, desc = "ID2")
+            @Param(name = "id2", type = ApiParamType.LONG, isRequired = true, desc = "ID2"),
+            @Param(name = "sleep", type = ApiParamType.LONG, desc = "睡眠时间，单位秒")
     })
     @Output({})
     @Description(desc = "Test transaction timeout")
@@ -63,6 +65,10 @@ public class TestSqlTimeoutApi extends PrivateApiComponentBase {
             Long id2 = paramObj.getLong("id2");
             testMapper.getProcessTaskByIdForUpdate(id1);
             System.out.println("id1=" + id1);
+            Long sleep = paramObj.getLong("sleep");
+            if (sleep != null) {
+                TimeUnit.SECONDS.sleep(sleep);
+            }
             testMapper.getProcessTaskByIdForUpdate(id2);
             System.out.println("id2=" + id2);
             System.out.println("endTime=" + System.currentTimeMillis());
