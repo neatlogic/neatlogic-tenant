@@ -20,9 +20,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
@@ -58,7 +60,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询在线帮助文档";
+        return "nmtad.searchdocumentonlineapi.getname";
     }
 
     @Override
@@ -67,15 +69,15 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "关键字"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "keyword", type = ApiParamType.STRING, isRequired = true, desc = "common.keyword"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
+            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "查询在线帮助文档")
+    @Description(desc = "nmtad.searchdocumentonlineapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
 
@@ -109,7 +111,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     int docId = scoreDoc.doc;
                     Document doc = indexSearcher.doc(docId);
                     if (doc == null) {
-                        logger.warn("找不到docID为“" + docId + "”的文档");
+                        logger.warn($.t("nmtad.searchdocumentonlineapi.mydoservice.error", docId));
                         continue;
                     }
                     DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
@@ -121,6 +123,10 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     int skip = keywordOnlineFirstCharacterIndex(content, basePageVo.getKeyword());
                     String result = documentOnlineService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
                     documentOnlineVo.setContent(result);
+                    DocumentOnlineDirectoryVo directoryVo = documentOnlineService.getDocumentOnlineDirectoryByFilePath(doc.get("filePath"));
+                    if (directoryVo != null) {
+                        documentOnlineVo.setConfigList(directoryVo.getConfigList());
+                    }
                     tbodyList.add(documentOnlineVo);
                 }
             }

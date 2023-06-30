@@ -37,7 +37,7 @@ import java.util.Objects;
 public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
     @Override
     public String getName() {
-        return "在线帮助文档目录";
+        return "nmtad.getdocumentonlinedirectoryapi.getname";
     }
 
     @Override
@@ -47,9 +47,9 @@ public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "在线帮助文档目录")
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist")
     })
-    @Description(desc = "在线帮助文档目录")
+    @Description(desc = "nmtad.getdocumentonlinedirectoryapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<DocumentOnlineDirectoryVo> tbodyList = new ArrayList<>();

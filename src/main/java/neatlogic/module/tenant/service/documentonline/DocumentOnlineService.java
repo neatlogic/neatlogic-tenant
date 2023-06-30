@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.service.documentonline;
 
+import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 
@@ -49,4 +50,25 @@ public interface DocumentOnlineService {
      * @return 返回文件列表
      */
     List<DocumentOnlineVo> getAllFileList(DocumentOnlineDirectoryVo directory);
+
+    /**
+     * 根据文件路径在目录树中找到该文件信息
+     * @param filePath 文件路径
+     * @return 对应文件信息
+     */
+    DocumentOnlineDirectoryVo getDocumentOnlineDirectoryByFilePath(String filePath);
+
+    /**
+     * 保存在线帮助文档与模块菜单的映射配置
+     * @param directory
+     * @param newConfigVo
+     */
+    void saveDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo newConfigVo);
+
+    /**
+     * 删除在线帮助文档与模块菜单的映射配置
+     * @param directory
+     * @param oldConfigVo
+     */
+    void deleteDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo oldConfigVo);
 }
