@@ -86,6 +86,9 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             } else {
                 // 新的映射关系列表
                 List<DocumentOnlineConfigVo> newConfigList = configArray.toJavaList(DocumentOnlineConfigVo.class);
+                for (DocumentOnlineConfigVo configVo : newConfigList) {
+                    configVo.setFilePath(filePath);
+                }
                 // 需要删除的旧映射关系列表
                 List<DocumentOnlineConfigVo> needDeleteList = ListUtils.removeAll(oldConfigList, newConfigList);
                 // 遍历，删除
