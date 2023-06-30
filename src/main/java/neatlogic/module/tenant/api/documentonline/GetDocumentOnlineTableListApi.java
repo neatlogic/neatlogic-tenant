@@ -38,14 +38,14 @@ import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
+public class GetDocumentOnlineTableListApi extends PrivateApiComponentBase {
 
     @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
-        return "查询在线帮助文档列表";
+        return "nmtad.getdocumentonlinetablelistapi.getname";
     }
 
     @Override
@@ -54,13 +54,13 @@ public class getDocumentOnlineTableListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
-            @Param(name = "tableList", type = ApiParamType.JSONARRAY, desc = "文档列表")
+            @Param(name = "tableList", type = ApiParamType.JSONARRAY, desc = "common.tablelist")
     })
-    @Description(desc = "查询在线帮助文档")
+    @Description(desc = "nmtad.getdocumentonlinetablelistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONArray tableList = new JSONArray();

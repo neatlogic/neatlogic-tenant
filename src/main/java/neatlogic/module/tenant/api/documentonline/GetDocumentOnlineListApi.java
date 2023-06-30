@@ -31,6 +31,7 @@ import neatlogic.framework.util.TableResultUtil;
 import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -43,14 +44,14 @@ import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class getDocumentOnlineListApi extends PrivateApiComponentBase {
+public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
 
     @Resource
     private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
-        return "查询在线帮助文档列表";
+        return "nmtad.getdocumentonlinelistapi.getname";
     }
 
     @Override
@@ -59,17 +60,17 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, desc = "上层目录名称列表"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块组标识"),
-            @Param(name = "menu", type = ApiParamType.STRING, desc = "菜单标识"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "upwardNameList", type = ApiParamType.JSONARRAY, desc = "common.upwardnamelist"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "common.modulegroup"),
+            @Param(name = "menu", type = ApiParamType.STRING, desc = "common.menu"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "文档列表")
+            @Param(name = "tbodyList", explode = DocumentOnlineVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "查询在线帮助文档")
+    @Description(desc = "nmtad.getdocumentonlinelistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
@@ -107,6 +108,9 @@ public class getDocumentOnlineListApi extends PrivateApiComponentBase {
         }
         String moduleGroup = paramObj.getString("moduleGroup");
         String menu = paramObj.getString("menu");
+        if (menu == null) {
+            menu = StringUtils.EMPTY;
+        }
         tbodyList = documentOnlineService.getAllFileList(directory, moduleGroup, menu);
         if (tbodyList.size() == 0) {
             return TableResultUtil.getResult(tbodyList, basePageVo);
