@@ -69,41 +69,43 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
         if (directory == null) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
-        // 操作前备份configList，如果发生异常，事务回滚，不改变configList
-        List<DocumentOnlineConfigVo> backupConfigList = new ArrayList<>();
-        for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
-            backupConfigList.add(new DocumentOnlineConfigVo(configVo));
-        }
-        try {
-            // 旧的映射关系列表
-            List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
-            JSONArray configArray = paramObj.getJSONArray("configList");
-            if (CollectionUtils.isEmpty(configArray)) {
-                // 遍历，删除所有旧的映射关系
-                for (DocumentOnlineConfigVo configVo : oldConfigList) {
-                    documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
-                }
-            } else {
-                // 新的映射关系列表
-                List<DocumentOnlineConfigVo> newConfigList = configArray.toJavaList(DocumentOnlineConfigVo.class);
-                for (DocumentOnlineConfigVo configVo : newConfigList) {
-                    configVo.setFilePath(filePath);
-                }
-                // 需要删除的旧映射关系列表
-                List<DocumentOnlineConfigVo> needDeleteList = ListUtils.removeAll(oldConfigList, newConfigList);
-                // 遍历，删除
-                for (DocumentOnlineConfigVo configVo : needDeleteList) {
-                    documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
-                }
-                // 遍历，更新所有新的映射关系
-                for (DocumentOnlineConfigVo configVo : newConfigList) {
-                    documentOnlineService.saveDocumentOnlineConfig(directory, configVo);
-                }
+        synchronized (directory) {
+            // 操作前备份configList，如果发生异常，事务回滚，不改变configList
+            List<DocumentOnlineConfigVo> backupConfigList = new ArrayList<>();
+            for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
+                backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-        } catch (Exception e) {
-            directory.getConfigList().clear();
-            directory.getConfigList().addAll(backupConfigList);
-            throw e;
+            try {
+                // 旧的映射关系列表
+                List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
+                JSONArray configArray = paramObj.getJSONArray("configList");
+                if (CollectionUtils.isEmpty(configArray)) {
+                    // 遍历，删除所有旧的映射关系
+                    for (DocumentOnlineConfigVo configVo : new ArrayList<>(oldConfigList)) {
+                        documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
+                    }
+                } else {
+                    // 新的映射关系列表
+                    List<DocumentOnlineConfigVo> newConfigList = configArray.toJavaList(DocumentOnlineConfigVo.class);
+                    for (DocumentOnlineConfigVo configVo : newConfigList) {
+                        configVo.setFilePath(filePath);
+                    }
+                    // 需要删除的旧映射关系列表
+                    List<DocumentOnlineConfigVo> needDeleteList = ListUtils.removeAll(oldConfigList, newConfigList);
+                    // 遍历，删除
+                    for (DocumentOnlineConfigVo configVo : needDeleteList) {
+                        documentOnlineService.deleteDocumentOnlineConfig(directory, configVo);
+                    }
+                    // 遍历，更新所有新的映射关系
+                    for (DocumentOnlineConfigVo configVo : newConfigList) {
+                        documentOnlineService.saveDocumentOnlineConfig(directory, configVo);
+                    }
+                }
+            } catch (Exception e) {
+                directory.getConfigList().clear();
+                directory.getConfigList().addAll(backupConfigList);
+                throw e;
+            }
         }
         return null;
     }

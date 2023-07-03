@@ -69,17 +69,19 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
         if (directory == null) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
-        // 操作前备份configList，如果发生异常，事务回滚，不改变configList
-        List<DocumentOnlineConfigVo> backupConfigList = new ArrayList<>();
-        for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
-            backupConfigList.add(new DocumentOnlineConfigVo(configVo));
-        }
-        try {
-            documentOnlineService.deleteDocumentOnlineConfig(directory, documentOnlineConfigVo);
-        } catch (Exception e) {
-            directory.getConfigList().clear();
-            directory.getConfigList().addAll(backupConfigList);
-            throw e;
+        synchronized (directory) {
+            // 操作前备份configList，如果发生异常，事务回滚，不改变configList
+            List<DocumentOnlineConfigVo> backupConfigList = new ArrayList<>();
+            for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
+                backupConfigList.add(new DocumentOnlineConfigVo(configVo));
+            }
+            try {
+                documentOnlineService.deleteDocumentOnlineConfig(directory, documentOnlineConfigVo);
+            } catch (Exception e) {
+                directory.getConfigList().clear();
+                directory.getConfigList().addAll(backupConfigList);
+                throw e;
+            }
         }
         return null;
     }
