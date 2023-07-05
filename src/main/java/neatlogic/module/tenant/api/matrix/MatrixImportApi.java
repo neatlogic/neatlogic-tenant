@@ -52,12 +52,12 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "matrix/import";
+        return "matrix/data/import";
     }
 
     @Override
     public String getName() {
-        return "矩阵导入接口";
+        return "nmtam.matriximportapi.getname";
     }
 
     @Override
@@ -66,9 +66,9 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING, isRequired = true)
+            @Param(name = "matrixUuid", desc = "term.framework.matrixuuid", type = ApiParamType.STRING, isRequired = true)
     })
-    @Description(desc = "矩阵导入接口")
+    @Description(desc = "nmtam.matriximportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String matrixUuid = paramObj.getString("matrixUuid");

@@ -16,8 +16,8 @@
 
 package neatlogic.module.tenant.api.matrix;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.ExportFileType;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -30,38 +30,30 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.FileUtil;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-/**
- * @program: neatlogic
- * @description:
- * @create: 2020-03-26 19:04
- **/
-@Service
-
+@Component
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
+public class ExportMatrixApi extends PrivateBinaryStreamApiComponentBase {
+
+    private final static Logger logger = LoggerFactory.getLogger(ExportMatrixApi.class);
 
     @Resource
     private MatrixMapper matrixMapper;
 
     @Override
-    public String getToken() {
-        return "matrix/data/export";
-    }
-
-    @Override
     public String getName() {
-        return "nmtam.matrixexportapi.getname";
+        return "nmtam.exportmatrixapi.getname";
     }
 
     @Override
@@ -69,43 +61,38 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    @SuppressWarnings({"unchecked"})
     @Input({
-            @Param(name = "matrixUuid", desc = "term.framework.matrixuuid", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "fileType", desc = "common.filetype", type = ApiParamType.ENUM, rule = "excel,csv", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "common.uuid")
     })
-    @Description(desc = "nmtam.matrixexportapi.getname")
+    @Description(desc = "导出矩阵")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String matrixUuid = paramObj.getString("matrixUuid");
-        String fileType = paramObj.getString("fileType");
-        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
+        String uuid = paramObj.getString("uuid");
+        MatrixVo matrixVo = matrixMapper.getMatrixByUuid(uuid);
         if (matrixVo == null) {
-            throw new MatrixNotFoundException(matrixUuid);
+            throw new MatrixNotFoundException(uuid);
         }
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        OutputStream os = response.getOutputStream();
-        if (ExportFileType.CSV.getValue().equals(fileType)) {
-            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".csv");
-            response.setContentType("application/text;charset=GBK");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
-            os.flush();
-        } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
-            Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
-            if (workbook == null) {
-                workbook = new HSSFWorkbook();
-            }
-            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xls");
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-            workbook.write(os);
-            os.flush();
+        MatrixVo matrixDefinition = matrixDataSourceHandler.exportMatrix(matrixVo);
+        String fileName = FileUtil.getEncodedFileName($.t("common.matrix") + "_" + matrixDefinition.getName() + ".pak");
+        response.setContentType("application/octet-stream;charset=utf-8");
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+
+        try (ZipOutputStream zipos = new ZipOutputStream(response.getOutputStream())) {
+            zipos.putNextEntry(new ZipEntry(matrixDefinition.getName() + ".json"));
+            zipos.write(JSONObject.toJSONBytes(matrixDefinition));
+            zipos.closeEntry();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
 
+    @Override
+    public String getToken() {
+        return "matrix/export";
+    }
 }
