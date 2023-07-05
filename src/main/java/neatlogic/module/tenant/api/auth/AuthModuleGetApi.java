@@ -89,9 +89,15 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         //获取用户权限
         List<UserAuthVo> userAuthList = null;
         String userUuid = UserContext.get().getUserUuid(true);
-        UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
-        if (userVo == null) {
-            throw new UserNotFoundException(userUuid);
+        UserVo userVo = null;
+        if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
+            userVo = new UserVo();
+            userVo.setUserId(Config.SUPERADMIN());
+        }else {
+            userVo = userMapper.getUserBaseInfoByUuid(userUuid);
+            if (userVo == null) {
+                throw new UserNotFoundException(userUuid);
+            }
         }
         //超级管理员拥有所有权限
         if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
