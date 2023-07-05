@@ -84,7 +84,7 @@ public class UserGetApi extends PrivateApiComponentBase {
         }
         UserVo userVo = null;
         //维护模式下 获取厂商维护人员信息
-        if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
+        if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId()) && StringUtils.isBlank(jsonObj.getString("userUuid"))) {
             userVo = MaintenanceMode.getMaintenanceUser();
             //告诉前端是否为维护模式
             userVo.setIsMaintenanceMode(1);
