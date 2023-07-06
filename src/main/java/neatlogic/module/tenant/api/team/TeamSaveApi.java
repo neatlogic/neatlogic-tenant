@@ -136,6 +136,10 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 userTitleMap.put(userTitleVo.getName(), userTitleVo.getId());
             }
             for (TeamUserTitleVo teamUserTitleVo : teamUserTitleList) {
+                List<String> userUuidList = teamUserTitleVo.getUserList();
+                if (CollectionUtils.isEmpty(userUuidList)) {
+                    continue;
+                }
                 Long titleId;
                 if (!userTitleMap.containsKey(teamUserTitleVo.getTitle()) ) {
                     UserTitleVo userTitleVo = new UserTitleVo(teamUserTitleVo.getTitle());
@@ -145,7 +149,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 } else {
                     titleId = userTitleMap.get(teamUserTitleVo.getTitle());
                 }
-                for (String userUuid : teamUserTitleVo.getUserList()) {
+                for (String userUuid : userUuidList) {
                     teamMapper.insertTeamUserTitle(teamVo.getUuid(), userUuid, titleId);
                 }
             }
