@@ -18,7 +18,6 @@ package neatlogic.module.tenant.api.matrix;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
@@ -26,13 +25,9 @@ import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
 import neatlogic.framework.matrix.dto.MatrixVo;
 import neatlogic.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
-import neatlogic.framework.matrix.exception.MatrixLabelRepeatException;
-import neatlogic.framework.matrix.exception.MatrixNameRepeatException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -158,31 +153,5 @@ public class ImportMatrixApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public String getToken() {
         return "matrix/import";
-    }
-
-    public IValid name() {
-        return value -> {
-            MatrixVo matrixVo = JSONObject.toJavaObject(value, MatrixVo.class);
-            if (StringUtils.isBlank(matrixVo.getUuid())) {
-                matrixVo.setUuid(UuidUtil.randomUuid());
-            }
-            if (matrixMapper.checkMatrixNameIsRepeat(matrixVo) > 0) {
-                return new FieldValidResultVo(new MatrixNameRepeatException(matrixVo.getName()));
-            }
-            return new FieldValidResultVo();
-        };
-    }
-
-    public IValid label() {
-        return value -> {
-            MatrixVo matrixVo = JSONObject.toJavaObject(value, MatrixVo.class);
-            if (StringUtils.isBlank(matrixVo.getUuid())) {
-                matrixVo.setUuid(UuidUtil.randomUuid());
-            }
-            if (matrixMapper.checkMatrixLabelIsRepeat(matrixVo) > 0) {
-                return new FieldValidResultVo(new MatrixLabelRepeatException(matrixVo.getLabel()));
-            }
-            return new FieldValidResultVo();
-        };
     }
 }
