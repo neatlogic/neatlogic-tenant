@@ -71,7 +71,7 @@ public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBa
 
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         org.springframework.core.io.Resource resource = resolver.getResource("classpath:" + filePath);
-        if (resource == null) {
+        if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
 

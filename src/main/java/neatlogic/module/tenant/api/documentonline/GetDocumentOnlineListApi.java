@@ -121,7 +121,7 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (DocumentOnlineVo tbody : tbodyList) {
             org.springframework.core.io.Resource resource = resolver.getResource("classpath:" + tbody.getFilePath());
-            if (resource == null) {
+            if (!resource.exists()) {
                 continue;
             }
             String content = documentOnlineService.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
