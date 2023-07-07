@@ -44,13 +44,14 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Locale;
 
 @Component
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
 
-    private final String CLASSPATH_ROOT = "classpath:neatlogic/resources/notifypolicytemplate/";
+    private final String CLASSPATH_ROOT = "classpath:neatlogic/resources/{0}/notifypolicytemplate/";
 
     @Autowired
     private NotifyMapper notifyMapper;
@@ -101,9 +102,10 @@ public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
         }
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource(CLASSPATH_ROOT + moduleGroup + "/" + simpleHandlerName + "/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
+        String classpathRoot = MessageFormat.format(CLASSPATH_ROOT, moduleGroup);
+        Resource resource = resolver.getResource(classpathRoot + simpleHandlerName + "/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
         if (!resource.exists()) {
-            resource = resolver.getResource(CLASSPATH_ROOT + moduleGroup + "/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
+            resource = resolver.getResource(classpathRoot + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
             if (!resource.exists()) {
                 return null;
             }

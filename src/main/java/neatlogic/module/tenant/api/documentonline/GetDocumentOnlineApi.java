@@ -63,13 +63,14 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         String filePath = paramObj.getString("filePath");
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource resource = resolver.getResource("classpath:" + filePath);
-        if (resource == null) {
+        if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
         String filename = resource.getFilename().substring(0, resource.getFilename().length() - 3);
         StringWriter writer = new StringWriter();
         IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
         String content = writer.toString();
+        writer.close();
         List<String> upwardNameList = new ArrayList<>();
         String[] split = filePath.split("/");
         for (int i = 0; i < split.length; i++) {
