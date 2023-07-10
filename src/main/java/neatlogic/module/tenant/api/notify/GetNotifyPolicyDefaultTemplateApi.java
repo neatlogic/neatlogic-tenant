@@ -92,6 +92,7 @@ public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
             throw new NotifyPolicyHandlerNotFoundException(handler);
         }
         String moduleGroup = notifyPolicyHandlerVo.getModuleGroup();
+        String module = notifyPolicyHandlerVo.getModule();
         int index = handler.lastIndexOf('.');
         String simpleHandlerName = handler.substring(index + 1);
         simpleHandlerName = simpleHandlerName.toLowerCase();
@@ -102,12 +103,18 @@ public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
         }
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        String classpathRoot = MessageFormat.format(CLASSPATH_ROOT, moduleGroup);
-        Resource resource = resolver.getResource(classpathRoot + simpleHandlerName + "/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
+        // 先到处理器所在模块查找默认模板
+        String classpathRoot = MessageFormat.format(CLASSPATH_ROOT, module);
+        Resource resource = resolver.getResource(classpathRoot + "notifypolicyhandler/" + simpleHandlerName + "/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
         if (!resource.exists()) {
-            resource = resolver.getResource(classpathRoot + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
+            resource = resolver.getResource(classpathRoot + "trigger/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
             if (!resource.exists()) {
-                return null;
+                // 再到处理器所在模块组查找默认模板
+                classpathRoot = MessageFormat.format(CLASSPATH_ROOT, moduleGroup);
+                resource = resolver.getResource(classpathRoot + "trigger/" + trigger + "/" + notifyHandlerType + "/" + locale + ".html");
+                if (!resource.exists()) {
+                    return null;
+                }
             }
         }
         StringWriter writer = new StringWriter();
