@@ -81,19 +81,6 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
         String content = writer.toString();
         writer.close();
-//        List<String> upwardNameList = new ArrayList<>();
-//        String[] split = filePath.split("/");
-//        for (int i = 0; i < split.length; i++) {
-//            if (i == 0 || i == 1) {
-//                continue;
-//            }
-//            String name = split[i];
-//            int index = name.lastIndexOf(".");
-//            if (i == split.length - 1) {
-//                name = name.substring(0, index);
-//            }
-//            upwardNameList.add(name);
-//        }
         DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
         documentOnlineVo.setContent(replaceImagePath(content, filePath));
         documentOnlineVo.setFileName(filename);
