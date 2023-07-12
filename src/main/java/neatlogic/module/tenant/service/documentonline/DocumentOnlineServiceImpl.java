@@ -118,6 +118,8 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
         if (StringUtils.isBlank(filePath)) {
             return null;
         }
+        int directoryRootIndex = filePath.indexOf(DocumentOnlineInitializeIndexHandler.DIRECTORY_ROOT);
+        filePath = filePath.substring(directoryRootIndex);
         DocumentOnlineDirectoryVo directory = DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT;
         String[] directoryNameList = filePath.split("/");
         for (int i = 1; i < directoryNameList.length; i++) {

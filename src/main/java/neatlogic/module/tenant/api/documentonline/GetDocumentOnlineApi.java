@@ -18,14 +18,17 @@ package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
 import neatlogic.framework.util.RegexUtils;
+import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -40,6 +43,9 @@ import java.util.regex.Matcher;
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
+
+    @Autowired
+    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -66,28 +72,19 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
         if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
+        DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
+        if (directory == null) {
+            throw new DocumentOnlineNotFoundException(filePath);
+        }
         String filename = resource.getFilename().substring(0, resource.getFilename().length() - 3);
         StringWriter writer = new StringWriter();
         IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
         String content = writer.toString();
         writer.close();
-        List<String> upwardNameList = new ArrayList<>();
-        String[] split = filePath.split("/");
-        for (int i = 0; i < split.length; i++) {
-            if (i == 0 || i == 1) {
-                continue;
-            }
-            String name = split[i];
-            int index = name.lastIndexOf(".");
-            if (i == split.length - 1) {
-                name = name.substring(0, index);
-            }
-            upwardNameList.add(name);
-        }
         DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
         documentOnlineVo.setContent(replaceImagePath(content, filePath));
         documentOnlineVo.setFileName(filename);
-        documentOnlineVo.setUpwardNameList(upwardNameList);
+        documentOnlineVo.setUpwardNameList(directory.getUpwardNameList());
         return documentOnlineVo;
     }
 
