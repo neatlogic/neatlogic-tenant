@@ -17,7 +17,6 @@
 package neatlogic.module.tenant.api.menu;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -71,8 +70,7 @@ public class MenuSearchApi extends PrivateApiComponentBase {
 		Integer isActive = null;
 		// 如果是根据角色返回对应菜单
 		if (jsonObj.containsKey("type") && jsonObj.getIntValue("type") == 0) {
-			UserContext userContext = UserContext.get();
-			roleUuidList = userContext.getRoleUuidList();
+			roleUuidList = UserContext.get().getAuthenticationInfoVo().getRoleUuidList();
 		}
 		if (jsonObj.containsKey("isAll") &&jsonObj.getIntValue("isAll") == 0) {
 			isActive = 1;
