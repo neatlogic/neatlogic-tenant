@@ -25,7 +25,6 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import neatlogic.framework.systemnotice.dto.SystemNoticeVo;
 import neatlogic.framework.util.HtmlUtil;
@@ -52,9 +51,6 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     @Resource
     private SystemNoticeMapper systemNoticeMapper;
 
-    @Resource
-    private AuthenticationInfoService authenticationInfoService;
-
     @Override
     public String getToken() {
         return "systemnotice/pull";
@@ -62,7 +58,7 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "拉取系统公告";
+        return "nmtas.systemnoticepullapi.getname";
     }
 
     @Override
@@ -71,25 +67,25 @@ public class SystemNoticePullApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "issueTime", type = ApiParamType.LONG, desc = "下发时间"),
-            @Param(name = "direction", type = ApiParamType.ENUM, rule = "before", desc = "before:找issueTime之前的公告"),
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
+            @Param(name = "issueTime", type = ApiParamType.LONG, desc = "term.framework.issuetime"),
+            @Param(name = "direction", type = ApiParamType.ENUM, rule = "before", desc = "nmtas.systemnoticepullapi.input.param.desc.direction"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss=true),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.isneedpage")
     })
     @Output({
-            @Param(name = "tbodyList", explode = SystemNoticeVo.class, desc = "公告列表"),
-            @Param(name = "popUpNoticeIdList",desc = "需要弹窗的公告ID列表"),
+            @Param(name = "tbodyList", explode = SystemNoticeVo.class, desc = "common.tbodylist"),
+            @Param(name = "popUpNoticeIdList",desc = "nmtas.systemnoticepullapi.output.param.desc.popupnoticeidlist"),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "拉取系统公告")
+    @Description(desc = "nmtas.systemnoticepullapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});
 
         List<String> uuidList = new ArrayList<>();
-        AuthenticationInfoVo authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(UserContext.get().getUserUuid(true));
+        AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
         uuidList.add(UserContext.get().getUserUuid(true));
         uuidList.add(UserType.ALL.getValue());
         uuidList.addAll(authenticationInfoVo.getTeamUuidList());
