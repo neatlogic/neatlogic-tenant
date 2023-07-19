@@ -46,9 +46,5 @@ limitations under the License.
             <groupId>com.neatlogic</groupId>
             <artifactId>neatlogic-framework</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.neatlogic</groupId>
-            <artifactId>neatlogic-autoexec-base</artifactId>
-        </dependency>
     </dependencies> 
 </project> 

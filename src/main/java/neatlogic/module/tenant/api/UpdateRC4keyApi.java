@@ -16,22 +16,12 @@ limitations under the License.
 
 package neatlogic.module.tenant.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
-import neatlogic.framework.autoexec.crossover.IAutoexecGlobalParamCrossoverMapper;
-import neatlogic.framework.autoexec.crossover.IAutoexecProfileCrossoverMapper;
-import neatlogic.framework.autoexec.dao.mapper.AutoexecCombopMapper;
-import neatlogic.framework.autoexec.dao.mapper.AutoexecScriptMapper;
-import neatlogic.framework.autoexec.dto.combop.AutoexecCombopParamVo;
-import neatlogic.framework.autoexec.dto.global.param.AutoexecGlobalParamVo;
-import neatlogic.framework.autoexec.dto.profile.AutoexecProfileParamVo;
-import neatlogic.framework.autoexec.dto.script.AutoexecScriptVersionParamVo;
-import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountVo;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.RC4Util;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.DatasourceMapper;
 import neatlogic.framework.dao.mapper.MongoDbMapper;
 import neatlogic.framework.dto.DatasourceVo;
@@ -44,14 +34,12 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiVo;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 
-@Service
+//@Service
 @AuthAction(action = AUTHORITY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UpdateRC4keyApi extends PrivateApiComponentBase {
@@ -62,10 +50,10 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
     MongoDbMapper mongoDbMapper;
     @Resource
     ApiMapper apiMapper;
-    @Resource
-    AutoexecScriptMapper autoexecScriptMapper;
-    @Resource
-    AutoexecCombopMapper autoexecCombopMapper;
+//    @Resource
+//    AutoexecScriptMapper autoexecScriptMapper;
+//    @Resource
+//    AutoexecCombopMapper autoexecCombopMapper;
 
     @Override
     public String getToken() {
@@ -120,26 +108,26 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
                 apiMapper.updatePasswordByToken(apiVo.getToken(), newPassword);
             }
         }
-        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+        //IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         //cmdb account
-        List<AccountVo> accounts = resourceAccountCrossoverMapper.getAllAccountList();
-        for (AccountVo account : accounts) {
-            String oldPassword = account.getPasswordCipher();
-            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
-                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
-                resourceAccountCrossoverMapper.updateAccountPasswordById(account.getId(), newPassword);
-            }
-        }
+//        List<AccountVo> accounts = resourceAccountCrossoverMapper.getAllAccountList();
+//        for (AccountVo account : accounts) {
+//            String oldPassword = account.getPasswordCipher();
+//            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
+//                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
+//                resourceAccountCrossoverMapper.updateAccountPasswordById(account.getId(), newPassword);
+//            }
+//        }
         //autoexec global param
-        IAutoexecGlobalParamCrossoverMapper autoexecGlobalParamCrossoverMapper = CrossoverServiceFactory.getApi(IAutoexecGlobalParamCrossoverMapper.class);
-        List<AutoexecGlobalParamVo> autoexecGlobalParamVos = autoexecGlobalParamCrossoverMapper.getAllPasswordGlobalParam();
-        for (AutoexecGlobalParamVo autoexecGlobalParamVo : autoexecGlobalParamVos) {
-            String oldPassword = autoexecGlobalParamVo.getDefaultValueStr();
-            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
-                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
-                autoexecGlobalParamCrossoverMapper.updateGlobalParamPasswordById(autoexecGlobalParamVo.getId(), newPassword);
-            }
-        }
+//        IAutoexecGlobalParamCrossoverMapper autoexecGlobalParamCrossoverMapper = CrossoverServiceFactory.getApi(IAutoexecGlobalParamCrossoverMapper.class);
+//        List<AutoexecGlobalParamVo> autoexecGlobalParamVos = autoexecGlobalParamCrossoverMapper.getAllPasswordGlobalParam();
+//        for (AutoexecGlobalParamVo autoexecGlobalParamVo : autoexecGlobalParamVos) {
+//            String oldPassword = autoexecGlobalParamVo.getDefaultValueStr();
+//            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
+//                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
+//                autoexecGlobalParamCrossoverMapper.updateGlobalParamPasswordById(autoexecGlobalParamVo.getId(), newPassword);
+//            }
+//        }
         //autoexec combop param
 //        List<AutoexecCombopParamVo> autoexecCombopParamVos = autoexecCombopMapper.getAllAutoexecCombopPasswordParamList();
 //        for (AutoexecCombopParamVo autoexecCombopParamVo : autoexecCombopParamVos) {
@@ -151,24 +139,24 @@ public class UpdateRC4keyApi extends PrivateApiComponentBase {
 //        }
 
         //autoexec script version param
-        List<AutoexecScriptVersionParamVo> autoexecScriptVersionParamVos = autoexecScriptMapper.getAllPasswordScriptParam();
-        for (AutoexecScriptVersionParamVo autoexecScriptVersionParamVo : autoexecScriptVersionParamVos) {
-            String oldPassword = autoexecScriptVersionParamVo.getDefaultValueStr();
-            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
-                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
-                autoexecScriptMapper.updateScriptVersionParamPassword(autoexecScriptVersionParamVo, newPassword);
-            }
-        }
+//        List<AutoexecScriptVersionParamVo> autoexecScriptVersionParamVos = autoexecScriptMapper.getAllPasswordScriptParam();
+//        for (AutoexecScriptVersionParamVo autoexecScriptVersionParamVo : autoexecScriptVersionParamVos) {
+//            String oldPassword = autoexecScriptVersionParamVo.getDefaultValueStr();
+//            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
+//                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
+//                autoexecScriptMapper.updateScriptVersionParamPassword(autoexecScriptVersionParamVo, newPassword);
+//            }
+//        }
         //autoexec_profile_param
-        IAutoexecProfileCrossoverMapper autoexecProfileCrossoverMapper = CrossoverServiceFactory.getApi(IAutoexecProfileCrossoverMapper.class);
-        List<AutoexecProfileParamVo> autoexecProfileParamVos = autoexecProfileCrossoverMapper.getAllProfileParamList();
-        for (AutoexecProfileParamVo autoexecProfileParamVo : autoexecProfileParamVos) {
-            String oldPassword = autoexecProfileParamVo.getDefaultValueStr();
-            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
-                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
-                autoexecProfileCrossoverMapper.updateProfileParamPassword(autoexecProfileParamVo, newPassword);
-            }
-        }
+//        IAutoexecProfileCrossoverMapper autoexecProfileCrossoverMapper = CrossoverServiceFactory.getApi(IAutoexecProfileCrossoverMapper.class);
+//        List<AutoexecProfileParamVo> autoexecProfileParamVos = autoexecProfileCrossoverMapper.getAllProfileParamList();
+//        for (AutoexecProfileParamVo autoexecProfileParamVo : autoexecProfileParamVos) {
+//            String oldPassword = autoexecProfileParamVo.getDefaultValueStr();
+//            if (StringUtils.isNotBlank(oldPassword) && oldPassword.startsWith(oldPre)) {
+//                String newPassword = RC4Util.encrypt(RC4Util.decrypt(oldKey, oldPassword));
+//                autoexecProfileCrossoverMapper.updateProfileParamPassword(autoexecProfileParamVo, newPassword);
+//            }
+//        }
         return null;
     }
 }
