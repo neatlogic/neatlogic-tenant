@@ -17,6 +17,7 @@
 package neatlogic.module.tenant.api.auth;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -60,16 +61,17 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input( {
+    @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param( name = "auth",  desc = "权限", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "auth", desc = "权限", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页")
     })
 
     @Output({
-            @Param( name = "userList", desc = "用户列表",explode = UserVo[].class),
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "用户列表"),
+            @Param(explode = BasePageVo.class),
     })
 
     @Description(desc = "权限用户查询接口")
@@ -80,7 +82,7 @@ public class AuthUserSearchApi extends PrivateApiComponentBase {
         int rowNum = userMapper.searchUserCountByAuth(vo);
         if (rowNum > 0) {
             List<String> uuidList = userMapper.searchUserUuIdByUser(vo);
-                userList = userMapper.getUserByUserUuidList(uuidList);
+            userList = userMapper.getUserByUserUuidList(uuidList);
         }
         vo.setRowNum(rowNum);
         return TableResultUtil.getResult(userList, vo);
