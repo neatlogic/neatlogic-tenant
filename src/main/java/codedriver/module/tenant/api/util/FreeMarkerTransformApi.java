@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.util;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.ADMIN;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -26,6 +28,7 @@ import java.io.Writer;
  * @since 2021/8/26 11:55
  **/
 @Service
+@AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FreeMarkerTransformApi extends PrivateApiComponentBase {
 

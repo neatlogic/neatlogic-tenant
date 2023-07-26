@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.apiaudit;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.API_AUDIT_VIEW;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -37,6 +39,7 @@ import java.nio.charset.StandardCharsets;
  */
 
 @Service
+@AuthAction(action = API_AUDIT_VIEW.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditExportApi extends PrivateBinaryStreamApiComponentBase {
 

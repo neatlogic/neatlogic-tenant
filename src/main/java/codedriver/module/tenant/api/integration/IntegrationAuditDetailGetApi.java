@@ -12,9 +12,8 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
-@Service
+@Deprecated
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {

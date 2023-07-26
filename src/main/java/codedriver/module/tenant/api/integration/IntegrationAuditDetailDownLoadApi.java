@@ -11,12 +11,11 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Service
+@Deprecated
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {

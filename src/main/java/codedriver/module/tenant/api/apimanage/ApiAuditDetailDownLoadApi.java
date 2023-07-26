@@ -5,19 +5,17 @@
 
 package codedriver.module.tenant.api.apimanage;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Service
+@Deprecated
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {

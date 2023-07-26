@@ -6,17 +6,17 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.API_AUDIT_VIEW;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.exception.file.FilePathIllegalException;
-import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.annotation.*;
+import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
-@Service
-
+@Deprecated
+@AuthAction(action = API_AUDIT_VIEW.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailGetApi extends PrivateApiComponentBase {
 

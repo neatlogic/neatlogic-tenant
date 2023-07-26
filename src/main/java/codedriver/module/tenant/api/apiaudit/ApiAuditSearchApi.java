@@ -5,6 +5,8 @@
 
 package codedriver.module.tenant.api.apiaudit;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.API_AUDIT_VIEW;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.common.util.PageUtil;
@@ -25,7 +27,7 @@ import java.util.List;
  */
 
 @Service
-
+@AuthAction(action = API_AUDIT_VIEW.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditSearchApi extends PrivateApiComponentBase {
 

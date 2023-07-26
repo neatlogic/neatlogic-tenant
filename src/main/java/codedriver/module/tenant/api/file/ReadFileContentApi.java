@@ -10,6 +10,7 @@ import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.heartbeat.dao.mapper.ServerMapper;
 import codedriver.framework.heartbeat.dto.ServerClusterVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
@@ -117,6 +118,8 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
         if (path.startsWith(prefix)) {
             path = path.substring(prefix.length());
             path = dataHome + path;
+        }else{
+            throw new FilePathIllegalException(path);
         }
         if (!path.startsWith("file:")) {
             path = "file:" + path;

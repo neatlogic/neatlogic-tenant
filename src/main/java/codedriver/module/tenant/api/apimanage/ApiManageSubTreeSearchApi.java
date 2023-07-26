@@ -6,6 +6,8 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.INTERFACE_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.module.ModuleVo;
 import codedriver.framework.restful.annotation.*;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageSubTreeSearchApi extends PrivateApiComponentBase {
 
