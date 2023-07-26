@@ -17,7 +17,6 @@
 package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
@@ -25,6 +24,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.service.UserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -35,7 +35,7 @@ import javax.annotation.Resource;
 public class GetUserTokenApi extends PrivateApiComponentBase {
 
     @Resource
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Override
     public String getToken() {
@@ -44,7 +44,7 @@ public class GetUserTokenApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取用户自己的令牌";
+        return "nmtau.getusertokenapi.getname";
     }
 
     @Override
@@ -52,10 +52,10 @@ public class GetUserTokenApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Output({@Param(name = "Return", explode = String.class, desc = "令牌")})
-    @Description(desc = "获取用户自己的令牌接口")
+    @Output({@Param(name = "Return", explode = String.class, desc = "nmra.savewebhookdataapi.input.param.desc")})
+    @Description(desc = "nmtau.getusertokenapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return userMapper.getUserTokenByUserId(UserContext.get().getUserId(true));
+        return userService.getUserTokenByUserId(UserContext.get().getUserId(true));
     }
 }
