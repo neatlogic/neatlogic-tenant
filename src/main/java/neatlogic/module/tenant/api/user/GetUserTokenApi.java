@@ -56,6 +56,6 @@ public class GetUserTokenApi extends PrivateApiComponentBase {
     @Description(desc = "nmtau.getusertokenapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return userService.getUserTokenByUserId(UserContext.get().getUserId(true));
+        return userService.getUserByUserUuid(UserContext.get().getUserUuid(true));
     }
 }
