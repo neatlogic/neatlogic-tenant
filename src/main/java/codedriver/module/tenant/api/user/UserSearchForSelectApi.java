@@ -7,7 +7,9 @@ package codedriver.module.tenant.api.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,7 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", xss = true),
             @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "状态"),
+            @Param(name = "needTeam", type = ApiParamType.BOOLEAN, desc = "是否需要组信息"),
             @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "用户组uuid"),
             @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "角色uuid"),
             @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "用于回显的参数列表", xss = true),
@@ -59,11 +62,9 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认10", isRequired = false)
     })
     @Output({
-            @Param(name = "list", type = ApiParamType.JSONARRAY, desc = "选项列表"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总条目数")})
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "选项列表"),
+            @Param(explode = BasePageVo.class)
+    })
     @Description(desc = "查询用户_下拉")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -82,8 +83,13 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
             }
         }
         if (CollectionUtils.isNotEmpty(userList)) {
+            Boolean needTeam = jsonObj.getBoolean("needTeam");
             for (UserVo user : userList) {
-                tbodyList.add(new UserVo(user.getUuid(), user.getUserId(), user.getUserName()));
+                UserVo userVo = new UserVo(user.getUuid(), user.getUserId(), user.getUserName());
+                if (Objects.equals(needTeam, true)) {
+                    userVo.setTeamNameList(user.getTeamNameList());
+                }
+                tbodyList.add(userVo);
             }
         }
         return TableResultUtil.getResult(tbodyList, searchVo);
