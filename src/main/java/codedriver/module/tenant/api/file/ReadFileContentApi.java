@@ -5,44 +5,21 @@
 
 package codedriver.module.tenant.api.file;
 
-import codedriver.framework.asynchronization.threadlocal.RequestContext;
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.FileUtil;
-import codedriver.framework.exception.file.FilePathIllegalException;
-import codedriver.framework.heartbeat.dao.mapper.ServerMapper;
-import codedriver.framework.heartbeat.dto.ServerClusterVo;
-import codedriver.framework.integration.authentication.enums.AuthenticateType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
+import codedriver.framework.file.dto.AuditFilePathVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.util.HttpRequestUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ReadFileContentApi extends PrivateApiComponentBase {
-
-    private final Logger logger = LoggerFactory.getLogger(ReadFileContentApi.class);
-
-    @Resource
-    private ServerMapper serverMapper;
-
-    /*查看审计记录时可显示的最大字节数，超过此数需要下载文件后查看*/
-    public final static int MAX_FILE_SIZE = 1024 * 1024;
 
     @Override
     public String getToken() {
@@ -69,133 +46,14 @@ public class ReadFileContentApi extends PrivateApiComponentBase {
     @Description(desc = "读取文件内容")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Map<String, String> paramMap = new HashMap<>();
         String filePath = paramObj.getString("filePath");
-        String[] split = filePath.split("\\?");
-        String path = split[0];
-        if (split.length >= 2) {
-            String[] paramArray = split[1].split("&");
-            for (String param : paramArray) {
-                if (param.contains("=")) {
-                    String[] paramKeyValue = param.split("=");
-                    paramMap.put(paramKeyValue[0], paramKeyValue[1]);
-                }
-            }
-        }
-        int startIndex = 0;
-        int offset = 0;
-        int serverId = 0;
-        String startIndexStr = paramMap.get("startIndex");
-        if (StringUtils.isNotBlank(startIndexStr)) {
-            startIndex = Integer.parseInt(startIndexStr);
-        }
-        String offsetStr = paramMap.get("offset");
-        if (StringUtils.isNotBlank(offsetStr)) {
-            offset = Integer.parseInt(offsetStr);
-        }
-        String serverIdStr = paramMap.get("serverId");
-        if (StringUtils.isNotBlank(serverIdStr)) {
-            serverId = Integer.parseInt(serverIdStr);
-        }
-        if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            return readLocalFile(path, startIndex, offset);
+        AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
+        IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+        if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
+            return fileCrossoverService.readLocalFile(auditFilePathVo.getPath(), auditFilePathVo.getStartIndex(), auditFilePathVo.getOffset());
         } else {
-            return readRemoteFile(paramObj, serverId);
+            return fileCrossoverService.readRemoteFile(paramObj, auditFilePathVo.getServerId());
         }
     }
 
-    /**
-     * 读取服务器本地文件内容
-     * @param path 路径
-     * @param startIndex 开始下标
-     * @param offset 读取内容字节数
-     * @return 文件内容
-     */
-    private JSONObject readLocalFile(String path, int startIndex, int offset) {
-        String dataHome = Config.DATA_HOME() + TenantContext.get().getTenantUuid();
-        String prefix = "${home}";
-        if (path.startsWith(prefix)) {
-            path = path.substring(prefix.length());
-            path = dataHome + path;
-        }else{
-            throw new FilePathIllegalException(path);
-        }
-        if (!path.startsWith("file:")) {
-            path = "file:" + path;
-        }
-        JSONObject resultObj = new JSONObject();
-        boolean hasMore = false;
-        /*
-         * 如果偏移量大于最大字节数限制，那么就只截取最大字节数长度的数据
-         */
-        if (offset > MAX_FILE_SIZE) {
-            offset = MAX_FILE_SIZE;
-            hasMore = true;
-        }
-        resultObj.put("hasMore", hasMore);
-        try (InputStream in = FileUtil.getData(path)) {
-            if (in != null) {
-                in.skip(startIndex);
-                byte[] buff = new byte[1024];
-                StringBuilder sb = new StringBuilder();
-                int len;
-                int endPoint = 0;
-                while ((len = in.read(buff)) != -1) {
-                    endPoint += len;
-                    if (endPoint >= offset) {
-                        len = (len - (endPoint - offset));
-                        sb.append(new String(buff, 0, len, StandardCharsets.UTF_8));
-                        break;
-                    } else {
-                        sb.append(new String(buff, 0, len, StandardCharsets.UTF_8));
-                    }
-                }
-                resultObj.put("content", sb.toString());
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return resultObj;
-    }
-
-    /**
-     * 读取其他服务器文件内容
-     * @param paramObj 入参
-     * @param serverId 服务器ID
-     * @return 文件内容
-     */
-    private JSONObject readRemoteFile(JSONObject paramObj, Integer serverId) {
-        JSONObject resultObj = new JSONObject();
-        String host = null;
-        TenantContext.get().setUseDefaultDatasource(true);
-        ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-        if (serverClusterVo != null) {
-            host = serverClusterVo.getHost();
-        }
-        TenantContext.get().setUseDefaultDatasource(false);
-        if (StringUtils.isBlank(host)) {
-            return resultObj;
-        }
-        HttpServletRequest request = RequestContext.get().getRequest();
-        String url = host + request.getRequestURI();
-        HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
-                .setPayload(paramObj.toJSONString())
-                .setAuthType(AuthenticateType.BUILDIN)
-                .setConnectTimeout(5000)
-                .setReadTimeout(5000)
-                .sendRequest();
-        String error = httpRequestUtil.getError();
-        if(StringUtils.isNotBlank(error)){
-            throw new RuntimeException(error);
-        }
-        JSONObject resultJson = httpRequestUtil.getResultJson();
-        if (MapUtils.isNotEmpty(resultJson)) {
-            String status = resultJson.getString("Status");
-            if (!"OK".equals(status)) {
-                throw new RuntimeException(resultJson.getString("Message"));
-            }
-            resultObj = resultJson.getJSONObject("Return");
-        }
-        return resultObj;
-    }
 }
