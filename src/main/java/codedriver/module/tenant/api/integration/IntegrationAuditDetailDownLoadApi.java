@@ -5,18 +5,27 @@
 
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.INTEGRATION_MODIFY;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-@Deprecated
-
+@Component
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 
@@ -35,16 +44,47 @@ public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiCom
 		return null;
 	}
 
-	@Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true)})
+	@Input({
+			@Param(name = "filePath", type = ApiParamType.STRING, desc = "文件路径", isRequired = true)
+	})
 	@Output({})
 	@Description(desc = "下载集成管理调用记录")
 	@Override
-	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		String filePath = jsonObj.getString("filePath");
-
-		AuditUtil.downLoadAuditDetail(request, response, filePath);
-
+	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Map<String, String> paramMap = new HashMap<>();
+		String filePath = paramObj.getString("filePath");
+		String[] split = filePath.split("\\?");
+		String path = split[0];
+		if (split.length >= 2) {
+			String[] paramArray = split[1].split("&");
+			for (String param : paramArray) {
+				if (param.contains("=")) {
+					String[] paramKeyValue = param.split("=");
+					paramMap.put(paramKeyValue[0], paramKeyValue[1]);
+				}
+			}
+		}
+		int startIndex = 0;
+		int offset = 0;
+		int serverId = 0;
+		String startIndexStr = paramMap.get("startIndex");
+		if (StringUtils.isNotBlank(startIndexStr)) {
+			startIndex = Integer.parseInt(startIndexStr);
+		}
+		String offsetStr = paramMap.get("offset");
+		if (StringUtils.isNotBlank(offsetStr)) {
+			offset = Integer.parseInt(offsetStr);
+		}
+		String serverIdStr = paramMap.get("serverId");
+		if (StringUtils.isNotBlank(serverIdStr)) {
+			serverId = Integer.parseInt(serverIdStr);
+		}
+		IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+		if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
+			fileCrossoverService.downloadLocalFile(path, startIndex, offset, response);
+		} else {
+			fileCrossoverService.downloadRemoteFile(paramObj, serverId, request, response);
+		}
 		return null;
 	}
 
