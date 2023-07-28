@@ -11,6 +11,7 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.crossover.IFileCrossoverService;
+import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.file.dto.AuditFilePathVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -52,6 +53,9 @@ public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
 
         String filePath = paramObj.getString("filePath");
+        if (!filePath.contains("integrationaudit")) {
+            throw new FilePathIllegalException(filePath);
+        }
         AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
         IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
         if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
