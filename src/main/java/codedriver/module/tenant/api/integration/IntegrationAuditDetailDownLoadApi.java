@@ -5,18 +5,25 @@
 
 package codedriver.module.tenant.api.integration;
 
+import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.INTEGRATION_MODIFY;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
+import codedriver.framework.file.dto.AuditFilePathVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
-@Deprecated
-
+@Component
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 
@@ -35,16 +42,21 @@ public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiCom
 		return null;
 	}
 
-	@Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true)})
+	@Input({
+			@Param(name = "filePath", type = ApiParamType.STRING, desc = "文件路径", isRequired = true)
+	})
 	@Output({})
 	@Description(desc = "下载集成管理调用记录")
 	@Override
-	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		String filePath = jsonObj.getString("filePath");
-
-		AuditUtil.downLoadAuditDetail(request, response, filePath);
-
+	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String filePath = paramObj.getString("filePath");
+		AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
+		IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+		if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
+			fileCrossoverService.downloadLocalFile(auditFilePathVo.getPath(), auditFilePathVo.getStartIndex(), auditFilePathVo.getOffset(), response);
+		} else {
+			fileCrossoverService.downloadRemoteFile(paramObj, auditFilePathVo.getServerId(), request, response);
+		}
 		return null;
 	}
 

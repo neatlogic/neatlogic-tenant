@@ -6,17 +6,25 @@
 package codedriver.module.tenant.api.apimanage;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.auth.label.API_AUDIT_VIEW;
+import codedriver.framework.auth.label.INTERFACE_MODIFY;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.file.FilePathIllegalException;
+import codedriver.framework.crossover.CrossoverServiceFactory;
+import codedriver.framework.crossover.IFileCrossoverService;
+import codedriver.framework.file.dto.AuditFilePathVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
-@Deprecated
-@AuthAction(action = API_AUDIT_VIEW.class)
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+@Service
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiAuditDetailGetApi extends PrivateApiComponentBase {
 
@@ -35,33 +43,25 @@ public class ApiAuditDetailGetApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Input({ @Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true) })
-	@Output({})
+	@Input({
+			@Param(name = "filePath", type = ApiParamType.STRING, desc = "文件路径", isRequired = true)
+	})
+	@Output({
+			@Param(name = "content", type = ApiParamType.STRING, desc = "内容"),
+			@Param(name = "hasMore", type = ApiParamType.BOOLEAN, desc = "是否还有更多内容")
+	})
 	@Description(desc = "获取接口调用记录")
 	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
+	public Object myDoService(JSONObject paramObj) throws Exception {
 
-		JSONObject resultJson = new JSONObject();
-
-		String filePath = jsonObj.getString("filePath");
-
-		if(!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")){
-			throw new FilePathIllegalException("文件路径格式错误");
+		String filePath = paramObj.getString("filePath");
+		AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
+		IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+		if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
+			return fileCrossoverService.readLocalFile(auditFilePathVo.getPath(), auditFilePathVo.getStartIndex(), auditFilePathVo.getOffset());
+		} else {
+			return fileCrossoverService.readRemoteFile(paramObj, auditFilePathVo.getServerId());
 		}
-
-		long offset = Long.parseLong(filePath.split("\\?")[1].split("&")[1].split("=")[1]);
-
-		String result = null;
-		if(offset > AuditUtil.maxFileSize){
-			result = AuditUtil.getAuditDetail(filePath);
-			resultJson.put("result",result);
-			resultJson.put("hasMore",true);
-		}else{
-			result = AuditUtil.getAuditDetail(filePath);
-			resultJson.put("result",result);
-			resultJson.put("hasMore",false);
-		}
-		return resultJson;
 	}
 
 }
