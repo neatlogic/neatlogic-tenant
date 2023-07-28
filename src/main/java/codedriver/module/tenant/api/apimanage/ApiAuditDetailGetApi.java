@@ -11,6 +11,7 @@ import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.crossover.IFileCrossoverService;
+import codedriver.framework.exception.file.FilePathIllegalException;
 import codedriver.framework.file.dto.AuditFilePathVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -19,6 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -53,8 +55,10 @@ public class ApiAuditDetailGetApi extends PrivateApiComponentBase {
 	@Description(desc = "获取接口调用记录")
 	@Override
 	public Object myDoService(JSONObject paramObj) throws Exception {
-
 		String filePath = paramObj.getString("filePath");
+		if (!filePath.contains("apiaudit")) {
+			throw new FilePathIllegalException(filePath);
+		}
 		AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
 		IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
 		if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
