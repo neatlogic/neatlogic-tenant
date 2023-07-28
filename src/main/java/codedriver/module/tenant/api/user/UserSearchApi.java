@@ -6,6 +6,8 @@
 package codedriver.module.tenant.api.user;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.auth.label.ROLE_MODIFY;
+import codedriver.framework.auth.label.TEAM_MODIFY;
 import codedriver.framework.auth.label.USER_MODIFY;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.PageUtil;
@@ -24,6 +26,8 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@AuthAction(action = TEAM_MODIFY.class)
+@AuthAction(action = ROLE_MODIFY.class)
 @AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserSearchApi extends PrivateApiComponentBase {
