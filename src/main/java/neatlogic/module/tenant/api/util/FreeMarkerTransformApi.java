@@ -37,7 +37,7 @@ import java.io.Writer;
  * @author linbq
  * @since 2021/8/26 11:55
  **/
-@Deprecated// 有安全漏洞
+@Deprecated
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FreeMarkerTransformApi extends PrivateApiComponentBase {
