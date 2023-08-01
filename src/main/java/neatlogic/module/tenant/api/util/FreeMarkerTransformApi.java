@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.util;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -27,7 +29,6 @@ import com.alibaba.fastjson.JSONObject;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -36,7 +37,8 @@ import java.io.Writer;
  * @author linbq
  * @since 2021/8/26 11:55
  **/
-@Service
+@Deprecated
+@AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class FreeMarkerTransformApi extends PrivateApiComponentBase {
 

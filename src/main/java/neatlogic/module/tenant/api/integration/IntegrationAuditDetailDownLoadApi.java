@@ -16,19 +16,26 @@
 
 package neatlogic.module.tenant.api.integration;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.crossover.IFileCrossoverService;
+import neatlogic.framework.exception.file.FilePathIllegalException;
+import neatlogic.framework.file.dto.AuditFilePathVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
 @Service
-
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 
@@ -39,7 +46,7 @@ public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiCom
 
 	@Override
 	public String getName() {
-		return "下载集成管理调用记录";
+		return "nmtai.integrationauditdetaildownloadapi.getname";
 	}
 
 	@Override
@@ -47,16 +54,24 @@ public class IntegrationAuditDetailDownLoadApi extends PrivateBinaryStreamApiCom
 		return null;
 	}
 
-	@Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true)})
+	@Input({
+			@Param(name = "filePath", type = ApiParamType.STRING, desc = "common.filepath", isRequired = true)
+	})
 	@Output({})
-	@Description(desc = "下载集成管理调用记录")
+	@Description(desc = "nmtai.integrationauditdetaildownloadapi.getname")
 	@Override
-	public Object myDoService(JSONObject jsonObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		String filePath = jsonObj.getString("filePath");
-
-		AuditUtil.downLoadAuditDetail(request, response, filePath);
-
+	public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String filePath = paramObj.getString("filePath");
+		if (!filePath.contains("integrationaudit")) {
+			throw new FilePathIllegalException(filePath);
+		}
+		AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
+		IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+		if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
+			fileCrossoverService.downloadLocalFile(auditFilePathVo.getPath(), auditFilePathVo.getStartIndex(), auditFilePathVo.getOffset(), response);
+		} else {
+			fileCrossoverService.downloadRemoteFile(paramObj, auditFilePathVo.getServerId(), request, response);
+		}
 		return null;
 	}
 

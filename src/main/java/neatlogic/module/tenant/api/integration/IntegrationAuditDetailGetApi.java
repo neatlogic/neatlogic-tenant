@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
+
 package neatlogic.module.tenant.api.integration;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.crossover.IFileCrossoverService;
 import neatlogic.framework.exception.file.FilePathIllegalException;
+import neatlogic.framework.file.dto.AuditFilePathVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.AuditUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-@Service
+import java.util.Objects;
 
+@Service
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {
 
@@ -37,7 +45,7 @@ public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取集成管理审计内容";
+        return "nmtai.integrationauditdetailgetapi.getname";
     }
 
     @Override
@@ -45,32 +53,27 @@ public class IntegrationAuditDetailGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "调用记录文件路径", isRequired = true)})
-    @Output({@Param(type = ApiParamType.STRING)})
-    @Description(desc = "获取集成管理审计内容")
+    @Input({
+            @Param(name = "filePath", type = ApiParamType.STRING, desc = "common.filepath", isRequired = true)
+    })
+    @Output({
+            @Param(name = "content", type = ApiParamType.STRING, desc = "common.content"),
+            @Param(name = "hasMore", type = ApiParamType.BOOLEAN, desc = "common.hasmore")
+    })
+    @Description(desc = "nmtai.integrationauditdetailgetapi.getname")
     @Override
-    public Object myDoService(JSONObject jsonObj) throws Exception {
+    public Object myDoService(JSONObject paramObj) throws Exception {
 
-        JSONObject resultJson = new JSONObject();
-
-        String filePath = jsonObj.getString("filePath");
-
-        if (!filePath.contains("?") || !filePath.contains("&") || !filePath.contains("=")) {
-            throw new FilePathIllegalException("文件路径格式错误");
+        String filePath = paramObj.getString("filePath");
+        if (!filePath.contains("integrationaudit")) {
+            throw new FilePathIllegalException(filePath);
         }
-
-        long offset = Long.parseLong(filePath.split("\\?")[1].split("&")[1].split("=")[1]);
-
-        String result;
-        if (offset > AuditUtil.maxFileSize) {
-            result = AuditUtil.getAuditDetail(filePath);
-            resultJson.put("result", result);
-            resultJson.put("hasMore", true);
+        AuditFilePathVo auditFilePathVo = new AuditFilePathVo(filePath);
+        IFileCrossoverService fileCrossoverService = CrossoverServiceFactory.getApi(IFileCrossoverService.class);
+        if (Objects.equals(auditFilePathVo.getServerId(), Config.SCHEDULE_SERVER_ID)) {
+            return fileCrossoverService.readLocalFile(auditFilePathVo.getPath(), auditFilePathVo.getStartIndex(), auditFilePathVo.getOffset());
         } else {
-            result = AuditUtil.getAuditDetail(filePath);
-            resultJson.put("result", result);
-            resultJson.put("hasMore", false);
+            return fileCrossoverService.readRemoteFile(paramObj, auditFilePathVo.getServerId());
         }
-        return resultJson;
     }
 }
