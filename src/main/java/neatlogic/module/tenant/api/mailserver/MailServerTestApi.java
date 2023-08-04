@@ -18,16 +18,12 @@ package neatlogic.module.tenant.api.mailserver;
 
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.notify.core.INotifyHandler;
-import neatlogic.framework.notify.core.NotifyHandlerFactory;
-import neatlogic.framework.notify.dto.NotifyVo;
-import neatlogic.framework.notify.exception.NotifyHandlerNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.auth.label.MAIL_SERVER_MODIFY;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.module.framework.notify.handler.EmailNotifyHandler;
+import neatlogic.framework.util.EmailUtil;
 import org.springframework.stereotype.Service;
 
 /**
@@ -63,16 +59,11 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Description(desc = "nmtam.mailservertestapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        INotifyHandler notifyHandler = NotifyHandlerFactory.getHandler(EmailNotifyHandler.class.getSimpleName());
-        if (notifyHandler == null) {
-            throw new NotifyHandlerNotFoundException(EmailNotifyHandler.class.getSimpleName());
-        }
-        NotifyVo notifyVo = new NotifyVo.Builder()
-                .withTitleTemplate("Test mail")
-                .withContentTemplate("Your configured mail server information is available!")
-                .addToEmail(jsonObj.getString("emailAddress"))
-                .build();
-        notifyHandler.execute(notifyVo);
+        EmailUtil.sendEmailWithFile(
+                "Test mail",
+                "Your configured mail server information is available!",
+                jsonObj.getString("emailAddress")
+        );
         return null;
     }
 
