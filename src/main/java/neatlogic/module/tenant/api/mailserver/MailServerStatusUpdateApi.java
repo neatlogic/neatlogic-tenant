@@ -16,10 +16,8 @@
 
 package neatlogic.module.tenant.api.mailserver;
 
-import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.auth.label.MAIL_SERVER_MODIFY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +33,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.exception.mailserver.MailServerNotFoundException;
 //@Service
 @Transactional
-@AuthAction(action = MAIL_SERVER_MODIFY.class)
+//@AuthAction(action = MAIL_SERVER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class MailServerStatusUpdateApi extends PrivateApiComponentBase {
 

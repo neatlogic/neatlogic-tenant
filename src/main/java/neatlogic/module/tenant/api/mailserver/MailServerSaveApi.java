@@ -17,7 +17,7 @@
 package neatlogic.module.tenant.api.mailserver;
 
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.MAIL_SERVER_MODIFY;
+import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.MailServerMapper;
 import neatlogic.framework.dto.MailServerVo;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
-@AuthAction(action = MAIL_SERVER_MODIFY.class)
+@AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MailServerSaveApi extends PrivateApiComponentBase {
 
