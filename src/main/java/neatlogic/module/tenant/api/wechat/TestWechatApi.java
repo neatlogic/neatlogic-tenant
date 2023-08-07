@@ -20,11 +20,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.WechatMapper;
-import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.WechatVo;
-import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -39,9 +36,6 @@ import javax.annotation.Resource;
 public class TestWechatApi extends PrivateApiComponentBase {
 
     @Resource
-    private UserMapper userMapper;
-
-    @Resource
     private WechatMapper wechatMapper;
 
     @Override
@@ -50,20 +44,21 @@ public class TestWechatApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "userId", type = ApiParamType.STRING, isRequired = true, desc = "用户userId")
+            @Param(name = "toUser", type = ApiParamType.STRING, isRequired = true, desc = "用户")
     })
     @Output({})
     @Description(desc = "测试企业微信发送消息")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        String userId = paramObj.getString("userId");
-        UserVo userVo = userMapper.getUserByUserId(userId);
-        if (userVo == null) {
-            throw new UserNotFoundException(userId);
-        }
+        String toUser = paramObj.getString("toUser");
         WechatVo wechatVo = wechatMapper.getWechat();
         WechatUtil.AccessToken accessToken = WechatUtil.getAccessToken(wechatVo.getCorpId(), wechatVo.getCorpSecret());
-        JSONObject data = WechatUtil.getTextCardMsg(userId , "Test wechat", "Your enterprise wechat configuration is available!", wechatVo.getCorpId());
+        JSONObject data = WechatUtil.getTextCardMsg(
+                toUser ,
+                "Test wechat",
+                "Your enterprise wechat configuration is available!@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.techsure.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect",
+                wechatVo.getCorpId()
+        );
         WechatUtil.sendMessage(accessToken.getToken(), data, wechatVo.getAgentId());
         return null;
     }
