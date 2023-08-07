@@ -60,6 +60,7 @@ public class GlobalLockApi extends PrivateApiComponentBase {
             switch (action) {
                 case "lock":
                     return globalLockHandler.getLock(jsonObj);
+                case "cancel":
                 case "unlock":
                     return globalLockHandler.unLock(lockId, jsonObj);
                 case "retry":
