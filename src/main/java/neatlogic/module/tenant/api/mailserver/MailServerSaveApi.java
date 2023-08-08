@@ -19,28 +19,27 @@ package neatlogic.module.tenant.api.mailserver;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.MailServerMapper;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.MailServerVo;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
-import neatlogic.module.tenant.exception.mailserver.MailServerNameRepeatException;
-import neatlogic.module.tenant.exception.mailserver.MailServerNotFoundException;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+
 @Service
 @Transactional
 @AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MailServerSaveApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private MailServerMapper mailServerMapper;
+	@Resource
+	private NotifyConfigMapper notifyConfigMapper;
 	
 	@Override
 	public String getToken() {
@@ -68,25 +67,13 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 			@Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "common.mailaddress"),
 			@Param(name = "sslEnable", type = ApiParamType.ENUM, rule = "true,false", isRequired = true, maxLength = 50, desc = "term.framework.smptsslenable")
 	})
-	@Output({
-		@Param(name = "Return", type = ApiParamType.STRING, desc = "common.uuid")
-	})
+	@Output({})
 	@Description(desc = "nmtam.mailserversaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		MailServerVo mailServerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MailServerVo>() {});
-		if(mailServerMapper.checkMailServerNameIsRepeat(mailServerVo) > 0) {
-			throw new MailServerNameRepeatException(mailServerVo.getName());
-		}
-		
-		String uuid = jsonObj.getString("uuid");
-		if(uuid != null) {
-			if(mailServerMapper.checkMailServerIsExists(uuid) == 0) {
-				throw new MailServerNotFoundException(uuid);
-			}
-		}
-		mailServerMapper.replaceMailServer(mailServerVo);		
-		return mailServerVo.getUuid();
+		MailServerVo mailServerVo = jsonObj.toJavaObject(MailServerVo.class);
+		notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.EMAIL.getValue(), JSONObject.toJSONString(mailServerVo));
+		return null;
 	}
 
 }
