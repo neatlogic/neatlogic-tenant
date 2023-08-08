@@ -20,8 +20,9 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.WechatMapper;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.WechatVo;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -37,7 +38,7 @@ import javax.annotation.Resource;
 public class SaveWechatApi extends PrivateApiComponentBase {
 
     @Resource
-    private WechatMapper wechatMapper;
+    private NotifyConfigMapper notifyConfigMapper;
 
     @Override
     public String getName() {
@@ -50,12 +51,11 @@ public class SaveWechatApi extends PrivateApiComponentBase {
             @Param(name = "agentId", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.agentid")
     })
     @Output({})
-    @Description(desc = "保存企业微信数据")
+    @Description(desc = "nmtaw.savewechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         WechatVo wechatVo = paramObj.toJavaObject(WechatVo.class);
-        wechatMapper.deleteWechat();
-        wechatMapper.insertWechat(wechatVo);
+        notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.WECHAT.getValue(), JSONObject.toJSONString(wechatVo));
         return null;
     }
 

@@ -20,12 +20,15 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.WechatMapper;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.WechatVo;
+import neatlogic.framework.exception.wechat.WechatAuthenticationInformationNotFoundException;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.WechatUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -36,7 +39,7 @@ import javax.annotation.Resource;
 public class TestWechatApi extends PrivateApiComponentBase {
 
     @Resource
-    private WechatMapper wechatMapper;
+    private NotifyConfigMapper notifyConfigMapper;
 
     @Override
     public String getName() {
@@ -50,9 +53,13 @@ public class TestWechatApi extends PrivateApiComponentBase {
     @Description(desc = "nmtaw.testwechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        String toUser = paramObj.getString("toUser");
-        WechatVo wechatVo = wechatMapper.getWechat();
+        String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.WECHAT.getValue());
+        if (StringUtils.isBlank(config)) {
+            throw new WechatAuthenticationInformationNotFoundException();
+        }
+        WechatVo wechatVo = JSONObject.parseObject(config, WechatVo.class);
         WechatUtil.AccessToken accessToken = WechatUtil.getAccessToken(wechatVo.getCorpId(), wechatVo.getCorpSecret());
+        String toUser = paramObj.getString("toUser");
         JSONObject data = WechatUtil.getTextCardMsg(
                 toUser ,
                 "Test wechat",

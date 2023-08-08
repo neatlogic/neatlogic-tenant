@@ -19,11 +19,13 @@ package neatlogic.module.tenant.api.wechat;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
-import neatlogic.framework.dao.mapper.WechatMapper;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.WechatVo;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -34,7 +36,7 @@ import javax.annotation.Resource;
 public class GetWechatApi extends PrivateApiComponentBase {
 
     @Resource
-    private WechatMapper wechatMapper;
+    private NotifyConfigMapper notifyConfigMapper;
 
     @Override
     public String getName() {
@@ -48,7 +50,12 @@ public class GetWechatApi extends PrivateApiComponentBase {
     @Description(desc = "nmtaw.getwechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return wechatMapper.getWechat();
+        String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.WECHAT.getValue());
+        if (StringUtils.isBlank(config)) {
+            return null;
+        }
+        WechatVo wechatVo = JSONObject.parseObject(config, WechatVo.class);
+        return wechatVo;
     }
 
     @Override
