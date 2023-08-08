@@ -38,14 +38,14 @@ public class GetWechatApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取企业微信数据";
+        return "nmtaw.getwechatapi.getname";
     }
 
     @Input({})
     @Output({
             @Param(explode = WechatVo.class)
     })
-    @Description(desc = "获取企业微信数据")
+    @Description(desc = "nmtaw.getwechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         return wechatMapper.getWechat();

@@ -16,14 +16,11 @@
 
 package neatlogic.module.tenant.api.mailserver;
 
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -31,8 +28,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.MailServerMapper;
 import neatlogic.framework.dto.MailServerVo;
 import neatlogic.module.tenant.exception.mailserver.MailServerNotFoundException;
-@Service
-@AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
+//@Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MailServerGetApi extends PrivateApiComponentBase {
 

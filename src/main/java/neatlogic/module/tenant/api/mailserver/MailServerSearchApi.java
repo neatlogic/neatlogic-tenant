@@ -51,7 +51,7 @@ public class MailServerSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "邮件服务器信息列表查询接口";
+		return "nmtam.mailserversearchapi.getname";
 	}
 
 	@Override
@@ -60,16 +60,16 @@ public class MailServerSearchApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，名称模糊查询"),
-		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="当前页码，默认值1"),
-		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc="页大小，默认值10"),
-		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc="是否分页，默认值true")
+		@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "common.keyword"),
+		@Param(name = "currentPage", type = ApiParamType.INTEGER, desc="common.currentpage"),
+		@Param(name = "pageSize", type = ApiParamType.INTEGER, desc="common.pagesize"),
+		@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc="common.isneedpage")
 	})
 	@Output({
 		@Param(explode = BasePageVo.class),
-		@Param(name = "tbodyList", explode = MailServerVo[].class, desc = "邮件服务器信息列表")
+		@Param(name = "tbodyList", explode = MailServerVo[].class, desc = "common.tbodylist")
 	})
-	@Description(desc = "邮件服务器信息列表查询接口")
+	@Description(desc = "nmtam.mailserversearchapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		MailServerVo mailServerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MailServerVo>() {});

@@ -40,14 +40,14 @@ public class TestWechatApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "测试企业微信发送消息";
+        return "nmtaw.testwechatapi.getname";
     }
 
     @Input({
-            @Param(name = "toUser", type = ApiParamType.STRING, isRequired = true, desc = "用户")
+            @Param(name = "toUser", type = ApiParamType.STRING, isRequired = true, desc = "nmtaw.testwechatapi.input.param.desc.touser")
     })
     @Output({})
-    @Description(desc = "测试企业微信发送消息")
+    @Description(desc = "nmtaw.testwechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String toUser = paramObj.getString("toUser");

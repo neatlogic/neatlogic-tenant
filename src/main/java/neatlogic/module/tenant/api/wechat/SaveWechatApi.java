@@ -41,13 +41,13 @@ public class SaveWechatApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存企业微信数据";
+        return "nmtaw.savewechatapi.getname";
     }
 
     @Input({
-            @Param(name = "corpId", type = ApiParamType.STRING, isRequired = true, desc = "企业ID"),
-            @Param(name = "corpSecret", type = ApiParamType.STRING, isRequired = true, desc = "企业密钥"),
-            @Param(name = "agentId", type = ApiParamType.STRING, isRequired = true, desc = "企业应用ID")
+            @Param(name = "corpId", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.corpid"),
+            @Param(name = "corpSecret", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.corpsecret"),
+            @Param(name = "agentId", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.agentid")
     })
     @Output({})
     @Description(desc = "保存企业微信数据")

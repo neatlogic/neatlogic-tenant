@@ -49,7 +49,7 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "邮件服务器信息保存接口";
+		return "nmtam.mailserversaveapi.getname";
 	}
 
 	@Override
@@ -58,19 +58,20 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, desc = "uuid"),
-		@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "名称"),
-		@Param(name = "host", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "smtp主机"),
-		@Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "smtp端口"),
-		@Param(name = "userName", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "用户"),
-		@Param(name = "password", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "密码"),
-		@Param(name = "domain", type = ApiParamType.STRING,  maxLength = 50, desc = "域名"),
-		@Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "")
+			@Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+			@Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired= true, maxLength = 50, desc = "common.name"),
+			@Param(name = "host", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "term.framework.smpthost"),
+			@Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.smptport"),
+			@Param(name = "userName", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "common.username"),
+			@Param(name = "password", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "common.password"),
+			@Param(name = "domain", type = ApiParamType.STRING,  maxLength = 50, desc = "term.framework.domain"),
+			@Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true,  maxLength = 50, desc = "common.mailaddress"),
+			@Param(name = "sslEnable", type = ApiParamType.ENUM, rule = "true,false", isRequired = true, maxLength = 50, desc = "term.framework.smptsslenable")
 	})
 	@Output({
-		@Param(name = "Return", type = ApiParamType.STRING, desc = "邮件服务器uuid")
+		@Param(name = "Return", type = ApiParamType.STRING, desc = "common.uuid")
 	})
-	@Description(desc = "邮件服务器信息保存接口")
+	@Description(desc = "nmtam.mailserversaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		MailServerVo mailServerVo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<MailServerVo>() {});
