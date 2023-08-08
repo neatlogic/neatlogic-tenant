@@ -17,26 +17,29 @@
 package neatlogic.module.tenant.api.mailserver;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.MailServerMapper;
 import neatlogic.framework.dto.MailServerVo;
-import neatlogic.module.tenant.exception.mailserver.MailServerNotFoundException;
-@Service
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
+@Service
+@AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MailServerGetApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private MailServerMapper mailServerMapper;
+	@Resource
+	private NotifyConfigMapper notifyConfigMapper;
 
 	@Override
 	public String getToken() {
@@ -45,7 +48,7 @@ public class MailServerGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "邮件服务器信息获取接口";
+		return "nmtam.mailservergetapi.getname";
 	}
 
 	@Override
@@ -53,20 +56,18 @@ public class MailServerGetApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Input({
-		@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "邮件服务器uuid")
-	})
+	@Input({})
 	@Output({
-		@Param(explode = MailServerVo.class, desc = "邮件服务器信息")
+		@Param(explode = MailServerVo.class)
 	})
-	@Description(desc = "邮件服务器信息获取接口")
+	@Description(desc = "nmtam.mailservergetapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String uuid = jsonObj.getString("uuid");
-		MailServerVo mailServerVo = mailServerMapper.getMailServerByUuid(uuid);
-		if(mailServerVo == null) {
-			throw new MailServerNotFoundException(uuid);
+		String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.EMAIL.getValue());
+		if (StringUtils.isBlank(config)) {
+			return null;
 		}
+		MailServerVo mailServerVo = JSONObject.parseObject(config, MailServerVo.class);
 		return mailServerVo;
 	}
 

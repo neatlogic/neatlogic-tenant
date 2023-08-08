@@ -14,57 +14,52 @@
  * limitations under the License.
  */
 
-package neatlogic.module.tenant.api.mailserver;
+package neatlogic.module.tenant.api.wechat;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
-import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.NotifyConfigMapper;
+import neatlogic.framework.dto.WechatVo;
+import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.util.EmailUtil;
-import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
-/**
- * 测试邮件服务器能否正常发送邮件
- *
- * @author linbq
- * @since 2021/5/11 11:21
- **/
-@Service
+import javax.annotation.Resource;
+
+@Component
 @AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MailServerTestApi extends PrivateApiComponentBase {
+public class GetWechatApi extends PrivateApiComponentBase {
 
-    @Override
-    public String getToken() {
-        return "mailserver/test";
-    }
+    @Resource
+    private NotifyConfigMapper notifyConfigMapper;
 
     @Override
     public String getName() {
-        return "nmtam.mailservertestapi.getname";
+        return "nmtaw.getwechatapi.getname";
     }
 
-    @Override
-    public String getConfig() {
-        return null;
-    }
-
-    @Input({
-            @Param(name = "emailAddress", type = ApiParamType.EMAIL, isRequired = true, desc = "common.mailaddress")
+    @Input({})
+    @Output({
+            @Param(explode = WechatVo.class)
     })
-    @Output({})
-    @Description(desc = "nmtam.mailservertestapi.getname")
+    @Description(desc = "nmtaw.getwechatapi.getname")
     @Override
-    public Object myDoService(JSONObject jsonObj) throws Exception {
-        EmailUtil.sendEmailWithFile(
-                "Test mail",
-                "Your configured mail server information is available!",
-                jsonObj.getString("emailAddress")
-        );
-        return null;
+    public Object myDoService(JSONObject paramObj) throws Exception {
+        String config = notifyConfigMapper.getConfigByType(NotifyHandlerType.WECHAT.getValue());
+        if (StringUtils.isBlank(config)) {
+            return null;
+        }
+        WechatVo wechatVo = JSONObject.parseObject(config, WechatVo.class);
+        return wechatVo;
     }
 
+    @Override
+    public String getToken() {
+        return "wechat/get";
+    }
 }
