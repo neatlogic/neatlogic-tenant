@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.service.UserRoleTeamService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,8 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
     @Description(desc = "用户角色及组织架构查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return userRoleTeamService.searchUserRoleTeam(jsonObj);
+        GroupSearchVo groupSearchVo = jsonObj.toJavaObject(GroupSearchVo.class);
+        return userRoleTeamService.searchUserRoleTeam(groupSearchVo);
     }
 
 }
