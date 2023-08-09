@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.restful.groupsearch.core.GroupSearchGroupVo;
 import neatlogic.framework.restful.groupsearch.core.GroupSearchVo;
 import neatlogic.framework.service.UserRoleTeamService;
 import com.alibaba.fastjson.JSONObject;
@@ -42,7 +43,7 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "用户角色及组织架构查询接口";
+        return "nmmat.userroleteamsearchapi.getname";
     }
 
     @Override
@@ -51,21 +52,18 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", isRequired = false, xss = true),
-            @Param(name = "valueList", type = ApiParamType.JSONARRAY, desc = "用于回显的参数列表"),
-            @Param(name = "excludeList", type = ApiParamType.JSONARRAY, desc = "用于过滤回显参数"),
-            @Param(name = "includeList", type = ApiParamType.JSONARRAY, desc = "用于需要回显参数，‘当前登录人：common#loginuser’"),
-            @Param(name = "groupList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "限制接口返回类型，['processUserType','user','team','role']"),
-            @Param(name = "rangeList", type = ApiParamType.JSONARRAY, desc = "限制接口option范围，['user#xxx','team#xxx','role#xxxx']"),
-            @Param(name = "total", type = ApiParamType.INTEGER, desc = "共展示数量 默认18", isRequired = false)
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true),
+            @Param(name = "valueList", type = ApiParamType.JSONARRAY, desc = "common.defaultvaluelist"),
+            @Param(name = "excludeList", type = ApiParamType.JSONARRAY, desc = "common.excludelist"),
+            @Param(name = "includeList", type = ApiParamType.JSONARRAY, desc = "common.includelist", help = "‘当前登录人：common#loginuser’"),
+            @Param(name = "groupList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.grouplist", help = "['processUserType','user','team','role']"),
+            @Param(name = "rangeList", type = ApiParamType.JSONARRAY, desc = "common.rangelist", help = "['user#xxx','team#xxx','role#xxxx']"),
+            @Param(name = "total", type = ApiParamType.INTEGER, desc = "common.rownum")
     })
     @Output({
-            @Param(name = "text", type = ApiParamType.STRING, desc = "类型中文名"),
-            @Param(name = "value", type = ApiParamType.STRING, desc = "类型"),
-            @Param(name = "dataList[0].text", type = ApiParamType.STRING, desc = "类型具体选项名"),
-            @Param(name = "dataList[0].value", type = ApiParamType.STRING, desc = "类型具体选项值")
+            @Param(explode = GroupSearchGroupVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "用户角色及组织架构查询接口")
+    @Description(desc = "nmmat.userroleteamsearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         GroupSearchVo groupSearchVo = jsonObj.toJavaObject(GroupSearchVo.class);
