@@ -63,7 +63,7 @@ public class TestWechatApi extends PrivateApiComponentBase {
         JSONObject data = WechatUtil.getTextCardMsg(
                 toUser ,
                 "Test wechat",
-                "Your enterprise wechat configuration is available!@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.techsure.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect",
+                "Your enterprise wechat configuration is available!@link:https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx8a4c400b4c54eead&redirect_uri=http://demo.neatlogic.cn:8011/demo/workDetail?processTaskId=${DATA.id}&isHandle=true&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect",
                 wechatVo.getCorpId()
         );
         WechatUtil.sendMessage(accessToken.getToken(), data, wechatVo.getAgentId());
