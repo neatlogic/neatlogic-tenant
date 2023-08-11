@@ -131,6 +131,9 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (child.getIsFile()) {
                     childName += ".md";
                 }
+                if (StringUtils.isNotBlank(child.getPrefix())) {
+                    childName = child.getPrefix() + childName;
+                }
                 if (Objects.equals(childName, directoryName)) {
                     directory = child;
                     flag = true;
