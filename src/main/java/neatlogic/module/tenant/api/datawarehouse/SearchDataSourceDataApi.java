@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.datawarehouse;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -29,8 +31,6 @@ import neatlogic.framework.datawarehouse.exceptions.DataSourceIsNotFoundExceptio
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 

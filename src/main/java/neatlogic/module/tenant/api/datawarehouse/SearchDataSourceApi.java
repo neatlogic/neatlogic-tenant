@@ -48,7 +48,7 @@ public class SearchDataSourceApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询数据仓库数据源";
+        return "nmtad.searchdatasourceapi.getname";
     }
 
     @Override
@@ -56,10 +56,12 @@ public class SearchDataSourceApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss = true)})
+    @Input({
+            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "nfdd.datasourcevo.entityfield.name.moduleid"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true)})
     @Output({@Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = DataSourceVo[].class)})
-    @Description(desc = "查询数据仓库数据源接口")
+    @Description(desc = "nmtad.searchdatasourceapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         DataSourceVo reportDataSourceVo = JSONObject.toJavaObject(jsonObj, DataSourceVo.class);

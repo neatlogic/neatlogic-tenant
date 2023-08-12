@@ -55,7 +55,7 @@ public class ExecuteDataSourceApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "执行数据仓库数据源数据同步";
+        return "nmtad.executedatasourceapi.getname";
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ExecuteDataSourceApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id", isRequired = true)})
-    @Description(desc = "执行数据仓库数据源数据同步接口")
+    @Description(desc = "nmtad.executedatasourceapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
