@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -76,6 +77,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
             try {
+                TenantContext.get().setUseDefaultDatasource(true);
                 // 旧的映射关系列表
                 List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
                 JSONArray configArray = paramObj.getJSONArray("configList");
@@ -105,6 +107,8 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 directory.getConfigList().clear();
                 directory.getConfigList().addAll(backupConfigList);
                 throw e;
+            } finally {
+                TenantContext.get().setUseDefaultDatasource(false);
             }
         }
         return null;
