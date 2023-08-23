@@ -78,9 +78,6 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            if (TransactionSynchronizationManager.isSynchronizationActive()) {
-                System.out.println("1");
-            }
             TenantContext.get().setUseDefaultDatasource(true);
             TransactionStatus tx = TransactionUtil.openTx();
             try {

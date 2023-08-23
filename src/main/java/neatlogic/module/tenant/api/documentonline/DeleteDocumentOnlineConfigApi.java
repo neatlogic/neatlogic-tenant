@@ -76,11 +76,8 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
+            TenantContext.get().setUseDefaultDatasource(true);
             try {
-                if (TransactionSynchronizationManager.isSynchronizationActive()) {
-                    System.out.println("3");
-                }
-                TenantContext.get().setUseDefaultDatasource(true);
                 documentOnlineService.deleteDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
                 directory.getConfigList().clear();
