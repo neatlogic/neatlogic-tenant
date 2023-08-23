@@ -30,13 +30,13 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 @AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
@@ -78,6 +78,9 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
             try {
+                if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                    System.out.println("2");
+                }
                 TenantContext.get().setUseDefaultDatasource(true);
                 documentOnlineService.saveDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {

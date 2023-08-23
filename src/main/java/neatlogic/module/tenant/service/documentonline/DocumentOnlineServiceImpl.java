@@ -29,6 +29,7 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -147,6 +148,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
         return directory;
     }
 
+    @Transactional
     @Override
     public void saveDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo newConfigVo) {
         boolean needUpdateDataBaseTable = false;
@@ -175,6 +177,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteDocumentOnlineConfig(DocumentOnlineDirectoryVo directory, DocumentOnlineConfigVo oldConfigVo) {
         List<DocumentOnlineConfigVo> configList = directory.getConfigList();
