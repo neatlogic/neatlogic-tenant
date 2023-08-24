@@ -27,10 +27,8 @@ import neatlogic.framework.heartbeat.dto.ServerClusterVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.RegexUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import java.util.Objects;
@@ -59,23 +57,16 @@ public class SaveServerApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         TenantContext.get().setUseDefaultDatasource(true);
         ServerClusterVo serverVo = paramObj.toJavaObject(ServerClusterVo.class);
-        TransactionStatus tx = TransactionUtil.openTx();
-        try {
-            ServerClusterVo oldServerClusterVo = serverMapper.getServerByServerId(serverVo.getServerId());
-            if (oldServerClusterVo == null) {
-
-            }
-            if (!Objects.equals(oldServerClusterVo.getHost(), serverVo.getHost())) {
-                serverVo.setFcu(UserContext.get().getUserUuid());
-                serverVo.setLcu(UserContext.get().getUserUuid());
-                serverMapper.updateServerHostByServerId(serverVo);
-            }
-            TransactionUtil.commitTx(tx);
-        } catch (Exception e) {
-            TransactionUtil.rollbackTx(tx);
-        } finally {
-            TenantContext.get().setUseDefaultDatasource(false);
+        ServerClusterVo oldServerClusterVo = serverMapper.getServerByServerId(serverVo.getServerId());
+        if (oldServerClusterVo == null) {
+            return null;
         }
+        if (!Objects.equals(oldServerClusterVo.getHost(), serverVo.getHost())) {
+            serverVo.setFcu(UserContext.get().getUserUuid());
+            serverVo.setLcu(UserContext.get().getUserUuid());
+            serverMapper.updateServerHostByServerId(serverVo);
+        }
+        TenantContext.get().setUseDefaultDatasource(false);
         return null;
     }
 
