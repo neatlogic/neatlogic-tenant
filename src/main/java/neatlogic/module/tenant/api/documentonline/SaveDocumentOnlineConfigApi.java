@@ -28,18 +28,20 @@ import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundExcept
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 @AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
@@ -76,8 +78,9 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
+            TenantContext.get().setUseDefaultDatasource(true);
+            TransactionStatus tx = TransactionUtil.openTx();
             try {
-                TenantContext.get().setUseDefaultDatasource(true);
                 // 旧的映射关系列表
                 List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
                 JSONArray configArray = paramObj.getJSONArray("configList");
@@ -103,9 +106,11 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
                         documentOnlineService.saveDocumentOnlineConfig(directory, configVo);
                     }
                 }
+                TransactionUtil.commitTx(tx);
             } catch (Exception e) {
                 directory.getConfigList().clear();
                 directory.getConfigList().addAll(backupConfigList);
+                TransactionUtil.rollbackTx(tx);
                 throw e;
             } finally {
                 TenantContext.get().setUseDefaultDatasource(false);
