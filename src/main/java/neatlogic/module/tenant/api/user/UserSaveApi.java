@@ -1,3 +1,19 @@
+/*
+ * Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSON;
@@ -7,7 +23,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.dto.UserAuthVo;
@@ -22,10 +37,10 @@ import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,11 +51,9 @@ import java.util.Set;
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     UserMapper userMapper;
 
-    @Autowired
-    TeamMapper teamMapper;
 
     @Override
     public String getToken() {

@@ -16,8 +16,8 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
@@ -25,7 +25,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.exception.user.UserCurrentPasswordException;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,6 @@ import java.util.List;
 
 @Service
 @Transactional
-
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {
 	
@@ -84,7 +82,7 @@ public class UserPasswordUpdateApi extends PrivateApiComponentBase {
 			userVo.setPassword(password);		
 			userMapper.updateUserPasswordActive(userUuid);
 			List<Long> idList = userMapper.getLimitUserPasswordIdList(userUuid);
-			if (idList != null && idList.size() > 0){
+			if (idList != null && !idList.isEmpty()) {
 				userMapper.deleteUserPasswordByLimit(userUuid, idList);
 			}
 			userMapper.insertUserPassword(userVo);
