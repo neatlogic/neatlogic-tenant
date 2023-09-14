@@ -1,0 +1,89 @@
+/*
+ * Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package neatlogic.module.tenant.api.importexport;
+
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.file.FileNotUploadException;
+import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
+import neatlogic.framework.importexport.dto.ImportDependencyTypeVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
+
+@Component
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class ImportApi extends PrivateBinaryStreamApiComponentBase {
+
+    private Logger logger = LoggerFactory.getLogger(ImportApi.class);
+
+    @Override
+    public String getName() {
+        return "通用导入接口";
+    }
+
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({
+            @Param(name = "targetType", type = ApiParamType.STRING, isRequired = true, desc = "导入目标类型"),
+            @Param(name = "userSelection", type = ApiParamType.JSONOBJECT, desc = "用户选择导入的依赖数据")
+    })
+    @Output({
+            @Param(name = "typeList", explode = ImportDependencyTypeVo[].class, desc = "依赖项列表")
+    })
+    @Description(desc = "通用导入接口")
+    @Override
+    public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        // 获取所有导入文件
+        Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
+        // 如果没有导入文件，抛出异常
+        if (multipartFileMap.isEmpty()) {
+            throw new FileNotUploadException();
+        }
+        MultipartFile multipartFile = null;
+        // 遍历导入文件
+        for (Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
+            multipartFile = entry.getValue();
+            break;
+        }
+        if (multipartFile != null) {
+            String targetType = paramObj.getString("targetType");
+            String userSelection = paramObj.getString("userSelection");
+            return ImportExportHandlerFactory.importData(multipartFile, targetType, userSelection);
+        }
+        return null;
+    }
+
+    @Override
+    public String getToken() {
+        return "common/import";
+    }
+
+}
