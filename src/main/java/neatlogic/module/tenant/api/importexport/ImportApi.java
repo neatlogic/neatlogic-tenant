@@ -27,6 +27,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiCompone
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Component
+@Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ImportApi extends PrivateBinaryStreamApiComponentBase {
 
