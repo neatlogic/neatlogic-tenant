@@ -24,8 +24,6 @@ import neatlogic.framework.importexport.dto.ImportDependencyTypeVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,8 +37,6 @@ import java.util.Map;
 @Transactional
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ImportApi extends PrivateBinaryStreamApiComponentBase {
-
-    private Logger logger = LoggerFactory.getLogger(ImportApi.class);
 
     @Override
     public String getName() {
