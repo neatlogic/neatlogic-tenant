@@ -47,7 +47,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "通用导出接口";
+        return "nmtai.exportapi.getname";
     }
 
     @Override
@@ -56,11 +56,11 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "primaryKey", type = ApiParamType.NOAUTH, isRequired = true, desc = "主键"),
-            @Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "导入类型")
+            @Param(name = "primaryKey", type = ApiParamType.NOAUTH, isRequired = true, desc = "common.primarykey"),
+            @Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "common.type")
     })
     @Output({})
-    @Description(desc = "通用导出接口")
+    @Description(desc = "nmtai.exportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Object primaryKey = paramObj.get("primaryKey");

@@ -40,7 +40,7 @@ public class ImportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "通用导入接口";
+        return "nmtai.importapi.getname";
     }
 
     @Override
@@ -49,13 +49,13 @@ public class ImportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "targetType", type = ApiParamType.STRING, isRequired = true, desc = "导入目标类型"),
-            @Param(name = "userSelection", type = ApiParamType.JSONOBJECT, desc = "用户选择导入的依赖数据")
+            @Param(name = "targetType", type = ApiParamType.STRING, isRequired = true, desc = "common.importtargettype"),
+            @Param(name = "userSelection", type = ApiParamType.JSONOBJECT, desc = "common.userselectionimportoption")
     })
     @Output({
-            @Param(name = "typeList", explode = ImportDependencyTypeVo[].class, desc = "依赖项列表")
+            @Param(name = "typeList", explode = ImportDependencyTypeVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "通用导入接口")
+    @Description(desc = "nmtai.importapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
