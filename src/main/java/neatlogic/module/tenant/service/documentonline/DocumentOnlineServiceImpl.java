@@ -35,10 +35,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class DocumentOnlineServiceImpl implements DocumentOnlineService {
@@ -88,6 +85,40 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
 
     @Override
     public List<DocumentOnlineVo> getAllFileList(DocumentOnlineDirectoryVo directory, String moduleGroup, String menu) {
+        return getAllFileListAndSort(directory, moduleGroup, menu);
+    }
+
+    /**
+     * 通过递归，获取某个目录下的指定模块、指定菜单下的文件，并且排序
+     * @param directory 目录
+     * @param moduleGroup 指定模块
+     * @param menu 指定菜单
+     * @return 返回文件列表
+     */
+    private List<DocumentOnlineVo> getAllFileListAndSort(DocumentOnlineDirectoryVo directory, String moduleGroup, String menu) {
+        List<DocumentOnlineVo> list = getAllFileListUseRecurve(directory, moduleGroup, menu);
+        list.sort((o1, o2) -> {
+            if (o1.getPrefix() != null && o2.getPrefix() != null) {
+                return Integer.compare(o1.getPrefix(), o2.getPrefix());
+            } else if (o1.getPrefix() != null && o2.getPrefix() == null) {
+                return -1;
+            } else if (o1.getPrefix() == null && o2.getPrefix() != null) {
+                return 1;
+            } else {
+                return String.CASE_INSENSITIVE_ORDER.compare(o1.getFileName(), o2.getFileName());
+            }
+        });
+        return list;
+    }
+
+    /**
+     * 通过递归，获取某个目录下的指定模块、指定菜单下的文件
+     * @param directory 目录
+     * @param moduleGroup 指定模块
+     * @param menu 指定菜单
+     * @return 返回文件列表
+     */
+    private List<DocumentOnlineVo> getAllFileListUseRecurve(DocumentOnlineDirectoryVo directory, String moduleGroup, String menu) {
         List<DocumentOnlineVo> list = new ArrayList<>();
         for (DocumentOnlineDirectoryVo child : directory.getChildren()) {
             if (child.getIsFile()) {
@@ -95,6 +126,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (StringUtils.isBlank(moduleGroup) || child.belongToOwner(moduleGroup, menu, returnObj)) {
                     DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
                     documentOnlineVo.setUpwardNameList(child.getUpwardNameList());
+                    documentOnlineVo.setPrefix(child.getPrefix());
                     documentOnlineVo.setFileName(child.getName());
                     documentOnlineVo.setFilePath(child.getFilePath());
                     String anchorPoint = returnObj.getString("anchorPoint");
@@ -103,7 +135,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                     list.add(documentOnlineVo);
                 }
             } else {
-                list.addAll(getAllFileList(child, moduleGroup, menu));
+                list.addAll(getAllFileListUseRecurve(child, moduleGroup, menu));
             }
         }
         return list;
@@ -111,7 +143,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
 
     @Override
     public List<DocumentOnlineVo> getAllFileList(DocumentOnlineDirectoryVo directory) {
-        return getAllFileList(directory, null, null);
+        return getAllFileListAndSort(directory, null, null);
     }
 
     @Override
@@ -132,8 +164,8 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
                 if (child.getIsFile()) {
                     childName += ".md";
                 }
-                if (StringUtils.isNotBlank(child.getPrefix())) {
-                    childName = child.getPrefix() + childName;
+                if (child.getPrefix() != null) {
+                    childName = child.getPrefix() + "." + childName;
                 }
                 if (Objects.equals(childName, directoryName)) {
                     directory = child;
