@@ -17,12 +17,11 @@ limitations under the License.
 package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.RUNNER_MODIFY;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dto.runner.RunnerAuthVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.service.RunnerService;
@@ -33,21 +32,20 @@ import javax.annotation.Resource;
 
 @Service
 @Transactional
-@AuthAction(action = RUNNER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class RunnerSaveApi extends PrivateApiComponentBase {
+public class RunnerRegisterApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerService runnerService;
 
     @Override
     public String getName() {
-        return "保存runner";
+        return "注册runner";
     }
 
     @Override
     public String getToken() {
-        return "runner/save";
+        return "runner/register";
     }
 
     @Override
@@ -56,14 +54,9 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "runner id"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 名"),
             @Param(name = "protocol", type = ApiParamType.ENUM, isRequired = true, rule = "http,https", desc = "协议"),
-            @Param(name = "host", type = ApiParamType.STRING, desc = "runner host", xss = true),
             @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
-            @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口"),
-            @Param(name = "isAuth", type = ApiParamType.INTEGER, desc = "是否认证"),
-            @Param(name = "runnerAuthList", explode = RunnerAuthVo.class, type = ApiParamType.JSONARRAY, desc = "runner外部认证信息"),
+            @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口")
     })
     @Output({
     })
@@ -71,8 +64,15 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo paramRunner = JSONObject.toJavaObject(paramObj, RunnerVo.class);
-        Long id = paramObj.getLong("id");
-        runnerService.SaveRunner(paramRunner, id);
+        String host = RequestContext.get().getRequest().getRemoteHost();
+        paramRunner.setHost(host);
+        paramRunner.setName(host);
+        runnerService.SaveRunner(paramRunner, null);
         return null;
+    }
+
+    @Override
+    public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
+        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITHOUT_ENCRYPTION;
     }
 }

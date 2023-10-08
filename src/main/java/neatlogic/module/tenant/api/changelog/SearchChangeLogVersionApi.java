@@ -72,7 +72,7 @@ public class SearchChangeLogVersionApi extends PrivateApiComponentBase {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
 
             // 定义比较器
-            Comparator<String> fileNameComparator = Comparator.comparing((String fileName) -> LocalDate.parse(fileName.substring(0, 10), formatter)).reversed();
+            Comparator<String> fileNameComparator = Comparator.comparing((String fileName) -> LocalDate.parse(fileName, formatter)).reversed();
 
             // 按日期排序
             list.sort(fileNameComparator);
