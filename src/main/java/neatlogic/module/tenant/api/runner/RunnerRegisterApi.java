@@ -40,7 +40,7 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "注册runner";
+        return "nmtar.runnerregisterapi.getname";
     }
 
     @Override
@@ -54,13 +54,13 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "protocol", type = ApiParamType.ENUM, isRequired = true, rule = "http,https", desc = "协议"),
-            @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
-            @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口")
+            @Param(name = "protocol", type = ApiParamType.ENUM, isRequired = true, rule = "http,https", desc = "term.cmdb.protocol"),
+            @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "nmtar.runnerregisterapi.input.param.nettyport"),
+            @Param(name = "port", type = ApiParamType.INTEGER, desc = "nmtar.runnerregisterapi.input.param.port")
     })
     @Output({
     })
-    @Description(desc = "runner 保存接口,直接由ip确定一个runner")
+    @Description(desc = "nmtar.runnerregisterapi.description.desc")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo paramRunner = JSONObject.toJavaObject(paramObj, RunnerVo.class);
