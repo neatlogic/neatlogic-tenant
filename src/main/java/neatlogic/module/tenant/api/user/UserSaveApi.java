@@ -33,6 +33,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -44,6 +45,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -141,6 +143,9 @@ public class UserSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
+            // 自动生成token
+            String token = Md5Util.encryptMD5(UUID.randomUUID().toString());
+            userMapper.updateUserTokenByUuid(token, userVo.getUuid());
         } else {
             UserVo existUserVo = userMapper.getUserBaseInfoByUuid(uuid);
             if (existUserVo == null || Objects.equals(existUserVo.getIsDelete(), 1)) {

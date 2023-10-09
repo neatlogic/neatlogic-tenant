@@ -17,10 +17,12 @@
 package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.USER_MODIFY;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
@@ -29,13 +31,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+@AuthAction(action = USER_MODIFY.class)
 @Service
-
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetUserTokenApi extends PrivateApiComponentBase {
 
     @Resource
     private UserService userService;
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public String getToken() {
@@ -52,10 +56,15 @@ public class GetUserTokenApi extends PrivateApiComponentBase {
         return null;
     }
 
+    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid", isRequired = true)})
     @Output({@Param(name = "Return", explode = String.class, desc = "nmra.savewebhookdataapi.input.param.desc")})
     @Description(desc = "nmtau.getusertokenapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return userService.getUserTokenByUser(UserContext.get().getUserUuid(true));
+        String userUuid = jsonObj.getString("userUuid");
+        if(userMapper.getUserBaseInfoByUuid(userUuid) == null) {
+            throw new UserNotFoundException(userUuid);
+        }
+        return userService.getUserTokenByUser(userUuid);
     }
 }
