@@ -16,37 +16,36 @@
 
 package neatlogic.module.tenant.api.user;
 
-import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.USER_MODIFY;
-import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.Md5Util;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.UUID;
 
-@AuthAction(action = USER_MODIFY.class)
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ResetUserTokenApi extends PrivateApiComponentBase {
+public class ResetCurrentUserTokenApi extends PrivateApiComponentBase {
 
     @Resource
     private UserMapper userMapper;
 
     @Override
     public String getToken() {
-        return "user/token/reset";
+        return "user/current/token/reset";
     }
 
     @Override
     public String getName() {
-        return "nmtau.resetusertokenapi.getname";
+        return "nmtau.resetcurrentusertokenapi.getname";
     }
 
     @Override
@@ -54,17 +53,12 @@ public class ResetUserTokenApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid", isRequired = true)})
     @Output({@Param(name = "Return", explode = String.class, desc = "nmtau.resetcurrentusertokenapi.output.param.return.desc")})
-    @Description(desc = "nmtau.resetusertokenapi.getname")
+    @Description(desc = "nmtau.resetcurrentusertokenapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String userUuid = jsonObj.getString("userUuid");
-        if(userMapper.getUserBaseInfoByUuid(userUuid) == null) {
-            throw new UserNotFoundException(userUuid);
-        }
         String token = Md5Util.encryptMD5(UUID.randomUUID().toString());
-        userMapper.updateUserTokenByUuid(token, userUuid);
+        userMapper.updateUserTokenByUuid(token, UserContext.get().getUserUuid(true));
         return token;
     }
 }
