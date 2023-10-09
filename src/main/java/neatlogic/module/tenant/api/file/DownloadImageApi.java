@@ -54,12 +54,12 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "图片下载接口";
+        return "nmtaf.downloadimageapi.getname";
     }
 
     @Override
     public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
-        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITH_ENCRYPTION;
+        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITHOUT_ENCRYPTION;
     }
 
     @Override
@@ -68,8 +68,8 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "图片id", isRequired = true)})
-    @Description(desc = "图片下载接口")
+    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "common.id", isRequired = true)})
+    @Description(desc = "nmtaf.downloadimageapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long id = paramObj.getLong("id");
