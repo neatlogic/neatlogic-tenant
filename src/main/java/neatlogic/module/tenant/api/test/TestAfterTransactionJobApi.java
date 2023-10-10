@@ -16,6 +16,7 @@ limitations under the License.
 
 package neatlogic.module.tenant.api.test;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
@@ -23,13 +24,12 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.transaction.core.AfterTransactionJob;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 //@Transactional
-@Service
+//@Service
+@Deprecated
 public class TestAfterTransactionJobApi extends PrivateApiComponentBase {
     @Resource
     UserMapper userMapper;

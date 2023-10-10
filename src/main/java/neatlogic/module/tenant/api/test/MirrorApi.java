@@ -16,15 +16,13 @@
 
 package neatlogic.module.tenant.api.test;
 
-import neatlogic.framework.auth.core.AuthAction;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Component;
 
 @Deprecated
 
-@Component
+//@Component
 public class MirrorApi extends PrivateApiComponentBase {
 
 	@Override
