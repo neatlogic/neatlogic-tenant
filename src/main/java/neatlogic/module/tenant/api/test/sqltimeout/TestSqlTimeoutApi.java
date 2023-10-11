@@ -23,16 +23,14 @@ import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.module.tenant.dao.mapper.TestMapper;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
-@Component
+//@Component
+@Deprecated
 @Transactional
 public class TestSqlTimeoutApi extends PrivateApiComponentBase {
 

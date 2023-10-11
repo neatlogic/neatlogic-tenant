@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.test;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -24,12 +25,10 @@ import neatlogic.framework.restful.annotation.ResubmitInterval;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.transaction.core.AfterTransactionJob;
 import neatlogic.module.tenant.dao.mapper.TestMapper;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Deprecated
-@Component
+//@Component
 //@Transactional
 public class TestApi extends PrivateApiComponentBase {
 
