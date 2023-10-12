@@ -34,7 +34,7 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.I18n;
+import neatlogic.framework.util.$;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +60,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "通知策略分类列表接口";
+        return "nmtan.notifypolicyhandlerlistapi.getname";
     }
 
     @Override
@@ -69,9 +69,9 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
     }
 
     @Output({
-            @Param(explode = ValueTextVo[].class, desc = "通知策略分类列表")
+            @Param(explode = ValueTextVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "通知策略分类列表接口")
+    @Description(desc = "nmtan.notifypolicyhandlerlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<NotifyPolicyVo> notifyPolicyList = notifyMapper.getAllDefaultNotifyPolicyList();
@@ -110,7 +110,7 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
             }
         }
         if (AuthActionChecker.check(NOTIFY_JOB_MODIFY.class)) {
-            resultTree.add(new ValueTextVo("schedule", new I18n("定时任务").toString()));
+            resultTree.add(new ValueTextVo("schedule", $.t("common.schedule")));
         }
         if (CollectionUtils.isEmpty(resultTree)) {
             throw new PermissionDeniedException();

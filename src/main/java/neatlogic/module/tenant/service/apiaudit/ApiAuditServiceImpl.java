@@ -2,13 +2,14 @@ package neatlogic.module.tenant.service.apiaudit;
 
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.restful.annotation.ExcelField;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.dao.mapper.ApiAuditMapper;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiAuditVo;
 import neatlogic.framework.restful.dto.ApiVo;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.AuditUtil;
 import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,7 +21,10 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ApiAuditServiceImpl implements ApiAuditService{
@@ -307,7 +311,7 @@ public class ApiAuditServiceImpl implements ApiAuditService{
             for (ApiAuditVo vo : apiAuditVoList) {
                 for (ApiVo api : apiList) {
                     if (vo.getToken().equals(api.getToken())) {
-                        vo.setApiName(api.getName());
+                        vo.setApiName($.t(api.getName()));
                         vo.setModuleGroup(api.getModuleGroup());
                         Class<?> apiClass = null;
                         try{
