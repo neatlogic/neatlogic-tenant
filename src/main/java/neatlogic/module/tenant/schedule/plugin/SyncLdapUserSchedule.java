@@ -67,7 +67,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "同步LDAP的用户信息";
+        return "全量同步LDAP的用户信息";
     }
 
     @Prop({
@@ -75,7 +75,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "cn=Manager,dc=neatlogic,dc=com"),
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "123456"),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "dc=neatlogic,dc=com"),
-            @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的ou，同步到系统用户"),
+            @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
             @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 5, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
             @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 6, help = "指定用户主键映射字段"),
             @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 7, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),

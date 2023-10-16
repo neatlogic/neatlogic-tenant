@@ -53,14 +53,14 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "同步LDAP的组织架构";
+        return "全量同步LDAP的组织架构";
     }
 
     @Prop({
-            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true, sort = 0, help = "ldap://192.168.1.99"),
-            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "cn=Manager,dc=neatlogic,dc=com"),
-            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "123456"),
-            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "dc=neatlogic,dc=com"),
+            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true, sort = 0, help = "例如：ldap://192.168.1.99"),
+            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "例如：cn=Manager,dc=neatlogic,dc=com"),
+            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "例如：123456"),
+            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "例如：dc=neatlogic,dc=com"),
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的ou，同步到系统分组"),
             @Param(name = "rootParentUUid", controlType = "text", description = "根节点", required = false, sort = 5, help = "默认：0"),
             @Param(name = "uuid", controlType = "text", description = "分组UUID", required = true, sort = 6, help = "指定分组主键映射字段"),
