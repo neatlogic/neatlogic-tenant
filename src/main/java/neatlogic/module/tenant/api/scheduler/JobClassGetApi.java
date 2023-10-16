@@ -16,25 +16,24 @@
 
 package neatlogic.module.tenant.api.scheduler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobClassVo;
+import neatlogic.framework.scheduler.dto.JobPropVo;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 @Service
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -47,7 +46,7 @@ public class JobClassGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取定时作业组件信息";
+		return "nmtas.jobclassgetapi.getname";
 	}
 
 	@Override
@@ -55,15 +54,13 @@ public class JobClassGetApi extends PrivateApiComponentBase {
 		return null;
 	}
 	
-	@Input({@Param(name="className",type=ApiParamType.STRING,isRequired=true,desc="定时作业组件className")})
-	@Description(desc="获取定时作业组件信息")
+	@Input({
+			@Param(name = "className", type = ApiParamType.STRING, isRequired = true, desc = "common.classname")
+	})
+	@Description(desc="nmtas.jobclassgetapi.getname")
 	@Output({
-		@Param(name="Return",explode=JobClassVo.class,isRequired=true,desc="定时作业组件信息"),
-		@Param(name="inputList",type=ApiParamType.JSONARRAY,isRequired=true,desc="属性列表"),
-		@Param(name="inputList[0].name",type=ApiParamType.STRING,isRequired=true,desc="属性名称"),
-		@Param(name="inputList[0].dataType",type=ApiParamType.STRING,isRequired=true,desc="属性数据类型"),
-		@Param(name="inputList[0].description",type=ApiParamType.STRING,isRequired=true,desc="属性说明"),
-		@Param(name="inputList[0].required",type=ApiParamType.BOOLEAN,isRequired=true,desc="属性是否必填")		
+			@Param(name = "jobClass", explode = JobClassVo.class, desc="common.schedulejobclassinfo"),
+			@Param(name = "propList", explode = JobPropVo[].class, desc = "common.attributelist")
 		})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
@@ -73,26 +70,25 @@ public class JobClassGetApi extends PrivateApiComponentBase {
 		if(jobClass == null) {
 			throw new ScheduleHandlerNotFoundException(className);
 		}
-		JSONArray inputList = new JSONArray();
+		List<JobPropVo> propList = new ArrayList<>();
 		IJob job = SchedulerManager.getHandler(jobClass.getClassName());
 		Map<String, neatlogic.framework.scheduler.annotation.Param> paramMap = job.initProp();
-		for(Entry<String, neatlogic.framework.scheduler.annotation.Param> entry : paramMap.entrySet()) {
+		for (Map.Entry<String, neatlogic.framework.scheduler.annotation.Param> entry : paramMap.entrySet()) {
 			neatlogic.framework.scheduler.annotation.Param param = entry.getValue();
-			JSONObject paramObj = new JSONObject();
-            paramObj.put("name", param.name());
-            paramObj.put("dataType", param.dataType());
-            paramObj.put("description", param.description());
-            paramObj.put("required", param.required());
-			paramObj.put("sort", param.sort());
-            inputList.add(paramObj);
+			JobPropVo jobPropVo = new JobPropVo();
+			jobPropVo.setName(param.name());
+			jobPropVo.setDataType(param.dataType());
+			jobPropVo.setDescription(param.description());
+			jobPropVo.setRequired(param.required());
+			jobPropVo.setSort(param.sort());
+			jobPropVo.setHelp(param.help());
+			propList.add(jobPropVo);
 		}
 		//排序
-		inputList.sort(Comparator.comparing(obj->((JSONObject)obj)
-				.getIntValue("sort"),Comparator.nullsFirst(Comparator.naturalOrder()))
-		);
+		propList.sort(Comparator.comparing(JobPropVo::getSort, Comparator.nullsFirst(Comparator.naturalOrder())));
 		JSONObject returnObj = new JSONObject();
 		returnObj.put("jobClass", jobClass);
-		returnObj.put("inputList", inputList);
+		returnObj.put("propList", propList);
 		return returnObj;
 	}
 
