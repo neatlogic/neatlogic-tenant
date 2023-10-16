@@ -18,7 +18,7 @@ package neatlogic.module.tenant.schedule.plugin;
 
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.exception.core.ApiRuntimeException;
+import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
@@ -79,109 +79,110 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         }
 
         if (StringUtils.isBlank(searchFilter)) {
-            logger.error("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
-            throw new ApiRuntimeException("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
+            throw new ParamNotExistsException("过滤条件");
         }
-
+        if (StringUtils.isBlank(ldapUrl)) {
+            throw new ParamNotExistsException("ldap地址");
+        }
+        if (StringUtils.isBlank(userDn)) {
+            throw new ParamNotExistsException("同步账号dn");
+        }
+        if (StringUtils.isBlank(userSecret)) {
+            throw new ParamNotExistsException("登录密码");
+        }
         //parent不存在
         if (teamMapper.getTeamByUuid(rootParentUUid) == null) {
             rootParentUUid = TeamVo.ROOT_UUID;
         }
 
         int pageSize = 1000;//分页查询大小
-        if (StringUtils.isNotBlank(ldapUrl) && StringUtils.isNotBlank(userDn) && StringUtils.isNotBlank(userSecret)) {
-            Hashtable<String, String> HashEnv = new Hashtable<>();
-            HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
-            HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
-            HashEnv.put(Context.SECURITY_CREDENTIALS, userSecret);
-            HashEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-            HashEnv.put(Context.PROVIDER_URL, ldapUrl);
-            HashEnv.put(Context.BATCHSIZE, pageSize + "");
-            List<String> returnedAttList = new ArrayList<>();
-            String _uuid = getPropValue(jobObject, "uuid");
-            if (StringUtils.isNotBlank(_uuid)) {
-                returnedAttList.add(_uuid);
-            }
-            LdapContext ctx = new InitialLdapContext(HashEnv, null);
-            // 搜索控制器
-            SearchControls searchCtls = new SearchControls();
-            // 创建搜索控制器
-            searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            // 对象的每个属性名
-            String[] returnedAtts = new String[returnedAttList.size()];
-            returnedAttList.toArray(returnedAtts);
-            searchCtls.setReturningAttributes(returnedAtts);
-            //开启分页查询
-            ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, Control.CRITICAL)});
-            Date lcd = new Date();
-            byte[] cookie = null;
-            do {
-                // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
-                NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
-                String rootDn = searchBase;
-                Map<String, String> uuidMap = new HashMap<>();
-                while (answer.hasMoreElements()) {
-                    SearchResult sr = (SearchResult) answer.next();
-                    String uuid = null, teamName = null, parentName = null;
-                    String fullName = sr.getNameInNamespace();
-                    if (Objects.equals(rootDn, fullName)) {
-                        continue;
-                    }
-                    Attributes Attrs = sr.getAttributes();
-                    if (Attrs != null) {
-                        try {
-                            for (NamingEnumeration ne = Attrs.getAll(); ne.hasMore(); ) {
-                                Attribute Attr = (Attribute) ne.next();
-                                String attrName = Attr.getID();
-                                String attrValue = null;
-                                for (NamingEnumeration e = Attr.getAll(); e.hasMore(); ) {
-                                    attrValue = e.next().toString();
-                                }
-                                if (attrName.equals(_uuid)) {
-                                    uuid = attrValue.replace("-", "");
-                                }
+        Hashtable<String, String> HashEnv = new Hashtable<>();
+        HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
+        HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
+        HashEnv.put(Context.SECURITY_CREDENTIALS, userSecret);
+        HashEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        HashEnv.put(Context.PROVIDER_URL, ldapUrl);
+        HashEnv.put(Context.BATCHSIZE, pageSize + "");
+        List<String> returnedAttList = new ArrayList<>();
+        String _uuid = getPropValue(jobObject, "uuid");
+        if (StringUtils.isNotBlank(_uuid)) {
+            returnedAttList.add(_uuid);
+        }
+        LdapContext ctx = new InitialLdapContext(HashEnv, null);
+        // 搜索控制器
+        SearchControls searchCtls = new SearchControls();
+        // 创建搜索控制器
+        searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        // 对象的每个属性名
+        String[] returnedAtts = new String[returnedAttList.size()];
+        returnedAttList.toArray(returnedAtts);
+        searchCtls.setReturningAttributes(returnedAtts);
+        //开启分页查询
+        ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, Control.CRITICAL)});
+        Date lcd = new Date();
+        byte[] cookie = null;
+        do {
+            // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
+            NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
+            String rootDn = searchBase;
+            Map<String, String> uuidMap = new HashMap<>();
+            while (answer.hasMoreElements()) {
+                SearchResult sr = (SearchResult) answer.next();
+                String uuid = null, teamName = null, parentName = null;
+                String fullName = sr.getNameInNamespace();
+                if (Objects.equals(rootDn, fullName)) {
+                    continue;
+                }
+                Attributes Attrs = sr.getAttributes();
+                if (Attrs != null) {
+                    try {
+                        for (NamingEnumeration ne = Attrs.getAll(); ne.hasMore(); ) {
+                            Attribute Attr = (Attribute) ne.next();
+                            String attrName = Attr.getID();
+                            String attrValue = null;
+                            for (NamingEnumeration e = Attr.getAll(); e.hasMore(); ) {
+                                attrValue = e.next().toString();
                             }
-                        } catch (NamingException e) {
-                            logger.error("[Sync Ldap Team Error]:" + e.getMessage());
+                            if (attrName.equals(_uuid)) {
+                                uuid = attrValue.replace("-", "");
+                            }
                         }
-                    }
-                    if (StringUtils.isNotBlank(uuid)) {
-                        String pathName = fullName.replace(rootDn, "");
-                        String[] split = pathName.split(",");
-                        if (split.length > 0) {
-                            teamName = split[0].split("=")[1];
-                        }
-                        if (split.length > 1) {
-                            parentName = split[1].split("=")[1];
-                        }
-                        uuidMap.put(teamName, uuid);
-                        TeamVo teamVo = new TeamVo();
-                        teamVo.setSource("ldap");
-                        teamVo.setUuid(uuid);
-                        teamVo.setName(teamName);
-                        teamVo.setParentName(parentName);
-                        setUpwardTeamName(teamVo, fullName, rootDn);
-                        setUpwardUuidPath(uuidMap, teamVo);
-                        String parentUuid = uuidMap.get(teamVo.getParentName());
-                        teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
-                        teamVo.setLcd(lcd);
-                        this.teamMapper.insertTeamForLdap(teamVo);
+                    } catch (NamingException e) {
+                        logger.error("[Sync Ldap Team Error]:" + e.getMessage());
                     }
                 }
-                System.out.println(uuidMap.size());
-                cookie = parseControls(ctx.getResponseControls());
-                ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
-            } while ((cookie != null) && (cookie.length != 0));
-            ctx.close();
+                if (StringUtils.isNotBlank(uuid)) {
+                    String pathName = fullName.replace(rootDn, "");
+                    String[] split = pathName.split(",");
+                    if (split.length > 0) {
+                        teamName = split[0].split("=")[1];
+                    }
+                    if (split.length > 1) {
+                        parentName = split[1].split("=")[1];
+                    }
+                    uuidMap.put(teamName, uuid);
+                    TeamVo teamVo = new TeamVo();
+                    teamVo.setSource("ldap");
+                    teamVo.setUuid(uuid);
+                    teamVo.setName(teamName);
+                    teamVo.setParentName(parentName);
+                    setUpwardTeamName(teamVo, fullName, rootDn);
+                    setUpwardUuidPath(uuidMap, teamVo);
+                    String parentUuid = uuidMap.get(teamVo.getParentName());
+                    teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
+                    teamVo.setLcd(lcd);
+                    this.teamMapper.insertTeamForLdap(teamVo);
+                }
+            }
+            cookie = parseControls(ctx.getResponseControls());
+            ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
+        } while ((cookie != null) && (cookie.length != 0));
+        ctx.close();
 
-            //数据清理
-            this.teamMapper.updateTeamIsDeleteBySourceAndLcd("ldap", lcd);
-            //重算左右编码
-            LRCodeManager.rebuildLeftRightCode("team", "uuid", "parent_uuid", "`is_delete` = 0");
-        } else {
-            logger.error("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
-            throw new ApiRuntimeException("[Sync Ldap Team Error]: Incomplete Plugin parameters.");
-        }
+        //数据清理
+        this.teamMapper.updateTeamIsDeleteBySourceAndLcd("ldap", lcd);
+        //重算左右编码
+        LRCodeManager.rebuildLeftRightCode("team", "uuid", "parent_uuid", "`is_delete` = 0");
     }
 
     /**
