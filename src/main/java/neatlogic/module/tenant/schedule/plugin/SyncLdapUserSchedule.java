@@ -26,6 +26,7 @@ import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
 import neatlogic.framework.scheduler.core.PublicJobBase;
+import neatlogic.framework.scheduler.dto.JobAuditVo;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.TimeUtil;
@@ -48,7 +49,9 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @DisallowConcurrentExecution
@@ -67,7 +70,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "全量同步LDAP的用户信息";
+        return "同步LDAP的用户信息";
     }
 
     @Prop({
@@ -76,17 +79,18 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "123456"),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "dc=neatlogic,dc=com"),
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
-            @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 5, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
-            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 6, help = "指定用户主键映射字段"),
-            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 7, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
-            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 8, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
-            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 9, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
-            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 10, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
+            @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的"),
+            @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 6, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
+            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 7, help = "指定用户主键映射字段"),
+            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 8, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
+            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 9, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
+            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 10, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
+            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 11, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
         JobDetail jobDetail = context.getJobDetail();
-//        String jobUuid = jobDetail.getKey().getName();
+        String jobUuid = jobDetail.getKey().getName();
 
         int pageSize = 1000;//分页查询大小
         String ldapUrl = getPropValue(jobObject, "ldapUrl");
@@ -95,6 +99,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         String searchBase = getPropValue(jobObject, "searchBase"); //从xx顶层目录快速查找
         String searchFilter = getPropValue(jobObject, "searchFilter"); //LDAP搜索过滤器类
         String defaultRole = getPropValue(jobObject, "defaultRole");
+        String scope = getPropValue(jobObject, "scope");
         if (StringUtils.isBlank(searchFilter)) {
             throw new ParamNotExistsException("过滤条件");
         }
@@ -107,22 +112,9 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         if (StringUtils.isBlank(userSecret)) {
             throw new ParamNotExistsException("登录密码");
         }
-
-        //如果为空全量，不为空以上一次执行成功的作业开始时间检索
-//        String lastStartTime = schedulerMapper.getJobLastExecAuditStartTime(jobUuid, JobAuditVo.Status.SUCCEED.getValue());
-//        if(StringUtils.isNotBlank(lastStartTime)){
-//            //查询格式:(&(objectClass=*)(modifyTimestamp>=20230523000000.0Z))
-//            lastStartTime = lastStartTime.split(" ")[0].replace("-","").trim();
-//            lastStartTime = lastStartTime+"000000.0Z";
-//            searchFilter = "(&("+ searchFilter +")(modifyTimestamp>="+ lastStartTime +"))";
-//        }
-        Hashtable<String, String> HashEnv = new Hashtable<String, String>();
-        HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
-        HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
-        HashEnv.put(Context.SECURITY_CREDENTIALS, userSecret);
-        HashEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        HashEnv.put(Context.PROVIDER_URL, ldapUrl);
-        HashEnv.put(Context.BATCHSIZE, pageSize + "");
+        if (StringUtils.isBlank(scope)) {
+            throw new ParamNotExistsException("同步范围");
+        }
         List<String> returnedAttList = new ArrayList<>();
         String _uuid = getPropValue(jobObject, "uuid");
         if (StringUtils.isNotBlank(_uuid)) {
@@ -147,6 +139,13 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         int totalResults = 0;
         byte[] cookie = null;
 
+        Hashtable<String, String> HashEnv = new Hashtable<>();
+        HashEnv.put(Context.SECURITY_AUTHENTICATION, "simple"); // LDAP访问安全级别
+        HashEnv.put(Context.SECURITY_PRINCIPAL, userDn);
+        HashEnv.put(Context.SECURITY_CREDENTIALS, userSecret);
+        HashEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        HashEnv.put(Context.PROVIDER_URL, ldapUrl);
+        HashEnv.put(Context.BATCHSIZE, pageSize + "");
         LdapContext ctx = new InitialLdapContext(HashEnv, null);
         // 搜索控制器
         SearchControls searchCtls = new SearchControls();
@@ -168,6 +167,21 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             }
         }
         Date lcd = new Date();
+        //如果为空全量，不为空以上一次执行成功的作业开始时间检索
+        if (Objects.equals(scope, "0")) {
+            String lastStartTime = schedulerMapper.getJobLastExecAuditStartTime(jobUuid, JobAuditVo.Status.SUCCEED.getValue());
+            if (StringUtils.isNotBlank(lastStartTime)) {
+                //查询格式:(&(objectClass=*)(modifyTimestamp>=20230523000000.0Z))
+                lastStartTime = lastStartTime.split(" ")[0].replace("-", "").trim();
+                lastStartTime = lastStartTime + "000000.0Z";
+                searchFilter = "(&(" + searchFilter + ")(modifyTimestamp>=" + lastStartTime + "))";
+            } else {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                Date date = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1));
+                lastStartTime = sdf.format(date) + "000000.0Z";
+                searchFilter = "(&(" + searchFilter + ")(modifyTimestamp>=" + lastStartTime + "))";
+            }
+        }
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
             NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
@@ -231,6 +245,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         }
                         TransactionUtil.commitTx(transactionStatus);
                     } catch (Exception e) {
+                        ctx.close();
                         TransactionUtil.rollbackTx(transactionStatus);
                         throw e;
                     }
