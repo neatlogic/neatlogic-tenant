@@ -61,7 +61,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
             @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "cn=Manager,dc=neatlogic,dc=com"),
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "123456"),
             @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "dc=neatlogic,dc=com"),
-            @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "过滤条件把所有ou查询出来，导入到系统分组"),
+            @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的ou，同步到系统分组"),
             @Param(name = "rootParentUUid", controlType = "text", description = "根节点", required = false, sort = 5, help = "默认：0"),
             @Param(name = "uuid", controlType = "text", description = "分组UUID", required = true, sort = 6, help = "指定分组主键映射字段"),
     })
@@ -148,7 +148,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
                             }
                         }
                     } catch (NamingException e) {
-                        logger.error("[Sync Ldap Team Error]:" + e.getMessage());
+                        logger.error("[Sync Ldap Team Error]:" + e.getMessage(), e);
                     }
                 }
                 if (StringUtils.isNotBlank(uuid)) {
