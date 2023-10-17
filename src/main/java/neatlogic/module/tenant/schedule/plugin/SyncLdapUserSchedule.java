@@ -79,7 +79,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "例如：123456"),
             @Param(name = "baseDN", controlType = "text", description = "基准DN", required = true, sort = 3, help = "例如：dc=neatlogic,dc=com"),
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
-            @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的"),
+            @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的，如果第一次执行则根据modifyTimestamp属性大于等于前一天0点的时间点来过滤数据"),
             @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 6, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
             @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 7, help = "指定用户主键映射字段"),
             @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 8, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
@@ -256,7 +256,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         } while ((cookie != null) && (cookie.length != 0));
         logger.info("时间：" + TimeUtil.getDateString("yyyy-MM-dd hh:mm:ss") + "，从ldap同步用户总数=" + totalResults);
         ctx.close();
-        userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);
+        // 全量同步时才根据lcd更新is_delete标志位
+        if (Objects.equals(scope, "1")) {
+            userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);
+        }
     }
 
     /**
