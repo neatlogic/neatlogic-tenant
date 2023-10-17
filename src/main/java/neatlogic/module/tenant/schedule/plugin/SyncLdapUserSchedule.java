@@ -256,7 +256,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         } while ((cookie != null) && (cookie.length != 0));
         logger.info("时间：" + TimeUtil.getDateString("yyyy-MM-dd hh:mm:ss") + "，从ldap同步用户总数=" + totalResults);
         ctx.close();
-        userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);
+        // 全量同步时才根据lcd更新is_delete标志位
+        if (Objects.equals(scope, "1")) {
+            userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);
+        }
     }
 
     /**
