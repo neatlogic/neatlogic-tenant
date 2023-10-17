@@ -51,8 +51,8 @@ public class GetChangeLogVersionApi extends PrivateApiComponentBase {
             @Param(name = "date", type = ApiParamType.STRING, isRequired = true, desc = "common.time")
     })
     @Output({
-            @Param(name = "dml", type = ApiParamType.JSONARRAY, desc = "dml"),
-            @Param(name = "dll", type = ApiParamType.JSONARRAY, desc = "dll"),
+            @Param(name = "neatlogic", type = ApiParamType.JSONARRAY, desc = "nmtac.getchangelogversionapi.output.param.neatlogic"),
+            @Param(name = "neatlogic_tenant", type = ApiParamType.JSONARRAY, desc = "nmtac.getchangelogversionapi.output.param.neatlogictenant"),
             @Param(name = "version", type = ApiParamType.JSONARRAY, desc = "nmtac.getchangelogversionapi.output.param.version")
     })
 
@@ -113,7 +113,6 @@ public class GetChangeLogVersionApi extends PrivateApiComponentBase {
         JSONObject result = new JSONObject();
         Resource[] resources = resolver.getResources("classpath*:neatlogic/resources/" + paramObj.getString("moduleId") + "/changelog/" + dateString + "/*");
         for (Resource resource : resources) {
-            JSONObject sqlJson = new JSONObject();
             String sqlFileName = resource.getFilename();
             if (StringUtils.isNotBlank(sqlFileName) && sqlFileName.endsWith(".sql")) {
                 InputStreamReader reader = new InputStreamReader(resource.getInputStream());

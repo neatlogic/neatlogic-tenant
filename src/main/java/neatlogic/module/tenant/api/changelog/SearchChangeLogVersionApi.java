@@ -27,7 +27,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -64,18 +63,18 @@ public class SearchChangeLogVersionApi extends PrivateApiComponentBase {
         Resource[] resources = resolver.getResources("classpath*:neatlogic/resources/" + paramObj.getString("moduleId") + "/changelog/*/");
         for (Resource resource : resources) {
             String fileName = resource.getURL().getPath().substring(0, resource.getURL().getPath().lastIndexOf("/"));
-            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-            list.add(fileName);
+            String version = fileName.substring(fileName.lastIndexOf("/") + 1);
+            list.add(version);
         }
         if (CollectionUtils.isNotEmpty(list)) {
             // 定义日期格式
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TimeUtil.YYYY_MM_DD);
 
-            // 定义比较器
-            Comparator<String> fileNameComparator = Comparator.comparing((String fileName) -> LocalDate.parse(fileName, formatter)).reversed();
+            // 定义倒序比较器
+            Comparator<String> fileNameComparatorReversed = Comparator.reverseOrder();
 
             // 按日期排序
-            list.sort(fileNameComparator);
+            list.sort(fileNameComparatorReversed);
         }
         result.put("versionList", list);
         return result;
