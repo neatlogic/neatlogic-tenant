@@ -60,7 +60,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
             @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true, sort = 0, help = "例如：ldap://192.168.1.99"),
             @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "例如：cn=Manager,dc=neatlogic,dc=com"),
             @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "例如：123456"),
-            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "例如：dc=neatlogic,dc=com"),
+            @Param(name = "baseDN", controlType = "text", description = "基准DN", required = true, sort = 3, help = "例如：dc=neatlogic,dc=com"),
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的ou，同步到系统分组"),
             @Param(name = "rootParentUUid", controlType = "text", description = "根节点", required = false, sort = 5, help = "默认：0"),
             @Param(name = "uuid", controlType = "text", description = "分组UUID", required = true, sort = 6, help = "指定分组主键映射字段"),
@@ -71,7 +71,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         String ldapUrl = getPropValue(jobObject, "ldapUrl");
         String userDn = getPropValue(jobObject, "userDn");
         String userSecret = getPropValue(jobObject, "userSecret");
-        String searchBase = getPropValue(jobObject, "searchBase"); //从xx顶层目录快速查找
+        String baseDN = getPropValue(jobObject, "baseDN"); //从xx顶层目录快速查找
         String searchFilter = getPropValue(jobObject, "searchFilter"); //LDAP搜索过滤器类
         String rootParentUUid = getPropValue(jobObject, "rootParentUUid");
         if (StringUtils.isBlank(rootParentUUid)) {
@@ -123,8 +123,8 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         byte[] cookie = null;
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
-            NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
-            String rootDn = searchBase;
+            NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
+            String rootDn = baseDN;
             Map<String, String> uuidMap = new HashMap<>();
             while (answer.hasMoreElements()) {
                 SearchResult sr = (SearchResult) answer.next();

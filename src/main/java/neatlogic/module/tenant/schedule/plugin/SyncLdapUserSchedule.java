@@ -74,10 +74,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
     }
 
     @Prop({
-            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true, sort = 0, help = "ldap://192.168.1.99"),
-            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "cn=Manager,dc=neatlogic,dc=com"),
-            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "123456"),
-            @Param(name = "searchBase", controlType = "text", description = "从指定目录开始查找", required = true, sort = 3, help = "dc=neatlogic,dc=com"),
+            @Param(name = "ldapUrl", controlType = "text", description = "ldap地址", required = true, sort = 0, help = "例如：ldap://192.168.1.99"),
+            @Param(name = "userDn", controlType = "text", description = "同步账号dn", required = true, sort = 1, help = "例如：cn=Manager,dc=neatlogic,dc=com"),
+            @Param(name = "userSecret", controlType = "text", description = "登录密码", required = true, sort = 2, help = "例如：123456"),
+            @Param(name = "baseDN", controlType = "text", description = "基准DN", required = true, sort = 3, help = "例如：dc=neatlogic,dc=com"),
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
             @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的"),
             @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 6, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
@@ -96,7 +96,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         String ldapUrl = getPropValue(jobObject, "ldapUrl");
         String userDn = getPropValue(jobObject, "userDn");
         String userSecret = getPropValue(jobObject, "userSecret");
-        String searchBase = getPropValue(jobObject, "searchBase"); //从xx顶层目录快速查找
+        String baseDN = getPropValue(jobObject, "baseDN"); //从xx顶层目录快速查找
         String searchFilter = getPropValue(jobObject, "searchFilter"); //LDAP搜索过滤器类
         String defaultRole = getPropValue(jobObject, "defaultRole");
         String scope = getPropValue(jobObject, "scope");
@@ -184,7 +184,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         }
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
-            NamingEnumeration answer = ctx.search(searchBase, searchFilter, searchCtls);
+            NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
             while (answer.hasMoreElements()) {
                 totalResults++;
                 SearchResult sr = (SearchResult) answer.next();
