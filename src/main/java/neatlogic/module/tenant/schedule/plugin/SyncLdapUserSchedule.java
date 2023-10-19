@@ -16,12 +16,14 @@
 
 package neatlogic.module.tenant.schedule.plugin;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.RoleUserVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
@@ -182,6 +184,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                 searchFilter = "(&(" + searchFilter + ")(modifyTimestamp>=" + lastStartTime + "))";
             }
         }
+        String msg = "baseDN=" + baseDN;
+        msg = msg + ", filter=" + searchFilter;
+        msg = msg + ", searchScope=SUBTREE_SCOPE";
+        msg = msg + ", returningAttributes=" + String.join("、", returnedAttList);
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
             NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
@@ -190,7 +196,8 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                 SearchResult sr = (SearchResult) answer.next();
                 String fullName = sr.getNameInNamespace();
                 String upwardTeamName = getUpwardTeamName(fullName);
-                String uuid = null, userId = null, userName = null, email = null, phone = null;
+//                String uuid = null, userId = null, userName = null, email = null, phone = null;
+                Map<String, String> map = new HashMap<>();
                 Attributes Attrs = sr.getAttributes();
                 if (Attrs != null) {
                     for (NamingEnumeration ne = Attrs.getAll(); ne.hasMore(); ) {
@@ -200,30 +207,42 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         for (NamingEnumeration e = Attr.getAll(); e.hasMore(); ) {
                             attrValue = e.next().toString();
                         }
-                        if (attrName.equals(_uuid)) {
-                            uuid = attrValue.replace("-", "");
-                        } else if (attrName.equals(_userId)) {
-                            userId = attrValue;
-                        } else if (attrName.equals(_userName)) {
-                            userName = attrValue;
-                        } else if (attrName.equals(_email)) {
-                            email = attrValue;
-                        } else if (attrName.equals(_phone)) {
-                            phone = attrValue;
-                        }
+                        map.put(attrName, attrValue);
+//                        if (attrName.equals(_uuid)) {
+//                            uuid = attrValue.replace("-", "");
+//                        } else if (attrName.equals(_userId)) {
+//                            userId = attrValue;
+//                        } else if (attrName.equals(_userName)) {
+//                            userName = attrValue;
+//                        } else if (attrName.equals(_email)) {
+//                            email = attrValue;
+//                        } else if (attrName.equals(_phone)) {
+//                            phone = attrValue;
+//                        }
                     }
                 }
-
-                if (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(uuid)) {
+                String uuid = map.get(_uuid);
+                if (StringUtils.isBlank(uuid)) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _uuid + " does not exist";
+                    throw new ApiRuntimeException(msg);
+                }
+                String userId = map.get(_userId);
+                if (StringUtils.isBlank(userId)) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _userId + " does not exist";
+                    throw new ApiRuntimeException(msg);
+                }
+//                if (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(uuid)) {
                     TransactionStatus transactionStatus = null;
                     try {
                         transactionStatus = TransactionUtil.openTx();
                         UserVo userVo = new UserVo();
                         userVo.setUuid(uuid);
                         userVo.setUserId(userId);
-                        userVo.setUserName(userName);
-                        userVo.setEmail(email);
-                        userVo.setPhone(phone);
+                        userVo.setUserName(map.get(_userName));
+                        userVo.setEmail(map.get(_email));
+                        userVo.setPhone(map.get(_phone));
                         userVo.setSource("ldap");
                         userVo.setIsActive(1);
                         userVo.setFcu(SystemUser.SYSTEM.getUserUuid());
@@ -249,13 +268,17 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         TransactionUtil.rollbackTx(transactionStatus);
                         throw e;
                     }
-                }
+//                }
             }
             cookie = parseControls(ctx.getResponseControls());
             ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
         } while ((cookie != null) && (cookie.length != 0));
         logger.info("时间：" + TimeUtil.getDateString("yyyy-MM-dd hh:mm:ss") + "，从ldap同步用户总数=" + totalResults);
         ctx.close();
+        if (totalResults == 0) {
+            msg = msg + ", searchResultCount=0";
+            throw new ApiRuntimeException(msg);
+        }
         // 全量同步时才根据lcd更新is_delete标志位
         if (Objects.equals(scope, "1")) {
             userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);
