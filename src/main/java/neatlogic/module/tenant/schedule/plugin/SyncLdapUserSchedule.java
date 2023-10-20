@@ -16,12 +16,14 @@
 
 package neatlogic.module.tenant.schedule.plugin;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.RoleUserVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.scheduler.annotation.Param;
 import neatlogic.framework.scheduler.annotation.Prop;
@@ -81,11 +83,12 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
             @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的，如果第一次执行则根据modifyTimestamp属性大于等于前一天0点的时间点来过滤数据"),
             @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 6, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
-            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 7, help = "指定用户主键映射字段"),
-            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 8, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
-            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 9, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
-            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 10, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
-            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 11, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
+            @Param(name = "defaultPassword", controlType = "text", description = "用户默认密码", required = false, sort = 7, help = "如果不自定义默认密码，则默认密码为123456"),
+            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 8, help = "指定用户主键映射字段"),
+            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 9, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
+            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 10, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
+            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 11, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
+            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 12, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
@@ -136,6 +139,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         if (StringUtils.isNotBlank(_phone)) {
             returnedAttList.add(_phone);
         }
+        String defaultPassword = getPropValue(jobObject, "defaultPassword");
+        if (StringUtils.isBlank(defaultPassword)) {
+            defaultPassword = "123456";
+        }
         int totalResults = 0;
         byte[] cookie = null;
 
@@ -182,6 +189,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                 searchFilter = "(&(" + searchFilter + ")(modifyTimestamp>=" + lastStartTime + "))";
             }
         }
+        String msg = "baseDN=" + baseDN;
+        msg = msg + ", filter=" + searchFilter;
+        msg = msg + ", searchScope=SUBTREE_SCOPE";
+        msg = msg + ", returningAttributes=" + String.join("、", returnedAttList);
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
             NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
@@ -190,7 +201,8 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                 SearchResult sr = (SearchResult) answer.next();
                 String fullName = sr.getNameInNamespace();
                 String upwardTeamName = getUpwardTeamName(fullName);
-                String uuid = null, userId = null, userName = null, email = null, phone = null;
+//                String uuid = null, userId = null, userName = null, email = null, phone = null;
+                Map<String, String> map = new HashMap<>();
                 Attributes Attrs = sr.getAttributes();
                 if (Attrs != null) {
                     for (NamingEnumeration ne = Attrs.getAll(); ne.hasMore(); ) {
@@ -200,35 +212,44 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         for (NamingEnumeration e = Attr.getAll(); e.hasMore(); ) {
                             attrValue = e.next().toString();
                         }
-                        if (attrName.equals(_uuid)) {
-                            uuid = attrValue.replace("-", "");
-                        } else if (attrName.equals(_userId)) {
-                            userId = attrValue;
-                        } else if (attrName.equals(_userName)) {
-                            userName = attrValue;
-                        } else if (attrName.equals(_email)) {
-                            email = attrValue;
-                        } else if (attrName.equals(_phone)) {
-                            phone = attrValue;
-                        }
+                        map.put(attrName, attrValue);
                     }
                 }
-
-                if (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(uuid)) {
+                String uuid = map.get(_uuid);
+                if (StringUtils.isBlank(uuid)) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _uuid + " does not exist";
+                    throw new ApiRuntimeException(msg);
+                }
+                if (uuid.contains("-")) {
+                    uuid = uuid.replace("-", "");
+                }
+                if (uuid.length() > 32) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _uuid + " value contains a maximum of 32 characters";
+                    throw new ApiRuntimeException(msg);
+                }
+                String userId = map.get(_userId);
+                if (StringUtils.isBlank(userId)) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _userId + " does not exist";
+                    throw new ApiRuntimeException(msg);
+                }
                     TransactionStatus transactionStatus = null;
                     try {
                         transactionStatus = TransactionUtil.openTx();
                         UserVo userVo = new UserVo();
                         userVo.setUuid(uuid);
                         userVo.setUserId(userId);
-                        userVo.setUserName(userName);
-                        userVo.setEmail(email);
-                        userVo.setPhone(phone);
+                        userVo.setUserName(map.get(_userName));
+                        userVo.setEmail(map.get(_email));
+                        userVo.setPhone(map.get(_phone));
                         userVo.setSource("ldap");
                         userVo.setIsActive(1);
                         userVo.setFcu(SystemUser.SYSTEM.getUserUuid());
                         userVo.setLcu(SystemUser.SYSTEM.getUserUuid());
                         userVo.setLcd(lcd);
+                        userVo.setPassword(defaultPassword);
                         this.userMapper.bacthDeleteUserTeamByUserUuid(uuid, "ldap");
                         this.userMapper.insertUserForLdap(userVo);
                         //人员默认角色
@@ -243,19 +264,25 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         if (StringUtils.isNotBlank(teamUuid)) {
                             this.userMapper.insertUserTeam(uuid, teamUuid);
                         }
+                        if (CollectionUtils.isEmpty(userMapper.getLimitUserPasswordIdList(uuid))) {
+                            userMapper.insertUserPassword(userVo);
+                        }
                         TransactionUtil.commitTx(transactionStatus);
                     } catch (Exception e) {
                         ctx.close();
                         TransactionUtil.rollbackTx(transactionStatus);
                         throw e;
                     }
-                }
             }
             cookie = parseControls(ctx.getResponseControls());
             ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
         } while ((cookie != null) && (cookie.length != 0));
         logger.info("时间：" + TimeUtil.getDateString("yyyy-MM-dd hh:mm:ss") + "，从ldap同步用户总数=" + totalResults);
         ctx.close();
+        if (totalResults == 0) {
+            msg = msg + ", searchResultCount=0";
+            throw new ApiRuntimeException(msg);
+        }
         // 全量同步时才根据lcd更新is_delete标志位
         if (Objects.equals(scope, "1")) {
             userMapper.updateUserIsDeletedBySourceAndLcd("ldap", lcd);

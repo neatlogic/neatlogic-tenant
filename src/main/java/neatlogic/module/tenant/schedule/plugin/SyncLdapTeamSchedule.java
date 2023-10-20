@@ -18,6 +18,7 @@ package neatlogic.module.tenant.schedule.plugin;
 
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.scheduler.annotation.Param;
@@ -121,12 +122,18 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, Control.CRITICAL)});
         Date lcd = new Date();
         byte[] cookie = null;
+        int totalResults = 0;
+        Map<String, String> uuidMap = new HashMap<>();
+        String msg = "baseDN=" + baseDN;
+        msg = msg + ", filter=" + searchFilter;
+        msg = msg + ", searchScope=SUBTREE_SCOPE";
+        msg = msg + ", returningAttributes=" + String.join("、", returnedAttList);
         do {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
             NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
             String rootDn = baseDN;
-            Map<String, String> uuidMap = new HashMap<>();
             while (answer.hasMoreElements()) {
+                totalResults++;
                 SearchResult sr = (SearchResult) answer.next();
                 String uuid = null, teamName = null, parentName = null;
                 String fullName = sr.getNameInNamespace();
@@ -151,34 +158,39 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
                         logger.error("[Sync Ldap Team Error]:" + e.getMessage(), e);
                     }
                 }
-                if (StringUtils.isNotBlank(uuid)) {
-                    String pathName = fullName.replace(rootDn, "");
-                    String[] split = pathName.split(",");
-                    if (split.length > 0) {
-                        teamName = split[0].split("=")[1];
-                    }
-                    if (split.length > 1) {
-                        parentName = split[1].split("=")[1];
-                    }
-                    uuidMap.put(teamName, uuid);
-                    TeamVo teamVo = new TeamVo();
-                    teamVo.setSource("ldap");
-                    teamVo.setUuid(uuid);
-                    teamVo.setName(teamName);
-                    teamVo.setParentName(parentName);
-                    setUpwardTeamName(teamVo, fullName, rootDn);
-                    setUpwardUuidPath(uuidMap, teamVo);
-                    String parentUuid = uuidMap.get(teamVo.getParentName());
-                    teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
-                    teamVo.setLcd(lcd);
-                    this.teamMapper.insertTeamForLdap(teamVo);
+                if (StringUtils.isBlank(uuid)) {
+                    msg = msg + ", attribute " + _uuid + " does not exist";
+                    throw new ApiRuntimeException(msg);
                 }
+                String pathName = fullName.replace(rootDn, "");
+                String[] split = pathName.split(",");
+                if (split.length > 0) {
+                    teamName = split[0].split("=")[1];
+                }
+                if (split.length > 1) {
+                    parentName = split[1].split("=")[1];
+                }
+                uuidMap.put(teamName, uuid);
+                TeamVo teamVo = new TeamVo();
+                teamVo.setSource("ldap");
+                teamVo.setUuid(uuid);
+                teamVo.setName(teamName);
+                teamVo.setParentName(parentName);
+                setUpwardTeamName(teamVo, fullName, rootDn);
+                setUpwardUuidPath(uuidMap, teamVo);
+                String parentUuid = uuidMap.get(teamVo.getParentName());
+                teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
+                teamVo.setLcd(lcd);
+                this.teamMapper.insertTeamForLdap(teamVo);
             }
             cookie = parseControls(ctx.getResponseControls());
             ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
         } while ((cookie != null) && (cookie.length != 0));
         ctx.close();
-
+        if (totalResults == 0) {
+            msg = msg + ", searchResultCount=0";
+            throw new ApiRuntimeException(msg);
+        }
         //数据清理
         this.teamMapper.updateTeamIsDeleteBySourceAndLcd("ldap", lcd);
         //重算左右编码
