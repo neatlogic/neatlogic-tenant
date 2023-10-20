@@ -123,6 +123,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         Date lcd = new Date();
         byte[] cookie = null;
         int totalResults = 0;
+        Map<String, String> uuidMap = new HashMap<>();
         String msg = "baseDN=" + baseDN;
         msg = msg + ", filter=" + searchFilter;
         msg = msg + ", searchScope=SUBTREE_SCOPE";
@@ -131,7 +132,6 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
             // 根据设置的域节点、过滤器类和搜索控制器搜索LDAP得到结果
             NamingEnumeration answer = ctx.search(baseDN, searchFilter, searchCtls);
             String rootDn = baseDN;
-            Map<String, String> uuidMap = new HashMap<>();
             while (answer.hasMoreElements()) {
                 totalResults++;
                 SearchResult sr = (SearchResult) answer.next();

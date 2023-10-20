@@ -83,11 +83,12 @@ public class SyncLdapUserSchedule extends PublicJobBase {
             @Param(name = "searchFilter", controlType = "text", description = "过滤条件", required = true, sort = 4, help = "将满足该过滤条件的cn，同步到系统用户"),
             @Param(name = "scope", controlType = "text", description = "同步范围", required = true, sort = 5, help = "1表示全量，0表示增量，增量是根据modifyTimestamp属性大于等于上次作业执行成功的时间点来过滤数据的，如果第一次执行则根据modifyTimestamp属性大于等于前一天0点的时间点来过滤数据"),
             @Param(name = "defaultRole", controlType = "text", description = "用户默认角色", required = false, sort = 6, help = "neatlogic-系统配置-角色管理中的角色名字段，多个角色名之间用逗号隔开，如：R_ADMIN,R_ITSM_ADMIN"),
-            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 7, help = "指定用户主键映射字段"),
-            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 8, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
-            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 9, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
-            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 10, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
-            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 11, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
+            @Param(name = "defaultPassword", controlType = "text", description = "用户默认密码", required = false, sort = 7, help = "如果不自定义默认密码，则默认密码为123456"),
+            @Param(name = "uuid", controlType = "text", description = "用户UUID", required = true, sort = 8, help = "指定用户主键映射字段"),
+            @Param(name = "userId", controlType = "text", description = "用户ID", required = true, sort = 9, help = "指定neatlogic-系统配置-用户管理中的用户ID属性映射字段"),
+            @Param(name = "userName", controlType = "text", description = "用户名", required = true, sort = 10, help = "指定neatlogic-系统配置-用户管理中的用户名属性映射字段"),
+            @Param(name = "email", controlType = "text", description = "邮箱", required = false, sort = 11, help = "指定neatlogic-系统配置-用户管理中的邮箱属性映射字段"),
+            @Param(name = "phone", controlType = "text", description = "电话", required = false, sort = 12, help = "指定neatlogic-系统配置-用户管理中的电话属性映射字段"),
     })
     @Override
     public void executeInternal(JobExecutionContext context, JobObject jobObject) throws Exception {
@@ -137,6 +138,10 @@ public class SyncLdapUserSchedule extends PublicJobBase {
         String _phone = getPropValue(jobObject, "phone");
         if (StringUtils.isNotBlank(_phone)) {
             returnedAttList.add(_phone);
+        }
+        String defaultPassword = getPropValue(jobObject, "defaultPassword");
+        if (StringUtils.isBlank(defaultPassword)) {
+            defaultPassword = "123456";
         }
         int totalResults = 0;
         byte[] cookie = null;
@@ -208,17 +213,6 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                             attrValue = e.next().toString();
                         }
                         map.put(attrName, attrValue);
-//                        if (attrName.equals(_uuid)) {
-//                            uuid = attrValue.replace("-", "");
-//                        } else if (attrName.equals(_userId)) {
-//                            userId = attrValue;
-//                        } else if (attrName.equals(_userName)) {
-//                            userName = attrValue;
-//                        } else if (attrName.equals(_email)) {
-//                            email = attrValue;
-//                        } else if (attrName.equals(_phone)) {
-//                            phone = attrValue;
-//                        }
                     }
                 }
                 String uuid = map.get(_uuid);
@@ -227,13 +221,20 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                     msg = msg + ", attribute " + _uuid + " does not exist";
                     throw new ApiRuntimeException(msg);
                 }
+                if (uuid.contains("-")) {
+                    uuid = uuid.replace("-", "");
+                }
+                if (uuid.length() > 32) {
+                    msg = msg + ", rowData=" + JSONObject.toJSONString(map);
+                    msg = msg + ", attribute " + _uuid + " value contains a maximum of 32 characters";
+                    throw new ApiRuntimeException(msg);
+                }
                 String userId = map.get(_userId);
                 if (StringUtils.isBlank(userId)) {
                     msg = msg + ", rowData=" + JSONObject.toJSONString(map);
                     msg = msg + ", attribute " + _userId + " does not exist";
                     throw new ApiRuntimeException(msg);
                 }
-//                if (StringUtils.isNotBlank(userId) && StringUtils.isNotBlank(uuid)) {
                     TransactionStatus transactionStatus = null;
                     try {
                         transactionStatus = TransactionUtil.openTx();
@@ -248,6 +249,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         userVo.setFcu(SystemUser.SYSTEM.getUserUuid());
                         userVo.setLcu(SystemUser.SYSTEM.getUserUuid());
                         userVo.setLcd(lcd);
+                        userVo.setPassword(defaultPassword);
                         this.userMapper.bacthDeleteUserTeamByUserUuid(uuid, "ldap");
                         this.userMapper.insertUserForLdap(userVo);
                         //人员默认角色
@@ -262,13 +264,13 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         if (StringUtils.isNotBlank(teamUuid)) {
                             this.userMapper.insertUserTeam(uuid, teamUuid);
                         }
+                        userMapper.insertUserPasswordForLdap(userVo);
                         TransactionUtil.commitTx(transactionStatus);
                     } catch (Exception e) {
                         ctx.close();
                         TransactionUtil.rollbackTx(transactionStatus);
                         throw e;
                     }
-//                }
             }
             cookie = parseControls(ctx.getResponseControls());
             ctx.setRequestControls(new Control[]{new PagedResultsControl(pageSize, cookie, Control.CRITICAL)});
