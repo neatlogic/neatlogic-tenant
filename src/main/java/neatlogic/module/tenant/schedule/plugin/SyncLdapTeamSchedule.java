@@ -124,6 +124,8 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         byte[] cookie = null;
         int totalResults = 0;
         Map<String, String> uuidMap = new HashMap<>();
+        String baseDnName = "";
+        String baseDnUuid = "";
         String msg = "baseDN=" + baseDN;
         msg = msg + ", filter=" + searchFilter;
         msg = msg + ", searchScope=SUBTREE_SCOPE";
@@ -135,11 +137,11 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
             while (answer.hasMoreElements()) {
                 totalResults++;
                 SearchResult sr = (SearchResult) answer.next();
-                String uuid = null, teamName = null, parentName = null;
+                String uuid = null, teamName = null, parentName = null, upwardNamePath = null;
                 String fullName = sr.getNameInNamespace();
-                if (Objects.equals(rootDn, fullName)) {
-                    continue;
-                }
+//                if (Objects.equals(rootDn, fullName)) {
+//                    continue;
+//                }
                 Attributes Attrs = sr.getAttributes();
                 if (Attrs != null) {
                     try {
@@ -162,22 +164,42 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
                     msg = msg + ", attribute " + _uuid + " does not exist";
                     throw new ApiRuntimeException(msg);
                 }
-                String pathName = fullName.replace(rootDn, "");
-                String[] split = pathName.split(",");
-                if (split.length > 0) {
-                    teamName = split[0].split("=")[1];
+                if (Objects.equals(rootDn, fullName)) {
+                    teamName = getTeamName(fullName);
+                    parentName = "";
+                    upwardNamePath = teamName;
+                    baseDnName = teamName;
+                } else {
+                    String pathName = fullName.replace(rootDn, "");
+                    teamName = getTeamName(pathName);
+                    parentName = getParentName(pathName);
+                    if (StringUtils.isBlank(parentName)) {
+                        parentName = baseDnName;
+                    }
+                    upwardNamePath = getUpwardTeamName(pathName, baseDnName);
                 }
-                if (split.length > 1) {
-                    parentName = split[1].split("=")[1];
-                }
+
+
+
+
+//                String[] split = pathName.split(",");
+//                if (split.length > 0) {
+//                    teamName = split[0].split("=")[1];
+//                }
+//                if (split.length > 1) {
+//                    parentName = split[1].split("=")[1];
+//                }
                 uuidMap.put(teamName, uuid);
+                String upwardUuidPath = getUpwardUuidPath(uuidMap, upwardNamePath);
                 TeamVo teamVo = new TeamVo();
                 teamVo.setSource("ldap");
                 teamVo.setUuid(uuid);
                 teamVo.setName(teamName);
                 teamVo.setParentName(parentName);
-                setUpwardTeamName(teamVo, fullName, rootDn);
-                setUpwardUuidPath(uuidMap, teamVo);
+                teamVo.setUpwardNamePath(upwardNamePath);
+                teamVo.setUpwardUuidPath(upwardUuidPath);
+//                setUpwardTeamName(teamVo, fullName, rootDn);
+//                setUpwardUuidPath(uuidMap, teamVo);
                 String parentUuid = uuidMap.get(teamVo.getParentName());
                 teamVo.setParentUuid(parentUuid == null ? rootParentUUid : parentUuid);
                 teamVo.setLcd(lcd);
@@ -197,30 +219,67 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         LRCodeManager.rebuildLeftRightCode("team", "uuid", "parent_uuid", "`is_delete` = 0");
     }
 
-    /**
-     * 计算检索的组 name层级
-     *
-     * @param teamVo
-     * @param fullName
-     * @param rootDn
-     */
-    private static void setUpwardTeamName(TeamVo teamVo, String fullName, String rootDn) {
-        String handleName = fullName.replace(rootDn, "");
-        if (StringUtils.isNotBlank(handleName)) {
-            List<String> upwardTeamNameList = new ArrayList<>();
-            String[] dnNames = handleName.split(",");
-            for (String dnName : dnNames) {
-                if (StringUtils.isNotBlank(dnName)) {
-                    upwardTeamNameList.add(getTeamName(dnName));
+    private String getTeamName(String pathName) {
+        String[] split = pathName.split(",");
+        if (split.length > 0) {
+            String[] names = split[0].split("=");
+            if (names.length > 1) {
+                return names[1];
+            }
+        }
+        return null;
+    }
+
+    private String getParentName(String pathName) {
+        String[] split = pathName.split(",");
+        if (split.length > 1) {
+            String[] names = split[1].split("=");
+            if (names.length > 1) {
+                return names[1];
+            }
+        }
+        return null;
+    }
+
+    private String getUpwardTeamName(String pathName, String baseDnName) {
+        List<String> upwardTeamNameList = new ArrayList<>();
+        upwardTeamNameList.add(baseDnName);
+        String[] split = pathName.split(",");
+        for (int i = split.length - 1; i >= 0; i--) {
+            String str = split[i];
+            if (StringUtils.isNotBlank(str) && str.contains("=")) {
+                String[] names = str.split("=");
+                if (names.length > 1) {
+                    upwardTeamNameList.add(names[1]);
                 }
             }
-            //补充根
-            String rootName = getTeamName(rootDn);
-            upwardTeamNameList.add(rootName);
-            Collections.reverse(upwardTeamNameList);
-            teamVo.setUpwardNamePath(String.join("/", upwardTeamNameList));
         }
+        return String.join("/", upwardTeamNameList);
     }
+//    /**
+//     * 计算检索的组 name层级
+//     *
+//     * @param teamVo
+//     * @param fullName
+//     * @param rootDn
+//     */
+//    private static void setUpwardTeamName(TeamVo teamVo, String fullName, String rootDn) {
+//        String handleName = fullName.replace(rootDn, "");
+//        if (StringUtils.isNotBlank(handleName)) {
+//            List<String> upwardTeamNameList = new ArrayList<>();
+//            String[] dnNames = handleName.split(",");
+//            for (String dnName : dnNames) {
+//                if (StringUtils.isNotBlank(dnName)) {
+//                    upwardTeamNameList.add(getTeamName(dnName));
+//                }
+//            }
+//            //补充根
+//            String rootName = getTeamName(rootDn);
+//            upwardTeamNameList.add(rootName);
+//            Collections.reverse(upwardTeamNameList);
+//            teamVo.setUpwardNamePath(String.join("/", upwardTeamNameList));
+//        }
+//    }
 
     private static byte[] parseControls(Control[] controls) throws NamingException {
         byte[] cookie = null;
@@ -235,24 +294,37 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         return (cookie == null) ? new byte[0] : cookie;
     }
 
-    /**
-     * 计算检索的组uuid 层级 path
-     *
-     * @param uuidMap
-     * @param teamVo
-     */
-    private static void setUpwardUuidPath(Map<String, String> uuidMap, TeamVo teamVo) {
-        String namePath = teamVo.getUpwardNamePath();
-        if (StringUtils.isNotBlank(namePath)) {
-            String[] namePaths = namePath.split("/");
-            List<String> upwardTeamUuidList = new ArrayList<>();
+//    /**
+//     * 计算检索的组uuid 层级 path
+//     *
+//     * @param uuidMap
+//     * @param teamVo
+//     */
+//    private static void setUpwardUuidPath(Map<String, String> uuidMap, TeamVo teamVo) {
+//        String namePath = teamVo.getUpwardNamePath();
+//        if (StringUtils.isNotBlank(namePath)) {
+//            String[] namePaths = namePath.split("/");
+//            List<String> upwardTeamUuidList = new ArrayList<>();
+//            for (String name : namePaths) {
+//                if (StringUtils.isNotBlank(name) && uuidMap.containsKey(name)) {
+//                    upwardTeamUuidList.add(uuidMap.get(name));
+//                }
+//            }
+//            teamVo.setUpwardUuidPath(String.join(",", upwardTeamUuidList));
+//        }
+//    }
+
+    private String getUpwardUuidPath(Map<String, String> uuidMap, String upwardNamePath) {
+        List<String> upwardTeamUuidList = new ArrayList<>();
+        if (StringUtils.isNotBlank(upwardNamePath)) {
+            String[] namePaths = upwardNamePath.split("/");
             for (String name : namePaths) {
                 if (StringUtils.isNotBlank(name) && uuidMap.containsKey(name)) {
                     upwardTeamUuidList.add(uuidMap.get(name));
                 }
             }
-            teamVo.setUpwardUuidPath(String.join(",", upwardTeamUuidList));
         }
+        return String.join(",", upwardTeamUuidList);
     }
 
     /**
@@ -271,24 +343,23 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
         }
     }
 
-    private static String getTeamName(String name) {
-        if (StringUtils.isBlank(name)) {
-            return "";
-        }
-        String groupName = name.split("ou=")[1].split(",")[0];
-        //去掉顶层结构
-        if ("groups".equals(groupName)) {
-            groupName = "";
-        }
-        return groupName;
-    }
+//    private static String getTeamName(String name) {
+//        if (StringUtils.isBlank(name)) {
+//            return "";
+//        }
+//        String groupName = name.split("ou=")[1].split(",")[0];
+//        //去掉顶层结构
+//        if ("groups".equals(groupName)) {
+//            groupName = "";
+//        }
+//        return groupName;
+//    }
 
-    private static String getParentName(String fullName) {
-        if (StringUtils.isBlank(fullName)) {
-            return "";
-        }
-        String parentFullName = fullName.substring(fullName.indexOf(",") + 1, fullName.length());
-        return getTeamName(parentFullName);
-    }
-
+//    private static String getParentName(String fullName) {
+//        if (StringUtils.isBlank(fullName)) {
+//            return "";
+//        }
+//        String parentFullName = fullName.substring(fullName.indexOf(",") + 1, fullName.length());
+//        return getTeamName(parentFullName);
+//    }
 }
