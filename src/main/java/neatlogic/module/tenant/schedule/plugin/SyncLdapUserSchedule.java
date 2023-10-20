@@ -264,7 +264,9 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         if (StringUtils.isNotBlank(teamUuid)) {
                             this.userMapper.insertUserTeam(uuid, teamUuid);
                         }
-                        userMapper.insertUserPasswordForLdap(userVo);
+                        if (CollectionUtils.isEmpty(userMapper.getLimitUserPasswordIdList(uuid))) {
+                            userMapper.insertUserPassword(userVo);
+                        }
                         TransactionUtil.commitTx(transactionStatus);
                     } catch (Exception e) {
                         ctx.close();
