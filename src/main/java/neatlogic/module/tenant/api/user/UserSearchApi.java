@@ -17,6 +17,7 @@
 package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
@@ -47,7 +48,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询用户";
+        return "nmtau.usersearchapi.getname";
     }
 
     @Override
@@ -56,26 +57,20 @@ public class UserSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字(用户id或名称),模糊查询", xss = true),
-            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "状态"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true, help = "用户id或名称或email"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "common.isactive"),
             @Param(name = "vipLevel", type = ApiParamType.INTEGER, desc = "VIP等级"),
-            @Param(name = "authGroup", type = ApiParamType.STRING, desc = "权限模块"),
-            @Param(name = "auth", type = ApiParamType.STRING, desc = "权限"),
-            @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "用户组uuid"),
-            @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "角色uuid"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量 默认0"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
-            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值列表")
+            @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "common.teamuuid"),
+            @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "common.roleuuid"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "common.defaultvalue")
     })
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = UserVo[].class, desc = "table数据列表"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页展示数量"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总条目数")
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = UserVo[].class, desc = "common.tbodylist"),
+            @Param(explode = BasePageVo.class, desc = "common.pageinfo")
     })
-    @Description(desc = "查询用户接口")
+    @Description(desc = "nmtau.usersearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
 
