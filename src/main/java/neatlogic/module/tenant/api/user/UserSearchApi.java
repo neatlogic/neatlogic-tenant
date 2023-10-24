@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -90,12 +89,11 @@ public class UserSearchApi extends PrivateApiComponentBase {
             return TableResultUtil.getResult(new ArrayList(), userVo);
         }
         userVo.setRowNum(rowNum);
-        List<UserVo> userBaseInfoList = userMapper.searchUserBaseInfo(userVo);
-        if (CollectionUtils.isEmpty(userBaseInfoList)) {
+        List<String> userUuidList = userMapper.searchUserBaseInfo(userVo);
+        if (CollectionUtils.isEmpty(userUuidList)) {
             return TableResultUtil.getResult(new ArrayList(), userVo);
         }
-        List<String> uuidList = userBaseInfoList.stream().map(UserVo::getUuid).collect(Collectors.toList());
-        List<UserVo> tbodyList = userMapper.searchUserDetailInfoByUuidList(uuidList);
+        List<UserVo> tbodyList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
         return TableResultUtil.getResult(tbodyList, userVo);
     }
 }

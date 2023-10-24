@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -86,10 +85,9 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 			int rowNum = userMapper.searchUserCount(searchVo);
 			if (rowNum > 0) {
 				searchVo.setRowNum(rowNum);
-				List<UserVo> userBaseInfoList = userMapper.searchUserBaseInfo(searchVo);
-				if (CollectionUtils.isNotEmpty(userBaseInfoList)) {
-					List<String> uuidList = userBaseInfoList.stream().map(UserVo::getUuid).collect(Collectors.toList());
-					userList = userMapper.searchUserDetailInfoByUuidList(uuidList);
+				List<String> userUuidList = userMapper.searchUserBaseInfo(searchVo);
+				if (CollectionUtils.isNotEmpty(userUuidList)) {
+					userList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
 				}
 			}
 		}
