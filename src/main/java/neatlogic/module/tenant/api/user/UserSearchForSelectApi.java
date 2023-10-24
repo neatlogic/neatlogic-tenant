@@ -17,29 +17,24 @@
 
 package neatlogic.module.tenant.api.user;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -91,7 +86,11 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 			int rowNum = userMapper.searchUserCount(searchVo);
 			if (rowNum > 0) {
 				searchVo.setRowNum(rowNum);
-				userList = userMapper.searchUser(searchVo);
+				List<UserVo> userBaseInfoList = userMapper.searchUserBaseInfo(searchVo);
+				if (CollectionUtils.isNotEmpty(userBaseInfoList)) {
+					List<String> uuidList = userBaseInfoList.stream().map(UserVo::getUuid).collect(Collectors.toList());
+					userList = userMapper.searchUserDetailInfoByUuidList(uuidList);
+				}
 			}
 		}
 		if (CollectionUtils.isNotEmpty(userList)) {
