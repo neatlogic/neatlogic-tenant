@@ -85,7 +85,7 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 			int rowNum = userMapper.searchUserCount(searchVo);
 			if (rowNum > 0) {
 				searchVo.setRowNum(rowNum);
-				List<String> userUuidList = userMapper.searchUserBaseInfo(searchVo);
+				List<String> userUuidList = userMapper.searchUserUuidList(searchVo);
 				if (CollectionUtils.isNotEmpty(userUuidList)) {
 					userList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
 				}
