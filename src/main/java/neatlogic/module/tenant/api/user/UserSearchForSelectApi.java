@@ -17,29 +17,23 @@
 
 package neatlogic.module.tenant.api.user;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -91,7 +85,10 @@ public class UserSearchForSelectApi extends PrivateApiComponentBase {
 			int rowNum = userMapper.searchUserCount(searchVo);
 			if (rowNum > 0) {
 				searchVo.setRowNum(rowNum);
-				userList = userMapper.searchUser(searchVo);
+				List<String> userUuidList = userMapper.searchUserUuidList(searchVo);
+				if (CollectionUtils.isNotEmpty(userUuidList)) {
+					userList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
+				}
 			}
 		}
 		if (CollectionUtils.isNotEmpty(userList)) {

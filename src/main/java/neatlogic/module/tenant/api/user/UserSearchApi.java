@@ -16,21 +16,22 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,18 +81,19 @@ public class UserSearchApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> uuidList = defaultValue.toJavaList(String.class);
             List<UserVo> userList = userMapper.getUserByUserUuidList(uuidList);
-            resultObj.put("tbodyList", userList);
-            return resultObj;
+            return TableResultUtil.getResult(userList);
         }
         userVo.setIsDelete(0);
-        if (userVo.getNeedPage()) {
-            int rowNum = userMapper.searchUserCount(userVo);
-            resultObj.put("rowNum", rowNum);
-            resultObj.put("pageSize", userVo.getPageSize());
-            resultObj.put("currentPage", userVo.getCurrentPage());
-            resultObj.put("pageCount", PageUtil.getPageCount(rowNum, userVo.getPageSize()));
+        int rowNum = userMapper.searchUserCount(userVo);
+        if (rowNum == 0) {
+            return TableResultUtil.getResult(new ArrayList(), userVo);
         }
-        resultObj.put("tbodyList", userMapper.searchUser(userVo));
-        return resultObj;
+        userVo.setRowNum(rowNum);
+        List<String> userUuidList = userMapper.searchUserUuidList(userVo);
+        if (CollectionUtils.isEmpty(userUuidList)) {
+            return TableResultUtil.getResult(new ArrayList(), userVo);
+        }
+        List<UserVo> tbodyList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
+        return TableResultUtil.getResult(tbodyList, userVo);
     }
 }
