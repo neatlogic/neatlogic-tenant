@@ -22,6 +22,8 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -59,12 +61,25 @@ public class SearchChangeLogVersionApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject result = new JSONObject();
         List<String> list = new ArrayList<>();
+        int startTimeStart = 0;
+        int startTimeEnd = 0;
+        if (paramObj.containsKey("startTime") && MapUtils.isNotEmpty(paramObj.getJSONObject("startTime"))) {
+            JSONObject startTimeFilter = TimeUtil.getStartTimeAndEndTimeByDateJson(paramObj.getJSONObject("startTime"));
+            if (MapUtils.isNotEmpty(startTimeFilter)) {
+                startTimeStart = Integer.parseInt((startTimeFilter.getString("startTime").substring(0, 10).replace("-", StringUtils.EMPTY)));
+                startTimeEnd = Integer.parseInt((startTimeFilter.getString("endTime").substring(0, 10).replace("-", StringUtils.EMPTY)));
+            }
+        }
+
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = resolver.getResources("classpath*:neatlogic/resources/" + paramObj.getString("moduleId") + "/changelog/*/");
         for (Resource resource : resources) {
             String fileName = resource.getURL().getPath().substring(0, resource.getURL().getPath().lastIndexOf("/"));
             String version = fileName.substring(fileName.lastIndexOf("/") + 1);
-            list.add(version);
+            int versionTmp = Integer.parseInt(version.replace("-", StringUtils.EMPTY).substring(0, 8));
+            if ((startTimeStart == 0 && startTimeEnd == 0) || (startTimeStart != 0 && startTimeEnd != 0 && versionTmp >= startTimeStart && versionTmp <= startTimeEnd)) {
+                list.add(version);
+            }
         }
         if (CollectionUtils.isNotEmpty(list)) {
             // 定义日期格式
