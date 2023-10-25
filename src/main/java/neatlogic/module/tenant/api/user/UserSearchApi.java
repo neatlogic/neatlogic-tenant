@@ -80,6 +80,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> uuidList = defaultValue.toJavaList(String.class);
             userList = userMapper.getUserByUserUuidList(uuidList);
+            return TableResultUtil.getResult(userList);
         }else {
             userVo.setIsDelete(0);
             int rowNum = userMapper.searchUserCount(userVo);
