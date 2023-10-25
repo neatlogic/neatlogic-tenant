@@ -74,26 +74,23 @@ public class UserSearchApi extends PrivateApiComponentBase {
     @Description(desc = "nmtau.usersearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-
-        JSONObject resultObj = new JSONObject();
         UserVo userVo = JSON.toJavaObject(jsonObj, UserVo.class);
         JSONArray defaultValue = userVo.getDefaultValue();
+        List<UserVo> userList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> uuidList = defaultValue.toJavaList(String.class);
-            List<UserVo> userList = userMapper.getUserByUserUuidList(uuidList);
-            return TableResultUtil.getResult(userList);
+            userList = userMapper.getUserByUserUuidList(uuidList);
+        }else {
+            userVo.setIsDelete(0);
+            int rowNum = userMapper.searchUserCount(userVo);
+            userVo.setRowNum(rowNum);
+            if(rowNum > 0){
+                List<String> userUuidList = userMapper.searchUserUuidList(userVo);
+                if (CollectionUtils.isNotEmpty(userUuidList)) {
+                    userList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
+                }
+            }
         }
-        userVo.setIsDelete(0);
-        int rowNum = userMapper.searchUserCount(userVo);
-        if (rowNum == 0) {
-            return TableResultUtil.getResult(new ArrayList(), userVo);
-        }
-        userVo.setRowNum(rowNum);
-        List<String> userUuidList = userMapper.searchUserUuidList(userVo);
-        if (CollectionUtils.isEmpty(userUuidList)) {
-            return TableResultUtil.getResult(new ArrayList(), userVo);
-        }
-        List<UserVo> tbodyList = userMapper.searchUserDetailInfoByUuidList(userUuidList);
-        return TableResultUtil.getResult(tbodyList, userVo);
+        return TableResultUtil.getResult(userList, userVo);
     }
 }
