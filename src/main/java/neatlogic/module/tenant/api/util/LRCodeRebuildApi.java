@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @AuthAction(action = ADMIN.class)
-@OperationType(type = OperationTypeEnum.OPERATE)
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class LRCodeRebuildApi extends PrivateApiComponentBase {
 
 
@@ -52,16 +52,22 @@ public class LRCodeRebuildApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "tableName", type = ApiParamType.STRING, isRequired = true, desc = "表名"),
+    @Input({
+            @Param(name = "tableName", type = ApiParamType.STRING, isRequired = true, desc = "表名"),
             @Param(name = "idKey", type = ApiParamType.STRING, isRequired = true, desc = "id字段名"),
-            @Param(name = "parentIdKey", type = ApiParamType.STRING, isRequired = true, desc = "父id字段名")})
+            @Param(name = "parentIdKey", type = ApiParamType.STRING, isRequired = true, desc = "父id字段名"),
+            @Param(name = "sortKey", type = ApiParamType.STRING, desc = "排序字段名"),
+            @Param(name = "condition", type = ApiParamType.STRING, desc = "条件")
+    })
     @Description(desc = "重建左右编码接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String tableName = jsonObj.getString("tableName");
         String idKey = jsonObj.getString("idKey");
         String parentIdKey = jsonObj.getString("parentIdKey");
-        LRCodeManager.rebuildLeftRightCode(tableName, idKey, parentIdKey);
+        String sortKey = jsonObj.getString("sortKey");
+        String condition = jsonObj.getString("condition");
+        LRCodeManager.rebuildLeftRightCodeOrderBySortKey(tableName, idKey, parentIdKey, condition, sortKey);
         return null;
     }
 
