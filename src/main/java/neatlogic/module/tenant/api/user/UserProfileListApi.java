@@ -16,32 +16,27 @@
 
 package neatlogic.module.tenant.api.user;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.IUserProfile;
+import neatlogic.framework.common.constvalue.IUserProfileOperate;
+import neatlogic.framework.common.util.ModuleUtil;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserProfileVo;
+import neatlogic.framework.dto.module.ModuleVo;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
+import neatlogic.framework.userprofile.UserProfileFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserProfileVo;
-import neatlogic.framework.userprofile.UserProfileFactory;
+import java.util.*;
 
 @Service
 
@@ -57,7 +52,7 @@ public class UserProfileListApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "用户个性化查询列表接口";
+		return "nmtau.userprofilelistapi.getname";
 	}
 
 	@Override
@@ -66,11 +61,11 @@ public class UserProfileListApi extends PrivateApiComponentBase {
 	}
 	
 	@Input({
-		@Param( name="moduleId" , type=ApiParamType.STRING , desc="模块Id"),
-		@Param(name="name",type=ApiParamType.STRING,desc="操作个性化选项名")
+		@Param( name="moduleId" , type=ApiParamType.STRING , desc="common.moduleid"),
+		@Param(name="name",type=ApiParamType.STRING,desc="common.name")
 	})
-	@Output({@Param( explode = UserProfileVo.class , desc = "用户个性化查询接口")})
-	@Description(desc = "用户个性化查询列表接口")
+	@Output({@Param( explode = UserProfileVo.class , desc = "common.tbodylist")})
+	@Description(desc = "nmtau.userprofilelistapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String moduleId = jsonObj.getString("moduleId");
@@ -93,40 +88,57 @@ public class UserProfileListApi extends PrivateApiComponentBase {
 				
 			}
 		}
-		List<UserProfileVo> userProfileList = new ArrayList<UserProfileVo>();
-		Map<String, UserProfileVo>  userProfileMap = UserProfileFactory.getUserProfileMap();
-		Set<Entry<String, UserProfileVo>> entrySet = userProfileMap.entrySet();
-		for(Entry<String, UserProfileVo> entry:entrySet) {
-			UserProfileVo usrProfileVo = (UserProfileVo) entry.getValue().clone();
-			if(StringUtils.isNotBlank(moduleId)&&!moduleId.equals(usrProfileVo.getModuleId())) {
+		List<UserProfileVo> userProfileList = new ArrayList<>();
+		List<String> activeModuleIdList = new ArrayList<>();
+		if (moduleId != null) {
+			activeModuleIdList.add(moduleId);
+		} else {
+			List<ModuleVo> activeModuleList = TenantContext.get().getActiveModuleList();
+			for (ModuleVo moduleVo : activeModuleList) {
+				activeModuleIdList.add(moduleVo.getId());
+			}
+		}
+		for (String activeModuleId : activeModuleIdList) {
+			List<IUserProfile> userProfiles = UserProfileFactory.getUserProfileListByModuleId(activeModuleId);
+			if (CollectionUtils.isEmpty(userProfiles)) {
 				continue;
 			}
-			String config = usrProfileVo.getConfig();
-			JSONArray configObjArray = JSONArray.parseArray(config);
-			ListIterator<Object> configIterator = configObjArray.listIterator();
-			while(configIterator.hasNext()) {
-				JSONObject configJson = (JSONObject)configIterator.next();
-				if(StringUtils.isNotBlank(name)&&!name.equals(configJson.getString("value"))) {
-					configIterator.remove();
+			UserProfileVo userProfileVo = new UserProfileVo();
+			userProfileVo.setModuleId(activeModuleId);
+			userProfileVo.setModuleName(ModuleUtil.getModuleById(activeModuleId).getName());
+			JSONArray userProfileArray = new JSONArray();
+			for (IUserProfile userProfile : userProfiles) {
+				if (StringUtils.isNotBlank(name) && !Objects.equals(name, userProfile.getValue())) {
 					continue;
 				}
-				configJson.put("checked", 1);
-				JSONArray operateArray = configJson.getJSONArray("userProfileOperateList");
-				if(CollectionUtils.isNotEmpty(operateArray)) {
-					for(Object operateObj:operateArray) {
-						JSONObject operateJson = (JSONObject)operateObj;
-						if(myUserProfileOperateMap.containsKey(usrProfileVo.getModuleId()+configJson.getString("value")+operateJson.getString("value"))) {
-							operateJson.put("checked", 1);
-							configJson.put("checked", 0);
-						}else {
-							operateJson.put("checked", 0);
-						}
-					}
+				List<IUserProfileOperate> profileOperateList = userProfile.getProfileOperateList();
+				if (CollectionUtils.isEmpty(profileOperateList)) {
+					continue;
 				}
+				JSONObject userProfileObj = new JSONObject();
+				userProfileObj.put("value", userProfile.getValue());
+				userProfileObj.put("text", userProfile.getText());
+				userProfileObj.put("checked", 1);
+				JSONArray userProfileOperateArray = new JSONArray();
+				for (IUserProfileOperate userProfileOperate : profileOperateList) {
+					JSONObject userProfileOperateObj = new JSONObject();
+					userProfileOperateObj.put("value", userProfileOperate.getValue());
+					userProfileOperateObj.put("text", userProfileOperate.getText());
+					String key = activeModuleId + userProfile.getValue() + userProfileOperate.getValue();
+					if (myUserProfileOperateMap.containsKey(key)) {
+						userProfileOperateObj.put("checked", 1);
+						userProfileObj.put("checked", 0);
+					} else {
+						userProfileOperateObj.put("checked", 0);
+					}
+					userProfileOperateArray.add(userProfileOperateObj);
+				}
+				userProfileObj.put("userProfileOperateList", userProfileOperateArray);
+				userProfileArray.add(userProfileObj);
 			}
-			usrProfileVo.setConfig(configObjArray.toJSONString());
-			userProfileList.add(usrProfileVo);
+			userProfileVo.setConfig(userProfileArray.toJSONString());
+			userProfileList.add(userProfileVo);
 		}
-		return userProfileList; 
+		return userProfileList;
 	}
 }
