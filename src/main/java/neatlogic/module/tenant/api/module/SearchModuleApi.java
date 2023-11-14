@@ -16,9 +16,12 @@
 
 package neatlogic.module.tenant.api.module;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MODULE_MODIFY;
+import neatlogic.framework.dao.mapper.TenantMapper;
+import neatlogic.framework.dto.TenantModuleVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -26,17 +29,21 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = MODULE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchModuleApi extends PrivateApiComponentBase {
 
+    @Resource
+    private TenantMapper tenantMapper;
 
     @Override
     public String getToken() {
@@ -59,6 +66,16 @@ public class SearchModuleApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ModuleGroupVo> moduleGroupList = TenantContext.get().getActiveModuleGroupList();
         moduleGroupList.sort(Comparator.comparing(ModuleGroupVo::getGroupSort));
+        String tenantUuid = TenantContext.get().getTenantUuid();
+        TenantContext.get().setUseDefaultDatasource(true);
+        List<TenantModuleVo> tenantModuleVos = tenantMapper.getTenantModuleByTenantUuid(tenantUuid);
+        Map<String, String> moduleVersionMap = tenantModuleVos.stream().collect(Collectors.toMap(TenantModuleVo::getModuleId, TenantModuleVo::getVersion));
+        moduleGroupList.forEach(o -> {
+            o.getModuleList().forEach(e -> {
+                e.setChangelogVersion(moduleVersionMap.get(e.getId()));
+            });
+        });
+        TenantContext.get().setUseDefaultDatasource(false);
         return moduleGroupList;
     }
 }
