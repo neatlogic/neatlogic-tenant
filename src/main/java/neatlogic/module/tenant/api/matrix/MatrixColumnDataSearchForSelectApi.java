@@ -239,7 +239,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 continue;
             }
             String firstValue = firstObj.getString("value");
-            System.out.println("23");
             String compose = firstValue;
             if (exsited.contains(compose)) {
                 iterator.remove();
