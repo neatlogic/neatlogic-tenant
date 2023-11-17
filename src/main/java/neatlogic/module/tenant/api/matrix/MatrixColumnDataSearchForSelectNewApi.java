@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.matrix;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -29,18 +30,15 @@ import neatlogic.framework.matrix.exception.MatrixNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 @Deprecated
-@Service
+//@Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBase {
 
@@ -146,10 +144,10 @@ public class MatrixColumnDataSearchForSelectNewApi extends PrivateApiComponentBa
                 }
             }
         }
-        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
+//        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableColumnData(dataVo);
         JSONObject returnObj = new JSONObject();
-        returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
-        returnObj.put("tbodyList", resultList);
+//        returnObj.put("columnDataList", resultList);//TODO linbq 等前端改完再删
+//        returnObj.put("tbodyList", resultList);
         returnObj.put("currentPage", dataVo.getCurrentPage());
         returnObj.put("pageSize", dataVo.getPageSize());
         returnObj.put("pageCount", dataVo.getPageCount());
