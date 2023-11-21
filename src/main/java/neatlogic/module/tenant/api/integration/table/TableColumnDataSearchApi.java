@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TableColumnDataSearchApi extends PrivateApiComponentBase {
 

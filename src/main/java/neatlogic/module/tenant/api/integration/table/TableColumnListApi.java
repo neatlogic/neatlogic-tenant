@@ -40,7 +40,7 @@ import javax.annotation.Resource;
  * @create: 2020-03-26 19:06
  **/
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TableColumnListApi extends PrivateApiComponentBase {
 
