@@ -188,7 +188,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 } else if (defaultValueObject instanceof String) {
                     String defaultValueStr = (String) defaultValueObject;
                     MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
-                            new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), defaultValueStr)
+                            new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), defaultValueStr),
+                            null
                     );
                     defaultValueFilterList.add(matrixDefaultValueFilterVo);
                 }
@@ -224,7 +225,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
     }
 
     private void deduplicateData(String valueField, String textField, List<Map<String, JSONObject>> resultList) {
-        List<String> exsited = new ArrayList<>();
+        List<String> duplicateValue = new ArrayList<>();
+        List<String> duplicateText = new ArrayList<>();
         Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
         while (iterator.hasNext()) {
             Map<String, JSONObject> resultObj = iterator.next();
@@ -238,12 +240,17 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 iterator.remove();
                 continue;
             }
-            String firstValue = firstObj.getString("value");
-            String compose = firstValue;
-            if (exsited.contains(compose)) {
+            String value = firstObj.getString("value");
+            if (duplicateValue.contains(value)) {
                 iterator.remove();
             } else {
-                exsited.add(compose);
+                duplicateValue.add(value);
+            }
+            String text = secondObj.getString("text");
+            if (duplicateText.contains(text)) {
+                iterator.remove();
+            } else {
+                duplicateText.add(text);
             }
         }
     }
