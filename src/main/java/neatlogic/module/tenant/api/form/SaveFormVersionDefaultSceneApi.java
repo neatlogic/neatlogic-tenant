@@ -56,28 +56,25 @@ public class SaveFormVersionDefaultSceneApi extends PrivateApiComponentBase {
         if (Objects.equals(defaultSceneUuid, sceneUuid)) {
             return null;
         }
-        String mainSceneUuid = config.getString("uuid");
-        if (!Objects.equals(mainSceneUuid, sceneUuid)) {
-            JSONArray sceneList = config.getJSONArray("sceneList");
-            if (CollectionUtils.isEmpty(sceneList)) {
-                return null;
+        JSONArray sceneList = config.getJSONArray("sceneList");
+        if (CollectionUtils.isEmpty(sceneList)) {
+            return null;
+        }
+        boolean flag = false;
+        for (int i = 0; i < sceneList.size(); i++) {
+            JSONObject sceneObj = sceneList.getJSONObject(i);
+            String uuid = sceneObj.getString("uuid");
+            if (Objects.equals(uuid, sceneUuid)) {
+                flag = true;
+                break;
             }
-            boolean flag = false;
-            for (int i = 0; i < sceneList.size(); i++) {
-                JSONObject sceneObj = sceneList.getJSONObject(i);
-                String uuid = sceneObj.getString("uuid");
-                if (Objects.equals(uuid, sceneUuid)) {
-                    flag = true;
-                    break;
-                }
+        }
+        if (!flag) {
+            FormVo formVo = formMapper.getFormByUuid(formVersionVo.getFormUuid());
+            if (formVo == null) {
+                throw new FormNotFoundException(formVersionVo.getFormUuid());
             }
-            if (!flag) {
-                FormVo formVo = formMapper.getFormByUuid(formVersionVo.getFormUuid());
-                if (formVo == null) {
-                    throw new FormNotFoundException(formVersionVo.getFormUuid());
-                }
-                throw new FormVersionSceneNotFoundException(formVo.getName(), String.valueOf(formVersionVo.getVersion()), sceneUuid);
-            }
+            throw new FormVersionSceneNotFoundException(formVo.getName(), String.valueOf(formVersionVo.getVersion()), sceneUuid);
         }
         config.put("defaultSceneUuid", sceneUuid);
         formVersionVo.setFormConfig(config);
