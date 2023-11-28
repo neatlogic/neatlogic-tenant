@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.matrix;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.exception.type.ParamIrregularException;
@@ -33,16 +35,14 @@ import neatlogic.framework.matrix.exception.MatrixNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
 
-@Service
+//@Service
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForTableApi extends PrivateApiComponentBase {
 

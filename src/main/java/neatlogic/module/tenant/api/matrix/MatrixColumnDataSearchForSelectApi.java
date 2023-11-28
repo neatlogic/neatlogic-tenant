@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase {
 
-    private String SELECT_COMPOSE_JOINER = "&=&";
     @Resource
     private MatrixMapper matrixMapper;
 
@@ -82,7 +81,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
     })
     @Output({
-            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合，value值的格式是value&=&text，适配value相同，text不同的场景"),
+            @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
             @Param(explode = BasePageVo.class)
     })
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
@@ -175,16 +174,25 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         JSONArray defaultValue = dataVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
-            for (String value : defaultValue.toJavaList(String.class)) {
-                if (!value.contains(SELECT_COMPOSE_JOINER)) {
-                    continue;
+            for (int i = 0; i < defaultValue.size(); i++) {
+                Object defaultValueObject = defaultValue.get(i);
+                if (defaultValueObject instanceof JSONObject) {
+                    JSONObject defaultValueObj = (JSONObject) defaultValueObject;
+                    String value = defaultValueObj.getString("value");
+                    String text = defaultValueObj.getString("text");
+                    MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                            new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
+                            new MatrixKeywordFilterVo(textField, SearchExpression.EQ.getExpression(), text)
+                    );
+                    defaultValueFilterList.add(matrixDefaultValueFilterVo);
+                } else if (defaultValueObject instanceof String) {
+                    String defaultValueStr = (String) defaultValueObject;
+                    MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                            new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), defaultValueStr),
+                            null
+                    );
+                    defaultValueFilterList.add(matrixDefaultValueFilterVo);
                 }
-                String[] split = value.split(SELECT_COMPOSE_JOINER);
-                MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
-                        new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), split[0]),
-                        new MatrixKeywordFilterVo(textField, SearchExpression.EQ.getExpression(), split[1])
-                );
-                defaultValueFilterList.add(matrixDefaultValueFilterVo);
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
@@ -204,7 +212,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 if (MapUtils.isNotEmpty(textObj)) {
                     textStr = textObj.getString("text");
                 }
-                dataList.add(new ValueTextVo(valueStr + "&=&" + textStr, textStr));
+                dataList.add(new ValueTextVo(valueStr, textStr));
             }
         }
         JSONObject returnObj = new JSONObject();
@@ -217,7 +225,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
     }
 
     private void deduplicateData(String valueField, String textField, List<Map<String, JSONObject>> resultList) {
-        List<String> exsited = new ArrayList<>();
+        List<String> duplicateValue = new ArrayList<>();
+        List<String> duplicateText = new ArrayList<>();
         Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
         while (iterator.hasNext()) {
             Map<String, JSONObject> resultObj = iterator.next();
@@ -231,13 +240,17 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 iterator.remove();
                 continue;
             }
-            String firstValue = firstObj.getString("value");
-            String secondText = secondObj.getString("text");
-            String compose = firstValue + SELECT_COMPOSE_JOINER + secondText;
-            if (exsited.contains(compose)) {
+            String value = firstObj.getString("value");
+            if (duplicateValue.contains(value)) {
                 iterator.remove();
             } else {
-                exsited.add(compose);
+                duplicateValue.add(value);
+            }
+            String text = secondObj.getString("text");
+            if (duplicateText.contains(text)) {
+                iterator.remove();
+            } else {
+                duplicateText.add(text);
             }
         }
     }

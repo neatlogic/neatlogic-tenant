@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.integration.table;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -23,7 +25,6 @@ import neatlogic.framework.exception.integration.IntegrationNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationSendRequestException;
 import neatlogic.framework.exception.integration.IntegrationTableColumnNotFoundException;
 import neatlogic.framework.exception.type.ParamIrregularException;
-import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.crossover.IntegrationCrossoverService;
@@ -36,8 +37,6 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,11 +44,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TableColumnDataSearchApi extends PrivateApiComponentBase {
 
@@ -130,37 +132,37 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             for (String value : defaultValue.toJavaList(String.class)) {
-                if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
-                    String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
-                    //当下拉框配置的值和显示文字列为同一列时，value值是这样的20210101&=&20210101，split数组第一和第二个元素相同，这时需要去重
-                    List<String> splitList = new ArrayList<>();
-                    for (String str : split) {
-                        if (!splitList.contains(str)) {
-                            splitList.add(str);
-                        }
-                    }
-                    List<SourceColumnVo> sourceColumnList = new ArrayList<>();
-                    int min = Math.min(splitList.size(), columnList.size());
-                    for (int i = 0; i < min; i++) {
-                        String column = columnList.get(i);
-                        if (StringUtils.isNotBlank(column)) {
-                            SourceColumnVo sourceColumnVo = new SourceColumnVo();
-                            sourceColumnVo.setColumn(column);
-                            List<String> valueList = new ArrayList<>();
-                            valueList.add(splitList.get(i));
-                            sourceColumnVo.setValueList(valueList);
-                            sourceColumnList.add(sourceColumnVo);
-                        }
-                    }
-                    integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
-//                    integrationVo.getParamObj().putAll(jsonObj);
-                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
-                    if (StringUtils.isNotBlank(resultVo.getError())) {
-                        logger.error(resultVo.getError());
-                        throw new IntegrationSendRequestException(integrationVo.getName());
-                    }
-                    resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
-                } else {
+//                if (value.contains(IFormAttributeHandler.SELECT_COMPOSE_JOINER)) {
+//                    String[] split = value.split(IFormAttributeHandler.SELECT_COMPOSE_JOINER);
+//                    //当下拉框配置的值和显示文字列为同一列时，value值是这样的20210101&=&20210101，split数组第一和第二个元素相同，这时需要去重
+//                    List<String> splitList = new ArrayList<>();
+//                    for (String str : split) {
+//                        if (!splitList.contains(str)) {
+//                            splitList.add(str);
+//                        }
+//                    }
+//                    List<SourceColumnVo> sourceColumnList = new ArrayList<>();
+//                    int min = Math.min(splitList.size(), columnList.size());
+//                    for (int i = 0; i < min; i++) {
+//                        String column = columnList.get(i);
+//                        if (StringUtils.isNotBlank(column)) {
+//                            SourceColumnVo sourceColumnVo = new SourceColumnVo();
+//                            sourceColumnVo.setColumn(column);
+//                            List<String> valueList = new ArrayList<>();
+//                            valueList.add(splitList.get(i));
+//                            sourceColumnVo.setValueList(valueList);
+//                            sourceColumnList.add(sourceColumnVo);
+//                        }
+//                    }
+//                    integrationVo.getParamObj().put("sourceColumnList", sourceColumnList);
+////                    integrationVo.getParamObj().putAll(jsonObj);
+//                    IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.FORM);
+//                    if (StringUtils.isNotBlank(resultVo.getError())) {
+//                        logger.error(resultVo.getError());
+//                        throw new IntegrationSendRequestException(integrationVo.getName());
+//                    }
+//                    resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
+//                } else {
                     List<SourceColumnVo> sourceColumnList = new ArrayList<>();
                     String column = columnList.get(0);
                     if (StringUtils.isNotBlank(column)) {
@@ -179,7 +181,7 @@ public class TableColumnDataSearchApi extends PrivateApiComponentBase {
                         throw new IntegrationSendRequestException(integrationVo.getName());
                     }
                     resultList.addAll(integrationCrossoverService.getTbodyList(resultVo, columnList));
-                }
+//                }
             }
         } else {
             List<SourceColumnVo> sourceColumnList = new ArrayList<>();

@@ -16,36 +16,23 @@
 
 package neatlogic.module.tenant.api.integration.table;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.exception.integration.*;
-import neatlogic.framework.exception.type.ParamIrregularException;
-import neatlogic.framework.integration.core.IIntegrationHandler;
-import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.crossover.IntegrationCrossoverService;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
-import neatlogic.framework.integration.dto.IntegrationResultVo;
-import neatlogic.framework.integration.dto.IntegrationVo;
-import neatlogic.framework.integration.dto.table.ColumnVo;
-import neatlogic.framework.integration.dto.table.SourceColumnVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TableDataSearchApi extends PrivateApiComponentBase {
 
