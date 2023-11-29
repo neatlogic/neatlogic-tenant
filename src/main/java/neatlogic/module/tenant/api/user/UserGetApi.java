@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.user;
 
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
@@ -32,6 +33,7 @@ import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -105,9 +108,23 @@ public class UserGetApi extends PrivateApiComponentBase {
                 userVo.setUserAuthList(userAuthVos);
             } else {
                 List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
+                List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-                    AuthActionChecker.getAuthList(userAuthVoList);
-                    userVo.setUserAuthList(userAuthVoList);
+                    userAuthVoList.forEach(auth->{
+                        //过滤反射后不存在非法auth
+                        AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
+                        if(authBase != null){
+                            List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
+                            List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+                            //过滤该租户没有tenantGroup对应的auth
+                            if (CollectionUtils.isNotEmpty(moduleGroupVos)&& activeModuleGroupList.contains(auth.getAuthGroup())) {
+                                filteredUserAuthVoList.add(auth);
+                            }
+                        }
+                    });
+
+                    AuthActionChecker.getAuthList(filteredUserAuthVoList);
+                    userVo.setUserAuthList(filteredUserAuthVoList);
                 }
             }
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
