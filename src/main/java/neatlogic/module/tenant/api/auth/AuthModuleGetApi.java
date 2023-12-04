@@ -93,7 +93,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
             userVo = new UserVo();
             userVo.setUserId(Config.SUPERADMIN());
-        }else {
+        } else {
             userVo = userMapper.getUserBaseInfoByUuid(userUuid);
             if (userVo == null) {
                 throw new UserNotFoundException(userUuid);
@@ -159,7 +159,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             List<AuthVo> authBaseList = new ArrayList<AuthVo>();
             if (authModuleMap.containsKey(moduleGroupVo.getGroup())) {
                 for (AuthBase tmpAuth : authModuleMap.get(moduleGroupVo.getGroup())) {
-                    if (authSet.contains(tmpAuth.getAuthName())) {
+                    if (authSet.contains(tmpAuth.getAuthName()) && tmpAuth.isShow()) {
                         authBaseList.add(new AuthVo(tmpAuth));
                     }
                 }
