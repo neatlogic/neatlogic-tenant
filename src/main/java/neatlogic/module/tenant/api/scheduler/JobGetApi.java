@@ -28,6 +28,7 @@ import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.JobPropVo;
 import neatlogic.framework.scheduler.dto.JobVo;
+import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.scheduler.exception.ScheduleJobNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,9 @@ public class JobGetApi extends PrivateApiComponentBase {
         }
         List<JobPropVo> propList = new ArrayList<>();
         IJob job = SchedulerManager.getHandler(jobVo.getHandler());
+        if (job == null) {
+            throw new ScheduleHandlerNotFoundException(jobVo.getHandler());
+        }
         Map<String, neatlogic.framework.scheduler.annotation.Param> paramMap = job.initProp();
         for (Map.Entry<String, neatlogic.framework.scheduler.annotation.Param> entry : paramMap.entrySet()) {
             neatlogic.framework.scheduler.annotation.Param param = entry.getValue();
