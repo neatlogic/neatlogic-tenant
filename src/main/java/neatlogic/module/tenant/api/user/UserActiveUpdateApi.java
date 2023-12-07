@@ -1,6 +1,7 @@
 package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -68,8 +69,8 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
                 //禁用用户时删除userSession
-                UserSessionCache.removeItem(tenantUuid, userUuid);
-                userSessionMapper.deleteUserSessionByUserUuid(userUuid);
+                UserSessionCache.removeItem(UserContext.get().getTokenHash());
+                userSessionMapper.deleteUserSessionByTokenHash(userUuid);
 //                if(isActive == 0){
 //                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
 //                    userMapper.deleteUserRoleByUserUuid(userUuid);

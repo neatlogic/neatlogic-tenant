@@ -64,6 +64,9 @@ public class RoleSaveApi extends PrivateApiComponentBase {
             @Param(name = "description",
                     type = ApiParamType.STRING,
                     desc = "角色描述", xss = true),
+            @Param(name = "env",
+                    type = ApiParamType.STRING,
+                    desc = "环境。登录认证的请求需要携带Key为Env的Header，如果Env Header值等于当前值或当前值为空则该角色生效，否则不生效", xss = true),
             @Param(name = "userUuidList",
                     type = ApiParamType.JSONARRAY,
                     desc = "用户uuid集合"),
@@ -83,6 +86,7 @@ public class RoleSaveApi extends PrivateApiComponentBase {
         RoleVo roleVo = new RoleVo();
         roleVo.setName(jsonObj.getString("name"));
         roleVo.setDescription(jsonObj.getString("description"));
+        roleVo.setEnv(jsonObj.getString("env"));
         String uuid = jsonObj.getString("uuid");
         if (StringUtils.isNotBlank(uuid)) {
             if (roleMapper.checkRoleIsExists(uuid) == 0) {
