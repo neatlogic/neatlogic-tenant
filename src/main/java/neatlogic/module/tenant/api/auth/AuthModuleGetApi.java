@@ -90,9 +90,9 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         List<UserAuthVo> userAuthList = null;
         String userUuid = UserContext.get().getUserUuid(true);
         UserVo userVo = null;
-        if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
+        if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId())) {
             userVo = new UserVo();
-            userVo.setUserId(Config.SUPERADMIN());
+            userVo.setUserId(Config.MAINTENANCE());
         } else {
             userVo = userMapper.getUserBaseInfoByUuid(userUuid);
             if (userVo == null) {
@@ -109,7 +109,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             userAuthList = userAuthVos;
         } else
             //维护模式下 获取厂商维护人员信息
-            if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId())) {
+            if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId())) {
                 userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
             } else {
                 userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));

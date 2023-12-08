@@ -68,7 +68,7 @@ public class UserGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "根据用户id查询用户详情接口";
+        return "nmtau.usergetapi.getname";
     }
 
     @Override
@@ -76,9 +76,9 @@ public class UserGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = false)})
-    @Output({@Param(name = "Return", explode = UserVo.class, desc = "用户详情")})
-    @Description(desc = "根据用户Id查询用户详情")
+    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid", isRequired = false)})
+    @Output({@Param(name = "Return", explode = UserVo.class, desc = "nmtau.usergetapi.output.param.desc.user")})
+    @Description(desc = "nmtau.usergetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = jsonObj.getString("userUuid");
@@ -87,7 +87,7 @@ public class UserGetApi extends PrivateApiComponentBase {
         }
         UserVo userVo = null;
         //维护模式下 获取厂商维护人员信息
-        if (Config.ENABLE_SUPERADMIN() && Config.SUPERADMIN().equals(UserContext.get().getUserId()) && StringUtils.isBlank(jsonObj.getString("userUuid"))) {
+        if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId()) && StringUtils.isBlank(jsonObj.getString("userUuid"))) {
             userVo = MaintenanceMode.getMaintenanceUser();
             //告诉前端是否为维护模式
             userVo.setIsMaintenanceMode(1);
