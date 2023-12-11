@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.importexport;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.importexport.core.ImportExportHandler;
 import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
 import neatlogic.framework.importexport.dto.ImportExportBaseInfoVo;
@@ -28,6 +29,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -69,22 +71,38 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
         if (importExportHandler == null) {
             throw new ImportExportHandlerNotFoundException(type);
         }
+        if (primaryKey instanceof String) {
+            String str = (String) primaryKey;
+            if (StringUtils.length(str) != 32) {
+                try {
+                    primaryKey = Long.valueOf(str);
+                } catch (NumberFormatException e) {
+                    throw new ParamIrregularException("primaryKey");
+                }
+            }
+        }
         if (!importExportHandler.checkExportAuth(primaryKey)) {
             throw new ExportNoAuthException();
         }
-        String fileName = FileUtil.getEncodedFileName(primaryKey + ".pak");
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
 
         List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
-        try (ZipOutputStream zipos = new ZipOutputStream(response.getOutputStream())) {
+        ZipOutputStream zipos = null;
+        try {
+            zipos = new ZipOutputStream(response.getOutputStream());
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, zipos);
+            String fileName = FileUtil.getEncodedFileName(importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             importExportVo.setDependencyBaseInfoList(dependencyBaseInfoList);
             zipos.putNextEntry(new ZipEntry(importExportVo.getPrimaryKey() + ".json"));
             zipos.write(JSONObject.toJSONBytes(importExportVo));
             zipos.closeEntry();
         } catch (Exception e) {
+            if (zipos != null) {
+                zipos.closeEntry();
+            }
             logger.error(e.getMessage(), e);
+            throw e;
         }
         return null;
     }
