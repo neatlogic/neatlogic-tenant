@@ -87,20 +87,17 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
 
         List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
-        ZipOutputStream zipos = null;
-        try {
-            zipos = new ZipOutputStream(response.getOutputStream());
+        try (ZipOutputStream zipos = new ZipOutputStream(response.getOutputStream())) {
+            dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, zipos);
             String fileName = FileUtil.getEncodedFileName(importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+            dependencyBaseInfoList.remove(0);
             importExportVo.setDependencyBaseInfoList(dependencyBaseInfoList);
             zipos.putNextEntry(new ZipEntry(importExportVo.getPrimaryKey() + ".json"));
             zipos.write(JSONObject.toJSONBytes(importExportVo));
             zipos.closeEntry();
         } catch (Exception e) {
-            if (zipos != null) {
-                zipos.closeEntry();
-            }
             logger.error(e.getMessage(), e);
             throw e;
         }
