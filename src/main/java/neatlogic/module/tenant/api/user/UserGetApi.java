@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
@@ -29,16 +30,12 @@ import neatlogic.framework.common.constvalue.SystemUser;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.RoleVo;
-import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.dto.UserAuthVo;
-import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -107,17 +104,19 @@ public class UserGetApi extends PrivateApiComponentBase {
                 }
                 userVo.setUserAuthList(userAuthVos);
             } else {
-                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(userUuid));
+                AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+                String env = UserContext.get().getEnv();
+                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo, env);
                 List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-                    userAuthVoList.forEach(auth->{
+                    userAuthVoList.forEach(auth -> {
                         //过滤反射后不存在非法auth
                         AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
-                        if(authBase != null){
+                        if (authBase != null) {
                             List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
                             List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
                             //过滤该租户没有tenantGroup对应的auth
-                            if (CollectionUtils.isNotEmpty(moduleGroupVos)&& activeModuleGroupList.contains(auth.getAuthGroup())) {
+                            if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
                                 filteredUserAuthVoList.add(auth);
                             }
                         }
