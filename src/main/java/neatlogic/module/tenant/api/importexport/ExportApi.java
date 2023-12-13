@@ -84,14 +84,23 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
         if (!importExportHandler.checkExportAuth(primaryKey)) {
             throw new ExportNoAuthException();
         }
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
 
+        String fileName = null;
+        // 先检查导出对象及依赖对象有没有找不到数据，如果有就抛异常
+        {
+            List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
+            dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
+            ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, null);
+            fileName = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak";
+        }
+        // 上面代码检查没有异常再进行导出压缩到文件
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        fileName = FileUtil.getEncodedFileName(fileName);
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
         List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
         try (ZipOutputStream zipos = new ZipOutputStream(response.getOutputStream())) {
             dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, zipos);
-            String fileName = FileUtil.getEncodedFileName(importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             dependencyBaseInfoList.remove(0);
             importExportVo.setDependencyBaseInfoList(dependencyBaseInfoList);
             zipos.putNextEntry(new ZipEntry(importExportVo.getPrimaryKey() + ".json"));
