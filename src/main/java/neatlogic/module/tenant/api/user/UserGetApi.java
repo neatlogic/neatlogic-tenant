@@ -91,7 +91,7 @@ public class UserGetApi extends PrivateApiComponentBase {
         } else if (Objects.equals(SystemUser.SYSTEM.getUserUuid(), userUuid)) {
             userVo = SystemUser.SYSTEM.getUserVo();
         } else {
-            userVo = userMapper.getUserByUuid(userUuid);
+            userVo = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
             if (userVo == null) {
                 throw new UserNotFoundException(userUuid);
             }
@@ -169,26 +169,5 @@ public class UserGetApi extends PrivateApiComponentBase {
             }
         }
         return userVo;
-//		JSONObject userJson = (JSONObject) JSON.toJSON(userVo);// 防止修改cache vo
-//		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("teamUuidList"))) {
-//			List<String> teamUuidList = new ArrayList<>();
-//			for (Object teamUuid : userJson.getJSONArray("teamUuidList")) {
-//				teamUuidList.add(GroupSearch.TEAM.getValuePlugin() + teamUuid);
-//			}
-//			userJson.put("teamUuidList", teamUuidList);
-//		}
-//		if (CollectionUtils.isNotEmpty(userJson.getJSONArray("roleUuidList"))) {
-//			List<String> roleUuidList = new ArrayList<>();
-//			for (Object roleUuid : userJson.getJSONArray("roleUuidList")) {
-//				roleUuidList.add(GroupSearch.ROLE.getValuePlugin() + roleUuid);
-//			}
-//			userJson.put("roleUuidList", roleUuidList);
-//		}
-        //告诉前端是否为维护模式
-//		userJson.put("isMaintenanceMode", 0);
-//		if (Config.ENABLE_SUPERADMIN()) {
-//			userJson.put("isMaintenanceMode", 1);
-//		}
-//		return userJson;
     }
 }
