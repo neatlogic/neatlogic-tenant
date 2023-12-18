@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.notify;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
@@ -26,8 +28,6 @@ import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,7 @@ public class NotifyPolicySearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "通知策略管理列表搜索接口";
+        return "nmtan.notifypolicysearchapi.getname";
     }
 
     @Override
@@ -57,17 +57,17 @@ public class NotifyPolicySearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字搜索"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
-            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "common.needpage"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "term.notify.handler")
     })
     @Output({
             @Param(explode = BasePageVo.class),
-            @Param(name = "tbodyList", explode = NotifyPolicyVo[].class, desc = "通知策略列表")
+            @Param(name = "tbodyList", explode = NotifyPolicyVo[].class, desc = "term.notify.policylist")
     })
-    @Description(desc = "通知策略管理列表搜索接口")
+    @Description(desc = "nmtan.notifypolicysearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
