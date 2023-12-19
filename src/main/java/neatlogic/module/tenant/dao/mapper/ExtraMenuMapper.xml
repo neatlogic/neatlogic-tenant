@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.tenant.dao.mapper.ExtraMenuMapper">
+
+    <insert id="insertExtraMenu" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        insert into `extramenu`(`id`,
+                                `name`,
+                                `type`,
+                                `is_active`,
+                                `url`,
+                                `description`,
+                                `parent_id`,
+                                `lft`,
+                                `rht`)
+        values (#{id},
+                #{name},
+                #{type},
+                #{isActive},
+                #{url},
+                #{description},
+                #{parentId},
+                #{lft},
+                #{rht})
+    </insert>
+    <insert id="insertExtraMenuAuthority">
+        INSERT INTO `extramenu_authority` (`menu_id`,
+                                           `type`,
+                                           `uuid`)
+        VALUES (#{menuId},
+                #{authorityVo.type},
+                #{authorityVo.uuid})
+    </insert>
+    <update id="updateExtraMenuById" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        update `extramenu`
+        set `name`        = #{name},
+            `is_active`   = #{isActive},
+            `url`         = #{url},
+            `description` = #{description}
+        where `id` = #{id}
+    </update>
+    <delete id="deleteExtraMenuAuthorityByMenuId" parameterType="java.lang.Long">
+        DELETE
+        FROM `extramenu_authority`
+        WHERE `menu_id` = #{value}
+    </delete>
+    <delete id="deleteExtraMenuById" parameterType="java.lang.Long">
+        DELETE
+        FROM `extramenu`
+        WHERE `id` = #{value}
+    </delete>
+    <select id="getMaxRhtCode" resultType="java.lang.Integer">
+        select MAX(`rht`)
+        from `extramenu`
+    </select>
+    <select id="checkExtraMenuNameIsRepeat" resultType="java.lang.Integer" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        select count(1)
+        from `extramenu`
+        where `name` = #{name}
+          and `id` != #{id}
+          and `parent_id` = #{parentId}
+    </select>
+    <select id="checkExtraMenuIsExists" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM `extramenu`
+        WHERE `id` = #{value}
+    </select>
+    <select id="getExtraMenuForTree" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        select a.`id`,
+               a.`name`,
+               a.`type`,
+               a.`url`,
+               a.`is_active`                                                 as isActive,
+               a.`description`,
+               a.`parent_id`                                                 as parentId,
+               a.`lft`,
+               a.`rht`,
+               (select COUNT(1) from `extramenu` where `parent_id` = a.`id`) as `childCount`
+        from `extramenu` a
+        where a.`lft` &gt;= #{lft}
+          and a.`rht` &lt;= #{rht}
+        order by a.`lft`
+    </select>
+    <select id="checkExtraMenuRootCount" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM `extramenu`
+        WHERE `parent_id` = #{value}
+    </select>
+    <select id="getExtraMenuById" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo" parameterType="java.lang.Long">
+        select a.`id`,
+               a.`name`,
+               a.`type`,
+               a.`url`,
+               a.`is_active` as isActive,
+               a.`description`,
+               a.`parent_id` as parentId,
+               a.`lft`,
+               a.`rht`
+        from `extramenu` a
+        where a.`id` = #{value}
+    </select>
+    <select id="getExtraMenuAuthorityListByMenuId" resultType="neatlogic.framework.dto.AuthorityVo" parameterType="java.lang.Long">
+        select `type`,
+               `uuid`
+        from `extramenu_authority`
+        where `menu_id` = #{value}
+    </select>
+    <select id="getAuthorizedExtraMenuIdList" resultType="java.lang.Long">
+        select
+        distinct `menu_id`
+        from `extramenu_authority`
+        <where>
+            (`type` = 'common' AND `uuid` = 'alluser')
+            <if test="userUuid != null and userUuid != ''">
+                OR (type = 'user' AND `uuid` = #{userUuid})
+            </if>
+            <if test="teamUuidList != null and teamUuidList.size() > 0">
+                OR (type = 'team' AND `uuid` IN
+                <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                    #{teamUuid}
+                </foreach>
+                )
+            </if>
+            <if test="roleUuidList != null and roleUuidList.size() > 0">
+                OR (type = 'role' AND `uuid` IN
+                <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                    #{roleUuid}
+                </foreach>
+                )
+            </if>
+        </where>
+    </select>
+</mapper>
+
