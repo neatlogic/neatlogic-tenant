@@ -24,9 +24,9 @@ import neatlogic.framework.auth.label.NOTIFY_JOB_MODIFY;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.type.PermissionDeniedException;
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
-import neatlogic.framework.notify.dto.NotifyPolicyHandlerVo;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -39,10 +39,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,32 +75,32 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<NotifyPolicyVo> notifyPolicyList = notifyMapper.getAllDefaultNotifyPolicyList();
         Map<String, NotifyPolicyVo> handlerToNotifyPolicyMap = notifyPolicyList.stream().collect(Collectors.toMap(e -> e.getHandler(), e -> e));
-        Map<String, List<NotifyPolicyHandlerVo>> moduleGroupNotifyPolicyHandlerListMap = new HashMap<>();
-        List<NotifyPolicyHandlerVo> list = new ArrayList<>(NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList());
-        for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : list) {
-            /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
-            if (AuthActionChecker.check(notifyPolicyHandlerVo.getAuthName())) {
-                moduleGroupNotifyPolicyHandlerListMap.computeIfAbsent(notifyPolicyHandlerVo.getModuleGroup(), key -> new ArrayList<>()).add(notifyPolicyHandlerVo);
-            }
-        }
+        List<INotifyPolicyHandler> handlerList = NotifyPolicyHandlerFactory.getHandlerList();
         JSONArray resultTree = new JSONArray();
         List<ModuleGroupVo> moduleGroupList = TenantContext.get().getActiveModuleGroupList();
         for (ModuleGroupVo moduleGroupVo : moduleGroupList) {
-            List<NotifyPolicyHandlerVo> notifyPolicyHandlerVoList = moduleGroupNotifyPolicyHandlerListMap.get(moduleGroupVo.getGroup());
-            if (CollectionUtils.isNotEmpty(notifyPolicyHandlerVoList)) {
-                JSONArray children = new JSONArray();
-                for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : notifyPolicyHandlerVoList) {
-                    JSONObject child = new JSONObject();
-                    child.put("value", notifyPolicyHandlerVo.getHandler());
-                    child.put("text", notifyPolicyHandlerVo.getName());
-                    NotifyPolicyVo notifyPolicyVo = handlerToNotifyPolicyMap.get(notifyPolicyHandlerVo.getHandler());
-                    if (notifyPolicyVo != null) {
-                        child.put("defaultNotifyPolicyId", notifyPolicyVo.getId());
-                        child.put("defaultNotifyPolicyName", notifyPolicyVo.getName());
-                    }
-                    child.put("isAllowMultiPolicy", notifyPolicyHandlerVo.getIsAllowMultiPolicy());
-                    children.add(child);
+            JSONArray children = new JSONArray();
+            for (INotifyPolicyHandler notifyPolicyHandler : handlerList) {
+                /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
+                if (!AuthActionChecker.check(notifyPolicyHandler.getAuthName())) {
+                    continue;
                 }
+                String moduleGroup = NotifyPolicyHandlerFactory.getModuleGroupIdByHandler(notifyPolicyHandler.getClassName());
+                if (!Objects.equals(moduleGroup, moduleGroupVo.getGroup())) {
+                    continue;
+                }
+                JSONObject child = new JSONObject();
+                child.put("value", notifyPolicyHandler.getClassName());
+                child.put("text", $.t(notifyPolicyHandler.getName()));
+                NotifyPolicyVo notifyPolicyVo = handlerToNotifyPolicyMap.get(notifyPolicyHandler.getClassName());
+                if (notifyPolicyVo != null) {
+                    child.put("defaultNotifyPolicyId", notifyPolicyVo.getId());
+                    child.put("defaultNotifyPolicyName", notifyPolicyVo.getName());
+                }
+                child.put("isAllowMultiPolicy", notifyPolicyHandler.isAllowMultiPolicy());
+                children.add(child);
+            }
+            if (CollectionUtils.isNotEmpty(children)) {
                 JSONObject moduleGroupObj = new JSONObject();
                 moduleGroupObj.put("value", moduleGroupVo.getGroup());
                 moduleGroupObj.put("text", moduleGroupVo.getGroupName());

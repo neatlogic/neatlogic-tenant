@@ -23,7 +23,6 @@ import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
-import neatlogic.framework.notify.dto.NotifyPolicyHandlerVo;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
@@ -42,6 +41,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
+
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -87,12 +87,14 @@ public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(handler);
         }
-        NotifyPolicyHandlerVo notifyPolicyHandlerVo = NotifyPolicyHandlerFactory.getNotifyPolicyHandlerVo(handler);
-        if (notifyPolicyHandlerVo == null) {
+        String moduleGroup = NotifyPolicyHandlerFactory.getModuleGroupIdByHandler(handler);
+        if (moduleGroup == null) {
             throw new NotifyPolicyHandlerNotFoundException(handler);
         }
-        String moduleGroup = notifyPolicyHandlerVo.getModuleGroup();
-        String module = notifyPolicyHandlerVo.getModule();
+        String module = NotifyPolicyHandlerFactory.getModuleIdByHandler(handler);
+        if (module == null) {
+            throw new NotifyPolicyHandlerNotFoundException(handler);
+        }
         int index = handler.lastIndexOf('.');
         String simpleHandlerName = handler.substring(index + 1);
         simpleHandlerName = simpleHandlerName.toLowerCase();

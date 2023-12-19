@@ -16,9 +16,8 @@
 
 package neatlogic.module.tenant.api.notify;
 
-import neatlogic.framework.auth.core.AuthAction;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dto.NotifyTreeVo;
@@ -28,16 +27,14 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@Service
-
+//@Service
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerTreeApi extends PrivateApiComponentBase {
 
@@ -62,12 +59,13 @@ public class NotifyPolicyHandlerTreeApi extends PrivateApiComponentBase {
 	@Description(desc = "通知策略分类树接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<NotifyTreeVo> notifyPolicyTreeVoList = copy(NotifyPolicyHandlerFactory.getNotifyPolicyTreeVoList());
-		authActionChecker(notifyPolicyTreeVoList);
-		if(CollectionUtils.isEmpty(notifyPolicyTreeVoList)){
-			throw new PermissionDeniedException();
-		}
-		return notifyPolicyTreeVoList;
+//		List<NotifyTreeVo> notifyPolicyTreeVoList = copy(NotifyPolicyHandlerFactory.getNotifyPolicyTreeVoList());
+//		authActionChecker(notifyPolicyTreeVoList);
+//		if(CollectionUtils.isEmpty(notifyPolicyTreeVoList)){
+//			throw new PermissionDeniedException();
+//		}
+//		return notifyPolicyTreeVoList;
+		return null;
 	}
 
 	/**
