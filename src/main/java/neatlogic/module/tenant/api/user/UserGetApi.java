@@ -73,12 +73,19 @@ public class UserGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid", isRequired = false)})
+    @Input({
+            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
+            @Param(name = "isAuthEnv", type = ApiParamType.BOOLEAN, desc = "nmtau.usergetapi.input.param.desc.isauthenv")
+    })
     @Output({@Param(name = "Return", explode = UserVo.class, desc = "nmtau.usergetapi.output.param.desc.user")})
     @Description(desc = "nmtau.usergetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = jsonObj.getString("userUuid");
+        Boolean isAuthEnv = true;
+        if(jsonObj.containsKey("isAuthEnv")) {
+            isAuthEnv = jsonObj.getBoolean("isAuthEnv");
+        }
         if (StringUtils.isBlank(userUuid)) {
             userUuid = UserContext.get().getUserUuid(true);
         }
@@ -91,7 +98,11 @@ public class UserGetApi extends PrivateApiComponentBase {
         } else if (Objects.equals(SystemUser.SYSTEM.getUserUuid(), userUuid)) {
             userVo = SystemUser.SYSTEM.getUserVo();
         } else {
-            userVo = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
+            if(isAuthEnv) {
+                userVo = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
+            }else{
+                userVo = userMapper.getUserByUuid(userUuid);
+            }
             if (userVo == null) {
                 throw new UserNotFoundException(userUuid);
             }
