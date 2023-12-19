@@ -16,6 +16,9 @@
 
 package neatlogic.module.tenant.api.apimanage;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
@@ -32,9 +35,7 @@ import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.restful.enums.ApiKind;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import neatlogic.framework.util.$;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -164,15 +165,23 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         List<String> dbTokenList = new ArrayList<>();
         Map<String, ApiVo> ramApiMap = PrivateApiComponentFactory.getApiMap();
         for (ApiVo api : dbAllApiList) {
-            if (ramApiMap.get(api.getToken()) != null) {
+            ApiVo ramApi = ramApiMap.get(api.getToken());
+            if (ramApi != null) {
                 api.setIsPrivate(true);
                 api.setApiType(ApiKind.SYSTEM.getValue());
+                api.setHandler(ramApi.getHandler());
+                api.setName($.t(ramApi.getName()));
+                api.setModuleId(ramApi.getModuleId());
+                ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(api.getHandler());
+                if (apiHandlerVo != null) {
+                    api.setHandlerName($.t(apiHandlerVo.getName()));
+                }
             } else {
                 ApiHandlerVo publicApiHandler = PublicApiComponentFactory.getApiHandlerByHandler(api.getHandler());
                 if (publicApiHandler == null) {
                     api.setHandlerName("接口组件:" + api.getHandler() + "不存在");
                 } else {
-                    api.setHandlerName(publicApiHandler.getName());
+                    api.setHandlerName($.t(publicApiHandler.getName()));
                 }
                 api.setIsPrivate(false);
                 api.setApiType(ApiKind.CUSTOM.getValue());
