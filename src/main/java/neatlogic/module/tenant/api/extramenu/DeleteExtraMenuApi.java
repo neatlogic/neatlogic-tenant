@@ -41,7 +41,7 @@ import java.util.List;
 @Transactional
 @AuthAction(action = EXTRA_MENU_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
-public class ExtraMenuDeleteApi extends PrivateApiComponentBase {
+public class DeleteExtraMenuApi extends PrivateApiComponentBase {
 
     @Resource
     private ExtraMenuMapper extraMenuMapper;

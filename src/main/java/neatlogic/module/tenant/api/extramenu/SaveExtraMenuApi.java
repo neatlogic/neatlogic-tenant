@@ -43,7 +43,7 @@ import java.util.List;
 @AuthAction(action = EXTRA_MENU_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class ExtraMenuSaveApi extends PrivateApiComponentBase {
+public class SaveExtraMenuApi extends PrivateApiComponentBase {
 
     @Resource
     private ExtraMenuMapper extraMenuMapper;

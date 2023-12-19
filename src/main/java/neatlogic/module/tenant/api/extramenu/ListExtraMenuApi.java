@@ -37,7 +37,7 @@ import java.util.Map;
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ExtraMenuApi extends PrivateApiComponentBase {
+public class ListExtraMenuApi extends PrivateApiComponentBase {
 
     @Resource
     private ExtraMenuMapper extraMenuMapper;

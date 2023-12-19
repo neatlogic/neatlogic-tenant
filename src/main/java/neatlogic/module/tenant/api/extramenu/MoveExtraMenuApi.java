@@ -40,7 +40,7 @@ import javax.annotation.Resource;
 @AuthAction(action = EXTRA_MENU_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
-public class ExtraMenuMoveApi extends PrivateApiComponentBase {
+public class MoveExtraMenuApi extends PrivateApiComponentBase {
 
     @Resource
     private ExtraMenuMapper extraMenuMapper;
