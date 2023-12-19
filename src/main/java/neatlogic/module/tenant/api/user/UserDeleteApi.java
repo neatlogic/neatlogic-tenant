@@ -1,7 +1,8 @@
 package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSONArray;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -11,7 +12,6 @@ import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,8 +57,8 @@ public class UserDeleteApi extends PrivateApiComponentBase{
 		List<String> userUuidList = userUuidArray.toJavaList(String.class);
 		for (String userUuid : userUuidList) {
 			userMapper.updateUserIsDeletedByUuid(userUuid);
-			userSessionMapper.deleteUserSessionByUserUuid(userUuid);
-			UserSessionCache.removeItem(TenantContext.get().getTenantUuid(), userUuid);
+			userSessionMapper.deleteUserSessionByTokenHash(UserContext.get().getTokenHash());
+			UserSessionCache.removeItem(UserContext.get().getTokenHash());
 		}
 		return null;
 	}

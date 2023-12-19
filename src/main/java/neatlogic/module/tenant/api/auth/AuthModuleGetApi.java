@@ -28,10 +28,7 @@ import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.AuthVo;
-import neatlogic.framework.dto.UserAuthVo;
-import neatlogic.framework.dto.UserDataVo;
-import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
@@ -112,7 +109,9 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId())) {
                 userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
             } else {
-                userAuthList = userMapper.searchUserAllAuthByUserAuth(new UserAuthVo(UserContext.get().getUserUuid()));
+                AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+                String env = UserContext.get().getEnv();
+                userAuthList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo, env);
                 AuthActionChecker.getAuthList(userAuthList);
             }
         for (UserAuthVo userAuth : userAuthList) {
