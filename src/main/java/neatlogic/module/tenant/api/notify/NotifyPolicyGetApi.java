@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.notify;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
@@ -27,7 +28,6 @@ import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.NotifyPolicyConfigVo;
-import neatlogic.framework.notify.dto.NotifyPolicyHandlerVo;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
@@ -36,8 +36,8 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.usertype.UserTypeFactory;
+import neatlogic.framework.util.$;
 import neatlogic.module.tenant.service.notify.NotifyPolicyService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -143,17 +143,16 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
 
-        String moduleGroupName = "";
-        List<NotifyPolicyHandlerVo> notifyPolicyHandlerList = NotifyPolicyHandlerFactory.getNotifyPolicyHandlerList();
-        for (NotifyPolicyHandlerVo notifyPolicyHandlerVo : notifyPolicyHandlerList) {
-            if (Objects.equals(notifyPolicyHandlerVo.getHandler(), notifyPolicyVo.getHandler())) {
-                ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(notifyPolicyHandlerVo.getModuleGroup());
-                if (moduleGroupVo != null) {
-                    moduleGroupName = moduleGroupVo.getGroupName();
-                }
-            }
+        String moduleGroup = NotifyPolicyHandlerFactory.getModuleGroupIdByHandler(notifyPolicyVo.getHandler());
+        if (moduleGroup == null) {
+            throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        String handlerName = notifyPolicyHandler.getName();
+        String moduleGroupName = "";
+        ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(moduleGroup);
+        if (moduleGroupVo != null) {
+            moduleGroupName = moduleGroupVo.getGroupName();
+        }
+        String handlerName = $.t(notifyPolicyHandler.getName());
         notifyPolicyVo.setPath(moduleGroupName + "/" + handlerName + "/" + notifyPolicyVo.getName());
         return notifyPolicyVo;
     }
