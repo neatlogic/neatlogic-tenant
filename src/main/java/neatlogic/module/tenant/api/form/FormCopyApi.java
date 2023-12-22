@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -48,7 +50,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单复制接口";
+        return "nmtaf.formcopyapi.getname";
     }
 
     @Override
@@ -57,16 +59,25 @@ public class FormCopyApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "表单名称"),
-            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "要复制的版本uuid,空表示复制所有版本")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "common.uuid"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
+            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "common.versionuuid", help = "要复制的版本uuid,空表示复制所有版本")
     })
     @Output({
-            @Param(name = "Return", explode = FormVo.class, desc = "新表单信息")
+            @Param(name = "Return", explode = FormVo.class, desc = "common.tbodylist")
     })
-    @Description(desc = "表单复制接口")
+    @Description(desc = "nmtaf.formcopyapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        FormVo newFrom = new FormVo();
+        String name = jsonObj.getString("name");
+        newFrom.setName(name);
+        //如果表单名称已存在
+        if (formMapper.checkFormNameIsRepeat(newFrom) > 0) {
+            throw new FormNameRepeatException(name);
+        }
+        // 收集要复制的版本
+        List<FormVersionVo> newFormVersionList = new ArrayList<>();
         String uuid = jsonObj.getString("uuid");
         String currentVersionUuid = jsonObj.getString("currentVersionUuid");
         if (StringUtils.isNotBlank(currentVersionUuid)) {
@@ -78,49 +89,49 @@ public class FormCopyApi extends PrivateApiComponentBase {
             if (formVo == null) {
                 throw new FormNotFoundException(formVersionVo.getFormUuid());
             }
-            formVo.setUuid(null);
-            String newFormUuid = formVo.getUuid();
-
-            String oldName = formVo.getName();
-            String name = jsonObj.getString("name");
-            formVo.setName(name);
-            //如果表单名称已存在
-            if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
-                throw new FormNameRepeatException(name);
-            }
-            formMapper.insertForm(formVo);
-            formVersionVo.setVersion(1);
-            saveFormVersion(formVersionVo, newFormUuid, oldName, name);
-            formVo.setCurrentVersion(formVersionVo.getVersion());
-            formVo.setCurrentVersionUuid(formVersionVo.getUuid());
-            return formVo;
+            newFrom.setIsActive(formVo.getIsActive());
+            newFormVersionList.add(copyFormVersion(formVersionVo, newFrom.getUuid()));
         } else if(StringUtils.isNotBlank(uuid)) {
             FormVo formVo = formMapper.getFormByUuid(uuid);
             if (formVo == null) {
                 throw new FormNotFoundException(uuid);
             }
-            formVo.setUuid(null);
-            String newFormUuid = formVo.getUuid();
-            String oldName = formVo.getName();
-            String name = jsonObj.getString("name");
-            formVo.setName(name);
-            //如果表单名称已存在
-            if (formMapper.checkFormNameIsRepeat(formVo) > 0) {
-                throw new FormNameRepeatException(name);
-            }
-            formMapper.insertForm(formVo);
+            newFrom.setIsActive(formVo.getIsActive());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             for (FormVersionVo formVersionVo : formVersionList) {
-                saveFormVersion(formVersionVo, newFormUuid, oldName, name);
-                if (formVersionVo.getIsActive().equals(1)) {
-                    formVo.setCurrentVersion(formVersionVo.getVersion());
-                    formVo.setCurrentVersionUuid(formVersionVo.getUuid());
-                }
+                newFormVersionList.add(copyFormVersion(formVersionVo, newFrom.getUuid()));
             }
-            return formVo;
         } else {
             throw new ParamNotExistsException("uuid", "currentVersionUuid");
         }
+        // 插入表单
+        formMapper.insertForm(newFrom);
+        // 重新生成版本号
+        if (newFormVersionList.size() == 1) {
+            newFormVersionList.get(0).setVersion(1);
+        } else {
+            newFormVersionList.sort(Comparator.comparing(FormVersionVo::getVersion));
+            for (int i = 0; i < newFormVersionList.size(); i++) {
+                newFormVersionList.get(i).setVersion(i);
+            }
+        }
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        // 遍历要复制的版本列表
+        for (FormVersionVo formVersionVo : newFormVersionList) {
+            // 插入表单版本
+            formMapper.insertFormVersion(formVersionVo);
+            // 保存依赖
+            formCrossoverService.saveDependency(formVersionVo);
+            if (formVersionVo.getIsActive().equals(1)) {
+                newFrom.setCurrentVersion(formVersionVo.getVersion());
+                newFrom.setCurrentVersionUuid(formVersionVo.getUuid());
+                // 对应激活版本需要插入表单属性
+                for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
+                    formMapper.insertFormAttribute(formAttributeVo);
+                }
+            }
+        }
+        return newFrom;
     }
 
     public IValid name() {
@@ -133,43 +144,48 @@ public class FormCopyApi extends PrivateApiComponentBase {
         };
     }
 
-    private void saveFormVersion(FormVersionVo formVersionVo, String newFormUuid, String oldName, String newName) {
-        JSONObject formConfig = formVersionVo.getFormConfig();
+    /**
+     * 复制一份表单版本配置信息，需要将所有属性的uuid值重新生成，避免不同版本的属性uuid冲突
+     * @param oldFormVersionVo
+     * @param newFormUuid
+     * @return
+     */
+    private FormVersionVo copyFormVersion(FormVersionVo oldFormVersionVo, String newFormUuid) {
+        JSONObject formConfig = oldFormVersionVo.getFormConfig();
         // 更新各种唯一标识uuid，防止不同表单版本之间唯一标识uuid相同
         // 更新场景uuid
-        formConfig.put("uuid", UuidUtil.randomUuid());
+        String defaultSceneUuid = formConfig.getString("defaultSceneUuid");
         JSONArray sceneList = formConfig.getJSONArray("sceneList");
         if (CollectionUtils.isNotEmpty(sceneList)) {
             for (int i = 0; i < sceneList.size(); i++) {
                 JSONObject scene = sceneList.getJSONObject(i);
-                scene.put("uuid", UuidUtil.randomUuid());
-            }
-        }
-        String content = formConfig.toJSONString();
-        // 更新表单uuid
-        content = content.replace(formVersionVo.getFormUuid(), newFormUuid);
-        // 更新表单名称
-        content = content.replace(oldName, newName);
-        List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-        if (CollectionUtils.isNotEmpty(formAttributeList)) {
-            IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-            for (FormAttributeVo formAttributeVo : formAttributeList) {
-                // 更新表单属性uuid
-                content = content.replace(formAttributeVo.getUuid(), UuidUtil.randomUuid());
-            }
-            formVersionVo.setUuid(null);
-            formVersionVo.setFormUuid(newFormUuid);
-            formVersionVo.setFormConfig(JSONObject.parseObject(content));
-            formMapper.insertFormVersion(formVersionVo);
-            formVersionVo.setFormAttributeList(null);
-            formAttributeList = formVersionVo.getFormAttributeList();
-            for (FormAttributeVo formAttributeVo : formAttributeList) {
-                //保存激活版本时，插入表单属性信息
-                if (Objects.equal(formVersionVo.getIsActive(), 1)) {
-                    formMapper.insertFormAttribute(formAttributeVo);
+                String uuid = scene.getString("uuid");
+                String newUuid = UuidUtil.randomUuid();
+                scene.put("uuid", newUuid);
+                if (Objects.equal(uuid, defaultSceneUuid)) {
+                    formConfig.put("defaultSceneUuid", newUuid);
                 }
-                formCrossoverService.saveDependency(formAttributeVo);
             }
         }
+        String uuid = formConfig.getString("uuid");
+        String newUuid = UuidUtil.randomUuid();
+        formConfig.put("uuid", newUuid);
+        if (Objects.equal(uuid, defaultSceneUuid)) {
+            formConfig.put("defaultSceneUuid", newUuid);
+        }
+
+        String content = formConfig.toJSONString();
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        List<FormAttributeVo> allFormAttributeList = formCrossoverService.getAllFormAttributeList(formConfig);
+        for (FormAttributeVo formAttributeVo : allFormAttributeList) {
+            // 更新表单属性uuid
+            content = content.replace(formAttributeVo.getUuid(), UuidUtil.randomUuid());
+        }
+        FormVersionVo formVersionVo = new FormVersionVo();
+        formVersionVo.setVersion(oldFormVersionVo.getVersion());
+        formVersionVo.setIsActive(oldFormVersionVo.getIsActive());
+        formVersionVo.setFormUuid(newFormUuid);
+        formVersionVo.setFormConfig(JSONObject.parseObject(content));
+        return formVersionVo;
     }
 }

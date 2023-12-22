@@ -1,28 +1,23 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dependency.core.DependencyManager;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionCannotBeDeletedException;
 import neatlogic.framework.form.exception.FormVersionNotFoundException;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
-import neatlogic.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @OperationType(type = OperationTypeEnum.DELETE)
@@ -39,7 +34,7 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单版本删除接口";
+        return "nmtaf.formversiondeleteapi.getname";
     }
 
     @Override
@@ -48,9 +43,9 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单版本uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "common.uuid")
     })
-    @Description(desc = "表单版本删除接口")
+    @Description(desc = "nmtaf.formversiondeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
@@ -63,14 +58,8 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
         }
         //删除表单版本
         formMapper.deleteFormVersionByUuid(uuid);
-        formMapper.deleteFormAttributeMatrixByFormVersionUuid(uuid);
-        List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
-        if (CollectionUtils.isNotEmpty(formAttributeList)) {
-            for (FormAttributeVo formAttributeVo : formAttributeList) {
-                DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-            }
-        }
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        formCrossoverService.deleteDependency(formVersion);
         return null;
     }
 
