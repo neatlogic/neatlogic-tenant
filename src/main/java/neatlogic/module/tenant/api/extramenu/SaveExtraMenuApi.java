@@ -64,7 +64,7 @@ public class SaveExtraMenuApi extends PrivateApiComponentBase {
         @Param(name = "type", type = ApiParamType.ENUM, rule = "0,1", isRequired = true,
             desc = "nmtae.extramenusaveapi.input.param.type.desc"),
         @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "common.isactive"),
-        @Param(name = "url", type = ApiParamType.REGEX, desc = "URL", rule = RegexUtils.CONNECT_URL),
+        @Param(name = "url", type = ApiParamType.REGEX, desc = "URL", rule = RegexUtils.URL),
         @Param(name = "description", type = ApiParamType.STRING, desc = "common.description"),
         @Param(name = "authorityList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.authlist"),
         @Param(name = "parentId", type = ApiParamType.LONG, desc = "common.parentid")})
