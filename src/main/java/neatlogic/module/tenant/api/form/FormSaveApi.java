@@ -1,10 +1,10 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
@@ -20,9 +20,6 @@ import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.UuidUtil;
-import neatlogic.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
-import neatlogic.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -50,7 +47,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单保存接口";
+        return "nmtaf.formsaveapi.getname";
     }
 
     @Override
@@ -60,16 +57,16 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Override
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "表单名称"),
-            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "当前版本的uuid，为空代表创建一个新版本", isRequired = false),
-            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "表单控件生成的json内容", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = true),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
+            @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "common.versionuuid", help = "当前版本的uuid，为空代表创建一个新版本"),
+            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
     })
     @Output({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid"),
-            @Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "表单版本uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "common.versionuuid")
     })
-    @Description(desc = "表单保存接口")
+    @Description(desc = "nmtaf.formsaveapi.getname")
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         FormVo formVo = jsonObj.toJavaObject(FormVo.class);
@@ -80,6 +77,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
         boolean updateFormConfig = true;
         boolean formIsExists = false;
         Integer oldFormVersionIsActive = 0;
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
         FormVo oldFormVo = formMapper.getFormByUuid(formUuid);
         if (oldFormVo != null) {
             formIsExists = true;
@@ -97,14 +95,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 if (Objects.equals(oldFormVersionVo.getFormConfig(), formVo.getFormConfig())) {
                     updateFormConfig = false;
                 } else {
-                    formMapper.deleteFormAttributeMatrixByFormVersionUuid(currentVersionUuid);
-                    List<FormAttributeVo> formAttributeList = oldFormVersionVo.getFormAttributeList();
-                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                        for (FormAttributeVo formAttributeVo : formAttributeList) {
-                            DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                            DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                        }
-                    }
+                    formCrossoverService.deleteDependency(oldFormVersionVo);
                 }
             }
         }
@@ -183,18 +174,15 @@ public class FormSaveApi extends PrivateApiComponentBase {
             } else {
                 formMapper.updateFormVersion(formVersionVo);
             }
+            formCrossoverService.saveDependency(formVersionVo);
             //保存激活版本时，更新表单属性信息
             if (Objects.equals(formVersionVo.getIsActive(), 1)) {
                 formMapper.deleteFormAttributeByFormUuid(formUuid);
-            }
-            if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-                for (FormAttributeVo formAttributeVo : formAttributeList) {
-                    //保存激活版本时，更新表单属性信息
-                    if (Objects.equals(formVersionVo.getIsActive(), 1)) {
+                if (CollectionUtils.isNotEmpty(formAttributeList)) {
+                    for (FormAttributeVo formAttributeVo : formAttributeList) {
+                        //保存激活版本时，更新表单属性信息
                         formMapper.insertFormAttribute(formAttributeVo);
                     }
-                    formCrossoverService.saveDependency(formAttributeVo);
                 }
             }
             return resultObj;

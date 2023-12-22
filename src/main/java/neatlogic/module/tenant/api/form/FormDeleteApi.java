@@ -1,20 +1,19 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormReferencedCannotBeDeletedException;
+import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.framework.dependency.handler.Integration2FormAttrDependencyHandler;
-import neatlogic.module.framework.dependency.handler.MatrixAttr2FormAttrDependencyHandler;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +37,7 @@ public class FormDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单删除接口";
+        return "nmtaf.formdeleteapi.getname";
     }
 
     @Override
@@ -47,12 +46,12 @@ public class FormDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "表单uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "common.uuid")
     })
     @Output({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid")
     })
-    @Description(desc = "表单删除接口")
+    @Description(desc = "nmtaf.formdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
@@ -63,15 +62,9 @@ public class FormDeleteApi extends PrivateApiComponentBase {
             }
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             if (CollectionUtils.isNotEmpty(formVersionList)) {
+                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
                 for (FormVersionVo formVersionVo : formVersionList) {
-                    formMapper.deleteFormAttributeMatrixByFormVersionUuid(formVersionVo.getUuid());
-                    List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
-                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                        for (FormAttributeVo formAttributeVo : formAttributeList) {
-                            DependencyManager.delete(MatrixAttr2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                            DependencyManager.delete(Integration2FormAttrDependencyHandler.class, formAttributeVo.getUuid());
-                        }
-                    }
+                    formCrossoverService.deleteDependency(formVersionVo);
                 }
             }
             formMapper.deleteFormByUuid(uuid);
