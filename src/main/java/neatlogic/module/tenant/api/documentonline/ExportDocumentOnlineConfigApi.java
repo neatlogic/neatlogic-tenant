@@ -67,6 +67,7 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
         for (DocumentOnlineVo documentOnlineVo : allFileList) {
             List<DocumentOnlineConfigVo> configList = documentOnlineVo.getConfigList();
             for (DocumentOnlineConfigVo configVo : configList) {
+                configVo.setSource(null);
                 allList.add(configVo);
             }
         }
