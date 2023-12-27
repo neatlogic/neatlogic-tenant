@@ -243,12 +243,14 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             String value = firstObj.getString("value");
             if (duplicateValue.contains(value)) {
                 iterator.remove();
+                continue;
             } else {
                 duplicateValue.add(value);
             }
             String text = secondObj.getString("text");
             if (duplicateText.contains(text)) {
                 iterator.remove();
+                continue;
             } else {
                 duplicateText.add(text);
             }
