@@ -18,7 +18,6 @@ package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
@@ -75,7 +74,7 @@ public class UserGetListApi extends PrivateApiComponentBase {
         List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
         List<UserVo> userList = new ArrayList<>();
         for (String userUuid : userUuidList){
-            UserVo userVo = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
+            UserVo userVo = userMapper.getUserByUuid(userUuid);
             if(userVo == null) {
     			throw new UserNotFoundException(userUuid);
     		}else {

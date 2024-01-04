@@ -86,7 +86,7 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
             throw new NoTenantException();
         }
         String userUuid = UserContext.get().getUserUuid(true);
-        UserVo user = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
+        UserVo user = userMapper.getUserByUuid(userUuid);
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         String paramName = "upload";
         JSONObject returnObj = new JSONObject();

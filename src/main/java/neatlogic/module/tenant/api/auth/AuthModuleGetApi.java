@@ -110,8 +110,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
                 userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
             } else {
                 AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-                String env = UserContext.get().getEnv();
-                userAuthList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo, env);
+                userAuthList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
                 AuthActionChecker.getAuthList(userAuthList);
             }
         for (UserAuthVo userAuth : userAuthList) {

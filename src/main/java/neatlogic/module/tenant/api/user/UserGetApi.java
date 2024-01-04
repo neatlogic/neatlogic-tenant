@@ -36,6 +36,7 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,9 @@ public class UserGetApi extends PrivateApiComponentBase {
     @Resource
     private RoleMapper roleMapper;
 
+    @Resource
+    private AuthenticationInfoService authenticationInfoService;
+
     @Override
     public String getToken() {
         return "user/get";
@@ -75,36 +79,41 @@ public class UserGetApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
-            @Param(name = "isAuthEnv", type = ApiParamType.BOOLEAN, desc = "nmtau.usergetapi.input.param.desc.isauthenv")
+            @Param(name = "isRuleRole", type = ApiParamType.BOOLEAN, desc = "nmtau.usergetapi.input.param.desc.isrulerole")
     })
     @Output({@Param(name = "Return", explode = UserVo.class, desc = "nmtau.usergetapi.output.param.desc.user")})
     @Description(desc = "nmtau.usergetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = jsonObj.getString("userUuid");
-        Boolean isAuthEnv = true;
-        if(jsonObj.containsKey("isAuthEnv")) {
-            isAuthEnv = jsonObj.getBoolean("isAuthEnv");
+        Boolean isRuleRole = true;
+        AuthenticationInfoVo authenticationInfoVo = null;
+        if (jsonObj.containsKey("isRuleRole")) {
+            isRuleRole = jsonObj.getBoolean("isRuleRole");
         }
-        if (StringUtils.isBlank(userUuid)) {
-            userUuid = UserContext.get().getUserUuid(true);
-        }
-        UserVo userVo = null;
+        UserVo userVo;
         //维护模式下 获取厂商维护人员信息
         if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId()) && StringUtils.isBlank(jsonObj.getString("userUuid"))) {
             userVo = MaintenanceMode.getMaintenanceUser();
             //告诉前端是否为维护模式
             userVo.setIsMaintenanceMode(1);
         } else if (Objects.equals(SystemUser.SYSTEM.getUserUuid(), userUuid)) {
-            userVo = SystemUser.SYSTEM.getUserVo();
+            userVo = SystemUser.SYSTEM.getUserVo(false);
         } else {
-            if(isAuthEnv) {
-                userVo = userMapper.getUserByUuidAndEnv(userUuid, UserContext.get().getEnv());
-            }else{
-                userVo = userMapper.getUserByUuid(userUuid);
+            if (StringUtils.isBlank(userUuid)) {
+                userUuid = UserContext.get().getUserUuid(true);
+                authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
+            } else {
+                authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userUuid, isRuleRole);
             }
+            userVo = userMapper.getUserByUuid(userUuid);
             if (userVo == null) {
                 throw new UserNotFoundException(userUuid);
+            }
+            userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
+            userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
+            if (CollectionUtils.isNotEmpty(authenticationInfoVo.getRoleUuidList())) {
+                userVo.setRoleList(roleMapper.getRoleByUuidList(authenticationInfoVo.getRoleUuidList()));
             }
             //超级管理员拥有所有权限
             if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
@@ -115,9 +124,8 @@ public class UserGetApi extends PrivateApiComponentBase {
                 }
                 userVo.setUserAuthList(userAuthVos);
             } else {
-                AuthenticationInfoVo authenticationInfoVo = UserContext.get().getAuthenticationInfoVo();
-                String env = UserContext.get().getEnv();
-                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo, env);
+
+                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
                 List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userAuthVoList)) {
                     userAuthVoList.forEach(auth -> {
@@ -138,6 +146,7 @@ public class UserGetApi extends PrivateApiComponentBase {
                 }
             }
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
+            userVo.setTeamList(teamList);
             List<String> teamUuidList = userVo.getTeamUuidList();
             /**
              * 补充分组角色信息,以用户的a分组为例
@@ -149,7 +158,7 @@ public class UserGetApi extends PrivateApiComponentBase {
             Map<String, RoleVo> roleVoMap = new HashMap<>();
             teamList.forEach(e -> teamRoleList.addAll(roleMapper.getParentTeamRoleListWithCheckedChildrenByTeam(e)));
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
-                teamRoleList.addAll(roleMapper.getRoleListByTeamUuidList(teamUuidList));
+                teamRoleList.addAll(roleMapper.getRoleListWithTeamByTeamUuidList(teamUuidList));
             }
             for (RoleVo roleVo : teamRoleList) {
                 String uuid = roleVo.getUuid();

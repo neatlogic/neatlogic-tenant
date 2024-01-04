@@ -72,7 +72,7 @@ public class UserGetWithCacheControlApi extends PrivateApiComponentBase {
 		if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId())) {
 			userVo = MaintenanceMode.getMaintenanceUser();
 		}else if(Objects.equals(SystemUser.SYSTEM.getUserUuid(),userUuid)){
-			userVo = SystemUser.SYSTEM.getUserVo();
+			userVo = SystemUser.SYSTEM.getUserVo(false);
 		}else {
 			userVo = userMapper.getUserSimpleInfoByUuid(userUuid);
 		}
