@@ -16,14 +16,13 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.NoTenantException;
-import neatlogic.module.framework.file.handler.LocalFileSystemHandler;
-import neatlogic.module.framework.file.handler.MinioFileSystemHandler;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -32,16 +31,13 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,11 +46,11 @@ import javax.servlet.http.HttpServletResponse;
 
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
-    static Logger logger = LoggerFactory.getLogger(UserAvatarUploadApi.class);
+    //static Logger logger = LoggerFactory.getLogger(UserAvatarUploadApi.class);
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
 
     @Override
@@ -102,18 +98,11 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setUserUuid(userUuid);
                 fileVo.setType("image");
                 fileVo.setContentType(multipartFile.getContentType());
-                String filePath = null;
-                try {
-                    filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-                } catch (Exception ex) {
-                    //如果minio出现异常，则上传到本地
-                    logger.error(ex.getMessage(), ex);
-                    filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-                }
+                String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
                 fileVo.setPath(filePath);
                 fileMapper.insertFile(fileVo);
                 Long fileId = fileVo.getId();
-                /** 保存头像数据 */
+                /* 保存头像数据 */
                 JSONObject userInfo = new JSONObject();
                 userInfo.put("avatar", "api/binary/image/download?id=" + fileId);
                 user.setUserInfo(userInfo.toJSONString());

@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.file;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -33,29 +35,23 @@ import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicBinaryStreamApiComponentBase;
-import neatlogic.module.framework.file.handler.LocalFileSystemHandler;
-import neatlogic.module.framework.file.handler.MinioFileSystemHandler;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.CREATE)
 public class UploadFilePublicApi extends PublicBinaryStreamApiComponentBase {
-    static Logger logger = LoggerFactory.getLogger(UploadFilePublicApi.class);
+    // static Logger logger = LoggerFactory.getLogger(UploadFilePublicApi.class);
 
-    @Autowired
+    @Resource
     private FileMapper fileMapper;
 
     @Override
@@ -99,12 +95,15 @@ public class UploadFilePublicApi extends PublicBinaryStreamApiComponentBase {
         if (multipartFile != null && multipartFile.getName() != null) {
             String userUuid = UserContext.get().getUserUuid(true);
             String oldFileName = multipartFile.getOriginalFilename();
-            Long size = multipartFile.getSize();
+            long size = multipartFile.getSize();
             // 如果配置为空代表不受任何限制
             if (fileTypeConfigVo != null) {
                 boolean isAllowed = false;
-                Long maxSize = 0L;
-                String fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+                long maxSize = 0L;
+                String fileExt = null;
+                if (oldFileName != null) {
+                    fileExt = oldFileName.substring(oldFileName.lastIndexOf(".") + 1).toLowerCase();
+                }
                 JSONObject configObj = fileTypeConfigVo.getConfigObj();
                 JSONArray whiteList = new JSONArray();
                 JSONArray blackList = new JSONArray();
@@ -116,17 +115,17 @@ public class UploadFilePublicApi extends PublicBinaryStreamApiComponentBase {
                     blackList = configObj.getJSONArray("blackList");
                     maxSize = configObj.getLongValue("maxSize");
                 }
-                if (whiteList != null && whiteList.size() > 0) {
+                if (whiteList != null && !whiteList.isEmpty()) {
                     for (int i = 0; i < whiteList.size(); i++) {
-                        if (fileExt.equalsIgnoreCase(whiteList.getString(i))) {
+                        if (fileExt != null && fileExt.equalsIgnoreCase(whiteList.getString(i))) {
                             isAllowed = true;
                             break;
                         }
                     }
-                } else if (blackList != null && blackList.size() > 0) {
+                } else if (blackList != null && !blackList.isEmpty()) {
                     isAllowed = true;
                     for (int i = 0; i < blackList.size(); i++) {
-                        if (fileExt.equalsIgnoreCase(blackList.getString(i))) {
+                        if (fileExt != null && fileExt.equalsIgnoreCase(blackList.getString(i))) {
                             isAllowed = false;
                             break;
                         }
@@ -137,7 +136,7 @@ public class UploadFilePublicApi extends PublicBinaryStreamApiComponentBase {
                 if (!isAllowed) {
                     throw new FileExtNotAllowedException(fileExt);
                 }
-                if (maxSize != null && maxSize > 0 && size > maxSize) {
+                if (maxSize > 0 && size > maxSize) {
                     throw new FileTooLargeException(size, maxSize);
                 }
             }
@@ -153,14 +152,7 @@ public class UploadFilePublicApi extends PublicBinaryStreamApiComponentBase {
             fileVo.setUserUuid(userUuid);
             fileVo.setType(type);
             fileVo.setContentType(multipartFile.getContentType());
-            String filePath = null;
-            try {
-                filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-            } catch (Exception ex) {
-                // 如果minio出现异常，则上传到本地
-                logger.error(ex.getMessage(), ex);
-                filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-            }
+            String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
             fileVo.setPath(filePath);
             fileMapper.insertFile(fileVo);
             fileTypeHandler.afterUpload(fileVo, paramObj);

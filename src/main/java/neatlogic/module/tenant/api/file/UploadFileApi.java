@@ -16,9 +16,10 @@
 
 package neatlogic.module.tenant.api.file;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.exception.file.*;
@@ -31,10 +32,6 @@ import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.module.framework.file.handler.LocalFileSystemHandler;
-import neatlogic.module.framework.file.handler.MinioFileSystemHandler;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,30 +172,21 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         fileVo.setUniqueKey(uk);
                         oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), uk);
                     }
-                    String filePath;
-                    try {
-                        filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-                    } catch (Exception ex) {
-                        //如果没有配置minioUrl，则表示不使用minio，无需抛异常
-                        if (StringUtils.isNotBlank(Config.MINIO_URL())) {
-                            logger.error(ex.getMessage(), ex);
+                    String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                    if (StringUtils.isNotBlank(filePath)) {
+                        fileVo.setPath(filePath);
+                        if (oldFileVo == null) {
+                            fileMapper.insertFile(fileVo);
+                        } else {
+                            FileUtil.deleteData(oldFileVo.getPath());
+                            fileVo.setId(oldFileVo.getId());
+                            fileMapper.updateFile(fileVo);
                         }
-                        // 如果minio出现异常，则上传到本地
-                        filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                        fileTypeHandler.afterUpload(fileVo, paramObj);
+                        FileVo file = fileMapper.getFileById(fileVo.getId());
+                        file.setUrl("api/binary/file/download?id=" + fileVo.getId());
+                        return file;
                     }
-                    fileVo.setPath(filePath);
-                    if (oldFileVo == null) {
-                        fileMapper.insertFile(fileVo);
-                    } else {
-                        FileUtil.deleteData(oldFileVo.getPath());
-                        fileVo.setId(oldFileVo.getId());
-                        fileMapper.updateFile(fileVo);
-                    }
-                    fileTypeHandler.afterUpload(fileVo, paramObj);
-                    FileVo file = fileMapper.getFileById(fileVo.getId());
-                    file.setUrl("api/binary/file/download?id=" + fileVo.getId());
-
-                    return file;
                 } else {
                     fileTypeHandler.analyze(multipartFile, paramObj);
                     return fileVo;
