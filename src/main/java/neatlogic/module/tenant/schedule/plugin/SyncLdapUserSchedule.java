@@ -260,7 +260,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                             }
                             this.userMapper.batchInsertUserRole(userRoleList);
                         }
-                        String teamUuid = this.teamMapper.getTeamUuidbyUpwardNamePath(upwardTeamName);
+                        String teamUuid = this.teamMapper.getTeamUuidByUpwardNamePath(upwardTeamName);
                         if (StringUtils.isNotBlank(teamUuid)) {
                             this.userMapper.insertUserTeam(uuid, teamUuid);
                         }
