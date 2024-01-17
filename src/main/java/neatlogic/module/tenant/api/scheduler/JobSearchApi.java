@@ -16,22 +16,24 @@
 
 package neatlogic.module.tenant.api.scheduler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.JobClassVo;
 import neatlogic.framework.scheduler.dto.JobVo;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.framework.util.TableResultUtil;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,51 +42,55 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JobSearchApi extends PrivateApiComponentBase {
 
-	@Autowired
-	private SchedulerMapper schedulerMapper;
+    @Resource
+    private SchedulerMapper schedulerMapper;
 
-	@Override
-	public String getToken() {
-		return "job/search";
-	}
+    @Override
+    public String getToken() {
+        return "job/search";
+    }
 
-	@Override
-	public String getName() {
-		return "查询定时作业列表";
-	}
+    @Override
+    public String getName() {
+        return "nmtas.jobsearchapi.getname";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({ @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = false, desc = "当前页码"), @Param(name = "pageSize", type = ApiParamType.INTEGER, isRequired = false, desc = "页大小"), @Param(name = "keyword", type = ApiParamType.STRING, isRequired = false, desc = "定时作业名称(支持模糊查询)"), @Param(name = "handler", type = ApiParamType.STRING, isRequired = false, desc = "定时作业组件className") })
-	@Description(desc = "查询定时作业列表")
-	@Output({ @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"), @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"), @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"), @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"), @Param(name = "tbodyList", explode = JobVo[].class, desc = "定时作业列表"), })
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		// 判断定时作业组件是否存在
-		if (jsonObj.containsKey("handler")) {
-			String handler = jsonObj.getString("handler");
-			JobClassVo jobClass = SchedulerManager.getJobClassByClassName(handler);
-			if (jobClass == null) {
-				throw new ScheduleHandlerNotFoundException(handler);
-			}
-		}
+    @Input({
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "nmtas.jobsearchapi.input.param.desc.handler")
+    })
+    @Description(desc = "nmtas.jobsearchapi.getname")
+    @Output({
+            @Param(explode = JobVo.class, desc = "nmtas.jobsearchapi.output.param.desc")
+    })
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        // 判断定时作业组件是否存在
+        if (jsonObj.containsKey("handler")) {
+            String handler = jsonObj.getString("handler");
+            JobClassVo jobClass = SchedulerManager.getJobClassByClassName(handler);
+            if (jobClass == null) {
+                throw new ScheduleHandlerNotFoundException(handler);
+            }
+        }
 
-		JobVo jobVo = JSONObject.toJavaObject(jsonObj, JobVo.class);
-		int rowNum = schedulerMapper.searchJobCount(jobVo);
-		int pageCount = PageUtil.getPageCount(rowNum, jobVo.getPageSize());
-		jobVo.setPageCount(pageCount);
-		jobVo.setRowNum(rowNum);
-		List<JobVo> jobList = schedulerMapper.searchJob(jobVo);
-		JSONObject resultObj = new JSONObject();
-		resultObj.put("tbodyList", jobList);
-		resultObj.put("currentPage", jobVo.getCurrentPage());
-		resultObj.put("pageSize", jobVo.getPageSize());
-		resultObj.put("pageCount", jobVo.getPageCount());
-		resultObj.put("rowNum", jobVo.getRowNum());
-		return resultObj;
-	}
+        JobVo jobVo = JSONObject.toJavaObject(jsonObj, JobVo.class);
+        int rowNum = schedulerMapper.searchJobCount(jobVo);
+        int pageCount = PageUtil.getPageCount(rowNum, jobVo.getPageSize());
+        jobVo.setPageCount(pageCount);
+        jobVo.setRowNum(rowNum);
+        List<JobVo> jobList = new ArrayList<>();
+        if (rowNum > 0) {
+            jobList = schedulerMapper.searchJob(jobVo);
+        }
+        return TableResultUtil.getResult(jobList, jobVo);
+    }
 
 }
