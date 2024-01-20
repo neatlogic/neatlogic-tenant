@@ -16,7 +16,10 @@
 
 package neatlogic.module.tenant.api.apimanage;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
@@ -27,7 +30,6 @@ import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.restful.enums.TreeMenuType;
 import neatlogic.module.tenant.service.apiaudit.ApiAuditService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,7 @@ import java.util.*;
  */
 
 @Service
-
+@AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 

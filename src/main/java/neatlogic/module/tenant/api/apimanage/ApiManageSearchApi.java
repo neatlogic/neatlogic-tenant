@@ -37,9 +37,9 @@ import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.restful.enums.ApiKind;
 import neatlogic.framework.util.$;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,11 +48,11 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageSearchApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ApiMapper ApiMapper;
 
 
-    @Autowired
+    @Resource
     private ApiAuditMapper apiAuditMapper;
 
     @Override

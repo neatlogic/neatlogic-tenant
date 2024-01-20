@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.apimanage;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.exception.type.ApiNotFoundException;
@@ -26,31 +27,27 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.dao.mapper.ApiAuditMapper;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
-import neatlogic.framework.restful.dto.ApiAuditPathVo;
 import neatlogic.framework.restful.dto.ApiAuditVo;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.util.TableResultUtil;
 import neatlogic.framework.util.TimeUtil;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageAuditListApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ApiMapper ApiMapper;
 
-    @Autowired
+    @Resource
     private ApiAuditMapper apiAuditMapper;
 
     @Override
