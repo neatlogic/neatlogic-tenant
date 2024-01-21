@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.auth;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -27,8 +29,6 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @program: neatlogic
- * @description:
- * @create: 2020-03-17 12:03
- **/
+
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -53,7 +49,7 @@ public class AuthGroupApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "权限组列表获取接口";
+        return "获取权限组列表";
     }
 
     @Override
@@ -64,7 +60,7 @@ public class AuthGroupApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "groupList", type = ApiParamType.JSONARRAY, desc = "权限组列表")
     })
-    @Description(desc = "权限组列表获取接口")
+    @Description(desc = "获取权限组列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
