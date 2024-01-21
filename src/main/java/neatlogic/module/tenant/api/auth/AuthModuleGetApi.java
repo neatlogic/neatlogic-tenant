@@ -104,7 +104,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
                 userAuthVos.add(new UserAuthVo(userUuid, authBase));
             }
             userAuthList = userAuthVos;
-        } else
+        } else {
             //维护模式下 获取厂商维护人员信息
             if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(UserContext.get().getUserId())) {
                 userAuthList = MaintenanceMode.getMaintenanceUser().getUserAuthList();
@@ -113,6 +113,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
                 userAuthList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
                 AuthActionChecker.getAuthList(userAuthList);
             }
+        }
         for (UserAuthVo userAuth : userAuthList) {
             authSet.add(userAuth.getAuth());
         }
