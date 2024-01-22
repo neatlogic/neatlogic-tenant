@@ -24,6 +24,7 @@ import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -97,13 +98,13 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
             if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName) || (groupName != null && !groupName.equalsIgnoreCase(authGroupName))) {
                 continue;
             }
-            String displayName = ModuleUtil.getModuleGroup(authGroupName).getGroupName();
+            ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(authGroupName);
             List<AuthBase> authList = authGroupMap.get(authGroupName);
             if (authList != null && authList.size() > 0) {
                 List<AuthVo> authArray = new ArrayList<>();
                 for (AuthBase authBase : authList) {
                     if (authBase.isShow() && (StringUtils.isBlank(keyword) || authBase.getAuthDisplayName().contains(keyword))) {
-                        AuthVo authVo = new AuthVo(authBase.getAuthName(), authBase.getAuthDisplayName(), authBase.getAuthIntroduction(), displayName, authBase.getSort());
+                        AuthVo authVo = new AuthVo(authBase.getAuthName(), authBase.getAuthDisplayName(), authBase.getAuthIntroduction(), moduleGroupVo, authBase.getSort());
                         if (roleAuthMap.containsKey(authVo.getName())) {
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
                         }
