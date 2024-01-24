@@ -41,7 +41,7 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除分组接口";
+        return "nmtat.teamdeleteapi.getname";
     }
 
     @Override
@@ -49,8 +49,8 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "分组uuid", isRequired = true)})
-    @Description(desc = "删除分组接口")
+    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = true)})
+    @Description(desc = "nmtat.teamdeleteapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String uuid = jsonObj.getString("uuid");
@@ -61,7 +61,8 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
         List<String> uuidList = teamMapper.getChildrenUuidListByLeftRightCode(team.getLft(), team.getRht());
         LRCodeManager.beforeDeleteTreeNode("team", "uuid", "parent_uuid", uuid);
         uuidList.add(team.getUuid());
-        teamMapper.deleteTeamByUuidList(uuidList);
+//        teamMapper.deleteTeamByUuidList(uuidList);
+        teamMapper.updateTeamIsDeletedByUuidList(uuidList);
         teamMapper.deleteTeamUserByTeamUuidList(uuidList);
         teamMapper.deleteTeamRoleByTeamUuidList(uuidList);
         //delete teamUserTitle
