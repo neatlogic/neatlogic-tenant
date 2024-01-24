@@ -112,7 +112,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
         } else {
             newFormVersionList.sort(Comparator.comparing(FormVersionVo::getVersion));
             for (int i = 0; i < newFormVersionList.size(); i++) {
-                newFormVersionList.get(i).setVersion(i);
+                newFormVersionList.get(i).setVersion(i + 1);
             }
         }
         IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);

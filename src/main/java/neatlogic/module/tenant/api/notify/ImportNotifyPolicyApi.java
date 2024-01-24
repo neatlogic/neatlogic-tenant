@@ -1,5 +1,6 @@
 package neatlogic.module.tenant.api.notify;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
@@ -15,7 +16,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.$;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class ImportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
     }
     @Override
     public String getName() {
-        return "导入通知策略";
+        return "nmtan.importnotifypolicyapi.getname";
     }
 
     @Override
@@ -56,7 +57,7 @@ public class ImportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
 
     @Input({})
     @Output({})
-    @Description(desc = "导入通知策略")
+    @Description(desc = "nmtan.importnotifypolicyapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -101,7 +102,7 @@ public class ImportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
             throw new NotifyPolicyHandlerNotFoundException(handler);
         }
         if (notifyMapper.getNotifyPolicyByHandlerLimitOne(handler) != null && notifyPolicyHandler.isAllowMultiPolicy() == 0) {
-            throw new NotifyPolicyMoreThanOneException(notifyPolicyHandler.getName());
+            throw new NotifyPolicyMoreThanOneException($.t(notifyPolicyHandler.getName()));
         }
         int i = 1;
         while (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
