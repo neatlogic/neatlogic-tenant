@@ -16,6 +16,9 @@
 
 package neatlogic.module.tenant.api.notify;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_POLICY_MODIFY;
@@ -36,10 +39,8 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.RegexUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +64,7 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "通知策略信息保存接口";
+        return "nmtan.notifypolicysaveapi.getname";
     }
 
     @Override
@@ -71,12 +72,15 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "策略id"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, maxLength = 50,
-                    isRequired = true, desc = "策略名"),
-            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "通知策略处理器")})
-    @Output({@Param(explode = NotifyPolicyVo.class, desc = "策略信息")})
-    @Description(desc = "通知策略信息保存接口")
+    @Input({
+            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, maxLength = 50, isRequired = true, desc = "common.name"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "term.notify.handler")
+    })
+    @Output({
+            @Param(explode = NotifyPolicyVo.class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmtan.notifypolicysaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String handler = jsonObj.getString("handler");
@@ -104,7 +108,7 @@ public class NotifyPolicySaveApi extends PrivateApiComponentBase {
             paramList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         } else {
             if (notifyMapper.getNotifyPolicyByHandlerLimitOne(handler) != null && notifyPolicyHandler.isAllowMultiPolicy() == 0) {
-                throw new NotifyPolicyMoreThanOneException(notifyPolicyHandler.getName());
+                throw new NotifyPolicyMoreThanOneException($.t(notifyPolicyHandler.getName()));
             }
             notifyPolicyVo = new NotifyPolicyVo(name, handler);
             if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {

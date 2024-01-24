@@ -1,5 +1,7 @@
 package neatlogic.module.tenant.api.team;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.TEAM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -8,15 +10,15 @@ import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.exception.team.TeamLevelNotFoundException;
+import neatlogic.framework.exception.team.TeamNameRepeatException;
 import neatlogic.framework.exception.team.TeamNotFoundException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.tenant.service.TeamService;
 import neatlogic.framework.service.UserService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.tenant.service.TeamService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存组信息";
+        return "nmtat.teamsaveapi.getname";
     }
 
     @Override
@@ -60,16 +62,16 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "组id", isRequired = false),
-            @Param(name = "name", type = ApiParamType.STRING, desc = "组名", isRequired = true, xss = true),
-            @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "父级组id"),
-            @Param(name = "level", type = ApiParamType.STRING, desc = "层级"),
-            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid集合"),
-            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "分组uuid集合"),
-            @Param(name = "teamUserTitleList", type = ApiParamType.JSONARRAY, desc = "分组领导集合")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = false),
+            @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", isRequired = true, xss = true),
+            @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "term.diagram.parentuuid"),
+            @Param(name = "level", type = ApiParamType.STRING, desc = "common.level"),
+            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "common.useruuidlist"),
+            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
+            @Param(name = "teamUserTitleList", type = ApiParamType.JSONARRAY, desc = "common.teamusertitlelist")
     })
-    @Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "保存的组id")})
-    @Description(desc = "保存组信息")
+    @Output({@Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid")})
+    @Description(desc = "nmtat.teamsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String level = jsonObj.getString("level");
@@ -86,8 +88,13 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         teamVo.setLevel(level);
         teamVo.setUuid(uuid);
         if (StringUtils.isNotBlank(uuid)) {
-            if (teamMapper.checkTeamIsExists(uuid) == 0) {
+            TeamVo oldTeam = teamMapper.getTeamByUuid(uuid);
+            if (oldTeam == null) {
                 throw new TeamNotFoundException(uuid);
+            }
+            teamVo.setParentUuid(oldTeam.getParentUuid());
+            if (teamMapper.checkTeamNameIsIsRepeat(teamVo) > 0) {
+                throw new TeamNameRepeatException(teamVo.getName());
             }
             teamVo.setUuid(uuid);
             teamMapper.updateTeamNameByUuid(teamVo);
@@ -103,6 +110,14 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 }
             }
             teamVo.setParentUuid(parentUuid);
+            if (teamMapper.checkTeamNameIsIsRepeat(teamVo) > 0) {
+                throw new TeamNameRepeatException(teamVo.getName());
+            }
+            TeamVo oldTeam = teamMapper.getTeamByNameAndParentUuid(teamVo);
+            if (oldTeam != null) {
+                teamVo.setId(oldTeam.getId());
+                teamVo.setUuid(oldTeam.getUuid());
+            }
             int lft = LRCodeManager.beforeAddTreeNode("team", "uuid", "parent_uuid", parentUuid);
             teamVo.setLft(lft);
             teamVo.setRht(lft + 1);
@@ -158,6 +173,16 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         JSONObject returnObj = new JSONObject();
         returnObj.put("uuid", teamVo.getUuid());
         return returnObj;
+    }
+
+    public IValid name() {
+        return value -> {
+            TeamVo teamVo = JSON.toJavaObject(value, TeamVo.class);
+            if (teamMapper.checkTeamNameIsIsRepeat(teamVo) > 0) {
+                return new FieldValidResultVo(new TeamNameRepeatException(teamVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 
 //    private Object backup(JSONObject jsonObj){

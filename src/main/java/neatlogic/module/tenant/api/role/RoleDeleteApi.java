@@ -35,7 +35,7 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "角色删除接口";
+		return "nmtar.roledeleteapi.getname";
 	}
 
 	@Override
@@ -46,9 +46,9 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "uuidList",
 					type = ApiParamType.JSONARRAY,
-					desc = "角色名称集合",
+					desc = "common.roleuuidlist",
 					isRequired = true) })
-	@Description(desc = "角色删除接口")
+	@Description(desc = "nmtar.roledeleteapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
@@ -56,7 +56,8 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 			roleMapper.deleteMenuRoleByRoleUuid(uuid);
 			roleMapper.deleteTeamRoleByRoleUuid(uuid);
 			roleMapper.deleteRoleUser(new RoleUserVo(uuid));
-			roleMapper.deleteRoleByUuid(uuid);
+//			roleMapper.deleteRoleByUuid(uuid);
+			roleMapper.updateRoleIsDeletedByUuid(uuid);
 			roleMapper.deleteRoleAuthByRoleUuid(uuid);
 		}
 		return null;
