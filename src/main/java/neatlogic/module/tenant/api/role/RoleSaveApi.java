@@ -90,13 +90,14 @@ public class RoleSaveApi extends PrivateApiComponentBase {
         roleVo.setRule(jsonObj.getString("rule"));
         String uuid = jsonObj.getString("uuid");
         if (StringUtils.isNotBlank(uuid)) {
+            roleVo.setUuid(uuid);
             if (roleMapper.checkRoleIsExists(uuid) == 0) {
                 throw new RoleNotFoundException(uuid);
             }
             if (roleMapper.checkRoleNameIsIsRepeat(roleVo) > 0) {
                 throw new RoleNameRepeatException(roleVo.getName());
             }
-            roleVo.setUuid(uuid);
+            roleVo.setIsDelete(0);
             roleMapper.updateRole(roleVo);
         } else {
             if (roleMapper.checkRoleNameIsIsRepeat(roleVo) > 0) {
