@@ -103,7 +103,7 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
             if (authList != null && authList.size() > 0) {
                 List<AuthVo> authArray = new ArrayList<>();
                 for (AuthBase authBase : authList) {
-                    if (authBase.isShow() && (StringUtils.isBlank(keyword) || authBase.getAuthDisplayName().contains(keyword))) {
+                    if (authBase.isShow() && (StringUtils.isBlank(keyword) || authBase.getAuthDisplayName().contains(keyword)) || authBase.getAuthName().contains(keyword)) {
                         AuthVo authVo = new AuthVo(authBase.getAuthName(), authBase.getAuthDisplayName(), authBase.getAuthIntroduction(), moduleGroupVo, authBase.getSort());
                         if (roleAuthMap.containsKey(authVo.getName())) {
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
