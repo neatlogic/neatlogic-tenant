@@ -16,6 +16,7 @@
 
 package neatlogic.module.tenant.api.mq;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.mq.core.TopicFactory;
@@ -27,7 +28,6 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +59,7 @@ public class ListTopicApi extends PrivateApiComponentBase {
     }
 
     @Output({@Param(explode = TopicVo[].class)})
-    @Description(desc = "获取消息队列主题列表接口")
+    @Description(desc = "获取消息队列主题列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<TopicVo> topicList = TopicFactory.getTopicList();
@@ -69,6 +69,7 @@ public class ListTopicApi extends PrivateApiComponentBase {
                 Optional<TopicVo> op = activeTopicList.stream().filter(t -> t.getName().equals(topicVo.getName())).findFirst();
                 if (op.isPresent()) {
                     topicVo.setIsActive(op.get().getIsActive());
+                    topicVo.setConfig(op.get().getConfig());
                 } else {
                     topicVo.setIsActive(1);
                 }

@@ -35,19 +35,19 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = MQ_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class ToggleTopicActiveApi extends PrivateApiComponentBase {
+public class SaveTopicConfigApi extends PrivateApiComponentBase {
 
     @Resource
     private MqTopicMapper mqTopicMapper;
 
     @Override
     public String getToken() {
-        return "/mq/topic/toggleactive";
+        return "/mq/topic/save";
     }
 
     @Override
     public String getName() {
-        return "term.framework.togglemqtopicisactive";
+        return "term.framework.savetopic";
     }
 
     @Override
@@ -55,13 +55,14 @@ public class ToggleTopicActiveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "common.uniquename"),
-            @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "common.isactive")})
-    @Description(desc = "term.framework.togglemqtopicisactive")
+    @Input({
+            @Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "common.uniquename"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")})
+    @Description(desc = "term.framework.savetopic")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         TopicVo topicVo = JSONObject.toJavaObject(jsonObj, TopicVo.class);
-        mqTopicMapper.saveTopicIsActive(topicVo);
+        mqTopicMapper.saveTopicConfig(topicVo);
         return null;
     }
 
