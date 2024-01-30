@@ -19,25 +19,17 @@ package neatlogic.module.tenant.api.test;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.annotation.ResubmitInterval;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.transaction.core.AfterTransactionJob;
-import neatlogic.module.tenant.dao.mapper.TestMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.framework.restful.core.privateapi.PrivateRawApiComponentBase;
 
-@Deprecated
 //@Component
 //@Transactional
-public class TestApi extends PrivateApiComponentBase {
-
-    @Autowired
-    private TestMapper testMapper;
+public class TestApi extends PrivateRawApiComponentBase {
 
     @Override
     public String getName() {
-        return "测试BG";
+        return "测试RAW接口";
     }
 
     @Override
@@ -45,25 +37,18 @@ public class TestApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "测试BG")
-    @ResubmitInterval(value = 10)
-    @Input({@Param(name = "content", type = ApiParamType.STRING, isRequired = true)})
+    @Description(desc = "测试RAW接口")
+    @Output({@Param(name = "result", type = ApiParamType.STRING)})
     @Override
-    public Object myDoService(JSONObject jsonObj) throws Exception {
-        String content = jsonObj.getString("content");
-        AfterTransactionJob<String> job = new AfterTransactionJob<>("TEST");
-        job.execute(content, c -> {
-            System.out.println(testMapper.getContent());
-        });
-        testMapper.insertContent(content);
-        System.out.println("done");
-        Thread.sleep(20000L);
-        return null;
+    public Object myDoService(String param) throws Exception {
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("result", param);
+        return jsonObj;
     }
 
     @Override
     public String getToken() {
-        return "/testbg";
+        return "/testraw";
     }
 
 }
