@@ -16,6 +16,8 @@
 
 package neatlogic.module.tenant.api.auth;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -28,10 +30,9 @@ import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -54,7 +55,7 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "权限管理列表查询接口";
+        return "nmtaa.authmanagesearchapi.getname";
     }
 
     @Override
@@ -63,18 +64,20 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "groupName", type = ApiParamType.STRING, desc = "权限组名"),
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字")
+            @Param(name = "groupName", type = ApiParamType.STRING, desc = "nmtaa.authmanagesearchapi.input.param.desc.groupname"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "nmtaa.authmanagesearchapi.input.param.desc.defaultvalue"),
     })
     @Output({
             @Param(type = ApiParamType.JSONARRAY, desc = "权限列表组集合", explode = AuthVo[].class)
     })
-    @Description(desc = "权限管理列表查询接口")
+    @Description(desc = "nmtaa.authmanagesearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<AuthVo> authVoList = new ArrayList<>();
         String groupName = jsonObj.getString("groupName");
         String keyword = jsonObj.getString("keyword");
+        JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         if ("all".equals(groupName)) {
             groupName = null;
         }
@@ -103,7 +106,11 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
             if (authList != null && authList.size() > 0) {
                 List<AuthVo> authArray = new ArrayList<>();
                 for (AuthBase authBase : authList) {
-                    if (authBase.isShow() && (StringUtils.isBlank(keyword) || authBase.getAuthDisplayName().contains(keyword) || authBase.getAuthName().contains(keyword))) {
+                    if (authBase.isShow() && ((StringUtils.isBlank(keyword) && CollectionUtils.isEmpty(defaultValue))
+                            || (StringUtils.isNotBlank(keyword) && authBase.getAuthDisplayName().contains(keyword))
+                            || (StringUtils.isNotBlank(keyword) && authBase.getAuthName().contains(keyword)))
+                            || (CollectionUtils.isNotEmpty(defaultValue) && defaultValue.contains(authBase.getAuthName()))
+                    ) {
                         AuthVo authVo = new AuthVo(authBase.getAuthName(), authBase.getAuthDisplayName(), authBase.getAuthIntroduction(), moduleGroupVo, authBase.getSort());
                         if (roleAuthMap.containsKey(authVo.getName())) {
                             authVo.setRoleCount(roleAuthMap.get(authVo.getName()));
