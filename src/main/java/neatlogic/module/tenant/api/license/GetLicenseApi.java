@@ -19,6 +19,7 @@ package neatlogic.module.tenant.api.license;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
+import neatlogic.framework.auth.label.LICENSE_MODIFY;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.dto.LicenseVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AuthAction(action = ADMIN.class)
+@AuthAction(action = LICENSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetLicenseApi extends PrivateApiComponentBase {
 

@@ -19,6 +19,7 @@ package neatlogic.module.tenant.api.apimanage;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.API_AUDIT_VIEW;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.module.ModuleGroupVo;
@@ -46,6 +47,7 @@ import java.util.*;
 
 @Service
 @AuthAction(action = INTERFACE_MODIFY.class)
+@AuthAction(action = API_AUDIT_VIEW.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageTreeSearchApi extends PrivateApiComponentBase {
 
