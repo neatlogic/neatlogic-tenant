@@ -16,9 +16,10 @@
 
 package neatlogic.module.tenant.api.matrix;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.matrix.constvalue.SearchExpression;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -31,8 +32,6 @@ import neatlogic.framework.matrix.exception.MatrixNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +75,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
             @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "hiddenFieldList", desc = "隐藏属性uuid列表", type = ApiParamType.JSONARRAY),
+            @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
@@ -169,6 +170,18 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         List<String> columnList = new ArrayList<>();
         columnList.add(valueField);
         columnList.add(textField);
+        JSONArray hiddenFieldList = jsonObj.getJSONArray("hiddenFieldList");
+        if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
+            for (int i = 0; i < hiddenFieldList.size(); i++) {
+                String hiddenField = hiddenFieldList.getString(i);
+                if (StringUtils.isNotBlank(hiddenField)) {
+                    if (!attributeList.contains(hiddenField)) {
+                        throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenField);
+                    }
+                    columnList.add(hiddenField);
+                }
+            }
+        }
         dataVo.setColumnList(columnList);
         dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
         JSONArray defaultValue = dataVo.getDefaultValue();
@@ -197,22 +210,39 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
         }
-        List<ValueTextVo> dataList = new ArrayList<>();
+        JSONArray dataList = new JSONArray();
         List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
         deduplicateData(valueField, textField, resultList);
         if (CollectionUtils.isNotEmpty(resultList)) {
             for (Map<String, JSONObject> result : resultList) {
-                String valueStr = null;
+                JSONObject element = new JSONObject();
                 JSONObject valueObj = result.get(valueField);
                 if (MapUtils.isNotEmpty(valueObj)) {
-                    valueStr = valueObj.getString("value");
+                    String valueStr = valueObj.getString("value");
+                    element.put("value", valueStr);
                 }
-                String textStr = null;
                 JSONObject textObj = result.get(textField);
                 if (MapUtils.isNotEmpty(textObj)) {
-                    textStr = textObj.getString("text");
+                    String textStr = textObj.getString("text");
+                    element.put("text", textStr);
                 }
-                dataList.add(new ValueTextVo(valueStr, textStr));
+                if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
+                    for (int i = 0; i < hiddenFieldList.size(); i++) {
+                        String hiddenField = hiddenFieldList.getString(i);
+                        if (StringUtils.isBlank(hiddenField)) {
+                            continue;
+                        }
+                        if (Objects.equals(hiddenField, valueField)) {
+                            continue;
+                        }
+                        JSONObject hiddenFieldObj = result.get(hiddenField);
+                        if (MapUtils.isNotEmpty(hiddenFieldObj)) {
+                            String hiddenFieldValue = hiddenFieldObj.getString("value");
+                            element.put(hiddenField, hiddenFieldValue);
+                        }
+                    }
+                }
+                dataList.add(element);
             }
         }
         JSONObject returnObj = new JSONObject();
