@@ -16,7 +16,10 @@
 
 package neatlogic.module.tenant.api.integration;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -30,9 +33,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,7 +64,7 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
 	@Description(desc = "集成配置测试接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
+		IntegrationVo integrationVo = JSON.toJavaObject(jsonObj, IntegrationVo.class);
 		IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
 		if (handler == null) {
 			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
