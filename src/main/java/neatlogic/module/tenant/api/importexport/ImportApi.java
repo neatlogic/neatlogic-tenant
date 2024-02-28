@@ -21,6 +21,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.FileNotUploadException;
 import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
 import neatlogic.framework.importexport.dto.ImportDependencyTypeVo;
+import neatlogic.framework.importexport.exception.DependencyNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -74,7 +75,13 @@ public class ImportApi extends PrivateBinaryStreamApiComponentBase {
         if (multipartFile != null) {
             String targetType = paramObj.getString("targetType");
             String userSelection = paramObj.getString("userSelection");
-            return ImportExportHandlerFactory.importData(multipartFile, targetType, userSelection);
+            try {
+                return ImportExportHandlerFactory.importData(multipartFile, targetType, userSelection);
+            } catch (DependencyNotFoundException e) {
+                JSONObject resultObj = new JSONObject();
+                resultObj.put("messageList", e.getMessageList());
+                return resultObj;
+            }
         }
         return null;
     }
