@@ -48,7 +48,7 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "集成配置测试接口";
+		return "nmtai.integrationtestapi.getname";
 	}
 
 	@Override
@@ -57,11 +57,11 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-			@Param(name = "url", type = ApiParamType.STRING, desc = "目标地址", isRequired = true, rule = "^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?"),
-			@Param(name = "handler", type = ApiParamType.STRING, desc = "组件", isRequired = true, xss = true),
-			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置，json格式", isRequired = true)
+			@Param(name = "url", type = ApiParamType.STRING, desc = "nmtai.integrationtestapi.address", isRequired = true, rule = "^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?"),
+			@Param(name = "handler", type = ApiParamType.STRING, desc = "nmtai.integrationtestapi.component", isRequired = true, xss = true),
+			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
 	})
-	@Description(desc = "集成配置测试接口")
+	@Description(desc = "nmtai.integrationtestapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = JSON.toJavaObject(jsonObj, IntegrationVo.class);

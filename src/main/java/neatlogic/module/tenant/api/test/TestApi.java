@@ -17,15 +17,13 @@
 package neatlogic.module.tenant.api.test;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
-import neatlogic.framework.restful.core.privateapi.PrivateRawApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 //@Component
 //@Transactional
-public class TestApi extends PrivateRawApiComponentBase {
+public class TestApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
@@ -37,18 +35,16 @@ public class TestApi extends PrivateRawApiComponentBase {
         return null;
     }
 
-    @Description(desc = "测试RAW接口")
-    @Output({@Param(name = "result", type = ApiParamType.STRING)})
-    @Override
-    public Object myDoService(String param) throws Exception {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("result", param);
-        return jsonObj;
-    }
 
     @Override
     public String getToken() {
         return "/testraw";
     }
 
+    @Description(desc = "测试RAW接口")
+    @Override
+    public Object myDoService(JSONObject paramObj) throws Exception {
+        System.out.println(RequestContext.get().getRequest().getMethod());
+        return paramObj;
+    }
 }
