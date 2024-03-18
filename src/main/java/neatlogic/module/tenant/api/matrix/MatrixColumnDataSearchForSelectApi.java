@@ -75,7 +75,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "hiddenFieldList", desc = "隐藏属性uuid列表", type = ApiParamType.JSONARRAY),
-            @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+            @Param(name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
@@ -164,6 +164,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         if (!attributeList.contains(textField)) {
             throw new MatrixAttributeNotFoundException(matrixVo.getName(), textField);
         }
+        List<Map<String, JSONObject>> resultList = new ArrayList<>();
         dataVo.setKeywordColumn(textField);
         notNullColumnSet.add(textField);
         List<String> columnList = new ArrayList<>();
@@ -208,10 +209,33 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
+
+            resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+            deduplicateData(null, valueField, textField, resultList);
+        } else {
+            List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
+            int startPage = dataVo.getCurrentPage();
+            int pageSize = dataVo.getPageSize();
+            int currentPage = 0;
+            while (resultList.size() < pageSize && currentPage < 100) {
+                currentPage++;
+                dataVo.setCurrentPage(currentPage);
+                if (currentPage < startPage) {
+                    List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
+                    deduplicateData(previousPageList, valueField, textField, list);
+                    previousPageList.addAll(list);
+                } else {
+                    List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
+                    deduplicateData(previousPageList, valueField, textField, list);
+                    previousPageList.addAll(list);
+                    resultList.addAll(list);
+                }
+                if (currentPage >= dataVo.getPageCount()) {
+                    break;
+                }
+            }
         }
         JSONArray dataList = new JSONArray();
-        List<Map<String, JSONObject>> resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-        deduplicateData(valueField, textField, resultList);
         if (CollectionUtils.isNotEmpty(resultList)) {
             for (Map<String, JSONObject> result : resultList) {
                 JSONObject element = new JSONObject();
@@ -253,9 +277,33 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         return returnObj;
     }
 
-    private void deduplicateData(String valueField, String textField, List<Map<String, JSONObject>> resultList) {
+    private void deduplicateData(List<Map<String, JSONObject>> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
         List<String> duplicateValue = new ArrayList<>();
         List<String> duplicateText = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(previousPageList)) {
+            for (Map<String, JSONObject> resultObj : previousPageList) {
+                JSONObject firstObj = resultObj.get(valueField);
+                if (MapUtils.isEmpty(firstObj)) {
+                    continue;
+                }
+                JSONObject secondObj = resultObj.get(textField);
+                if (MapUtils.isEmpty(secondObj)) {
+                    continue;
+                }
+                String value = firstObj.getString("value");
+                if (duplicateValue.contains(value)) {
+                    continue;
+                } else {
+                    duplicateValue.add(value);
+                }
+                String text = secondObj.getString("text");
+                if (duplicateText.contains(text)) {
+                    continue;
+                } else {
+                    duplicateText.add(text);
+                }
+            }
+        }
         Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
         while (iterator.hasNext()) {
             Map<String, JSONObject> resultObj = iterator.next();
