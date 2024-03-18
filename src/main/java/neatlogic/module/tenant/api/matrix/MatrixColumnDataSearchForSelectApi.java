@@ -278,11 +278,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         return returnObj;
     }
 
-    private void deduplicateData(List<Map<String, JSONObject>> oldResultList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
+    private void deduplicateData(List<Map<String, JSONObject>> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
         List<String> duplicateValue = new ArrayList<>();
         List<String> duplicateText = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(oldResultList)) {
-            for (Map<String, JSONObject> resultObj : oldResultList) {
+        if (CollectionUtils.isNotEmpty(previousPageList)) {
+            for (Map<String, JSONObject> resultObj : previousPageList) {
                 JSONObject firstObj = resultObj.get(valueField);
                 if (MapUtils.isEmpty(firstObj)) {
                     continue;
