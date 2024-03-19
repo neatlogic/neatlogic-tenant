@@ -217,7 +217,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             int startPage = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
             int currentPage = 0;
-            while (resultList.size() < pageSize && currentPage < 100) {
+            while (resultList.size() < pageSize) {
                 currentPage++;
                 dataVo.setCurrentPage(currentPage);
                 if (currentPage < startPage) {
