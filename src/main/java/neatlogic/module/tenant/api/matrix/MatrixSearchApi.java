@@ -55,7 +55,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "数据源矩阵检索";
+        return "nmtam.matrixsearchapi.getname";
     }
 
     @Override
@@ -64,18 +64,18 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private"),
-            @Param(name = "currentPage", desc = "当前页码", type = ApiParamType.INTEGER),
-            @Param(name = "needPage", desc = "是否分页", type = ApiParamType.BOOLEAN),
-            @Param(name = "pageSize", desc = "页面展示数", type = ApiParamType.INTEGER),
-            @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY)
+            @Param(name = "keyword", desc = "common.keyword", type = ApiParamType.STRING),
+            @Param(name = "type", desc = "common.type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private,cmdbcustomview"),
+            @Param(name = "currentPage", desc = "common.currentpage", type = ApiParamType.INTEGER),
+            @Param(name = "needPage", desc = "common.needpage", type = ApiParamType.BOOLEAN),
+            @Param(name = "pageSize", desc = "common.pagesize", type = ApiParamType.INTEGER),
+            @Param(name = "defaultValue", desc = "common.defaultvalue", type = ApiParamType.JSONARRAY)
     })
     @Output({
-            @Param(name = "tbodyList", desc = "矩阵数据源列表", explode = MatrixVo[].class),
+            @Param(name = "tbodyList", desc = "common.tbodylist", explode = MatrixVo[].class),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "数据源矩阵检索")
+    @Description(desc = "nmtam.matrixsearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MatrixVo searchVo = JSONObject.toJavaObject(jsonObj, MatrixVo.class);

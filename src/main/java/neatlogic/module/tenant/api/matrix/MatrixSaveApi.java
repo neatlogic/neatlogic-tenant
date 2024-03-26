@@ -24,10 +24,7 @@ import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
 import neatlogic.framework.matrix.dto.*;
 import neatlogic.framework.matrix.exception.*;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -62,7 +59,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "数据源矩阵保存";
+        return "nmtam.matrixsaveapi.getname";
     }
 
     @Override
@@ -71,18 +68,19 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", type = ApiParamType.STRING, desc = "矩阵名称", xss = true),
-            @Param(name = "label", type = ApiParamType.REGEX, rule = RegexUtils.ENGLISH_NAME, desc = "矩阵唯一标识", xss = true),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci", desc = "矩阵类型"),
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "矩阵uuid"),
-            @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "集成设置uuid"),
-            @Param(name = "fileId", type = ApiParamType.LONG, desc = "视图配置文件id"),
-            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "配置信息")
+            @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", xss = true),
+            @Param(name = "label", type = ApiParamType.REGEX, rule = RegexUtils.ENGLISH_NAME, desc = "common.uniquename", xss = true),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,cmdbcustomview", desc = "common.type"),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "integrationUuid", type = ApiParamType.STRING, desc = "term.framework.integrationuuid"),
+            @Param(name = "fileId", type = ApiParamType.LONG, desc = "common.fileid"),
+            @Param(name = "ciId", type = ApiParamType.LONG, desc = "term.cmdb.ciid"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")
     })
     @Output({
-            @Param(name = "matrix", explode = MatrixVo.class, desc = "矩阵数据源")
+            @Param(name = "matrix", explode = MatrixVo.class, desc = "common.matrix")
     })
+    @Description(desc = "nmtam.matrixsaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
