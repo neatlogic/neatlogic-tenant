@@ -60,7 +60,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "矩阵属性检索接口";
+        return "nmtam.matrixattributesearchapi.getname";
     }
 
     @Override
@@ -73,15 +73,15 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
         return true;
     }
     @Input({
-            @Param(name = "matrixUuid", desc = "矩阵uuid", type = ApiParamType.STRING),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private"),
-            @Param(name = "ciId", type = ApiParamType.LONG, desc = "ci模型id")
+            @Param(name = "matrixUuid", desc = "term.framework.matrixuuid", type = ApiParamType.STRING),
+            @Param(name = "type", desc = "common.type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private,cmdbcustomview"),
+            @Param(name = "ciId", type = ApiParamType.LONG, desc = "term.cmdb.ciid")
     })
     @Output({
-            @Param(name = "tbodyList", desc = "矩阵属性集合", explode = MatrixAttributeVo[].class),
-            @Param(name = "type", desc = "类型", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private")
+            @Param(name = "tbodyList", desc = "common.tbodylist", explode = MatrixAttributeVo[].class),
+            @Param(name = "type", desc = "common.type", type = ApiParamType.ENUM, rule = "custom,external,view,cmdbci,private,cmdbcustomview")
     })
-    @Description(desc = "矩阵属性检索接口")
+    @Description(desc = "nmtam.matrixattributesearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
