@@ -15,31 +15,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.notify;
 
-import neatlogic.framework.auth.core.AuthAction;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
-import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.notify.dto.NotifyTriggerTemplateVo;
 import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import javax.annotation.Resource;
 
-@Service
-
+@Deprecated
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyTriggerHelpListApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private NotifyMapper notifyMapper;
 
     @Override
@@ -75,9 +70,9 @@ public class NotifyPolicyTriggerHelpListApi extends PrivateApiComponentBase {
         if (notifyPolicyHandler == null) {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
-        List<NotifyTriggerTemplateVo> list = notifyPolicyHandler.getNotifyTriggerTemplateList(NotifyHandlerType.EMAIL);
+        //List<NotifyTriggerTemplateVo> list = notifyPolicyHandler.getNotifyTriggerTemplateList(NotifyHandlerType.EMAIL);
         JSONObject resultObj = new JSONObject();
-        resultObj.put("helpList", list);
+        //resultObj.put("helpList", list);
         return resultObj;
     }
 
