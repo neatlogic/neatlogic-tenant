@@ -141,6 +141,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             int referenceCount = DependencyManager.getDependencyCount(FrameworkFromType.MATRIX, matrixVo.getUuid());
             matrixVo.setReferenceCount(referenceCount);
         }
+        searchVo.setRowNum(rowNum);
         return TableResultUtil.getResult(tbodyList, searchVo);
     }
 }
