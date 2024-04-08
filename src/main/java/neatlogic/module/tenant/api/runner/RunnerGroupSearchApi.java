@@ -53,6 +53,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
 
     @Description(desc = "获取runner组列表")
     @Input({
+            @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "默认值"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否分页"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
