@@ -271,8 +271,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         JSONArray defaultValue = dataVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
-            for (int i = 0; i < defaultValue.size(); i++) {
-                Object defaultValueObject = defaultValue.get(i);
+            for (Object defaultValueObject : defaultValue) {
                 if (defaultValueObject instanceof JSONObject) {
                     JSONObject defaultValueObj = (JSONObject) defaultValueObject;
                     String value = defaultValueObj.getString("value");
@@ -304,14 +303,10 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             while (resultList.size() < pageSize) {
                 currentPage++;
                 dataVo.setCurrentPage(currentPage);
-                if (currentPage < startPage) {
-                    List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                    deduplicateData(previousPageList, valueField, textField, list);
-                    previousPageList.addAll(list);
-                } else {
-                    List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                    deduplicateData(previousPageList, valueField, textField, list);
-                    previousPageList.addAll(list);
+                List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
+                deduplicateData(previousPageList, valueField, textField, list);
+                previousPageList.addAll(list);
+                if (currentPage >= startPage) {
                     resultList.addAll(list);
                 }
                 if (currentPage >= dataVo.getPageCount()) {
@@ -400,9 +395,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                     duplicateValue.add(value);
                 }
                 String text = secondObj.getString("text");
-                if (duplicateText.contains(text)) {
-                    continue;
-                } else {
+                if (!duplicateText.contains(text)) {
                     duplicateText.add(text);
                 }
             }
@@ -430,7 +423,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             String text = secondObj.getString("text");
             if (duplicateText.contains(text)) {
                 iterator.remove();
-                continue;
             } else {
                 duplicateText.add(text);
             }
