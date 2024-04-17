@@ -76,6 +76,7 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
 
             @Param(name = "matrixLabel", desc = "矩阵名", type = ApiParamType.STRING),
             @Param(name = "columnNameList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, minSize = 1),
+            @Param(name = "isAllColumn", desc = "是否返回所有属性", type = ApiParamType.INTEGER),
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
@@ -194,30 +195,35 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
 
         List<String> attributeUuidList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
         List<String> columnNameList = dataVo.getColumnNameList();
-        if (CollectionUtils.isNotEmpty(dataVo.getColumnList())) {
-            dataVo.setColumnNameList(null);
-            List<String> notFoundColumnList = ListUtils.removeAll(dataVo.getColumnList(), attributeUuidList);
-            if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
-            }
-        } else if (CollectionUtils.isNotEmpty(columnNameList)) {
-            List<String> columnList = new ArrayList<>();
-            List<String> notFoundColumnList = new ArrayList<>();
-            for (String columnName : columnNameList) {
-                if (StringUtils.isBlank(columnName)) {
-                    continue;
+        Integer isAllColumn = jsonObj.getInteger("isAllColumn");
+        if (Objects.equals(isAllColumn, 1)) {
+            dataVo.setColumnList(attributeUuidList);
+        } else {
+            if (CollectionUtils.isNotEmpty(dataVo.getColumnList())) {
+                dataVo.setColumnNameList(null);
+                List<String> notFoundColumnList = ListUtils.removeAll(dataVo.getColumnList(), attributeUuidList);
+                if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
+                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
                 }
-                String column = nameToUuidMap.get(columnName);
-                if (StringUtils.isBlank(column)) {
-                    notFoundColumnList.add(columnName);
-                } else {
-                    columnList.add(column);
+            } else if (CollectionUtils.isNotEmpty(columnNameList)) {
+                List<String> columnList = new ArrayList<>();
+                List<String> notFoundColumnList = new ArrayList<>();
+                for (String columnName : columnNameList) {
+                    if (StringUtils.isBlank(columnName)) {
+                        continue;
+                    }
+                    String column = nameToUuidMap.get(columnName);
+                    if (StringUtils.isBlank(column)) {
+                        notFoundColumnList.add(columnName);
+                    } else {
+                        columnList.add(column);
+                    }
                 }
+                if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
+                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
+                }
+                dataVo.setColumnList(columnList);
             }
-            if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
-            }
-            dataVo.setColumnList(columnList);
         }
         List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableDataNew(dataVo);
         if (CollectionUtils.isNotEmpty(columnNameList)) {
