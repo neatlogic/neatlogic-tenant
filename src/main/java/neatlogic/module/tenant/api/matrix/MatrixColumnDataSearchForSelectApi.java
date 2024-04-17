@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.matrix.constvalue.SearchExpression;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -70,15 +71,21 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
 
     @Input({
             @Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING, xss = true),
-            @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING),
             @Param(name = "keywordColumn", desc = "关键字属性uuid", type = ApiParamType.STRING),
-            @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "valueField", desc = "value属性uuid", type = ApiParamType.STRING),
+            @Param(name = "textField", desc = "text属性uuid", type = ApiParamType.STRING),
             @Param(name = "hiddenFieldList", desc = "隐藏属性uuid列表", type = ApiParamType.JSONARRAY),
             @Param(name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
-            @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
+            @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY),
+
+            @Param(name = "matrixLabel", desc = "矩阵名", type = ApiParamType.STRING),
+            @Param(name = "keywordColumnName", desc = "关键字属性名", type = ApiParamType.STRING),
+            @Param(name = "valueFieldName", desc = "value属性名", type = ApiParamType.STRING),
+            @Param(name = "textFieldName", desc = "text属性名", type = ApiParamType.STRING),
+            @Param(name = "hiddenFieldNameList", desc = "隐藏属性名列表", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
@@ -125,13 +132,29 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
     public Object myDoService(JSONObject jsonObj) throws Exception {
         jsonObj.remove("needPage");
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
-        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
-        if (matrixVo == null) {
-            matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
-            if (matrixVo == null) {
-                throw new MatrixNotFoundException(dataVo.getMatrixUuid());
-            }
+        if (StringUtils.isBlank(dataVo.getMatrixUuid()) && StringUtils.isBlank(dataVo.getMatrixLabel())) {
+            throw new ParamNotExistsException("matrixUuid", "matrixLabel");
         }
+        MatrixVo matrixVo = null;
+        if (StringUtils.isNotBlank(dataVo.getMatrixUuid())) {
+            matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
+            if (matrixVo == null) {
+                matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+                if (matrixVo == null) {
+                    throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+                }
+            }
+        } else if (StringUtils.isNotBlank(dataVo.getMatrixLabel())) {
+            matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVoByLabel(dataVo.getMatrixLabel());
+            if (matrixVo == null) {
+                matrixVo = matrixMapper.getMatrixByLabel(dataVo.getMatrixLabel());
+                if (matrixVo == null) {
+                    throw new MatrixNotFoundException(dataVo.getMatrixLabel());
+                }
+            }
+            dataVo.setMatrixUuid(matrixVo.getUuid());
+        }
+
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
@@ -141,14 +164,28 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         if (CollectionUtils.isEmpty(matrixAttributeList)) {
             return new JSONObject();
         }
+        Map<String, String> nameToUuidMap = matrixAttributeList.stream().collect(Collectors.toMap(MatrixAttributeVo::getName, MatrixAttributeVo::getUuid));
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
         if (CollectionUtils.isNotEmpty(filterList)) {
             Iterator<MatrixFilterVo> iterator = filterList.iterator();
             while (iterator.hasNext()) {
                 MatrixFilterVo matrixFilterVo = iterator.next();
                 if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    iterator.remove();
-                } else if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())) {
+                    if (StringUtils.isBlank(matrixFilterVo.getName())) {
+                        iterator.remove();
+                        continue;
+                    }
+                    String attrUuid = nameToUuidMap.get(matrixFilterVo.getName());
+                    if (StringUtils.isBlank(attrUuid)) {
+                        iterator.remove();
+                        continue;
+                    }
+                    matrixFilterVo.setUuid(attrUuid);
+                }
+                if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())
+                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
+                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
+                ) {
                     iterator.remove();
                 }
             }
@@ -156,13 +193,37 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         Set<String> notNullColumnSet = new HashSet<>();
         List<String> attributeList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
         String valueField = jsonObj.getString("valueField");
-        if (!attributeList.contains(valueField)) {
-            throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueField);
+        String valueFieldName = jsonObj.getString("valueFieldName");
+        if (StringUtils.isNotBlank(valueField)) {
+            if (!attributeList.contains(valueField)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueField);
+            }
+        } else {
+            if (StringUtils.isBlank(valueFieldName)) {
+                throw new ParamNotExistsException("valueField", "valueFieldName");
+            }
+            String attrUuid = nameToUuidMap.get(valueFieldName);
+            if (StringUtils.isBlank(attrUuid)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueFieldName);
+            }
+            valueField = attrUuid;
         }
         notNullColumnSet.add(valueField);
         String textField = jsonObj.getString("textField");
-        if (!attributeList.contains(textField)) {
-            throw new MatrixAttributeNotFoundException(matrixVo.getName(), textField);
+        String textFieldName = jsonObj.getString("textFieldName");
+        if (StringUtils.isNotBlank(textField)) {
+            if (!attributeList.contains(textField)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), textField);
+            }
+        } else {
+            if (StringUtils.isBlank(textFieldName)) {
+                throw new ParamNotExistsException("textField", "textFieldName");
+            }
+            String attrUuid = nameToUuidMap.get(textFieldName);
+            if (StringUtils.isBlank(attrUuid)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), textFieldName);
+            }
+            textField = attrUuid;
         }
         List<Map<String, JSONObject>> resultList = new ArrayList<>();
         dataVo.setKeywordColumn(textField);
@@ -171,6 +232,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         columnList.add(valueField);
         columnList.add(textField);
         JSONArray hiddenFieldList = jsonObj.getJSONArray("hiddenFieldList");
+        JSONArray hiddenFieldNameList = jsonObj.getJSONArray("hiddenFieldNameList");
         if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
             for (int i = 0; i < hiddenFieldList.size(); i++) {
                 String hiddenField = hiddenFieldList.getString(i);
@@ -181,9 +243,31 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                     columnList.add(hiddenField);
                 }
             }
+        } else if (CollectionUtils.isNotEmpty(hiddenFieldNameList)) {
+            for (int i = 0; i < hiddenFieldNameList.size(); i++) {
+                String hiddenFieldName = hiddenFieldNameList.getString(i);
+                if (StringUtils.isBlank(hiddenFieldName)) {
+                    continue;
+                }
+                String hiddenField = nameToUuidMap.get(hiddenFieldName);
+                if (StringUtils.isBlank(hiddenField)) {
+                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldName);
+                }
+                columnList.add(hiddenField);
+            }
         }
         dataVo.setColumnList(columnList);
         dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
+
+        String keywordColumn = dataVo.getKeywordColumn();
+        String keywordColumnName = dataVo.getKeywordColumnName();
+        if (StringUtils.isBlank(keywordColumn) && StringUtils.isNotBlank(keywordColumnName)) {
+            String attrUuid = nameToUuidMap.get(keywordColumnName);
+            if (StringUtils.isBlank(attrUuid)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnName);
+            }
+            dataVo.setKeywordColumn(attrUuid);
+        }
         JSONArray defaultValue = dataVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
@@ -262,6 +346,25 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                         if (MapUtils.isNotEmpty(hiddenFieldObj)) {
                             String hiddenFieldValue = hiddenFieldObj.getString("value");
                             element.put(hiddenField, hiddenFieldValue);
+                        }
+                    }
+                } else if (CollectionUtils.isNotEmpty(hiddenFieldNameList)) {
+                    for (int i = 0; i < hiddenFieldNameList.size(); i++) {
+                        String hiddenFieldName = hiddenFieldNameList.getString(i);
+                        if (StringUtils.isBlank(hiddenFieldName)) {
+                            continue;
+                        }
+                        String hiddenField = nameToUuidMap.get(hiddenFieldName);
+                        if (StringUtils.isBlank(hiddenField)) {
+                            continue;
+                        }
+                        if (Objects.equals(hiddenField, valueField)) {
+                            continue;
+                        }
+                        JSONObject hiddenFieldObj = result.get(hiddenField);
+                        if (MapUtils.isNotEmpty(hiddenFieldObj)) {
+                            String hiddenFieldValue = hiddenFieldObj.getString("value");
+                            element.put(hiddenFieldName, hiddenFieldValue);
                         }
                     }
                 }

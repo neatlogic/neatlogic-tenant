@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.matrix;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.matrix.constvalue.SearchExpression;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
@@ -64,14 +65,17 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
     }
 
     @Input({
-            @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "matrixUuid", desc = "矩阵Uuid", type = ApiParamType.STRING),
             @Param(name = "defaultValue", desc = "需要回显的数据uuid集合", type = ApiParamType.JSONARRAY),
-            @Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1),
+            @Param(name = "columnList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, minSize = 1),
             @Param(name = "searchColumnList ", desc = "搜索属性集合", type = ApiParamType.JSONARRAY),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY)
+            @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY),
+
+            @Param(name = "matrixLabel", desc = "矩阵名", type = ApiParamType.STRING),
+            @Param(name = "columnNameList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, minSize = 1),
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
@@ -121,28 +125,57 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
-        List<String> columnList = dataVo.getColumnList();
-
-        MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
-        if (matrixVo == null) {
-            matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
-            if (matrixVo == null) {
-                throw new MatrixNotFoundException(dataVo.getMatrixUuid());
-            }
+        if (StringUtils.isBlank(dataVo.getMatrixUuid()) && StringUtils.isBlank(dataVo.getMatrixLabel())) {
+            throw new ParamNotExistsException("matrixUuid", "matrixLabel");
         }
+        MatrixVo matrixVo = null;
+        if (StringUtils.isNotBlank(dataVo.getMatrixUuid())) {
+            matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(dataVo.getMatrixUuid());
+            if (matrixVo == null) {
+                matrixVo = matrixMapper.getMatrixByUuid(dataVo.getMatrixUuid());
+                if (matrixVo == null) {
+                    throw new MatrixNotFoundException(dataVo.getMatrixUuid());
+                }
+            }
+        } else if (StringUtils.isNotBlank(dataVo.getMatrixLabel())) {
+            matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVoByLabel(dataVo.getMatrixLabel());
+            if (matrixVo == null) {
+                matrixVo = matrixMapper.getMatrixByLabel(dataVo.getMatrixLabel());
+                if (matrixVo == null) {
+                    throw new MatrixNotFoundException(dataVo.getMatrixLabel());
+                }
+            }
+            dataVo.setMatrixUuid(matrixVo.getUuid());
+        }
+
         String type = matrixVo.getType();
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(type);
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(type);
         }
+        List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
+        if (CollectionUtils.isEmpty(matrixAttributeList)) {
+            return new JSONObject();
+        }
+        Map<String, String> nameToUuidMap = matrixAttributeList.stream().collect(Collectors.toMap(MatrixAttributeVo::getName, MatrixAttributeVo::getUuid));
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
         if (CollectionUtils.isNotEmpty(filterList)) {
             Iterator<MatrixFilterVo> iterator = filterList.iterator();
             while (iterator.hasNext()) {
                 MatrixFilterVo matrixFilterVo = iterator.next();
                 if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    iterator.remove();
-                } else if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())
+                    if (StringUtils.isBlank(matrixFilterVo.getName())) {
+                        iterator.remove();
+                        continue;
+                    }
+                    String attrUuid = nameToUuidMap.get(matrixFilterVo.getName());
+                    if (StringUtils.isBlank(attrUuid)) {
+                        iterator.remove();
+                        continue;
+                    }
+                    matrixFilterVo.setUuid(attrUuid);
+                }
+                if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())
                         && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
                         && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
                 ) {
@@ -150,17 +183,55 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
                 }
             }
         }
-        List<MatrixAttributeVo> matrixAttributeList = matrixDataSourceHandler.getAttributeList(matrixVo);
-        if (CollectionUtils.isEmpty(matrixAttributeList)) {
-            return new JSONObject();
-        }
+
         List<String> attributeUuidList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-        List<String> notFoundColumnList = ListUtils.removeAll(columnList, attributeUuidList);
-        if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
-            throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
+        List<String> columnNameList = dataVo.getColumnNameList();
+        if (CollectionUtils.isNotEmpty(dataVo.getColumnList())) {
+            dataVo.setColumnNameList(null);
+            List<String> notFoundColumnList = ListUtils.removeAll(dataVo.getColumnList(), attributeUuidList);
+            if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
+            }
+        } else if (CollectionUtils.isNotEmpty(columnNameList)) {
+            List<String> columnList = new ArrayList<>();
+            List<String> notFoundColumnList = new ArrayList<>();
+            for (String columnName : columnNameList) {
+                if (StringUtils.isBlank(columnName)) {
+                    continue;
+                }
+                String column = nameToUuidMap.get(columnName);
+                if (StringUtils.isBlank(column)) {
+                    notFoundColumnList.add(columnName);
+                } else {
+                    columnList.add(column);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
+            }
+            dataVo.setColumnList(columnList);
         }
         List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-        JSONArray theadList = getTheadList(dataVo.getMatrixUuid(), matrixAttributeList, dataVo.getColumnList());
+        if (CollectionUtils.isNotEmpty(columnNameList)) {
+            List<Map<String, JSONObject>> newTbodyList = new ArrayList<>();
+            for (Map<String, JSONObject> tbody : tbodyList) {
+                Map<String, JSONObject> newTbody = new HashMap<>();
+                for (String columnName : columnNameList) {
+                    String attrUuid = nameToUuidMap.get(columnName);
+                    if (StringUtils.isBlank(attrUuid)) {
+                        continue;
+                    }
+                    JSONObject jsonObject = tbody.get(attrUuid);
+                    if (jsonObject == null) {
+                        continue;
+                    }
+                    newTbody.put(columnName, jsonObject);
+                }
+                newTbodyList.add(newTbody);
+            }
+            tbodyList = newTbodyList;
+        }
+        JSONArray theadList = getTheadList(dataVo.getMatrixUuid(), matrixAttributeList, dataVo.getColumnList(), columnNameList);
         JSONObject returnObj = TableResultUtil.getResult(theadList, tbodyList, dataVo);
         JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
         returnObj.put("searchColumnDetailList", getSearchColumnDetailList(dataVo.getMatrixUuid(), matrixAttributeList, searchColumnArray));
@@ -188,7 +259,10 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         return null;
     }
 
-    private JSONArray getTheadList(String matrixUuid, List<MatrixAttributeVo> attributeList, List<String> columnList) {
+    private JSONArray getTheadList(String matrixUuid, List<MatrixAttributeVo> attributeList, List<String> columnList, List<String> columnNameList) {
+        if (columnNameList == null) {
+            columnNameList = new ArrayList<>();
+        }
         Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
         for (MatrixAttributeVo attribute : attributeList) {
             attributeMap.put(attribute.getUuid(), attribute);
@@ -200,7 +274,11 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
                 throw new MatrixAttributeNotFoundException(matrixUuid, column);
             }
             JSONObject theadObj = new JSONObject();
-            theadObj.put("key", attribute.getUuid());
+            if (columnNameList.contains(attribute.getName())) {
+                theadObj.put("key", attribute.getName());
+            } else {
+                theadObj.put("key", attribute.getUuid());
+            }
             theadObj.put("title", attribute.getName());
             theadList.add(theadObj);
         }
