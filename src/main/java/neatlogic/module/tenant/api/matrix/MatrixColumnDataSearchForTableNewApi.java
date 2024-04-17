@@ -157,7 +157,15 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         if (CollectionUtils.isEmpty(matrixAttributeList)) {
             return new JSONObject();
         }
-        Map<String, String> nameToUuidMap = matrixAttributeList.stream().collect(Collectors.toMap(MatrixAttributeVo::getName, MatrixAttributeVo::getUuid));
+        Map<String, String> nameToUuidMap = new HashMap<>();
+        for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
+            String name = matrixAttributeVo.getName();
+            if(nameToUuidMap.containsKey(name)) {
+                nameToUuidMap.remove(name);
+            } else {
+                nameToUuidMap.put(name, matrixAttributeVo.getUuid());
+            }
+        }
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
         if (CollectionUtils.isNotEmpty(filterList)) {
             Iterator<MatrixFilterVo> iterator = filterList.iterator();
