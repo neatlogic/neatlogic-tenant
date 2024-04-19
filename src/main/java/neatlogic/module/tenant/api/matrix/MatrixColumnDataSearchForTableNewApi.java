@@ -75,8 +75,9 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY),
 
             @Param(name = "matrixLabel", desc = "矩阵名", type = ApiParamType.STRING),
-            @Param(name = "columnNameList", desc = "目标属性集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, minSize = 1),
+            @Param(name = "columnUniqueIdentifierList", desc = "目标属性唯一标识集合，数据按这个字段顺序返回", type = ApiParamType.JSONARRAY, minSize = 1),
             @Param(name = "isAllColumn", desc = "是否返回所有属性", type = ApiParamType.INTEGER),
+            @Param(name = "keyMode", desc = "key模式", rule = "uuid,uniqueIdentifier", type = ApiParamType.ENUM, defaultValue = "uuid", help = "默认是用uuid作为key"),
     })
     @Description(desc = "矩阵属性数据查询-table接口")
     @Output({
@@ -158,14 +159,13 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         if (CollectionUtils.isEmpty(matrixAttributeList)) {
             return new JSONObject();
         }
-        Map<String, String> nameToUuidMap = new HashMap<>();
+        Map<String, String> uniqueIdentifierToUuidMap = new HashMap<>();
         for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
-            String name = matrixAttributeVo.getName();
-            if(nameToUuidMap.containsKey(name)) {
-                nameToUuidMap.remove(name);
-            } else {
-                nameToUuidMap.put(name, matrixAttributeVo.getUuid());
+            String uniqueIdentifier = matrixAttributeVo.getUniqueIdentifier();
+            if (StringUtils.isBlank(uniqueIdentifier)) {
+                continue;
             }
+            uniqueIdentifierToUuidMap.put(uniqueIdentifier, matrixAttributeVo.getUuid());
         }
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
         if (CollectionUtils.isNotEmpty(filterList)) {
@@ -173,11 +173,11 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
             while (iterator.hasNext()) {
                 MatrixFilterVo matrixFilterVo = iterator.next();
                 if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    if (StringUtils.isBlank(matrixFilterVo.getName())) {
+                    if (StringUtils.isBlank(matrixFilterVo.getUniqueIdentifier())) {
                         iterator.remove();
                         continue;
                     }
-                    String attrUuid = nameToUuidMap.get(matrixFilterVo.getName());
+                    String attrUuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
                     if (StringUtils.isBlank(attrUuid)) {
                         iterator.remove();
                         continue;
@@ -194,27 +194,27 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         }
 
         List<String> attributeUuidList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-        List<String> columnNameList = dataVo.getColumnNameList();
+        List<String> columnUniqueIdentifierList = dataVo.getColumnUniqueIdentifierList();
         Integer isAllColumn = jsonObj.getInteger("isAllColumn");
         if (Objects.equals(isAllColumn, 1)) {
             dataVo.setColumnList(attributeUuidList);
         } else {
             if (CollectionUtils.isNotEmpty(dataVo.getColumnList())) {
-                dataVo.setColumnNameList(null);
+                dataVo.setColumnUniqueIdentifierList(null);
                 List<String> notFoundColumnList = ListUtils.removeAll(dataVo.getColumnList(), attributeUuidList);
                 if (CollectionUtils.isNotEmpty(notFoundColumnList)) {
                     throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
                 }
-            } else if (CollectionUtils.isNotEmpty(columnNameList)) {
+            } else if (CollectionUtils.isNotEmpty(columnUniqueIdentifierList)) {
                 List<String> columnList = new ArrayList<>();
                 List<String> notFoundColumnList = new ArrayList<>();
-                for (String columnName : columnNameList) {
-                    if (StringUtils.isBlank(columnName)) {
+                for (String columnUniqueIdentifier : columnUniqueIdentifierList) {
+                    if (StringUtils.isBlank(columnUniqueIdentifier)) {
                         continue;
                     }
-                    String column = nameToUuidMap.get(columnName);
+                    String column = uniqueIdentifierToUuidMap.get(columnUniqueIdentifier);
                     if (StringUtils.isBlank(column)) {
-                        notFoundColumnList.add(columnName);
+                        notFoundColumnList.add(columnUniqueIdentifier);
                     } else {
                         columnList.add(column);
                     }
@@ -226,26 +226,29 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
             }
         }
         List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-        if (CollectionUtils.isNotEmpty(columnNameList)) {
+        String keyMode = jsonObj.getString("keyMode");
+        if (Objects.equals(keyMode, "uniqueIdentifier")) {
+            Map<String, MatrixAttributeVo> attributeMap = matrixAttributeList.stream().collect(Collectors.toMap(MatrixAttributeVo::getUuid, e -> e));
             List<Map<String, JSONObject>> newTbodyList = new ArrayList<>();
             for (Map<String, JSONObject> tbody : tbodyList) {
                 Map<String, JSONObject> newTbody = new HashMap<>();
-                for (String columnName : columnNameList) {
-                    String attrUuid = nameToUuidMap.get(columnName);
-                    if (StringUtils.isBlank(attrUuid)) {
-                        continue;
+                for (Map.Entry<String, JSONObject> entry : tbody.entrySet()) {
+                    String uniqueIdentifier = null;
+                    MatrixAttributeVo matrixAttributeVo = attributeMap.get(entry.getKey());
+                    if (matrixAttributeVo != null) {
+                        uniqueIdentifier = matrixAttributeVo.getUniqueIdentifier();
                     }
-                    JSONObject jsonObject = tbody.get(attrUuid);
-                    if (jsonObject == null) {
-                        continue;
+                    if (StringUtils.isNotBlank(uniqueIdentifier)) {
+                        newTbody.put(uniqueIdentifier, entry.getValue());
+                    } else {
+                        newTbody.put(entry.getKey(), entry.getValue());
                     }
-                    newTbody.put(columnName, jsonObject);
                 }
                 newTbodyList.add(newTbody);
             }
             tbodyList = newTbodyList;
         }
-        JSONArray theadList = getTheadList(dataVo.getMatrixUuid(), matrixAttributeList, dataVo.getColumnList(), columnNameList);
+        JSONArray theadList = getTheadList(dataVo.getMatrixUuid(), matrixAttributeList, dataVo.getColumnList(), keyMode);
         JSONObject returnObj = TableResultUtil.getResult(theadList, tbodyList, dataVo);
         JSONArray searchColumnArray = jsonObj.getJSONArray("searchColumnList");
         returnObj.put("searchColumnDetailList", getSearchColumnDetailList(dataVo.getMatrixUuid(), matrixAttributeList, searchColumnArray));
@@ -273,14 +276,8 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
         return null;
     }
 
-    private JSONArray getTheadList(String matrixUuid, List<MatrixAttributeVo> attributeList, List<String> columnList, List<String> columnNameList) {
-        if (columnNameList == null) {
-            columnNameList = new ArrayList<>();
-        }
-        Map<String, MatrixAttributeVo> attributeMap = new HashMap<>();
-        for (MatrixAttributeVo attribute : attributeList) {
-            attributeMap.put(attribute.getUuid(), attribute);
-        }
+    private JSONArray getTheadList(String matrixUuid, List<MatrixAttributeVo> matrixAttributeList, List<String> columnList, String keyMode) {
+        Map<String, MatrixAttributeVo> attributeMap = matrixAttributeList.stream().collect(Collectors.toMap(MatrixAttributeVo::getUuid, e -> e));
         JSONArray theadList = new JSONArray();
         for (String column : columnList) {
             MatrixAttributeVo attribute = attributeMap.get(column);
@@ -288,8 +285,8 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
                 throw new MatrixAttributeNotFoundException(matrixUuid, column);
             }
             JSONObject theadObj = new JSONObject();
-            if (columnNameList.contains(attribute.getName())) {
-                theadObj.put("key", attribute.getName());
+            if (Objects.equals(keyMode, "uniqueIdentifier") && StringUtils.isNotBlank(attribute.getUniqueIdentifier())) {
+                theadObj.put("key", attribute.getUniqueIdentifier());
             } else {
                 theadObj.put("key", attribute.getUuid());
             }

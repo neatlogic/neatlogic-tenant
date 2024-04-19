@@ -82,10 +82,10 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY),
 
             @Param(name = "matrixLabel", desc = "矩阵名", type = ApiParamType.STRING),
-            @Param(name = "keywordColumnName", desc = "关键字属性名", type = ApiParamType.STRING),
-            @Param(name = "valueFieldName", desc = "value属性名", type = ApiParamType.STRING),
-            @Param(name = "textFieldName", desc = "text属性名", type = ApiParamType.STRING),
-            @Param(name = "hiddenFieldNameList", desc = "隐藏属性名列表", type = ApiParamType.JSONARRAY)
+            @Param(name = "keywordColumnUniqueIdentifier", desc = "关键字属性唯一标识", type = ApiParamType.STRING),
+            @Param(name = "valueFieldUniqueIdentifier", desc = "value属性唯一标识", type = ApiParamType.STRING),
+            @Param(name = "textFieldUniqueIdentifier", desc = "text属性唯一标识", type = ApiParamType.STRING),
+            @Param(name = "hiddenFieldUniqueIdentifierList", desc = "隐藏属性唯一标识列表", type = ApiParamType.JSONARRAY)
     })
     @Output({
             @Param(name = "dataList", type = ApiParamType.JSONARRAY, desc = "属性数据集合"),
@@ -164,14 +164,13 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         if (CollectionUtils.isEmpty(matrixAttributeList)) {
             return new JSONObject();
         }
-        Map<String, String> nameToUuidMap = new HashMap<>();
+        Map<String, String> uniqueIdentifierToUuidMap = new HashMap<>();
         for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
-            String name = matrixAttributeVo.getName();
-            if(nameToUuidMap.containsKey(name)) {
-                nameToUuidMap.remove(name);
-            } else {
-                nameToUuidMap.put(name, matrixAttributeVo.getUuid());
+            String uniqueIdentifier = matrixAttributeVo.getUniqueIdentifier();
+            if (StringUtils.isBlank(uniqueIdentifier)) {
+                continue;
             }
+            uniqueIdentifierToUuidMap.put(uniqueIdentifier, matrixAttributeVo.getUuid());
         }
         List<MatrixFilterVo> filterList = dataVo.getFilterList();
         if (CollectionUtils.isNotEmpty(filterList)) {
@@ -179,11 +178,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             while (iterator.hasNext()) {
                 MatrixFilterVo matrixFilterVo = iterator.next();
                 if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    if (StringUtils.isBlank(matrixFilterVo.getName())) {
+                    if (StringUtils.isBlank(matrixFilterVo.getUniqueIdentifier())) {
                         iterator.remove();
                         continue;
                     }
-                    String attrUuid = nameToUuidMap.get(matrixFilterVo.getName());
+                    String attrUuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
                     if (StringUtils.isBlank(attrUuid)) {
                         iterator.remove();
                         continue;
@@ -201,35 +200,35 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         Set<String> notNullColumnSet = new HashSet<>();
         List<String> attributeList = matrixAttributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
         String valueField = jsonObj.getString("valueField");
-        String valueFieldName = jsonObj.getString("valueFieldName");
+        String valueFieldUniqueIdentifier = jsonObj.getString("valueFieldUniqueIdentifier");
         if (StringUtils.isNotBlank(valueField)) {
             if (!attributeList.contains(valueField)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueField);
             }
         } else {
-            if (StringUtils.isBlank(valueFieldName)) {
-                throw new ParamNotExistsException("valueField", "valueFieldName");
+            if (StringUtils.isBlank(valueFieldUniqueIdentifier)) {
+                throw new ParamNotExistsException("valueField", "valueFieldUniqueIdentifier");
             }
-            String attrUuid = nameToUuidMap.get(valueFieldName);
+            String attrUuid = uniqueIdentifierToUuidMap.get(valueFieldUniqueIdentifier);
             if (StringUtils.isBlank(attrUuid)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueFieldName);
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueFieldUniqueIdentifier);
             }
             valueField = attrUuid;
         }
         notNullColumnSet.add(valueField);
         String textField = jsonObj.getString("textField");
-        String textFieldName = jsonObj.getString("textFieldName");
+        String textFieldUniqueIdentifier = jsonObj.getString("textFieldUniqueIdentifier");
         if (StringUtils.isNotBlank(textField)) {
             if (!attributeList.contains(textField)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), textField);
             }
         } else {
-            if (StringUtils.isBlank(textFieldName)) {
-                throw new ParamNotExistsException("textField", "textFieldName");
+            if (StringUtils.isBlank(textFieldUniqueIdentifier)) {
+                throw new ParamNotExistsException("textField", "textFieldUniqueIdentifier");
             }
-            String attrUuid = nameToUuidMap.get(textFieldName);
+            String attrUuid = uniqueIdentifierToUuidMap.get(textFieldUniqueIdentifier);
             if (StringUtils.isBlank(attrUuid)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), textFieldName);
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), textFieldUniqueIdentifier);
             }
             textField = attrUuid;
         }
@@ -240,7 +239,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         columnList.add(valueField);
         columnList.add(textField);
         JSONArray hiddenFieldList = jsonObj.getJSONArray("hiddenFieldList");
-        JSONArray hiddenFieldNameList = jsonObj.getJSONArray("hiddenFieldNameList");
+        JSONArray hiddenFieldUniqueIdentifierList = jsonObj.getJSONArray("hiddenFieldUniqueIdentifierList");
         if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
             for (int i = 0; i < hiddenFieldList.size(); i++) {
                 String hiddenField = hiddenFieldList.getString(i);
@@ -251,15 +250,15 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                     columnList.add(hiddenField);
                 }
             }
-        } else if (CollectionUtils.isNotEmpty(hiddenFieldNameList)) {
-            for (int i = 0; i < hiddenFieldNameList.size(); i++) {
-                String hiddenFieldName = hiddenFieldNameList.getString(i);
-                if (StringUtils.isBlank(hiddenFieldName)) {
+        } else if (CollectionUtils.isNotEmpty(hiddenFieldUniqueIdentifierList)) {
+            for (int i = 0; i < hiddenFieldUniqueIdentifierList.size(); i++) {
+                String hiddenFieldUniqueIdentifier = hiddenFieldUniqueIdentifierList.getString(i);
+                if (StringUtils.isBlank(hiddenFieldUniqueIdentifier)) {
                     continue;
                 }
-                String hiddenField = nameToUuidMap.get(hiddenFieldName);
+                String hiddenField = uniqueIdentifierToUuidMap.get(hiddenFieldUniqueIdentifier);
                 if (StringUtils.isBlank(hiddenField)) {
-                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldName);
+                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldUniqueIdentifier);
                 }
                 columnList.add(hiddenField);
             }
@@ -268,11 +267,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
 
         String keywordColumn = dataVo.getKeywordColumn();
-        String keywordColumnName = dataVo.getKeywordColumnName();
-        if (StringUtils.isBlank(keywordColumn) && StringUtils.isNotBlank(keywordColumnName)) {
-            String attrUuid = nameToUuidMap.get(keywordColumnName);
+        String keywordColumnUniqueIdentifier = dataVo.getKeywordColumnUniqueIdentifier();
+        if (StringUtils.isBlank(keywordColumn) && StringUtils.isNotBlank(keywordColumnUniqueIdentifier)) {
+            String attrUuid = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
             if (StringUtils.isBlank(attrUuid)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnName);
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
             }
             dataVo.setKeywordColumn(attrUuid);
         }
@@ -351,13 +350,13 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                             element.put(hiddenField, hiddenFieldValue);
                         }
                     }
-                } else if (CollectionUtils.isNotEmpty(hiddenFieldNameList)) {
-                    for (int i = 0; i < hiddenFieldNameList.size(); i++) {
-                        String hiddenFieldName = hiddenFieldNameList.getString(i);
-                        if (StringUtils.isBlank(hiddenFieldName)) {
+                } else if (CollectionUtils.isNotEmpty(hiddenFieldUniqueIdentifierList)) {
+                    for (int i = 0; i < hiddenFieldUniqueIdentifierList.size(); i++) {
+                        String hiddenFieldUniqueIdentifier = hiddenFieldUniqueIdentifierList.getString(i);
+                        if (StringUtils.isBlank(hiddenFieldUniqueIdentifier)) {
                             continue;
                         }
-                        String hiddenField = nameToUuidMap.get(hiddenFieldName);
+                        String hiddenField = uniqueIdentifierToUuidMap.get(hiddenFieldUniqueIdentifier);
                         if (StringUtils.isBlank(hiddenField)) {
                             continue;
                         }
@@ -367,7 +366,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                         JSONObject hiddenFieldObj = result.get(hiddenField);
                         if (MapUtils.isNotEmpty(hiddenFieldObj)) {
                             String hiddenFieldValue = hiddenFieldObj.getString("value");
-                            element.put(hiddenFieldName, hiddenFieldValue);
+                            element.put(hiddenFieldUniqueIdentifier, hiddenFieldValue);
                         }
                     }
                 }
