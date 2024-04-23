@@ -15,27 +15,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.fulltextindex;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
-import neatlogic.framework.fulltextindex.dao.mapper.FullTextIndexRebuildAuditMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
-    @Resource
-    private FullTextIndexRebuildAuditMapper fullTextIndexRebuildAuditMapper;
 
     @Override
     public String getToken() {
