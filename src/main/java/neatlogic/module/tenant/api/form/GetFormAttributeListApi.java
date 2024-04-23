@@ -46,7 +46,7 @@ public class GetFormAttributeListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = true),
+            @Param(name = "formUuid", type = ApiParamType.STRING, desc = "term.framework.formuuid", isRequired = true),
             @Param(name = "tag", type = ApiParamType.STRING, desc = "common.tag")
     })
     @Output({
