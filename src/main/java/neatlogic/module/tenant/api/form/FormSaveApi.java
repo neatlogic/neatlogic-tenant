@@ -1,5 +1,6 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
@@ -21,6 +22,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +62,8 @@ public class FormSaveApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = true),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "common.versionuuid", help = "当前版本的uuid，为空代表创建一个新版本"),
-            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
+            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true),
+            @Param(name = "formExtendConfig", type = ApiParamType.JSONOBJECT, desc = "common.config")
     })
     @Output({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
@@ -119,6 +122,8 @@ public class FormSaveApi extends PrivateApiComponentBase {
             } else {
                 formVersionVo.getUuid();
             }
+            String mainSceneUuid = formVo.getFormConfig().getString("uuid");
+            formVersionVo.setSceneUuid(mainSceneUuid);
             List<FormAttributeVo> formAttributeList = formVersionVo.getFormAttributeList();
             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                 //判断组件名是否重复
@@ -182,6 +187,39 @@ public class FormSaveApi extends PrivateApiComponentBase {
                     for (FormAttributeVo formAttributeVo : formAttributeList) {
                         //保存激活版本时，更新表单属性信息
                         formMapper.insertFormAttribute(formAttributeVo);
+                    }
+                }
+            }
+            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, currentVersionUuid);
+            JSONObject formExtendConfig = jsonObj.getJSONObject("formExtendConfig");
+            if (MapUtils.isNotEmpty(formExtendConfig)) {
+                JSONArray attributeArray = formExtendConfig.getJSONArray("attributeList");
+                if (CollectionUtils.isNotEmpty(attributeArray)) {
+                    for (int i = 0; i < attributeArray.size(); i++) {
+                        JSONObject attributeObj = attributeArray.getJSONObject(i);
+                        if (MapUtils.isEmpty(attributeObj)) {
+                            continue;
+                        }
+                        String parentUuid = attributeObj.getString("parentUuid");
+                        String tag = attributeObj.getString("tag");
+                        String key = attributeObj.getString("key");
+                        String uuid = UuidUtil.getCustomUUID(parentUuid + "#" + key);
+                        String label = attributeObj.getString("label");
+                        String type = attributeObj.getString("type");
+                        String handler = attributeObj.getString("handler");
+                        JSONObject config = attributeObj.getJSONObject("config");
+                        FormAttributeVo formAttributeVo = new FormAttributeVo();
+                        formAttributeVo.setFormUuid(formUuid);
+                        formAttributeVo.setFormVersionUuid(currentVersionUuid);
+                        formAttributeVo.setParentUuid(parentUuid);
+                        formAttributeVo.setTag(tag);
+                        formAttributeVo.setKey(key);
+                        formAttributeVo.setUuid(uuid);
+                        formAttributeVo.setLabel(label);
+                        formAttributeVo.setType(type);
+                        formAttributeVo.setHandler(handler);
+                        formAttributeVo.setConfig(config);
+                        formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
                 }
             }
