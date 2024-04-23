@@ -171,7 +171,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         fileVo.setUniqueKey(uk);
                         oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), uk);
                     }
-                    String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                    String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo);
                     if (StringUtils.isNotBlank(filePath)) {
                         fileVo.setPath(filePath);
                         if (oldFileVo == null) {

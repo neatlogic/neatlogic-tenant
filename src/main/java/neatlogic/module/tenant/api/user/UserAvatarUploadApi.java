@@ -97,7 +97,7 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setUserUuid(userUuid);
                 fileVo.setType("image");
                 fileVo.setContentType(multipartFile.getContentType());
-                String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+                String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo);
                 fileVo.setPath(filePath);
                 fileMapper.insertFile(fileVo);
                 Long fileId = fileVo.getId();
