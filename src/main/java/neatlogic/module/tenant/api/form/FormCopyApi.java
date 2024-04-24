@@ -1,10 +1,12 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Objects;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -14,16 +16,13 @@ import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNameRepeatException;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.form.exception.FormVersionNotFoundException;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.UuidUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -115,13 +114,12 @@ public class FormCopyApi extends PrivateApiComponentBase {
                 newFormVersionList.get(i).setVersion(i + 1);
             }
         }
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
         // 遍历要复制的版本列表
         for (FormVersionVo formVersionVo : newFormVersionList) {
             // 插入表单版本
             formMapper.insertFormVersion(formVersionVo);
             // 保存依赖
-            formCrossoverService.saveDependency(formVersionVo);
+            FormUtil.saveDependency(formVersionVo);
             if (formVersionVo.getIsActive().equals(1)) {
                 newFrom.setCurrentVersion(formVersionVo.getVersion());
                 newFrom.setCurrentVersionUuid(formVersionVo.getUuid());
@@ -175,8 +173,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
         }
 
         String content = formConfig.toJSONString();
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        List<FormAttributeVo> allFormAttributeList = formCrossoverService.getAllFormAttributeList(formConfig);
+        List<FormAttributeVo> allFormAttributeList = FormUtil.getAllFormAttributeList(formConfig);
         for (FormAttributeVo formAttributeVo : allFormAttributeList) {
             // 更新表单属性uuid
             content = content.replace(formAttributeVo.getUuid(), UuidUtil.randomUuid());
