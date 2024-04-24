@@ -19,6 +19,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,7 +99,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 if (Objects.equals(oldFormVersionVo.getFormConfig(), formVo.getFormConfig())) {
                     updateFormConfig = false;
                 } else {
-                    formCrossoverService.deleteDependency(oldFormVersionVo);
+                    FormUtil.deleteDependency(oldFormVersionVo);
                 }
             }
         }
@@ -179,7 +180,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
             } else {
                 formMapper.updateFormVersion(formVersionVo);
             }
-            formCrossoverService.saveDependency(formVersionVo);
+            FormUtil.saveDependency(formVersionVo);
             //保存激活版本时，更新表单属性信息
             if (Objects.equals(formVersionVo.getIsActive(), 1)) {
                 formMapper.deleteFormAttributeByFormUuid(formUuid);
@@ -190,7 +191,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, currentVersionUuid);
+            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, formVersionVo.getUuid());
             JSONObject formExtendConfig = jsonObj.getJSONObject("formExtendConfig");
             if (MapUtils.isNotEmpty(formExtendConfig)) {
                 JSONArray attributeArray = formExtendConfig.getJSONArray("attributeList");
@@ -210,7 +211,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         JSONObject config = attributeObj.getJSONObject("config");
                         FormAttributeVo formAttributeVo = new FormAttributeVo();
                         formAttributeVo.setFormUuid(formUuid);
-                        formAttributeVo.setFormVersionUuid(currentVersionUuid);
+                        formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
                         formAttributeVo.setParentUuid(parentUuid);
                         formAttributeVo.setTag(tag);
                         formAttributeVo.setKey(key);
