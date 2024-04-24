@@ -190,7 +190,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, currentVersionUuid);
+            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, formVersionVo.getUuid());
             JSONObject formExtendConfig = jsonObj.getJSONObject("formExtendConfig");
             if (MapUtils.isNotEmpty(formExtendConfig)) {
                 JSONArray attributeArray = formExtendConfig.getJSONArray("attributeList");
@@ -210,7 +210,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         JSONObject config = attributeObj.getJSONObject("config");
                         FormAttributeVo formAttributeVo = new FormAttributeVo();
                         formAttributeVo.setFormUuid(formUuid);
-                        formAttributeVo.setFormVersionUuid(currentVersionUuid);
+                        formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
                         formAttributeVo.setParentUuid(parentUuid);
                         formAttributeVo.setTag(tag);
                         formAttributeVo.setKey(key);
