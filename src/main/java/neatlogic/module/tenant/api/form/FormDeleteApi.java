@@ -63,6 +63,7 @@ public class FormDeleteApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(formVersionList)) {
                 for (FormVersionVo formVersionVo : formVersionList) {
                     FormUtil.deleteDependency(formVersionVo);
+                    formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formVersionVo.getFormUuid(), formVersionVo.getUuid());
                 }
             }
             formMapper.deleteFormByUuid(uuid);

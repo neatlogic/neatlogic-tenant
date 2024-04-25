@@ -49,7 +49,7 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单导入接口";
+        return "nmtaf.formimportapi.getname";
     }
 
     @Override
@@ -58,9 +58,9 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Output({
-            @Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "导入结果")
+            @Param(name = "Return", type = ApiParamType.JSONARRAY, desc = "nmtaf.formimportapi.output.param.desc.return")
     })
-    @Description(desc = "表单导入接口")
+    @Description(desc = "nmtaf.formimportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
@@ -117,6 +117,14 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                             }
                         }
                         resultList.add("新增版本" + formVersion.getVersion());
+                        List<FormAttributeVo> formExtendAttributeList = formVersion.getFormExtendAttributeList();
+                        if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+                            for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+                                formAttributeVo.setFormUuid(formVersion.getFormUuid());
+                                formAttributeVo.setFormVersionUuid(formVersion.getUuid());
+                                formMapper.insertFormExtendAttribute(formAttributeVo);
+                            }
+                        }
                     }
                 } else {
                     resultList.add("更新表单：" + formVo.getName());
@@ -135,12 +143,21 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                             }
                             formVersion.setVersion(version);
                             formVersion.setIsActive(0);
-                            formVersion.setUuid(null);
+                            if (existsFormVersionVo != null) {
+                                formVersion.setUuid(null);
+                            }
                             formMapper.insertFormVersion(formVersion);
                             resultList.add("新增版本" + version);
                         }
+                        List<FormAttributeVo> formExtendAttributeList = formVersion.getFormExtendAttributeList();
+                        if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+                            for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+                                formAttributeVo.setFormUuid(formVersion.getFormUuid());
+                                formAttributeVo.setFormVersionUuid(formVersion.getUuid());
+                                formMapper.insertFormExtendAttribute(formAttributeVo);
+                            }
+                        }
                     }
-
                 }
                 return resultList;
             } else {

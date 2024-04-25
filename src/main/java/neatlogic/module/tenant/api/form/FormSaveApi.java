@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -150,7 +148,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 //更新表单信息
                 formMapper.updateForm(formVo);
             }
-
+            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
             //插入表单版本信息
             if (StringUtils.isBlank(currentVersionUuid)) {
                 Integer version = formMapper.getMaxVersionByFormUuid(formUuid);
@@ -167,6 +165,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                             String oldUuid = formAttributeVo.getUuid();
                             String newUuid = UuidUtil.randomUuid();
                             formConfigStr = formConfigStr.replace(oldUuid, newUuid);
+                            formAttributeOldUuid2NewUuidMap.put(oldUuid, newUuid);
                         }
                         formVersionVo.setFormConfig(JSONObject.parseObject(formConfigStr));
                         formVersionVo.setFormAttributeList(null);
@@ -202,9 +201,13 @@ public class FormSaveApi extends PrivateApiComponentBase {
                             continue;
                         }
                         String parentUuid = attributeObj.getString("parentUuid");
+                        String newParentUuid = formAttributeOldUuid2NewUuidMap.get(parentUuid);
+                        if (StringUtils.isNotBlank(newParentUuid)) {
+                            parentUuid = newParentUuid;
+                        }
                         String tag = attributeObj.getString("tag");
                         String key = attributeObj.getString("key");
-                        String uuid = UuidUtil.getCustomUUID(parentUuid + "#" + key);
+                        String uuid = UuidUtil.getCustomUUID(parentUuid + "#" + tag + "#" + key);
                         String label = attributeObj.getString("label");
                         String type = attributeObj.getString("type");
                         String handler = attributeObj.getString("handler");
