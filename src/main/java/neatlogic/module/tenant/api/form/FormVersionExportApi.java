@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.form;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
@@ -28,6 +29,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Service
 
@@ -55,7 +58,7 @@ public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单版本导出接口";
+        return "nmtaf.formversionexportapi.getname";
     }
 
     @Override
@@ -64,9 +67,9 @@ public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "表单版本uuid", isRequired = true)
+            @Param(name = "formVersionUuid", type = ApiParamType.STRING, desc = "term.framework.formversionuuid", isRequired = true)
     })
-    @Description(desc = "表单版本导出接口")
+    @Description(desc = "nmtaf.formversionexportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String formVersionUuid = paramObj.getString("formVersionUuid");
@@ -79,6 +82,10 @@ public class FormVersionExportApi extends PrivateBinaryStreamApiComponentBase {
         //判断表单是否存在
         if (formVo == null) {
             throw new FormNotFoundException(formVersion.getFormUuid());
+        }
+        List<FormAttributeVo> formExtendAttributeList = formMapper.getFormExtendAttributeListByFormUuidAndFormVersionUuid(formVersion.getFormUuid(), formVersion.getUuid());
+        if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+            formVersion.setFormExtendAttributeList(formExtendAttributeList);
         }
         formVersion.setFormName(formVo.getName());
         //设置导出文件名, 表单名称_版本号

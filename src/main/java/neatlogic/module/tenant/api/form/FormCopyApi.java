@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -89,7 +87,11 @@ public class FormCopyApi extends PrivateApiComponentBase {
                 throw new FormNotFoundException(formVersionVo.getFormUuid());
             }
             newFrom.setIsActive(formVo.getIsActive());
-            newFormVersionList.add(copyFormVersion(formVersionVo, newFrom.getUuid()));
+            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
+            FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
+            List<FormAttributeVo> formVersionExtendAttributeList = copyFormVersionExtendAttributeList(formVersionVo.getFormUuid(), formVersionVo.getUuid(), newFormVersion.getFormUuid(), newFormVersion.getUuid(), formAttributeOldUuid2NewUuidMap);
+            newFormVersion.setFormExtendAttributeList(formVersionExtendAttributeList);
+            newFormVersionList.add(newFormVersion);
         } else if(StringUtils.isNotBlank(uuid)) {
             FormVo formVo = formMapper.getFormByUuid(uuid);
             if (formVo == null) {
@@ -98,7 +100,11 @@ public class FormCopyApi extends PrivateApiComponentBase {
             newFrom.setIsActive(formVo.getIsActive());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             for (FormVersionVo formVersionVo : formVersionList) {
-                newFormVersionList.add(copyFormVersion(formVersionVo, newFrom.getUuid()));
+                Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
+                FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
+                List<FormAttributeVo> formVersionExtendAttributeList = copyFormVersionExtendAttributeList(formVersionVo.getFormUuid(), formVersionVo.getUuid(), newFormVersion.getFormUuid(), newFormVersion.getUuid(), formAttributeOldUuid2NewUuidMap);
+                newFormVersion.setFormExtendAttributeList(formVersionExtendAttributeList);
+                newFormVersionList.add(newFormVersion);
             }
         } else {
             throw new ParamNotExistsException("uuid", "currentVersionUuid");
@@ -128,6 +134,12 @@ public class FormCopyApi extends PrivateApiComponentBase {
                     formMapper.insertFormAttribute(formAttributeVo);
                 }
             }
+            List<FormAttributeVo> formVersionExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(formVersionExtendAttributeList)) {
+                for (FormAttributeVo formAttributeVo : formVersionExtendAttributeList) {
+                    formMapper.insertFormExtendAttribute(formAttributeVo);
+                }
+            }
         }
         return newFrom;
     }
@@ -148,7 +160,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
      * @param newFormUuid
      * @return
      */
-    private FormVersionVo copyFormVersion(FormVersionVo oldFormVersionVo, String newFormUuid) {
+    private FormVersionVo copyFormVersion(FormVersionVo oldFormVersionVo, String newFormUuid, Map<String, String> formAttributeOldUuid2NewUuidMap) {
         JSONObject formConfig = oldFormVersionVo.getFormConfig();
         // 更新各种唯一标识uuid，防止不同表单版本之间唯一标识uuid相同
         // 更新场景uuid
@@ -176,7 +188,9 @@ public class FormCopyApi extends PrivateApiComponentBase {
         List<FormAttributeVo> allFormAttributeList = FormUtil.getAllFormAttributeList(formConfig);
         for (FormAttributeVo formAttributeVo : allFormAttributeList) {
             // 更新表单属性uuid
-            content = content.replace(formAttributeVo.getUuid(), UuidUtil.randomUuid());
+            String formAttributeNewUuid = UuidUtil.randomUuid();
+            formAttributeOldUuid2NewUuidMap.put(formAttributeVo.getUuid(), formAttributeNewUuid);
+            content = content.replace(formAttributeVo.getUuid(), formAttributeNewUuid);
         }
         FormVersionVo formVersionVo = new FormVersionVo();
         formVersionVo.setVersion(oldFormVersionVo.getVersion());
@@ -184,5 +198,16 @@ public class FormCopyApi extends PrivateApiComponentBase {
         formVersionVo.setFormUuid(newFormUuid);
         formVersionVo.setFormConfig(JSONObject.parseObject(content));
         return formVersionVo;
+    }
+
+    private List<FormAttributeVo> copyFormVersionExtendAttributeList(String oldFormUuid, String oldFormVersionUuid, String newFormUuid, String newFormVersionUuid, Map<String, String> formAttributeOldUuid2NewUuidMap) {
+        List<FormAttributeVo> formExtendAttributeList = formMapper.getFormExtendAttributeListByFormUuidAndFormVersionUuid(oldFormUuid, oldFormVersionUuid);
+        for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+            String newParentUuid = formAttributeOldUuid2NewUuidMap.get(formAttributeVo.getParentUuid());
+            formAttributeVo.setParentUuid(newParentUuid);
+            formAttributeVo.setFormUuid(newFormUuid);
+            formAttributeVo.setFormVersionUuid(newFormVersionUuid);
+        }
+        return formExtendAttributeList;
     }
 }
