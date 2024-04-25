@@ -57,6 +57,7 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
         }
         //删除表单版本
         formMapper.deleteFormVersionByUuid(uuid);
+        formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formVersion.getFormUuid(), formVersion.getUuid());
         FormUtil.deleteDependency(formVersion);
         return null;
     }

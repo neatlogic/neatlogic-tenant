@@ -1,17 +1,19 @@
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,7 +44,7 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "表单版本导入接口";
+        return "nmtaf.formversionimportapi.getname";
     }
 
     @Override
@@ -50,13 +53,13 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "表单uuid", isRequired = true)
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "term.framework.formuuid", isRequired = true)
     })
     @Output({
             @Param(name = "versionUuid", type = ApiParamType.INTEGER, desc = "导入版本号"),
-            @Param(name = "result", type = ApiParamType.STRING, desc = "导入结果")
+            @Param(name = "result", type = ApiParamType.STRING, desc = "nmtaf.formimportapi.output.param.desc.return")
     })
-    @Description(desc = "表单版本导入接口")
+    @Description(desc = "nmtaf.formversionimportapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String uuid = paramObj.getString("uuid");
@@ -100,7 +103,6 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
                     formMapper.updateFormVersion(formVersionVo);
                     resultObj.put("versionUuid", formVersionVo.getUuid());
                     resultObj.put("result", "版本" + existsFormVersionVo.getVersion() + "被覆盖");
-                    return resultObj;
                 } else {
                     Integer version = formMapper.getMaxVersionByFormUuid(uuid);
                     if (version == null) {
@@ -110,13 +112,22 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
                     }
                     formVersionVo.setIsActive(0);
                     formVersionVo.setVersion(version);
-                    formVersionVo.setUuid(null);
+                    if (existsFormVersionVo != null) {
+                        formVersionVo.setUuid(null);
+                    }
                     formMapper.insertFormVersion(formVersionVo);
                     resultObj.put("versionUuid", formVersionVo.getUuid());
                     resultObj.put("result", "新增版本" + version);
-                    return resultObj;
                 }
-
+                List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+                if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+                    for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+                        formAttributeVo.setFormUuid(formVersionVo.getFormUuid());
+                        formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
+                        formMapper.insertFormExtendAttribute(formAttributeVo);
+                    }
+                }
+                return resultObj;
             } else {
                 throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
             }
