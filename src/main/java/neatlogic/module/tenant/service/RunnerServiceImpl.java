@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.service;
 
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
+import neatlogic.framework.dto.runner.RunnerMapVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
 import neatlogic.framework.exception.runner.RunnerIpIsExistException;
@@ -93,5 +94,7 @@ public class RunnerServiceImpl implements RunnerService {
             replaceRunner = paramRunner;
         }
         runnerMapper.replaceRunner(replaceRunner);
+
+        runnerMapper.insertRunnerMap(new RunnerMapVo(replaceRunner.getId(), replaceRunner.getId()));
     }
 }
