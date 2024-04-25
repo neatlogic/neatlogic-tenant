@@ -4,16 +4,15 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormReferencedCannotBeDeletedException;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FormUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +61,8 @@ public class FormDeleteApi extends PrivateApiComponentBase {
             }
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             if (CollectionUtils.isNotEmpty(formVersionList)) {
-                IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
                 for (FormVersionVo formVersionVo : formVersionList) {
-                    formCrossoverService.deleteDependency(formVersionVo);
+                    FormUtil.deleteDependency(formVersionVo);
                 }
             }
             formMapper.deleteFormByUuid(uuid);

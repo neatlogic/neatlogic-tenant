@@ -4,18 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.exception.FormActiveVersionCannotBeDeletedException;
 import neatlogic.framework.form.exception.FormVersionNotFoundException;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FormUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,8 +57,7 @@ public class FormVersionDeleteApi extends PrivateApiComponentBase {
         }
         //删除表单版本
         formMapper.deleteFormVersionByUuid(uuid);
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        formCrossoverService.deleteDependency(formVersion);
+        FormUtil.deleteDependency(formVersion);
         return null;
     }
 
