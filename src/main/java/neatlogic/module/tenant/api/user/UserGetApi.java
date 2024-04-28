@@ -119,6 +119,10 @@ public class UserGetApi extends PrivateApiComponentBase {
                 List<AuthBase> authBaseList = AuthFactory.getAuthList();
                 List<UserAuthVo> userAuthVos = new ArrayList<>();
                 for (AuthBase authBase : authBaseList) {
+                    String authGroupName = authBase.getAuthGroup();
+                    if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
+                        continue;
+                    }
                     userAuthVos.add(new UserAuthVo(userUuid, authBase));
                 }
                 userVo.setUserAuthList(userAuthVos);
