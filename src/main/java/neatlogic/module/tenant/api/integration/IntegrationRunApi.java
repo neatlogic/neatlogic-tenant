@@ -15,7 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.integration;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
@@ -29,18 +31,17 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class IntegrationRunApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private IntegrationMapper integrationMapper;
 
 	@Override
@@ -50,7 +51,7 @@ public class IntegrationRunApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "集成配置执行接口";
+		return "nmtai.integrationrunapi.getname";
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class IntegrationRunApi extends PrivateApiComponentBase {
 	}
 
 	@Input({ @Param(name = "uuid", type = ApiParamType.STRING, desc = "集成配置uuid", isRequired = true) })
-	@Description(desc = "集成配置执行接口")
+	@Description(desc = "nmtai.integrationrunapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
