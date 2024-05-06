@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthBase;
+import neatlogic.framework.auth.core.AuthCSBase;
 import neatlogic.framework.auth.core.AuthFactory;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
@@ -102,7 +103,7 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
             }
             ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(authGroupName);
             List<AuthBase> authList = authGroupMap.get(authGroupName);
-            if (authList != null && authList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(authList)) {
                 List<AuthVo> authArray = new ArrayList<>();
                 for (AuthBase authBase : authList) {
                     if (authBase.isShow() && ((StringUtils.isBlank(keyword) && CollectionUtils.isEmpty(defaultValue))
@@ -116,6 +117,9 @@ public class AuthManageSearchApi extends PrivateApiComponentBase {
                         }
                         if (userAuthMap.containsKey(authVo.getName())) {
                             authVo.setUserCount(userAuthMap.get(authVo.getName()));
+                        }
+                        if (authBase instanceof AuthCSBase) {
+                            authVo.setCommercial(true);
                         }
                         authArray.add(authVo);
                     }
