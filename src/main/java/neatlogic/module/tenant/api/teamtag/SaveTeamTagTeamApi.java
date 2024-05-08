@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package neatlogic.module.tenant.api.region;
+package neatlogic.module.tenant.api.teamtag;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.REGION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.region.RegionMapper;
-import neatlogic.framework.dto.region.RegionTeamVo;
+import neatlogic.framework.dao.mapper.teamtag.TeamTagMapper;
+import neatlogic.framework.dto.teamtag.TeamTagTeamVo;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.auth.label.REGION_MODIFY;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,23 +39,23 @@ import javax.annotation.Resource;
 @AuthAction(action = REGION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Transactional
-public class SaveRegionTeamApi extends PrivateApiComponentBase {
+public class SaveTeamTagTeamApi extends PrivateApiComponentBase {
     @Resource
-    RegionMapper regionMapper;
+    TeamTagMapper teamTagMapper;
 
     @Override
     public String getName() {
-        return "nmtar.saveregionteamapi.getname";
+        return "nmtat.saveteamtagteamapi.getname";
     }
 
 
     @Input({
-            @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid", isRequired = true, help = "地域id"),
+            @Param(name = "tagId", type = ApiParamType.LONG, desc = "common.tagid", isRequired = true, help = "地域id"),
             @Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "分组列表", isRequired = true, help = "分组列表"),
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Long regionId = paramObj.getLong("regionId");
+        Long tagId = paramObj.getLong("tagId");
         JSONArray teamList = paramObj.getJSONArray("teamList");
         Long updateTime = System.currentTimeMillis();
         for (int i = 0; i < teamList.size(); i++) {
@@ -63,16 +63,16 @@ public class SaveRegionTeamApi extends PrivateApiComponentBase {
             if (MapUtils.isNotEmpty(team)) {
                 String teamUuid = team.getString("uuid");
                 Integer checkedChildren = team.getInteger("checkedChildren");
-                RegionTeamVo regionTeamVo = new RegionTeamVo(regionId, teamUuid, checkedChildren, updateTime);
-                regionMapper.insertRegionTeam(regionTeamVo);
+                TeamTagTeamVo teamTagTeamVo = new TeamTagTeamVo(tagId, teamUuid, checkedChildren, updateTime);
+                teamTagMapper.insertTeamTagTeam(teamTagTeamVo);
             }
         }
-        regionMapper.deleteRegionExpired(regionId, updateTime);
+        teamTagMapper.deleteTeamTagTeamExpired(tagId, updateTime);
         return null;
     }
 
     @Override
     public String getToken() {
-        return "/region/team/save";
+        return "/team/tag/team/save";
     }
 }
