@@ -50,12 +50,12 @@ public class SaveTeamTagTeamApi extends PrivateApiComponentBase {
 
 
     @Input({
-            @Param(name = "tagId", type = ApiParamType.LONG, desc = "common.tagid", isRequired = true, help = "地域id"),
-            @Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "分组列表", isRequired = true, help = "分组列表"),
+            @Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "common.tagidlist", isRequired = true, help = "标签id列表"),
+            @Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "common.teamlist", isRequired = true, help = "分组列表"),
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        Long tagId = paramObj.getLong("tagId");
+        JSONArray tagIdList = paramObj.getJSONArray("tagIdList");
         JSONArray teamList = paramObj.getJSONArray("teamList");
         Long updateTime = System.currentTimeMillis();
         for (int i = 0; i < teamList.size(); i++) {
@@ -63,11 +63,14 @@ public class SaveTeamTagTeamApi extends PrivateApiComponentBase {
             if (MapUtils.isNotEmpty(team)) {
                 String teamUuid = team.getString("uuid");
                 Integer checkedChildren = team.getInteger("checkedChildren");
-                TeamTagTeamVo teamTagTeamVo = new TeamTagTeamVo(tagId, teamUuid, checkedChildren, updateTime);
+                TeamTagTeamVo teamTagTeamVo = new TeamTagTeamVo(tagIdList.toJavaList(Long.class), teamUuid, checkedChildren, updateTime);
                 teamTagMapper.insertTeamTagTeam(teamTagTeamVo);
             }
         }
-        teamTagMapper.deleteTeamTagTeamExpired(tagId, updateTime);
+        //只有一个标签的时候才执行删除操作
+        if(tagIdList.size() == 1) {
+            teamTagMapper.deleteTeamTagTeamExpired(tagIdList.getLong(0), updateTime);
+        }
         return null;
     }
 
