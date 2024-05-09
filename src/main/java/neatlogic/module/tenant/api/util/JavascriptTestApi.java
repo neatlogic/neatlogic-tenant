@@ -47,7 +47,6 @@ public class JavascriptTestApi extends PrivateApiComponentBase {
         String script = jsonObj.getString("script");
         JSONObject paramObj = new JSONObject();
         paramObj.put("data", param);
-        System.out.println("paramObj = " + paramObj);
         Object returnValue = JavascriptUtil.runScript(paramObj, script);
         Boolean result = Boolean.parseBoolean(returnValue.toString());
         JSONObject resultObj = new JSONObject();
