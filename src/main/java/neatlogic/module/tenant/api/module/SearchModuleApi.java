@@ -28,6 +28,7 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,7 +69,7 @@ public class SearchModuleApi extends PrivateApiComponentBase {
         String tenantUuid = TenantContext.get().getTenantUuid();
         TenantContext.get().setUseDefaultDatasource(true);
         List<TenantModuleVo> tenantModuleVos = tenantMapper.getTenantModuleByTenantUuid(tenantUuid);
-        Map<String, String> moduleVersionMap = tenantModuleVos.stream().collect(Collectors.toMap(TenantModuleVo::getModuleId, TenantModuleVo::getVersion));
+        Map<String, String> moduleVersionMap = tenantModuleVos.stream().collect(Collectors.toMap(TenantModuleVo::getModuleId, o -> o.getVersion() == null ? StringUtils.EMPTY : o.getVersion()));
         moduleGroupList.forEach(o -> {
             o.getModuleList().forEach(e -> {
                 e.setChangelogVersion(moduleVersionMap.get(e.getId()));
