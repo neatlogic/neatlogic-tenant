@@ -89,8 +89,6 @@ public class FormCopyApi extends PrivateApiComponentBase {
             newFrom.setIsActive(formVo.getIsActive());
             Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
             FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
-            List<FormAttributeVo> formVersionExtendAttributeList = copyFormVersionExtendAttributeList(formVersionVo.getFormUuid(), formVersionVo.getUuid(), newFormVersion.getFormUuid(), newFormVersion.getUuid(), formAttributeOldUuid2NewUuidMap);
-            newFormVersion.setFormExtendAttributeList(formVersionExtendAttributeList);
             newFormVersionList.add(newFormVersion);
         } else if(StringUtils.isNotBlank(uuid)) {
             FormVo formVo = formMapper.getFormByUuid(uuid);
@@ -102,8 +100,6 @@ public class FormCopyApi extends PrivateApiComponentBase {
             for (FormVersionVo formVersionVo : formVersionList) {
                 Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
                 FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
-                List<FormAttributeVo> formVersionExtendAttributeList = copyFormVersionExtendAttributeList(formVersionVo.getFormUuid(), formVersionVo.getUuid(), newFormVersion.getFormUuid(), newFormVersion.getUuid(), formAttributeOldUuid2NewUuidMap);
-                newFormVersion.setFormExtendAttributeList(formVersionExtendAttributeList);
                 newFormVersionList.add(newFormVersion);
             }
         } else {
@@ -198,16 +194,5 @@ public class FormCopyApi extends PrivateApiComponentBase {
         formVersionVo.setFormUuid(newFormUuid);
         formVersionVo.setFormConfig(JSONObject.parseObject(content));
         return formVersionVo;
-    }
-
-    private List<FormAttributeVo> copyFormVersionExtendAttributeList(String oldFormUuid, String oldFormVersionUuid, String newFormUuid, String newFormVersionUuid, Map<String, String> formAttributeOldUuid2NewUuidMap) {
-        List<FormAttributeVo> formExtendAttributeList = formMapper.getFormExtendAttributeListByFormUuidAndFormVersionUuid(oldFormUuid, oldFormVersionUuid);
-        for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
-            String newParentUuid = formAttributeOldUuid2NewUuidMap.get(formAttributeVo.getParentUuid());
-            formAttributeVo.setParentUuid(newParentUuid);
-            formAttributeVo.setFormUuid(newFormUuid);
-            formAttributeVo.setFormVersionUuid(newFormVersionUuid);
-        }
-        return formExtendAttributeList;
     }
 }

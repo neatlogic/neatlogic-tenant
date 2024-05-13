@@ -1,11 +1,9 @@
 package neatlogic.module.tenant.api.form;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
@@ -14,7 +12,6 @@ import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormAttributeNameIsRepeatException;
 import neatlogic.framework.form.exception.FormNameRepeatException;
 import neatlogic.framework.form.exception.FormVersionNotFoundException;
-import neatlogic.framework.form.service.IFormCrossoverService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
@@ -23,7 +20,6 @@ import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,8 +57,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = true),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "common.versionuuid", help = "当前版本的uuid，为空代表创建一个新版本"),
-            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true),
-            @Param(name = "formExtendConfig", type = ApiParamType.JSONOBJECT, desc = "common.config")
+            @Param(name = "formConfig", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
     })
     @Output({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
@@ -79,7 +74,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
         boolean updateFormConfig = true;
         boolean formIsExists = false;
         Integer oldFormVersionIsActive = 0;
-        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
         FormVo oldFormVo = formMapper.getFormByUuid(formUuid);
         if (oldFormVo != null) {
             formIsExists = true;
@@ -189,40 +183,11 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         formMapper.insertFormAttribute(formAttributeVo);
                     }
                 }
-            }
-            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, formVersionVo.getUuid());
-            JSONObject formExtendConfig = jsonObj.getJSONObject("formExtendConfig");
-            if (MapUtils.isNotEmpty(formExtendConfig)) {
-                JSONArray attributeArray = formExtendConfig.getJSONArray("attributeList");
-                if (CollectionUtils.isNotEmpty(attributeArray)) {
-                    for (int i = 0; i < attributeArray.size(); i++) {
-                        JSONObject attributeObj = attributeArray.getJSONObject(i);
-                        if (MapUtils.isEmpty(attributeObj)) {
-                            continue;
-                        }
-                        String parentUuid = attributeObj.getString("parentUuid");
-                        String newParentUuid = formAttributeOldUuid2NewUuidMap.get(parentUuid);
-                        if (StringUtils.isNotBlank(newParentUuid)) {
-                            parentUuid = newParentUuid;
-                        }
-                        String tag = attributeObj.getString("tag");
-                        String key = attributeObj.getString("key");
-                        String uuid = UuidUtil.getCustomUUID(parentUuid + "#" + tag + "#" + key);
-                        String label = attributeObj.getString("label");
-                        String type = attributeObj.getString("type");
-                        String handler = attributeObj.getString("handler");
-                        JSONObject config = attributeObj.getJSONObject("config");
-                        FormAttributeVo formAttributeVo = new FormAttributeVo();
-                        formAttributeVo.setFormUuid(formUuid);
-                        formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
-                        formAttributeVo.setParentUuid(parentUuid);
-                        formAttributeVo.setTag(tag);
-                        formAttributeVo.setKey(key);
-                        formAttributeVo.setUuid(uuid);
-                        formAttributeVo.setLabel(label);
-                        formAttributeVo.setType(type);
-                        formAttributeVo.setHandler(handler);
-                        formAttributeVo.setConfig(config);
+                // 表单扩展属性
+                formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formUuid, formVersionVo.getUuid());
+                List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+                if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+                    for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
                         formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
                 }

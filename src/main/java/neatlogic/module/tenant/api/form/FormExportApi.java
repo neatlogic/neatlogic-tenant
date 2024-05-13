@@ -15,9 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.form.dao.mapper.FormMapper;
-import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormNotFoundException;
@@ -27,8 +27,6 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,14 +76,8 @@ public class FormExportApi extends PrivateBinaryStreamApiComponentBase {
             throw new FormNotFoundException(uuid);
         }
         //获取表单的所有版本
-        List<FormVersionVo> formVersionLsit = formMapper.getFormVersionByFormUuid(uuid);
-        for (FormVersionVo formVersion : formVersionLsit) {
-            List<FormAttributeVo> formExtendAttributeList = formMapper.getFormExtendAttributeListByFormUuidAndFormVersionUuid(formVersion.getFormUuid(), formVersion.getUuid());
-            if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
-                formVersion.setFormExtendAttributeList(formExtendAttributeList);
-            }
-        }
-        formVo.setVersionList(formVersionLsit);
+        List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
+        formVo.setVersionList(formVersionList);
 
         //设置导出文件名, 表单名称_版本号
         String fileNameEncode = formVo.getName() + ".form";
