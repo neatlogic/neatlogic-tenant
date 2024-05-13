@@ -133,6 +133,7 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                         //如果导入的表单版本已存在, 且表单uuid相同, 则覆盖，反之，新增一个版本
                         if (existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(formVo.getUuid())) {
                             formMapper.updateFormVersion(formVersion);
+                            formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(formVersion.getFormUuid(), formVersion.getUuid());
                             resultList.add("版本" + existsFormVersionVo.getVersion() + "被覆盖");
                         } else {
                             Integer version = formMapper.getMaxVersionByFormUuid(formVo.getUuid());

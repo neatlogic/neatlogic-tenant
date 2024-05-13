@@ -34,7 +34,7 @@ public class JavascriptTestApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "param", type = ApiParamType.STRING, isRequired = true, desc = "参数"),
+            @Param(name = "data", type = ApiParamType.STRING, isRequired = true, desc = "参数"),
             @Param(name = "script", type = ApiParamType.STRING, isRequired = true, desc = "脚本")
     })
     @Output({
@@ -43,10 +43,10 @@ public class JavascriptTestApi extends PrivateApiComponentBase {
     @Description(desc = "")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject param = jsonObj.getJSONObject("param");
+        JSONObject data = jsonObj.getJSONObject("data");
         String script = jsonObj.getString("script");
         JSONObject paramObj = new JSONObject();
-        paramObj.put("data", param);
+        paramObj.put("data", data);
         Object returnValue = JavascriptUtil.runScript(paramObj, script);
         Boolean result = Boolean.parseBoolean(returnValue.toString());
         JSONObject resultObj = new JSONObject();

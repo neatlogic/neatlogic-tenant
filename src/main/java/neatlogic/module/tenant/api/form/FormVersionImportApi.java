@@ -101,6 +101,7 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
                 if (existsFormVersionVo != null && existsFormVersionVo.getFormUuid().equals(uuid)) {
                     formVersionVo.setIsActive(existsFormVersionVo.getIsActive());
                     formMapper.updateFormVersion(formVersionVo);
+                    formMapper.deleteFormExtendAttributeByFormUuidAndFormVersionUuid(uuid, formVersionVo.getUuid());
                     resultObj.put("versionUuid", formVersionVo.getUuid());
                     resultObj.put("result", "版本" + existsFormVersionVo.getVersion() + "被覆盖");
                 } else {
