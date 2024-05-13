@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.form;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
@@ -28,7 +29,6 @@ import neatlogic.framework.form.exception.FormVersionNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +50,7 @@ public class FormGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "单个表单查询接口";
+        return "获取表单信息";
     }
 
     @Override
@@ -64,7 +64,7 @@ public class FormGetApi extends PrivateApiComponentBase {
             @Param(name = "currentVersionUuid", type = ApiParamType.STRING, desc = "选择表单版本uuid"),
     })
     @Output({@Param(explode = FormVo.class)})
-    @Description(desc = "单个表单查询接口")
+    @Description(desc = "获取表单信息")
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String currentVersionUuid = jsonObj.getString("currentVersionUuid");
         String uuid = jsonObj.getString("uuid");

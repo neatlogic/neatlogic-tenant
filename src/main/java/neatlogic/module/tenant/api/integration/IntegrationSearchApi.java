@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.integration;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.BasePageVo;
@@ -26,23 +29,19 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
 @Service
-
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationSearchApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private IntegrationMapper integrationMapper;
 
     @Override
@@ -52,7 +51,7 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "集成设置查询接口";
+        return "nmtai.integrationsearchapi.getname";
     }
 
     @Override
@@ -68,18 +67,18 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数量")})
     @Output({@Param(explode = BasePageVo.class), @Param(name = "integrationList", explode = IntegrationVo[].class, desc = "集成设置列表")})
-    @Description(desc = "集成设置查询接口")
+    @Description(desc = "nmtai.integrationsearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        List<IntegrationVo> integrationList = new ArrayList<>();
-        IntegrationVo integrationVo = JSONObject.toJavaObject(jsonObj, IntegrationVo.class);
+        List<IntegrationVo> integrationList;
+        IntegrationVo integrationVo = JSON.toJavaObject(jsonObj, IntegrationVo.class);
         JSONArray defaultValue = integrationVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<String> uuidList = defaultValue.toJavaList(String.class);
             integrationList = integrationMapper.getIntegrationListByUuidList(uuidList);
         } else {
             integrationList = integrationMapper.searchIntegration(integrationVo);
-            if (integrationList.size() > 0) {
+            if (!integrationList.isEmpty()) {
                 int rowNum = integrationMapper.searchIntegrationCount(integrationVo);
                 integrationVo.setRowNum(rowNum);
             }

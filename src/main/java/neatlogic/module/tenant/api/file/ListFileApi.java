@@ -15,14 +15,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.file;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -57,7 +57,7 @@ public class ListFileApi extends PrivateApiComponentBase {
             @Param(name = "idList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "附件id")
     })
     @Output({@Param(explode = FileVo[].class)})
-    @Description(desc = "根据附件id列表获取附件信息接口")
+    @Description(desc = "根据附件id列表获取附件信息")
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray jsonList = jsonObj.getJSONArray("idList");
         List<Long> fileIdList = new ArrayList<>();
