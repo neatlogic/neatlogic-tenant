@@ -17,68 +17,50 @@
 
 package neatlogic.module.tenant.api.teamtag;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.TEAM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.teamtag.TeamTagMapper;
-import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.dto.teamtag.TeamTagTeamVo;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.TableResultUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = TEAM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class SearchTeamTagTeamApi extends PrivateApiComponentBase {
+@Transactional
+public class deleteTeamTagTeamApi extends PrivateApiComponentBase {
     @Resource
     TeamTagMapper teamTagMapper;
 
-    @Resource
-    TeamMapper teamMapper;
-
     @Override
     public String getName() {
-        return "查询标签映射分组";
+        return "nmtat.deleteteamtagteamapi.getname";
     }
 
 
     @Input({
-            @Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "common.tagidlist", isRequired = true, minSize = 1,help = "标签id列表"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
+            @Param(name = "tagIdList", type = ApiParamType.JSONARRAY, desc = "common.tagidlist", minSize = 1, isRequired = true, help = "标签idList"),
+            @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "nmtat.deleteteamtagteamapi.input.param.desc.teamuuid", isRequired = true, help = "分组uuid")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TeamTagTeamVo teamTagTeam = JSON.toJavaObject(paramObj, TeamTagTeamVo.class);
-        List<TeamVo> teamList = new ArrayList<>();
-        int rowNum = teamTagMapper.searchTeamTagTeamCount(teamTagTeam);
-        teamTagTeam.setRowNum(rowNum);
-        if (rowNum > 0) {
-            List<TeamTagTeamVo> teamTagTeamList = teamTagMapper.getTeamTagTeamUuidList(teamTagTeam);
-            Map<String,Integer> teamCheckedChildrenMap = teamTagTeamList.stream().collect(Collectors.toMap(TeamTagTeamVo::getTeamUuid, TeamTagTeamVo::getCheckedChildren));
-            teamList = teamMapper.getTeamByUuidList(teamTagTeamList.stream().map(TeamTagTeamVo::getTeamUuid).collect(Collectors.toList()));
-            teamList.forEach(t-> t.setCheckedChildren(teamCheckedChildrenMap.get(t.getUuid())));
-        }
-
-        return TableResultUtil.getResult(teamList, teamTagTeam);
+        JSONArray tagIdList = paramObj.getJSONArray("tagIdList");
+        String teamUuid = paramObj.getString("teamUuid");
+        teamTagMapper.deleteTeamTagTeam(tagIdList,teamUuid);
+        return null;
     }
 
     @Override
     public String getToken() {
-        return "team/tag/team/search";
+        return "/team/tag/team/delete";
     }
 }

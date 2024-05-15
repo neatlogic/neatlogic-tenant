@@ -20,7 +20,7 @@ package neatlogic.module.tenant.api.teamtag;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.REGION_MODIFY;
+import neatlogic.framework.auth.label.TEAM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.teamtag.TeamTagMapper;
 import neatlogic.framework.dto.teamtag.TeamTagTeamVo;
@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = REGION_MODIFY.class)
+@AuthAction(action = TEAM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 @Transactional
 public class SaveTeamTagTeamApi extends PrivateApiComponentBase {
