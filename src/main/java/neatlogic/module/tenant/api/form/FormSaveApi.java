@@ -162,6 +162,8 @@ public class FormSaveApi extends PrivateApiComponentBase {
                             formAttributeOldUuid2NewUuidMap.put(oldUuid, newUuid);
                         }
                         formVersionVo.setFormConfig(JSONObject.parseObject(formConfigStr));
+                        mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+                        formVersionVo.setSceneUuid(mainSceneUuid);
                         formVersionVo.setFormAttributeList(null);
                         formAttributeList = formVersionVo.getFormAttributeList();
                     }

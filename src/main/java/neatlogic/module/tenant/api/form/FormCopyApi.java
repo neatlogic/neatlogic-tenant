@@ -125,6 +125,8 @@ public class FormCopyApi extends PrivateApiComponentBase {
             if (formVersionVo.getIsActive().equals(1)) {
                 newFrom.setCurrentVersion(formVersionVo.getVersion());
                 newFrom.setCurrentVersionUuid(formVersionVo.getUuid());
+                String mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+                formVersionVo.setSceneUuid(mainSceneUuid);
                 // 对应激活版本需要插入表单属性
                 for (FormAttributeVo formAttributeVo : formVersionVo.getFormAttributeList()) {
                     formMapper.insertFormAttribute(formAttributeVo);

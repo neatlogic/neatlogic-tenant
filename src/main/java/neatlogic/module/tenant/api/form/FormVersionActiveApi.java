@@ -72,6 +72,8 @@ public class FormVersionActiveApi extends PrivateApiComponentBase {
         formMapper.updateFormVersion(formVersionVo);
 
         formMapper.deleteFormAttributeByFormUuid(formVersion.getFormUuid());
+        String mainSceneUuid = formVersion.getFormConfig().getString("uuid");
+        formVersion.setSceneUuid(mainSceneUuid);
         List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
         if (CollectionUtils.isNotEmpty(formAttributeList)) {
             for (FormAttributeVo formAttributeVo : formAttributeList) {
