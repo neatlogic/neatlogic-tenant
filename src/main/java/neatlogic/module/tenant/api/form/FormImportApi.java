@@ -109,6 +109,8 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                         //保存激活版本时，更新表单属性信息
                         if (Objects.equal(formVersion.getIsActive(), 1)) {
                             formMapper.deleteFormAttributeByFormUuid(formVo.getUuid());
+                            String mainSceneUuid = formVersion.getFormConfig().getString("uuid");
+                            formVersion.setSceneUuid(mainSceneUuid);
                             List<FormAttributeVo> formAttributeList = formVersion.getFormAttributeList();
                             if (CollectionUtils.isNotEmpty(formAttributeList)) {
                                 for (FormAttributeVo formAttributeVo : formAttributeList) {
