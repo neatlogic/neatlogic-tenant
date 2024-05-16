@@ -16,11 +16,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.test;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.springframework.stereotype.Component;
 
-//@Component
+@Component
 //@Transactional
 public class TestApi extends PrivateApiComponentBase {
 
@@ -43,7 +43,7 @@ public class TestApi extends PrivateApiComponentBase {
     @Description(desc = "测试RAW接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        System.out.println(RequestContext.get().getRequest().getMethod());
+        System.out.println("######################进来了：" + paramObj);
         return paramObj;
     }
 }
