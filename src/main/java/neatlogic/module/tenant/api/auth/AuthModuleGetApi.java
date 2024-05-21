@@ -26,6 +26,8 @@ import neatlogic.framework.auth.init.MaintenanceMode;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
+import neatlogic.framework.config.ConfigManager;
+import neatlogic.framework.config.FrameworkTenantConfig;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.module.ModuleGroupVo;
@@ -33,6 +35,8 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -138,6 +142,13 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         Map<String, List<AuthBase>> authModuleMap = AuthFactory.getAuthGroupMap();
         List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
         for (ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
+            String disabledModuleListStr = ConfigManager.getConfig(FrameworkTenantConfig.DISABLED_MODULELIST);
+            if(StringUtils.isNotBlank(disabledModuleListStr)){
+                List<String> disabledModuleList = Arrays.asList(disabledModuleListStr.split(","));
+                if (CollectionUtils.isNotEmpty(disabledModuleList) && disabledModuleList.contains(moduleGroupVo.getGroup())){
+                    continue;
+                }
+            }
             JSONObject moduleGroupJson = new JSONObject();
             //把用户默认模块首页配置放入moduleGroupJson中
             Map<String, Object> map = OuterMap.get(moduleGroupVo.getGroup());
