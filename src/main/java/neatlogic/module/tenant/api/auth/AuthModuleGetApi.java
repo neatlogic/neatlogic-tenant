@@ -142,10 +142,10 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         Map<String, List<AuthBase>> authModuleMap = AuthFactory.getAuthGroupMap();
         List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
         for (ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
-            String disabledModuleListStr = ConfigManager.getConfig(FrameworkTenantConfig.DISABLED_MODULELIST);
-            if(StringUtils.isNotBlank(disabledModuleListStr)){
-                List<String> disabledModuleList = Arrays.asList(disabledModuleListStr.split(","));
-                if (CollectionUtils.isNotEmpty(disabledModuleList) && disabledModuleList.contains(moduleGroupVo.getGroup())){
+            String disabledModuleGroupListStr = ConfigManager.getConfig(FrameworkTenantConfig.DISABLED_MODULEGROUPLIST);
+            if(StringUtils.isNotBlank(disabledModuleGroupListStr)){
+                List<String> disabledModuleGroupList = Arrays.asList(disabledModuleGroupListStr.split(","));
+                if (CollectionUtils.isNotEmpty(disabledModuleGroupList) && disabledModuleGroupList.contains(moduleGroupVo.getGroup())){
                     continue;
                 }
             }
