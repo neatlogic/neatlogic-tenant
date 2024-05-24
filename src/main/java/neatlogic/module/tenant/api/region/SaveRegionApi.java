@@ -24,17 +24,20 @@ import neatlogic.framework.auth.label.REGION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.region.RegionVo;
+import neatlogic.framework.exception.region.RegionNotFoundException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.exception.region.RegionNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = REGION_MODIFY.class)
@@ -61,15 +64,30 @@ public class SaveRegionApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        if(id != null){
+        if (id != null) {
             RegionVo regionVo = regionMapper.getRegionById(id);
-            if(regionVo == null){
+            if (regionVo == null) {
                 throw new RegionNotFoundException(id);
             }
         }
         RegionVo region = JSON.toJavaObject(paramObj, RegionVo.class);
+        if(id == null) {
+            int lft = LRCodeManager.beforeAddTreeNode("region", "id", "parent_id", region.getParentId());
+            region.setLft(lft);
+            region.setRht(lft + 1);
+            List<Long> upwardRegionIdList = new ArrayList<>();
+            List<String> upwardRegionNameList = new ArrayList<>();
+            List<RegionVo> upwardRegionList = regionMapper.getAncestorsAndSelfByLftRht(region.getLft(), region.getRht());
+            for (RegionVo upwardRegion : upwardRegionList) {
+                upwardRegionIdList.add(upwardRegion.getId());
+                upwardRegionNameList.add(upwardRegion.getName());
+            }
+            upwardRegionIdList.add(region.getId());
+            upwardRegionNameList.add(region.getName());
+            region.setUpwardIdPath(upwardRegionIdList.stream().map(Object::toString).collect(Collectors.joining(",")));
+            region.setUpwardNamePath(String.join("/", upwardRegionNameList));
+        }
         regionMapper.insertRegion(region);
-        LRCodeManager.rebuildLeftRightCode("region", "id", "parent_id", RegionVo.ROOT_PARENTID.toString());
         return region.getId();
     }
 

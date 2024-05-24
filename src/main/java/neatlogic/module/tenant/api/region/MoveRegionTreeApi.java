@@ -69,7 +69,11 @@ public class MoveRegionTreeApi extends PrivateApiComponentBase {
             throw new RegionNotFoundException(targetId);
         }
         String moveType = paramObj.getString("moveType");
-        LRCodeManager.moveTreeNode("region", "id", "parent_id", id, MoveType.getMoveType(moveType), targetId);
+        int[] lftRht = LRCodeManager.moveTreeNode("region", "id", "parent_id", id, MoveType.getMoveType(moveType), targetId);
+        if (!targetId.equals(regionVo.getParentId()) && lftRht != null) {
+            regionMapper.updateUpwardIdPathByLftRht(lftRht[0], lftRht[1]);
+            regionMapper.updateUpwardNamePathByLftRht(lftRht[0], lftRht[1]);
+        }
         Long parentId = regionMapper.getParentIdById(id);
         regionVo.setParentId(parentId);
         //判断移动后相同目录下是否有同名目录
