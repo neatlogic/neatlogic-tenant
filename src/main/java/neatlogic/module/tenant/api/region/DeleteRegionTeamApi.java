@@ -47,16 +47,14 @@ public class DeleteRegionTeamApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid", isRequired = true, help = "地域id"),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "owner,worker", desc = "nmtar.searchregionteamapi.input.param.desc.type", isRequired = true, help = "地域id"),
             @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "nmtar.deleteregionteamapi.input.param.desc.teamuuidlist", isRequired = true, help = "分组uuid列表")
 
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("regionId");
-        String type = paramObj.getString("type");
         JSONArray teamUuidArray = paramObj.getJSONArray("teamUuidList");
-        regionMapper.deleteRegionTeamByRegionIdAndTypeAndTeamUuidList(id,type,teamUuidArray);
+        regionMapper.deleteRegionTeamByRegionIdAndTypeAndTeamUuidList(id, teamUuidArray);
         return null;
     }
 

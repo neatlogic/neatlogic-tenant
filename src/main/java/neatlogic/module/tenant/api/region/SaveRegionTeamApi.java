@@ -51,25 +51,23 @@ public class SaveRegionTeamApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid", isRequired = true, help = "地域id"),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "owner,worker", desc = "nmtar.searchregionteamapi.input.param.desc.type", isRequired = true, help = "地域id"),
             @Param(name = "teamList", type = ApiParamType.JSONARRAY, desc = "分组列表", isRequired = true, help = "分组列表"),
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long regionId = paramObj.getLong("regionId");
-        String type = paramObj.getString("type");
         JSONArray teamList = paramObj.getJSONArray("teamList");
         Long updateTime = System.currentTimeMillis();
         for (int i = 0; i < teamList.size(); i++) {
             JSONObject team = teamList.getJSONObject(i);
-            if(MapUtils.isNotEmpty(team)){
+            if (MapUtils.isNotEmpty(team)) {
                 String teamUuid = team.getString("uuid");
                 Integer checkedChildren = team.getInteger("checkedChildren");
-                RegionTeamVo regionTeamVo = new RegionTeamVo(regionId,type,teamUuid,checkedChildren,updateTime);
+                RegionTeamVo regionTeamVo = new RegionTeamVo(regionId, teamUuid, checkedChildren, updateTime);
                 regionMapper.insertRegionTeam(regionTeamVo);
             }
         }
-        regionMapper.deleteRegionExpired(regionId,type,updateTime);
+        regionMapper.deleteRegionExpired(regionId, updateTime);
         return null;
     }
 

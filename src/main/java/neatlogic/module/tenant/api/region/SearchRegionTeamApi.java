@@ -52,7 +52,6 @@ public class SearchRegionTeamApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "regionId", type = ApiParamType.LONG, desc = "nmtar.searchregionteamapi.input.param.desc.regionid", isRequired = true, help = "地域id"),
-            @Param(name = "type", type = ApiParamType.ENUM, rule = "owner,worker", desc = "nmtar.searchregionteamapi.input.param.desc.type", isRequired = true, help = "地域id"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
