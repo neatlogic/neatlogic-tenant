@@ -341,9 +341,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                         if (StringUtils.isBlank(hiddenField)) {
                             continue;
                         }
-                        if (Objects.equals(hiddenField, valueField)) {
-                            continue;
-                        }
+//                        if (Objects.equals(hiddenField, valueField)) {
+//                            continue;
+//                        }
                         JSONObject hiddenFieldObj = result.get(hiddenField);
                         if (MapUtils.isNotEmpty(hiddenFieldObj)) {
                             String hiddenFieldValue = hiddenFieldObj.getString("value");
@@ -360,9 +360,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                         if (StringUtils.isBlank(hiddenField)) {
                             continue;
                         }
-                        if (Objects.equals(hiddenField, valueField)) {
-                            continue;
-                        }
+//                        if (Objects.equals(hiddenField, valueField)) {
+//                            continue;
+//                        }
                         JSONObject hiddenFieldObj = result.get(hiddenField);
                         if (MapUtils.isNotEmpty(hiddenFieldObj)) {
                             String hiddenFieldValue = hiddenFieldObj.getString("value");
