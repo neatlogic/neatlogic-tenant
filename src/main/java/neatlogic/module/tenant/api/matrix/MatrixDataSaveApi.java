@@ -15,27 +15,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.matrix;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.MATRIX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
 import neatlogic.framework.matrix.dto.MatrixVo;
-import neatlogic.framework.matrix.exception.*;
+import neatlogic.framework.matrix.exception.MatrixDataSourceHandlerNotFoundException;
+import neatlogic.framework.matrix.exception.MatrixNotFoundException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.auth.label.MATRIX_MODIFY;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @program: neatlogic
@@ -87,54 +93,57 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        matrixDataSourceHandler.saveTableRowData(matrixUuid, rowDataObj);
-//        if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-//            List<MatrixAttributeVo> attributeList = matrixAttributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-//            List<String> attributeUuidList = attributeList.stream().map(MatrixAttributeVo::getUuid).collect(Collectors.toList());
-////            JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
-//            for (String columnUuid : rowDataObj.keySet()) {
-//                if (!"uuid".equals(columnUuid) && !"id".equals(columnUuid) && !attributeUuidList.contains(columnUuid)) {
-//                    throw new MatrixAttributeNotFoundException(matrixUuid, columnUuid);
-//                }
-//            }
-//
-//            boolean hasData = false;
-//            List<MatrixColumnVo> rowData = new ArrayList<>();
-//            for (MatrixAttributeVo matrixAttributeVo : attributeList) {
-//                String value = rowDataObj.getString(matrixAttributeVo.getUuid());
-//                if (StringUtils.isNotBlank(value)) {
-//                    hasData = true;
-//                    if (MatrixAttributeType.USER.getValue().equals(matrixAttributeVo.getType())) {
-//                        value = value.split("#")[1];
-//                    } else if (MatrixAttributeType.TEAM.getValue().equals(matrixAttributeVo.getType())) {
-//                        value = value.split("#")[1];
-//                    } else if (MatrixAttributeType.ROLE.getValue().equals(matrixAttributeVo.getType())) {
-//                        value = value.split("#")[1];
-//                    }
-//                }
-//                rowData.add(new MatrixColumnVo(matrixAttributeVo.getUuid(), value));
-//            }
-//            String schemaName = TenantContext.get().getDataDbName();
-//            String uuidValue = rowDataObj.getString("uuid");
-//            if (uuidValue == null) {
-//                if (hasData) {
-//                    rowData.add(new MatrixColumnVo("uuid", UuidUtil.randomUuid()));
-//                    matrixDataMapper.insertDynamicTableData(rowData, matrixUuid, schemaName);
-//                }
-//            } else {
-//                if (hasData) {
-//                    MatrixColumnVo uuidColumn = new MatrixColumnVo("uuid", uuidValue);
-//                    matrixDataMapper.updateDynamicTableDataByUuid(rowData, uuidColumn, matrixUuid, schemaName);
-//                } else {
-//                    matrixDataMapper.deleteDynamicTableDataByUuid(matrixUuid, uuidValue, schemaName);
-//                }
-//            }
-//        } else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixExternalEditRowDataException();
-//        } else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-//            throw new MatrixViewEditRowDataException();
-//        }
-
+        //通过笛卡尔积平铺数据
+        JSONArray rowDataList = getRowDataList(rowDataObj);
+        for (int i = 0; i < rowDataList.size(); i++) {
+            JSONObject rowData = rowDataList.getJSONObject(i);
+            matrixDataSourceHandler.saveTableRowData(matrixUuid, rowData);
+        }
         return null;
+    }
+
+    /**
+     * 获取最终的rowData列表
+     *
+     * @param rowDataObject 入参中的rowData json数据
+     * @return 通过笛卡尔积平铺的rowDataArray数据
+     */
+    private JSONArray getRowDataList(JSONObject rowDataObject) {
+        JSONArray result = new JSONArray();
+        Set<String> keys = rowDataObject.keySet();
+        cartesianProductHelper(rowDataObject, keys.toArray(new String[0]), new JSONObject(), result, 0);
+        return result;
+    }
+
+    /**
+     * @param rowDataObject 入参中的rowData json数据
+     * @param keys          入参中的rowData json数据的keys
+     * @param current       当前的row
+     * @param rowDataArray  返回结果
+     * @param index         key的下标
+     */
+    private void cartesianProductHelper(JSONObject rowDataObject, String[] keys,
+                                        JSONObject current, JSONArray rowDataArray, int index) {
+        if (index == keys.length) {
+            rowDataArray.add(current.clone());
+            return;
+        }
+
+        String key = keys[index];
+        Object valuesObject = rowDataObject.get(key);
+        List<Object> values;
+        if (valuesObject instanceof JSONArray) {
+            values = (JSONArray) valuesObject;
+            if (CollectionUtils.isEmpty(values)) {
+                values = Collections.singletonList(null);
+            }
+        } else {
+            values = Collections.singletonList(valuesObject);
+        }
+
+        for (Object value : values) {
+            current.put(key, value);
+            cartesianProductHelper(rowDataObject, keys, current, rowDataArray, index + 1);
+        }
     }
 }

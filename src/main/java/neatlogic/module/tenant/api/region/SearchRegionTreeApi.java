@@ -19,9 +19,12 @@ package neatlogic.module.tenant.api.region;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.region.RegionVo;
+import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.auth.label.REGION_MODIFY;
@@ -44,8 +47,15 @@ public class SearchRegionTreeApi extends PrivateApiComponentBase {
         return "nmtar.searchregiontreeapi.getname";
     }
 
+    @Input({
+            @Param(name = "isActive", type = ApiParamType.INTEGER, desc = "common.isactive", help = "是否激活")
+    })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        Integer isActive = null;
+        if (paramObj.containsKey("isActive")) {
+            isActive = paramObj.getInteger("isActive");
+        }
         Map<Long, RegionVo> idKeyMap = new HashMap<>();
         Integer maxRhtCode = regionMapper.getMaxRhtCode();
         RegionVo rootRegion = new RegionVo();
@@ -53,8 +63,8 @@ public class SearchRegionTreeApi extends PrivateApiComponentBase {
         rootRegion.setName("所有");
         rootRegion.setParentId(RegionVo.ROOT_PARENTID);
         rootRegion.setLft(1);
-        rootRegion.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
-        List<RegionVo> regionList = regionMapper.getRegionListForTree(rootRegion.getLft(), rootRegion.getRht());
+        rootRegion.setRht(maxRhtCode == null ? 2 : maxRhtCode + 1);
+        List<RegionVo> regionList = regionMapper.getRegionListForTree(rootRegion.getLft(), rootRegion.getRht(), isActive);
         //将虚拟的root节点加入到catalogList中
         regionList.add(rootRegion);
         for (RegionVo regionVo : regionList) {
