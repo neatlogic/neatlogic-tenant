@@ -89,6 +89,7 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
         int update = 0;
         int insert = 0;
         int unExist = 0;
+        int failed = 0;
         JSONArray failureReasonList = new JSONArray();
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         //获取所有导入文件
@@ -110,6 +111,10 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
             Integer unExistCount = resultObj.getInteger("unExist");
             if (unExistCount != null) {
                 unExist += unExistCount;
+            }
+            Integer failedCount = resultObj.getInteger("failed");
+            if (failedCount != null) {
+                failed += failedCount;
             }
             JSONObject invalidData = resultObj.getJSONObject("invalidDataMap");
             JSONObject repeatData = resultObj.getJSONObject("repeatDataMap");
@@ -134,7 +139,7 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
                     for (Map.Entry<String, Object> colEntry : col.entrySet()) {
                         int colIndex = Integer.parseInt(colEntry.getKey()) + 1;
                         Object value = colEntry.getValue();
-                        failureList.add($.t("第{0}行，第{1}列的值：”{2}“匹配到多条数据", rowIndex, colIndex, value == null ? "" : value));
+                        failureList.add($.t("nmtam.matriximportapi.mydoservice.validrepeattip", rowIndex, colIndex, value == null ? "" : value));
                     }
                 }
             }
@@ -143,6 +148,7 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
         returnObj.put("insert", insert);
         returnObj.put("update", update);
         returnObj.put("unExist", unExist);
+        returnObj.put("failed", failed);
         return returnObj;
     }
 }
