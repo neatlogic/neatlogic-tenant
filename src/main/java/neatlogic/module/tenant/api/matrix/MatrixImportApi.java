@@ -86,8 +86,9 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
         JSONObject returnObj = new JSONObject();
-        int update = 0, insert = 0, unExist = 0;
-        JSONObject invalidDataMap = new JSONObject();
+        int update = 0;
+        int insert = 0;
+        int unExist = 0;
         JSONArray failureReasonList = new JSONArray();
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         //获取所有导入文件
@@ -111,20 +112,29 @@ public class MatrixImportApi extends PrivateBinaryStreamApiComponentBase {
                 unExist += unExistCount;
             }
             JSONObject invalidData = resultObj.getJSONObject("invalidDataMap");
-            invalidDataMap.putAll(invalidData);
-            if (MapUtils.isNotEmpty(invalidDataMap)) {
+            JSONObject repeatData = resultObj.getJSONObject("repeatDataMap");
+            if (MapUtils.isNotEmpty(invalidData) || MapUtils.isNotEmpty(repeatData)) {
                 JSONObject failureReason = new JSONObject();
                 JSONArray failureList = new JSONArray();
                 failureReasonList.add(failureReason);
-                failureReason.put("list",failureList);
-                failureReason.put("item",$.t("nmtam.matriximportapi.mydoservice.filevalidtip",multipartFile.getOriginalFilename()));
-                for (Map.Entry<String, Object> entryInvalid : invalidDataMap.entrySet()) {
-                    int rowIndex = Integer.parseInt(entryInvalid.getKey());
+                failureReason.put("list", failureList);
+                failureReason.put("item", $.t("nmtam.matriximportapi.mydoservice.filevalidtip", multipartFile.getOriginalFilename()));
+                for (Map.Entry<String, Object> entryInvalid : invalidData.entrySet()) {
+                    int rowIndex = Integer.parseInt(entryInvalid.getKey()) + 1;
                     JSONObject col = JSON.parseObject(JSON.toJSONString(entryInvalid.getValue()));
                     for (Map.Entry<String, Object> colEntry : col.entrySet()) {
-                        int colIndex = Integer.parseInt(colEntry.getKey());
+                        int colIndex = Integer.parseInt(colEntry.getKey()) + 1;
                         Object value = colEntry.getValue();
-                        failureList.add($.t("nmtam.matriximportapi.mydoservice.validtip", rowIndex,colIndex,value == null ? "" : value));
+                        failureList.add($.t("nmtam.matriximportapi.mydoservice.validtip", rowIndex, colIndex, value == null ? "" : value));
+                    }
+                }
+                for (Map.Entry<String, Object> entryRepeat : repeatData.entrySet()) {
+                    int rowIndex = Integer.parseInt(entryRepeat.getKey()) + 1;
+                    JSONObject col = JSON.parseObject(JSON.toJSONString(entryRepeat.getValue()));
+                    for (Map.Entry<String, Object> colEntry : col.entrySet()) {
+                        int colIndex = Integer.parseInt(colEntry.getKey()) + 1;
+                        Object value = colEntry.getValue();
+                        failureList.add($.t("第{0}行，第{1}列的值：”{2}“匹配到多条数据", rowIndex, colIndex, value == null ? "" : value));
                     }
                 }
             }
