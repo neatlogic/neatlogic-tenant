@@ -128,6 +128,14 @@ public class FormVersionImportApi extends PrivateBinaryStreamApiComponentBase {
                         formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
                 }
+                List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+                if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                    for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                        formAttributeVo.setFormUuid(formVersionVo.getFormUuid());
+                        formAttributeVo.setFormVersionUuid(formVersionVo.getUuid());
+                        formMapper.insertFormExtendAttribute(formAttributeVo);
+                    }
+                }
                 return resultObj;
             } else {
                 throw new FileExtNotAllowedException(multipartFile.getOriginalFilename());
