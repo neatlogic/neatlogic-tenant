@@ -138,6 +138,12 @@ public class FormCopyApi extends PrivateApiComponentBase {
                     formMapper.insertFormExtendAttribute(formAttributeVo);
                 }
             }
+            List<FormAttributeVo> formVersionCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+            if (CollectionUtils.isNotEmpty(formVersionCustomExtendAttributeList)) {
+                for (FormAttributeVo formAttributeVo : formVersionCustomExtendAttributeList) {
+                    formMapper.insertFormExtendAttribute(formAttributeVo);
+                }
+            }
         }
         return newFrom;
     }

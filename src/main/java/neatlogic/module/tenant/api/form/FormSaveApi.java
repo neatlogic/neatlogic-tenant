@@ -193,6 +193,13 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
                 }
+                // 表单自定义扩展属性
+                List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
+                if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                    for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                        formMapper.insertFormExtendAttribute(formAttributeVo);
+                    }
+                }
             }
             return resultObj;
         }

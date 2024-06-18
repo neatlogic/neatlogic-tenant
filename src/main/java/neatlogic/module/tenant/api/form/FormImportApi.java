@@ -127,6 +127,14 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                                 formMapper.insertFormExtendAttribute(formAttributeVo);
                             }
                         }
+                        List<FormAttributeVo> formCustomExtendAttributeList = formVersion.getFormCustomExtendAttributeList();
+                        if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                            for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                                formAttributeVo.setFormUuid(formVersion.getFormUuid());
+                                formAttributeVo.setFormVersionUuid(formVersion.getUuid());
+                                formMapper.insertFormExtendAttribute(formAttributeVo);
+                            }
+                        }
                     }
                 } else {
                     resultList.add("更新表单：" + formVo.getName());
@@ -155,6 +163,14 @@ public class FormImportApi extends PrivateBinaryStreamApiComponentBase {
                         List<FormAttributeVo> formExtendAttributeList = formVersion.getFormExtendAttributeList();
                         if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
                             for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+                                formAttributeVo.setFormUuid(formVersion.getFormUuid());
+                                formAttributeVo.setFormVersionUuid(formVersion.getUuid());
+                                formMapper.insertFormExtendAttribute(formAttributeVo);
+                            }
+                        }
+                        List<FormAttributeVo> formCustomExtendAttributeList = formVersion.getFormCustomExtendAttributeList();
+                        if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
+                            for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
                                 formAttributeVo.setFormUuid(formVersion.getFormUuid());
                                 formAttributeVo.setFormVersionUuid(formVersion.getUuid());
                                 formMapper.insertFormExtendAttribute(formAttributeVo);
