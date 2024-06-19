@@ -62,7 +62,8 @@ public class GetFormAttributeListApi extends PrivateApiComponentBase {
             throw new FormNotFoundException(formUuid);
         }
         IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
-        return formCrossoverService.getFormAttributeList(formUuid, form.getName(), tag);
+//        return formCrossoverService.getFormAttributeList(formUuid, form.getName(), tag);
+        return formCrossoverService.getFormAttributeListNew(formUuid, form.getName(), tag);
     }
 
     @Override
