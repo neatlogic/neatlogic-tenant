@@ -77,12 +77,12 @@ public class ListFormTagApi extends PrivateApiComponentBase {
             throw new FormActiveVersionNotFoundExcepiton(form.getName());
         }
         Set<String> tagSet = new HashSet<>();
-        List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
-        if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
-            for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
-                tagSet.add(formAttributeVo.getTag());
-            }
-        }
+//        List<FormAttributeVo> formExtendAttributeList = formVersionVo.getFormExtendAttributeList();
+//        if (CollectionUtils.isNotEmpty(formExtendAttributeList)) {
+//            for (FormAttributeVo formAttributeVo : formExtendAttributeList) {
+//                tagSet.add(formAttributeVo.getTag());
+//            }
+//        }
         List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
         if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
             for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
