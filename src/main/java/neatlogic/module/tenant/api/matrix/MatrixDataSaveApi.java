@@ -17,10 +17,12 @@ package neatlogic.module.tenant.api.matrix;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.MATRIX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ParamNotExistsException;
+import neatlogic.framework.exception.type.PermissionDeniedException;
+import neatlogic.framework.matrix.constvalue.MatrixType;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -41,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -50,7 +53,6 @@ import java.util.Set;
  **/
 @Service
 @Transactional
-@AuthAction(action = MATRIX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixDataSaveApi extends PrivateApiComponentBase {
 
@@ -84,6 +86,10 @@ public class MatrixDataSaveApi extends PrivateApiComponentBase {
         MatrixVo matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
         if (matrixVo == null) {
             throw new MatrixNotFoundException(matrixUuid);
+        }
+        //表单下拉框支持动态添加数据到自定义矩阵
+        if (!Objects.equals(MatrixType.CUSTOM.getValue(), matrixVo.getType()) && Boolean.FALSE.equals(AuthActionChecker.check(MATRIX_MODIFY.class))) {
+            throw new PermissionDeniedException(MATRIX_MODIFY.class);
         }
         JSONObject rowDataObj = jsonObj.getJSONObject("rowData");
         if (MapUtils.isEmpty(rowDataObj)) {
