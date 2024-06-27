@@ -125,20 +125,21 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         }
         List<ConditionParamVo> systemParamList = notifyPolicyHandler.getSystemParamList();
         List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
-        if (CollectionUtils.isNotEmpty(systemConditionOptionList)) {
-            List<ConditionParamVo> paramList = config.getParamList();
-            if (CollectionUtils.isNotEmpty(paramList)) {
-                for (ConditionParamVo param : paramList) {
-                    systemParamList.add(param);
-                    systemConditionOptionList.add(new ConditionParamVo(param));
-                }
+        List<ConditionParamVo> paramList = config.getParamList();
+        if (CollectionUtils.isNotEmpty(paramList)) {
+            if (CollectionUtils.isNotEmpty(systemConditionOptionList)) {
+                systemConditionOptionList = new ArrayList<>();
             }
-
-            systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
+            systemConditionOptionList.addAll(paramList);
             systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-            config.setParamList(systemParamList);
-            config.setConditionOptionList(systemConditionOptionList);
+            if (CollectionUtils.isNotEmpty(systemParamList)) {
+                systemParamList = new ArrayList<>();
+            }
+            systemParamList.addAll(paramList);
+            systemParamList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
         }
+        config.setConditionOptionList(systemConditionOptionList);
+        config.setParamList(systemParamList);
         int count = DependencyManager.getDependencyCount(FrameworkFromType.NOTIFY_POLICY, id);
         notifyPolicyVo.setReferenceCount(count);
 
