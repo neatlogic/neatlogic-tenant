@@ -1,6 +1,7 @@
 package neatlogic.module.tenant.api.globallock;
 
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.globallock.GlobalLockManager;
 import neatlogic.framework.globallock.core.GlobalLockHandlerFactory;
@@ -52,19 +53,21 @@ public class GlobalLockApi extends PrivateApiComponentBase {
         String action = jsonObj.getString("action");
         Long lockId = jsonObj.getLong("lockId");
         String handler = jsonObj.getString("operType");
-
         if (Objects.equals(action, "cancel")) {
             GlobalLockManager.cancelLock(lockId);
         } else {
             IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
+            if(globalLockHandler == null){
+                throw new ParamIrregularException("operType");
+            }
             switch (action) {
                 case "lock":
                     return globalLockHandler.getLock(jsonObj);
-                case "cancel":
                 case "unlock":
                     return globalLockHandler.unLock(lockId, jsonObj);
                 case "retry":
                     return globalLockHandler.retryLock(lockId, jsonObj);
+                default: throw new ParamIrregularException("action");
             }
         }
         return null;

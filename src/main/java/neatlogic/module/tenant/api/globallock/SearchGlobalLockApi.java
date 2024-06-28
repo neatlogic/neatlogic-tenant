@@ -15,13 +15,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.globallock;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.globallock.GlobalLockVo;
 import neatlogic.framework.globallock.GlobalLockManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,7 +57,7 @@ public class SearchGlobalLockApi extends PrivateApiComponentBase {
     @Description(desc = "搜索全局锁接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        GlobalLockVo globalLockVo = JSONObject.toJavaObject(jsonObj, GlobalLockVo.class);
+        GlobalLockVo globalLockVo = JSON.toJavaObject(jsonObj, GlobalLockVo.class);
         return GlobalLockManager.searchGlobalLock(globalLockVo);
     }
 }
