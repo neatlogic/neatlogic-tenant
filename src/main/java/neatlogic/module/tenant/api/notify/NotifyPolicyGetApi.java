@@ -127,12 +127,12 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         List<ConditionParamVo> systemConditionOptionList = notifyPolicyHandler.getSystemConditionOptionList();
         List<ConditionParamVo> paramList = config.getParamList();
         if (CollectionUtils.isNotEmpty(paramList)) {
-            if (CollectionUtils.isNotEmpty(systemConditionOptionList)) {
+            if (CollectionUtils.isEmpty(systemConditionOptionList)) {
                 systemConditionOptionList = new ArrayList<>();
             }
             systemConditionOptionList.addAll(paramList);
             systemConditionOptionList.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-            if (CollectionUtils.isNotEmpty(systemParamList)) {
+            if (CollectionUtils.isEmpty(systemParamList)) {
                 systemParamList = new ArrayList<>();
             }
             for (ConditionParamVo conditionParamVo : paramList) {
