@@ -93,6 +93,7 @@ public class NotifyPolicyCopyApi extends PrivateApiComponentBase {
         String name = jsonObj.getString("name");
         notifyPolicyVo.setName(name);
         notifyPolicyVo.setId(null);
+        notifyPolicyVo.setIsDefault(0);
         notifyPolicyVo.setFcu(UserContext.get().getUserUuid(true));
         if (notifyMapper.checkNotifyPolicyNameIsRepeat(notifyPolicyVo) > 0) {
             throw new NotifyPolicyNameRepeatException(name);
