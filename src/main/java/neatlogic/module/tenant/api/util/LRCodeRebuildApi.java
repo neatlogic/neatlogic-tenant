@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.util;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.common.util.StringUtil;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.lrcode.dao.mapper.TreeMapper;
 import neatlogic.framework.lrcode.dto.TreeNodeVo;
@@ -28,10 +30,13 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -63,6 +68,7 @@ public class LRCodeRebuildApi extends PrivateApiComponentBase {
             @Param(name = "idKey", type = ApiParamType.STRING, isRequired = true, desc = "id字段名"),
             @Param(name = "parentIdKey", type = ApiParamType.STRING, isRequired = true, desc = "父id字段名"),
             @Param(name = "isRebuildUpwardPath", type = ApiParamType.BOOLEAN, desc = "是否重建全路径"),
+            @Param(name = "upwardIdPathKey", type = ApiParamType.STRING, desc = "全id路径字段名，默认upward_id_path"),
             @Param(name = "sortKey", type = ApiParamType.STRING, desc = "排序字段名"),
             @Param(name = "condition", type = ApiParamType.STRING, desc = "条件")
     })
@@ -74,11 +80,32 @@ public class LRCodeRebuildApi extends PrivateApiComponentBase {
         String parentIdKey = jsonObj.getString("parentIdKey");
         String sortKey = jsonObj.getString("sortKey");
         String condition = jsonObj.getString("condition");
+        boolean isRebuildUpwardPath = jsonObj.getBooleanValue("isRebuildUpwardPath");
         LRCodeManager.rebuildLeftRightCodeOrderBySortKey(tableName, idKey, parentIdKey, condition, sortKey);
-        if (jsonObj.getBooleanValue("isRebuildUpwardPath")) {
+        if (isRebuildUpwardPath) {
+            String upwardIdPathKey = "upward_id_path";
+            String upwardNamePathKey = "upward_name_path";
+            String nameKey = "name";
+            if (StringUtils.isNotBlank(jsonObj.getString("upwardIdPathKey"))) {
+                upwardIdPathKey = jsonObj.getString("upwardIdPathKey");
+            }
             TreeNodeVo treeNodeVo = new TreeNodeVo(tableName);
-            treeMapper.updateUpwardIdPathByLftRht(treeNodeVo);
-            treeMapper.updateUpwardNamePathByLftRht(treeNodeVo);
+            treeNodeVo.setIdKey(idKey);
+            treeNodeVo.setParentIdKey(parentIdKey);
+            int rowNum = treeMapper.getTreeNodeCount(treeNodeVo);
+            if (rowNum > 0) {
+                treeNodeVo.setRowNum(rowNum);
+                for (int i = 1; i <= treeNodeVo.getPageCount(); i++) {
+                    treeNodeVo.setCurrentPage(i);
+                    List<TreeNodeVo> treeNodeVos = treeMapper.getTreeNodeList(treeNodeVo);
+                    for (TreeNodeVo treeNode : treeNodeVos) {
+                        List<String> idList = treeMapper.getUpwardIdPathListByLftRht(tableName, idKey, treeNode.getLft(), treeNode.getRht());
+                        treeMapper.updateTreeNodeUpwardIdPathById(tableName, idKey, treeNode.getIdKey(), upwardIdPathKey, String.join(",", idList));
+                        List<String> nameList = treeMapper.getUpwardNamePathListByLftRht(tableName, nameKey, treeNode.getLft(), treeNode.getRht());
+                        treeMapper.updateTreeNodeUpwardNamePathById(tableName, idKey, treeNode.getIdKey(), upwardNamePathKey, String.join("/", nameList));
+                    }
+                }
+            }
         }
         return null;
     }
