@@ -32,6 +32,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserService;
 import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,6 +55,9 @@ public class UserSaveApi extends PrivateApiComponentBase {
 
     @Resource
     UserMapper userMapper;
+
+    @Resource
+    UserService userService;
 
 
     @Override
@@ -182,6 +186,8 @@ public class UserSaveApi extends PrivateApiComponentBase {
                 userMapper.insertUserRole(userVo.getUuid(), roleUuid.replaceAll(GroupSearch.ROLE.getValuePlugin(), StringUtils.EMPTY));
             }
         }
+
+        userService.updateUserCacheAndSessionByUserUuid(userVo.getUuid());
 
         return userVo.getUuid();
     }

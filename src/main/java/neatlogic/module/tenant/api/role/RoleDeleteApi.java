@@ -1,23 +1,26 @@
 package neatlogic.module.tenant.api.role;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.ROLE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dto.RoleUserVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.auth.label.ROLE_MODIFY;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.framework.service.UserSessionService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AuthAction(action = ROLE_MODIFY.class)
 @Service
@@ -25,8 +28,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RoleDeleteApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private RoleMapper roleMapper;
+
+	@Resource
+	private UserSessionService userSessionService;
 
 	@Override
 	public String getToken() {
@@ -52,13 +58,24 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		List<String> uuidList = JSON.parseArray(jsonObj.getString("uuidList"), String.class);
-		for (String uuid : uuidList) {
-			roleMapper.deleteMenuRoleByRoleUuid(uuid);
-			roleMapper.deleteTeamRoleByRoleUuid(uuid);
-			roleMapper.deleteRoleUser(new RoleUserVo(uuid));
+		List<String> userUuidList = null;
+		if(CollectionUtils.isNotEmpty(uuidList)) {
+			List<RoleUserVo> roleUserList = roleMapper.getRoleUserListByRoleUuidList(uuidList);
+			if(CollectionUtils.isNotEmpty(roleUserList)){
+				userUuidList = roleUserList.stream().map(RoleUserVo::getUserUuid).collect(Collectors.toList());
+			}
+			for (String uuid : uuidList) {
+				roleMapper.deleteMenuRoleByRoleUuid(uuid);
+				roleMapper.deleteTeamRoleByRoleUuid(uuid);
+				roleMapper.deleteRoleUser(new RoleUserVo(uuid));
 //			roleMapper.deleteRoleByUuid(uuid);
-			roleMapper.updateRoleIsDeletedByUuid(uuid);
-			roleMapper.deleteRoleAuthByRoleUuid(uuid);
+				roleMapper.updateRoleIsDeletedByUuid(uuid);
+				roleMapper.deleteRoleAuthByRoleUuid(uuid);
+			}
+
+			if(CollectionUtils.isNotEmpty(userUuidList)){
+				userSessionService.deleteUserSessionByUserUuid(userUuidList);
+			}
 		}
 		return null;
 	}
