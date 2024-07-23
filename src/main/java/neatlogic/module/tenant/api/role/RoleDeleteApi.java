@@ -13,7 +13,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.UserSessionService;
+import neatlogic.framework.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 	private RoleMapper roleMapper;
 
 	@Resource
-	private UserSessionService userSessionService;
+	UserService userService;
 
 	@Override
 	public String getToken() {
@@ -74,7 +74,9 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 			}
 
 			if(CollectionUtils.isNotEmpty(userUuidList)){
-				userSessionService.deleteUserSessionByUserUuid(userUuidList);
+				for (String userUuid : userUuidList){
+					userService.updateUserCacheAndSessionByUserUuid(userUuid);
+				}
 			}
 		}
 		return null;

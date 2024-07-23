@@ -15,7 +15,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.UserSessionService;
+import neatlogic.framework.service.UserService;
 import neatlogic.module.tenant.service.TeamService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
     TeamService teamService;
 
     @Resource
-    UserSessionService userSessionService;
+    UserService userService;
 
     @Override
     public String getToken() {
@@ -78,7 +78,9 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(teamUserVos)) {
             List<String> userUuidList = teamUserVos.stream().map(TeamUserVo::getUserUuid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(userUuidList)) {
-                userSessionService.deleteUserSessionByUserUuid(userUuidList);
+               for (String userUuid : userUuidList){
+                   userService.updateUserCacheAndSessionByUserUuid(userUuid);
+               }
             }
         }
         return null;
