@@ -36,7 +36,7 @@ public class TeamUserSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private TeamMapper teamMapper;
-    
+
     @Resource
     private UserService userService;
 
@@ -56,24 +56,25 @@ public class TeamUserSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param( name = "teamUuid", isRequired = true, desc = "分组uuid", type = ApiParamType.STRING),
-            @Param( name = "userUuidList", desc = "用户Uuid集合", type = ApiParamType.JSONARRAY),
-            @Param( name = "teamUuidList", desc = "分组Uuid集合", type = ApiParamType.JSONARRAY)
+            @Param(name = "teamUuid", isRequired = true, desc = "分组uuid", type = ApiParamType.STRING),
+            @Param(name = "userUuidList", desc = "用户Uuid集合", type = ApiParamType.JSONARRAY),
+            @Param(name = "teamUuidList", desc = "分组Uuid集合", type = ApiParamType.JSONARRAY)
     })
-    @Description( desc = "分组用户保存接口")
+    @Description(desc = "分组用户保存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-    	String teamUuid = jsonObj.getString("teamUuid");
-    	if(teamMapper.checkTeamIsExists(teamUuid) == 0) {
-			throw new TeamNotFoundException(teamUuid);
-		}
+        String teamUuid = jsonObj.getString("teamUuid");
+        if (teamMapper.checkTeamIsExists(teamUuid) == 0) {
+            throw new TeamNotFoundException(teamUuid);
+        }
         List<String> userUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("userUuidList")), String.class);
         List<String> teamUuidList = JSON.parseArray(JSON.toJSONString(jsonObj.getJSONArray("teamUuidList")), String.class);
-        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList,teamUuidList);
-        if(CollectionUtils.isNotEmpty(uuidList)){
+        Set<String> uuidList = userService.getUserUuidSetByUserUuidListAndTeamUuidList(userUuidList, teamUuidList);
+        if (CollectionUtils.isNotEmpty(uuidList)) {
             teamMapper.deleteTeamUserByTeamUuid(teamUuid);
-            for (String userUuid: uuidList){
+            for (String userUuid : uuidList) {
                 teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid));
+                userService.updateUserCacheAndSessionByUserUuid(userUuid);
             }
         }
         return null;

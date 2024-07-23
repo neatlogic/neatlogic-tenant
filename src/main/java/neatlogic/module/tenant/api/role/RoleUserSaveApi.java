@@ -17,6 +17,7 @@ import neatlogic.framework.auth.label.ROLE_MODIFY;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import neatlogic.framework.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,9 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserService userService;
 
     @Override
     public String getToken() {
@@ -88,6 +92,7 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(existUserUuidList)) {
                 for (String userUuid : existUserUuidList) {
                     roleMapper.replaceRoleUser(new RoleUserVo(roleUuid, userUuid));
+                    userService.updateUserCacheAndSessionByUserUuid(userUuid);
                 }
             }
         }

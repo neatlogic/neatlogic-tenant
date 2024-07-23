@@ -3,13 +3,10 @@ package neatlogic.module.tenant.api.user;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.Input;
@@ -17,13 +14,16 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = AUTHORITY_MODIFY.class)
 public class UserActiveUpdateApi extends PrivateApiComponentBase {
@@ -31,7 +31,7 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
     @Resource
     private UserMapper userMapper;
     @Resource
-    UserSessionMapper userSessionMapper;
+    UserSessionService userSessionService;
 
     @Override
     public String getToken() {
@@ -66,15 +66,13 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
                 }
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
-                //禁用用户时删除userSession
-                UserSessionCache.removeItem(UserContext.get().getTokenHash());
-                userSessionMapper.deleteUserSessionByTokenHash(userUuid);
 //                if(isActive == 0){
 //                    userMapper.deleteUserAuth(new UserAuthVo(userUuid));
 //                    userMapper.deleteUserRoleByUserUuid(userUuid);
 //                    userMapper.deleteUserTeamByUserUuid(userUuid);
 //                }
             }
+            userSessionService.deleteUserSessionByUserUuid(userUuidList);
         }
         return null;
     }

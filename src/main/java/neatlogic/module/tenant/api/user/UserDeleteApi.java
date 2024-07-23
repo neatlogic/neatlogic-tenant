@@ -12,6 +12,7 @@ import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,9 @@ public class UserDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     UserSessionMapper userSessionMapper;
+
+    @Resource
+    UserSessionService userSessionService;
 
     @Override
     public String getToken() {
@@ -60,12 +64,12 @@ public class UserDeleteApi extends PrivateApiComponentBase {
             userMapper.updateUserIsDeletedByUuid(userUuid);
             List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuid(userUuid);
             if (CollectionUtils.isNotEmpty(userSessionVos)) {
-                userSessionMapper.deleteUserSessionByUserUuid(userUuid);
                 for (UserSessionVo userSessionVo : userSessionVos) {
                     UserSessionCache.removeItem(userSessionVo.getTokenHash());
                 }
             }
         }
+        userSessionService.deleteUserSessionByUserUuid(userUuidList);
         return null;
     }
 }

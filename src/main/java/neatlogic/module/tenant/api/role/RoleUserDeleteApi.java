@@ -1,35 +1,38 @@
 package neatlogic.module.tenant.api.role;
 
-import java.util.List;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.auth.label.ROLE_MODIFY;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.ROLE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dto.RoleUserVo;
 import neatlogic.framework.exception.role.RoleNotFoundException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+
 @Service
 @Transactional
 @AuthAction(action = ROLE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RoleUserDeleteApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private RoleMapper roleMapper;
+
+	@Resource
+	private UserService userService;
 
 	@Override
 	public String getToken() {
@@ -61,6 +64,7 @@ public class RoleUserDeleteApi extends PrivateApiComponentBase {
     	if (CollectionUtils.isNotEmpty(userUuidList)){
     		for (String userUuid: userUuidList){
     			roleMapper.deleteRoleUser(new RoleUserVo(roleUuid, userUuid));
+				userService.updateUserCacheAndSessionByUserUuid(userUuid);
     		}
     	}
 		return null;
