@@ -110,9 +110,10 @@ public class UserGetApi extends PrivateApiComponentBase {
                 throw new UserNotFoundException(userUuid);
             }
             userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
-            userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
-            if (CollectionUtils.isNotEmpty(authenticationInfoVo.getRoleUuidList())) {
-                userVo.setRoleList(roleMapper.getRoleByUuidList(authenticationInfoVo.getRoleUuidList()));
+//            userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
+            userVo.setRoleUuidList(roleMapper.getRoleUuidListByUserUuid(userUuid));
+            if (CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
+                userVo.setRoleList(roleMapper.getRoleByUuidList(userVo.getRoleUuidList()));
             }
             //超级管理员拥有所有权限
             if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
