@@ -72,7 +72,7 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
 //                    userMapper.deleteUserTeamByUserUuid(userUuid);
 //                }
             }
-            userSessionService.deleteUserSessionByUserUuid(userUuidList);
+            //userSessionService.deleteUserSessionByUserUuid(userUuidList);
         }
         return null;
     }

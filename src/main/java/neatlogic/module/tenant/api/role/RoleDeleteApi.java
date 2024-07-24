@@ -73,11 +73,11 @@ public class RoleDeleteApi extends PrivateApiComponentBase {
 				roleMapper.deleteRoleAuthByRoleUuid(uuid);
 			}
 
-			if(CollectionUtils.isNotEmpty(userUuidList)){
-				for (String userUuid : userUuidList){
-					userService.updateUserCacheAndSessionByUserUuid(userUuid);
-				}
-			}
+//			if(CollectionUtils.isNotEmpty(userUuidList)){
+//				for (String userUuid : userUuidList){
+//					userService.updateUserCacheAndSessionByUserUuid(userUuid);
+//				}
+//			}
 		}
 		return null;
 	}

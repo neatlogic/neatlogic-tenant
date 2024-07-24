@@ -1,5 +1,7 @@
 package neatlogic.module.tenant.api.team;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.TEAM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -13,11 +15,8 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.UserService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.Set;
  * @create: 2020-03-07 17:39
  **/
 @Service
-@Transactional
 @AuthAction(action = TEAM_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class TeamUserSaveApi extends PrivateApiComponentBase {
@@ -74,7 +72,7 @@ public class TeamUserSaveApi extends PrivateApiComponentBase {
             teamMapper.deleteTeamUserByTeamUuid(teamUuid);
             for (String userUuid : uuidList) {
                 teamMapper.insertTeamUser(new TeamUserVo(teamUuid, userUuid));
-                userService.updateUserCacheAndSessionByUserUuid(userUuid);
+                //userService.updateUserCacheAndSessionByUserUuid(userUuid);
             }
         }
         return null;

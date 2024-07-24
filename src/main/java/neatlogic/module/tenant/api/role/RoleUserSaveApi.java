@@ -92,7 +92,7 @@ public class RoleUserSaveApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(existUserUuidList)) {
                 for (String userUuid : existUserUuidList) {
                     roleMapper.replaceRoleUser(new RoleUserVo(roleUuid, userUuid));
-                    userService.updateUserCacheAndSessionByUserUuid(userUuid);
+//                    userService.updateUserCacheAndSessionByUserUuid(userUuid);
                 }
             }
         }

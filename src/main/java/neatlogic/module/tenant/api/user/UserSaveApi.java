@@ -187,7 +187,7 @@ public class UserSaveApi extends PrivateApiComponentBase {
             }
         }
 
-        userService.updateUserCacheAndSessionByUserUuid(userVo.getUuid());
+        //userService.updateUserCacheAndSessionByUserUuid(userVo.getUuid());
 
         return userVo.getUuid();
     }

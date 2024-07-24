@@ -59,9 +59,9 @@ public class TeamUserDeleteApi extends PrivateApiComponentBase {
     	List<String> userUuidList = jsonObj.getJSONArray("userUuidList").toJavaList(String.class);
     	if (CollectionUtils.isNotEmpty(userUuidList)){
 			teamMapper.deleteTeamUserByTeamUuidAndUserUuidList(teamUuid, userUuidList);
-    		for (String userUuid: userUuidList){
-				userService.updateUserCacheAndSessionByUserUuid(userUuid);
-    		}
+//    		for (String userUuid: userUuidList){
+//				userService.updateUserCacheAndSessionByUserUuid(userUuid);
+//    		}
     	}
 		return null;
 	}

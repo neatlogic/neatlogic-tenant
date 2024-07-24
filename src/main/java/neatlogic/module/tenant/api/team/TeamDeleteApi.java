@@ -17,13 +17,11 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.UserService;
 import neatlogic.module.tenant.service.TeamService;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AuthAction(action = TEAM_MODIFY.class)
 @Service
@@ -75,14 +73,14 @@ public class TeamDeleteApi extends PrivateApiComponentBase {
         teamMapper.deleteTeamRoleByTeamUuidList(uuidList);
         //delete teamUserTitle
         teamService.deleteTeamUserTitleByTeamUuid(uuid);
-        if (CollectionUtils.isNotEmpty(teamUserVos)) {
-            List<String> userUuidList = teamUserVos.stream().map(TeamUserVo::getUserUuid).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(userUuidList)) {
-               for (String userUuid : userUuidList){
-                   userService.updateUserCacheAndSessionByUserUuid(userUuid);
-               }
-            }
-        }
+//        if (CollectionUtils.isNotEmpty(teamUserVos)) {
+//            List<String> userUuidList = teamUserVos.stream().map(TeamUserVo::getUserUuid).collect(Collectors.toList());
+//            if (CollectionUtils.isNotEmpty(userUuidList)) {
+//               for (String userUuid : userUuidList){
+//                   userService.updateUserCacheAndSessionByUserUuid(userUuid);
+//               }
+//            }
+//        }
         return null;
     }
 

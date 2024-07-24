@@ -69,7 +69,7 @@ public class UserDeleteApi extends PrivateApiComponentBase {
                 }
             }
         }
-        userSessionService.deleteUserSessionByUserUuid(userUuidList);
+        //userSessionService.deleteUserSessionByUserUuid(userUuidList);
         return null;
     }
 }
