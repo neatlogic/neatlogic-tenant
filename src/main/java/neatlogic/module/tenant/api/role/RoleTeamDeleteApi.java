@@ -1,10 +1,11 @@
 package neatlogic.module.tenant.api.role;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ROLE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
-import neatlogic.framework.dto.RoleTeamVo;
 import neatlogic.framework.exception.role.RoleNotFoundException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -12,14 +13,11 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -61,6 +59,7 @@ public class RoleTeamDeleteApi extends PrivateApiComponentBase {
         JSONArray teamUuidArray = jsonObj.getJSONArray("teamUuidList");
         if (CollectionUtils.isNotEmpty(teamUuidArray)) {
             List<String> teamUuidList = teamUuidArray.toJavaList(String.class);
+            jsonObj.put("teamList", roleMapper.getRoleTeamListByRoleUuidAndTeamUuidList(roleUuid, teamUuidList));
             roleMapper.deleteTeamRoleByRoleUuidAndTeamUuidList(roleUuid, teamUuidList);
         }
         return null;
