@@ -21,8 +21,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.GroupSearch;
-import neatlogic.framework.common.constvalue.RegionType;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.region.RegionVo;
@@ -31,17 +29,15 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.AuthenticationInfoService;
 import neatlogic.framework.util.TableResultUtil;
+import neatlogic.framework.service.RegionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -53,7 +49,7 @@ public class SearchRegionApi extends PrivateApiComponentBase {
     TeamMapper teamMapper;
 
     @Resource
-    AuthenticationInfoService authenticationInfoService;
+    RegionService regionService;
 
     @Override
     public String getName() {
@@ -81,11 +77,7 @@ public class SearchRegionApi extends PrivateApiComponentBase {
             String owner = paramObj.getString("owner");
             //根据上报人获取地域
             if (StringUtils.isNotBlank(owner)) {
-                List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(GroupSearch.removePrefix(owner));
-                if (CollectionUtils.isEmpty(teamUuidList)) {
-                    return TableResultUtil.getResult(regionList, region);
-                }
-                List<Long> regionIdList = getRegionIdList(teamUuidList);
+                List<Long> regionIdList = regionService.getRegionIdListByUserUuid(owner);
                 if (CollectionUtils.isEmpty(regionIdList)) {
                     return TableResultUtil.getResult(regionList, region);
                 }
@@ -105,22 +97,5 @@ public class SearchRegionApi extends PrivateApiComponentBase {
         return "/region/search";
     }
 
-    /**
-     * 根据组获取地域id列表
-     *
-     * @param teamUuidList 组
-     */
-    private List<Long> getRegionIdList(List<String> teamUuidList) {
-        Set<Long> regionIdSet = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(teamUuidList)) {
-            List<Long> regionIdList = regionMapper.getRegionIdListByTeamUuidListAndType(teamUuidList, RegionType.OWNER.getValue());
-            regionIdSet.addAll(regionIdList);
-            Set<String> upwardUuidSet = authenticationInfoService.getTeamSetWithParents(teamUuidList);
-            if (CollectionUtils.isNotEmpty(upwardUuidSet)) {
-                regionIdList = regionMapper.getRegionIdListByTeamUuidListAndCheckedChildren(new ArrayList<>(upwardUuidSet), RegionType.OWNER.getValue(), 1);
-                regionIdSet.addAll(regionIdList);
-            }
-        }
-        return new ArrayList<>(regionIdSet);
-    }
+
 }
