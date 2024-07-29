@@ -49,7 +49,7 @@ public class MoveHomePageApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "移动首页配置位置";
+        return "nmtah.movehomepageapi.getname";
     }
 
     @Override
@@ -58,10 +58,10 @@ public class MoveHomePageApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id", type = ApiParamType.STRING, isRequired = true, desc = "被移动的ID"),
-            @Param(name = "sort", type = ApiParamType.INTEGER, isRequired = true, desc = "移动后的序号")
+            @Param(name = "id", type = ApiParamType.STRING, isRequired = true, desc = "common.id"),
+            @Param(name = "sort", type = ApiParamType.INTEGER, isRequired = true, desc = "common.sort")
     })
-    @Description(desc = "移动首页配置位置")
+    @Description(desc = "nmtah.movehomepageapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

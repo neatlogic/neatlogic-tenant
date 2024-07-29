@@ -31,7 +31,7 @@ public class DeleteHomePageApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除首页配置信息";
+        return "nmtah.deletehomepageapi.getname";
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DeleteHomePageApi extends PrivateApiComponentBase {
             @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id")
     })
     @Output({})
-    @Description(desc = "删除首页配置信息")
+    @Description(desc = "nmtah.deletehomepageapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

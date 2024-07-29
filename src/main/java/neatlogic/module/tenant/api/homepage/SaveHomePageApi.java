@@ -53,7 +53,7 @@ public class SaveHomePageApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存首页配置信息";
+        return "nmtah.savehomepageapi.getname";
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SaveHomePageApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "Return", type = ApiParamType.LONG, desc = "common.id")
     })
-    @Description(desc = "保存首页配置信息")
+    @Description(desc = "nmtah.savehomepageapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

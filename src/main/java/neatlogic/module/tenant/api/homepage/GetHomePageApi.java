@@ -31,7 +31,7 @@ public class GetHomePageApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取首页配置信息";
+        return "nmtah.gethomepageapi.getname";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GetHomePageApi extends PrivateApiComponentBase {
     @Output({
             @Param(explode = HomePageVo.class, desc = "common.tbodylist")
     })
-    @Description(desc = "获取首页配置信息")
+    @Description(desc = "nmtah.gethomepageapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");

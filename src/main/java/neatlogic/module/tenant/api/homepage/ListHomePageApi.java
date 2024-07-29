@@ -49,7 +49,7 @@ public class ListHomePageApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "首页配置列表";
+		return "nmtah.listhomepageapi.getname";
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class ListHomePageApi extends PrivateApiComponentBase {
 		@Param(explode = BasePageVo.class),
 		@Param(name="tbodyList",explode= HomePageVo[].class,desc="common.tbodylist")
 	})
-	@Description(desc = "nmpac.channelsearchapi.getname")
+	@Description(desc = "nmtah.listhomepageapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		BasePageVo basePageVo = jsonObj.toJavaObject(BasePageVo.class);
@@ -77,6 +77,7 @@ public class ListHomePageApi extends PrivateApiComponentBase {
 			for (HomePageVo homePageVo : tbodyList) {
 				JSONArray authorityVoArray = new JSONArray();
 				List<AuthorityVo> authorityVoList = homePageMapper.getHomePageAuthorityListByHomePageId(homePageVo.getId());
+				homePageVo.setAuthorityList(AuthorityVo.getAuthorityList(authorityVoList));
 				if (CollectionUtils.isNotEmpty(authorityVoList)) {
 					for (AuthorityVo authorityVo : authorityVoList) {
 						if (Objects.equals(authorityVo.getType(), GroupSearch.USER.getValue())) {
