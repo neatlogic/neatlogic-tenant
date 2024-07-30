@@ -61,7 +61,7 @@ public class UserDataSaveApi extends PrivateApiComponentBase {
 		String userUuid = UserContext.get().getUserUuid(true);
 		String type = jsonObj.getString("type");
 		userDataVo.setUserUuid(userUuid);
-		userDataVo.setData(jsonObj.toJSONString());
+		userDataVo.setData(jsonObj);
 		userDataVo.setType(type);
 
 		if(userMapper.getUserDataByUserUuidAndType(userUuid,type) == null){
