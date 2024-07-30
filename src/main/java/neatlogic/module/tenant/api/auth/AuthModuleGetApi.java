@@ -132,13 +132,12 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(homePageIdList)) {
                 HomePageVo homePage = homePageMapper.getMinSortHomePageByIdList(homePageIdList);
                 if (homePage != null) {
-                    userDataVo = new UserDataVo(UserContext.get().getUserUuid(), homePage.getConfigStr(), "defaultModulePage");
+                    userDataVo = new UserDataVo(UserContext.get().getUserUuid(), homePage.getConfig(), "defaultModulePage");
                 }
             }
         }
         if (userDataVo != null) {
-            String data = userDataVo.getData();
-            JSONObject dataJson = JSONObject.parseObject(data);
+            JSONObject dataJson = userDataVo.getData();
             JSONArray defaultModulePageList = dataJson.getJSONArray("defaultModulePageList");
             for (int i = 0; i < defaultModulePageList.size(); i++) {
                 JSONObject o = defaultModulePageList.getJSONObject(i);

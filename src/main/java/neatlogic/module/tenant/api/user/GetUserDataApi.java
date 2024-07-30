@@ -28,47 +28,38 @@ import org.springframework.stereotype.Service;
 
 @Service
 
-@OperationType(type = OperationTypeEnum.CREATE)
-public class UserDataSaveApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class GetUserDataApi extends PrivateApiComponentBase {
 
-	@Autowired
-	UserMapper userMapper;
+    @Autowired
+    UserMapper userMapper;
 
+    @Override
+    public String getToken() {
+        return "user/data/get";
+    }
 
-	@Override
-	public String getToken() {
-		return "user/data/save";
-	}
+    @Override
+    public String getName() {
+        return "nmtau.getuserdataapi.getname";
+    }
 
-	@Override
-	public String getName() {
-		return "nmtau.userdatasaveapi.getname";
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
-
-	@Input({
-			@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "common.type", help = "如果是用户默认模块数据，则应指定为defaultModulePage")
-	})
-	@Output({})
-	@Description(desc = "nmtau.userdatasaveapi.getname")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		UserDataVo userDataVo = new UserDataVo();
-		String userUuid = UserContext.get().getUserUuid(true);
-		String type = jsonObj.getString("type");
-		userDataVo.setUserUuid(userUuid);
-		userDataVo.setData(jsonObj);
-		userDataVo.setType(type);
-
-		if(userMapper.getUserDataByUserUuidAndType(userUuid,type) == null){
-			userMapper.insertUserData(userDataVo);
-		}else{
-			userMapper.updateUserData(userDataVo);
-		}
-		return null;
-	}
+    @Input({
+            @Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "common.type", help = "如果是用户默认模块数据，则应指定为defaultModulePage")
+    })
+    @Output({
+            @Param(explode = UserDataVo.class)
+    })
+    @Description(desc = "nmtau.getuserdataapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        String userUuid = UserContext.get().getUserUuid(true);
+        String type = jsonObj.getString("type");
+        return userMapper.getUserDataByUserUuidAndType(userUuid, type);
+    }
 }
