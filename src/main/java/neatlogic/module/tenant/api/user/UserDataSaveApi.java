@@ -42,7 +42,7 @@ public class UserDataSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "保存用户数据";
+		return "nmtau.userdatasaveapi.getname";
 	}
 
 	@Override
@@ -50,11 +50,11 @@ public class UserDataSaveApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Input({@Param(name = "type", type = ApiParamType.STRING, desc = "功能类型，如果是用户默认模块数据，则应指定为defaultModulePage",
-			isRequired = true)
+	@Input({
+			@Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "common.type", help = "如果是用户默认模块数据，则应指定为defaultModulePage")
 	})
 	@Output({})
-	@Description(desc = "保存用户数据")
+	@Description(desc = "nmtau.userdatasaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserDataVo userDataVo = new UserDataVo();
