@@ -28,6 +28,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.config.ConfigManager;
 import neatlogic.framework.config.FrameworkTenantConfig;
+import neatlogic.framework.dao.mapper.HomePageMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
 import neatlogic.framework.dto.module.ModuleGroupVo;
@@ -53,6 +54,9 @@ import java.util.*;
 public class AuthModuleGetApi extends PrivateApiComponentBase {
     @Resource
     UserMapper userMapper;
+
+    @Resource
+    HomePageMapper homePageMapper;
 
     @Override
     public String getToken() {
@@ -123,6 +127,15 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         //****获取用户默认模块首页开始****
         HashMap<String, Map<String, Object>> OuterMap = new HashMap<>(16);
         UserDataVo userDataVo = userMapper.getUserDataByUserUuidAndType(UserContext.get().getUserUuid(), "defaultModulePage");
+        if (userDataVo == null) {
+            List<Long> homePageIdList = homePageMapper.getHomePageIdListByAuthority(UserContext.get().getAuthenticationInfoVo());
+            if (CollectionUtils.isNotEmpty(homePageIdList)) {
+                HomePageVo homePage = homePageMapper.getMinSortHomePageByIdList(homePageIdList);
+                if (homePage != null) {
+                    userDataVo = new UserDataVo(UserContext.get().getUserUuid(), homePage.getConfigStr(), "defaultModulePage");
+                }
+            }
+        }
         if (userDataVo != null) {
             String data = userDataVo.getData();
             JSONObject dataJson = JSONObject.parseObject(data);

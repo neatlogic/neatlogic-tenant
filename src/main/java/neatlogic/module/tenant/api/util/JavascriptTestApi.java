@@ -34,7 +34,7 @@ public class JavascriptTestApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "data", type = ApiParamType.STRING, isRequired = true, desc = "参数"),
+            @Param(name = "data", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "参数"),
             @Param(name = "script", type = ApiParamType.STRING, isRequired = true, desc = "脚本")
     })
     @Output({
