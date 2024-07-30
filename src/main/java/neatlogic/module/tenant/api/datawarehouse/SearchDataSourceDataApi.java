@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.datawarehouse;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -72,7 +73,7 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
     @Description(desc = "查询数据源数据接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        DataSourceDataVo reportDataSourceDataVo = JSONObject.toJavaObject(jsonObj, DataSourceDataVo.class);
+        DataSourceDataVo reportDataSourceDataVo = JSON.toJavaObject(jsonObj, DataSourceDataVo.class);
         //去掉没有值的条件
         //reportDataSourceDataVo.getConditionList().removeIf(d -> d.getValue() == null || StringUtils.isBlank(d.getValue().toString()));
         DataSourceVo reportDataSourceVo = reportDataSourceMapper.getDataSourceById(reportDataSourceDataVo.getDataSourceId());
