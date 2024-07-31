@@ -75,18 +75,18 @@ public class SaveRegionApi extends PrivateApiComponentBase {
             int lft = LRCodeManager.beforeAddTreeNode("region", "id", "parent_id", region.getParentId());
             region.setLft(lft);
             region.setRht(lft + 1);
-            List<Long> upwardRegionIdList = new ArrayList<>();
-            List<String> upwardRegionNameList = new ArrayList<>();
-            List<RegionVo> upwardRegionList = regionMapper.getAncestorsAndSelfByLftRht(region.getLft(), region.getRht());
-            for (RegionVo upwardRegion : upwardRegionList) {
-                upwardRegionIdList.add(upwardRegion.getId());
-                upwardRegionNameList.add(upwardRegion.getName());
-            }
-            upwardRegionIdList.add(region.getId());
-            upwardRegionNameList.add(region.getName());
-            region.setUpwardIdPath(upwardRegionIdList.stream().map(Object::toString).collect(Collectors.joining(",")));
-            region.setUpwardNamePath(String.join("/", upwardRegionNameList));
         }
+        List<Long> upwardRegionIdList = new ArrayList<>();
+        List<String> upwardRegionNameList = new ArrayList<>();
+        List<RegionVo> upwardRegionList = regionMapper.getAncestorsAndSelfByLftRht(region.getLft(), region.getRht());
+        for (RegionVo upwardRegion : upwardRegionList) {
+            upwardRegionIdList.add(upwardRegion.getId());
+            upwardRegionNameList.add(upwardRegion.getName());
+        }
+        upwardRegionIdList.add(region.getId());
+        upwardRegionNameList.add(region.getName());
+        region.setUpwardIdPath(upwardRegionIdList.stream().map(Object::toString).collect(Collectors.joining(",")));
+        region.setUpwardNamePath(String.join("/", upwardRegionNameList));
         regionMapper.insertRegion(region);
         return region.getId();
     }
