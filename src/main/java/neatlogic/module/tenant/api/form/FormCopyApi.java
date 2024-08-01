@@ -3,13 +3,14 @@ package neatlogic.module.tenant.api.form;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Objects;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
+import neatlogic.framework.form.constvalue.FormHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
+import neatlogic.framework.form.dto.FormAttributeParentVo;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
 import neatlogic.framework.form.dto.FormVo;
@@ -176,7 +177,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
                 String uuid = scene.getString("uuid");
                 String newUuid = UuidUtil.randomUuid();
                 scene.put("uuid", newUuid);
-                if (Objects.equal(uuid, defaultSceneUuid)) {
+                if (Objects.equals(uuid, defaultSceneUuid)) {
                     formConfig.put("defaultSceneUuid", newUuid);
                 }
             }
@@ -184,13 +185,18 @@ public class FormCopyApi extends PrivateApiComponentBase {
         String uuid = formConfig.getString("uuid");
         String newUuid = UuidUtil.randomUuid();
         formConfig.put("uuid", newUuid);
-        if (Objects.equal(uuid, defaultSceneUuid)) {
+        if (Objects.equals(uuid, defaultSceneUuid)) {
             formConfig.put("defaultSceneUuid", newUuid);
         }
 
         String content = formConfig.toJSONString();
         List<FormAttributeVo> allFormAttributeList = FormUtil.getAllFormAttributeList(formConfig);
         for (FormAttributeVo formAttributeVo : allFormAttributeList) {
+            FormAttributeParentVo parent = formAttributeVo.getParent();
+            // 对于表格选择组件中的属性uuid不做替换，因为它们的来源是矩阵属性uuid，不会变
+            if (parent != null && Objects.equals(parent.getHandler(), FormHandler.FORMTABLESELECTOR.getHandler())) {
+                continue;
+            }
             // 更新表单属性uuid
             String formAttributeNewUuid = UuidUtil.randomUuid();
             formAttributeOldUuid2NewUuidMap.put(formAttributeVo.getUuid(), formAttributeNewUuid);
