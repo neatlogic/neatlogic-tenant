@@ -263,8 +263,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 columnList.add(hiddenField);
             }
         }
-        dataVo.setColumnList(columnList);
-        dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
 
         String keywordColumn = dataVo.getKeywordColumn();
         String keywordColumnUniqueIdentifier = dataVo.getKeywordColumnUniqueIdentifier();
@@ -277,6 +275,8 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         }
         JSONArray defaultValue = dataVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
+            dataVo.setColumnList(columnList);
+            dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
             for (Object defaultValueObject : defaultValue) {
                 if (defaultValueObject instanceof JSONObject) {
@@ -299,27 +299,63 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
-
+            dataVo.setPageSize(1);
             resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-            deduplicateData(null, valueField, textField, resultList);
+//            deduplicateData(null, valueField, textField, resultList);
         } else {
-            List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
+//            List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
+//            dataVo.setIsDistinct(true);
+//            int startPage = dataVo.getCurrentPage();
+//            int pageSize = dataVo.getPageSize();
+//            int currentPage = 0;
+//            while (resultList.size() < pageSize) {
+//                currentPage++;
+//                dataVo.setCurrentPage(currentPage);
+//                List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
+//                deduplicateData(previousPageList, valueField, textField, list);
+//                previousPageList.addAll(list);
+//                if (currentPage >= startPage) {
+//                    resultList.addAll(list);
+//                }
+//                if (currentPage >= dataVo.getPageCount()) {
+//                    break;
+//                }
+//            }
+            List<String> previousPageList = new ArrayList<>();
+            List<String> valueList = new ArrayList<>();
+            dataVo.setColumnList(Collections.singletonList(valueField));
+            dataVo.setIsDistinct(true);
             int startPage = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
             int currentPage = 0;
-            while (resultList.size() < pageSize) {
+            while (valueList.size() < pageSize) {
                 currentPage++;
+                System.out.println("currentPage = " + currentPage);
                 dataVo.setCurrentPage(currentPage);
-                List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                deduplicateData(previousPageList, valueField, textField, list);
-                previousPageList.addAll(list);
+                List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+                List<String> list = deduplicateData(previousPageList, valueField, dataList);
                 if (currentPage >= startPage) {
-                    resultList.addAll(list);
+                    valueList.addAll(list);
                 }
                 if (currentPage >= dataVo.getPageCount()) {
                     break;
                 }
             }
+            dataVo.setIsDistinct(false);
+            dataVo.setColumnList(columnList);
+            dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
+            List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
+            for (String value : valueList) {
+                MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                        new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
+                        null
+                );
+                defaultValueFilterList.add(matrixDefaultValueFilterVo);
+            }
+            dataVo.setDefaultValueFilterList(defaultValueFilterList);
+            dataVo.setDefaultValue(null);
+            dataVo.setPageSize(1);
+            resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
         }
         JSONArray dataList = new JSONArray();
         if (CollectionUtils.isNotEmpty(resultList)) {
@@ -382,57 +418,80 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         return returnObj;
     }
 
-    private void deduplicateData(List<Map<String, JSONObject>> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
-        List<String> duplicateValue = new ArrayList<>();
-        List<String> duplicateText = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(previousPageList)) {
-            for (Map<String, JSONObject> resultObj : previousPageList) {
-                JSONObject firstObj = resultObj.get(valueField);
-                if (MapUtils.isEmpty(firstObj)) {
-                    continue;
-                }
-                JSONObject secondObj = resultObj.get(textField);
-                if (MapUtils.isEmpty(secondObj)) {
-                    continue;
-                }
-                String value = firstObj.getString("value");
-                if (duplicateValue.contains(value)) {
-                    continue;
-                } else {
-                    duplicateValue.add(value);
-                }
-                String text = secondObj.getString("text");
-                if (!duplicateText.contains(text)) {
-                    duplicateText.add(text);
-                }
-            }
-        }
-        Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
-        while (iterator.hasNext()) {
-            Map<String, JSONObject> resultObj = iterator.next();
+//    private void deduplicateData(List<Map<String, JSONObject>> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
+//        List<String> duplicateValue = new ArrayList<>();
+//        List<String> duplicateText = new ArrayList<>();
+//        if (CollectionUtils.isNotEmpty(previousPageList)) {
+//            for (Map<String, JSONObject> resultObj : previousPageList) {
+//                JSONObject firstObj = resultObj.get(valueField);
+//                if (MapUtils.isEmpty(firstObj)) {
+//                    continue;
+//                }
+//                JSONObject secondObj = resultObj.get(textField);
+//                if (MapUtils.isEmpty(secondObj)) {
+//                    continue;
+//                }
+//                String value = firstObj.getString("value");
+//                if (duplicateValue.contains(value)) {
+//                    continue;
+//                } else {
+//                    duplicateValue.add(value);
+//                }
+//                String text = secondObj.getString("text");
+//                if (!duplicateText.contains(text)) {
+//                    duplicateText.add(text);
+//                }
+//            }
+//        }
+//        Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
+//        while (iterator.hasNext()) {
+//            Map<String, JSONObject> resultObj = iterator.next();
+//            JSONObject firstObj = resultObj.get(valueField);
+//            if (MapUtils.isEmpty(firstObj)) {
+//                iterator.remove();
+//                continue;
+//            }
+//            JSONObject secondObj = resultObj.get(textField);
+//            if (MapUtils.isEmpty(secondObj)) {
+//                iterator.remove();
+//                continue;
+//            }
+//            String value = firstObj.getString("value");
+//            if (duplicateValue.contains(value)) {
+//                iterator.remove();
+//                continue;
+//            } else {
+//                duplicateValue.add(value);
+//            }
+//            String text = secondObj.getString("text");
+//            if (duplicateText.contains(text)) {
+//                iterator.remove();
+//            } else {
+//                duplicateText.add(text);
+//            }
+//        }
+//    }
+
+    /**
+     * 只根据value值去重
+     * @param previousPageList
+     * @param valueField
+     * @param dataList
+     */
+    private List<String> deduplicateData(List<String> previousPageList, String valueField, List<Map<String, JSONObject>> dataList) {
+        List<String> resultList = new ArrayList<>();
+        for (Map<String, JSONObject> resultObj : dataList) {
             JSONObject firstObj = resultObj.get(valueField);
             if (MapUtils.isEmpty(firstObj)) {
-                iterator.remove();
-                continue;
-            }
-            JSONObject secondObj = resultObj.get(textField);
-            if (MapUtils.isEmpty(secondObj)) {
-                iterator.remove();
                 continue;
             }
             String value = firstObj.getString("value");
-            if (duplicateValue.contains(value)) {
-                iterator.remove();
+            if (previousPageList.contains(value)) {
                 continue;
-            } else {
-                duplicateValue.add(value);
             }
-            String text = secondObj.getString("text");
-            if (duplicateText.contains(text)) {
-                iterator.remove();
-            } else {
-                duplicateText.add(text);
-            }
+            previousPageList.add(value);
+            resultList.add(value);
         }
+        return resultList;
     }
 }
