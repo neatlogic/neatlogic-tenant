@@ -304,6 +304,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             deduplicateData(null, valueField, textField, resultList);
         } else {
             List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
+            dataVo.setIsDistinct(true);
             int startPage = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
             int currentPage = 0;
