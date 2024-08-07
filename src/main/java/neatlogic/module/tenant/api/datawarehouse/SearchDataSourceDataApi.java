@@ -70,7 +70,7 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
             @Param(name = "limit", type = ApiParamType.INTEGER, desc = "返回数据限制"),
             @Param(name = "isExpired", type = ApiParamType.INTEGER, desc = "是否过期，0未过期，1已过期")})
     @Output({@Param(explode = BasePageVo.class)})
-    @Description(desc = "查询数据源数据接口")
+    @Description(desc = "查询数据源数据")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         DataSourceDataVo reportDataSourceDataVo = JSON.toJavaObject(jsonObj, DataSourceDataVo.class);
