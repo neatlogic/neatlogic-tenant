@@ -332,7 +332,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 currentPage++;
                 dataVo.setCurrentPage(currentPage);
                 List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                List<String> list = deduplicateData(previousPageList, valueField, dataList);
+                List<String> list = deduplicateData(previousPageList, valueField, textField, dataList);
                 if (currentPage >= startPage) {
                     valueList.addAll(list);
                 }
@@ -347,7 +347,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             for (String value : valueList) {
                 MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
                         new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
-                        null
+                        new MatrixKeywordFilterVo(textField, SearchExpression.NOTNULL.getExpression(), null)
                 );
                 defaultValueFilterList.add(matrixDefaultValueFilterVo);
             }
@@ -477,7 +477,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
      * @param valueField
      * @param dataList
      */
-    private List<String> deduplicateData(List<String> previousPageList, String valueField, List<Map<String, JSONObject>> dataList) {
+    private List<String> deduplicateData(List<String> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> dataList) {
         List<String> resultList = new ArrayList<>();
         for (Map<String, JSONObject> resultObj : dataList) {
             JSONObject firstObj = resultObj.get(valueField);
@@ -485,7 +485,18 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 continue;
             }
             String value = firstObj.getString("value");
+            if (StringUtils.isBlank(value)) {
+                continue;
+            }
             if (previousPageList.contains(value)) {
+                continue;
+            }
+            JSONObject secondObj = resultObj.get(textField);
+            if (MapUtils.isEmpty(secondObj)) {
+                continue;
+            }
+            String text = secondObj.getString("text");
+            if (StringUtils.isBlank(text)) {
                 continue;
             }
             previousPageList.add(value);
