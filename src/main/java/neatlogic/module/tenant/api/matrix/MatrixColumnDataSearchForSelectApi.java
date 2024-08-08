@@ -330,7 +330,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             int currentPage = 0;
             while (valueList.size() < pageSize) {
                 currentPage++;
-                System.out.println("currentPage = " + currentPage);
                 dataVo.setCurrentPage(currentPage);
                 List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
                 List<String> list = deduplicateData(previousPageList, valueField, dataList);
