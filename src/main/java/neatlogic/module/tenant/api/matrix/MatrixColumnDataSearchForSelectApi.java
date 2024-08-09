@@ -322,40 +322,26 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
 //                }
 //            }
             List<String> previousPageList = new ArrayList<>();
-            List<String> valueList = new ArrayList<>();
             dataVo.setColumnList(Collections.singletonList(valueField));
             dataVo.setIsDistinct(true);
             int startPage = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
             int currentPage = 0;
-            while (valueList.size() < pageSize) {
+            while (resultList.size() < pageSize) {
                 currentPage++;
                 dataVo.setCurrentPage(currentPage);
                 List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                List<String> list = deduplicateData(previousPageList, valueField, textField, dataList);
+                List<String> list = deduplicateData(previousPageList, valueField, dataList);
                 if (currentPage >= startPage) {
-                    valueList.addAll(list);
+                    for (String value: list) {
+                        Map<String, JSONObject> options = getOptionsByValue(matrixVo, columnList, new ArrayList<>(notNullColumnSet), valueField, textField, value);
+                        if (options != null) {
+                            resultList.add(options);
+                        }
+                    }
                 }
                 if (currentPage >= dataVo.getPageCount()) {
                     break;
-                }
-            }
-            dataVo.setIsDistinct(false);
-            dataVo.setColumnList(columnList);
-            dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
-            dataVo.setDefaultValue(null);
-            dataVo.setPageSize(1);
-            for (String value : valueList) {
-                List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
-                MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
-                        new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
-                        new MatrixKeywordFilterVo(textField, SearchExpression.NOTNULL.getExpression(), null)
-                );
-                defaultValueFilterList.add(matrixDefaultValueFilterVo);
-                dataVo.setDefaultValueFilterList(defaultValueFilterList);
-                List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    resultList.add(dataList.get(0));
                 }
             }
         }
@@ -474,13 +460,65 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
 //        }
 //    }
 
+    private Map<String, JSONObject> getOptionsByValue(MatrixVo matrixVo, List<String> columnList, List<String> notNullColumnList, String valueField, String textField, String value) {
+        MatrixDataVo dataVo = new MatrixDataVo();
+        dataVo.setMatrixUuid(matrixVo.getUuid());
+        dataVo.setIsDistinct(false);
+        dataVo.setColumnList(columnList);
+        dataVo.setNotNullColumnList(notNullColumnList);
+        dataVo.setDefaultValue(null);
+        dataVo.setPageSize(1);
+        List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
+        MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
+                new MatrixKeywordFilterVo(textField, SearchExpression.NOTNULL.getExpression(), null)
+        );
+        defaultValueFilterList.add(matrixDefaultValueFilterVo);
+        dataVo.setDefaultValueFilterList(defaultValueFilterList);
+        IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
+        List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+        return getFirstElement(dataList, valueField, textField);
+    }
+
+    /**
+     * 找出第一个符合value不为空且text不为空的元素
+     * @param dataList
+     * @param valueField
+     * @param textField
+     */
+    private Map<String, JSONObject> getFirstElement(List<Map<String, JSONObject>> dataList, String valueField, String textField) {
+        if (CollectionUtils.isEmpty(dataList)) {
+            return null;
+        }
+        for (Map<String, JSONObject> resultObj : dataList) {
+            JSONObject firstObj = resultObj.get(valueField);
+            if (MapUtils.isEmpty(firstObj)) {
+                continue;
+            }
+            String value = firstObj.getString("value");
+            if (StringUtils.isBlank(value)) {
+                continue;
+            }
+            JSONObject secondObj = resultObj.get(textField);
+            if (MapUtils.isEmpty(secondObj)) {
+                continue;
+            }
+            String text = secondObj.getString("text");
+            if (StringUtils.isBlank(text)) {
+                continue;
+            }
+            return resultObj;
+        }
+        return null;
+    }
+
     /**
      * 只根据value值去重
      * @param previousPageList
      * @param valueField
      * @param dataList
      */
-    private List<String> deduplicateData(List<String> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> dataList) {
+    private List<String> deduplicateData(List<String> previousPageList, String valueField, List<Map<String, JSONObject>> dataList) {
         List<String> resultList = new ArrayList<>();
         for (Map<String, JSONObject> resultObj : dataList) {
             JSONObject firstObj = resultObj.get(valueField);
@@ -492,14 +530,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 continue;
             }
             if (previousPageList.contains(value)) {
-                continue;
-            }
-            JSONObject secondObj = resultObj.get(textField);
-            if (MapUtils.isEmpty(secondObj)) {
-                continue;
-            }
-            String text = secondObj.getString("text");
-            if (StringUtils.isBlank(text)) {
                 continue;
             }
             previousPageList.add(value);
