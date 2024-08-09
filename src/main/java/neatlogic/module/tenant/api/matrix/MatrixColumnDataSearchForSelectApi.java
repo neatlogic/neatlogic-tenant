@@ -343,18 +343,21 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             dataVo.setIsDistinct(false);
             dataVo.setColumnList(columnList);
             dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
-            List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
+            dataVo.setDefaultValue(null);
+            dataVo.setPageSize(1);
             for (String value : valueList) {
+                List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
                 MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
                         new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), value),
                         new MatrixKeywordFilterVo(textField, SearchExpression.NOTNULL.getExpression(), null)
                 );
                 defaultValueFilterList.add(matrixDefaultValueFilterVo);
+                dataVo.setDefaultValueFilterList(defaultValueFilterList);
+                List<Map<String, JSONObject>> dataList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+                if (CollectionUtils.isNotEmpty(dataList)) {
+                    resultList.add(dataList.get(0));
+                }
             }
-            dataVo.setDefaultValueFilterList(defaultValueFilterList);
-            dataVo.setDefaultValue(null);
-            dataVo.setPageSize(1);
-            resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
         }
         JSONArray dataList = new JSONArray();
         if (CollectionUtils.isNotEmpty(resultList)) {
