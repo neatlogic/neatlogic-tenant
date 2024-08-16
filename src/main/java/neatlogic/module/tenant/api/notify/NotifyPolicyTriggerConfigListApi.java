@@ -15,20 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.notify;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
@@ -39,6 +27,15 @@ import neatlogic.framework.notify.dto.NotifyPolicyVo;
 import neatlogic.framework.notify.dto.NotifyTriggerVo;
 import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 
@@ -79,14 +76,40 @@ public class NotifyPolicyTriggerConfigListApi extends PrivateApiComponentBase {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
         List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-        List<Object> notifyTriggerValueList =
-            notifyTriggerList.stream().map(NotifyTriggerVo::getTrigger).collect(Collectors.toList());
         String trigger = jsonObj.getString("trigger");
-        if (!notifyTriggerValueList.contains(trigger)) {
+        NotifyTriggerVo notifyTriggerVo = null;
+        for (NotifyTriggerVo triggerVo : notifyTriggerList) {
+            if (Objects.equals(triggerVo.getTrigger(), trigger)) {
+                notifyTriggerVo = triggerVo;
+                break;
+            }
+        }
+        if (notifyTriggerVo == null) {
             throw new ParamIrregularException("trigger");
         }
         JSONObject resultObj = new JSONObject();
-        resultObj.put("authorityConfig", notifyPolicyHandler.getAuthorityConfig());
+        JSONObject authorityConfig = notifyPolicyHandler.getAuthorityConfig();
+        JSONArray includeArray = authorityConfig.getJSONArray("includeList");
+        JSONArray excludeArray = authorityConfig.getJSONArray("excludeList");
+        List<String> includeList = notifyTriggerVo.getIncludeList();
+        if (CollectionUtils.isNotEmpty(includeList)) {
+            for (String include : includeList) {
+                if (!includeArray.contains(include)) {
+                    includeArray.add(include);
+                }
+                excludeArray.remove(include);
+            }
+        }
+        List<String> excludeList = notifyTriggerVo.getExcludeList();
+        if (CollectionUtils.isNotEmpty(excludeList)) {
+            for (String exclude : excludeList) {
+                if (!excludeArray.contains(exclude)) {
+                    excludeArray.add(exclude);
+                }
+                includeArray.remove(exclude);
+            }
+        }
+        resultObj.put("authorityConfig", authorityConfig);
         resultObj.put("notifyList", new JSONArray());
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
