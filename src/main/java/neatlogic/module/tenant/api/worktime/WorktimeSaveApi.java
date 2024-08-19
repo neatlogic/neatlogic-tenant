@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.worktime;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.WORKTIME_MODIFY;
@@ -25,7 +28,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.sla.core.SlaRecalculateManager;
-import neatlogic.framework.transaction.core.EscapeTransactionJob;
+import neatlogic.framework.transaction.core.AfterTransactionJob;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeRangeVo;
@@ -34,8 +37,6 @@ import neatlogic.framework.worktime.exception.WorktimeConfigIllegalException;
 import neatlogic.framework.worktime.exception.WorktimeNameRepeatException;
 import neatlogic.framework.worktime.exception.WorktimeStartTimeGreaterThanOrEqualToEndTimeException;
 import neatlogic.module.tenant.service.WorktimeService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,7 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工作时间窗口信息保存接口";
+        return "nmtaw.worktimesaveapi.getname";
     }
 
     @Override
@@ -75,15 +76,15 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "工作时间窗口uuid"),
-            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "工作时间窗口名称"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "是否激活", rule = "0,1"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "每周工作时段的定义")
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, desc = "common.isactive", rule = "0,1"),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "common.config", help = "每周工作时段的定义")
     })
     @Output({
-            @Param(name = "Return", type = ApiParamType.STRING, desc = "工作时间窗口uuid")
+            @Param(name = "Return", type = ApiParamType.STRING, desc = "common.uuid")
     })
-    @Description(desc = "工作时间窗口信息保存接口")
+    @Description(desc = "nmtaw.worktimesaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         WorktimeVo worktimeVo = JSONObject.toJavaObject(jsonObj, WorktimeVo.class);
@@ -151,9 +152,13 @@ public class WorktimeSaveApi extends PrivateApiComponentBase {
         }
         // 当服务窗口排班更新时，对与该服务窗口相关的未完成SLA进行耗时重算
         final String worktimeUuid = uuid;
-        EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
-            SlaRecalculateManager.execute(worktimeUuid);
-        }).execute();
+        AfterTransactionJob<NeatLogicThread> afterTransactionJob = new AfterTransactionJob<>("SLA-RECALCULATE-MANAGER");
+        afterTransactionJob.execute(new NeatLogicThread("SLA-RECALCULATE-MANAGER-THREAD") {
+            @Override
+            protected void execute() {
+                SlaRecalculateManager.execute(worktimeUuid);
+            }
+        });
 
         return uuid;
     }
