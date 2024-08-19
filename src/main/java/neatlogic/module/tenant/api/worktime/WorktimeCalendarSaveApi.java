@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.worktime;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.WORKTIME_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -25,13 +28,11 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.sla.core.SlaRecalculateManager;
-import neatlogic.framework.transaction.core.EscapeTransactionJob;
+import neatlogic.framework.transaction.core.AfterTransactionJob;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeVo;
 import neatlogic.framework.worktime.exception.WorktimeNotFoundException;
 import neatlogic.module.tenant.service.WorktimeService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +59,7 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "工作日历信息保存接口";
+		return "nmtaw.worktimecalendarsaveapi.getname";
 	}
 
 	@Override
@@ -67,11 +68,11 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 	}
 
 	@Input({
-		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "工作时间窗口uuid"),
-		@Param(name = "year", type = ApiParamType.INTEGER, isRequired = true, desc = "年份"),
-		@Param(name = "calendarList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "工作日历列表")
+		@Param(name = "worktimeUuid", type = ApiParamType.STRING, isRequired = true, desc = "common.worktimeuuid"),
+		@Param(name = "year", type = ApiParamType.INTEGER, isRequired = true, desc = "common.year"),
+		@Param(name = "calendarList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "term.framework.calendarlist")
 	})
-	@Description(desc = "工作日历信息保存接口")
+	@Description(desc = "nmtaw.worktimecalendarsaveapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String worktimeUuid = jsonObj.getString("worktimeUuid");
@@ -84,9 +85,13 @@ public class WorktimeCalendarSaveApi extends PrivateApiComponentBase {
 		JSONArray calendarList = jsonObj.getJSONArray("calendarList");
 		worktimeService.saveWorktimeRange(worktimeVo, year, generateDateList(calendarList));
 		// 当服务窗口排班更新时，对与该服务窗口相关的未完成SLA进行耗时重算
-		EscapeTransactionJob.State s = new EscapeTransactionJob(() -> {
-			SlaRecalculateManager.execute(worktimeUuid);
-		}).execute();
+		AfterTransactionJob<NeatLogicThread> afterTransactionJob = new AfterTransactionJob<>("SLA-RECALCULATE-MANAGER");
+		afterTransactionJob.execute(new NeatLogicThread("SLA-RECALCULATE-MANAGER-THREAD") {
+			@Override
+			protected void execute() {
+				SlaRecalculateManager.execute(worktimeUuid);
+			}
+		});
 		return null;
 	}
 
