@@ -87,8 +87,13 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         //TODO 没有兼容多模块
         Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
         UserTypeVo UsertypeVo = userTypeVoMap.get("process");
-        Map<String, String> processUserType = UsertypeVo.getValues();
-
+        Map<String, String> processUserType = null;
+        if (UsertypeVo != null) {
+            processUserType = UsertypeVo.getValues();
+        }
+        if (processUserType == null) {
+            processUserType = new HashMap<>();
+        }
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
