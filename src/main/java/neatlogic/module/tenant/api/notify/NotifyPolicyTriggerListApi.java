@@ -41,10 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 
@@ -104,7 +101,10 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
         //TODO 没有兼容多模块
         Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
         UserTypeVo UsertypeVo = userTypeVoMap.get("process");
-        Map<String, String> processUserType = UsertypeVo.getValues();
+        final Map<String, String> processUserType = new HashMap<>();
+        if (UsertypeVo != null && UsertypeVo.getValues() != null) {
+            processUserType.putAll(UsertypeVo.getValues());
+        }
 
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
         List<NotifyTriggerVo> triggerList = config.getTriggerList();

@@ -20,6 +20,7 @@ import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserTypeVo;
 import neatlogic.framework.notify.constvalue.NotifyRecipientType;
 import neatlogic.framework.notify.core.INotifyContentHandler;
 import neatlogic.framework.notify.core.INotifyHandler;
@@ -45,7 +46,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 
@@ -127,6 +130,12 @@ public class NotifyJobAuditSearchApi extends PrivateApiComponentBase {
 			List<NotifyJobReceiverVo> toList = notifyJobMapper.getToListByJobId(Long.valueOf(vo.getJobUuid()));
 			JSONArray toArray = new JSONArray();
 			if(CollectionUtils.isNotEmpty(toList)){
+				Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
+				UserTypeVo UsertypeVo = userTypeVoMap.get("process");
+				final Map<String, String> processUserType = new HashMap<>();
+				if (UsertypeVo != null && UsertypeVo.getValues() != null) {
+					processUserType.putAll(UsertypeVo.getValues());
+				}
 				for(NotifyJobReceiverVo receiverVo : toList){
 					if(NotifyRecipientType.USER.getValue().equals(receiverVo.getType())){
 						toArray.add(userMapper.getUserBaseInfoByUuidWithoutCache(receiverVo.getReceiver()));
@@ -146,7 +155,7 @@ public class NotifyJobAuditSearchApi extends PrivateApiComponentBase {
 						toArray.add(new JSONObject(){
 							{
 								this.put("initType",NotifyRecipientType.PROCESSUSERTYPE.getValue());
-								this.put("name", UserTypeFactory.getUserTypeMap().get("process").getValues().get(receiverVo.getReceiver()));
+								this.put("name", processUserType.get(receiverVo.getReceiver()));
 							}
 						});
 					}
