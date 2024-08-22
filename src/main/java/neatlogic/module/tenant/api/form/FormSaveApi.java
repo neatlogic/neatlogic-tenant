@@ -5,6 +5,8 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
+import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
+import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.form.dto.FormAttributeVo;
 import neatlogic.framework.form.dto.FormVersionVo;
@@ -197,6 +199,10 @@ public class FormSaveApi extends PrivateApiComponentBase {
                 List<FormAttributeVo> formCustomExtendAttributeList = formVersionVo.getFormCustomExtendAttributeList();
                 if (CollectionUtils.isNotEmpty(formCustomExtendAttributeList)) {
                     for (FormAttributeVo formAttributeVo : formCustomExtendAttributeList) {
+                        IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
+                        if (formAttributeHandler != null) {
+                            formAttributeHandler.validateExtendAttributeConfig(formAttributeVo.getKey(), formAttributeVo.getConfig());
+                        }
                         formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
                 }
