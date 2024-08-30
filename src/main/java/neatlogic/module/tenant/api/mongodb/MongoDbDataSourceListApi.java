@@ -15,25 +15,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mongodb;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dto.MongoDbVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dao.mapper.NeatLogicMapper;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class MongoDbDataSourceListPublicApi extends PublicApiComponentBase {
+public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
     @Autowired
     NeatLogicMapper neatlogicMapper;
 
     @Override
     public String getToken() {
-        return "/public/mongodb/datasource/list";
+        return "mongodb/datasource/list";
     }
 
     @Override
