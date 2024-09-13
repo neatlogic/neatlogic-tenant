@@ -38,9 +38,9 @@ import neatlogic.framework.usertype.UserTypeFactory;
 import neatlogic.framework.util.$;
 import neatlogic.module.tenant.service.notify.NotifyPolicyService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Service
@@ -48,10 +48,10 @@ import java.util.*;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private NotifyMapper notifyMapper;
 
-    @Autowired
+    @Resource
     private NotifyPolicyService notifyPolicyService;
 
     @Override
@@ -95,21 +95,15 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         List<NotifyTriggerVo> triggerList = config.getTriggerList();
         List<NotifyTriggerVo> notifyTriggerList = notifyPolicyHandler.getNotifyTriggerList();
         if (CollectionUtils.isNotEmpty(notifyTriggerList)) {
-            /** 矫正旧配置数据中的触发点 */
-            /** 多删 -- 删除已经不存在的触发点 */
-            Iterator<NotifyTriggerVo> iterator = triggerList.iterator();
-            while (iterator.hasNext()) {
-                NotifyTriggerVo next = iterator.next();
-                if (!notifyTriggerList.stream().anyMatch(o -> o.getTrigger().equals(next.getTrigger()))) {
-                    iterator.remove();
-                }
-            }
+            /* 矫正旧配置数据中的触发点 */
+            /* 多删 -- 删除已经不存在的触发点 */
+            triggerList.removeIf(next -> notifyTriggerList.stream().noneMatch(o -> o.getTrigger().equals(next.getTrigger())));
             List<NotifyTriggerVo> triggerArray = new ArrayList<>();
             for (NotifyTriggerVo notifyTrigger : notifyTriggerList) {
                 boolean existed = false;
                 for (NotifyTriggerVo triggerObj : triggerList) {
                     if (Objects.equals(notifyTrigger.getTrigger(), triggerObj.getTrigger())) {
-                        /** 补充通知对象详细信息 */
+                        /* 补充通知对象详细信息 */
                         notifyPolicyService.addReceiverExtraInfo(processUserType, triggerObj);
                         triggerObj.setTriggerName(notifyTrigger.getTriggerName());
                         triggerObj.setDescription(notifyTrigger.getDescription());
@@ -118,7 +112,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
                         break;
                     }
                 }
-                /** 少补 -- 新增老数据中没有而现在有的触发点 */
+                /* 少补 -- 新增老数据中没有而现在有的触发点 */
                 if (!existed) {
                     triggerArray.add(notifyTrigger);
                 }
