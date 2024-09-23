@@ -19,32 +19,27 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.auth.label.LICENSE_MODIFY;
-import neatlogic.framework.common.config.Config;
-import neatlogic.framework.dto.license.LicenseVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.LicenseUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @AuthAction(action = LICENSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class GetLicenseApi extends PrivateApiComponentBase {
+public class GetLicenseInvalidMsgApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "license/get";
+        return "license/invalid/msg/get";
     }
 
     @Override
     public String getName() {
-        return "nmtal.getlicenseapi.getname";
+        return "获取许可异常信息";
     }
 
     @Override
@@ -52,15 +47,9 @@ public class GetLicenseApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Output({@Param(explode = LicenseVo.class)})
-    @Description(desc = "nmtal.getlicenseapi.getname")
+    @Description(desc = "获取许可异常信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String licensePk = Config.LICENSE_PK();
-        String license = Config.LICENSE();
-        if (StringUtils.isNotBlank(license) && StringUtils.isNotBlank(licensePk)) {
-            return LicenseUtil.deLicense(license, licensePk);
-        }
-        return null;
+        return LicenseUtil.licenseInvalidTipsMap.values();
     }
 }
