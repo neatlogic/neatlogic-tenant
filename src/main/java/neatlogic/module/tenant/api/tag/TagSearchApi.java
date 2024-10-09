@@ -15,25 +15,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.tag;
 
-import neatlogic.framework.auth.core.AuthAction;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.TagVo;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.service.TagService;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
-@Deprecated
+
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TagSearchApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private TagService tagService;
 
     @Override
@@ -52,19 +51,22 @@ public class TagSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", desc = "标签名称", type = ApiParamType.STRING, isRequired = true, xss = true)
+            @Param(name = "name", desc = "标签名称", type = ApiParamType.STRING, xss = true),
+            @Param(name = "type", desc = "类型", type = ApiParamType.STRING, isRequired = true)
     })
 
     @Output({
             @Param(name = "tagList", desc = "标签集合", explode = TagVo[].class)
     })
-    @Description( desc = "标签查询接口")
+    @Description(desc = "标签查询接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         String tagName = jsonObj.getString("name");
+        String type = jsonObj.getString("type");
         TagVo tagVo = new TagVo();
         tagVo.setName(tagName);
+        tagVo.setType(type);
         List<TagVo> tagList = tagService.searchTag(tagVo);
         returnObj.put("tagList", tagList);
         return returnObj;

@@ -2,15 +2,15 @@ package neatlogic.module.tenant.service;
 
 import neatlogic.framework.dao.mapper.TagMapper;
 import neatlogic.framework.dto.TagVo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
 public class TagServiceImpl implements TagService {
 
-    @Autowired
+    @Resource
     private TagMapper tagMapper;
 
     @Override

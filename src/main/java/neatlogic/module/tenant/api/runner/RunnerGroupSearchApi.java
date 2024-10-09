@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.runner;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
@@ -64,7 +65,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
+        RunnerGroupVo groupVo = JSON.toJavaObject(paramObj, RunnerGroupVo.class);
         int rowNum = runnerMapper.searchRunnerGroupCount(groupVo);
         List<RunnerGroupVo> runnerGroupVoList = new ArrayList<>();
         groupVo.setRowNum(rowNum);

@@ -15,13 +15,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.runner;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.RUNNER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.TagType;
 import neatlogic.framework.common.util.IpUtil;
+import neatlogic.framework.dao.mapper.TagMapper;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.FieldValidResultVo;
+import neatlogic.framework.dto.TagVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
+import neatlogic.framework.dto.runner.GroupTagVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.runner.*;
@@ -32,9 +39,6 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -54,6 +58,9 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
+
+    @Resource
+    TagMapper tagMapper;
 
     @Override
     public String getName() {
@@ -82,14 +89,14 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerGroupVo runnerGroupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
+        RunnerGroupVo runnerGroupVo = JSON.toJavaObject(paramObj, RunnerGroupVo.class);
         Long id = paramObj.getLong("id");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
 
         if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
             throw new RunnerGroupNetworkNameRepeatsException(runnerGroupVo.getName());
         }
-            if (!CollectionUtils.isEmpty(groupNetworkList)) {
+        if (!CollectionUtils.isEmpty(groupNetworkList)) {
 
             Set<String> iPMaskSet = new HashSet<>();
             for (int i = 0; i < groupNetworkList.size(); i++) {
@@ -127,6 +134,28 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
             }
         }
 
+        //组标签
+        if (CollectionUtils.isNotEmpty(runnerGroupVo.getTagList())) {
+            runnerMapper.deleteGroupTag(groupId);
+            for (String tag : runnerGroupVo.getTagList()) {
+                Long tagId = tagMapper.getTagIdByNameAndType(tag, TagType.RUNNERGROUP.getValue());
+                if (tagId == null) {
+                    TagVo newTag = new TagVo(tag, TagType.RUNNERGROUP.getValue());
+                    tagMapper.insertTag(newTag);
+                    tagId = newTag.getId();
+                }
+                tagMapper.getTagLockById(tagId);
+                GroupTagVo groupTagVo = new GroupTagVo(groupId, tagId);
+                runnerMapper.insertRunnerTag(groupTagVo);
+            }
+        }
+        //删除没用的标签
+        List<TagVo> noUseTagList = tagMapper.searchNoUseTag();
+        for (TagVo noUseTag : noUseTagList) {
+            tagMapper.getTagLockById(noUseTag.getId());
+            tagMapper.deleteTagById(noUseTag.getId());
+        }
+
         //关联runner
         JSONArray runnerArray = paramObj.getJSONArray("runnerList");
         List<RunnerVo> runnerVoList = null;
@@ -138,6 +167,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                 runnerMapper.insertRunnerGroupRunnerByRunnerIdListAndGroupId(runnerIdList, groupId);
             }
         }
+
+        //
         return null;
     }
 
