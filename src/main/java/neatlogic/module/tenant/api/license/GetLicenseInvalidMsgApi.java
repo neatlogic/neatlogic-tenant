@@ -16,9 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.license;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.auth.label.LICENSE_MODIFY;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -27,8 +24,6 @@ import neatlogic.framework.util.LicenseUtil;
 import org.springframework.stereotype.Service;
 
 @Service
-@AuthAction(action = ADMIN.class)
-@AuthAction(action = LICENSE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetLicenseInvalidMsgApi extends PrivateApiComponentBase {
 
