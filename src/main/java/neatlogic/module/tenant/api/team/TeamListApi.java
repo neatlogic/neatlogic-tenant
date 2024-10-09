@@ -14,22 +14,21 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.team;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
-
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 @Deprecated
@@ -66,7 +65,7 @@ public class TeamListApi extends PrivateApiComponentBase {
 	@Description(desc = "分组列表接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		TeamVo teamVo = JSONObject.toJavaObject(jsonObj, TeamVo.class);
+		TeamVo teamVo = JSON.toJavaObject(jsonObj, TeamVo.class);
 		if(StringUtils.isNotBlank(teamVo.getKeyword())) {
 			if (teamVo.getNeedPage()) {
 				int rowNum = teamMapper.searchTeamCount(teamVo);
