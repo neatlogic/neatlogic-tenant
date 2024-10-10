@@ -135,8 +135,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         }
 
         //组标签
+        runnerMapper.deleteGroupTag(groupId);
         if (CollectionUtils.isNotEmpty(runnerGroupVo.getTagList())) {
-            runnerMapper.deleteGroupTag(groupId);
             for (String tag : runnerGroupVo.getTagList()) {
                 Long tagId = tagMapper.getTagIdByNameAndType(tag, TagType.RUNNERGROUP.getValue());
                 if (tagId == null) {
