@@ -16,12 +16,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.license;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.dto.license.LicenseInvalidVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.LicenseUtil;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -45,6 +51,10 @@ public class GetLicenseInvalidMsgApi extends PrivateApiComponentBase {
     @Description(desc = "获取许可异常信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        return LicenseUtil.licenseInvalidTipsMap.values();
+        Map<String, LicenseInvalidVo> licenseInvalidVoMap = LicenseUtil.tenantLicenseInvalidTipsMap.get(TenantContext.get().getTenantUuid());
+        if (MapUtils.isNotEmpty(licenseInvalidVoMap)) {
+            return licenseInvalidVoMap.values();
+        }
+        return CollectionUtils.EMPTY_COLLECTION;
     }
 }
