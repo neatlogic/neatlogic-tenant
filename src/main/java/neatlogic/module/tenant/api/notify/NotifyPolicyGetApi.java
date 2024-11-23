@@ -61,7 +61,7 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "通知策略信息获取接口";
+        return "nmtan.notifypolicygetapi.getname";
     }
 
     @Override
@@ -69,9 +69,14 @@ public class NotifyPolicyGetApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "策略id")})
-    @Output({@Param(explode = NotifyPolicyVo.class, desc = "策略信息")})
-    @Description(desc = "通知策略信息获取接口")
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
+    @Input({@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id")})
+    @Output({@Param(explode = NotifyPolicyVo.class, desc = "common.tbodylist")})
+    @Description(desc = "nmtan.notifypolicygetapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
