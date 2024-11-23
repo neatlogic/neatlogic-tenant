@@ -17,8 +17,11 @@ package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.notify.core.INotifyPolicyHandler;
+import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dao.mapper.NotifyMapper;
 import neatlogic.framework.notify.dto.NotifyPolicyVo;
+import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -35,20 +38,24 @@ public class GetDefaultNotifyPolicyApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取默认通知策略";
+        return "nmtan.getdefaultnotifypolicyapi.getname";
     }
 
     @Input({
-            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "策略类型"),
+            @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "common.handler"),
     })
     @Output({
-            @Param(explode = NotifyPolicyVo.class, desc = "通知策略信息")
+            @Param(explode = NotifyPolicyVo.class, desc = "common.tbodylist")
     })
-    @Description(desc = "获取默认通知策略")
+    @Description(desc = "nmtan.getdefaultnotifypolicyapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String handler = paramObj.getString("handler");
-        NotifyPolicyVo notifyPolicyVo = notifyMapper.getDefaultNotifyPolicyByHandler(handler);
+        INotifyPolicyHandler notifyPolicyHandler = NotifyPolicyHandlerFactory.getHandler(handler);
+        if (notifyPolicyHandler == null) {
+            throw new NotifyPolicyHandlerNotFoundException(handler);
+        }
+        NotifyPolicyVo notifyPolicyVo = notifyMapper.getDefaultNotifyPolicyByHandler(notifyPolicyHandler.getClassName());
         return notifyPolicyVo;
     }
 
