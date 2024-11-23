@@ -19,14 +19,10 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.mq.TopicNotFoundException;
 import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
 import neatlogic.framework.mq.dto.TopicVo;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
@@ -35,20 +31,20 @@ import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = MQ_MODIFY.class)
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class SaveTopicConfigApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class GetTopicApi extends PrivateApiComponentBase {
 
     @Resource
     private MqTopicMapper mqTopicMapper;
 
     @Override
     public String getToken() {
-        return "/mq/topic/save";
+        return "/mq/topic/get";
     }
 
     @Override
     public String getName() {
-        return "term.framework.savetopic";
+        return "获取消息队列主题";
     }
 
     @Override
@@ -56,22 +52,20 @@ public class SaveTopicConfigApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-            @Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "common.uniquename"),
-            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config")})
-    @Description(desc = "term.framework.savetopic")
+    @Input({@Param(name = "name", type = ApiParamType.STRING, desc = "消息队列唯一标识")})
+    @Output({@Param(explode = TopicVo.class)})
+    @Description(desc = "获取消息队列主题")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String name = jsonObj.getString("name");
         TopicVo topicVo = TopicFactory.getTopicByName(name);
-        if (topicVo != null) {
-            JSONObject config = jsonObj.getJSONObject("config");
-            topicVo.setConfig(config);
-            mqTopicMapper.saveTopicConfig(topicVo);
-            return null;
+        TopicVo topicSettingVo = mqTopicMapper.getTopicByName(name);
+        if (topicVo == null) {
+            topicVo = topicSettingVo;
         } else {
-            throw new TopicNotFoundException(name);
+            topicVo.setConfig(topicSettingVo.getConfig());
         }
+        return topicVo;
     }
 
 }

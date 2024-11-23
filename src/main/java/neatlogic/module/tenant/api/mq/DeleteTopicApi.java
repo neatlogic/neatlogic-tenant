@@ -19,10 +19,9 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.mq.TopicNotFoundException;
-import neatlogic.framework.mq.core.TopicFactory;
+import neatlogic.framework.exception.mq.TopicIsInUsedException;
+import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
-import neatlogic.framework.mq.dto.TopicVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -30,25 +29,30 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = MQ_MODIFY.class)
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class ToggleTopicActiveApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.DELETE)
+@Transactional
+public class DeleteTopicApi extends PrivateApiComponentBase {
 
     @Resource
     private MqTopicMapper mqTopicMapper;
 
+    @Resource
+    private MqSubscribeMapper mqSubscribeMapper;
+
     @Override
     public String getToken() {
-        return "/mq/topic/toggleactive";
+        return "/mq/topic/delete";
     }
 
     @Override
     public String getName() {
-        return "term.framework.togglemqtopicisactive";
+        return "删除消息队列主题";
     }
 
     @Override
@@ -56,22 +60,16 @@ public class ToggleTopicActiveApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "common.uniquename"),
-            @Param(name = "isActive", isRequired = true, type = ApiParamType.INTEGER, desc = "common.isactive")})
-    @Description(desc = "term.framework.togglemqtopicisactive")
+    @Input({@Param(name = "name", isRequired = true, type = ApiParamType.STRING, desc = "主题唯一标识")})
+    @Description(desc = "删除消息队列主题")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String name = jsonObj.getString("name");
-        TopicVo topicVo = TopicFactory.getTopicByName(name);
-        Integer isActive = jsonObj.getInteger("isActive");
-        if (topicVo == null) {
-            topicVo = mqTopicMapper.getTopicByName(name);
-            if (topicVo == null) {
-                throw new TopicNotFoundException(name);
-            }
+        int c = mqSubscribeMapper.selectSubscribeCountByTopicName(name);
+        if (c > 0) {
+            throw new TopicIsInUsedException(c);
         }
-        topicVo.setIsActive(isActive);
-        mqTopicMapper.saveTopicIsActive(topicVo);
+        mqTopicMapper.deleteTopicByName(name);
         return null;
     }
 
