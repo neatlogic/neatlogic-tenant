@@ -80,6 +80,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             @Param(name = "hiddenFieldList", desc = "隐藏属性uuid列表", type = ApiParamType.JSONARRAY),
             @Param(name = "currentPage", desc = "当前页", type = ApiParamType.INTEGER),
             @Param(name = "pageSize", desc = "显示条目数", type = ApiParamType.INTEGER),
+            @Param(name = "needPage", desc = "是否需要分页", type = ApiParamType.BOOLEAN),
             @Param(name = "defaultValue", desc = "精确匹配回显数据参数", type = ApiParamType.JSONARRAY),
             @Param(name = "filterList", desc = "过滤条件集合", type = ApiParamType.JSONARRAY),
 
@@ -132,6 +133,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             "}")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        Boolean needPage = jsonObj.getBoolean("needPage");
         jsonObj.remove("needPage");
         MatrixDataVo dataVo = jsonObj.toJavaObject(MatrixDataVo.class);
         if (StringUtils.isBlank(dataVo.getMatrixUuid()) && StringUtils.isBlank(dataVo.getMatrixLabel())) {
@@ -277,6 +279,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
             dataVo.setKeywordColumn(attrUuid);
         }
+        dataVo.setDistinct(true);
         JSONArray defaultValue = dataVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
@@ -301,7 +304,6 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
-
             resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
             deduplicateData(null, valueField, textField, resultList);
         } else {
@@ -309,6 +311,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             int startNum = dataVo.getStartNum();
             int currentPageBackup = dataVo.getCurrentPage();
             int pageSize = dataVo.getPageSize();
+            if (Objects.equals(needPage, false)) {
+                dataVo.setNeedPage(needPage);
+                dataVo.getPageSize();
+                pageSize = Integer.MAX_VALUE;
+            }
             int currentPage = 0;
             while (resultList.size() < pageSize) {
                 currentPage++;
@@ -327,6 +334,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 if (currentPage >= dataVo.getPageCount()) {
                     break;
                 }
+            }
+            if (Objects.equals(needPage, false)) {
+                dataVo.setPageCount(1);
             }
             dataVo.setCurrentPage(currentPageBackup);
         }
