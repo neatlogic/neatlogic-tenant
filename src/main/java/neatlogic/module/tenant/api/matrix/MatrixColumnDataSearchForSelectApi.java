@@ -304,6 +304,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             dataVo.setDefaultValue(null);
+
             resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
             deduplicateData(null, valueField, textField, resultList);
         } else {
