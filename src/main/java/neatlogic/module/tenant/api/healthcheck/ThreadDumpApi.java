@@ -15,14 +15,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.healthcheck;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class ThreadDumpApi extends PrivateApiComponentBase {
     private static void dumpTraces(ThreadMXBean mxBean, Map<Long, ThreadInfo> threadInfoMap, Writer writer) throws IOException {
         Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
         long now = System.currentTimeMillis();
-        writer.write("=================" + stacks.size() + " thread of " + RequestContext.get().getRequest().getLocalAddr() + " at " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z").format(new Date(now)) + " start.=================\n\n");
+        writer.write("=================" + stacks.size() + " thread of " + RequestContext.get().getRequest().getLocalAddr() + " at " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z").format(new Date(now)) + " start.serverId is " + Config.SCHEDULE_SERVER_ID + "=================\n\n");
         for (Map.Entry<Thread, StackTraceElement[]> entry : stacks.entrySet()) {
             Thread thread = entry.getKey();
             writer.write("\"" + thread.getName() + "\" prio=" + thread.getPriority() + " tid=" + thread.getId() + " " + thread.getState() + " " + (thread.isDaemon() ? "deamon" : "worker"));
