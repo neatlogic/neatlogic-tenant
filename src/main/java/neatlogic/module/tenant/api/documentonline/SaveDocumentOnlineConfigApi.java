@@ -33,8 +33,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -77,7 +75,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            TenantContext.get().setUseDefaultDatasource(true);
+            TenantContext.get().setUseMasterDatabase(true);
             TransactionStatus tx = TransactionUtil.openTx();
             try {
                 // 旧的映射关系列表
@@ -112,7 +110,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 TransactionUtil.rollbackTx(tx);
                 throw e;
             } finally {
-                TenantContext.get().setUseDefaultDatasource(false);
+                TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;

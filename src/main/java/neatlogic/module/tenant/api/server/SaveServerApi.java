@@ -54,7 +54,7 @@ public class SaveServerApi extends PrivateApiComponentBase {
     @Description(desc = "nmtas.saveserverapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TenantContext.get().setUseDefaultDatasource(true);
+        TenantContext.get().setUseMasterDatabase(true);
         ServerClusterVo serverVo = paramObj.toJavaObject(ServerClusterVo.class);
         ServerClusterVo oldServerClusterVo = serverMapper.getServerByServerId(serverVo.getServerId());
         if (oldServerClusterVo == null) {
@@ -65,7 +65,7 @@ public class SaveServerApi extends PrivateApiComponentBase {
             serverVo.setLcu(UserContext.get().getUserUuid());
             serverMapper.updateServerHostByServerId(serverVo);
         }
-        TenantContext.get().setUseDefaultDatasource(false);
+        TenantContext.get().setUseMasterDatabase(false);
         return null;
     }
 

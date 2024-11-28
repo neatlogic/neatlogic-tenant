@@ -28,8 +28,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -75,7 +73,7 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            TenantContext.get().setUseDefaultDatasource(true);
+            TenantContext.get().setUseMasterDatabase(true);
             try {
                 documentOnlineService.deleteDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
@@ -83,7 +81,7 @@ public class DeleteDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 directory.getConfigList().addAll(backupConfigList);
                 throw e;
             } finally {
-                TenantContext.get().setUseDefaultDatasource(false);
+                TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;

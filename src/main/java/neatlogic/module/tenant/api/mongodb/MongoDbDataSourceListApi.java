@@ -55,10 +55,10 @@ public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String tenant = TenantContext.get().getTenantUuid();
-        TenantContext.get().setUseDefaultDatasource(true);
+        TenantContext.get().setUseMasterDatabase(true);
         MongoDbVo mongodbVo = neatlogicMapper.getMongodbList();
         TenantContext.get().switchTenant(tenant);
-        TenantContext.get().setUseDefaultDatasource(false);
+        TenantContext.get().setUseMasterDatabase(false);
         return mongodbVo;
     }
 }
