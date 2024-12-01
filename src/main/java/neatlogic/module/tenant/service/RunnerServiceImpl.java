@@ -23,10 +23,15 @@ import neatlogic.framework.exception.runner.RunnerNameRepeatsException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
 public class RunnerServiceImpl implements RunnerService {
+    public static Map<String,Map<Long, Date>> runnerTagentRegisterMap = new HashMap<>();
+
     @Resource
     RunnerMapper runnerMapper;
 
