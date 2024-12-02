@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.runner;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.RUNNER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -25,10 +26,13 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.tenant.service.RunnerServiceImpl;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AuthAction(action = RUNNER_MODIFY.class)
@@ -70,6 +74,7 @@ public class RunnerSearchApi extends PrivateApiComponentBase {
         Long groupId = paramObj.getLong("groupId");
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         runnerVo.setIsDelete(0);
+        List<RunnerVo> runnerVoList = new ArrayList<>();
         int rowNum = 0;
         if (groupId != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(groupId) == 0) {
@@ -80,7 +85,20 @@ public class RunnerSearchApi extends PrivateApiComponentBase {
             rowNum = runnerMapper.searchRunnerCount(runnerVo);
         }
         runnerVo.setRowNum(rowNum);
-        return TableResultUtil.getResult(runnerMapper.searchRunner(runnerVo), runnerVo);
+        if (rowNum > 0) {
+            runnerVoList = runnerMapper.searchRunner(runnerVo);
+            if (CollectionUtils.isNotEmpty(runnerVoList)) {
+                for (RunnerVo runner : runnerVoList) {
+                    if (RunnerServiceImpl.runnerInforMap.containsKey(runner.getHost())) {
+                        RunnerVo runnerInfo = RunnerServiceImpl.runnerInforMap.get(runner.getHost());
+                        runner.setInfo(runnerInfo.getInfo());
+                        runner.setStatus(runnerInfo.getStatus());
+                        runner.setStatusLcd(runnerInfo.getStatusLcd());
+                    }
+                }
+            }
+        }
+        return TableResultUtil.getResult(runnerVoList, runnerVo);
 
 
     }

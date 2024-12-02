@@ -19,17 +19,16 @@ package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
-import neatlogic.framework.dao.mapper.runner.RunnerMapper;
+import neatlogic.framework.common.constvalue.RunnerStatus;
+import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.tenant.service.RunnerServiceImpl;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.Date;
 
 @Service
 public class PushRunnerStatusApi extends PrivateApiComponentBase {
-
-    @Resource
-    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -39,7 +38,12 @@ public class PushRunnerStatusApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String host = RequestContext.get().getRequest().getRemoteHost();
-        runnerMapper.updateStatusAndInfoByHost(host, "connected", paramObj.toString());
+        RunnerVo runnerVo = new RunnerVo();
+        runnerVo.setHost(host);
+        runnerVo.setStatus(RunnerStatus.CONNECTED.getValue());
+        runnerVo.setInfo(paramObj.toJSONString());
+        runnerVo.setStatusLcd(new Date());
+        RunnerServiceImpl.runnerInforMap.put(host,runnerVo);
         return null;
     }
 
