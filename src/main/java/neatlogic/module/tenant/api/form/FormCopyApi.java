@@ -88,9 +88,11 @@ public class FormCopyApi extends PrivateApiComponentBase {
                 throw new FormNotFoundException(formVersionVo.getFormUuid());
             }
             newFrom.setIsActive(formVo.getIsActive());
-            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
-            FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
-            newFormVersionList.add(newFormVersion);
+            formVersionVo.setFormUuid(newFrom.getUuid());
+            newFormVersionList.add(formVersionVo);
+//            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
+//            FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
+//            newFormVersionList.add(newFormVersion);
         } else if(StringUtils.isNotBlank(uuid)) {
             FormVo formVo = formMapper.getFormByUuid(uuid);
             if (formVo == null) {
@@ -99,9 +101,11 @@ public class FormCopyApi extends PrivateApiComponentBase {
             newFrom.setIsActive(formVo.getIsActive());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             for (FormVersionVo formVersionVo : formVersionList) {
-                Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
-                FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
-                newFormVersionList.add(newFormVersion);
+                formVersionVo.setFormUuid(newFrom.getUuid());
+                newFormVersionList.add(formVersionVo);
+//                Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
+//                FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
+//                newFormVersionList.add(newFormVersion);
             }
         } else {
             throw new ParamNotExistsException("uuid", "currentVersionUuid");
