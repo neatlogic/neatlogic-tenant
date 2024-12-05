@@ -20,7 +20,6 @@ import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.FormUtil;
 import neatlogic.framework.util.RegexUtils;
-import neatlogic.framework.util.UuidUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -155,20 +154,20 @@ public class FormSaveApi extends PrivateApiComponentBase {
                     version += 1;
                     formVersionVo.setIsActive(0);
                     //另存为新版时，需要对表单组件的uuid重新生成新值，既同一个表单的不同版本中组件uuid不同
-                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
-                        String formConfigStr = formVersionVo.getFormConfig().toJSONString();
-                        for (FormAttributeVo formAttributeVo : formAttributeList) {
-                            String oldUuid = formAttributeVo.getUuid();
-                            String newUuid = UuidUtil.randomUuid();
-                            formConfigStr = formConfigStr.replace(oldUuid, newUuid);
-                            formAttributeOldUuid2NewUuidMap.put(oldUuid, newUuid);
-                        }
-                        formVersionVo.setFormConfig(JSONObject.parseObject(formConfigStr));
-                        mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
-                        formVersionVo.setSceneUuid(mainSceneUuid);
-                        formVersionVo.setFormAttributeList(null);
-                        formAttributeList = formVersionVo.getFormAttributeList();
-                    }
+//                    if (CollectionUtils.isNotEmpty(formAttributeList)) {
+//                        String formConfigStr = formVersionVo.getFormConfig().toJSONString();
+//                        for (FormAttributeVo formAttributeVo : formAttributeList) {
+//                            String oldUuid = formAttributeVo.getUuid();
+//                            String newUuid = UuidUtil.randomUuid();
+//                            formConfigStr = formConfigStr.replace(oldUuid, newUuid);
+//                            formAttributeOldUuid2NewUuidMap.put(oldUuid, newUuid);
+//                        }
+//                        formVersionVo.setFormConfig(JSONObject.parseObject(formConfigStr));
+//                        mainSceneUuid = formVersionVo.getFormConfig().getString("uuid");
+//                        formVersionVo.setSceneUuid(mainSceneUuid);
+//                        formVersionVo.setFormAttributeList(null);
+//                        formAttributeList = formVersionVo.getFormAttributeList();
+//                    }
                 }
                 formVersionVo.setVersion(version);
                 formMapper.insertFormVersion(formVersionVo);
