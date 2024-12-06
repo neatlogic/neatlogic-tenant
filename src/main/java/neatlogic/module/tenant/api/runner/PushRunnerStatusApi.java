@@ -18,7 +18,8 @@
 package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class PushRunnerStatusApi extends PrivateApiComponentBase {
 
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        String host = RequestContext.get().getRequest().getRemoteHost();
+        String host = IpUtil.getIpAddr(UserContext.get().getRequest());
         runnerMapper.updateStatusAndInfoByHost(host, "connected", paramObj.toString());
         return null;
     }

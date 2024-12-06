@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
@@ -63,7 +64,7 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo paramRunner = JSONObject.toJavaObject(paramObj, RunnerVo.class);
-        String host = RequestContext.get().getRequest().getRemoteHost();
+        String host = IpUtil.getIpAddr(UserContext.get().getRequest());
         paramRunner.setHost(host);
         paramRunner.setName(host);
         runnerService.SaveRunner(paramRunner, null);
