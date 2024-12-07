@@ -88,6 +88,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
                 throw new FormNotFoundException(formVersionVo.getFormUuid());
             }
             newFrom.setIsActive(formVo.getIsActive());
+            formVersionVo.setUuid(null);
             formVersionVo.setFormUuid(newFrom.getUuid());
             newFormVersionList.add(formVersionVo);
 //            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
@@ -101,6 +102,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
             newFrom.setIsActive(formVo.getIsActive());
             List<FormVersionVo> formVersionList = formMapper.getFormVersionByFormUuid(uuid);
             for (FormVersionVo formVersionVo : formVersionList) {
+                formVersionVo.setUuid(null);
                 formVersionVo.setFormUuid(newFrom.getUuid());
                 newFormVersionList.add(formVersionVo);
 //                Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
