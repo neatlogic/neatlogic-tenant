@@ -18,7 +18,9 @@ package neatlogic.module.tenant.api.runner;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.RunnerStatus;
 import neatlogic.framework.common.util.IpUtil;
+import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
@@ -37,6 +39,9 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerService runnerService;
+
+    @Resource
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -66,8 +71,13 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
         RunnerVo paramRunner = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         String host = IpUtil.getIpAddr(UserContext.get().getRequest());
         paramRunner.setHost(host);
-        paramRunner.setName(host);
-        runnerService.SaveRunner(paramRunner, null);
+        RunnerVo originRunner = runnerMapper.getRunnerByIp(host);
+        if (originRunner != null) {
+            runnerMapper.updateStatusAndInfoByHost(host, RunnerStatus.CONNECTED.getValue(), null);
+        } else {
+            paramRunner.setName(host);
+            runnerService.SaveRunner(paramRunner, null);
+        }
         return null;
     }
 
