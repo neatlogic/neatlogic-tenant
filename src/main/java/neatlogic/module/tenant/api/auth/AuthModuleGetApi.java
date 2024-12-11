@@ -43,11 +43,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 
-/**
- * @program: neatlogic
- * @description:
- * @create: 2020-06-04
- **/
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -89,7 +84,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray returnArray = new JSONArray();
-        Set<String> authSet = new HashSet<String>();
+        Set<String> authSet = new HashSet<>();
         //获取用户权限
         List<UserAuthVo> userAuthList = null;
         String userUuid = UserContext.get().getUserUuid(true);
@@ -177,7 +172,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
             moduleGroupJson.put("description", ModuleUtil.getModuleGroup(moduleGroupVo.getGroup()).getGroupDescription());
             returnArray.add(moduleGroupJson);
 
-            List<AuthVo> authBaseList = new ArrayList<AuthVo>();
+            List<AuthVo> authBaseList = new ArrayList<>();
             if (authModuleMap.containsKey(moduleGroupVo.getGroup())) {
                 for (AuthBase tmpAuth : authModuleMap.get(moduleGroupVo.getGroup())) {
                     if (authSet.contains(tmpAuth.getAuthName()) && tmpAuth.isShow()) {
