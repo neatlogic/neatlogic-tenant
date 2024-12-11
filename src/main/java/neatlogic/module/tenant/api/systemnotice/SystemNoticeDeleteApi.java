@@ -15,16 +15,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.systemnotice;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.SYSTEM_NOTICE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.scheduler.core.IJob;
+import neatlogic.framework.scheduler.core.SchedulerManager;
+import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import neatlogic.framework.systemnotice.dto.SystemNoticeVo;
 import neatlogic.framework.systemnotice.exception.SystemNoticeNotFoundException;
-import neatlogic.framework.auth.label.SYSTEM_NOTICE_MODIFY;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.module.framework.systemnotice.schedule.IssueSystemNoticeJob;
+import neatlogic.module.framework.systemnotice.schedule.StopSystemNoticeJob;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +45,9 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     private SystemNoticeMapper systemNoticeMapper;
+
+    @Resource
+    private SchedulerManager schedulerManager;
 
     @Override
     public String getToken() {
@@ -72,6 +82,27 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
          **/
         systemNoticeMapper.deleteRecipientByNoticeId(vo.getId());
         systemNoticeMapper.deleteSystemNoticeById(vo.getId());
+        systemNoticeMapper.deleteSystemNoticeUserByNoticeId(vo.getId());
+        {
+            IJob jobHandler = SchedulerManager.getHandler(IssueSystemNoticeJob.class.getName());
+            if (jobHandler == null) {
+                throw new ScheduleHandlerNotFoundException(IssueSystemNoticeJob.class.getName());
+            }
+            String tenantUuid = TenantContext.get().getTenantUuid();
+            JobObject jobObject = new JobObject.Builder(vo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
+                    .build();
+            schedulerManager.unloadJob(jobObject);
+        }
+        {
+            IJob jobHandler = SchedulerManager.getHandler(StopSystemNoticeJob.class.getName());
+            if (jobHandler == null) {
+                throw new ScheduleHandlerNotFoundException(StopSystemNoticeJob.class.getName());
+            }
+            String tenantUuid = TenantContext.get().getTenantUuid();
+            JobObject jobObject = new JobObject.Builder(vo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
+                    .build();
+            schedulerManager.unloadJob(jobObject);
+        }
         return null;
     }
 }
