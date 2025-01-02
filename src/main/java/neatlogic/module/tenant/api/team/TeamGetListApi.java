@@ -15,37 +15,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.team;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.TeamMapper;
-import neatlogic.framework.dto.TeamVo;
-
-/**
- * @program: neatlogic
- * @description:
- * @create: 2020-03-20 10:43
- **/
 @Service
-
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamGetListApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
 
     @Override
@@ -55,7 +45,7 @@ public class TeamGetListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "批量获取用户组信息接口";
+        return "批量获取用户组信息";
     }
 
     @Override
@@ -64,25 +54,20 @@ public class TeamGetListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param( name = "teamUuidList", desc = "用户组Uuid集合", type = ApiParamType.JSONARRAY, isRequired = true)
+            @Param(name = "teamUuidList", desc = "用户组Uuid集合", type = ApiParamType.JSONARRAY, isRequired = true)
     })
     @Output({
-            @Param( name = "teamList", desc = "用户组集合", explode = TeamVo[].class)
+            @Param(name = "teamList", desc = "用户组集合", explode = TeamVo[].class)
     })
-    @Description(desc = "批量获取用户组信息接口")
+    @Description(desc = "批量获取用户组信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         returnObj.put("teamList", new ArrayList<>());
         List<String> teamUuidList = JSON.parseArray(jsonObj.getString("teamUuidList"), String.class);
-        if(CollectionUtils.isNotEmpty(teamUuidList)) {
-        	List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
-        	teamList.sort(new Comparator<TeamVo>() {
-				@Override
-				public int compare(TeamVo o1, TeamVo o2) {
-					return teamUuidList.indexOf(o1.getUuid()) - teamUuidList.indexOf(o2.getUuid());
-				}       		
-        	});
+        if (CollectionUtils.isNotEmpty(teamUuidList)) {
+            List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+            teamList.sort(Comparator.comparingInt(o -> teamUuidList.indexOf(o.getUuid())));
             returnObj.put("teamList", teamList);
         }
         return returnObj;
