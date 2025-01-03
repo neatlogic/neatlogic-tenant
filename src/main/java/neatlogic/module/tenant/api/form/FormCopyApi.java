@@ -90,6 +90,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
             newFrom.setIsActive(formVo.getIsActive());
             formVersionVo.setUuid(null);
             formVersionVo.setFormUuid(newFrom.getUuid());
+            updateSceneUuid(formVersionVo);
             newFormVersionList.add(formVersionVo);
 //            Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
 //            FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
@@ -104,6 +105,7 @@ public class FormCopyApi extends PrivateApiComponentBase {
             for (FormVersionVo formVersionVo : formVersionList) {
                 formVersionVo.setUuid(null);
                 formVersionVo.setFormUuid(newFrom.getUuid());
+                updateSceneUuid(formVersionVo);
                 newFormVersionList.add(formVersionVo);
 //                Map<String, String> formAttributeOldUuid2NewUuidMap = new HashMap<>();
 //                FormVersionVo newFormVersion = copyFormVersion(formVersionVo, newFrom.getUuid(), formAttributeOldUuid2NewUuidMap);
@@ -163,6 +165,36 @@ public class FormCopyApi extends PrivateApiComponentBase {
             }
             return new FieldValidResultVo();
         };
+    }
+
+    /**
+     * 复制一份表单版本配置信息，需要将所有场景的uuid值重新生成，避免不同表单的场景uuid冲突
+     * @param formVersionVo
+     * @return
+     */
+    private void updateSceneUuid(FormVersionVo formVersionVo) {
+        JSONObject formConfig = formVersionVo.getFormConfig();
+        // 更新场景uuid
+        String defaultSceneUuid = formConfig.getString("defaultSceneUuid");
+        JSONArray sceneList = formConfig.getJSONArray("sceneList");
+        if (CollectionUtils.isNotEmpty(sceneList)) {
+            for (int i = 0; i < sceneList.size(); i++) {
+                JSONObject scene = sceneList.getJSONObject(i);
+                String uuid = scene.getString("uuid");
+                String newUuid = UuidUtil.randomUuid();
+                scene.put("uuid", newUuid);
+                if (Objects.equals(uuid, defaultSceneUuid)) {
+                    formConfig.put("defaultSceneUuid", newUuid);
+                }
+            }
+        }
+        String uuid = formConfig.getString("uuid");
+        String newUuid = UuidUtil.randomUuid();
+        formConfig.put("uuid", newUuid);
+        if (Objects.equals(uuid, defaultSceneUuid)) {
+            formConfig.put("defaultSceneUuid", newUuid);
+        }
+        formVersionVo.setFormConfig(formConfig);
     }
 
     /**
