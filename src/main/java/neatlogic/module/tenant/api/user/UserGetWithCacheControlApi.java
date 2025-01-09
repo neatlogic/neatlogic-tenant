@@ -20,7 +20,7 @@ import neatlogic.framework.auth.init.MaintenanceMode;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.*;

@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.schedule.plugin;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.common.constvalue.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
