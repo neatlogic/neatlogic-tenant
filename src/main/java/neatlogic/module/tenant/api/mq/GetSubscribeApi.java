@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mq;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -23,7 +24,6 @@ import neatlogic.framework.mq.dto.SubscribeVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -53,7 +53,7 @@ public class GetSubscribeApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id", isRequired = true)})
     @Output({@Param(explode = SubscribeVo.class)})
-    @Description(desc = "获取消息队列订阅信息接口")
+    @Description(desc = "获取消息队列订阅信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         return mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
