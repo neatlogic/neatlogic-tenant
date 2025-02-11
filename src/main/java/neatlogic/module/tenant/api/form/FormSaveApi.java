@@ -201,6 +201,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
                         IFormAttributeHandler formAttributeHandler = FormAttributeHandlerFactory.getHandler(formAttributeVo.getHandler());
                         if (formAttributeHandler != null) {
                             formAttributeHandler.validateExtendAttributeConfig(formAttributeVo.getKey(), formAttributeVo.getConfig());
+                            formAttributeVo.setConfigStr(null);
                         }
                         formMapper.insertFormExtendAttribute(formAttributeVo);
                     }
