@@ -300,6 +300,13 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                             null
                     );
                     defaultValueFilterList.add(matrixDefaultValueFilterVo);
+                } else {
+                    String defaultValueStr = defaultValueObject.toString();
+                    MatrixDefaultValueFilterVo matrixDefaultValueFilterVo = new MatrixDefaultValueFilterVo(
+                            new MatrixKeywordFilterVo(valueField, SearchExpression.EQ.getExpression(), defaultValueStr),
+                            null
+                    );
+                    defaultValueFilterList.add(matrixDefaultValueFilterVo);
                 }
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);

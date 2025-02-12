@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.util;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
+import neatlogic.framework.dao.mapper.DataBaseViewInfoMapper;
 import neatlogic.framework.rebuilddatabaseview.core.RebuildDataBaseViewManager;
 import neatlogic.framework.rebuilddatabaseview.core.ViewStatusInfo;
 import neatlogic.framework.restful.annotation.*;
@@ -27,6 +28,7 @@ import neatlogic.framework.util.TableResultUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
@@ -34,6 +36,10 @@ import java.util.List;
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class RebuildDataBaseViewApi extends PrivateApiComponentBase {
+
+    @Resource
+    private DataBaseViewInfoMapper dataBaseViewInfoMapper;
+
     @Override
     public String getName() {
         return "重建数据库视图";
@@ -51,6 +57,7 @@ public class RebuildDataBaseViewApi extends PrivateApiComponentBase {
     @Description(desc = "重建数据库视图")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        dataBaseViewInfoMapper.deleteDataBaseViewInfo();
         List<ViewStatusInfo> resultList = RebuildDataBaseViewManager.execute();
         return TableResultUtil.getResult(resultList);
     }
