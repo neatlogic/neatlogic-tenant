@@ -58,7 +58,7 @@ public class RebuildDataBaseViewApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         dataBaseViewInfoMapper.deleteDataBaseViewInfo();
-        List<ViewStatusInfo> resultList = RebuildDataBaseViewManager.execute();
+        List<ViewStatusInfo> resultList = RebuildDataBaseViewManager.createOrReplaceView();
         return TableResultUtil.getResult(resultList);
     }
 
