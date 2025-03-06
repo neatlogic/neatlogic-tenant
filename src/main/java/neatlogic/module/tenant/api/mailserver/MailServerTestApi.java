@@ -15,13 +15,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.mailserver;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.util.EmailUtil;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 @AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
+@OperationType(type = OperationTypeEnum.OPERATE)
 public class MailServerTestApi extends PrivateApiComponentBase {
 
     @Override
