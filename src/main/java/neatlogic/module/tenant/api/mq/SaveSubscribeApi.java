@@ -82,8 +82,6 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
                 throw new SubscribeNotFoundException(jsonObj.getLong("id"));
             }
             SubscribeManager.destroy(oldSubVo);
-            subscribeVo.setTopicName(oldSubVo.getTopicName());
-            subscribeVo.setName(oldSubVo.getName());
         }
         if (subscribeVo.getIsActive().equals(1)) {
             try {
