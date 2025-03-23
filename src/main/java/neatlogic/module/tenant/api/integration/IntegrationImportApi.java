@@ -15,6 +15,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.integration;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
@@ -29,9 +35,6 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +55,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 @Service
-
+@AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
 
@@ -103,7 +106,7 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
                     while ((len = zis.read(buf)) != -1) {
                         out.write(buf, 0, len);
                     }
-                    IntegrationVo integrationVo = JSONObject.parseObject(new String(out.toByteArray(), StandardCharsets.UTF_8), new TypeReference<IntegrationVo>() {
+                    IntegrationVo integrationVo = JSON.parseObject(new String(out.toByteArray(), StandardCharsets.UTF_8), new TypeReference<IntegrationVo>() {
                     });
                     JSONObject result = save(integrationVo);
                     if (MapUtils.isNotEmpty(result)) {
