@@ -17,13 +17,14 @@
 
 package neatlogic.module.tenant.api.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
@@ -33,81 +34,61 @@ import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
-import org.apache.commons.io.IOUtils;
+import org.apache.catalina.util.ServerInfo;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
+public class GetServerInfoApi extends PrivateApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
 
     @Override
     public String getName() {
-        return "下载服务器文件";
-    }
-
-    @Override
-    public String getConfig() {
-        return null;
+        return "获取服务器信息";
     }
 
     @Input({
-            @Param(name = "path", type = ApiParamType.STRING, desc = "路径", isRequired = true),
             @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "服务器ID")
     })
-    @Description(desc = "下载服务器文件")
+    @Description(desc = "获取服务器信息")
     @Override
-    public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Object myDoService(JSONObject paramObj) throws Exception {
+        JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
         Integer serverId = paramObj.getInteger("serverId");
         if (serverId == null) {
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            String fileName = null;
-            String path = paramObj.getString("path");
-            int index = path.lastIndexOf(File.separator);
-            if (index != -1) {
-                fileName = path.substring(index + 1);
-            } else {
-                fileName = path;
-            }
-            fileName += "_serverId" + serverId;
-            File file = new File(path);
-            if (!file.exists()) {
-                throw new ApiRuntimeException("文件不存在");
-            }
-            if (!file.isFile()) {
-                throw new ApiRuntimeException(path + "不是文件");
-            }
-            if (!path.startsWith("file:")) {
-                path = "file:" + path;
-            }
-            ServletOutputStream os;
-            InputStream in;
-            in = FileUtil.getData(path);
-            if (in != null) {
-                response.setContentType("application/octet-stream");
-                response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileName) + "\"");
-                os = response.getOutputStream();
-                IOUtils.copyLarge(in, os);
-                os.flush();
-                os.close();
-                in.close();
-            }
+            resultObj.put("Server.服务器版本", ServerInfo.getServerInfo());
+            resultObj.put("服务器构建", ServerInfo.getServerBuilt());
+            resultObj.put("服务器版本号", ServerInfo.getServerNumber());
+            resultObj.put("操作系统名称", System.getProperty("os.name"));
+            resultObj.put("OS.版本", System.getProperty("os.version"));
+            resultObj.put("架构", System.getProperty("os.arch"));
+            resultObj.put("Java 环境变量", System.getProperty("java.home"));
+            resultObj.put("Java虚拟机版本", System.getProperty("java.runtime.version"));
+            resultObj.put("JVM.供应商", System.getProperty("java.vm.vendor"));
+            resultObj.put("CATALINA_BASE", System.getProperty("catalina.base"));
+            resultObj.put("CATALINA_HOME", System.getProperty("catalina.home"));
+            List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+            JSONArray array = new JSONArray();
+            array.addAll(args);
+            resultObj.put("命令行参数", array);
+            resultObj.put("serverId", serverId);
         } else {
             String host = null;
             TenantContext.get().setUseMasterDatabase(true);
@@ -117,9 +98,9 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
             }
             TenantContext.get().setUseMasterDatabase(false);
             if (StringUtils.isNotBlank(host)) {
-                ServletOutputStream os = response.getOutputStream();
+                HttpServletRequest request = RequestContext.get().getRequest();
                 String url = host + request.getRequestURI();
-                HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os)
+                HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
                         .setPayload(paramObj.toJSONString())
                         .setAuthType(AuthenticateType.BUILDIN)
                         .setConnectTimeout(5000)
@@ -129,13 +110,21 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
                 if (StringUtils.isNotBlank(error)) {
                     throw new ApiRuntimeException(error);
                 }
+                JSONObject resultJson = httpRequestUtil.getResultJson();
+                if (MapUtils.isNotEmpty(resultJson)) {
+                    String status = resultJson.getString("Status");
+                    if (!"OK".equals(status)) {
+                        throw new RuntimeException(resultJson.getString("Message"));
+                    }
+                    resultObj = resultJson.getJSONObject("Return");
+                }
             }
         }
-        return null;
+        return resultObj;
     }
 
     @Override
     public String getToken() {
-        return "util/localfile/download";
+        return "util/serverinfo/get";
     }
 }
