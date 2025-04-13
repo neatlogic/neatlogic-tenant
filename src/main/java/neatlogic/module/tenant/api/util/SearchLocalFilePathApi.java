@@ -97,6 +97,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                             pathObj.put("canRead", file.canRead());
                             pathObj.put("canWrite", file.canWrite());
                             pathObj.put("isHidden", file.isHidden());
+                            pathObj.put("length", file.length());
                             filePathList.add(pathObj);
                         } else {
                             JSONObject pathObj = new JSONObject();
@@ -140,6 +141,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                                         pathObj.put("canRead", file.canRead());
                                         pathObj.put("canWrite", file.canWrite());
                                         pathObj.put("isHidden", file.isHidden());
+                                        pathObj.put("length", file.length());
                                         filePathList.add(pathObj);
                                     } else {
                                         JSONObject pathObj = new JSONObject();
