@@ -87,8 +87,8 @@ public class UpdateLocalFileApi extends PrivateApiComponentBase {
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
             Long fileId = paramObj.getLong("fileId");
             String path = paramObj.getString("path");
-            FileVo file = fileMapper.getFileById(fileId);
-            String filePath = file.getPath();
+            FileVo fileVo = fileMapper.getFileById(fileId);
+            String filePath = fileVo.getPath();
             String[] split = filePath.split(":", 2);
             IFileStorageHandler handler = FileStorageMediumFactory.getHandler(split[0].toUpperCase());
             if (handler == null) {
@@ -96,13 +96,17 @@ public class UpdateLocalFileApi extends PrivateApiComponentBase {
             }
             try (InputStream inputStream = handler.getData(filePath)) {
                 Path targetPath = Paths.get(path);
-                File file1 = targetPath.toFile();
-                if (file1.exists()) {
+                File file = targetPath.toFile();
+                resultObj.put("path", file.getPath());
+                if (file.exists()) {
                     resultObj.put("文件是否已存在", "是");
                     long length = Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
                     resultObj.put("操作类型", "覆盖");
                     resultObj.put("文件大小", length);
                 } else {
+                    if (!file.getParentFile().exists()) {
+                        file.getParentFile().mkdirs();
+                    }
                     resultObj.put("文件是否已存在", "否");
                     long length = Files.copy(inputStream, targetPath);
                     resultObj.put("操作类型", "新增");
