@@ -25,6 +25,8 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.EmailUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
 /**
  * 测试邮件服务器能否正常发送邮件
  *
@@ -58,10 +60,11 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     @Description(desc = "nmtam.mailservertestapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        EmailUtil.sendEmailWithFile(
+        EmailUtil.sendHtmlEmail(
                 "Test mail",
                 "Your configured mail server information is available!",
-                jsonObj.getString("emailAddress")
+                Collections.singletonList(jsonObj.getString("emailAddress")),
+                null
         );
         return null;
     }
