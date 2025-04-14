@@ -68,13 +68,11 @@ public class SaveWechatApi extends PrivateApiComponentBase {
         WechatVo wechatVo = paramObj.toJavaObject(WechatVo.class);
         NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
         notifyConfigVo.setId(id);
-//        notifyConfigVo.setName();
         notifyConfigVo.setIsActive(1);
         notifyConfigVo.setIsDefault(1);
         notifyConfigVo.setType(NotifyHandlerType.WECHAT.getValue());
         notifyConfigVo.setConfigStr(JSON.toJSONString(wechatVo));
         notifyConfigMapper.insertNotifyConfigVo(notifyConfigVo);
-//        notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.WECHAT.getValue(), JSONObject.toJSONString(wechatVo));
         return null;
     }
 
