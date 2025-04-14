@@ -20,32 +20,31 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
-import neatlogic.framework.dto.MailServerVo;
-import neatlogic.framework.dto.NotifyConfigVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class MailServerGetApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.DELETE)
+@Transactional
+public class DeleteMailServerApi extends PrivateApiComponentBase {
 
 	@Resource
 	private NotifyConfigMapper notifyConfigMapper;
 
 	@Override
 	public String getToken() {
-		return "mailserver/get";
+		return "mailserver/delete";
 	}
 
 	@Override
 	public String getName() {
-		return "nmtam.mailservergetapi.getname";
+		return "nmtam.deletemailserverapi.getname";
 	}
 
 	@Override
@@ -56,43 +55,12 @@ public class MailServerGetApi extends PrivateApiComponentBase {
 	@Input({
 			@Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id")
 	})
-	@Output({
-		@Param(explode = MailServerVo.class)
-	})
-	@Description(desc = "nmtam.mailservergetapi.getname")
+	@Output({})
+	@Description(desc = "nmtam.deletemailserverapi.getname")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		Long id = jsonObj.getLong("id");
-		NotifyConfigVo notifyConfigVo = notifyConfigMapper.getNotifyConfigById(id);
-		if (notifyConfigVo != null) {
-			String name = notifyConfigVo.getName();
-			Integer isActive = notifyConfigVo.getIsActive();
-			Integer isDefault = notifyConfigVo.getIsDefault();
-			JSONObject config = notifyConfigVo.getConfig();
-			String fromAddress = config.getString("fromAddress");
-			String homeUrl = config.getString("homeUrl");
-			String host = config.getString("host");
-			if (StringUtils.isBlank(name)) {
-				name = config.getString("name");
-			}
-			String password = config.getString("password");
-			Integer port = config.getInteger("port");
-			String sslEnable = config.getString("sslEnable");
-			String userName = config.getString("userName");
-			MailServerVo mailServerVo = new MailServerVo();
-			mailServerVo.setFromAddress(fromAddress);
-			mailServerVo.setHomeUrl(homeUrl);
-			mailServerVo.setHost(host);
-			mailServerVo.setName(name);
-			mailServerVo.setPassword(password);
-			mailServerVo.setPort(port);
-			mailServerVo.setSslEnable(sslEnable);
-			mailServerVo.setUserName(userName);
-			mailServerVo.setId(id);
-			mailServerVo.setIsActive(isActive);
-			mailServerVo.setIsDefault(isDefault);
-			return mailServerVo;
-		}
+		notifyConfigMapper.deleteNotifyConfigById(id);
 		return null;
 	}
 

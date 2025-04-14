@@ -22,6 +22,7 @@ import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.MailServerVo;
+import neatlogic.framework.dto.NotifyConfigVo;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -57,22 +58,29 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "id", type = ApiParamType.STRING, desc = "common.id"),
             @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
             @Param(name = "host", type = ApiParamType.STRING, isRequired = true, maxLength = 50, desc = "term.framework.smpthost"),
             @Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.smptport"),
             @Param(name = "userName", type = ApiParamType.STRING, maxLength = 50, desc = "common.username"),
             @Param(name = "password", type = ApiParamType.STRING, maxLength = 50, desc = "common.password"),
-            @Param(name = "domain", type = ApiParamType.STRING, maxLength = 50, desc = "term.framework.domain"),
+            @Param(name = "homeUrl", type = ApiParamType.STRING, desc = "common.homeurl"),
             @Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true, maxLength = 50, desc = "common.mailaddress"),
-            @Param(name = "sslEnable", type = ApiParamType.ENUM, rule = "true,false", isRequired = true, maxLength = 50, desc = "term.framework.smptsslenable")
+            @Param(name = "sslEnable", type = ApiParamType.ENUM, rule = "true,false", isRequired = true, maxLength = 50, desc = "term.framework.smptsslenable"),
     })
     @Output({})
     @Description(desc = "nmtam.mailserversaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MailServerVo mailServerVo = jsonObj.toJavaObject(MailServerVo.class);
-        notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.EMAIL.getValue(), JSON.toJSONString(mailServerVo));
+        NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
+        notifyConfigVo.setId(mailServerVo.getId());
+        notifyConfigVo.setName(mailServerVo.getName());
+        notifyConfigVo.setIsActive(0);
+        notifyConfigVo.setIsDefault(0);
+        notifyConfigVo.setType(NotifyHandlerType.EMAIL.getValue());
+        notifyConfigVo.setConfigStr(JSON.toJSONString(mailServerVo));
+        notifyConfigMapper.insertNotifyConfigVo(notifyConfigVo);
         return null;
     }
 

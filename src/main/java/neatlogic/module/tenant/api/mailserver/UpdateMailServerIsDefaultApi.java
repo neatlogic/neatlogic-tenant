@@ -13,71 +13,72 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-package neatlogic.module.tenant.api.wechat;
+package neatlogic.module.tenant.api.mailserver;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.NotifyConfigVo;
-import neatlogic.framework.dto.WechatVo;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.SnowflakeUtil;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
-@Component
+@Service
 @Transactional
 @AuthAction(action = NOTIFY_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class SaveWechatApi extends PrivateApiComponentBase {
+public class UpdateMailServerIsDefaultApi extends PrivateApiComponentBase {
 
     @Resource
     private NotifyConfigMapper notifyConfigMapper;
 
     @Override
-    public String getName() {
-        return "nmtaw.savewechatapi.getname";
+    public String getToken() {
+        return "mailserver/isdefault/update";
     }
 
-    @Input({
-            @Param(name = "corpId", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.corpid"),
-            @Param(name = "corpSecret", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.corpsecret"),
-            @Param(name = "agentId", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.agentid")
-    })
-    @Output({})
-    @Description(desc = "nmtaw.savewechatapi.getname")
     @Override
-    public Object myDoService(JSONObject paramObj) throws Exception {
-        Long id = null;
-        List<NotifyConfigVo> notifyConfigList = notifyConfigMapper.getNotifyConfigListByType(NotifyHandlerType.WECHAT.getValue());
-        if (CollectionUtils.isNotEmpty(notifyConfigList)) {
-            id = notifyConfigList.get(0).getId();
-        } else {
-            id = SnowflakeUtil.uniqueLong();
-        }
-        WechatVo wechatVo = paramObj.toJavaObject(WechatVo.class);
-        NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
-        notifyConfigVo.setId(id);
-        notifyConfigVo.setIsActive(1);
-        notifyConfigVo.setIsDefault(1);
-        notifyConfigVo.setType(NotifyHandlerType.WECHAT.getValue());
-        notifyConfigVo.setConfigStr(JSON.toJSONString(wechatVo));
-        notifyConfigMapper.insertNotifyConfigVo(notifyConfigVo);
+    public String getName() {
+        return "nmtam.updatemailserverisdefaultapi.getname";
+    }
+
+    @Override
+    public String getConfig() {
         return null;
     }
 
+    @Input({
+            @Param(name = "id", type = ApiParamType.STRING, isRequired = true, desc = "common.id"),
+            @Param(name = "isDefault", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "common.isdefault"),
+    })
+    @Output({})
+    @Description(desc = "nmtam.updatemailserverisdefaultapi.getname")
     @Override
-    public String getToken() {
-        return "wechat/save";
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        Long id = jsonObj.getLong("id");
+        Integer isDefault = jsonObj.getInteger("isDefault");
+        if (Objects.equals(isDefault, 1)) {
+            List<NotifyConfigVo> notifyConfigList = notifyConfigMapper.getNotifyConfigListByType(NotifyHandlerType.EMAIL.getValue());
+            if (CollectionUtils.isNotEmpty(notifyConfigList)) {
+                for (NotifyConfigVo notifyConfigVo : notifyConfigList) {
+                    if (Objects.equals(notifyConfigVo.getIsDefault(), 1) && !Objects.equals(notifyConfigVo.getId(), id)) {
+                        notifyConfigMapper.updateNotifyConfigIsDefault(notifyConfigVo.getId(), 0);
+                    }
+                }
+            }
+        }
+        notifyConfigMapper.updateNotifyConfigIsDefault(id, isDefault);
+        return null;
     }
+
 }
