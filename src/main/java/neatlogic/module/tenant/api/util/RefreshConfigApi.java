@@ -82,34 +82,37 @@ public class RefreshConfigApi extends PrivateApiComponentBase {
             resultObj.put("config", prop);
             resultObj.put("serverId", serverId);
         } else {
-            String host = null;
             TenantContext.get().setUseMasterDatabase(true);
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            if (serverClusterVo != null) {
-                host = serverClusterVo.getHost();
-            }
             TenantContext.get().setUseMasterDatabase(false);
-            if (StringUtils.isNotBlank(host)) {
-                HttpServletRequest request = RequestContext.get().getRequest();
-                String url = host + request.getRequestURI();
-                HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
-                        .setPayload(paramObj.toJSONString())
-                        .setAuthType(AuthenticateType.BUILDIN)
-                        .setConnectTimeout(5000)
-                        .setReadTimeout(5000)
-                        .sendRequest();
-                String error = httpRequestUtil.getError();
-                if (StringUtils.isNotBlank(error)) {
-                    throw new ApiRuntimeException(error);
-                }
-                JSONObject resultJson = httpRequestUtil.getResultJson();
-                if (MapUtils.isNotEmpty(resultJson)) {
-                    String status = resultJson.getString("Status");
-                    if (!"OK".equals(status)) {
-                        throw new RuntimeException(resultJson.getString("Message"));
+            if (serverClusterVo != null) {
+                String host = serverClusterVo.getHost();
+                if (StringUtils.isNotBlank(host)) {
+                    HttpServletRequest request = RequestContext.get().getRequest();
+                    String url = host + request.getRequestURI();
+                    HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
+                            .setPayload(paramObj.toJSONString())
+                            .setAuthType(AuthenticateType.BUILDIN)
+                            .setConnectTimeout(5000)
+                            .setReadTimeout(5000)
+                            .sendRequest();
+                    String error = httpRequestUtil.getError();
+                    if (StringUtils.isNotBlank(error)) {
+                        throw new ApiRuntimeException(error);
                     }
-                    resultObj = resultJson.getJSONObject("Return");
+                    JSONObject resultJson = httpRequestUtil.getResultJson();
+                    if (MapUtils.isNotEmpty(resultJson)) {
+                        String status = resultJson.getString("Status");
+                        if (!"OK".equals(status)) {
+                            throw new RuntimeException(resultJson.getString("Message"));
+                        }
+                        resultObj = resultJson.getJSONObject("Return");
+                    }
+                } else {
+                    resultObj.put("message", "serverId为" + serverId + "的应用服务器的`server_status`表中对应数据没有配置host");
                 }
+            } else {
+                resultObj.put("message", "找不到serverId为" + serverId + "的应用服务器");
             }
         }
         return resultObj;

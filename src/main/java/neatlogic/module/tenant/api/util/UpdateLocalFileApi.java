@@ -17,7 +17,6 @@
 
 package neatlogic.module.tenant.api.util;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
@@ -26,6 +25,11 @@ import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.core.ApiRuntimeException;
+import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
+import neatlogic.framework.file.core.FileStorageMediumFactory;
+import neatlogic.framework.file.core.IFileStorageHandler;
+import neatlogic.framework.file.dao.mapper.FileMapper;
+import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
@@ -36,35 +40,43 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
-import org.apache.catalina.util.ServerInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.management.ManagementFactory;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Objects;
 
 @Service
 @AuthAction(action = ADMIN.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class GetServerInfoApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.OPERATE)
+public class UpdateLocalFileApi extends PrivateApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
 
+    @Resource
+    private FileMapper fileMapper;
+
     @Override
     public String getName() {
-        return "获取服务器信息";
+        return "更新服务器文件";
     }
 
     @Input({
-            @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "服务器ID")
+            @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "服务器ID"),
+            @Param(name = "fileId", type = ApiParamType.LONG, isRequired = true, desc = "附件ID"),
+            @Param(name = "path", type = ApiParamType.STRING, isRequired = true, desc = "需要更新的文件路径")
     })
-    @Description(desc = "获取服务器信息")
+    @Description(desc = "更新服务器文件")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
@@ -73,23 +85,34 @@ public class GetServerInfoApi extends PrivateApiComponentBase {
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            resultObj.put("Server.服务器版本", ServerInfo.getServerInfo());
-            resultObj.put("服务器构建", ServerInfo.getServerBuilt());
-            resultObj.put("服务器版本号", ServerInfo.getServerNumber());
-            resultObj.put("操作系统名称", System.getProperty("os.name"));
-            resultObj.put("OS.版本", System.getProperty("os.version"));
-            resultObj.put("架构", System.getProperty("os.arch"));
-            resultObj.put("Java 环境变量", System.getProperty("java.home"));
-            resultObj.put("Java虚拟机版本", System.getProperty("java.runtime.version"));
-            resultObj.put("JVM.供应商", System.getProperty("java.vm.vendor"));
-            resultObj.put("CATALINA_BASE", System.getProperty("catalina.base"));
-            resultObj.put("CATALINA_HOME", System.getProperty("catalina.home"));
-            List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-            JSONArray array = new JSONArray();
-            array.addAll(args);
-            resultObj.put("命令行参数", array);
-            resultObj.put("Java虚拟机的系统属性", System.getProperties());
-            resultObj.put("操作系统的环境变量", System.getenv());
+            Long fileId = paramObj.getLong("fileId");
+            String path = paramObj.getString("path");
+            FileVo fileVo = fileMapper.getFileById(fileId);
+            String filePath = fileVo.getPath();
+            String[] split = filePath.split(":", 2);
+            IFileStorageHandler handler = FileStorageMediumFactory.getHandler(split[0].toUpperCase());
+            if (handler == null) {
+                throw new FileStorageMediumHandlerNotFoundException(split[0]);
+            }
+            try (InputStream inputStream = handler.getData(filePath)) {
+                Path targetPath = Paths.get(path);
+                File file = targetPath.toFile();
+                resultObj.put("path", file.getPath());
+                if (file.exists()) {
+                    resultObj.put("文件是否已存在", "是");
+                    long length = Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    resultObj.put("操作类型", "覆盖");
+                    resultObj.put("文件大小", length);
+                } else {
+                    if (!file.getParentFile().exists()) {
+                        file.getParentFile().mkdirs();
+                    }
+                    resultObj.put("文件是否已存在", "否");
+                    long length = Files.copy(inputStream, targetPath);
+                    resultObj.put("操作类型", "新增");
+                    resultObj.put("文件大小", length);
+                }
+            }
             resultObj.put("serverId", serverId);
         } else {
             TenantContext.get().setUseMasterDatabase(true);
@@ -130,6 +153,12 @@ public class GetServerInfoApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "util/serverinfo/get";
+        return "util/localfile/update";
     }
+
+    @Override
+    public int needAudit() {
+        return 1;
+    }
+
 }
