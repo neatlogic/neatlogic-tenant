@@ -15,20 +15,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.wechat;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
+import neatlogic.framework.dto.NotifyConfigVo;
 import neatlogic.framework.dto.WechatVo;
 import neatlogic.framework.notify.core.NotifyHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.SnowflakeUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Component
 @Transactional
@@ -53,8 +58,23 @@ public class SaveWechatApi extends PrivateApiComponentBase {
     @Description(desc = "nmtaw.savewechatapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        Long id = null;
+        List<NotifyConfigVo> notifyConfigList = notifyConfigMapper.getNotifyConfigListByType(NotifyHandlerType.WECHAT.getValue());
+        if (CollectionUtils.isNotEmpty(notifyConfigList)) {
+            id = notifyConfigList.get(0).getId();
+        } else {
+            id = SnowflakeUtil.uniqueLong();
+        }
         WechatVo wechatVo = paramObj.toJavaObject(WechatVo.class);
-        notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.WECHAT.getValue(), JSONObject.toJSONString(wechatVo));
+        NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
+        notifyConfigVo.setId(id);
+//        notifyConfigVo.setName();
+        notifyConfigVo.setIsActive(1);
+        notifyConfigVo.setIsDefault(1);
+        notifyConfigVo.setType(NotifyHandlerType.WECHAT.getValue());
+        notifyConfigVo.setConfigStr(JSON.toJSONString(wechatVo));
+        notifyConfigMapper.insertNotifyConfigVo(notifyConfigVo);
+//        notifyConfigMapper.insertNotifyConfig(NotifyHandlerType.WECHAT.getValue(), JSONObject.toJSONString(wechatVo));
         return null;
     }
 
