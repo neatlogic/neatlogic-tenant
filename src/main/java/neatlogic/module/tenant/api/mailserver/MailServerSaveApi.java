@@ -28,6 +28,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
+import neatlogic.framework.util.SnowflakeUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +75,11 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MailServerVo mailServerVo = jsonObj.toJavaObject(MailServerVo.class);
         NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
-        notifyConfigVo.setId(mailServerVo.getId());
+        if (mailServerVo.getId() != null) {
+            notifyConfigVo.setId(mailServerVo.getId());
+        } else {
+            notifyConfigVo.setId(SnowflakeUtil.uniqueLong());
+        }
         notifyConfigVo.setName(mailServerVo.getName());
         notifyConfigVo.setIsActive(0);
         notifyConfigVo.setIsDefault(0);
