@@ -22,7 +22,10 @@ import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.MailServerVo;
 import neatlogic.framework.dto.NotifyConfigVo;
 import neatlogic.framework.notify.core.NotifyHandlerType;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
@@ -39,66 +42,65 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ListMailServerApi extends PrivateApiComponentBase {
 
-	@Resource
-	private NotifyConfigMapper notifyConfigMapper;
+    @Resource
+    private NotifyConfigMapper notifyConfigMapper;
 
-	@Override
-	public String getToken() {
-		return "mailserver/list";
-	}
+    @Override
+    public String getToken() {
+        return "mailserver/list";
+    }
 
-	@Override
-	public String getName() {
-		return "nmtam.listmailserverapi.getname";
-	}
+    @Override
+    public String getName() {
+        return "nmtam.listmailserverapi.getname";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({})
-	@Output({
-		@Param(name = "tbodyList", explode = MailServerVo[].class, desc = "common.tbodylist")
-	})
-	@Description(desc = "nmtam.listmailserverapi.getname")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		List<MailServerVo> tbodyList = new ArrayList<>();
-		List<NotifyConfigVo> notifyConfigList = notifyConfigMapper.getNotifyConfigListByType(NotifyHandlerType.EMAIL.getValue());
-		if (CollectionUtils.isNotEmpty(notifyConfigList)) {
-			for (NotifyConfigVo notifyConfigVo : notifyConfigList) {
-				Long id = notifyConfigVo.getId();
-				String name = notifyConfigVo.getName();
-				Integer isActive = notifyConfigVo.getIsActive();
-				Integer isDefault = notifyConfigVo.getIsDefault();
-				JSONObject config = notifyConfigVo.getConfig();
-				String fromAddress = config.getString("fromAddress");
-				String homeUrl = config.getString("homeUrl");
-				String host = config.getString("host");
-				if (StringUtils.isBlank(name)) {
-					name = config.getString("name");
-				}
-				String password = config.getString("password");
-				Integer port = config.getInteger("port");
-				String sslEnable = config.getString("sslEnable");
-				String userName = config.getString("userName");
-				MailServerVo mailServerVo = new MailServerVo();
-				mailServerVo.setFromAddress(fromAddress);
-				mailServerVo.setHomeUrl(homeUrl);
-				mailServerVo.setHost(host);
-				mailServerVo.setName(name);
-				mailServerVo.setPassword(password);
-				mailServerVo.setPort(port);
-				mailServerVo.setSslEnable(sslEnable);
-				mailServerVo.setUserName(userName);
-				mailServerVo.setId(id);
-				mailServerVo.setIsActive(isActive);
-				mailServerVo.setIsDefault(isDefault);
-				tbodyList.add(mailServerVo);
-			}
-		}
-		return TableResultUtil.getResult(tbodyList);
-	}
+    @Output({
+            @Param(name = "tbodyList", explode = MailServerVo[].class, desc = "common.tbodylist")
+    })
+    @Description(desc = "nmtam.listmailserverapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        List<MailServerVo> tbodyList = new ArrayList<>();
+        List<NotifyConfigVo> notifyConfigList = notifyConfigMapper.getNotifyConfigListByType(NotifyHandlerType.EMAIL.getValue());
+        if (CollectionUtils.isNotEmpty(notifyConfigList)) {
+            for (NotifyConfigVo notifyConfigVo : notifyConfigList) {
+                Long id = notifyConfigVo.getId();
+                String name = notifyConfigVo.getName();
+                Integer isActive = notifyConfigVo.getIsActive();
+                Integer isDefault = notifyConfigVo.getIsDefault();
+                JSONObject config = notifyConfigVo.getConfig();
+                String fromAddress = config.getString("fromAddress");
+                String homeUrl = config.getString("homeUrl");
+                String host = config.getString("host");
+                if (StringUtils.isBlank(name)) {
+                    name = config.getString("name");
+                }
+                String password = config.getString("password");
+                Integer port = config.getInteger("port");
+                String sslEnable = config.getString("sslEnable");
+                String userName = config.getString("userName");
+                MailServerVo mailServerVo = new MailServerVo();
+                mailServerVo.setFromAddress(fromAddress);
+                mailServerVo.setHomeUrl(homeUrl);
+                mailServerVo.setHost(host);
+                mailServerVo.setName(name);
+                mailServerVo.setPassword(password);
+                mailServerVo.setPort(port);
+                mailServerVo.setSslEnable(sslEnable);
+                mailServerVo.setUserName(userName);
+                mailServerVo.setId(id);
+                mailServerVo.setIsActive(isActive);
+                mailServerVo.setIsDefault(isDefault);
+                tbodyList.add(mailServerVo);
+            }
+        }
+        return TableResultUtil.getResult(tbodyList);
+    }
 
 }
