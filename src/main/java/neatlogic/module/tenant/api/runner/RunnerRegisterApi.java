@@ -15,8 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.runner;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.RunnerStatus;
 import neatlogic.framework.common.util.IpUtil;
@@ -68,8 +69,8 @@ public class RunnerRegisterApi extends PrivateApiComponentBase {
     @Description(desc = "nmtar.runnerregisterapi.description.desc")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerVo paramRunner = JSONObject.toJavaObject(paramObj, RunnerVo.class);
-        String host = IpUtil.getIpAddr(UserContext.get().getRequest());
+        RunnerVo paramRunner = JSON.toJavaObject(paramObj, RunnerVo.class);
+        String host = IpUtil.getIpAddr(RequestContext.get().getRequest());
         paramRunner.setHost(host);
         RunnerVo originRunner = runnerMapper.getRunnerByIp(host);
         if (originRunner != null) {
