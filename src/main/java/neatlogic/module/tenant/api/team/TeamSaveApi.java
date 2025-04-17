@@ -64,6 +64,8 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid", isRequired = false),
             @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", isRequired = true, xss = true),
+            @Param(name = "email", type = ApiParamType.STRING, desc = "common.email", maxLength = 100),
+            @Param(name = "phone", type = ApiParamType.STRING, desc = "common.phone", maxLength = 20),
             @Param(name = "parentUuid", type = ApiParamType.STRING, desc = "term.diagram.parentuuid"),
             @Param(name = "level", type = ApiParamType.STRING, desc = "common.level"),
             @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "common.useruuidlist"),
@@ -75,6 +77,8 @@ public class TeamSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String level = jsonObj.getString("level");
+        String email = jsonObj.getString("email");
+        String phone = jsonObj.getString("phone");
         List<TeamUserTitleVo> teamUserTitleList = null;
         if (CollectionUtils.isNotEmpty(jsonObj.getJSONArray("teamUserTitleList"))) {
             teamUserTitleList = jsonObj.getJSONArray("teamUserTitleList").toJavaList(TeamUserTitleVo.class);
@@ -87,6 +91,9 @@ public class TeamSaveApi extends PrivateApiComponentBase {
         teamVo.setName(jsonObj.getString("name"));
         teamVo.setLevel(level);
         teamVo.setUuid(uuid);
+        teamVo.setEmail(email);
+        teamVo.setPhone(phone);
+
         if (StringUtils.isNotBlank(uuid)) {
             TeamVo oldTeam = teamMapper.getTeamByUuid(uuid);
             if (oldTeam == null) {
@@ -97,7 +104,7 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                 throw new TeamNameRepeatException(teamVo.getName());
             }
             teamVo.setUuid(uuid);
-            teamMapper.updateTeamNameByUuid(teamVo);
+            teamMapper.updateTeamByUuid(teamVo);
             teamService.deleteTeamUserTitleByTeamUuid(uuid);
         } else {
             String parentUuid = jsonObj.getString("parentUuid");
@@ -156,11 +163,11 @@ public class TeamSaveApi extends PrivateApiComponentBase {
                     continue;
                 }
                 Long titleId;
-                if (!userTitleMap.containsKey(teamUserTitleVo.getTitle()) ) {
+                if (!userTitleMap.containsKey(teamUserTitleVo.getTitle())) {
                     UserTitleVo userTitleVo = new UserTitleVo(teamUserTitleVo.getTitle());
                     userMapper.insertUserTitle(userTitleVo);
                     titleId = userTitleVo.getId();
-                    userTitleMap.put(userTitleVo.getName(),userTitleVo.getId());
+                    userTitleMap.put(userTitleVo.getName(), userTitleVo.getId());
                 } else {
                     titleId = userTitleMap.get(teamUserTitleVo.getTitle());
                 }
