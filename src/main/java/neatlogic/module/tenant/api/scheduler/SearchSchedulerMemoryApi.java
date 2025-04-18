@@ -14,17 +14,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.scheduler;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.scheduler.dto.JobInfoVo;
 import neatlogic.framework.scheduler.dto.JobObject;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -74,35 +75,17 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
             @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
             @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-            @Param(name = "tbodyList", explode = JobObject[].class, desc = "内存的定时作业列表")
+            @Param(name = "tbodyList", explode = JobInfoVo[].class, desc = "内存的定时作业列表")
     })
     @Description(desc = "查询内存的定时作业列表")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String jobGroupName = paramObj.getString("jobGroupName");
         String jobName = paramObj.getString("jobName");
-        List<JobObject> returnList = new ArrayList<>();
-        Scheduler scheduler = schedulerFactoryBean.getScheduler();
-        if (StringUtils.isNotEmpty(jobName)) {
-            if (StringUtils.isEmpty(jobGroupName)) {
-                throw new ParamNotExistsException("jobGroupName");
-            }
-            TriggerKey triggerKey = new TriggerKey(jobName, jobGroupName);
-            Trigger trigger = scheduler.getTrigger(triggerKey);
-            if (trigger != null) {
-                JobDetail jobDetail = scheduler.getJobDetail(trigger.getJobKey());
-                JobObject jobObject = (JobObject) jobDetail.getJobDataMap().get("jobObject");
-                if (jobObject != null) {
-                    returnList.add(jobObject);
-                }
-            }
-        } else if (StringUtils.isNotEmpty(jobGroupName)) {
-            returnList = matchJobObject(scheduler, jobGroupName);
-        } else {
-            for (String groupName : scheduler.getJobGroupNames()) {
-                returnList.addAll(matchJobObject(scheduler, groupName));
-            }
-        }
+        List<JobInfoVo> returnList = getAllJob();
+        returnList = returnList.stream().filter(j -> (StringUtils.isBlank(jobGroupName) || j.getJobGroup().equals(jobGroupName))
+                && (StringUtils.isBlank(jobName) || j.getJobName().equals(jobName))
+        ).collect(Collectors.toList());
 
         JSONObject resultObj = new JSONObject();
         int currentPage = paramObj.getInteger("currentPage") != null ? paramObj.getInteger("currentPage") : 1;
@@ -119,18 +102,29 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
     /**
      * 获取对应的定时作业信息列表
      *
-     * @param scheduler scheduler
-     * @param groupName 作业组名
      * @return 作业信息列表
      * @throws SchedulerException e
      */
-    private List<JobObject> matchJobObject(Scheduler scheduler, String groupName) throws SchedulerException {
-        List<JobObject> returnList = new ArrayList<>();
-        for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+    private List<JobInfoVo> getAllJob() throws SchedulerException {
+        Scheduler scheduler = schedulerFactoryBean.getScheduler();
+        List<JobInfoVo> returnList = new ArrayList<>();
+        for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.anyGroup())) {
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
             JobObject jobObject = (JobObject) jobDetail.getJobDataMap().get("jobObject");
+            List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+            Trigger trigger = null;
+            if (CollectionUtils.isNotEmpty(triggers)) {
+                trigger = triggers.get(0);
+            }
             if (jobObject != null) {
-                returnList.add(jobObject);
+                JobInfoVo jobInfoVo = new JobInfoVo(jobObject);
+                if (trigger != null) {
+                    Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
+                    jobInfoVo.setState(triggerState.name());
+                    jobInfoVo.setNextFireTime(trigger.getNextFireTime());
+                    jobInfoVo.setLastFireTime(trigger.getPreviousFireTime());
+                }
+                returnList.add(jobInfoVo);
             }
         }
         return returnList;
