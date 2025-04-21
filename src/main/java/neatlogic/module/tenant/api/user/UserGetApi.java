@@ -111,7 +111,6 @@ public class UserGetApi extends PrivateApiComponentBase {
             }
             userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
             userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
-//            userVo.setRoleUuidList(roleMapper.getRoleUuidListByUserUuid(userUuid));
             if (CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
                 userVo.setRoleList(roleMapper.getRoleByUuidList(userVo.getRoleUuidList()));
             }
