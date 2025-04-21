@@ -15,25 +15,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.user;
 
-import java.util.Random;
-
-import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.annotation.OperationType;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
-
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.core.AuthBase;
+import neatlogic.framework.auth.core.AuthFactory;
+import neatlogic.framework.auth.init.MaintenanceMode;
+import neatlogic.framework.common.config.Config;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.AuthenticationInfoVo;
+import neatlogic.framework.dto.UserAuthVo;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.AuthenticationInfoService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class CurrentUserGetApi extends PrivateApiComponentBase {
+
+	@Resource
+	private AuthenticationInfoService authenticationInfoService;
+
+	@Resource
+	private UserMapper userMapper;
 
 	@Override
 	public String getToken() {
@@ -42,7 +61,7 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "获取当前用户test接口";
+		return "获取当前用户接口";
 	}
 
 	@Override
@@ -52,11 +71,64 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 
 	@Input({})
 	@Output({})
-	@Description(desc = "获取当前用户test接口")
+	@Description(desc = "获取当前用户接口")
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
-		Random random = new Random();
-		Thread.sleep(random.nextInt(10000));
-		return UserContext.get();
+		UserContext userContext = UserContext.get();
+		if (userContext != null) {
+			//维护模式下 获取厂商维护人员信息
+			if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(userContext.getUserId())) {
+				UserVo userVo = MaintenanceMode.getMaintenanceUser();
+				//告诉前端是否为维护模式
+				userVo.setIsMaintenanceMode(1);
+				return userVo;
+			} else {
+				UserVo userVo = new UserVo();
+				userVo.setUuid(userContext.getUserUuid());
+				userVo.setUserId(userContext.getUserId());
+				userVo.setUserName(userContext.getUserName());
+				AuthenticationInfoVo authenticationInfoVo = userContext.getAuthenticationInfoVo();
+				if (authenticationInfoVo == null) {
+					authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userContext.getUserUuid(), true);
+				}
+				userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
+				userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
+				//超级管理员拥有所有权限
+				if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
+					List<AuthBase> authBaseList = AuthFactory.getAuthList();
+					List<UserAuthVo> userAuthVos = new ArrayList<>();
+					for (AuthBase authBase : authBaseList) {
+						String authGroupName = authBase.getAuthGroup();
+						if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
+							continue;
+						}
+						userAuthVos.add(new UserAuthVo(userContext.getUserUuid(), authBase));
+					}
+					userVo.setUserAuthList(userAuthVos);
+				} else {
+					List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
+					List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
+					if (CollectionUtils.isNotEmpty(userAuthVoList)) {
+						userAuthVoList.forEach(auth -> {
+							//过滤反射后不存在非法auth
+							AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
+							if (authBase != null) {
+								List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
+								List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+								//过滤该租户没有tenantGroup对应的auth
+								if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
+									filteredUserAuthVoList.add(auth);
+								}
+							}
+						});
+
+						AuthActionChecker.getAuthList(filteredUserAuthVoList);
+						userVo.setUserAuthList(filteredUserAuthVoList);
+					}
+				}
+				return userVo;
+			}
+		}
+		return null;
 	}
 }
