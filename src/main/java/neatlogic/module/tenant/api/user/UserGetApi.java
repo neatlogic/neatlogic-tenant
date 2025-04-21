@@ -110,8 +110,8 @@ public class UserGetApi extends PrivateApiComponentBase {
                 throw new UserNotFoundException(userUuid);
             }
             userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
-//            userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
-            userVo.setRoleUuidList(roleMapper.getRoleUuidListByUserUuid(userUuid));
+            userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
+//            userVo.setRoleUuidList(roleMapper.getRoleUuidListByUserUuid(userUuid));
             if (CollectionUtils.isNotEmpty(userVo.getRoleUuidList())) {
                 userVo.setRoleList(roleMapper.getRoleByUuidList(userVo.getRoleUuidList()));
             }
