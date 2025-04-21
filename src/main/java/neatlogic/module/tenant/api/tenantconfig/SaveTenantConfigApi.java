@@ -24,6 +24,9 @@ import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dto.ConfigVo;
 import neatlogic.framework.exception.tenantconfig.TenantConfigNotFoundException;
+import neatlogic.framework.exception.type.ParamIrregularException;
+import neatlogic.framework.param.validate.core.ApiParamValidatorBase;
+import neatlogic.framework.param.validate.core.ParamValidatorFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -62,6 +65,15 @@ public class SaveTenantConfigApi extends PrivateApiComponentBase {
         ITenantConfig tenantConfig = TenantConfigFactory.getTenantConfigByKey(configVo.getKey());
         if (tenantConfig == null) {
             throw new TenantConfigNotFoundException(configVo.getKey());
+        }
+        ApiParamType type = tenantConfig.getType();
+        if (type != null) {
+            ApiParamValidatorBase authInstance = ParamValidatorFactory.getAuthInstance(type);
+            if (authInstance != null) {
+                if (!authInstance.validate(configVo.getValue(), null)) {
+                    throw new ParamIrregularException("value(值)");
+                }
+            }
         }
         configMapper.insertConfig(configVo);
         return null;
