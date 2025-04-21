@@ -21,8 +21,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
-import neatlogic.framework.auth.init.MaintenanceMode;
-import neatlogic.framework.common.config.Config;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserAuthVo;
@@ -76,58 +74,49 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		UserContext userContext = UserContext.get();
 		if (userContext != null) {
-			//维护模式下 获取厂商维护人员信息
-			if (Config.ENABLE_MAINTENANCE() && Config.MAINTENANCE().equals(userContext.getUserId())) {
-				UserVo userVo = MaintenanceMode.getMaintenanceUser();
-				//告诉前端是否为维护模式
-				userVo.setIsMaintenanceMode(1);
-				return userVo;
-			} else {
-				UserVo userVo = new UserVo();
-				userVo.setUuid(userContext.getUserUuid());
-				userVo.setUserId(userContext.getUserId());
-				userVo.setUserName(userContext.getUserName());
-				AuthenticationInfoVo authenticationInfoVo = userContext.getAuthenticationInfoVo();
-				if (authenticationInfoVo == null) {
-					authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userContext.getUserUuid(), true);
-				}
-				userVo.setTeamUuidList(authenticationInfoVo.getTeamUuidList());
-				userVo.setRoleUuidList(authenticationInfoVo.getRoleUuidList());
-				//超级管理员拥有所有权限
-				if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
-					List<AuthBase> authBaseList = AuthFactory.getAuthList();
-					List<UserAuthVo> userAuthVos = new ArrayList<>();
-					for (AuthBase authBase : authBaseList) {
-						String authGroupName = authBase.getAuthGroup();
-						if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
-							continue;
-						}
-						userAuthVos.add(new UserAuthVo(userContext.getUserUuid(), authBase));
-					}
-					userVo.setUserAuthList(userAuthVos);
-				} else {
-					List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
-					List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
-					if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-						userAuthVoList.forEach(auth -> {
-							//过滤反射后不存在非法auth
-							AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
-							if (authBase != null) {
-								List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
-								List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
-								//过滤该租户没有tenantGroup对应的auth
-								if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
-									filteredUserAuthVoList.add(auth);
-								}
-							}
-						});
-
-						AuthActionChecker.getAuthList(filteredUserAuthVoList);
-						userVo.setUserAuthList(filteredUserAuthVoList);
-					}
-				}
-				return userVo;
+			JSONObject userObj = new JSONObject();
+			UserVo userVo = userMapper.getUserBaseInfoByUuid(userContext.getUserUuid());
+			AuthenticationInfoVo authenticationInfoVo = userContext.getAuthenticationInfoVo();
+			if (authenticationInfoVo == null) {
+				authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userContext.getUserUuid(), true);
 			}
+			//超级管理员拥有所有权限
+			List<UserAuthVo> userAuthList = new ArrayList<>();
+			if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
+				List<AuthBase> authBaseList = AuthFactory.getAuthList();
+				for (AuthBase authBase : authBaseList) {
+					String authGroupName = authBase.getAuthGroup();
+					if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
+						continue;
+					}
+					userAuthList.add(new UserAuthVo(userContext.getUserUuid(), authBase));
+				}
+			} else {
+				List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
+				if (CollectionUtils.isNotEmpty(userAuthVoList)) {
+					userAuthVoList.forEach(auth -> {
+						//过滤反射后不存在非法auth
+						AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
+						if (authBase != null) {
+							List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
+							List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+							//过滤该租户没有tenantGroup对应的auth
+							if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
+								userAuthList.add(auth);
+							}
+						}
+					});
+
+					AuthActionChecker.getAuthList(userAuthList);
+				}
+			}
+			userObj.put("uuid", userContext.getUserUuid());
+			userObj.put("userId", userContext.getUserId());
+			userObj.put("userName", userContext.getUserName());
+			userObj.put("teamUuidList", authenticationInfoVo.getTeamUuidList());
+			userObj.put("roleUuidList", authenticationInfoVo.getRoleUuidList());
+			userObj.put("userAuthList", userAuthList);
+			return userObj;
 		}
 		return null;
 	}
