@@ -21,6 +21,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserAuthVo;
@@ -114,8 +115,22 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 			userObj.put("uuid", userContext.getUserUuid());
 			userObj.put("userId", userContext.getUserId());
 			userObj.put("userName", userContext.getUserName());
-			userObj.put("teamUuidList", authenticationInfoVo.getTeamUuidList());
-			userObj.put("roleUuidList", authenticationInfoVo.getRoleUuidList());
+			List<String> newTeamUuidList = new ArrayList<>();
+			List<String> teamUuidList = authenticationInfoVo.getTeamUuidList();
+			if (CollectionUtils.isNotEmpty(teamUuidList)) {
+				for (String teamUuid : teamUuidList) {
+					newTeamUuidList.add(GroupSearch.TEAM.addPrefix(teamUuid));
+				}
+			}
+			List<String> newRoleUuidList = new ArrayList<>();
+			List<String> roleUuidList = authenticationInfoVo.getRoleUuidList();
+			if (CollectionUtils.isNotEmpty(roleUuidList)) {
+				for (String roleUuid : roleUuidList) {
+					newRoleUuidList.add(GroupSearch.ROLE.addPrefix(roleUuid));
+				}
+			}
+			userObj.put("teamUuidList", newTeamUuidList);
+			userObj.put("roleUuidList", newRoleUuidList);
 			userObj.put("userAuthList", userAuthList);
 			JSONObject userInfoObj = userVo.getUserInfoObj();
 			if (MapUtils.isNotEmpty(userInfoObj)) {
