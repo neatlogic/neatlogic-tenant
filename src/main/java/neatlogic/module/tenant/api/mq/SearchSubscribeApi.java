@@ -55,7 +55,8 @@ public class SearchSubscribeApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "通知插件列表"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页数"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页大小")})
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页大小"),
+            @Param(name = "ignoreServerId", type = ApiParamType.BOOLEAN, desc = "是否忽略serverId")})
     @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = SubscribeVo[].class)})
     @Description(desc = "消息队列订阅查询")
     @Override
