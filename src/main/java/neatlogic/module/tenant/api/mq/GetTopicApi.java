@@ -63,7 +63,9 @@ public class GetTopicApi extends PrivateApiComponentBase {
         if (topicVo == null) {
             topicVo = topicSettingVo;
         } else {
-            topicVo.setConfig(topicSettingVo.getConfig());
+            if (topicSettingVo != null) {
+                topicVo.setConfig(topicSettingVo.getConfig());
+            }
         }
         return topicVo;
     }

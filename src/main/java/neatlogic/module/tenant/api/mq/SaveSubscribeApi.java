@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.mq.SubscribeNameIsExistsException;
 import neatlogic.framework.exception.mq.SubscribeNotFoundException;
@@ -72,6 +73,7 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SubscribeVo subscribeVo = JSON.toJavaObject(jsonObj, SubscribeVo.class);
+        subscribeVo.setServerId(Config.SCHEDULE_SERVER_ID);
         subscribeVo.setError("");
         if (mqSubscribeMapper.checkSubscribeNameIsExists(subscribeVo) > 0) {
             throw new SubscribeNameIsExistsException(subscribeVo.getName());
