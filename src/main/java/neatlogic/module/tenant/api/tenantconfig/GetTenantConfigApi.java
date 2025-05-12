@@ -70,7 +70,10 @@ public class GetTenantConfigApi extends PrivateApiComponentBase {
             configVo.setValue(tenantConfig.getValue());
         }
         configVo.setDescription(tenantConfig.getDescription());
-        configVo.setType(tenantConfig.getType().getText());
+        ApiParamType type = tenantConfig.getType();
+        if (type != null) {
+            configVo.setType(type.getText());
+        }
         return configVo;
     }
 
