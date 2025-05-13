@@ -58,7 +58,7 @@ public class UserGetForEditApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取用户信息(编辑页面回显专用)";
+        return "nmtau.usergetforeditapi.getname";
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UserGetForEditApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "Return", explode = UserVo.class, desc = "nmtau.usergetapi.output.param.desc.user")
     })
-    @Description(desc = "获取用户信息(编辑页面回显专用)")
+    @Description(desc = "nmtau.usergetforeditapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String userUuid = jsonObj.getString("userUuid");
