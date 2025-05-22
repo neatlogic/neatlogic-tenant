@@ -26,6 +26,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.SubmitKeyManager;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -62,12 +63,12 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Map.Entry<String, Long> entry : SubmitKeyManager.getAll().entrySet()) {
-            if(StringUtils.isNotBlank(keyword) && !entry.getKey().contains(keyword)){
-                    continue;
+            if (StringUtils.isNotBlank(keyword) && !entry.getKey().contains(keyword)) {
+                continue;
             }
             Map<String, Object> item = new HashMap<>();
             item.put("key", entry.getKey());
-            item.put("expireTime", new Date(entry.getValue()));
+            item.put("expireTime", TimeUtil.convertDateToString(new Date(entry.getValue()), TimeUtil.YYYY_MM_DD_HH_MM_SS));
             item.put("remainingSeconds", Math.max(0, (entry.getValue() - now) / 1000));
             result.add(item);
         }
