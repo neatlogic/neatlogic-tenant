@@ -63,9 +63,9 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String keyword = paramObj.getString("keyword");
-        Integer page = paramObj.getInteger("currentPage");
-        if (page == null) {
-            page = 1;
+        Integer currentPage = paramObj.getInteger("currentPage");
+        if (currentPage == null) {
+            currentPage = 1;
         }
         Integer pageSize = paramObj.getInteger("pageSize");
         if (pageSize == null) {
@@ -87,14 +87,14 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
 
         // 分页处理
         int total = allItems.size();
-        int fromIndex = Math.min((page - 1) * pageSize, total);
+        int fromIndex = Math.min((currentPage - 1) * pageSize, total);
         int toIndex = Math.min(fromIndex + pageSize, total);
         List<Map<String, Object>> pageList = allItems.subList(fromIndex, toIndex);
 
         // 返回分页结果（你也可以封装成 PageResult 对象）
         Map<String, Object> result = new HashMap<>();
         result.put("total", total);
-        result.put("page", page);
+        result.put("currentPage", currentPage);
         result.put("pageSize", pageSize);
         result.put("list", pageList);
         return result;
