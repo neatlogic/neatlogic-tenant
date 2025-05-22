@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
+ * Copyright (C) 2025  深圳极向量科技有限公司 All Rights Reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package neatlogic.module.tenant.api;
+package neatlogic.module.tenant.api.util;
 
 
 import com.alibaba.fastjson.JSONObject;
@@ -44,7 +44,7 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取重复提交SubmitKeyMap";
+        return "nmtau.getsubmitkeyinfoapi.getname";
     }
 
     @Override
@@ -53,14 +53,26 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
     }
 
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "不填")})
+    @Input({
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页,默认第一页"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条目，默认1000条"),
+    })
     @Output({})
-    @Description(desc = "获取重复提交SubmitKeyMap")
+    @Description(desc = "nmtau.getsubmitkeyinfoapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String keyword = paramObj.getString("keyword");
+        Integer page = paramObj.getInteger("currentPage");
+        if (page == null) {
+            page = 1;
+        }
+        Integer pageSize = paramObj.getInteger("pageSize");
+        if (pageSize == null) {
+            pageSize = 1000;
+        }
         long now = System.currentTimeMillis();
-        List<Map<String, Object>> result = new ArrayList<>();
+        List<Map<String, Object>> allItems = new ArrayList<>();
 
         for (Map.Entry<String, Long> entry : SubmitKeyManager.getAll().entrySet()) {
             if (StringUtils.isNotBlank(keyword) && !entry.getKey().contains(keyword)) {
@@ -70,9 +82,21 @@ public class GetSubmitKeyInfoApi extends PrivateApiComponentBase {
             item.put("key", entry.getKey());
             item.put("expireTime", TimeUtil.convertDateToString(new Date(entry.getValue()), TimeUtil.YYYY_MM_DD_HH_MM_SS));
             item.put("remainingSeconds", Math.max(0, (entry.getValue() - now) / 1000));
-            result.add(item);
+            allItems.add(item);
         }
 
+        // 分页处理
+        int total = allItems.size();
+        int fromIndex = Math.min((page - 1) * pageSize, total);
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        List<Map<String, Object>> pageList = allItems.subList(fromIndex, toIndex);
+
+        // 返回分页结果（你也可以封装成 PageResult 对象）
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", total);
+        result.put("page", page);
+        result.put("pageSize", pageSize);
+        result.put("list", pageList);
         return result;
     }
 }
