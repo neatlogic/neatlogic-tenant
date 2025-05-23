@@ -24,6 +24,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.cache.NeatLogicConcurrentSafeCache;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
@@ -42,53 +43,36 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class RefreshConfigApi extends PrivateApiComponentBase {
+public class GetNeatLogicConcurrentSafeCacheLockKeyApi extends PrivateApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
 
-    @Resource
-    private Config config;
     @Override
     public String getName() {
-        return "刷新config.properties文件配置变量值";
+        return "获取Mybaties二级缓存NeatLogicConcurrentSafeCache中lockKey列表";
     }
 
     @Input({
             @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "服务器ID")
     })
-    @Description(desc = "刷新config.properties文件配置变量值")
+    @Description(desc = "获取Mybaties二级缓存NeatLogicConcurrentSafeCache中lockKey列表")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        JSONObject resultObj = new JSONObject();
+        JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
         Integer serverId = paramObj.getInteger("serverId");
         if (serverId == null) {
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            Properties prop = new Properties();
-            boolean flag = config.readProperties(prop);
-            Config.loadNacosProperties(prop);
-            if (flag) {
-                resultObj.put("数据来源", "Nacos");
-            } else {
-                resultObj.put("数据来源", "config.properties");
-            }
-            Map<String, Object> map = new LinkedHashMap<>();
-            for (Map.Entry<Object, Object> entry : prop.entrySet()) {
-                map.put(entry.getKey().toString(), entry.getValue());
-            }
-            Map<String, Object> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByKey())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-            resultObj.put("config", sortedMap);
+            List<String> lockKeyList = NeatLogicConcurrentSafeCache.getAllLockKeyList();
+            resultObj.put("lockKeyList", lockKeyList);
             resultObj.put("serverId", serverId);
         } else {
             TenantContext.get().setUseMasterDatabase(true);
@@ -129,6 +113,6 @@ public class RefreshConfigApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "util/config/refresh";
+        return "util/neatlogicconcurrentsafecache/lockkeylist";
     }
 }

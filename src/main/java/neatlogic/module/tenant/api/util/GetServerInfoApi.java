@@ -44,9 +44,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.management.ManagementFactory;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = ADMIN.class)
@@ -88,8 +87,22 @@ public class GetServerInfoApi extends PrivateApiComponentBase {
             JSONArray array = new JSONArray();
             array.addAll(args);
             resultObj.put("命令行参数", array);
-            resultObj.put("Java虚拟机的系统属性", System.getProperties());
-            resultObj.put("操作系统的环境变量", System.getenv());
+            {
+                Properties prop = System.getProperties();
+                Map<String, Object> map = new LinkedHashMap<>();
+                for (Map.Entry<Object, Object> entry : prop.entrySet()) {
+                    map.put(entry.getKey().toString(), entry.getValue());
+                }
+                Map<String, Object> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                resultObj.put("Java虚拟机的系统属性", sortedMap);
+            }
+            {
+                Map<String, String> map = System.getenv();
+                Map<String, Object> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                resultObj.put("操作系统的环境变量", sortedMap);
+            }
             resultObj.put("serverId", serverId);
         } else {
             TenantContext.get().setUseMasterDatabase(true);
