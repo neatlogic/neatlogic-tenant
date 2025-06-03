@@ -23,8 +23,11 @@ import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.datawarehouse.dao.mapper.DatabaseMapper;
 import neatlogic.framework.datawarehouse.dto.DatabaseVo;
+import neatlogic.framework.datawarehouse.exceptions.DatabaseNameRepeatException;
+import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.SnowflakeUtil;
 import org.springframework.stereotype.Service;
@@ -72,5 +75,16 @@ public class SavaDataBaseApi extends PrivateApiComponentBase {
     @Override
     public String getToken() {
         return "database/save";
+    }
+
+    public IValid name() {
+        return paramObj -> {
+            DatabaseVo dataBaseVo = paramObj.toJavaObject(DatabaseVo.class);
+            int count = databaseMapper.checkDatabaseNameIsRepeat(dataBaseVo);
+            if (count > 0) {
+                return new FieldValidResultVo(new DatabaseNameRepeatException(dataBaseVo.getName()));
+            }
+            return new FieldValidResultVo();
+        };
     }
 }
