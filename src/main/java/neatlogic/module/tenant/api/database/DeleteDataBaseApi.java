@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.datawarehouse.dao.mapper.DataBaseMapper;
+import neatlogic.framework.datawarehouse.dao.mapper.DatabaseMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -35,7 +35,7 @@ import javax.annotation.Resource;
 public class DeleteDataBaseApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataBaseMapper dataBaseMapper;
+    private DatabaseMapper databaseMapper;
 
     @Override
     public String getName() {
@@ -50,7 +50,7 @@ public class DeleteDataBaseApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        return dataBaseMapper.deleteDataBaseById(id);
+        return databaseMapper.deleteDataBaseById(id);
     }
 
     @Override

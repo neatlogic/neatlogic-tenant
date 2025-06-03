@@ -22,7 +22,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.datawarehouse.dao.mapper.DataBaseMapper;
+import neatlogic.framework.datawarehouse.dao.mapper.DatabaseMapper;
 import neatlogic.framework.datawarehouse.dto.DatabaseVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -40,7 +40,7 @@ import java.util.List;
 public class SearchDataBaseApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataBaseMapper dataBaseMapper;
+    private DatabaseMapper databaseMapper;
 
     @Override
     public String getName() {
@@ -62,10 +62,10 @@ public class SearchDataBaseApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         DatabaseVo searchVo = paramObj.toJavaObject(DatabaseVo.class);
         List<DatabaseVo> tbodyList = new ArrayList<>();
-        int rowNum = dataBaseMapper.getDataBaseCount(searchVo);
+        int rowNum = databaseMapper.getDataBaseCount(searchVo);
         if (rowNum > 0) {
             searchVo.setRowNum(rowNum);
-            tbodyList = dataBaseMapper.getDataBaseList(searchVo);
+            tbodyList = databaseMapper.getDataBaseList(searchVo);
         }
         return TableResultUtil.getResult(tbodyList, searchVo);
     }

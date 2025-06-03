@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.datawarehouse.dao.mapper.DataBaseMapper;
+import neatlogic.framework.datawarehouse.dao.mapper.DatabaseMapper;
 import neatlogic.framework.datawarehouse.dto.DatabaseVo;
 import neatlogic.framework.datawarehouse.exceptions.DatabaseNotFoundException;
 import neatlogic.framework.restful.annotation.*;
@@ -37,7 +37,7 @@ import javax.annotation.Resource;
 public class GetDataBaseApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataBaseMapper dataBaseMapper;
+    private DatabaseMapper databaseMapper;
 
     @Override
     public String getName() {
@@ -54,7 +54,7 @@ public class GetDataBaseApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        DatabaseVo databaseVo = dataBaseMapper.getDataBaseById(id);
+        DatabaseVo databaseVo = databaseMapper.getDataBaseById(id);
         if (databaseVo == null) {
             throw new DatabaseNotFoundException(id);
         }
