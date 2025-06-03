@@ -76,7 +76,7 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
             @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
             @Param(name = "dbType", type = ApiParamType.STRING, isRequired = true, desc = "数据库类型"),
-            @Param(name = "databaseId", type = ApiParamType.LONG, desc = "数据源id")
+            @Param(name = "databaseId", type = ApiParamType.LONG, desc = "数据库Id")
     })
     @Description(desc = "保存数据仓库数据源接口")
     @Override
