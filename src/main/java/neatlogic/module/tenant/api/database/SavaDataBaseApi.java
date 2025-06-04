@@ -54,6 +54,7 @@ public class SavaDataBaseApi extends PrivateApiComponentBase {
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "common.name"),
             @Param(name = "type", type = ApiParamType.STRING, isRequired = true, desc = "common.type"),
             @Param(name = "config", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "common.config"),
+            @Param(name = "fileIdList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.fileidlist"),
     })
     @Output({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = true, desc = "common.id")
