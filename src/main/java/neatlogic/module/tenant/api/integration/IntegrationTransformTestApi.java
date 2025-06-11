@@ -15,14 +15,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.integration;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.integration.ParamFormatInvalidException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.javascript.JavascriptUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -39,7 +39,7 @@ public class IntegrationTransformTestApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "集成设置参数转换测试接口";
+        return "集成设置参数转换测试";
     }
 
     @Override
@@ -49,17 +49,17 @@ public class IntegrationTransformTestApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "content", type = ApiParamType.STRING, desc = "原始内容，需要符合json格式", isRequired = true), @Param(name = "template", type = ApiParamType.STRING, desc = "转换模板，如果为空则不做转换")})
     @Output({@Param(name = "Return", type = ApiParamType.STRING, desc = "返回结果")})
-    @Description(desc = "集成设置参数转换测试接口")
+    @Description(desc = "集成设置参数转换测试")
     @Override
     public Object myDoService(JSONObject jsonObj) {
         String content = jsonObj.getString("content");
         String template = jsonObj.getString("template");
         Object object = null;
         try {
-            object = JSONObject.parseObject(content);
+            object = JSON.parseObject(content);
         } catch (Exception ex) {
             try {
-                object = JSONArray.parseArray(content);
+                object = JSON.parseArray(content);
             } catch (Exception ignored) {
 
             }
