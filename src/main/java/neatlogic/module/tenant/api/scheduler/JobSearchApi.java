@@ -26,9 +26,11 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.JobClassVo;
+import neatlogic.framework.scheduler.dto.JobStatusVo;
 import neatlogic.framework.scheduler.dto.JobVo;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.util.TableResultUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,6 +45,9 @@ public class JobSearchApi extends PrivateApiComponentBase {
 
     @Resource
     private SchedulerMapper schedulerMapper;
+
+    @Resource
+    private SchedulerManager schedulerManager;
 
     @Override
     public String getToken() {
@@ -88,6 +93,14 @@ public class JobSearchApi extends PrivateApiComponentBase {
         List<JobVo> jobList = new ArrayList<>();
         if (rowNum > 0) {
             jobList = schedulerMapper.searchJob(jobVo);
+            for (JobVo job : jobList) {
+                boolean isLoad = false;
+                JobStatusVo jobStatusVo = job.getJobStatus();
+                if (jobStatusVo != null && StringUtils.isNotBlank(jobStatusVo.getJobName()) && StringUtils.isNotBlank(jobStatusVo.getJobGroup())) {
+                    isLoad = schedulerManager.checkJobIsExists(jobStatusVo.getJobName(), jobStatusVo.getJobGroup());
+                }
+                job.setIsLoad(isLoad ? 1 : 0);
+            }
         }
         return TableResultUtil.getResult(jobList, jobVo);
     }
