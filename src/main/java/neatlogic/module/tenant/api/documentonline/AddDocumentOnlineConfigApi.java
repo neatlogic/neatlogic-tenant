@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -74,7 +73,7 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            TenantContext.get().setUseMasterDatabase(true);
+            //TenantContext.get().setUseMasterDatabase(true);
             try {
                 documentOnlineService.saveDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
@@ -82,7 +81,7 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 directory.getConfigList().addAll(backupConfigList);
                 throw e;
             } finally {
-                TenantContext.get().setUseMasterDatabase(false);
+                //TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;

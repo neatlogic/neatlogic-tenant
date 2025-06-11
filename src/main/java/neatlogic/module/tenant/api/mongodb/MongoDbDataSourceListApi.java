@@ -16,20 +16,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.mongodb;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dto.MongoDbVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dao.mapper.NeatLogicMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
-    @Autowired
-    NeatLogicMapper neatlogicMapper;
+    @Resource
+    private NeatLogicMapper neatlogicMapper;
 
     @Override
     public String getToken() {
@@ -51,14 +51,13 @@ public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "mongoVo", explode = MongoDbVo[].class, desc = "mongodb数据库")
     })
-    @Description(desc = "获取所有mongodb连接信息接口")
+    @Description(desc = "获取所有mongodb连接信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        String tenant = TenantContext.get().getTenantUuid();
-        TenantContext.get().setUseMasterDatabase(true);
-        MongoDbVo mongodbVo = neatlogicMapper.getMongodbList();
-        TenantContext.get().switchTenant(tenant);
-        TenantContext.get().setUseMasterDatabase(false);
-        return mongodbVo;
+        //String tenant = TenantContext.get().getTenantUuid();
+        //TenantContext.get().setUseMasterDatabase(true);
+        //TenantContext.get().switchTenant(tenant);
+        //TenantContext.get().setUseMasterDatabase(false);
+        return neatlogicMapper.getMongodbList();
     }
 }

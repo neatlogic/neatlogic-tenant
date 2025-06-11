@@ -34,7 +34,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DocumentOnlineServiceImpl implements DocumentOnlineService {
@@ -185,9 +188,7 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
         boolean needUpdateDataBaseTable = false;
         boolean updateSuccessfully = false;
         List<DocumentOnlineConfigVo> configList = directory.getConfigList();
-        Iterator<DocumentOnlineConfigVo> iterator = configList.iterator();
-        while (iterator.hasNext()) {
-            DocumentOnlineConfigVo configVo = iterator.next();
+        for (DocumentOnlineConfigVo configVo : configList) {
             if (configVo.equals(newConfigVo)) {
                 if (!Objects.equals(configVo.getAnchorPoint(), newConfigVo.getAnchorPoint())) {
                     configVo.setAnchorPoint(newConfigVo.getAnchorPoint());
