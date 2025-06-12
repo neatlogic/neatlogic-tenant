@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.sql.Connection;
 import java.sql.Driver;
 import java.util.List;
 import java.util.Properties;
@@ -91,7 +92,11 @@ public class TestDataBaseApi extends PrivateApiComponentBase {
             if (StringUtils.isNotBlank(password)) {
                 props.put("password", password);
             }
-            return driver.connect(url, props);
+            Connection conn = driver.connect(url, props);
+            if (conn != null) {
+                conn.close();
+            }
+            return null;
         } else {
             throw new DatabaseConnectionFailedException(DatabaseConnectionFailedException.Type.CONFIG_IS_EMPTY, databaseVo.getName());
         }
