@@ -50,9 +50,7 @@ public class GetServerListApi extends PrivateApiComponentBase {
     @Description(desc = "nmtas.getserverlistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        //TenantContext.get().setUseMasterDatabase(true);
         List<ServerClusterVo> list = serverMapper.getAllServerList();
-        //TenantContext.get().setUseMasterDatabase(false);
         return TableResultUtil.getResult(list);
     }
 

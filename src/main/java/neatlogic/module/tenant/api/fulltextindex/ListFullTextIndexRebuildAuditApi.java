@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.fulltextindex;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.FULLTEXTINDEX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.dao.mapper.FullTextIndexMapper;
@@ -37,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AuthAction(action = FULLTEXTINDEX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
     @Resource

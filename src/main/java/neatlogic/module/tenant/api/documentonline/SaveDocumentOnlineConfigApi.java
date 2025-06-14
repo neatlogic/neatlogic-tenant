@@ -74,7 +74,6 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            //TenantContext.get().setUseMasterDatabase(true);
             TransactionStatus tx = TransactionUtil.openTx();
             try {
                 // 旧的映射关系列表
@@ -108,8 +107,6 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
                 directory.getConfigList().addAll(backupConfigList);
                 TransactionUtil.rollbackTx(tx);
                 throw e;
-            } finally {
-               // TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;

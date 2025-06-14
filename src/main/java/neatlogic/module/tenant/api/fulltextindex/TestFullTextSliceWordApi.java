@@ -39,16 +39,16 @@ import java.util.Objects;
 @Service
 @AuthAction(action = FULLTEXTINDEX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
+public class TestFullTextSliceWordApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "fulltextindex/rebuild";
+        return "fulltextindex/testsliceword";
     }
 
     @Override
     public String getName() {
-        return "重建检索索引";
+        return "测试分词";
     }
 
     @Override
@@ -59,7 +59,7 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
     @Input({@Param(name = "type", desc = "索引类型", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "handler", desc = "处理器", rule = "database,elasticsearch", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "isAll", desc = "是否全部重建", type = ApiParamType.BOOLEAN, isRequired = true)})
-    @Description(desc = "重建检索索引接口")
+    @Description(desc = "测试分词")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String type = paramObj.getString("type");

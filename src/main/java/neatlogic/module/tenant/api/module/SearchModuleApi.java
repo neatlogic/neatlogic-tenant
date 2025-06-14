@@ -67,11 +67,9 @@ public class SearchModuleApi extends PrivateApiComponentBase {
         List<ModuleGroupVo> moduleGroupList = TenantContext.get().getActiveModuleGroupList();
         moduleGroupList.sort(Comparator.comparing(ModuleGroupVo::getGroupSort));
         String tenantUuid = TenantContext.get().getTenantUuid();
-        //TenantContext.get().setUseMasterDatabase(true);
         List<TenantModuleVo> tenantModuleVos = tenantMapper.getTenantModuleByTenantUuid(tenantUuid);
         Map<String, String> moduleVersionMap = tenantModuleVos.stream().collect(Collectors.toMap(TenantModuleVo::getModuleId, o -> o.getVersion() == null ? StringUtils.EMPTY : o.getVersion()));
         moduleGroupList.forEach(o -> o.getModuleList().forEach(e -> e.setChangelogVersion(moduleVersionMap.get(e.getId()))));
-        //TenantContext.get().setUseMasterDatabase(false);
         return moduleGroupList;
     }
 }

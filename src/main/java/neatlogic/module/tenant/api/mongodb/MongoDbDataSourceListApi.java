@@ -54,10 +54,6 @@ public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
     @Description(desc = "获取所有mongodb连接信息")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        //String tenant = TenantContext.get().getTenantUuid();
-        //TenantContext.get().setUseMasterDatabase(true);
-        //TenantContext.get().switchTenant(tenant);
-        //TenantContext.get().setUseMasterDatabase(false);
         return neatlogicMapper.getMongodbList();
     }
 }

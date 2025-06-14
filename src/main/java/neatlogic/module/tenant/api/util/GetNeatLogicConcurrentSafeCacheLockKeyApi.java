@@ -74,9 +74,7 @@ public class GetNeatLogicConcurrentSafeCacheLockKeyApi extends PrivateApiCompone
             resultObj.put("lockKeyList", lockKeyList);
             resultObj.put("serverId", serverId);
         } else {
-            //TenantContext.get().setUseMasterDatabase(true);
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            //TenantContext.get().setUseMasterDatabase(false);
             if (serverClusterVo != null) {
                 String host = serverClusterVo.getHost();
                 if (StringUtils.isNotBlank(host)) {

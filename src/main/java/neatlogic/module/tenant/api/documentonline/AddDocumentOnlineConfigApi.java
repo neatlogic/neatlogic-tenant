@@ -73,15 +73,12 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            //TenantContext.get().setUseMasterDatabase(true);
             try {
                 documentOnlineService.saveDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
                 directory.getConfigList().clear();
                 directory.getConfigList().addAll(backupConfigList);
                 throw e;
-            } finally {
-                //TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;
