@@ -15,43 +15,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.fulltextindex;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FULLTEXTINDEX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.fulltextindex.dao.mapper.FullTextIndexDictMapper;
-import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordVo;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordOffsetVo;
+import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.TableResultUtil;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 @AuthAction(action = FULLTEXTINDEX_MODIFY.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class SearchFulltextIndexDictionaryApi extends PrivateApiComponentBase {
-
-    @Resource
-    private FullTextIndexDictMapper fullTextIndexDictMapper;
+@OperationType(type = OperationTypeEnum.OPERATE)
+public class TestFulltextSliceWordApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "fulltextindex/dictionary/search";
+        return "fulltextindex/dictionary/word/test";
     }
 
     @Override
     public String getName() {
-        return "搜索字典";
+        return "测试分词";
     }
 
     @Override
@@ -59,16 +46,12 @@ public class SearchFulltextIndexDictionaryApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", desc = "关键字", type = ApiParamType.STRING)})
-    @Description(desc = "搜索字典")
+    @Input({@Param(name = "content", desc = "内容", type = ApiParamType.STRING, isRequired = true)})
+    @Output({@Param(explode = FullTextIndexWordOffsetVo[].class)})
+    @Description(desc = "测试分词")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        BasePageVo basePageVo = JSON.toJavaObject(paramObj, BasePageVo.class);
-        List<FullTextIndexWordVo> wordList = fullTextIndexDictMapper.searchDictionary(basePageVo);
-        if (CollectionUtils.isNotEmpty(wordList)) {
-            int rowNum = fullTextIndexDictMapper.searchDictionaryCount(basePageVo);
-            basePageVo.setRowNum(rowNum);
-        }
-        return TableResultUtil.getResult(wordList, basePageVo);
+        String content = paramObj.getString("content");
+        return FullTextIndexUtil.sliceWord(content);
     }
 }
