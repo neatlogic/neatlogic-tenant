@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -62,6 +63,8 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         DocumentOnlineConfigVo documentOnlineConfigVo = paramObj.toJavaObject(DocumentOnlineConfigVo.class);
         String filePath = documentOnlineConfigVo.getFilePath();
+
+
         // 根据文件路径在目录树中找到文件信息
         DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
         if (directory == null) {
@@ -73,12 +76,17 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
+
             try {
+                //下面打开了事务，需要先切库
+                TenantContext.get().setUseMasterDatabase(true);
                 documentOnlineService.saveDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
                 directory.getConfigList().clear();
                 directory.getConfigList().addAll(backupConfigList);
                 throw e;
+            } finally {
+                TenantContext.get().setUseMasterDatabase(false);
             }
         }
         return null;
