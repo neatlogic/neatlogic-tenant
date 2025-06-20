@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.role;
 
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.RoleMapper;
@@ -107,6 +108,7 @@ public class RoleSearchApi extends PrivateApiComponentBase {
         List<RoleVo> roleList = roleMapper.searchRole(roleVo);
         roleService.setRoleTeamCountAndRoleUserCount(roleList);
         returnObj.put("tbodyList", roleList);
+        returnObj.put("prefix", Config.HEADER_RULE_PREFIX());
         return returnObj;
     }
 }
