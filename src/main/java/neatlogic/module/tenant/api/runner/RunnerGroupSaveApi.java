@@ -79,11 +79,12 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
 
     @Input({
-            @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "id"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 分组名"),
-            @Param(name = "description", type = ApiParamType.STRING, isRequired = false, desc = "描述"),
-            @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner组 网段列表"),
-            @Param(name = "runnerList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "关联的runner列表"),
+            @Param(name = "id", type = ApiParamType.LONG, desc = "id"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "nmtar.runnergroupsaveapi.input.param.desc.name"),
+            @Param(name = "rule", type = ApiParamType.STRING, desc = "nmtar.runnergroupsaveapi.input.param.desc.rule"),
+            @Param(name = "description", type = ApiParamType.STRING, desc = "common.description"),
+            @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, desc = "nmtar.runnergroupsaveapi.input.param.desc.groupnetworklist"),
+            @Param(name = "runnerList", type = ApiParamType.JSONARRAY, desc = "nmtar.runnergroupsaveapi.input.param.desc.runnerlist"),
     })
     @Output({
     })
