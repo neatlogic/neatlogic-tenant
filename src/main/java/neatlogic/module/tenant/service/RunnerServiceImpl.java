@@ -14,24 +14,25 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.service;
 
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.constvalue.RunnerStatus;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerMapVo;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
-import neatlogic.framework.exception.runner.RunnerIpIsExistException;
-import neatlogic.framework.exception.runner.RunnerNameRepeatsException;
+import neatlogic.framework.exception.runner.*;
+import neatlogic.framework.integration.authentication.enums.AuthenticateType;
+import neatlogic.framework.util.HttpRequestUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
 public class RunnerServiceImpl implements RunnerService {
-    public static Map<String,Map<Long, Date>> runnerTagentRegisterMap = new HashMap<>();
-
+    private final Logger logger = LoggerFactory.getLogger(RunnerServiceImpl.class);
     @Resource
     RunnerMapper runnerMapper;
 
@@ -101,5 +102,27 @@ public class RunnerServiceImpl implements RunnerService {
         runnerMapper.replaceRunner(replaceRunner);
 
         runnerMapper.insertRunnerMap(new RunnerMapVo(replaceRunner.getId(), replaceRunner.getId()));
+    }
+
+    /**
+     * 检查runner联通性
+     */
+    @Override
+    public String checkRunnerHealth(Long runnerId) {
+        RunnerVo runner = runnerMapper.getRunnerById(runnerId);
+        if (runner == null) {
+            throw new RunnerNotFoundException(runnerId.toString());
+        }
+        String url = runner.getUrl() + "api/rest/health/check";
+        HttpRequestUtil requestUtil = HttpRequestUtil.post(url).setPayload(new JSONObject().toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(5000).sendRequest();
+        if (requestUtil.getResponseCode() != 200 || StringUtils.isNotBlank(requestUtil.getError())) {
+            logger.error(String.format("Request to %s failed, result: %s, ResponseCode: %s, ErrorMsg: %s, Exception %s",
+                    url, requestUtil.getResult(), requestUtil.getResponseCode(), requestUtil.getErrorMsg(), requestUtil.getError()));
+            runnerMapper.updateStatusById(runner.getId(), RunnerStatus.DISCONNECTED.getValue());
+            return RunnerStatus.DISCONNECTED.getValue();
+        }else {
+            runnerMapper.updateStatusById(runner.getId(), RunnerStatus.CONNECTED.getValue());
+            return RunnerStatus.CONNECTED.getValue();
+        }
     }
 }

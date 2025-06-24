@@ -23,4 +23,10 @@ public interface RunnerService {
      * @param paramRunnerId 入参runner id
      */
     void SaveRunner(RunnerVo runner,Long paramRunnerId);
+
+    /**
+     * 主动检查runner状态
+     * @param runnerId 指定检查runnerId
+     */
+    String checkRunnerHealth(Long runnerId);
 }
