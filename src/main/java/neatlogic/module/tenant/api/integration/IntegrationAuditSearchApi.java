@@ -35,6 +35,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 
@@ -70,6 +71,7 @@ public class IntegrationAuditSearchApi extends PrivateApiComponentBase {
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
             @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位"),
             @Param(name = "statusList", type = ApiParamType.JSONARRAY, desc = "状态"),
+            @Param(name = "paramKeyword", type = ApiParamType.STRING, desc = "入参关键字"),
     })
     @Output({
             @Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = IntegrationAuditVo[].class)
@@ -78,7 +80,7 @@ public class IntegrationAuditSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) {
         IntegrationAuditVo paramAuditVo = JSON.toJavaObject(jsonObj, IntegrationAuditVo.class);
-        List<IntegrationAuditVo> returnList = null;
+        List<IntegrationAuditVo> returnList = new ArrayList<>();
 
         //将时间范围转为 开始时间、结束时间
         if (paramAuditVo.getStartTime() == null && paramAuditVo.getEndTime() == null) {
@@ -97,13 +99,21 @@ public class IntegrationAuditSearchApi extends PrivateApiComponentBase {
         int auditCount = integrationMapper.getIntegrationAuditCount(paramAuditVo);
         if (auditCount > 0) {
             paramAuditVo.setRowNum(auditCount);
-            returnList = integrationMapper.searchIntegrationAudit(paramAuditVo);
+            List<Long> idList = integrationMapper.getIntegrationAuditIdList(paramAuditVo);
+            if (CollectionUtils.isNotEmpty(idList)) {
+                List<IntegrationAuditVo> integrationAuditList = integrationMapper.getIntegrationAuditListByIdList(idList);
+                for (Long id : idList) {
+                    for (IntegrationAuditVo integrationAuditVo : integrationAuditList) {
+                        if (Objects.equals(integrationAuditVo.getId(), id)) {
+                            returnList.add(integrationAuditVo);
+                            break;
+                        }
+                    }
+                }
+            }
+//            paramAuditVo.setParamKeyword(null);
+//            List<IntegrationAuditVo> returnList2 = integrationMapper.searchIntegrationAudit(paramAuditVo);
         }
-
-        if (CollectionUtils.isEmpty(returnList)) {
-            returnList = new ArrayList<>();
-        }
-
         return TableResultUtil.getResult(returnList, paramAuditVo);
     }
 }
