@@ -111,8 +111,6 @@ public class IntegrationAuditSearchApi extends PrivateApiComponentBase {
                     }
                 }
             }
-//            paramAuditVo.setParamKeyword(null);
-//            List<IntegrationAuditVo> returnList2 = integrationMapper.searchIntegrationAudit(paramAuditVo);
         }
         return TableResultUtil.getResult(returnList, paramAuditVo);
     }
