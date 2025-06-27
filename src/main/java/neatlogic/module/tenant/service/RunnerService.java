@@ -14,6 +14,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.service;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.runner.RunnerVo;
 
 public interface RunnerService {
@@ -28,5 +29,5 @@ public interface RunnerService {
      * 主动检查runner状态
      * @param runnerId 指定检查runnerId
      */
-    String checkRunnerHealth(Long runnerId);
+    JSONObject checkRunnerHealth(Long runnerId);
 }
