@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (C) 2025  深圳极向量科技有限公司 All Rights Reserved.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.tenant.dao.mapper.ChangelogAuditMapper">
+
+    <cache type="neatlogic.framework.dao.cache.NeatLogicConcurrentSafeCache" flushInterval="300000" size="100"/>
+
+    <select id="getChangelogAuditCount" parameterType="neatlogic.framework.dto.ChangelogAuditVo" resultType="int">
+        SELECT
+            count(1)
+        FROM `changelog_audit` a
+        LEFT JOIN `changelog_audit_detail` b ON b.`hash` = a.`sql_hash`
+        WHERE a.`tenant_uuid` = #{tenantUuid}
+        <if test="version != null and version != ''">
+            AND a.`version` LIKE concat('%', #{version}, '%')
+        </if>
+        <if test="sqlStatus != null">
+            AND a.`sql_status` = #{sqlStatus}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND b.`sql` LIKE concat('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <select id="getChangelogAuditList" parameterType="neatlogic.framework.dto.ChangelogAuditVo" resultType="neatlogic.framework.dto.ChangelogAuditVo">
+        SELECT
+            a.`version`,
+            a.`tenant_uuid` AS tenantUuid,
+            a.`module_id` AS moduleId,
+            a.`sql_hash` AS sqlHash,
+            a.`sql_status` AS sqlStatus,
+            a.`error_msg` AS errorMsg,
+            a.`ignored`,
+            a.`lcd`,
+            b.`sql`
+        FROM `changelog_audit` a
+        LEFT JOIN `changelog_audit_detail` b ON b.`hash` = a.`sql_hash`
+        WHERE a.`tenant_uuid` = #{tenantUuid}
+        <if test="version != null and version != ''">
+            AND a.`version` LIKE concat('%', #{version}, '%')
+        </if>
+        <if test="sqlStatus != null">
+            AND a.`sql_status` = #{sqlStatus}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND b.`sql` LIKE concat('%', #{keyword}, '%')
+        </if>
+        ORDER BY a.`lcd` DESC
+        LIMIT #{startNum},#{pageSize}
+    </select>
+</mapper>
