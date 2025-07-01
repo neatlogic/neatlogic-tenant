@@ -20,7 +20,6 @@ package neatlogic.module.tenant.api.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
@@ -39,7 +38,6 @@ import neatlogic.framework.util.HttpRequestUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -55,7 +53,7 @@ import java.util.Objects;
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SearchLocalFilePathApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @javax.annotation.Resource
     private ServerMapper serverMapper;
 
     @Override
@@ -165,9 +163,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
             resultObj.put("tbodyList", resultList);
             resultObj.put("serverId", serverId);
         } else {
-            TenantContext.get().setUseMasterDatabase(true);
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            TenantContext.get().setUseMasterDatabase(false);
             if (serverClusterVo != null) {
                 String host = serverClusterVo.getHost();
                 if (StringUtils.isNotBlank(host)) {

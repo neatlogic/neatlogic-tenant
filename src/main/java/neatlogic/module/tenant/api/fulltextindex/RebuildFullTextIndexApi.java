@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.fulltextindex;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.FULLTEXTINDEX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.elasticsearch.ElasticSearchIndexNotFoundException;
 import neatlogic.framework.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
@@ -35,6 +37,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
+@AuthAction(action = FULLTEXTINDEX_MODIFY.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
 
@@ -68,7 +71,7 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
                 throw new FullTextIndexHandlerNotFoundException(type);
             }
             fulltextHandler.rebuildIndex(type, isAll);
-        } else if (Objects.equals(FullTextIndexHandlerType.ELASTICSEARCH.getValue(), handler)){
+        } else if (Objects.equals(FullTextIndexHandlerType.ELASTICSEARCH.getValue(), handler)) {
             IElasticsearchIndex fulltextHandler = ElasticsearchIndexFactory.getIndex(type);
             if (fulltextHandler == null) {
                 throw new ElasticSearchIndexNotFoundException(type);

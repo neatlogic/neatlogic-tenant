@@ -18,7 +18,6 @@
 package neatlogic.module.tenant.api.util;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
@@ -155,9 +154,7 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
                 in.close();
             }
         } else {
-            TenantContext.get().setUseMasterDatabase(true);
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            TenantContext.get().setUseMasterDatabase(false);
             if (serverClusterVo != null) {
                 String host = serverClusterVo.getHost();
                 if (StringUtils.isNotBlank(host)) {

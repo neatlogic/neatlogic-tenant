@@ -1,4 +1,4 @@
-/*Copyright (C) 2023  深圳极向量科技有限公司 All Rights Reserved.
+/*Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -13,32 +13,32 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-package neatlogic.module.tenant.api.mongodb;
+package neatlogic.module.tenant.api.fulltextindex;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.dto.MongoDbVo;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.FULLTEXTINDEX_MODIFY;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.fulltextindex.dto.fulltextindex.FullTextIndexWordOffsetVo;
+import neatlogic.framework.fulltextindex.utils.FullTextIndexUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.restful.dao.mapper.NeatLogicMapper;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-
 @Service
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
-    @Resource
-    private NeatLogicMapper neatlogicMapper;
+@AuthAction(action = FULLTEXTINDEX_MODIFY.class)
+@OperationType(type = OperationTypeEnum.OPERATE)
+public class TestFulltextSliceWordApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "mongodb/datasource/list";
+        return "fulltextindex/dictionary/word/test";
     }
 
     @Override
     public String getName() {
-        return "获取所有mongodb连接信息";
+        return "测试分词";
     }
 
     @Override
@@ -46,14 +46,12 @@ public class MongoDbDataSourceListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({
-    })
-    @Output({
-            @Param(name = "mongoVo", explode = MongoDbVo[].class, desc = "mongodb数据库")
-    })
-    @Description(desc = "获取所有mongodb连接信息")
+    @Input({@Param(name = "content", desc = "内容", type = ApiParamType.STRING, isRequired = true)})
+    @Output({@Param(explode = FullTextIndexWordOffsetVo[].class)})
+    @Description(desc = "测试分词")
     @Override
-    public Object myDoService(JSONObject jsonObj) throws Exception {
-        return neatlogicMapper.getMongodbList();
+    public Object myDoService(JSONObject paramObj) throws Exception {
+        String content = paramObj.getString("content");
+        return FullTextIndexUtil.sliceWord(content);
     }
 }

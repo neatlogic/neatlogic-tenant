@@ -63,6 +63,8 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         DocumentOnlineConfigVo documentOnlineConfigVo = paramObj.toJavaObject(DocumentOnlineConfigVo.class);
         String filePath = documentOnlineConfigVo.getFilePath();
+
+
         // 根据文件路径在目录树中找到文件信息
         DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
         if (directory == null) {
@@ -74,8 +76,10 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
-            TenantContext.get().setUseMasterDatabase(true);
+
             try {
+                //下面打开了事务，需要先切库
+                TenantContext.get().setUseMasterDatabase(true);
                 documentOnlineService.saveDocumentOnlineConfig(directory, documentOnlineConfigVo);
             } catch (Exception e) {
                 directory.getConfigList().clear();

@@ -75,9 +75,12 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             for (DocumentOnlineConfigVo configVo : directory.getConfigList()) {
                 backupConfigList.add(new DocumentOnlineConfigVo(configVo));
             }
+
+            //下面打开了事务，需要先切库
             TenantContext.get().setUseMasterDatabase(true);
             TransactionStatus tx = TransactionUtil.openTx();
             try {
+
                 // 旧的映射关系列表
                 List<DocumentOnlineConfigVo> oldConfigList = directory.getConfigList();
                 JSONArray configArray = paramObj.getJSONArray("configList");
@@ -112,6 +115,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
             } finally {
                 TenantContext.get().setUseMasterDatabase(false);
             }
+
         }
         return null;
     }

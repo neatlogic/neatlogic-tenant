@@ -19,7 +19,6 @@ package neatlogic.module.tenant.api.util;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
@@ -41,8 +40,11 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = ADMIN.class)
@@ -54,6 +56,7 @@ public class RefreshConfigApi extends PrivateApiComponentBase {
 
     @Resource
     private Config config;
+
     @Override
     public String getName() {
         return "刷新config.properties文件配置变量值";
@@ -79,12 +82,16 @@ public class RefreshConfigApi extends PrivateApiComponentBase {
             } else {
                 resultObj.put("数据来源", "config.properties");
             }
-            resultObj.put("config", prop);
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (Map.Entry<Object, Object> entry : prop.entrySet()) {
+                map.put(entry.getKey().toString(), entry.getValue());
+            }
+            Map<String, Object> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+            resultObj.put("config", sortedMap);
             resultObj.put("serverId", serverId);
         } else {
-            TenantContext.get().setUseMasterDatabase(true);
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            TenantContext.get().setUseMasterDatabase(false);
             if (serverClusterVo != null) {
                 String host = serverClusterVo.getHost();
                 if (StringUtils.isNotBlank(host)) {

@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
@@ -72,7 +73,9 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         if (rowNum > 0) {
             runnerGroupVoList = runnerMapper.searchRunnerGroup(groupVo);
         }
-        return TableResultUtil.getResult(runnerGroupVoList, groupVo);
+        JSONObject result = TableResultUtil.getResult(runnerGroupVoList, groupVo);
+        result.put("prefix", Config.HEADER_RULE_PREFIX());
+        return result;
     }
 
 

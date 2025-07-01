@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.server;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
@@ -51,9 +50,7 @@ public class GetServerListApi extends PrivateApiComponentBase {
     @Description(desc = "nmtas.getserverlistapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TenantContext.get().setUseMasterDatabase(true);
         List<ServerClusterVo> list = serverMapper.getAllServerList();
-        TenantContext.get().setUseMasterDatabase(false);
         return TableResultUtil.getResult(list);
     }
 

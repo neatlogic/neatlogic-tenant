@@ -61,21 +61,15 @@ public class SearchModuleApi extends PrivateApiComponentBase {
     }
 
     @Output({@Param(explode = ModuleGroupVo[].class)})
-    @Description(desc = "获取模块列表接口")
+    @Description(desc = "获取模块列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ModuleGroupVo> moduleGroupList = TenantContext.get().getActiveModuleGroupList();
         moduleGroupList.sort(Comparator.comparing(ModuleGroupVo::getGroupSort));
         String tenantUuid = TenantContext.get().getTenantUuid();
-        TenantContext.get().setUseMasterDatabase(true);
         List<TenantModuleVo> tenantModuleVos = tenantMapper.getTenantModuleByTenantUuid(tenantUuid);
         Map<String, String> moduleVersionMap = tenantModuleVos.stream().collect(Collectors.toMap(TenantModuleVo::getModuleId, o -> o.getVersion() == null ? StringUtils.EMPTY : o.getVersion()));
-        moduleGroupList.forEach(o -> {
-            o.getModuleList().forEach(e -> {
-                e.setChangelogVersion(moduleVersionMap.get(e.getId()));
-            });
-        });
-        TenantContext.get().setUseMasterDatabase(false);
+        moduleGroupList.forEach(o -> o.getModuleList().forEach(e -> e.setChangelogVersion(moduleVersionMap.get(e.getId()))));
         return moduleGroupList;
     }
 }
