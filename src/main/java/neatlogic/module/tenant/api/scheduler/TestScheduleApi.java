@@ -18,31 +18,19 @@
 package neatlogic.module.tenant.api.scheduler;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.core.ApiRuntimeException;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.crossover.IScheduleCrossoverService;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.scheduler.core.IJob;
-import neatlogic.framework.scheduler.core.SchedulerManager;
-import neatlogic.framework.scheduler.dto.JobObject;
-import neatlogic.framework.scheduler.dto.JobVo;
-import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
-import neatlogic.framework.scheduler.exception.ScheduleJobNotFoundException;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.Objects;
 
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @Service
-public class JobTestApi extends PrivateApiComponentBase {
-    @Resource
-    private SchedulerManager schedulerManager;
-
+public class TestScheduleApi extends PrivateApiComponentBase {
     @Override
     public String getName() {
         return null;
@@ -56,25 +44,8 @@ public class JobTestApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         String jobUuid = paramObj.getString("jobUuid");
         String jobHandlerClassName = paramObj.getString("jobHandlerClassName");
-        IJob jobHandler = SchedulerManager.getHandler(jobHandlerClassName);
-        if (jobHandler == null) {
-            throw new ScheduleHandlerNotFoundException(jobHandlerClassName);
-        }
-        String tenantUuid = TenantContext.get().getTenantUuid();
-        JobVo jobVo = jobHandler.getJob(jobUuid);
-        if (jobVo == null) {
-            throw new ScheduleJobNotFoundException(jobUuid);
-        }
-        if (Objects.equals(jobVo.getIsActive(), 1)) {
-            throw new ApiRuntimeException("状态为‘禁用’，才能执行测试");
-        }
-        JobObject jobObject = new JobObject.Builder(jobVo.getUuid(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
-                .withRepeatCount(1)
-                .needAudit(1)
-                .withPropList(jobVo.getPropList())
-                .setIsTest(1)
-                .setType(jobHandler.getType()).build();
-        schedulerManager.loadJob(jobObject);
+        IScheduleCrossoverService scheduleCrossoverService = CrossoverServiceFactory.getApi(IScheduleCrossoverService.class);
+        scheduleCrossoverService.scheduleTest(jobHandlerClassName, jobUuid, "public");
         return null;
     }
 
