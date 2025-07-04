@@ -86,7 +86,7 @@ public class GetLogFileNameListApi extends PrivateApiComponentBase {
                         for (File file : listFiles) {
                             if (file.isFile()) {
                                 String fileName = file.getName();
-                                if (fileName.startsWith("neatloigc.") && fileName.endsWith(".acc")) {
+                                if (fileName.startsWith("neatlogic.") && fileName.endsWith(".acc")) {
                                     continue;
                                 }
                                 JSONObject jsonObj = new JSONObject();
