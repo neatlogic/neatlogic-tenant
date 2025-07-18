@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.datawarehouse;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -32,7 +34,6 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,10 +79,10 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             @Param(name = "dbType", type = ApiParamType.STRING, isRequired = true, desc = "数据库类型"),
             @Param(name = "databaseId", type = ApiParamType.LONG, desc = "数据库Id")
     })
-    @Description(desc = "保存数据仓库数据源接口")
+    @Description(desc = "保存数据仓库数据源")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        DataSourceVo newDataSourceVo = JSONObject.toJavaObject(jsonObj, DataSourceVo.class);
+        DataSourceVo newDataSourceVo = JSON.toJavaObject(jsonObj, DataSourceVo.class);
         if (dataSourceMapper.checkDataSourceNameIsExists(newDataSourceVo) > 0) {
             throw new DataSourceNameIsExistsException(newDataSourceVo.getName());
         }

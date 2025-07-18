@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.datawarehouse;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -26,8 +28,6 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +59,7 @@ public class SaveDataSourceFieldsApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "fieldList", type = ApiParamType.JSONARRAY, desc = "字段列表", isRequired = true)})
-    @Description(desc = "保存数据仓库数据源字段设置接口")
+    @Description(desc = "保存数据仓库数据源字段设置")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray fieldList = jsonObj.getJSONArray("fieldList");

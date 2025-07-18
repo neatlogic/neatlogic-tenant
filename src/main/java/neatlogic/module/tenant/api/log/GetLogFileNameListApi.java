@@ -36,6 +36,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
+import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @AuthAction(action = ADMIN.class)
@@ -82,12 +84,22 @@ public class GetLogFileNameListApi extends PrivateApiComponentBase {
                 if (dir.exists()) {
                     File[] listFiles = dir.listFiles();
                     if (listFiles != null) {
+                        String instanceName = System.getProperties().getProperty(SystemProperty.INSTANCE_NAME);
+                        if (instanceName == null) {
+                            instanceName = StringUtils.EMPTY;
+                        }
+                        String yyyy_MM_dd = new SimpleDateFormat(TimeUtil.YYYY_MM_DD).format(new Date());
+                        // 当天的接口访问日志名称
+                        String accessLogFileName = instanceName + "." + yyyy_MM_dd + ".acc";
                         Arrays.sort(listFiles, Comparator.comparing(File::getName));
                         for (File file : listFiles) {
                             if (file.isFile()) {
                                 String fileName = file.getName();
-                                if (fileName.startsWith("neatlogic.") && fileName.endsWith(".acc")) {
-                                    continue;
+                                // 接口访问日志每日归档，限制只能访问当天的接口访问日志
+                                if (fileName.startsWith(instanceName) && fileName.endsWith(".acc")) {
+                                    if (!Objects.equals(fileName, accessLogFileName)) {
+                                        continue;
+                                    }
                                 }
                                 JSONObject jsonObj = new JSONObject();
                                 jsonObj.put("fileName", fileName);
