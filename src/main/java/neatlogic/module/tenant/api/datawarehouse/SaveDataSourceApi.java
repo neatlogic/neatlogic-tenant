@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_MODIFY.class)
@@ -92,6 +93,7 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
         }
         String xml = IOUtils.toString(FileUtil.getData(fileVo.getPath()), StandardCharsets.UTF_8);*/
         String xml = jsonObj.getString("xml");
+        boolean isChangeXml = false;
         DataSourceVo dataSourceVo = ReportXmlUtil.generateDataSourceFromXml(xml);
         newDataSourceVo.setDataCount(0);
 
@@ -100,18 +102,24 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
         if (id == null) {
             newDataSourceVo.setFieldList(dataSourceVo.getFieldList());
             dataSourceService.insertDataSource(newDataSourceVo);
+            isChangeXml = true;
         } else {
             DataSourceVo oldDatasourceVo = dataSourceMapper.getDataSourceById(id);
             //比较新老数据，找出需要新增、修改和删除的属性，这样做的目的是为了保留条件配置
             if (oldDatasourceVo == null) {
                 throw new DataSourceIsNotFoundException(id);
             }
+            if (!Objects.equals(xml, oldDatasourceVo.getXml())) {
+                isChangeXml = true;
+            }
             // 还原条件设置
             List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(dataSourceVo.getFieldList(), oldDatasourceVo.getFieldList());
             dataSourceVo.setFieldList(newFieldList);
             dataSourceService.updateDataSource(newDataSourceVo, dataSourceVo, oldDatasourceVo);
         }
-        dataSourceService.createDataSourceSchema(newDataSourceVo);
+        if (isChangeXml) {
+            dataSourceService.createDataSourceSchema(newDataSourceVo);
+        }
         dataSourceService.loadOrUnloadReportDataSourceJob(newDataSourceVo);
 
         return null;
