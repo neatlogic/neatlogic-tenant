@@ -17,7 +17,9 @@ package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.ApiNotFoundException;
 import neatlogic.framework.exception.util.StartTimeAndEndTimeCanNotFoundException;
 import neatlogic.framework.restful.annotation.*;
@@ -112,6 +114,14 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
             apiAuditVo.setRowNum(rowNum);
             apiAuditVo.setPageCount(PageUtil.getPageCount(rowNum, apiAuditVo.getPageSize()));
             apiAuditList = apiAuditMapper.getApiAuditList(apiAuditVo);
+            for (ApiAuditVo apiAudit : apiAuditList) {
+                if (StringUtils.isBlank(apiAudit.getUserName())) {
+                    UserVo userVo = SystemUserFactory.getUserVoByUser(apiAudit.getUserUuid());
+                    if (userVo != null) {
+                        apiAudit.setUserName(userVo.getUserName());
+                    }
+                }
+            }
         }
         return TableResultUtil.getResult(apiAuditList, apiAuditVo);
     }

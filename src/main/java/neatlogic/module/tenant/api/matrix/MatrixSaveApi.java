@@ -81,6 +81,7 @@ public class MatrixSaveApi extends PrivateApiComponentBase {
             @Param(name = "matrix", explode = MatrixVo.class, desc = "common.matrix")
     })
     @Description(desc = "nmtam.matrixsaveapi.getname")
+    @ResubmitInterval(value = 2)
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
