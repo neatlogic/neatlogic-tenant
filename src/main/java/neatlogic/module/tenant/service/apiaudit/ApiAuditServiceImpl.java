@@ -1,6 +1,8 @@
 package neatlogic.module.tenant.service.apiaudit;
 
+import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.ExcelField;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -309,6 +311,12 @@ public class ApiAuditServiceImpl implements ApiAuditService{
     private void addFields(List<ApiVo> apiList, List<ApiAuditVo> apiAuditVoList) throws ClassNotFoundException {
         if(CollectionUtils.isNotEmpty(apiList) && CollectionUtils.isNotEmpty(apiAuditVoList)){
             for (ApiAuditVo vo : apiAuditVoList) {
+                if (StringUtils.isBlank(vo.getUserName())) {
+                    UserVo userVo = SystemUserFactory.getUserVoByUser(vo.getUserUuid());
+                    if (userVo != null) {
+                        vo.setUserName(userVo.getUserName());
+                    }
+                }
                 for (ApiVo api : apiList) {
                     if (vo.getToken().equals(api.getToken())) {
                         vo.setApiName($.t(api.getName()));
