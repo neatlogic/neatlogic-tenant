@@ -60,6 +60,7 @@ public class UserSearchApi extends PrivateApiComponentBase {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword", xss = true, help = "用户id或名称或email"),
             @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", desc = "common.isactive"),
             @Param(name = "vipLevel", type = ApiParamType.INTEGER, desc = "VIP等级"),
+            @Param(name = "isOnline", type = ApiParamType.INTEGER, desc = "是否在线"),
             @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "common.teamuuid"),
             @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "common.roleuuid"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
