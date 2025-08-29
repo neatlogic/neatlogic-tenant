@@ -27,6 +27,8 @@ public interface ExtraMenuMapper {
 
     int insertExtraMenu(ExtraMenuVo vo);
 
+    Integer getMaxSort();
+
     int insertExtraMenuAuthority(@Param("authorityVo") AuthorityVo authorityVo, @Param("menuId") Long menuId);
 
     int checkExtraMenuNameIsRepeat(ExtraMenuVo vo);
@@ -34,6 +36,8 @@ public interface ExtraMenuMapper {
     int checkExtraMenuIsExists(Long id);
 
     int updateExtraMenuById(ExtraMenuVo vo);
+
+    void updateExtraMenuSort(ExtraMenuVo vo);
 
     int deleteExtraMenuAuthorityByMenuId(Long id);
 
@@ -43,10 +47,12 @@ public interface ExtraMenuMapper {
 
     ExtraMenuVo getExtraMenuById(Long id);
 
+    List<ExtraMenuVo> getExtraMenuByIdList(@Param("idList") List<Long> idList);
+
     List<AuthorityVo> getExtraMenuAuthorityListByMenuId(Long id);
 
     int deleteExtraMenuById(Long id);
 
     List<Long> getAuthorizedExtraMenuIdList(@Param("userUuid") String userUuid,
-        @Param("teamUuidList") List<String> teamUuidList, @Param("roleUuidList") List<String> roleUuidList);
+                                            @Param("teamUuidList") List<String> teamUuidList, @Param("roleUuidList") List<String> roleUuidList);
 }

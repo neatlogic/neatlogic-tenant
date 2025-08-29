@@ -20,7 +20,9 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.EXTRA_MENU_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.extramenu.constvalue.ExtraMenuType;
-import neatlogic.framework.extramenu.exception.ExtraMenuRootNotAllowedException;
+import neatlogic.framework.extramenu.dto.ExtraMenuVo;
+import neatlogic.framework.extramenu.exception.ExtraMenuExistChildrenException;
+import neatlogic.framework.extramenu.exception.ExtraMenuNotFoundException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -29,9 +31,6 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.dao.mapper.ExtraMenuMapper;
-import neatlogic.framework.extramenu.dto.ExtraMenuVo;
-import neatlogic.framework.extramenu.exception.ExtraMenuExistChildrenException;
-import neatlogic.framework.extramenu.exception.ExtraMenuNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +61,6 @@ public class DeleteExtraMenuApi extends PrivateApiComponentBase {
         if (vo == null) {
             throw new ExtraMenuNotFoundException(id);
         }
-        if (ExtraMenuVo.ROOT_ID.equals(vo.getParentId())) {
-            throw new ExtraMenuRootNotAllowedException();
-        }
         if (ExtraMenuType.DIRECTORY.getType() == vo.getType()) {
             List<ExtraMenuVo> list = extraMenuMapper.getExtraMenuForTree(vo.getLft(), vo.getRht());
             if (CollectionUtils.isNotEmpty(list) && list.size() > 1) {
@@ -72,9 +68,10 @@ public class DeleteExtraMenuApi extends PrivateApiComponentBase {
                 throw new ExtraMenuExistChildrenException(vo.getName());
             }
         }
-        LRCodeManager.beforeDeleteTreeNode("extramenu", "id", "parent_id", id);
         extraMenuMapper.deleteExtraMenuAuthorityByMenuId(id);
         extraMenuMapper.deleteExtraMenuById(id);
+        //重建所有左右编码，性能差点但可靠
+        LRCodeManager.rebuildLeftRightCodeOrderBySortKey("extramenu", "id", "parent_id", "sort");
         return null;
     }
 

@@ -16,8 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.service.extramenu;
 
 import neatlogic.framework.extramenu.constvalue.ExtraMenuType;
-import neatlogic.module.tenant.dao.mapper.ExtraMenuMapper;
 import neatlogic.framework.extramenu.dto.ExtraMenuVo;
+import neatlogic.module.tenant.dao.mapper.ExtraMenuMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,7 +37,7 @@ public class ExtraMenuServiceImpl implements ExtraMenuService {
         extraMenuVo.setParentId(ExtraMenuVo.ROOT_PARENTID);
         extraMenuVo.setIsActive(1);
         extraMenuVo.setLft(1);
-        extraMenuVo.setRht(maxRhtCode == null ? 2 : maxRhtCode.intValue() + 1);
+        extraMenuVo.setRht(maxRhtCode == null ? 2 : maxRhtCode + 1);
         return extraMenuVo;
     }
 

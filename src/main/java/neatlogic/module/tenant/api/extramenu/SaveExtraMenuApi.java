@@ -23,7 +23,10 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.extramenu.constvalue.ExtraMenuType;
-import neatlogic.framework.extramenu.exception.*;
+import neatlogic.framework.extramenu.dto.ExtraMenuVo;
+import neatlogic.framework.extramenu.exception.ExtraMenuNameRepeatException;
+import neatlogic.framework.extramenu.exception.ExtraMenuNotFoundException;
+import neatlogic.framework.extramenu.exception.ExtraMenuParamException;
 import neatlogic.framework.lrcode.LRCodeManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -31,7 +34,6 @@ import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.module.tenant.dao.mapper.ExtraMenuMapper;
-import neatlogic.framework.extramenu.dto.ExtraMenuVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -61,15 +63,15 @@ public class SaveExtraMenuApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "id"),
-        @Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = true, maxLength = 50,
-            desc = "common.name"),
-        @Param(name = "type", type = ApiParamType.ENUM, rule = "0,1", isRequired = true,
-            desc = "nmtae.extramenusaveapi.input.param.type.desc"),
-        @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "common.isactive"),
-        @Param(name = "url", type = ApiParamType.REGEX, desc = "URL", rule = RegexUtils.URL),
-        @Param(name = "description", type = ApiParamType.STRING, desc = "common.description"),
-        @Param(name = "authorityList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.authlist"),
-        @Param(name = "parentId", type = ApiParamType.LONG, desc = "common.parentid")})
+            @Param(name = "name", type = ApiParamType.STRING, xss = true, isRequired = true, maxLength = 50,
+                    desc = "common.name"),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "0,1", isRequired = true,
+                    desc = "nmtae.extramenusaveapi.input.param.type.desc"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "common.isactive"),
+            @Param(name = "url", type = ApiParamType.REGEX, desc = "URL", rule = RegexUtils.URL),
+            @Param(name = "description", type = ApiParamType.STRING, desc = "common.description"),
+            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.authlist"),
+            @Param(name = "parentId", type = ApiParamType.LONG, desc = "common.parentid")})
     @Output({@Param(name = "id", type = ApiParamType.LONG, desc = "id")})
     @Description(desc = "nmtae.extramenusaveapi.getname")
     @Override
@@ -78,17 +80,11 @@ public class SaveExtraMenuApi extends PrivateApiComponentBase {
         ExtraMenuVo vo = JSON.toJavaObject(paramObj, ExtraMenuVo.class);
         if (vo.getParentId() == null) {
             vo.setParentId(ExtraMenuVo.ROOT_ID);
-        } else {
-            // 判断父节点是否为目录
-            ExtraMenuVo parentVo = extraMenuMapper.getExtraMenuById(vo.getParentId());
-            if (parentVo == null || parentVo.getType() != null && parentVo.getType() == ExtraMenuType.MENU.getType()) {
-                throw new ExtraMenuNotAllowedAddException();
-            }
         }
         if (extraMenuMapper.checkExtraMenuNameIsRepeat(vo) > 0) {
             throw new ExtraMenuNameRepeatException(vo.getName());
         }
-        if (vo.getType() != null && ExtraMenuType.MENU.getType() == vo.getType().intValue()) {
+        if (ExtraMenuType.MENU.getType() == vo.getType()) {
             if (StringUtils.isBlank(vo.getUrl())) {
                 throw new ExtraMenuParamException("url");
             }
@@ -100,20 +96,14 @@ public class SaveExtraMenuApi extends PrivateApiComponentBase {
             extraMenuMapper.deleteExtraMenuAuthorityByMenuId(id);
             extraMenuMapper.updateExtraMenuById(vo);
         } else {
-            if (!ExtraMenuVo.ROOT_ID.equals(vo.getParentId())) {
-                if (extraMenuMapper.checkExtraMenuIsExists(vo.getParentId()) == 0) {
-                    throw new ExtraMenuNotFoundException(vo.getParentId());
-                }
-            } else {
-                if (extraMenuMapper.checkExtraMenuRootCount(ExtraMenuVo.ROOT_ID) == 1) {
-                    throw new ExtraMenuRootException();
-                }
+            Integer sort = extraMenuMapper.getMaxSort();
+            if (sort == null) {
+                sort = 1;
             }
-            int lft = LRCodeManager.beforeAddTreeNode("extramenu", "id", "parent_id", vo.getParentId());
-            vo.setParentId(vo.getParentId());
-            vo.setLft(lft);
-            vo.setRht(lft + 1);
+            vo.setSort(sort);
             extraMenuMapper.insertExtraMenu(vo);
+            //重建所有左右编码，性能差点但可靠
+            LRCodeManager.rebuildLeftRightCodeOrderBySortKey("extramenu", "id", "parent_id", "sort");
         }
 
         List<AuthorityVo> authorityList = vo.getAuthorityVoList();

@@ -18,13 +18,16 @@ package neatlogic.module.tenant.api.extramenu;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.EXTRA_MENU_MODIFY;
-import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.extramenu.dto.ExtraMenuVo;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.tenant.dao.mapper.ExtraMenuMapper;
-import neatlogic.framework.extramenu.dto.ExtraMenuVo;
 import neatlogic.module.tenant.service.extramenu.ExtraMenuService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,13 +51,13 @@ public class TreeExtraMenuApi extends PrivateApiComponentBase {
         return "nmtae.extramenutreeapi.getname";
     }
 
-    @Output({@Param(name = "Return", type = ApiParamType.JSONOBJECT, explode = ExtraMenuVo.class)})
+    @Output({@Param(name = "Return", explode = ExtraMenuVo[].class)})
     @Description(desc = "nmtae.extramenutreeapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         ExtraMenuVo root = extraMenuService.buildRootExtraMenu();
         List<ExtraMenuVo> list = extraMenuMapper.getExtraMenuForTree(root.getLft(), root.getRht());
-        if (!list.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(list)) {
             Map<Long, ExtraMenuVo> map = new HashMap<>();
             list.add(root);
             list.forEach(o -> map.put(o.getId(), o));
@@ -63,8 +66,8 @@ public class TreeExtraMenuApi extends PrivateApiComponentBase {
                 vo.setParent(parent);
             }
         }
-        if (root.getChildren() != null && root.getChildren().size() > 0) {
-            return root.getChildren().get(0);
+        if (CollectionUtils.isNotEmpty(root.getChildren())) {
+            return root.getChildren();
         } else {
             return null;
         }

@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                                 `url`,
                                 `description`,
                                 `parent_id`,
+                                `open_type`,
+                                `sort`,
                                 `lft`,
                                 `rht`)
         values (#{id},
@@ -34,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                 #{url},
                 #{description},
                 #{parentId},
+                #{openType},
+                #{sort},
                 #{lft},
                 #{rht})
     </insert>
@@ -45,40 +49,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                 #{authorityVo.type},
                 #{authorityVo.uuid})
     </insert>
+
+    <update id="updateExtraMenuSort" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        update extramenu
+        set sort      = #{sort},
+            parent_id = #{parentId}
+        where id = #{id}
+    </update>
+
     <update id="updateExtraMenuById" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
         update `extramenu`
         set `name`        = #{name},
             `is_active`   = #{isActive},
             `url`         = #{url},
-            `description` = #{description}
+            `description` = #{description},
+            `open_type`   = #{openType}
         where `id` = #{id}
     </update>
-    <delete id="deleteExtraMenuAuthorityByMenuId" parameterType="java.lang.Long">
-        DELETE
-        FROM `extramenu_authority`
-        WHERE `menu_id` = #{value}
-    </delete>
-    <delete id="deleteExtraMenuById" parameterType="java.lang.Long">
-        DELETE
-        FROM `extramenu`
-        WHERE `id` = #{value}
-    </delete>
+
+
     <select id="getMaxRhtCode" resultType="java.lang.Integer">
         select MAX(`rht`)
         from `extramenu`
     </select>
-    <select id="checkExtraMenuNameIsRepeat" resultType="java.lang.Integer" parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+
+    <select id="checkExtraMenuNameIsRepeat" resultType="java.lang.Integer"
+            parameterType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
         select count(1)
         from `extramenu`
         where `name` = #{name}
           and `id` != #{id}
           and `parent_id` = #{parentId}
     </select>
+
+    <select id="getMaxSort" resultType="java.lang.Integer">
+        select max(sort)
+        from `extramenu`
+    </select>
+
     <select id="checkExtraMenuIsExists" resultType="java.lang.Integer" parameterType="java.lang.Long">
         SELECT COUNT(1)
         FROM `extramenu`
         WHERE `id` = #{value}
     </select>
+
     <select id="getExtraMenuForTree" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
         select a.`id`,
                a.`name`,
@@ -87,6 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                a.`is_active`                                                 as isActive,
                a.`description`,
                a.`parent_id`                                                 as parentId,
+               a.`open_type`                                                 as openType,
                a.`lft`,
                a.`rht`,
                (select COUNT(1) from `extramenu` where `parent_id` = a.`id`) as `childCount`
@@ -100,7 +115,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
         FROM `extramenu`
         WHERE `parent_id` = #{value}
     </select>
-    <select id="getExtraMenuById" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo" parameterType="java.lang.Long">
+
+    <select id="getExtraMenuById" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo"
+            parameterType="java.lang.Long">
         select a.`id`,
                a.`name`,
                a.`type`,
@@ -108,17 +125,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
                a.`is_active` as isActive,
                a.`description`,
                a.`parent_id` as parentId,
+               a.`open_type` as openType,
                a.`lft`,
                a.`rht`
         from `extramenu` a
         where a.`id` = #{value}
     </select>
-    <select id="getExtraMenuAuthorityListByMenuId" resultType="neatlogic.framework.dto.AuthorityVo" parameterType="java.lang.Long">
+
+    <select id="getExtraMenuByIdList" resultType="neatlogic.framework.extramenu.dto.ExtraMenuVo">
+        select
+        a.`id`,
+        a.`name`,
+        a.`type`,
+        a.`url`,
+        a.`is_active` as isActive,
+        a.`description`,
+        a.`parent_id` as parentId,
+        a.`open_type` as openType,
+        a.`sort` as sort,
+        a.`lft`,
+        a.`rht`
+        from `extramenu` a
+        where a.`id` in
+        <foreach collection="idList" item="item" open="(" close=")" separator=",">#{item}</foreach>
+        order by parent_id, lft
+    </select>
+
+    <select id="getExtraMenuAuthorityListByMenuId" resultType="neatlogic.framework.dto.AuthorityVo"
+            parameterType="java.lang.Long">
         select `type`,
                `uuid`
         from `extramenu_authority`
         where `menu_id` = #{value}
     </select>
+
     <select id="getAuthorizedExtraMenuIdList" resultType="java.lang.Long">
         select
         distinct `menu_id`
@@ -144,5 +184,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.-->
             </if>
         </where>
     </select>
+
+    <delete id="deleteExtraMenuAuthorityByMenuId" parameterType="java.lang.Long">
+        DELETE
+        FROM `extramenu_authority`
+        WHERE `menu_id` = #{value}
+    </delete>
+
+    <delete id="deleteExtraMenuById" parameterType="java.lang.Long">
+        DELETE
+        FROM `extramenu`
+        WHERE `id` = #{value}
+    </delete>
 </mapper>
 
