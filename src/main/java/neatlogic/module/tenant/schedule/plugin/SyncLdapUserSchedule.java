@@ -30,6 +30,7 @@ import neatlogic.framework.scheduler.core.PublicJobBase;
 import neatlogic.framework.scheduler.dto.JobAuditVo;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.transaction.util.TransactionUtil;
+import neatlogic.framework.util.Md5Util;
 import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -249,6 +250,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
                         userVo.setLcu(SystemUser.SYSTEM.getUserUuid());
                         userVo.setLcd(lcd);
                         userVo.setPassword(defaultPassword);
+                        userVo.setToken(Md5Util.encryptMD5(UUID.randomUUID().toString()));
                         this.userMapper.bacthDeleteUserTeamByUserUuid(uuid, "ldap");
                         this.userMapper.insertUserForLdap(userVo);
                         //人员默认角色
