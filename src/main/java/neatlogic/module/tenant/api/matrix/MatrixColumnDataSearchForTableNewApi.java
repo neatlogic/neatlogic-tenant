@@ -225,6 +225,8 @@ public class MatrixColumnDataSearchForTableNewApi extends PrivateApiComponentBas
                     throw new MatrixAttributeNotFoundException(matrixVo.getName(), String.join(",", notFoundColumnList));
                 }
                 dataVo.setColumnList(columnList);
+            } else {
+                throw new ParamNotExistsException("columnList", "columnUniqueIdentifierList");
             }
         }
         List<Map<String, JSONObject>> tbodyList = matrixDataSourceHandler.searchTableDataNew(dataVo);
