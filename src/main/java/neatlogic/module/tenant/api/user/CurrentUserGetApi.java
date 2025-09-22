@@ -27,6 +27,7 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
+import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -77,6 +78,9 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
         if (userContext != null) {
             JSONObject userObj = new JSONObject();
             UserVo userVo = userMapper.getUserBaseInfoByUuid(userContext.getUserUuid());
+            if (userVo == null) {
+                throw new UserNotFoundException(userContext.getUserUuid());
+            }
             AuthenticationInfoVo authenticationInfoVo = userContext.getAuthenticationInfoVo();
             if (authenticationInfoVo == null) {
                 authenticationInfoVo = authenticationInfoService.getAuthenticationInfo(userContext.getUserUuid(), true);
