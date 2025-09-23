@@ -62,7 +62,7 @@ public class IntegrationExportApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuidList", type = ApiParamType.JSONARRAY, desc = "集成配置uuid列表", isRequired = true)})
+    @Input({@Param(name = "uuidList", type = ApiParamType.JSONARRAY, desc = "集成配置uuid列表", minSize = 1, isRequired = true)})
     @Description(desc = "导出集成设置信息")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -72,7 +72,14 @@ public class IntegrationExportApi extends PrivateBinaryStreamApiComponentBase {
         if (CollectionUtils.isNotEmpty(uuidList)) {
             throw new IntegrationNotFoundException(uuidList);
         }
-        String fileName = FileUtil.getEncodedFileName("集成配置." + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".pak");
+        String prefix = "集成配置";
+        if (existedUuidList.size() == 1) {
+            IntegrationVo integration = integrationMapper.getIntegrationByUuid(existedUuidList.get(0));
+            if (integration != null) {
+                prefix = integration.getName();
+            }
+        }
+        String fileName = FileUtil.getEncodedFileName(prefix + "." + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".pak");
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
         try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream())) {
