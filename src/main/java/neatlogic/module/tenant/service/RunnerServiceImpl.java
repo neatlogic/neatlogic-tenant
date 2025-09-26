@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.service;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.RunnerStatus;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerMapVo;
@@ -119,7 +120,7 @@ public class RunnerServiceImpl implements RunnerService {
         }
         JSONObject statusObj = new JSONObject();
         String url = runner.getUrl() + "api/rest/health/check";
-        HttpRequestUtil requestUtil = HttpRequestUtil.post(url).setPayload(new JSONObject().toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(5000).sendRequest();
+        HttpRequestUtil requestUtil = HttpRequestUtil.post(url).setPayload(new JSONObject().toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(Config.RUNNER_CONNECT_TIMEOUT()).setReadTimeout(Config.RUNNER_READ_TIMEOUT()).sendRequest();
         long statusLcd = System.currentTimeMillis();
         if (requestUtil.getResponseCode() != 200 || StringUtils.isNotBlank(requestUtil.getError())) {
             logger.error(String.format("Request to %s failed, result: %s, ResponseCode: %s, ErrorMsg: %s, Exception %s",
