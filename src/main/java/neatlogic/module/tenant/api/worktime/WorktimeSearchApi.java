@@ -15,6 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.worktime;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
@@ -25,9 +28,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.worktime.dao.mapper.WorktimeMapper;
 import neatlogic.framework.worktime.dto.WorktimeVo;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class WorktimeSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "工作时间窗口列表接口";
+        return "工作时间窗口列表";
     }
 
     @Override
@@ -70,7 +70,7 @@ public class WorktimeSearchApi extends PrivateApiComponentBase {
             @Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = WorktimeVo[].class, desc = "工作时间窗口列表")
     })
-    @Description(desc = "工作时间窗口列表接口")
+    @Description(desc = "工作时间窗口列表")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         WorktimeVo worktimeVo = JSON.toJavaObject(jsonObj, WorktimeVo.class);
