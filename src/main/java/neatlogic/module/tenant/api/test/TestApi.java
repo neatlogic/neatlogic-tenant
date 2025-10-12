@@ -43,6 +43,7 @@ public class TestApi extends PrivateApiComponentBase {
     @Description(desc = "测试RAW接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        System.out.println("paramObj = " + paramObj);
         System.out.println("######################进来了：" + paramObj);
         return paramObj;
     }
