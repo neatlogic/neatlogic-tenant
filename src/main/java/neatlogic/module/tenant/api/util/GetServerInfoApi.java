@@ -35,12 +35,12 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
-import org.apache.catalina.util.ServerInfo;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.management.ManagementFactory;
 import java.util.*;
@@ -53,16 +53,18 @@ public class GetServerInfoApi extends PrivateApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
+    @Resource
+    private ServletContext servletContext;
 
     @Override
     public String getName() {
-        return "获取服务器信息";
+        return "nmtau.getserverinfoapi.getname";
     }
 
     @Input({
-            @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "服务器ID")
+            @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "term.framework.serverid")
     })
-    @Description(desc = "获取服务器信息")
+    @Description(desc = "nmtau.getserverinfoapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
@@ -71,9 +73,7 @@ public class GetServerInfoApi extends PrivateApiComponentBase {
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            resultObj.put("Server.服务器版本", ServerInfo.getServerInfo());
-            resultObj.put("服务器构建", ServerInfo.getServerBuilt());
-            resultObj.put("服务器版本号", ServerInfo.getServerNumber());
+            resultObj.put("Server.服务器版本", servletContext.getServerInfo());
             resultObj.put("操作系统名称", System.getProperty("os.name"));
             resultObj.put("OS.版本", System.getProperty("os.version"));
             resultObj.put("架构", System.getProperty("os.arch"));

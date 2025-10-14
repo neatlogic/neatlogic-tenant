@@ -1,23 +1,8 @@
-
-/*Copyright (C) 2024  深圳极向量科技有限公司 All Rights Reserved.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
 package neatlogic.module.tenant.api.logger;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.util.StatusPrinter;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -30,8 +15,8 @@ import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.util.HttpRequestUtil;
+import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -39,47 +24,53 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Component
-@OperationType(type = OperationTypeEnum.UPDATE)
-public class changeLoggerLevelApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.SEARCH)
+public class GetLoggerStatusApi extends PrivateApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
+    @Override
+    public String getName() {
+        return "nmtal.getloggerstatusapi.getname";
+    }
 
     @Override
     public String getToken() {
-        return "logger/updatelevel";
-    }
-
-    @Override
-    public String getName() {
-        return "修改日志级别";
-    }
-
-    @Override
-    public String getConfig() {
-        return null;
+        return "logger/status";
     }
 
     @Input({
-            @Param(name = "serverId", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.serverid"),
-            @Param(name = "level", type = ApiParamType.ENUM, rule = "ALL,TRACE,DEBUG,INFO,WARN,ERROR,OFF", isRequired = true, desc = "日志级别")
+            @Param(name = "serverId", type = ApiParamType.INTEGER, desc = "term.framework.serverid")
     })
     @Output({
-            @Param(type = ApiParamType.STRING, desc = "当前日志级别")
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist")
     })
-    @Description(desc = "修改日志级别接口")
+    @Description(desc = "nmtal.getloggerstatusapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Integer serverId = paramObj.getInteger("serverId");
+        if (serverId == null) {
+            serverId = Config.SCHEDULE_SERVER_ID;
+        }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
-            String level = paramObj.getString("level");
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            ch.qos.logback.classic.Logger logger = loggerContext.getLogger("neatlogic");
-            logger.setLevel(Level.toLevel(level));
-            return logger.getLevel().levelStr;
+            // 获取当前Logback配置状态
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            PrintStream printStream = new PrintStream(byteArrayOutputStream);
+            StatusPrinter.setPrintStream(printStream);
+            StatusPrinter.print(loggerContext);
+            StatusPrinter.setPrintStream(System.out);
+            String logbackStatus = byteArrayOutputStream.toString();
+            String[] split = logbackStatus.split("\r\n");
+            List<String> tbodyList = Arrays.asList(split);
+            return TableResultUtil.getResult(tbodyList);
         } else {
             ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
             if (serverClusterVo != null) {
@@ -111,7 +102,7 @@ public class changeLoggerLevelApi extends PrivateApiComponentBase {
             } else {
                 throw new ServerNotFoundException(serverId);
             }
-            return StringUtils.EMPTY;
+            return null;
         }
     }
 }
