@@ -17,12 +17,12 @@ package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfAction;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.draw.DottedLineSeparator;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfAction;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.draw.DottedLineSeparator;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;

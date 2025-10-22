@@ -68,7 +68,7 @@ public class GetLoggerStatusApi extends PrivateApiComponentBase {
             StatusPrinter.print(loggerContext);
             StatusPrinter.setPrintStream(System.out);
             String logbackStatus = byteArrayOutputStream.toString();
-            String[] split = logbackStatus.split("\r\n");
+            String[] split = logbackStatus.split(System.lineSeparator());
             List<String> tbodyList = Arrays.asList(split);
             return TableResultUtil.getResult(tbodyList);
         } else {
