@@ -182,6 +182,9 @@ public class GetLogContentApi extends PrivateApiComponentBase {
                 // 计算本次读取的起始位置和大小
                 int readSize = (int) Math.min(DEFAULT_BUFFER_SIZE, position);
                 position -= readSize;
+                if (position == 0 && readSize < DEFAULT_BUFFER_SIZE) {
+                    buffer = ByteBuffer.allocate(readSize);
+                }
                 // 清空缓冲区（准备重新写入）
                 buffer.clear();
                 // 设置当前读写位置
