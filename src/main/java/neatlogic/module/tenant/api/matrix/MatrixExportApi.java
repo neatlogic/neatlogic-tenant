@@ -98,7 +98,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             if (workbook == null) {
                 workbook = new HSSFWorkbook();
             }
-            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xls");
+            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xlsx");
             response.setContentType("application/vnd.ms-excel;charset=utf-8");
             response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             workbook.write(os);

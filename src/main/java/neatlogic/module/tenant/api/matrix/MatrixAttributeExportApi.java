@@ -28,18 +28,26 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.ExcelUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.util.excel.ExcelBuilder;
+import neatlogic.framework.util.excel.SheetBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +60,8 @@ import java.util.List;
 
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBase {
+
+	private static Logger logger = LoggerFactory.getLogger(MatrixAttributeExportApi.class);
 
 	@Resource
 	private MatrixMapper matrixMapper;
@@ -104,63 +114,55 @@ public class MatrixAttributeExportApi extends PrivateBinaryStreamApiComponentBas
 				columnSelectValueList.add(columnSelectValue.toJavaList(String.class));
 			}
 		}
-		String fileNameEncode = matrixVo.getName() + "_模板.xls";
-		Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-		if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-			fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-		} else {
-			fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-		}
+		String fileNameEncode = matrixVo.getName() + "_模板.xlsx";
+		fileNameEncode = FileUtil.getEncodedFileName(fileNameEncode);
 		response.setContentType("application/vnd.ms-excel;charset=utf-8");
 		response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-		ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
-//		if (MatrixType.CUSTOM.getValue().equals(matrixVo.getType())) {
-//			List<MatrixAttributeVo> attributeVoList = attributeMapper.getMatrixAttributeByMatrixUuid(matrixUuid);
-//			if (CollectionUtils.isNotEmpty(attributeVoList)) {
-//				List<String> headerList = new ArrayList<>();
-//				List<List<String>> columnSelectValueList = new ArrayList<>();
-//				headerList.add("uuid");
-//				columnSelectValueList.add(new ArrayList<>());
-//				for (MatrixAttributeVo attributeVo : attributeVoList) {
-//					headerList.add(attributeVo.getName());
-//					List<String> selectValueList = new ArrayList<>();
-//					decodeDataConfig(attributeVo, selectValueList);
-//					columnSelectValueList.add(selectValueList);
-//				}
-//				String fileNameEncode = matrixVo.getName() + "_模板.xls";
-//				Boolean flag = request.getHeader("User-Agent").indexOf("Gecko") > 0;
-//				if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0 || flag) {
-//					fileNameEncode = URLEncoder.encode(fileNameEncode, "UTF-8");// IE浏览器
-//				} else {
-//					fileNameEncode = new String(fileNameEncode.replace(" ", "").getBytes(StandardCharsets.UTF_8), "ISO8859-1");
-//				}
-//				response.setContentType("application/vnd.ms-excel;charset=utf-8");
-//				response.setHeader("Content-Disposition", " attachment; filename=\"" + fileNameEncode + "\"");
-//				ExcelUtil.exportExcelHeaders(headerList, columnSelectValueList, response.getOutputStream());
-//			}
-//		} else if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType()))  {
-//			throw new MatrixExternalExportTemplateException();
-//		} else if (MatrixType.VIEW.getValue().equals(matrixVo.getType())) {
-//			throw new MatrixViewExportTemplateException();
-//		}
+		ExcelBuilder builder = new ExcelBuilder(SXSSFWorkbook.class);
+		SheetBuilder sheetBuilder = builder.withBorderColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT)
+				.withHeadFontColor(HSSFColor.HSSFColorPredefined.WHITE)
+				.withHeadBgColor(HSSFColor.HSSFColorPredefined.DARK_BLUE)
+				.withColumnWidth(30)
+				.addSheet("sheet01")
+				.withHeaderList(headerList)
+				;
+		try (Workbook workbook = builder.build();
+			 OutputStream os = response.getOutputStream()) {
+			Sheet sheet = workbook.getSheet("sheet01");
+			if (CollectionUtils.isNotEmpty(columnSelectValueList)) {
+				for (int i = 0; i < columnSelectValueList.size(); i++) {
+					List<String> defaultValueList = columnSelectValueList.get(i);
+					//行添加下拉框
+					if (CollectionUtils.isNotEmpty(defaultValueList)) {
+						// 1. 创建下拉值数组
+						String[] values = new String[defaultValueList.size()];
+						defaultValueList.toArray(values);
+						// 2. 设置下拉框作用范围（注意SXSSF的行限制）
+						CellRangeAddressList regions = new CellRangeAddressList(
+								1, // 首行（从第2行开始）
+								SXSSFWorkbook.DEFAULT_WINDOW_SIZE - 1, // 末行（最大行数-1）
+								i,  // 列号
+								i   // 同一列
+						);
+						// 3. 创建约束（SXSSF需用XSSFDataValidationHelper）
+						DataValidationHelper dvHelper = sheet.getDataValidationHelper();
+						DataValidationConstraint constraint = dvHelper.createExplicitListConstraint(values);
 
+						// 4. 创建并应用数据验证
+						DataValidation validation = dvHelper.createValidation(constraint, regions);
+
+						// 5. 设置Excel的兼容性选项
+						validation.setSuppressDropDownArrow(true); // 是否显示下拉箭头
+						validation.setShowErrorBox(true); // 输入错误时显示提示
+						//将有效性验证添加到表单
+						sheet.addValidationData(validation);
+					}
+				}
+			}
+			workbook.write(os);
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
 		return null;
 	}
-
-	// 解析config，抽取属性下拉框值
-//	private void decodeDataConfig(MatrixAttributeVo attributeVo, List<String> selectValueList) {
-//		if (StringUtils.isNotBlank(attributeVo.getConfig())) {
-//			String config = attributeVo.getConfig();
-//			JSONObject configObj = JSONObject.parseObject(config);
-//			if (MatrixAttributeType.SELECT.getValue().equals(configObj.getString("handler"))) {
-//				if (configObj.containsKey("config")) {
-//					JSONArray configArray = configObj.getJSONArray("config");
-//					for (int i = 0; i < configArray.size(); i++) {
-//						JSONObject param = configArray.getJSONObject(i);
-//						selectValueList.add(param.getString("value"));
-//					}
-//				}
-//			}
-//		}
-//	}
 }
