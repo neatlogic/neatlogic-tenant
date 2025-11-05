@@ -45,7 +45,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 
 @Service
-
+@SystemUser("autoexec")
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
 

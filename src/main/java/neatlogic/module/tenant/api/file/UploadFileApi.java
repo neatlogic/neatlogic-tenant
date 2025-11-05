@@ -45,6 +45,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@SystemUser("autoexec")
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
     //static Logger logger = LoggerFactory.getLogger(UploadFileApi.class);

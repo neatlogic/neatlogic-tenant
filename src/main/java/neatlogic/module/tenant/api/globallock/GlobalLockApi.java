@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.util.Objects;
 
 @Service
+@SystemUser("autoexec")
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class GlobalLockApi extends PrivateApiComponentBase {
 
