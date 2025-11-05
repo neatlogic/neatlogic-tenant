@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Service
 @SystemUser("autoexec")
@@ -90,7 +91,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                 String userUuid = UserContext.get().getUserUuid();
                 IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
                 if (fileTypeHandler != null) {
-                    if (StringUtils.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
+                    if (Objects.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
                         ServletOutputStream os;
                         InputStream in;
                         in = FileUtil.getData(fileVo.getPath());
