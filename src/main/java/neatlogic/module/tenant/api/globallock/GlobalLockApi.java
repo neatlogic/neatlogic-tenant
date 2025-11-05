@@ -1,6 +1,8 @@
 package neatlogic.module.tenant.api.globallock;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.globallock.GlobalLockManager;
@@ -9,14 +11,13 @@ import neatlogic.framework.globallock.core.IGlobalLockHandler;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Objects;
 
 @Service
-@SystemUser("autoexec")
+@AuthUser(SystemUser.AUTOEXEC)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class GlobalLockApi extends PrivateApiComponentBase {
 

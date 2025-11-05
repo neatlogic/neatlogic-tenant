@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.file;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.exception.file.FileAccessDeniedException;
 import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
@@ -38,7 +39,7 @@ import javax.annotation.Resource;
 
 @Service
 @Transactional
-@SystemUser("autoexec")
+@AuthUser(SystemUser.AUTOEXEC)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class DeleteFileApi extends PrivateApiComponentBase {
 

@@ -20,6 +20,7 @@ import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.exception.file.FileAccessDeniedException;
 import neatlogic.framework.exception.file.FileNotFoundException;
@@ -45,7 +46,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 
 @Service
-@SystemUser("autoexec")
+@AuthUser(SystemUser.AUTOEXEC)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
 
