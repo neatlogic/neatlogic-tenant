@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
 import neatlogic.framework.exception.user.NoTenantException;
 import neatlogic.framework.restful.annotation.*;
@@ -37,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 
 @Service
-
+@AuthUser(SystemUser.ANONYMOUS)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBase {
 
