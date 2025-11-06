@@ -1,5 +1,7 @@
 package neatlogic.module.tenant.api.notify;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -23,6 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Component
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportNotifyPolicyApi extends PrivateBinaryStreamApiComponentBase {
 

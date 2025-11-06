@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.file;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.exception.user.NoTenantException;
 import neatlogic.framework.file.dao.mapper.FileMapper;
@@ -39,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class UploadImageApi extends PrivateBinaryStreamApiComponentBase {
     //static Logger logger = LoggerFactory.getLogger(UploadImageApi.class);
