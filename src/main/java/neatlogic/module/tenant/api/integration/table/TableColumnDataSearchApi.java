@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.integration.table;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
@@ -51,6 +53,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Deprecated
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TableColumnDataSearchApi extends PrivateApiComponentBase {
 

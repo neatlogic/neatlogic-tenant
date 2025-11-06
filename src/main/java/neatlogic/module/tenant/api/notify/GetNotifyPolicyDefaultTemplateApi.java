@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyHandlerType;
@@ -47,6 +49,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 @Component
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
 

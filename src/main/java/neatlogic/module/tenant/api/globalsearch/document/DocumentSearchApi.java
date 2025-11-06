@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.globalsearch.document;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.fulltextindex.dto.globalsearch.DocumentTypeVo;
 import neatlogic.framework.fulltextindex.dto.globalsearch.DocumentVo;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DocumentSearchApi extends PrivateApiComponentBase {
 

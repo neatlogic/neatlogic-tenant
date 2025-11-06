@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.team;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.mapper.TeamMapper;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Deprecated
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamListApi extends PrivateApiComponentBase {
 	@Autowired

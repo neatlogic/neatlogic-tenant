@@ -19,6 +19,8 @@ package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = NoAuth.class)
 public class PushRunnerStatusApi extends PrivateApiComponentBase {
 
     @Resource

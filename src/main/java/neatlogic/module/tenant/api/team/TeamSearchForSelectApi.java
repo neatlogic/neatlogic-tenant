@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.team;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.ValueTextVo;
@@ -38,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamSearchForSelectApi extends PrivateApiComponentBase {
 

@@ -17,8 +17,10 @@ package neatlogic.module.tenant.api.matrix;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.MATRIX_MODIFY;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
@@ -53,6 +55,7 @@ import java.util.Set;
  **/
 @Service
 @Transactional
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class MatrixDataSaveApi extends PrivateApiComponentBase {
 

@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.notify;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.OperationType;
 
@@ -41,7 +42,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyTemplateGetApi extends PrivateApiComponentBase {
 

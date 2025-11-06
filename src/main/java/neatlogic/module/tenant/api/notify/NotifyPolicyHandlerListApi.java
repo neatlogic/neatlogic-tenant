@@ -18,8 +18,10 @@ package neatlogic.module.tenant.api.notify;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.NOTIFY_JOB_MODIFY;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.type.PermissionDeniedException;
@@ -44,7 +46,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
 

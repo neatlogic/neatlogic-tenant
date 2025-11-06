@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.license;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.dto.license.LicenseInvalidVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetLicenseInvalidMsgApi extends PrivateApiComponentBase {
 

@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.team;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.TeamUserTitle;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
@@ -36,7 +37,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.exception.team.TeamNotFoundException;
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamUserListApi extends PrivateApiComponentBase  {
 

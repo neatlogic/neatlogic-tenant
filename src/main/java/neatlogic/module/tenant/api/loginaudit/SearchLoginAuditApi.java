@@ -1,6 +1,8 @@
 package neatlogic.module.tenant.api.loginaudit;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dao.mapper.LoginMapper;
@@ -20,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchLoginAuditApi extends PrivateApiComponentBase {
 

@@ -16,11 +16,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.test;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Component;
 
 @Component
+@AuthAction(action = NoAuth.class)
 //@Transactional
 public class TestApi extends PrivateApiComponentBase {
 

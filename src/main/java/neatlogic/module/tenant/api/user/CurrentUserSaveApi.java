@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -31,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class CurrentUserSaveApi extends PrivateApiComponentBase {
 
