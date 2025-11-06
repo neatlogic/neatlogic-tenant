@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
@@ -48,6 +50,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadI18nTranslatePropertiesApi extends PrivateBinaryStreamApiComponentBase {
     Logger logger = LoggerFactory.getLogger(DownloadI18nTranslatePropertiesApi.class);

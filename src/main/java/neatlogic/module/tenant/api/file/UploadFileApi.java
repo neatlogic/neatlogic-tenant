@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.FileUtil;
@@ -47,6 +49,7 @@ import java.util.List;
 @Service
 @Transactional
 @AuthUser(SystemUser.AUTOEXEC)
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
     //static Logger logger = LoggerFactory.getLogger(UploadFileApi.class);

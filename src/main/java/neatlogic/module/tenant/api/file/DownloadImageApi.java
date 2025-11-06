@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.file;
 
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
@@ -41,6 +43,7 @@ import java.io.InputStream;
 
 @Service
 @AuthUser(SystemUser.ANONYMOUS)
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
 
