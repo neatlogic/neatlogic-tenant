@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.apiaudit;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.Description;
@@ -32,7 +33,7 @@ import java.util.List;
 
 @Deprecated
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiOperationTypeListApi extends PrivateApiComponentBase {
 

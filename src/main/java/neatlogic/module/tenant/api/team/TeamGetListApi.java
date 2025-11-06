@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.team;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
@@ -32,6 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamGetListApi extends PrivateApiComponentBase {
 

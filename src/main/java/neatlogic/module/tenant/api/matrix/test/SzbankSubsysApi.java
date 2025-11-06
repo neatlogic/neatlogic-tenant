@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.matrix.test;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.dto.ValueTextVo;
@@ -37,6 +39,7 @@ import java.util.Objects;
  * @since 2021/9/16 11:22
  **/
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SzbankSubsysApi extends PrivateApiComponentBase {
 

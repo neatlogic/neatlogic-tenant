@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.form;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -31,6 +33,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchFormCustomItemApi extends PrivateApiComponentBase {
     @Resource

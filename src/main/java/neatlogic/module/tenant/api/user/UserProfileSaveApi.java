@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.user;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.IUserProfile;
 import neatlogic.framework.common.constvalue.IUserProfileOperate;
@@ -40,7 +42,7 @@ import java.util.Objects;
 
 @Service
 @Transactional
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserProfileSaveApi extends PrivateApiComponentBase {
 	@Autowired

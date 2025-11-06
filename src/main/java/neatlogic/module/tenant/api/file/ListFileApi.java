@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.file;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
@@ -30,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ListFileApi extends PrivateApiComponentBase {
 

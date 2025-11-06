@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.message;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.message.dao.mapper.MessageMapper;
 import neatlogic.framework.message.dto.MessageSearchVo;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 @Transactional
 public class MessageDeleteApi extends PrivateApiComponentBase {

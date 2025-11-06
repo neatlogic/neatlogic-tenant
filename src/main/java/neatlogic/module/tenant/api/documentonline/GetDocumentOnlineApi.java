@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
 

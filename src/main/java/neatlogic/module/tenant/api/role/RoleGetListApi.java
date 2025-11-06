@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.role;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dto.RoleVo;
@@ -40,7 +41,7 @@ import java.util.List;
  * @create: 2020-03-20 10:35
  **/
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class RoleGetListApi extends PrivateApiComponentBase {
 

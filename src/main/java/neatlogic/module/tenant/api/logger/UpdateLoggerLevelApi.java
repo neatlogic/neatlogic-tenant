@@ -19,6 +19,8 @@ package neatlogic.module.tenant.api.logger;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.core.ApiRuntimeException;
@@ -42,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 @Component
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UpdateLoggerLevelApi extends PrivateApiComponentBase {
 

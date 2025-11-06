@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.form;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ParamNotExistsException;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetFormCustomItemApi extends PrivateApiComponentBase {
     @Resource

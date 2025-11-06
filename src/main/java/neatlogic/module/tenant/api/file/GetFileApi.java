@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.file;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetFileApi extends PrivateApiComponentBase {
 

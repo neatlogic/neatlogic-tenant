@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +37,7 @@ import neatlogic.framework.restful.core.publicapi.PublicApiComponentFactory;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageApiHandlerListForSelectApi extends PrivateApiComponentBase {
 

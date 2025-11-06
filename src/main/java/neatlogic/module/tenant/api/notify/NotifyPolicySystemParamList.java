@@ -1,6 +1,8 @@
 package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.ConditionParamVo;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicySystemParamList extends PrivateApiComponentBase {
 

@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.user;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -31,6 +33,7 @@ import javax.annotation.Resource;
 import java.util.UUID;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class ResetCurrentUserTokenApi extends PrivateApiComponentBase {
 

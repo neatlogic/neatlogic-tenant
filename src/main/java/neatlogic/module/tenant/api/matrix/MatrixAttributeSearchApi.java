@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.matrix;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.type.ParamNotExistsException;
@@ -46,7 +48,7 @@ import java.util.List;
  * @create: 2020-03-26 19:06
  **/
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
 

@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.integration;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationGetApi extends PrivateApiComponentBase {
 

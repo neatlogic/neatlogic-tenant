@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.BasePageVo;
@@ -39,7 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SystemNoticePullApi extends PrivateApiComponentBase {
 

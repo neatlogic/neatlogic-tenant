@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
@@ -32,6 +34,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {
 	

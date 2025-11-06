@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.changelog;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.changelog.ChangelogVersionInvalidException;
 import neatlogic.framework.exception.type.ParamIrregularException;
@@ -38,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetChangeLogVersionApi extends PrivateApiComponentBase {
     @Override

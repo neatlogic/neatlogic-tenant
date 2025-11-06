@@ -18,6 +18,8 @@ package neatlogic.module.tenant.api.integration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ParamType;
 import neatlogic.framework.common.dto.BasePageVo;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class IntegrationSearchApi extends PrivateApiComponentBase {
 

@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserDataVo;
@@ -27,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 public class UserDataSaveApi extends PrivateApiComponentBase {
 

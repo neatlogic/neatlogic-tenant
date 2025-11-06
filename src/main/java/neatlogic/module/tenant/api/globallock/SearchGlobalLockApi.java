@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.globallock;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.globallock.GlobalLockVo;
 import neatlogic.framework.globallock.GlobalLockManager;
@@ -26,7 +28,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchGlobalLockApi extends PrivateApiComponentBase {
 

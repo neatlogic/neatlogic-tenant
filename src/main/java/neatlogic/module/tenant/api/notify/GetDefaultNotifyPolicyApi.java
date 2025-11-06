@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDefaultNotifyPolicyApi extends PrivateApiComponentBase {
 
