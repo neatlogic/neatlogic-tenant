@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.restful.annotation.*;
@@ -29,6 +31,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DeleteUserSessionApi extends PrivateApiComponentBase {
     @Resource

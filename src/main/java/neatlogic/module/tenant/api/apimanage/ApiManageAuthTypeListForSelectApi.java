@@ -15,6 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tenant.api.apimanage;
 
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.auth.core.ApiAuthFactory;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 @Deprecated
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageAuthTypeListForSelectApi extends PrivateApiComponentBase {
 

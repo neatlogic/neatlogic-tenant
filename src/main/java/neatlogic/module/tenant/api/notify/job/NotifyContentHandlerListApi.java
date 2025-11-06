@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.notify.job;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.notify.core.NotifyContentHandlerFactory;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -25,7 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyContentHandlerListApi extends PrivateApiComponentBase {
 

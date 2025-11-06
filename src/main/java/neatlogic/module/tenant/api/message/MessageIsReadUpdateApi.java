@@ -19,6 +19,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.message.dao.mapper.MessageMapper;
 import neatlogic.framework.message.dto.MessageSearchVo;
@@ -41,7 +43,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
 public class MessageIsReadUpdateApi extends PrivateApiComponentBase {

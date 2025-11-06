@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -47,7 +48,7 @@ import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException
 import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyParamListApi extends PrivateApiComponentBase {
 

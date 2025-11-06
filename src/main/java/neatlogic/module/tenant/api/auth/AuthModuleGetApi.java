@@ -19,10 +19,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
 import neatlogic.framework.auth.init.MaintenanceMode;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
@@ -44,7 +46,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthModuleGetApi extends PrivateApiComponentBase {
     @Resource

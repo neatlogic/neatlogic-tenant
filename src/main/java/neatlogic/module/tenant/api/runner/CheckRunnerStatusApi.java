@@ -18,6 +18,8 @@
 package neatlogic.module.tenant.api.runner;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
+@AuthAction(action = NoAuth.class)
 public class CheckRunnerStatusApi extends PrivateApiComponentBase {
 
     @Resource

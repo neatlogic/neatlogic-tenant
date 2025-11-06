@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.restful.annotation.*;
@@ -32,6 +34,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
     @Override

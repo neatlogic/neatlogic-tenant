@@ -18,6 +18,8 @@
 package neatlogic.module.tenant.api.util;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -26,6 +28,7 @@ import neatlogic.framework.util.javascript.JavascriptUtil;
 import org.springframework.stereotype.Service;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class JavascriptTestApi extends PrivateApiComponentBase {
     @Override

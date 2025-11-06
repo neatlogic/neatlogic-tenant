@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.message;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.message.constvalue.PopUpType;
 import neatlogic.framework.message.core.IMessageHandler;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 @Transactional
 public class MessageHandlerActiveUpdateApi extends PrivateApiComponentBase {

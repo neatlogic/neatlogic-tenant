@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.dto.ThemeVo;
 import neatlogic.framework.restful.annotation.*;
@@ -33,6 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class InitConfigGetApi extends PrivateApiComponentBase {
     private final Logger logger = LoggerFactory.getLogger(InitConfigGetApi.class);

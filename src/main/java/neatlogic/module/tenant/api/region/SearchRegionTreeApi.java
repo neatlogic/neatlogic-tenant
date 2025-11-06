@@ -18,6 +18,8 @@
 package neatlogic.module.tenant.api.region;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.region.RegionMapper;
 import neatlogic.framework.dto.region.RegionVo;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchRegionTreeApi extends PrivateApiComponentBase {
     @Resource

@@ -18,6 +18,8 @@
 package neatlogic.module.tenant.api.form;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -33,7 +35,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetFormAttributeListApi extends PrivateApiComponentBase {
 

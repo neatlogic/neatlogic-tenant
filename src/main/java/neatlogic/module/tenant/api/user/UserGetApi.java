@@ -18,10 +18,12 @@ package neatlogic.module.tenant.api.user;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
 import neatlogic.framework.auth.init.MaintenanceMode;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
@@ -45,7 +47,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserGetApi extends PrivateApiComponentBase {
 

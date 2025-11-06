@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -40,7 +41,7 @@ import neatlogic.framework.notify.exception.NotifyPolicyHandlerNotFoundException
 import neatlogic.framework.notify.exception.NotifyPolicyNotFoundException;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class NotifyPolicyConditionOptionListApi extends PrivateApiComponentBase {
 

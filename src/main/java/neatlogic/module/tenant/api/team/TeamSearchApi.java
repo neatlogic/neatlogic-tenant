@@ -18,6 +18,7 @@ package neatlogic.module.tenant.api.team;
 import java.util.List;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -36,7 +37,7 @@ import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dto.TeamVo;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamSearchApi extends PrivateApiComponentBase {
 

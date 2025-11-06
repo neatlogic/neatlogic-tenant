@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tenant.api.matrix.test;
 
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
  * 用于矩阵外部数据源测试
  */
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExternalTest5Api extends PrivateApiComponentBase {
 

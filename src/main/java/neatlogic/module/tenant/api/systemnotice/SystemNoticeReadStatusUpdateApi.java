@@ -17,6 +17,7 @@ package neatlogic.module.tenant.api.systemnotice;
 
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class SystemNoticeReadStatusUpdateApi extends PrivateApiComponentBase {
 
