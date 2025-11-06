@@ -17,6 +17,8 @@ package neatlogic.module.tenant.api.file;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.exception.file.FileAccessDeniedException;
@@ -40,6 +42,7 @@ import javax.annotation.Resource;
 @Service
 @Transactional
 @AuthUser(SystemUser.AUTOEXEC)
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class DeleteFileApi extends PrivateApiComponentBase {
 
