@@ -78,11 +78,13 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
             @Param(name = "expireUnit", type = ApiParamType.ENUM, rule = "minute,hour,day", desc = "有效期单位"),
             @Param(name = "dbType", type = ApiParamType.STRING, isRequired = true, desc = "数据库类型"),
+            @Param(name = "isClear", type = ApiParamType.INTEGER, rule = "0,1", desc = "是否清理数据"),
             @Param(name = "databaseId", type = ApiParamType.LONG, desc = "数据库Id")
     })
     @Description(desc = "保存数据仓库数据源")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        Integer isClear = jsonObj.getInteger("isClear");
         DataSourceVo newDataSourceVo = JSON.toJavaObject(jsonObj, DataSourceVo.class);
         if (dataSourceMapper.checkDataSourceNameIsExists(newDataSourceVo) > 0) {
             throw new DataSourceNameIsExistsException(newDataSourceVo.getName());
@@ -115,9 +117,13 @@ public class SaveDataSourceApi extends PrivateApiComponentBase {
             // 还原条件设置
             List<DataSourceFieldVo> newFieldList = dataSourceService.revertFieldCondition(dataSourceVo.getFieldList(), oldDatasourceVo.getFieldList());
             dataSourceVo.setFieldList(newFieldList);
+            if (!isChangeXml && !Objects.equals(isClear, 1)) {
+                //不重建schema则使用旧的数据量信息
+                newDataSourceVo.setDataCount(oldDatasourceVo.getDataCount());
+            }
             dataSourceService.updateDataSource(newDataSourceVo, dataSourceVo, oldDatasourceVo);
         }
-        if (isChangeXml) {
+        if (isChangeXml || Objects.equals(isClear, 1)) {
             dataSourceService.createDataSourceSchema(newDataSourceVo);
         }
         dataSourceService.loadOrUnloadReportDataSourceJob(newDataSourceVo);
