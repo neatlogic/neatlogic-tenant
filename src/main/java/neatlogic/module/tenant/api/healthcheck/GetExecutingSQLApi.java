@@ -13,44 +13,36 @@
 package neatlogic.module.tenant.api.healthcheck;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.common.config.Config;
-import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.dao.plugin.ExecutingSQLInterceptor;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.ThreadUtil;
 import org.springframework.stereotype.Service;
 
-import java.io.StringWriter;
+import java.util.Map;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ThreadDumpApi extends PrivateApiComponentBase {
-
-    @Override
-    public String getToken() {
-        return "/healthcheck/threaddump";
-    }
+public class GetExecutingSQLApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "打印线程快照";
+        return "查看正在执行的sql";
     }
 
-    @Override
-    public String getConfig() {
-        return null;
-    }
-
-    @Description(desc = "打印线程快照接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        StringWriter writer = new StringWriter();
-        ThreadUtil.dumpTraces(writer);
-        return writer.toString();
+        JSONObject resultObj = new JSONObject();
+        Map<String, String> thread2ExecutingSQLMap = ExecutingSQLInterceptor.getThread2ExecutingSQLMap();
+        resultObj.put("executingSQLMap", thread2ExecutingSQLMap);
+        return resultObj;
+    }
+
+    @Override
+    public String getToken() {
+        return "/healthcheck/executingsql/get";
     }
 }
