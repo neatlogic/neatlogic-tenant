@@ -16,9 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.dao.plugin.ExecutingSQLInterceptor;
+import neatlogic.framework.dto.healthcheck.DataSourceInfoVo;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.store.mysql.DatasourceManager;
+import neatlogic.framework.store.mysql.NeatLogicBasicDataSource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -38,6 +41,16 @@ public class GetExecutingSQLApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         Map<String, String> thread2ExecutingSQLMap = ExecutingSQLInterceptor.getThread2ExecutingSQLMap();
         resultObj.put("executingSQLMap", thread2ExecutingSQLMap);
+        NeatLogicBasicDataSource datasource = DatasourceManager.getDatasource();
+        DataSourceInfoVo dataSourceInfoVo = new DataSourceInfoVo();
+        dataSourceInfoVo.setPoolName(datasource.getPoolName());
+        if (datasource.getHikariPoolMXBean() != null) {
+            dataSourceInfoVo.setIdleConnections(datasource.getHikariPoolMXBean().getIdleConnections());
+            dataSourceInfoVo.setActiveConnections(datasource.getHikariPoolMXBean().getActiveConnections());
+            dataSourceInfoVo.setThreadsAwaitingConnection(datasource.getHikariPoolMXBean().getThreadsAwaitingConnection());
+            dataSourceInfoVo.setTotalConnections(datasource.getHikariPoolMXBean().getTotalConnections());
+        }
+        resultObj.put("dataSourceInfoVo", dataSourceInfoVo);
         return resultObj;
     }
 
