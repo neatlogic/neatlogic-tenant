@@ -37,40 +37,40 @@ import org.springframework.stereotype.Service;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class IntegrationTestApi extends PrivateApiComponentBase {
 
-	@Override
-	public String getToken() {
-		return "integration/test";
-	}
+    @Override
+    public String getToken() {
+        return "integration/test";
+    }
 
-	@Override
-	public String getName() {
-		return "nmtai.integrationtestapi.getname";
-	}
+    @Override
+    public String getName() {
+        return "nmtai.integrationtestapi.getname";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
 
-	@Input({
-			@Param(name = "url", type = ApiParamType.STRING, desc = "nmtai.integrationtestapi.address", isRequired = true, rule = "^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?"),
-			@Param(name = "handler", type = ApiParamType.STRING, desc = "nmtai.integrationtestapi.component", isRequired = true, xss = true),
-			@Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
-	})
-	@Description(desc = "nmtai.integrationtestapi.getname")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		IntegrationVo integrationVo = JSON.toJavaObject(jsonObj, IntegrationVo.class);
-		IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-		if (handler == null) {
-			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
-		}
-		IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
-		try {
-			handler.validate(resultVo);
-		}catch (ApiRuntimeException ex){
-			resultVo.appendError(ex.getMessage());
-		}
-		return resultVo;
-	}
+    @Input({
+            @Param(name = "url", type = ApiParamType.REGEX, desc = "nmtai.integrationtestapi.address", isRequired = true, rule = "^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "nmtai.integrationtestapi.component", isRequired = true, xss = true),
+            @Param(name = "config", type = ApiParamType.JSONOBJECT, desc = "common.config", isRequired = true)
+    })
+    @Description(desc = "nmtai.integrationtestapi.getname")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        IntegrationVo integrationVo = JSON.toJavaObject(jsonObj, IntegrationVo.class);
+        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+        if (handler == null) {
+            throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+        }
+        IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
+        try {
+            handler.validate(resultVo);
+        } catch (ApiRuntimeException ex) {
+            resultVo.appendError(ex.getMessage());
+        }
+        return resultVo;
+    }
 }
