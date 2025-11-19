@@ -13,44 +13,32 @@
 package neatlogic.module.tenant.api.healthcheck;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.common.config.Config;
-import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.ThreadUtil;
+import neatlogic.framework.store.mysql.SQLTransientConnectionExceptionAudit;
 import org.springframework.stereotype.Service;
-
-import java.io.StringWriter;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ThreadDumpApi extends PrivateApiComponentBase {
-
-    @Override
-    public String getToken() {
-        return "/healthcheck/threaddump";
-    }
+public class ClearExecutingSQLApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "打印线程快照";
+        return "清空正在执行的sql";
     }
 
     @Override
-    public String getConfig() {
+    public Object myDoService(JSONObject paramObj) throws Exception {
+        SQLTransientConnectionExceptionAudit.clearExecutingSQL();
         return null;
     }
 
-    @Description(desc = "打印线程快照接口")
     @Override
-    public Object myDoService(JSONObject paramObj) throws Exception {
-        StringWriter writer = new StringWriter();
-        ThreadUtil.dumpTraces(writer);
-        return writer.toString();
+    public String getToken() {
+        return "/healthcheck/executingsql/clear";
     }
 }
