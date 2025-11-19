@@ -15,13 +15,13 @@ package neatlogic.module.tenant.api.healthcheck;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.dao.plugin.ExecutingSQLInterceptor;
 import neatlogic.framework.dto.healthcheck.DataSourceInfoVo;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.store.mysql.DatasourceManager;
 import neatlogic.framework.store.mysql.NeatLogicBasicDataSource;
+import neatlogic.framework.store.mysql.SQLTransientConnectionExceptionAudit;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -39,8 +39,8 @@ public class GetExecutingSQLApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject();
-        Map<String, String> thread2ExecutingSQLMap = ExecutingSQLInterceptor.getThread2ExecutingSQLMap();
-        resultObj.put("executingSQLMap", thread2ExecutingSQLMap);
+        Map<String, String> executingSQLMap = SQLTransientConnectionExceptionAudit.getExecutingSQL();
+        resultObj.put("executingSQLMap", executingSQLMap);
         NeatLogicBasicDataSource datasource = DatasourceManager.getDatasource();
         DataSourceInfoVo dataSourceInfoVo = new DataSourceInfoVo();
         dataSourceInfoVo.setPoolName(datasource.getPoolName());

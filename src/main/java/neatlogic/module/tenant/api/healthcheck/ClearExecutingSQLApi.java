@@ -15,10 +15,10 @@ package neatlogic.module.tenant.api.healthcheck;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.dao.plugin.ExecutingSQLInterceptor;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.store.mysql.SQLTransientConnectionExceptionAudit;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,7 +33,7 @@ public class ClearExecutingSQLApi extends PrivateApiComponentBase {
 
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        ExecutingSQLInterceptor.clearThread2ExecutingSQLMap();
+        SQLTransientConnectionExceptionAudit.clearExecutingSQL();
         return null;
     }
 
