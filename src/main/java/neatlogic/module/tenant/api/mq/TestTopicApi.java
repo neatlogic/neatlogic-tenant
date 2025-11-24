@@ -19,7 +19,9 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.mq.MqHandlerNotFoundException;
 import neatlogic.framework.exception.mq.TopicNotFoundException;
 import neatlogic.framework.mq.core.IMqHandler;
+import neatlogic.framework.mq.core.ITopic;
 import neatlogic.framework.mq.core.MqHandlerFactory;
+import neatlogic.framework.mq.core.TopicFactory;
 import neatlogic.framework.mq.dao.mapper.MqTopicMapper;
 import neatlogic.framework.mq.dto.TopicVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -28,6 +30,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,15 +68,25 @@ public class TestTopicApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String name = jsonObj.getString("name");
         String content = jsonObj.getString("content");
+        String handlerName = null;
         TopicVo topicVo = mqTopicMapper.getTopicByName(name);
-        if (topicVo == null) {
+        if (topicVo != null) {
+            handlerName = topicVo.getHandler();
+        } else {
+            ITopic topic = TopicFactory.getTopic(name);
+            if (topic != null) {
+                handlerName = topic.getHandler();
+            }
+        }
+        if (StringUtils.isNotBlank(handlerName)) {
+            IMqHandler mqHandler = MqHandlerFactory.getMqHandler(handlerName);
+            if (mqHandler == null) {
+                throw new MqHandlerNotFoundException(handlerName);
+            }
+            mqHandler.send(name, content);
+        } else {
             throw new TopicNotFoundException(name);
         }
-        IMqHandler mqHandler = MqHandlerFactory.getMqHandler(topicVo.getHandler());
-        if (mqHandler == null) {
-            throw new MqHandlerNotFoundException(topicVo.getHandler());
-        }
-        mqHandler.send(name, content);
         return null;
     }
 
