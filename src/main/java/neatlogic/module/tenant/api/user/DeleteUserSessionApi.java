@@ -17,14 +17,18 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
+import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +37,9 @@ import java.util.List;
 public class DeleteUserSessionApi extends PrivateApiComponentBase {
     @Resource
     UserSessionMapper userSessionMapper;
+
+    @Resource
+    UserSessionService userSessionService;
 
     @Override
     public String getToken() {
@@ -56,10 +63,18 @@ public class DeleteUserSessionApi extends PrivateApiComponentBase {
     @Description(desc = "nmtau.deleteusersessionapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
-        if (CollectionUtils.isNotEmpty(userUuidArray)) {
-            List<String> userUuidList = userUuidArray.toJavaList(String.class);
-            userSessionMapper.deleteUserSessionByUserUuidList(userUuidList);
+        List<String> userUuidList = JSONArray.parseArray(jsonObj.getString("userUuidList"), String.class);
+        if (CollectionUtils.isNotEmpty(userUuidList)) {
+            List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuidList(userUuidList);
+            List<String> removeTokenList = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(userSessionVos)) {
+                for (UserSessionVo userSessionVo : userSessionVos) {
+                    UserSessionCache.removeItem(userSessionVo.getTokenHash());
+                    removeTokenList.add(userSessionVo.getTokenHash());
+                }
+                userSessionMapper.deleteUserSessionByUserUuidList(userUuidList);
+                userSessionService.deleteOtherClusterUserSessionByTokenList(removeTokenList);
+            }
         }
         return null;
     }

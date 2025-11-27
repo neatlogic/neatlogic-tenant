@@ -12,6 +12,7 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -22,15 +23,15 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,6 +44,9 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
     @Resource
     UserSessionMapper userSessionMapper;
 
+    @Resource
+    UserSessionService userSessionService;
+
     @Override
     public String getToken() {
         return "/user/session/cache/clear";
@@ -50,7 +54,7 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "清楚用户会话缓存";
+        return "清除用户会话缓存";
     }
 
     @Override
@@ -59,38 +63,42 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
-            @Param(name = "useId", type = ApiParamType.STRING, desc = "common.userid")
+            @Param(name = "userIdList", type = ApiParamType.STRING, desc = "用户id或uuid列表"),
+            @Param(name = "tokenHashList", type = ApiParamType.STRING, desc = "tokenHash列表"),
     })
     @Output({})
-    @Description(desc = "清楚用户会话缓存接口")
+    @Description(desc = "清除用户会话缓存接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        UserVo userVo = null;
-        String userUuid = null;
-        if (jsonObj.containsKey("userUuid")) {
-            userUuid = jsonObj.getString("userUuid");
-            userVo = userMapper.getUserByUuid(userUuid);
-            if (userVo == null) {
-                throw new UserNotFoundException(userUuid);
+        //如果是存在tokenHashList，说明是被动需要清除用户会话
+        if (jsonObj.containsKey("tokenHashList")) {
+            List<String> tokenHashList = JSONArray.parseArray(jsonObj.getString("tokenHashList"), String.class);
+            for (String tokenHash : tokenHashList) {
+                UserSessionCache.removeItem(tokenHash);
             }
-        } else if (jsonObj.containsKey("userId")) {
-            String userId = jsonObj.getString("userId");
-            userVo = userMapper.getUserByUserId(userId);
-            if (userVo == null) {
-                throw new UserNotFoundException(userId);
+        } else {
+            List<String> userUuidList = new ArrayList<>();
+            List<String> removeTokenList = new ArrayList<>();
+            if (jsonObj.containsKey("userIdList")) {
+                List<String> userIdList = JSONArray.parseArray(jsonObj.getString("userUuidList"), String.class);
+                List<UserVo> userList = userMapper.getUserByUserIdListOrUuidList(userIdList);
+                if (CollectionUtils.isNotEmpty(userList)) {
+                    userUuidList = userList.stream().map(UserVo::getUuid).toList();
+                }
+            } else {
+                userUuidList.add(UserContext.get().getUserUuid(true));
+                removeTokenList.add(UserContext.get().getTokenHash());
             }
-            userUuid = userVo.getUuid();
-        }
-        if (StringUtils.isBlank(userUuid)) {
-            userUuid = UserContext.get().getUserUuid(true);
-            UserSessionCache.removeItem(UserContext.get().getTokenHash());
-        }
-        List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuid(userUuid);
-        if (CollectionUtils.isNotEmpty(userSessionVos)) {
-            for (UserSessionVo userSessionVo : userSessionVos) {
-                UserSessionCache.removeItem(userSessionVo.getTokenHash());
+
+            List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuidList(userUuidList);
+            if (CollectionUtils.isNotEmpty(userSessionVos)) {
+                for (UserSessionVo userSessionVo : userSessionVos) {
+                    UserSessionCache.removeItem(userSessionVo.getTokenHash());
+                    removeTokenList.add(userSessionVo.getTokenHash());
+                }
             }
+            //调取其它节点的接口删除UserSessionCache
+            userSessionService.deleteOtherClusterUserSessionByTokenList(removeTokenList);
         }
         return null;
     }
