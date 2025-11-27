@@ -58,7 +58,8 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
     @Override
     public JSONObject example() {
         JSONObject defaultJson = new JSONObject(true);
-        defaultJson.put("name", "组名，不更新，只是用于查找，查找不到不做任何更新");
+        defaultJson.put("uuid", "组uuid，不更新，只是用于查找。uuid和name入参两者必须有一个有值，如果都有值则按uuid查找");
+        defaultJson.put("name", "组名，不更新，只是用于查找。uuid和name入参两者必须有一个有值，如果都有值则按uuid查找");
         defaultJson.put("email", "分组邮箱");
         defaultJson.put("phone", "分组电话");
         defaultJson.put("level", "层级");
