@@ -11,6 +11,9 @@ import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserTitleVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
+import neatlogic.framework.exception.team.TeamNotFoundException;
+import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -69,7 +72,8 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "name", type = ApiParamType.STRING, desc = "common.name", isRequired = true),
+            @Param(name = "uuid", type = ApiParamType.STRING, desc = "common.uuid"),
+            @Param(name = "name", type = ApiParamType.STRING, desc = "common.name"),
             @Param(name = "email", type = ApiParamType.STRING, desc = "common.email", maxLength = 100),
             @Param(name = "phone", type = ApiParamType.STRING, desc = "common.phone", maxLength = 20),
             @Param(name = "level", type = ApiParamType.ENUM, member = TeamLevel.class, desc = "common.level"),
@@ -82,36 +86,61 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
         String email = jsonObj.getString("email");
         String phone = jsonObj.getString("phone");
         String name = jsonObj.getString("name");
+        String uuid = jsonObj.getString("uuid");
         JSONArray leaderList = jsonObj.getJSONArray("leaderList");
-        List<TeamVo> teamList = teamMapper.getTeamByNameList(Collections.singletonList(name));
-        if (CollectionUtils.isNotEmpty(teamList) && teamList.size() == 1) {
-            TeamVo teamVo = new TeamVo();
-            teamVo.setUuid(teamList.get(0).getUuid());
-            teamVo.setName(teamList.get(0).getName());
-            teamVo.setLevel(level);
-            teamVo.setEmail(email);
-            teamVo.setPhone(phone);
-            teamMapper.updateTeamOptionalByUuid(teamVo);
+        TeamVo teamOrigin;
 
-            if (CollectionUtils.isNotEmpty(leaderList)) {
-                for (int i = 0; i < leaderList.size(); i++) {
-                    JSONObject leader = leaderList.getJSONObject(i);
-                    String title = leader.getString("title");
-                    String userId = leader.getString("userId");
-                    if (StringUtils.isNotBlank(title)) {
-                        UserTitleVo titleVo = userMapper.getUserTitleByName(title);
-                        UserVo userVo = userMapper.getUserByUserId(userId);
-                        if (titleVo != null && userVo != null) {
-                            teamMapper.deleteTeamUserTitleByTeamUuidAndTitleId(teamVo.getUuid(), titleVo.getId());
-                            teamMapper.insertTeamUserTitle(teamVo.getUuid(), userVo.getUuid(), titleVo.getId(), i + 1);
-                        }
+        if (StringUtils.isNotBlank(uuid)) {
+            teamOrigin = teamMapper.getTeamByUuid(uuid);
+            if (teamOrigin == null) {
+                throw new TeamNotFoundException(uuid);
+            }
+        } else if (StringUtils.isNotBlank(name)) {
+            List<TeamVo> teamList = teamMapper.getTeamByNameList(Collections.singletonList(name));
+            if (CollectionUtils.isEmpty(teamList)) {
+                throw new TeamNotFoundException(name);
+            }
+            //补丁包临时处理 TODO 需换个sql
+            teamList = teamList.stream().filter(t -> t.getIsDelete() == 0).toList();
+            if (CollectionUtils.isEmpty(teamList)) {
+                throw new TeamNotFoundException(name);
+            }
+
+            //补丁包临时处理 TODO 需用具体的runtime异常类
+            if (teamList.size() > 1) {
+                throw new ApiRuntimeException(String.format("find more than 1 team by name '%s', please update by uuid", name));
+            }
+            teamOrigin = teamList.get(0);
+        } else {
+            throw new ParamIrregularException("name or uuid");
+        }
+
+
+        TeamVo teamVo = new TeamVo();
+        teamVo.setUuid(teamOrigin.getUuid());
+        teamVo.setName(teamOrigin.getName());
+        teamVo.setLevel(level);
+        teamVo.setEmail(email);
+        teamVo.setPhone(phone);
+        teamMapper.updateTeamOptionalByUuid(teamVo);
+
+        if (CollectionUtils.isNotEmpty(leaderList)) {
+            for (int i = 0; i < leaderList.size(); i++) {
+                JSONObject leader = leaderList.getJSONObject(i);
+                String title = leader.getString("title");
+                String userId = leader.getString("userId");
+                if (StringUtils.isNotBlank(title)) {
+                    UserTitleVo titleVo = userMapper.getUserTitleByName(title);
+                    UserVo userVo = userMapper.getUserByUserId(userId);
+                    if (titleVo != null && userVo != null) {
+                        teamMapper.deleteTeamUserTitleByTeamUuidAndTitleId(teamVo.getUuid(), titleVo.getId());
+                        teamMapper.insertTeamUserTitle(teamVo.getUuid(), userVo.getUuid(), titleVo.getId(), i + 1);
                     }
                 }
             }
-
-            return teamVo.getUuid();
         }
-        return null;
+
+        return teamVo.getUuid();
     }
 
 
