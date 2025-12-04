@@ -14,7 +14,7 @@ package neatlogic.module.tenant.api.extramenu;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.EXTRA_MENU_MODIFY;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.extramenu.dto.ExtraMenuVo;
@@ -28,8 +28,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-
-@AuthAction(action = EXTRA_MENU_MODIFY.class)
+@AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetExtraMenuApi extends PrivateApiComponentBase {
 
