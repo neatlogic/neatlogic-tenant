@@ -38,7 +38,7 @@ public class GetLoggerStatusApi extends PrivateApiComponentBase {
     private ServerMapper serverMapper;
     @Override
     public String getName() {
-        return "nmtal.getloggerstatusapi.getname";
+        return "查看日志状态";
     }
 
     @Override
@@ -52,7 +52,7 @@ public class GetLoggerStatusApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist")
     })
-    @Description(desc = "nmtal.getloggerstatusapi.getname")
+    @Description(desc = "查看日志状态")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Integer serverId = paramObj.getInteger("serverId");
