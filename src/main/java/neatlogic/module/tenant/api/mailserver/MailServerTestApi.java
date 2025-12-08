@@ -16,10 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dto.MailServerVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.EmailUtil;
+import neatlogic.framework.util.RegexUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -51,18 +53,33 @@ public class MailServerTestApi extends PrivateApiComponentBase {
     }
 
     @Input({
+            @Param(name = "id", type = ApiParamType.STRING, desc = "common.id"),
+            @Param(name = "name", type = ApiParamType.REGEX, rule = RegexUtils.NAME, isRequired = true, maxLength = 50, desc = "common.name"),
+            @Param(name = "host", type = ApiParamType.STRING, isRequired = true, maxLength = 50, desc = "term.framework.smpthost"),
+            @Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.smptport"),
+            @Param(name = "userName", type = ApiParamType.STRING, maxLength = 50, desc = "common.username"),
+            @Param(name = "password", type = ApiParamType.STRING, maxLength = 50, desc = "common.password"),
+            @Param(name = "homeUrl", type = ApiParamType.STRING, desc = "common.homeurl"),
+            @Param(name = "fromAddress", type = ApiParamType.STRING, isRequired = true, maxLength = 50, desc = "common.mailaddress"),
+            @Param(name = "sslEnable", type = ApiParamType.ENUM, rule = "true,false", isRequired = true, maxLength = 50, desc = "term.framework.smptsslenable"),
             @Param(name = "emailAddress", type = ApiParamType.EMAIL, isRequired = true, desc = "common.mailaddress")
     })
     @Output({})
     @Description(desc = "nmtam.mailservertestapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        EmailUtil.sendHtmlEmail(
+//        EmailUtil.sendHtmlEmail(
+//                "Test mail",
+//                "Your configured mail server information is available!",
+//                Collections.singletonList(jsonObj.getString("emailAddress")),
+//                null
+//        );
+        MailServerVo mailServerVo = jsonObj.toJavaObject(MailServerVo.class);
+        EmailUtil.sendEmailWithFile(
                 "Test mail",
                 "Your configured mail server information is available!",
                 Collections.singletonList(jsonObj.getString("emailAddress")),
-                null
-        );
+                null, null, mailServerVo);
         return null;
     }
 
