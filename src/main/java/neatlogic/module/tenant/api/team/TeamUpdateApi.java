@@ -8,11 +8,12 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.TeamLevel;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.TeamUserTitleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserTitleVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.team.TeamNotFoundException;
+import neatlogic.framework.exception.team.UpdateTeamFoundMultiException;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -24,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @AuthAction(action = TEAM_MODIFY.class)
 
@@ -66,7 +69,9 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
         defaultJson.put("leaderList", new JSONArray() {{
             this.add(new JSONObject() {{
                 this.put("title", "岗位名称");
-                this.put("userId", "用户id");
+                this.put("userIdList", new JSONArray() {{
+                    this.add("用户id");
+                }});
             }});
         }});
         return defaultJson;
@@ -97,19 +102,12 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
                 throw new TeamNotFoundException(uuid);
             }
         } else if (StringUtils.isNotBlank(name)) {
-            List<TeamVo> teamList = teamMapper.getTeamByNameList(Collections.singletonList(name));
+            List<TeamVo> teamList = teamMapper.getTeamWithoutDeletedByNameList(Collections.singletonList(name));
             if (CollectionUtils.isEmpty(teamList)) {
                 throw new TeamNotFoundException(name);
             }
-            //补丁包临时处理 TODO 需换个sql
-            teamList = teamList.stream().filter(t -> t.getIsDelete() == 0).toList();
-            if (CollectionUtils.isEmpty(teamList)) {
-                throw new TeamNotFoundException(name);
-            }
-
-            //补丁包临时处理 TODO 需用具体的runtime异常类
             if (teamList.size() > 1) {
-                throw new ApiRuntimeException(String.format("find more than 1 team by name '%s', please update by uuid", name));
+                throw new UpdateTeamFoundMultiException(name);
             }
             teamOrigin = teamList.get(0);
         } else {
@@ -126,16 +124,44 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
         teamMapper.updateTeamOptionalByUuid(teamVo);
 
         if (CollectionUtils.isNotEmpty(leaderList)) {
+            Map<Long, Integer> teamUserTitleSortMap = new HashMap<>();
+            List<TeamUserTitleVo> teamUserTitleVoList = teamMapper.getTeamUserTitleListByTeamUuid(teamOrigin.getUuid());
+            // 顺便计算出新 title 的 sort
+            Integer maxTitleSort = null;
+            if (CollectionUtils.isNotEmpty(teamUserTitleVoList)) {
+                for (TeamUserTitleVo teamUserTitleVo : teamUserTitleVoList) {
+                    if (maxTitleSort == null || teamUserTitleVo.getTitleSort() > maxTitleSort) {
+                        maxTitleSort = teamUserTitleVo.getTitleSort();
+                    }
+                    teamUserTitleSortMap.put(teamUserTitleVo.getTitleId(), teamUserTitleVo.getTitleSort());
+                }
+            }
+            Integer newTitleSort = maxTitleSort;
             for (int i = 0; i < leaderList.size(); i++) {
                 JSONObject leader = leaderList.getJSONObject(i);
                 String title = leader.getString("title");
-                String userId = leader.getString("userId");
+                List<String> userIdList = leader.getJSONArray("userIdList").toJavaList(String.class);
                 if (StringUtils.isNotBlank(title)) {
                     UserTitleVo titleVo = userMapper.getUserTitleByName(title);
-                    UserVo userVo = userMapper.getUserByUserId(userId);
-                    if (titleVo != null && userVo != null) {
-                        teamMapper.deleteTeamUserTitleByTeamUuidAndTitleId(teamVo.getUuid(), titleVo.getId());
-                        teamMapper.insertTeamUserTitle(teamVo.getUuid(), userVo.getUuid(), titleVo.getId(), i + 1);
+                    if (titleVo != null) {
+                        if (newTitleSort != null) {
+                            if (teamUserTitleSortMap.containsKey(titleVo.getId())) {
+                                newTitleSort = teamUserTitleSortMap.get(titleVo.getId());
+                            } else {
+                                newTitleSort++;
+                            }
+                        } else {
+                            newTitleSort = 0;
+                        }
+                        if (CollectionUtils.isNotEmpty(userIdList)) {
+                            teamMapper.deleteTeamUserTitleByTeamUuidAndTitleId(teamVo.getUuid(), titleVo.getId());
+                            for (String userId : userIdList) {
+                                UserVo userVo = userMapper.getUserByUserId(userId);
+                                if (userVo != null) {
+                                    teamMapper.insertTeamUserTitle(teamVo.getUuid(), userVo.getUuid(), titleVo.getId(), newTitleSort);
+                                }
+                            }
+                        }
                     }
                 }
             }
