@@ -12,7 +12,9 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -190,6 +192,8 @@ public class UserGetApi extends PrivateApiComponentBase {
                 }
             }
         }
-        return userVo;
+        JSONObject userJson = JSON.parseObject(JSON.toJSONString(userVo, SerializerFeature.DisableCircularReferenceDetect));
+        userJson.put("serverId", Config.SCHEDULE_SERVER_ID);
+        return userJson;
     }
 }

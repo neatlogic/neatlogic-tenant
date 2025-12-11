@@ -12,13 +12,16 @@
 
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.UserSessionContentMapper;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.dto.UserVo;
@@ -42,6 +45,9 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
 
     @Resource
     UserSessionMapper userSessionMapper;
+
+    @Resource
+    UserSessionContentMapper userSessionContentMapper;
 
     @Override
     public String getToken() {
@@ -68,6 +74,7 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         UserVo userVo = null;
         String userUuid = null;
+        JSONArray removeTokenList = new JSONArray();
         if (jsonObj.containsKey("userUuid")) {
             userUuid = jsonObj.getString("userUuid");
             userVo = userMapper.getUserByUuid(userUuid);
@@ -84,14 +91,27 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
         }
         if (StringUtils.isBlank(userUuid)) {
             userUuid = UserContext.get().getUserUuid(true);
+            removeTokenList.add(UserContext.get().getTokenHash());
             UserSessionCache.removeItem(UserContext.get().getTokenHash());
         }
         List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuid(userUuid);
         if (CollectionUtils.isNotEmpty(userSessionVos)) {
             for (UserSessionVo userSessionVo : userSessionVos) {
+                JSONObject userSessionJson = new JSONObject();
+                userSessionJson.put("tokenHash",userSessionVo.getTokenHash());
+                userSessionJson.put("token",userSessionVo.getToken());
+                userSessionJson.put("authInfo",userSessionVo.getAuthInfoHash());
+                if(StringUtils.isNotBlank(userSessionVo.getAuthInfoHash())) {
+                    String authInfo = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getAuthInfoHash());
+                    userSessionJson.put("authInfo",authInfo);
+                }
+                removeTokenList.add(userSessionJson);
                 UserSessionCache.removeItem(userSessionVo.getTokenHash());
             }
         }
-        return null;
+        JSONObject result = new JSONObject();
+        result.put("serverId",Config.SCHEDULE_SERVER_ID);
+        result.put("removeTokenList",removeTokenList);
+        return result;
     }
 }
