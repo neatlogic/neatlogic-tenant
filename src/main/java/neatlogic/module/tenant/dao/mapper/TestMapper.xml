@@ -24,8 +24,17 @@
         select `id` from `processtask` where `id` = #{value} for update
     </select>
 
+    <select id="getDatabaseTableStructure" parameterType="java.lang.String" resultType="java.util.LinkedHashMap">
+        DESC `${tableName}`
+    </select>
+
     <select id="getGzipContentCountByTableNameAndColumnName" resultType="int">
-        SELECT COUNT(1) FROM `${tableName}` WHERE `${columnName}` LIKE 'GZIP:%'
+        SELECT COUNT(1) FROM `${tableName}`
+        WHERE `${columnName}`
+        <if test="action == 'compress'">
+            NOT
+        </if>
+        LIKE 'GZIP:%'
     </select>
 
     <resultMap id="gzipContentMap" type="java.util.LinkedHashMap">
@@ -33,7 +42,11 @@
     </resultMap>
 
     <select id="getGzipContentListByTableNameAndColumnName" resultMap="gzipContentMap">
-        SELECT `${columnName}` AS content FROM `${tableName}` WHERE `${columnName}` LIKE 'GZIP:%' LIMIT 10
+        SELECT `${columnName}` AS content FROM `${tableName}`
+        WHERE `${columnName}`
+        <if test="action == 'compress'">
+            NOT
+        </if>LIKE 'GZIP:%' LIMIT 10
     </select>
 
     <update id="updateGzipContentByTableNameAndColumnName">

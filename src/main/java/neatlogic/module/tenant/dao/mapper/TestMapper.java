@@ -27,9 +27,11 @@ public interface TestMapper {
 
     Map<String, Object> getProcessTaskByIdForUpdate(Long id);
 
-    int getGzipContentCountByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName);
+    List<Map<String, Object>> getDatabaseTableStructure(@Param("tableName") String tableName);
 
-    List<Map<String, String>> getGzipContentListByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName);
+    int getGzipContentCountByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName, @Param("action") String action);
+
+    List<Map<String, String>> getGzipContentListByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName, @Param("action") String action);
 
     int updateGzipContentByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName, @Param("oldContent") String oldContent, @Param("newContent") String newContent);
 }
