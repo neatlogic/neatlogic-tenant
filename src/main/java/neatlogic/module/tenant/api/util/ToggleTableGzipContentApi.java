@@ -119,4 +119,9 @@ public class ToggleTableGzipContentApi extends PrivateApiComponentBase {
     public String getToken() {
         return "/util/table/togglegzipcontent";
     }
+
+    @Override
+    public int needAudit() {
+        return 1;
+    }
 }
