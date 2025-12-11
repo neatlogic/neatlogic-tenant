@@ -59,6 +59,7 @@ public class ToggleTableGzipContentApi extends PrivateApiComponentBase {
         String columnName = paramObj.getString("columnName");
         String action = paramObj.getString("action");
         JSONObject resultObj = new JSONObject();
+        // 先查询表结构，检查字段是否存在，压缩时字段是否是text、mediumtext、longtext类型
         Object fieldType = null;
         List<Map<String, Object>> tableStructureList = testMapper.getDatabaseTableStructure(tableName);
         for (Map<String, Object> map : tableStructureList) {
