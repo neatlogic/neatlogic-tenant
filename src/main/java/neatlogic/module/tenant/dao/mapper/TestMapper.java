@@ -12,6 +12,8 @@
 
 package neatlogic.module.tenant.dao.mapper;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,4 +26,10 @@ public interface TestMapper {
     void insertContent(String content);
 
     Map<String, Object> getProcessTaskByIdForUpdate(Long id);
+
+    int getGzipContentCountByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName);
+
+    List<Map<String, String>> getGzipContentListByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName);
+
+    int updateGzipContentByTableNameAndColumnName(@Param("tableName") String tableName, @Param("columnName") String columnName, @Param("oldContent") String oldContent, @Param("newContent") String newContent);
 }
