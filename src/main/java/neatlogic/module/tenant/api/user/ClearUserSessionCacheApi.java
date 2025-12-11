@@ -105,10 +105,11 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
             for (UserSessionVo userSessionVo : userSessionVos) {
                 JSONObject userSessionJson = new JSONObject();
                 userSessionJson.put("tokenHash",userSessionVo.getTokenHash());
-                userSessionJson.put("token",userSessionVo.getToken());
-                userSessionJson.put("authInfo",userSessionVo.getAuthInfoHash());
+                userSessionJson.put("authInfoHash",userSessionVo.getAuthInfoHash());
                 if(StringUtils.isNotBlank(userSessionVo.getAuthInfoHash())) {
                     String authInfo = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getAuthInfoHash());
+                    String token = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getTokenHash());
+                    userSessionJson.put("token",token);
                     userSessionJson.put("authInfo",authInfo);
                 }
                 removeTokenList.add(userSessionJson);
