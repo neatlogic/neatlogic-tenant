@@ -34,6 +34,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
+import neatlogic.framework.util.TimeUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
@@ -74,6 +77,10 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
         Integer serverId = paramObj.getInteger("serverId");
+        ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
+        if (serverClusterVo == null) {
+            throw new ServerNotFoundException(serverId);
+        }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
             String log4jHome = System.getProperties().getProperty(SystemProperty.LOG4J_HOME);
             if (log4jHome != null) {
@@ -88,8 +95,12 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                         try (InputStream in = FileUtil.getData(path); ) {
                             if (in != null) {
                                 try (ServletOutputStream os = response.getOutputStream()) {
+                                    String prefix = new SimpleDateFormat(TimeUtil.YYYY_MM_DD).format(new Date());
+                                    if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
+                                        prefix = serverClusterVo.getIp() + "-" + prefix;
+                                    }
                                     response.setContentType("application/octet-stream");
-                                    response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileName) + "\"");
+                                    response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + fileName) + "\"");
                                     IOUtils.copyLarge(in, os);
                                     os.flush();
                                 }
@@ -105,27 +116,22 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                 throw new SystemPropertyNotFoundException(SystemProperty.LOG4J_HOME);
             }
         } else {
-            ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            if (serverClusterVo != null) {
-                String host = serverClusterVo.getHost();
-                if (StringUtils.isNotBlank(host)) {
-                    ServletOutputStream os = response.getOutputStream();
-                    String url = host + request.getRequestURI();
-                    HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os)
-                            .setPayload(paramObj.toJSONString())
-                            .setAuthType(AuthenticateType.BUILDIN)
-                            .setConnectTimeout(5000)
-                            .setReadTimeout(5000)
-                            .sendRequest();
-                    String error = httpRequestUtil.getError();
-                    if (StringUtils.isNotBlank(error)) {
-                        throw new ApiRuntimeException(error);
-                    }
-                } else {
-                    throw new ServerHostIsBankException(serverId);
+            String host = serverClusterVo.getHost();
+            if (StringUtils.isNotBlank(host)) {
+                ServletOutputStream os = response.getOutputStream();
+                String url = host + request.getRequestURI();
+                HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os)
+                        .setPayload(paramObj.toJSONString())
+                        .setAuthType(AuthenticateType.BUILDIN)
+                        .setConnectTimeout(5000)
+                        .setReadTimeout(5000)
+                        .sendRequest();
+                String error = httpRequestUtil.getError();
+                if (StringUtils.isNotBlank(error)) {
+                    throw new ApiRuntimeException(error);
                 }
             } else {
-                throw new ServerNotFoundException(serverId);
+                throw new ServerHostIsBankException(serverId);
             }
         }
         return resultObj;
