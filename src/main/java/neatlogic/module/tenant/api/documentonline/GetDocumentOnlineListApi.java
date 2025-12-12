@@ -22,19 +22,18 @@ import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
-import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -44,9 +43,6 @@ import java.util.Objects;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
-
-    @Resource
-    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -76,7 +72,7 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
         List<DocumentOnlineVo> tbodyList = new ArrayList<>();
         DocumentOnlineDirectoryVo directory = null;
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
-        for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+        for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineManager.getDocumentOnlineDirectoryRoot().getChildren()) {
             if (Objects.equals(localeLevel.getName(), locale.getLanguage())) {
                 directory = localeLevel;
             }
@@ -110,8 +106,8 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
         if (menu == null) {
             menu = StringUtils.EMPTY;
         }
-        tbodyList = documentOnlineService.getAllFileList(directory, moduleGroup, menu);
-        if (tbodyList.size() == 0) {
+        tbodyList = DocumentOnlineManager.getAllFileList(directory, moduleGroup, menu);
+        if (CollectionUtils.isEmpty(tbodyList)) {
             return TableResultUtil.getResult(tbodyList, basePageVo);
         }
         basePageVo.setRowNum(tbodyList.size());
@@ -119,11 +115,18 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
         // 遍历当前页中列表的所有文档，加载文档前120个字符内容
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (DocumentOnlineVo tbody : tbodyList) {
-            org.springframework.core.io.Resource resource = resolver.getResource("classpath:" + tbody.getFilePath());
+            String locationPattern = null;
+            String filePath = tbody.getFilePath();
+            if (filePath.startsWith("jar:file:")) {
+                locationPattern = filePath;
+            } else {
+                locationPattern = "classpath:" + filePath;
+            }
+            Resource resource = resolver.getResource(locationPattern);
             if (!resource.exists()) {
                 continue;
             }
-            String content = documentOnlineService.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
+            String content = DocumentOnlineManager.interceptsSpecifiedNumberOfCharacters(resource.getInputStream(), 0, 120);
             tbody.setContent(content);
         }
         return TableResultUtil.getResult(tbodyList, basePageVo);
