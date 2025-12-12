@@ -21,6 +21,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -62,7 +63,7 @@ public class SaveDocumentOnlineConfigApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String filePath = paramObj.getString("filePath");
-        DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
+        DocumentOnlineDirectoryVo directory = DocumentOnlineManager.getDocumentOnlineDirectoryByFilePath(filePath);
         if (directory == null) {
             throw new DocumentOnlineNotFoundException(filePath);
         }

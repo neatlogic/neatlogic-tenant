@@ -40,6 +40,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -118,10 +119,11 @@ public class GetNotifyPolicyDefaultTemplateApi extends PrivateApiComponentBase {
                 }
             }
         }
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
-        String html = writer.toString();
-        writer.close();
+        String html = null;
+        try (StringWriter writer = new StringWriter();InputStream inputStream = resource.getInputStream()) {
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
+            html = writer.toString();
+        }
         String title = StringUtils.EMPTY;
         String content = StringUtils.EMPTY;
         Document document = Jsoup.parse(html);

@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -63,7 +64,7 @@ public class AddDocumentOnlineConfigApi extends PrivateApiComponentBase {
 
 
         // 根据文件路径在目录树中找到文件信息
-        DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
+        DocumentOnlineDirectoryVo directory = DocumentOnlineManager.getDocumentOnlineDirectoryByFilePath(filePath);
         if (directory == null) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
