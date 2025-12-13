@@ -19,6 +19,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -32,6 +33,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
@@ -40,9 +42,6 @@ import java.util.regex.Matcher;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineApi extends PrivateApiComponentBase {
-
-    @Autowired
-    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -64,20 +63,28 @@ public class GetDocumentOnlineApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String filePath = paramObj.getString("filePath");
+        String locationPattern = DocumentOnlineManager.getResourceLocationPatternByFilePath(filePath);
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("classpath:" + filePath);
+        Resource resource = resolver.getResource(locationPattern);
         if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
-        DocumentOnlineDirectoryVo directory = documentOnlineService.getDocumentOnlineDirectoryByFilePath(filePath);
+        String withinJarAbsoluteFilePath = DocumentOnlineManager.getWithinJarAbsoluteFilePathByURL(resource.getURL());
+        DocumentOnlineDirectoryVo directory = DocumentOnlineManager.getDocumentOnlineDirectoryByFilePath(withinJarAbsoluteFilePath);
         if (directory == null) {
-            throw new DocumentOnlineNotFoundException(filePath);
+            throw new DocumentOnlineNotFoundException(withinJarAbsoluteFilePath);
         }
-        String filename = resource.getFilename().substring(0, resource.getFilename().length() - 3);
-        StringWriter writer = new StringWriter();
-        IOUtils.copy(resource.getInputStream(), writer, StandardCharsets.UTF_8);
-        String content = writer.toString();
-        writer.close();
+        String filename = resource.getFilename();
+        if (filename != null) {
+            filename = filename.substring(0, resource.getFilename().length() - 3);
+        } else {
+            filename = "无";
+        }
+        String content = null;
+        try (StringWriter writer = new StringWriter(); InputStream inputStream = resource.getInputStream()) {
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
+            content = writer.toString();
+        }
         DocumentOnlineVo documentOnlineVo = new DocumentOnlineVo();
         documentOnlineVo.setContent(replaceImagePath(content, filePath));
         documentOnlineVo.setFileName(filename);

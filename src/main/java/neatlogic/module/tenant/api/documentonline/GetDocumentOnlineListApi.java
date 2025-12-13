@@ -115,13 +115,7 @@ public class GetDocumentOnlineListApi extends PrivateApiComponentBase {
         // 遍历当前页中列表的所有文档，加载文档前120个字符内容
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         for (DocumentOnlineVo tbody : tbodyList) {
-            String locationPattern = null;
-            String filePath = tbody.getFilePath();
-            if (filePath.startsWith("jar:file:")) {
-                locationPattern = filePath;
-            } else {
-                locationPattern = "classpath:" + filePath;
-            }
+            String locationPattern = DocumentOnlineManager.getResourceLocationPatternByFilePath(tbody.getFilePath());
             Resource resource = resolver.getResource(locationPattern);
             if (!resource.exists()) {
                 continue;

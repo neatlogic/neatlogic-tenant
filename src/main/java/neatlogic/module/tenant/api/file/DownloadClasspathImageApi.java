@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.exception.user.NoTenantException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
@@ -69,14 +70,8 @@ public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBa
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String filePath = paramObj.getString("filePath");
-
+        String locationPattern = DocumentOnlineManager.getResourceLocationPatternByFilePath(filePath);
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        String locationPattern = null;
-        if (filePath.startsWith("jar:file:")) {
-            locationPattern = filePath;
-        } else {
-            locationPattern = "classpath:" + filePath;
-        }
         Resource resource = resolver.getResource(locationPattern);
         if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
