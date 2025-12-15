@@ -21,25 +21,20 @@ import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
-import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBase {
-
-    @Resource
-    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -66,7 +61,7 @@ public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBas
         List<DocumentOnlineVo> tbodyList = new ArrayList<>();
         DocumentOnlineDirectoryVo directory = null;
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
-        for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+        for (DocumentOnlineDirectoryVo localeLevel : DocumentOnlineManager.getDocumentOnlineDirectoryRoot().getChildren()) {
             if (Objects.equals(localeLevel.getName(), locale.getLanguage())) {
                 directory = localeLevel;
             }
@@ -75,7 +70,7 @@ public class GetDocumentOnlineUnclassifiedListApi extends PrivateApiComponentBas
             return TableResultUtil.getResult(tbodyList, basePageVo);
         }
 
-        tbodyList = documentOnlineService.getAllFileList(directory);
+        tbodyList = DocumentOnlineManager.getAllFileList(directory);
         if (tbodyList.size() == 0) {
             return TableResultUtil.getResult(tbodyList, basePageVo);
         }

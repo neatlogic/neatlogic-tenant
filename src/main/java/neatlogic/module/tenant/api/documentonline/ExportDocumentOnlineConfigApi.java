@@ -17,18 +17,16 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
-import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,8 +39,6 @@ import java.util.List;
 @AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiComponentBase {
-    @Resource
-    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -59,7 +55,7 @@ public class ExportDocumentOnlineConfigApi extends PrivateBinaryStreamApiCompone
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         List<DocumentOnlineConfigVo> allList = new ArrayList<>();
-        List<DocumentOnlineVo> allFileList = documentOnlineService.getAllFileList(DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT);
+        List<DocumentOnlineVo> allFileList = DocumentOnlineManager.getAllFileList(DocumentOnlineManager.getDocumentOnlineDirectoryRoot());
         for (DocumentOnlineVo documentOnlineVo : allFileList) {
             List<DocumentOnlineConfigVo> configList = documentOnlineVo.getConfigList();
             for (DocumentOnlineConfigVo configVo : configList) {

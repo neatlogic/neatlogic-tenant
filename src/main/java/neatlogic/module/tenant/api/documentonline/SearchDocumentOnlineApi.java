@@ -20,13 +20,12 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
-import neatlogic.module.tenant.service.documentonline.DocumentOnlineService;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -44,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
-import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -56,9 +54,6 @@ import java.util.List;
 public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
 
     private final Logger logger = LoggerFactory.getLogger(SearchDocumentOnlineApi.class);
-
-    @Resource
-    private DocumentOnlineService documentOnlineService;
 
     @Override
     public String getName() {
@@ -90,7 +85,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
             // 注意：分词器和创建索引的时候使用的分词器一模一样
             Analyzer analyzer = new IKAnalyzer(true);
             // 创建Directory目标对象，指定索引库的位置
-            Directory directory = MMapDirectory.open(Paths.get(DocumentOnlineInitializeIndexHandler.INDEX_DIRECTORY));
+            Directory directory = MMapDirectory.open(Paths.get(DocumentOnlineManager.INDEX_DIRECTORY));
             // 创建输入流对象
             indexReader = DirectoryReader.open(directory);
             // 创建搜索对象
@@ -123,9 +118,9 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     documentOnlineVo.setFilePath(doc.get("filePath"));
                     String content = doc.get("content");
                     int skip = keywordOnlineFirstCharacterIndex(content, basePageVo.getKeyword());
-                    String result = documentOnlineService.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
+                    String result = DocumentOnlineManager.interceptsSpecifiedNumberOfCharacters(new ByteArrayInputStream(content.getBytes()), skip, 120);
                     documentOnlineVo.setContent(result);
-                    DocumentOnlineDirectoryVo directoryVo = documentOnlineService.getDocumentOnlineDirectoryByFilePath(doc.get("filePath"));
+                    DocumentOnlineDirectoryVo directoryVo = DocumentOnlineManager.getDocumentOnlineDirectoryByFilePath(doc.get("filePath"));
                     if (directoryVo != null) {
                         documentOnlineVo.setConfigList(directoryVo.getConfigList());
                     }

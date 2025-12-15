@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.exception.user.NoTenantException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
@@ -27,6 +28,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -68,34 +70,21 @@ public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBa
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String filePath = paramObj.getString("filePath");
-
+        String locationPattern = DocumentOnlineManager.getResourceLocationPatternByFilePath(filePath);
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        org.springframework.core.io.Resource resource = resolver.getResource("classpath:" + filePath);
+        Resource resource = resolver.getResource(locationPattern);
         if (!resource.exists()) {
             throw new DocumentOnlineNotFoundException(filePath);
         }
 
-        String tenantUuid = TenantContext.get().getTenantUuid();
-        if (StringUtils.isBlank(tenantUuid)) {
+        if (StringUtils.isBlank(TenantContext.get().getTenantUuid())) {
             throw new NoTenantException();
         }
-        ServletOutputStream os = null;
-        InputStream in = resource.getInputStream();
-        try {
-            if (in != null) {
-                String contentType = "image/" + resource.getFilename().substring(resource.getFilename().lastIndexOf("."));
-                response.setContentType(contentType);
-                os = response.getOutputStream();
-                IOUtils.copyLarge(in, os);
-            }
-        } finally {
-            if (os != null) {
-                os.flush();
-                os.close();
-            }
-            if (in != null) {
-                in.close();
-            }
+        String contentType = "image/" + resource.getFilename().substring(resource.getFilename().lastIndexOf("."));
+        response.setContentType(contentType);
+
+        try (ServletOutputStream os = response.getOutputStream();InputStream in = resource.getInputStream()) {
+            IOUtils.copyLarge(in, os);
         }
         return null;
     }

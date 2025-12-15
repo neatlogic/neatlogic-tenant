@@ -18,11 +18,11 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class GetDocumentOnlineDirectoryApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<DocumentOnlineDirectoryVo> tbodyList = new ArrayList<>();
         Locale locale = RequestContext.get() != null ? RequestContext.get().getLocale() : Locale.getDefault();
-        for (DocumentOnlineDirectoryVo child : DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT.getChildren()) {
+        for (DocumentOnlineDirectoryVo child : DocumentOnlineManager.getDocumentOnlineDirectoryRoot().getChildren()) {
             if (Objects.equals(child.getName(), locale.getLanguage())) {
                 tbodyList = child.getChildren();
             }

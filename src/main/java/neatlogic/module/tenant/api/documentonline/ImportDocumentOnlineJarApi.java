@@ -1,0 +1,206 @@
+/*
+ * Copyright (C) 2025  TechSure Co., Ltd.  All Rights Reserved.
+ * This file is part of the NeatLogic software.
+ * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x – 2025.
+ * You may use this file only in compliance with the License.
+ * See the LICENSE file distributed with this work for the full license text.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+
+package neatlogic.module.tenant.api.documentonline;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.thread.NeatLogicThread;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
+import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
+import neatlogic.framework.common.config.Config;
+import neatlogic.framework.documentonline.exception.DocumentOnlineJarNameIllegalException;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
+import neatlogic.framework.exception.core.ApiRuntimeException;
+import neatlogic.framework.exception.file.FileNotUploadException;
+import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
+import neatlogic.framework.heartbeat.dto.ServerClusterVo;
+import neatlogic.framework.integration.authentication.enums.AuthenticateType;
+import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
+import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.HttpRequestUtil;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+@Service
+@AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
+@OperationType(type = OperationTypeEnum.UPDATE)
+public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentBase {
+
+    private final String COMMERCIAL_JAR_NAME_PREFIX = "neatlogic-document-online-commercial";
+
+    private final String COMMUNITY_JAR_NAME_PREFIX = "neatlogic-document-online";
+
+    @Resource
+    private ServerMapper serverMapper;
+
+    @Override
+    public String getName() {
+        return "nmtad.importdocumentonlinejarapi.getname";
+    }
+
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({})
+    @Output({})
+    @Description(desc = "nmtad.importdocumentonlinejarapi.getname")
+    @Override
+    public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        // 获取所有导入文件
+        Map<String, MultipartFile> multipartFileMap = multipartRequest.getFileMap();
+        // 如果没有导入文件，抛出异常
+        if (multipartFileMap.isEmpty()) {
+            throw new FileNotUploadException();
+        }
+        String documentOnlineHomeDirPath = Config.DATA_HOME() + DocumentOnlineManager.OUTSIDE_WAR_DOCUMENTS_ONLINE_JARS;
+        File documentOnlineHome = new File(documentOnlineHomeDirPath);
+        if (!documentOnlineHome.exists()) {
+            if (documentOnlineHome.mkdirs()) {
+                throw new ApiRuntimeException("创建文件目录失败: " + documentOnlineHomeDirPath);
+            }
+        }
+        JSONArray resultList = new JSONArray();
+        // 遍历导入文件
+        for (Map.Entry<String, MultipartFile> entry : multipartFileMap.entrySet()) {
+            MultipartFile multipartFile = entry.getValue();
+            // neatlogic-document-online-0.4.0.0-SNAPSHOT.jar neatlogic-document-online-commercial-0.4.0.0-SNAPSHOT.jar
+            String oldFileName = multipartFile.getOriginalFilename();
+            if (StringUtils.isNotBlank(oldFileName)
+                    && (oldFileName.startsWith(COMMERCIAL_JAR_NAME_PREFIX) || oldFileName.startsWith(COMMUNITY_JAR_NAME_PREFIX))
+                    && oldFileName.endsWith(".jar")) {
+                JSONObject jsonObj = new JSONObject();
+                File[] listFiles = documentOnlineHome.listFiles();
+                if (listFiles != null) {
+                    List<String> fileNameList = new ArrayList<>();
+                    for (File file : listFiles) {
+                        fileNameList.add(file.getName());
+                    }
+                    jsonObj.put("existsFileNameList", fileNameList);
+                    if (oldFileName.startsWith(COMMERCIAL_JAR_NAME_PREFIX)) {
+                        for (File file : listFiles) {
+                            if (file.getName().startsWith(COMMERCIAL_JAR_NAME_PREFIX)) {
+                                boolean delete = file.delete();
+                                break;
+                            }
+                        }
+                    } else {
+                        for (File file : listFiles) {
+                            if (file.getName().startsWith(COMMUNITY_JAR_NAME_PREFIX) && !file.getName().startsWith(COMMERCIAL_JAR_NAME_PREFIX)) {
+                                boolean delete = file.delete();
+                                break;
+                            }
+                        }
+                    }
+                }
+                try (InputStream inputStream = multipartFile.getInputStream()) {
+                    Path targetPath = Paths.get(documentOnlineHomeDirPath + "/" + oldFileName);
+                    File file = targetPath.toFile();
+                    jsonObj.put("path", file.getPath());
+                    if (file.exists()) {
+                        long length = Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                        jsonObj.put("length", length);
+                    } else {
+                        long length = Files.copy(inputStream, targetPath);
+                        jsonObj.put("length", length);
+                    }
+                }
+                resultList.add(jsonObj);
+            } else {
+                 throw new DocumentOnlineJarNameIllegalException(oldFileName);
+            }
+        }
+        long startTime = System.currentTimeMillis();
+        JSONObject resultObj = DocumentOnlineManager.LoadDocumentsOutsideWar();
+        resultObj.put("timeCost", (System.currentTimeMillis() - startTime));
+        if (MapUtils.isNotEmpty(resultObj)) {
+            List<String> messageList = asynchronousCallOtherServersLoadDocumentOnlineOutsideWarApi();
+            resultObj.put("messageList", messageList);
+        }
+        resultObj.put("importFileList", resultList);
+        return resultObj;
+    }
+
+    @Override
+    public String getToken() {
+        return "documentonline/jar/import";
+    }
+
+    /**
+     * 异步调用其他服务器的从war包外部加载在线文档接口
+     * @return
+     */
+    private List<String> asynchronousCallOtherServersLoadDocumentOnlineOutsideWarApi() {
+        List<String> messageList = new ArrayList<>();
+        List<ServerClusterVo> serverList = serverMapper.getAllServerList();
+        for (ServerClusterVo serverClusterVo : serverList) {
+            if (!Objects.equals(serverClusterVo.getServerId(), Config.SCHEDULE_SERVER_ID)
+                    && Objects.equals(serverClusterVo.getStatus(), ServerClusterVo.STARTUP)) {
+                String host = serverClusterVo.getHost();
+                if (StringUtils.isNotBlank(host)) {
+                    String threadName = "ASYNC-CALLOTHERSERVERS-LOADDOCUMENTONLINEOUTSIDEWAR-API-" + serverClusterVo.getServerId() + "-" + host;
+                    if (TenantContext.get().getTenantUuid() != null) {
+                        threadName = TenantContext.get().getTenantUuid() + "-" + threadName;
+                    }
+                    NeatLogicThread thread = new NeatLogicThread(threadName) {
+                        @Override
+                        protected void execute() {
+                            String url = host + "/neatlogic/api/rest/documentonline/outsidewar/load";
+                            HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
+                                    .setPayload(new JSONObject().fluentPut("serverId", serverClusterVo.getServerId()).toString())
+                                    .setAuthType(AuthenticateType.BUILDIN)
+                                    .setConnectTimeout(5000)
+                                    .setReadTimeout(5000)
+                                    .sendRequest();
+                            String error = httpRequestUtil.getError();
+                            if (StringUtils.isNotBlank(error)) {
+                                throw new ApiRuntimeException(error);
+                            }
+                            JSONObject resultJson = httpRequestUtil.getResultJson();
+                            if (MapUtils.isNotEmpty(resultJson)) {
+                                String status = resultJson.getString("Status");
+                                if (!"OK".equals(status)) {
+                                    throw new RuntimeException(resultJson.getString("Message"));
+                                }
+                            }
+                        }
+                    };
+                    CachedThreadPool.execute(thread);
+                } else {
+                    messageList.add("serverId为" + serverClusterVo.getServerId() + "的应用服务器的`server_status`表中对应数据没有配置host");
+                }
+            }
+        }
+        return messageList;
+    }
+}

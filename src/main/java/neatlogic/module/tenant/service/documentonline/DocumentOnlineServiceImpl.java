@@ -18,8 +18,8 @@ import neatlogic.framework.documentonline.crossover.IDocumentOnlineCrossoverMapp
 import neatlogic.framework.documentonline.dto.DocumentOnlineConfigVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineDirectoryVo;
 import neatlogic.framework.documentonline.dto.DocumentOnlineVo;
+import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.util.HtmlUtil;
-import neatlogic.module.framework.startup.DocumentOnlineInitializeIndexHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -27,10 +27,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -150,9 +147,9 @@ public class DocumentOnlineServiceImpl implements DocumentOnlineService {
         if (StringUtils.isBlank(filePath)) {
             return null;
         }
-        int directoryRootIndex = filePath.indexOf(DocumentOnlineInitializeIndexHandler.DIRECTORY_ROOT);
+        int directoryRootIndex = filePath.indexOf(DocumentOnlineManager.DIRECTORY_ROOT);
         filePath = filePath.substring(directoryRootIndex);
-        DocumentOnlineDirectoryVo directory = DocumentOnlineInitializeIndexHandler.DOCUMENT_ONLINE_DIRECTORY_ROOT;
+        DocumentOnlineDirectoryVo directory = DocumentOnlineManager.getDocumentOnlineDirectoryRoot();
         String[] directoryNameList = filePath.split("/");
         for (int i = 1; i < directoryNameList.length; i++) {
             String directoryName = directoryNameList[i];
