@@ -18,19 +18,14 @@ import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.FileUtil;
-import neatlogic.framework.exception.core.ApiRuntimeException;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
-import neatlogic.framework.heartbeat.dto.ServerClusterVo;
-import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.HttpRequestUtil;
+import neatlogic.module.tenant.service.ServerService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -50,7 +45,7 @@ import java.util.Objects;
 public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
 
     @javax.annotation.Resource
-    private ServerMapper serverMapper;
+    private ServerService serverService;
 
     @Override
     public String getName() {
@@ -149,28 +144,8 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
                 in.close();
             }
         } else {
-            ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            if (serverClusterVo != null) {
-                String host = serverClusterVo.getHost();
-                if (StringUtils.isNotBlank(host)) {
-                    ServletOutputStream os = response.getOutputStream();
-                    String url = host + request.getRequestURI();
-                    HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os)
-                            .setPayload(paramObj.toJSONString())
-                            .setAuthType(AuthenticateType.BUILDIN)
-                            .setConnectTimeout(5000)
-                            .setReadTimeout(5000)
-                            .sendRequest();
-                    String error = httpRequestUtil.getError();
-                    if (StringUtils.isNotBlank(error)) {
-                        throw new ApiRuntimeException(error);
-                    }
-                } else {
-                    resultObj.put("message", "serverId为" + serverId + "的应用服务器的`server_status`表中对应数据没有配置host");
-                }
-            } else {
-                resultObj.put("message", "找不到serverId为" + serverId + "的应用服务器");
-            }
+            ServletOutputStream os = response.getOutputStream();
+            resultObj.put("message", serverService.downloadOtherServerApi(paramObj, serverId, os));
         }
         return resultObj;
     }

@@ -53,7 +53,7 @@ public class SaveServerApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         ServerClusterVo serverVo = paramObj.toJavaObject(ServerClusterVo.class);
-        ServerClusterVo oldServerClusterVo = serverMapper.getServerByServerId(serverVo.getServerId());
+        ServerClusterVo oldServerClusterVo = serverMapper.getServerLockByServerId(serverVo.getServerId());
         if (oldServerClusterVo == null) {
             return null;
         }

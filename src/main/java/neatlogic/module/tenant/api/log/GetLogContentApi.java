@@ -13,30 +13,20 @@
 package neatlogic.module.tenant.api.log;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.constvalue.SystemProperty;
 import neatlogic.framework.exception.SystemPropertyNotFoundException;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileNotFoundException;
-import neatlogic.framework.exception.server.ServerHostIsBankException;
-import neatlogic.framework.exception.server.ServerNotFoundException;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
-import neatlogic.framework.heartbeat.dto.ServerClusterVo;
-import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.HttpRequestUtil;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+import neatlogic.module.tenant.service.ServerService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -62,7 +52,7 @@ public class GetLogContentApi extends PrivateApiComponentBase {
     private final int DEFAULT_MAX_BYTES = 200 * DEFAULT_MAX_LINES;
 
     @Resource
-    private ServerMapper serverMapper;
+    private ServerService serverService;
 
     @Override
     public String getName() {
@@ -111,37 +101,7 @@ public class GetLogContentApi extends PrivateApiComponentBase {
                 throw new SystemPropertyNotFoundException(SystemProperty.LOG4J_HOME);
             }
         } else {
-            ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
-            if (serverClusterVo != null) {
-                String host = serverClusterVo.getHost();
-                if (StringUtils.isNotBlank(host)) {
-                    HttpServletRequest request = RequestContext.get().getRequest();
-                    String url = host + request.getRequestURI();
-                    HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
-                            .setPayload(paramObj.toJSONString())
-                            .setAuthType(AuthenticateType.BUILDIN)
-                            .setConnectTimeout(5000)
-                            .setReadTimeout(5000)
-                            .sendRequest();
-                    String error = httpRequestUtil.getError();
-                    if (StringUtils.isNotBlank(error)) {
-                        throw new ApiRuntimeException(error);
-                    }
-                    JSONObject resultJson = httpRequestUtil.getResultJson();
-                    if (MapUtils.isNotEmpty(resultJson)) {
-                        String status = resultJson.getString("Status");
-                        if (!"OK".equals(status)) {
-                            throw new RuntimeException(resultJson.getString("Message"));
-                        }
-                        resultObj = resultJson.getJSONObject("Return");
-                    }
-                } else {
-                    throw new ServerHostIsBankException(serverId);
-                }
-            } else {
-                throw new ServerNotFoundException(serverId);
-            }
-            return resultObj;
+            return serverService.postOtherServerApi(paramObj,serverId);
         }
     }
 

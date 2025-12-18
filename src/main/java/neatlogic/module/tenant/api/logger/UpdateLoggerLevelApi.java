@@ -81,7 +81,7 @@ public class UpdateLoggerLevelApi extends PrivateApiComponentBase {
             logger.setLevel(Level.toLevel(level));
             return logger.getLevel().levelStr;
         } else {
-            ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
+            ServerClusterVo serverClusterVo = serverMapper.getServerLockByServerId(serverId);
             if (serverClusterVo != null) {
                 String host = serverClusterVo.getHost();
                 if (StringUtils.isNotBlank(host)) {

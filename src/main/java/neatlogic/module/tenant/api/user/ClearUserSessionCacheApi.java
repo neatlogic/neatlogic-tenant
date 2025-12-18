@@ -27,9 +27,11 @@ import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.LoadBalanceException;
 import neatlogic.framework.exception.user.UserNotFoundException;
+import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.tenant.service.ServerService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,12 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
     @Resource
     UserSessionContentMapper userSessionContentMapper;
 
+    @Resource
+    ServerService serverService;
+
+    @Resource
+    ServerMapper serverMapper;
+
     @Override
     public String getToken() {
         return "/user/session/cache/clear";
@@ -67,6 +75,7 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "serverId", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.serverid"),
+            @Param(name = "isPassive", type = ApiParamType.INTEGER, desc = "是否被动清理，0：否，1：是，默认 0"),
             @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
             @Param(name = "useId", type = ApiParamType.STRING, desc = "common.userid")
     })
@@ -77,9 +86,12 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
         UserVo userVo = null;
         String userUuid = null;
         int serverId = jsonObj.getIntValue("serverId");
-        if(serverId != Config.SCHEDULE_SERVER_ID){
+        int isPassive = jsonObj.getIntValue("isPassive");
+
+        if (isPassive == 0 && serverId != Config.SCHEDULE_SERVER_ID) {
             throw new LoadBalanceException(serverId, Config.SCHEDULE_SERVER_ID);
         }
+
         JSONArray removeTokenList = new JSONArray();
         if (jsonObj.containsKey("userUuid")) {
             userUuid = jsonObj.getString("userUuid");
@@ -104,22 +116,26 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(userSessionVos)) {
             for (UserSessionVo userSessionVo : userSessionVos) {
                 JSONObject userSessionJson = new JSONObject();
-                userSessionJson.put("tokenHash",userSessionVo.getTokenHash());
-                userSessionJson.put("authInfoHash",userSessionVo.getAuthInfoHash());
-                if(StringUtils.isNotBlank(userSessionVo.getAuthInfoHash())) {
+                userSessionJson.put("tokenHash", userSessionVo.getTokenHash());
+                userSessionJson.put("authInfoHash", userSessionVo.getAuthInfoHash());
+                if (StringUtils.isNotBlank(userSessionVo.getAuthInfoHash())) {
                     String authInfo = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getAuthInfoHash());
                     String token = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getTokenHash());
-                    userSessionJson.put("token",token);
-                    userSessionJson.put("authInfo",authInfo);
+                    userSessionJson.put("token", token);
+                    userSessionJson.put("authInfo", authInfo);
                 }
                 removeTokenList.add(userSessionJson);
                 UserSessionCache.removeItem(userSessionVo.getTokenHash());
             }
         }
         JSONObject result = new JSONObject();
-
-        result.put("serverId",Config.SCHEDULE_SERVER_ID);
-        result.put("removeTokenList",removeTokenList);
+        //清除其它节点的用户信息缓存
+        if (isPassive == 0) {
+            jsonObj.put("isPassive", 1);
+            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID));
+        }
+        result.put("serverId", Config.SCHEDULE_SERVER_ID);
+        result.put("removeTokenList", removeTokenList);
         return result;
     }
 }
