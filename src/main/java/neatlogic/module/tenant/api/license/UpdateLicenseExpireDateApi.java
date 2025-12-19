@@ -6,16 +6,15 @@ import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.auth.label.LICENSE_MODIFY;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.config.LocalConfig;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.license.LicenseModuleVo;
 import neatlogic.framework.dto.license.LicenseVo;
 import neatlogic.framework.exception.type.LicenseInvalidException;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.LicenseUtil;
+import neatlogic.module.tenant.service.ServerService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -39,6 +38,9 @@ public class UpdateLicenseExpireDateApi extends PrivateApiComponentBase {
     @Resource
     Config config;
 
+    @Resource
+    ServerService serverService;
+
     @Override
     public String getToken() {
         return "license/expiredate/update";
@@ -54,10 +56,15 @@ public class UpdateLicenseExpireDateApi extends PrivateApiComponentBase {
         return null;
     }
 
+
+    @Input({
+            @Param(name = "isPassive", type = ApiParamType.INTEGER, desc = "是否被动清理，0：否，1：是，默认 0")
+    })
     @Output({@Param(explode = LicenseVo.class)})
     @Description(desc = "nmtal.updatelicenseexpiredateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        int isPassive = jsonObj.getIntValue("isPassive");
         if (!Objects.equals(LocalConfig.getPropertiesFrom(), "Nacos")) {
             //重新获取本地配置
             config.reloadLocalConfig();
@@ -69,7 +76,7 @@ public class UpdateLicenseExpireDateApi extends PrivateApiComponentBase {
             if (CollectionUtils.isNotEmpty(licenseModulePolicyVos)) {
                 licenseModulePolicyMap = licenseModulePolicyVos.stream().collect(Collectors.toMap(LicenseModuleVo::getModule, LicenseModuleVo::getExpirationDate));
             }
-        }else{
+        } else {
             throw new LicenseInvalidException();
         }
         //修改对应模块中的超时时间
@@ -115,6 +122,11 @@ public class UpdateLicenseExpireDateApi extends PrivateApiComponentBase {
             }
             licenseModuleVo.setExpirationDate(licenseModulePolicyMap.get(licenseModuleVo.getModule()));
         }
-        return null;
+        JSONObject result = new JSONObject();
+        if (isPassive == 0) {
+            jsonObj.put("isPassive", 1);
+            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID));
+        }
+        return result;
     }
 }

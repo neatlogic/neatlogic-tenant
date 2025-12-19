@@ -22,19 +22,17 @@ import neatlogic.framework.constvalue.SystemProperty;
 import neatlogic.framework.exception.SystemPropertyNotFoundException;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileNotFoundException;
-import neatlogic.framework.exception.server.ServerHostIsBankException;
 import neatlogic.framework.exception.server.ServerNotFoundException;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
-import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.HttpRequestUtil;
 import neatlogic.framework.util.TimeUtil;
+import neatlogic.module.tenant.service.ServerService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -45,8 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
@@ -57,6 +53,9 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
 
     @Resource
     private ServerMapper serverMapper;
+
+    @Resource
+    private ServerService serverService;
 
     @Override
     public String getName() {
@@ -77,7 +76,7 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
         Integer serverId = paramObj.getInteger("serverId");
-        ServerClusterVo serverClusterVo = serverMapper.getServerByServerId(serverId);
+        ServerClusterVo serverClusterVo = serverMapper.getServerLockByServerId(serverId);
         if (serverClusterVo == null) {
             throw new ServerNotFoundException(serverId);
         }
@@ -92,10 +91,10 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                         if (!path.startsWith("file:")) {
                             path = "file:" + path;
                         }
-                        try (InputStream in = FileUtil.getData(path); ) {
+                        try (InputStream in = FileUtil.getData(path);) {
                             if (in != null) {
                                 try (ServletOutputStream os = response.getOutputStream()) {
-                                    String prefix = TimeUtil.yyyymmdd();
+                                    String prefix = serverId + "-" + TimeUtil.yyyymmdd();
                                     if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
                                         prefix = serverClusterVo.getIp() + "-" + prefix;
                                     }
@@ -116,22 +115,10 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                 throw new SystemPropertyNotFoundException(SystemProperty.LOG4J_HOME);
             }
         } else {
-            String host = serverClusterVo.getHost();
-            if (StringUtils.isNotBlank(host)) {
-                ServletOutputStream os = response.getOutputStream();
-                String url = host + request.getRequestURI();
-                HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os)
-                        .setPayload(paramObj.toJSONString())
-                        .setAuthType(AuthenticateType.BUILDIN)
-                        .setConnectTimeout(5000)
-                        .setReadTimeout(5000)
-                        .sendRequest();
-                String error = httpRequestUtil.getError();
-                if (StringUtils.isNotBlank(error)) {
-                    throw new ApiRuntimeException(error);
-                }
-            } else {
-                throw new ServerHostIsBankException(serverId);
+            ServletOutputStream os = response.getOutputStream();
+            String message = serverService.downloadOtherServerApi(paramObj, serverClusterVo, os);
+            if (StringUtils.isNotBlank(message)) {
+                throw new ApiRuntimeException(message);
             }
         }
         return resultObj;

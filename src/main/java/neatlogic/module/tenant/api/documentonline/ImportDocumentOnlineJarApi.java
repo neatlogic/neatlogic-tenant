@@ -12,9 +12,6 @@ package neatlogic.module.tenant.api.documentonline;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.thread.NeatLogicThread;
-import neatlogic.framework.asynchronization.threadlocal.TenantContext;
-import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DOCUMENTONLINE_CONFIG_MODIFY;
 import neatlogic.framework.common.config.Config;
@@ -22,13 +19,14 @@ import neatlogic.framework.documentonline.exception.DocumentOnlineJarNameIllegal
 import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileNotUploadException;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
-import neatlogic.framework.heartbeat.dto.ServerClusterVo;
-import neatlogic.framework.integration.authentication.enums.AuthenticateType;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.HttpRequestUtil;
+import neatlogic.module.tenant.service.ServerService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -47,7 +45,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @AuthAction(action = DOCUMENTONLINE_CONFIG_MODIFY.class)
@@ -59,7 +56,7 @@ public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentB
     private final String COMMUNITY_JAR_NAME_PREFIX = "neatlogic-document-online";
 
     @Resource
-    private ServerMapper serverMapper;
+    private ServerService serverService;
 
     @Override
     public String getName() {
@@ -86,7 +83,7 @@ public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentB
         String documentOnlineHomeDirPath = Config.DATA_HOME() + DocumentOnlineManager.OUTSIDE_WAR_DOCUMENTS_ONLINE_JARS;
         File documentOnlineHome = new File(documentOnlineHomeDirPath);
         if (!documentOnlineHome.exists()) {
-            if (documentOnlineHome.mkdirs()) {
+            if (!documentOnlineHome.mkdirs()) {
                 throw new ApiRuntimeException("创建文件目录失败: " + documentOnlineHomeDirPath);
             }
         }
@@ -137,14 +134,21 @@ public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentB
                 }
                 resultList.add(jsonObj);
             } else {
-                 throw new DocumentOnlineJarNameIllegalException(oldFileName);
+                throw new DocumentOnlineJarNameIllegalException(oldFileName);
             }
         }
         long startTime = System.currentTimeMillis();
         JSONObject resultObj = DocumentOnlineManager.LoadDocumentsOutsideWar();
         resultObj.put("timeCost", (System.currentTimeMillis() - startTime));
         if (MapUtils.isNotEmpty(resultObj)) {
-            List<String> messageList = asynchronousCallOtherServersLoadDocumentOnlineOutsideWarApi();
+            List<String> messageList = new ArrayList<>();
+            JSONArray resultArray = serverService.postOtherServersApi(new JSONObject(), Config.SCHEDULE_SERVER_ID,"/neatlogic/api/rest/documentonline/outsidewar/load");
+            if (CollectionUtils.isNotEmpty(resultArray)) {
+                for (int i = 0; i < resultArray.size(); i++) {
+                    JSONObject result = resultArray.getJSONObject(i);
+                    messageList.add(result.getString("message"));
+                }
+            }
             resultObj.put("messageList", messageList);
         }
         resultObj.put("importFileList", resultList);
@@ -156,51 +160,4 @@ public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentB
         return "documentonline/jar/import";
     }
 
-    /**
-     * 异步调用其他服务器的从war包外部加载在线文档接口
-     * @return
-     */
-    private List<String> asynchronousCallOtherServersLoadDocumentOnlineOutsideWarApi() {
-        List<String> messageList = new ArrayList<>();
-        List<ServerClusterVo> serverList = serverMapper.getAllServerList();
-        for (ServerClusterVo serverClusterVo : serverList) {
-            if (!Objects.equals(serverClusterVo.getServerId(), Config.SCHEDULE_SERVER_ID)
-                    && Objects.equals(serverClusterVo.getStatus(), ServerClusterVo.STARTUP)) {
-                String host = serverClusterVo.getHost();
-                if (StringUtils.isNotBlank(host)) {
-                    String threadName = "ASYNC-CALLOTHERSERVERS-LOADDOCUMENTONLINEOUTSIDEWAR-API-" + serverClusterVo.getServerId() + "-" + host;
-                    if (TenantContext.get().getTenantUuid() != null) {
-                        threadName = TenantContext.get().getTenantUuid() + "-" + threadName;
-                    }
-                    NeatLogicThread thread = new NeatLogicThread(threadName) {
-                        @Override
-                        protected void execute() {
-                            String url = host + "/neatlogic/api/rest/documentonline/outsidewar/load";
-                            HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url)
-                                    .setPayload(new JSONObject().fluentPut("serverId", serverClusterVo.getServerId()).toString())
-                                    .setAuthType(AuthenticateType.BUILDIN)
-                                    .setConnectTimeout(5000)
-                                    .setReadTimeout(5000)
-                                    .sendRequest();
-                            String error = httpRequestUtil.getError();
-                            if (StringUtils.isNotBlank(error)) {
-                                throw new ApiRuntimeException(error);
-                            }
-                            JSONObject resultJson = httpRequestUtil.getResultJson();
-                            if (MapUtils.isNotEmpty(resultJson)) {
-                                String status = resultJson.getString("Status");
-                                if (!"OK".equals(status)) {
-                                    throw new RuntimeException(resultJson.getString("Message"));
-                                }
-                            }
-                        }
-                    };
-                    CachedThreadPool.execute(thread);
-                } else {
-                    messageList.add("serverId为" + serverClusterVo.getServerId() + "的应用服务器的`server_status`表中对应数据没有配置host");
-                }
-            }
-        }
-        return messageList;
-    }
 }
