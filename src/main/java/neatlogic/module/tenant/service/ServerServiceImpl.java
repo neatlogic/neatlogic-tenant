@@ -60,14 +60,17 @@ public class ServerServiceImpl implements ServerService {
     }
 
     @Override
-    public JSONObject postOtherServerApi(JSONObject paramObj, ServerClusterVo serverClusterVo, String url) {
+    public JSONObject postOtherServerApi(JSONObject paramObj, ServerClusterVo serverClusterVo, String uri) {
         JSONObject resultObj = new JSONObject();
         String errorMessage = null;
+        String url;
         String host = serverClusterVo.getHost();
-        if (StringUtils.isNotBlank(host) || StringUtils.isNotBlank(url)) {
+        if (StringUtils.isNotBlank(host) || StringUtils.isNotBlank(uri)) {
             HttpServletRequest request = RequestContext.get().getRequest();
-            if (StringUtils.isBlank(url)) {
+            if (StringUtils.isBlank(uri)) {
                 url = host + request.getRequestURI();
+            } else {
+                url = host + uri;
             }
             HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url).setPayload(paramObj.toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(5000).setReadTimeout(5000).sendRequest();
             String error = httpRequestUtil.getError();
@@ -100,11 +103,11 @@ public class ServerServiceImpl implements ServerService {
     }
 
     @Override
-    public JSONArray postOtherServersApi(JSONObject paramObj, int serverId, String url) {
+    public JSONArray postOtherServersApi(JSONObject paramObj, int serverId, String uri) {
         JSONArray resultArray = new JSONArray();
         List<ServerClusterVo> serverList = serverMapper.getOtherStartUpServerByServerId(serverId);
         for (ServerClusterVo serverClusterVo : serverList) {
-            resultArray.add(postOtherServerApi(paramObj, serverClusterVo));
+            resultArray.add(postOtherServerApi(paramObj, serverClusterVo, uri));
         }
         return resultArray;
     }

@@ -48,7 +48,7 @@ public interface ServerService {
      * @param paramObj        入参
      * @param serverClusterVo 节点
      */
-    JSONObject postOtherServerApi(JSONObject paramObj, ServerClusterVo serverClusterVo, String url);
+    JSONObject postOtherServerApi(JSONObject paramObj, ServerClusterVo serverClusterVo, String uri);
 
     /**
      * 请求其他节点同个接口
@@ -64,7 +64,7 @@ public interface ServerService {
      * @param paramObj 入参
      * @param serverId 节点 id
      */
-    JSONArray postOtherServersApi(JSONObject paramObj, int serverId, String url);
+    JSONArray postOtherServersApi(JSONObject paramObj, int serverId, String uri);
 
 
     /**

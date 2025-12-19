@@ -142,7 +142,7 @@ public class ImportDocumentOnlineJarApi extends PrivateBinaryStreamApiComponentB
         resultObj.put("timeCost", (System.currentTimeMillis() - startTime));
         if (MapUtils.isNotEmpty(resultObj)) {
             List<String> messageList = new ArrayList<>();
-            JSONArray resultArray = serverService.postOtherServersApi(new JSONObject(), Config.SCHEDULE_SERVER_ID);
+            JSONArray resultArray = serverService.postOtherServersApi(new JSONObject(), Config.SCHEDULE_SERVER_ID,"/neatlogic/api/rest/documentonline/outsidewar/load");
             if (CollectionUtils.isNotEmpty(resultArray)) {
                 for (int i = 0; i < resultArray.size(); i++) {
                     JSONObject result = resultArray.getJSONObject(i);
