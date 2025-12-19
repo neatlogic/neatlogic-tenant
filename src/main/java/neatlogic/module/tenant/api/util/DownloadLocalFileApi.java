@@ -65,10 +65,8 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         JSONObject resultObj = new JSONObject(new LinkedHashMap<>());
-        boolean hasServerId = true;
         Integer serverId = paramObj.getInteger("serverId");
         if (serverId == null) {
-            hasServerId = false;
             serverId = Config.SCHEDULE_SERVER_ID;
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
@@ -132,9 +130,7 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
                 }
             }
             if (in != null) {
-                if (!hasServerId) {
-                    fileName += "_serverId" + serverId;
-                }
+                fileName = serverId + "-" + fileName;
                 response.setContentType("application/octet-stream");
                 response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileName) + "\"");
                 ServletOutputStream os = response.getOutputStream();

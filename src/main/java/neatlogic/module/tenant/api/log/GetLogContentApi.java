@@ -90,6 +90,7 @@ public class GetLogContentApi extends PrivateApiComponentBase {
                         }
                         resultObj.put("fileSize", length);
                         resultObj.put("filePath", file.getAbsolutePath());
+                        resultObj.put("serverId", serverId);
                         return resultObj;
                     } else {
                         throw new FileNotFoundException(FileNotFoundException.Type.DIRECTORY, log4jHome);

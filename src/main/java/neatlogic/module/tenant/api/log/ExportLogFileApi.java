@@ -94,7 +94,7 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                         try (InputStream in = FileUtil.getData(path);) {
                             if (in != null) {
                                 try (ServletOutputStream os = response.getOutputStream()) {
-                                    String prefix = TimeUtil.yyyymmdd();
+                                    String prefix = serverId + "-" + TimeUtil.yyyymmdd();
                                     if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
                                         prefix = serverClusterVo.getIp() + "-" + prefix;
                                     }

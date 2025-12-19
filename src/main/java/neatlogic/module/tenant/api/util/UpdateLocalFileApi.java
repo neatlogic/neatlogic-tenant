@@ -22,7 +22,6 @@ import neatlogic.framework.file.core.FileStorageMediumFactory;
 import neatlogic.framework.file.core.IFileStorageHandler;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -46,9 +45,6 @@ import java.util.Objects;
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UpdateLocalFileApi extends PrivateApiComponentBase {
-
-    @Resource
-    private ServerMapper serverMapper;
 
     @Resource
     private FileMapper fileMapper;

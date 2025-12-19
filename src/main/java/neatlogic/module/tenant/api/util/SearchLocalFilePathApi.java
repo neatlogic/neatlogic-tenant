@@ -18,7 +18,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -40,9 +39,6 @@ import java.util.Objects;
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SearchLocalFilePathApi extends PrivateApiComponentBase {
-
-    @javax.annotation.Resource
-    private ServerMapper serverMapper;
 
     @javax.annotation.Resource
     ServerService serverService;

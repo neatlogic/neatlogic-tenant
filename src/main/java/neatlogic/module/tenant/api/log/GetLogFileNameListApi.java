@@ -103,6 +103,7 @@ public class GetLogFileNameListApi extends PrivateApiComponentBase {
                     throw new FileNotFoundException(FileNotFoundException.Type.NONEXISTENT, log4jHome);
                 }
                 resultObj.put("tbodyList", tbodyList);
+                resultObj.put("serverId", serverId);
                 return resultObj;
             } else {
                 throw new SystemPropertyNotFoundException(SystemProperty.LOG4J_HOME);

@@ -27,7 +27,6 @@ import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.LoadBalanceException;
 import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -54,9 +53,6 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
 
     @Resource
     ServerService serverService;
-
-    @Resource
-    ServerMapper serverMapper;
 
     @Override
     public String getToken() {

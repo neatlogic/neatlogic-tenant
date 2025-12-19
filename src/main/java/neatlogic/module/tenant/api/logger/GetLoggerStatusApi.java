@@ -63,7 +63,9 @@ public class GetLoggerStatusApi extends PrivateApiComponentBase {
             String logbackStatus = byteArrayOutputStream.toString();
             String[] split = logbackStatus.split(System.lineSeparator());
             List<String> tbodyList = Arrays.asList(split);
-            return TableResultUtil.getResult(tbodyList);
+            JSONObject resultObj = TableResultUtil.getResult(tbodyList);
+            resultObj.put("serverId", serverId);
+            return resultObj;
         } else {
             return serverService.postOtherServerApi(paramObj,serverId);
         }
