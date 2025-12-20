@@ -13,14 +13,26 @@
 package neatlogic.module.tenant.api.healthcheck;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadpool.CachedThreadPool;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dto.healthcheck.ThreadPoolVo;
+import neatlogic.framework.dto.healthcheck.ThreadTaskVo;
+import neatlogic.framework.dto.healthcheck.ThreadVo;
 import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @AuthAction(action = ADMIN.class)
@@ -43,10 +55,39 @@ public class GetThreadPoolStatusApi extends PrivateApiComponentBase {
     }
 
 
+    @Input({
+            @Param(name = "isShowCurrentTenant", type = ApiParamType.ENUM, rule = "0,1", desc = "是否只看当前租户数据")
+    })
     @Description(desc = "获取线程池状态")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return CachedThreadPool.getStatus();
+        Integer isShowCurrentTenant = paramObj.getInteger("isShowCurrentTenant");
+        ThreadPoolVo threadPoolVo = CachedThreadPool.getStatus();
+        if (Objects.equals(isShowCurrentTenant, 1)) {
+            String tenantUuid = TenantContext.get().getTenantUuid();
+            List<Long> idList = new ArrayList<>();
+            List<ThreadTaskVo> threadTaskList = threadPoolVo.getThreadTaskList();
+            if (CollectionUtils.isNotEmpty(threadTaskList)) {
+                for (int i = threadTaskList.size() - 1; i >= 0; i--) {
+                    ThreadTaskVo threadTaskVo = threadTaskList.get(i);
+                    if (Objects.equals(threadTaskVo.getTenantUuid(), tenantUuid)) {
+                        idList.add(threadTaskVo.getId());
+                    } else {
+                        threadTaskList.remove(i);
+                    }
+                }
+            }
+            List<ThreadVo> threadList = threadPoolVo.getThreadList();
+            if (CollectionUtils.isNotEmpty(threadList)) {
+                for (int i = threadList.size() - 1; i >= 0; i--) {
+                    ThreadVo threadVo = threadList.get(i);
+                    if (!idList.contains(threadVo.getId())) {
+                        threadList.remove(i);
+                    }
+                }
+            }
+        }
+        return threadPoolVo;
     }
 
 
