@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -84,6 +85,10 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
             configVo.setDescription(tenantConfig.getDescription());
             tbodyList.add(configVo);
         }
+
+        // 按 key 升序排序
+        tbodyList.sort(Comparator.comparing(ConfigVo::getKey));
+
         return TableResultUtil.getResult(tbodyList, basePageVo);
     }
 

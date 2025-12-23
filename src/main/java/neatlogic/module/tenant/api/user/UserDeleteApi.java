@@ -5,15 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
-import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.service.UserSessionService;
-import org.apache.commons.collections4.CollectionUtils;
+import neatlogic.module.tenant.service.UserSessionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,14 +59,8 @@ public class UserDeleteApi extends PrivateApiComponentBase {
         List<String> userUuidList = userUuidArray.toJavaList(String.class);
         for (String userUuid : userUuidList) {
             userMapper.updateUserIsDeletedByUuid(userUuid);
-            List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuid(userUuid);
-            if (CollectionUtils.isNotEmpty(userSessionVos)) {
-                for (UserSessionVo userSessionVo : userSessionVos) {
-                    UserSessionCache.removeItem(userSessionVo.getTokenHash());
-                }
-            }
+            userSessionService.deleteUserSessionAndCache(userUuid);
         }
-        //userSessionService.deleteUserSessionByUserUuid(userUuidList);
         return null;
     }
 }
