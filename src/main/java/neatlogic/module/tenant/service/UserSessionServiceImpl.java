@@ -25,8 +25,6 @@ import neatlogic.framework.dto.UserSessionVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -43,7 +41,6 @@ public class UserSessionServiceImpl implements UserSessionService {
     @Resource
     private ServerService serverService;
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public JSONObject clearUserSessionCache(String userUuid) {
         return clearUserSessionCache(userUuid, 0, new JSONArray());
@@ -51,8 +48,9 @@ public class UserSessionServiceImpl implements UserSessionService {
 
     @Override
     public JSONObject deleteUserSessionAndCache(String userUuid) {
+        JSONObject result = clearUserSessionCache(userUuid, 0, new JSONArray());
         userSessionMapper.deleteUserSessionByUserUuid(userUuid);
-        return clearUserSessionCache(userUuid, 0, new JSONArray());
+        return result;
     }
 
     @Override
@@ -79,7 +77,7 @@ public class UserSessionServiceImpl implements UserSessionService {
             JSONObject jsonObj = new JSONObject();
             jsonObj.put("isPassive", 1);
             jsonObj.put("userUuid", userUuid);
-            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID, "/user/session/cache/clear"));
+            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID, "/neatlogic/api/rest/user/session/cache/clear"));
         }
         result.put("serverId", Config.SCHEDULE_SERVER_ID);
         result.put("removeTokenList", removeTokenList);

@@ -20,7 +20,6 @@ package neatlogic.module.tenant.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
@@ -75,7 +74,7 @@ public class ServerServiceImpl implements ServerService {
             HttpRequestUtil httpRequestUtil = HttpRequestUtil.post(url).setPayload(paramObj.toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(5000).setReadTimeout(5000).sendRequest();
             String error = httpRequestUtil.getError();
             if (StringUtils.isNotBlank(error)) {
-                throw new ApiRuntimeException(error);
+                errorMessage = "serverId:“" + serverClusterVo.getServerId() + "”，" + error;
             }
             JSONObject resultJson = httpRequestUtil.getResultJson();
             if (MapUtils.isNotEmpty(resultJson)) {
@@ -134,7 +133,7 @@ public class ServerServiceImpl implements ServerService {
             HttpRequestUtil httpRequestUtil = HttpRequestUtil.download(url, "POST", os).setPayload(paramObj.toJSONString()).setAuthType(AuthenticateType.BUILDIN).setConnectTimeout(5000).setReadTimeout(5000).sendRequest();
             String error = httpRequestUtil.getError();
             if (StringUtils.isNotBlank(error)) {
-                throw new ApiRuntimeException(error);
+                errorMessage = "serverId:“" + serverClusterVo.getServerId() + "”，" + error;
             }
             JSONObject resultJson = httpRequestUtil.getResultJson();
             if (MapUtils.isNotEmpty(resultJson)) {
