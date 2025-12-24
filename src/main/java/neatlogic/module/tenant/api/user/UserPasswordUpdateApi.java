@@ -32,6 +32,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@NoPasswordExpiredCheck
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {

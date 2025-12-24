@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@NoPasswordExpiredCheck()
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class UserGetApi extends PrivateApiComponentBase {
