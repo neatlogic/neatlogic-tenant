@@ -18,7 +18,6 @@ package neatlogic.module.tenant.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.config.Config;
-import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserSessionContentMapper;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserSessionVo;
@@ -68,17 +67,9 @@ public class UserSessionServiceImpl implements UserSessionService {
                     userSessionJson.put("authInfo", authInfo);
                 }
                 removeTokenList.add(userSessionJson);
-                UserSessionCache.removeItem(userSessionVo.getTokenHash());
             }
         }
         JSONObject result = new JSONObject();
-        //清除其它节点的用户信息缓存
-        if (isPassive == 0) {
-            JSONObject jsonObj = new JSONObject();
-            jsonObj.put("isPassive", 1);
-            jsonObj.put("userUuid", userUuid);
-            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID, "/neatlogic/api/rest/user/session/cache/clear"));
-        }
         result.put("serverId", Config.SCHEDULE_SERVER_ID);
         result.put("removeTokenList", removeTokenList);
         return result;

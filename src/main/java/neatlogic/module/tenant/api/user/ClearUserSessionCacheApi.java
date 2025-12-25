@@ -19,7 +19,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.LoadBalanceException;
@@ -95,7 +94,6 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(userUuid)) {
             userUuid = UserContext.get().getUserUuid(true);
             removeTokenList.add(UserContext.get().getTokenHash());
-            UserSessionCache.removeItem(UserContext.get().getTokenHash());
         }
         return userSessionService.clearUserSessionCache(userUuid, isPassive, removeTokenList);
     }
