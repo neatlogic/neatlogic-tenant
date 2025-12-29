@@ -13,6 +13,7 @@
 package neatlogic.module.tenant.api;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
@@ -67,6 +68,7 @@ public class InitConfigGetApi extends PrivateApiComponentBase {
         }
         result.put("commercialModuleSet", moduleSet);
         result.put("ssoTicketKey", Config.SSO_TICKET_KEY());
+        result.put("tokenHash", UserContext.get().getTokenHash());
         return result;
     }
 

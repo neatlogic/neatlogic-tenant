@@ -43,6 +43,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 @Service
+@NoPasswordExpiredCheck
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class AuthModuleGetApi extends PrivateApiComponentBase {

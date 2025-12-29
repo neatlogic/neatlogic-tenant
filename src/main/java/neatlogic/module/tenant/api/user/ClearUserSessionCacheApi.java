@@ -19,24 +19,18 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.cache.UserSessionCache;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dao.mapper.UserSessionContentMapper;
-import neatlogic.framework.dao.mapper.UserSessionMapper;
-import neatlogic.framework.dto.UserSessionVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.LoadBalanceException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.tenant.service.ServerService;
-import org.apache.commons.collections4.CollectionUtils;
+import neatlogic.module.tenant.service.UserSessionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 @AuthAction(action = NoAuth.class)
@@ -46,13 +40,7 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
     UserMapper userMapper;
 
     @Resource
-    UserSessionMapper userSessionMapper;
-
-    @Resource
-    UserSessionContentMapper userSessionContentMapper;
-
-    @Resource
-    ServerService serverService;
+    UserSessionService userSessionService;
 
     @Override
     public String getToken() {
@@ -106,32 +94,7 @@ public class ClearUserSessionCacheApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(userUuid)) {
             userUuid = UserContext.get().getUserUuid(true);
             removeTokenList.add(UserContext.get().getTokenHash());
-            UserSessionCache.removeItem(UserContext.get().getTokenHash());
         }
-        List<UserSessionVo> userSessionVos = userSessionMapper.getUserSessionByUuid(userUuid);
-        if (CollectionUtils.isNotEmpty(userSessionVos)) {
-            for (UserSessionVo userSessionVo : userSessionVos) {
-                JSONObject userSessionJson = new JSONObject();
-                userSessionJson.put("tokenHash", userSessionVo.getTokenHash());
-                userSessionJson.put("authInfoHash", userSessionVo.getAuthInfoHash());
-                if (StringUtils.isNotBlank(userSessionVo.getAuthInfoHash())) {
-                    String authInfo = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getAuthInfoHash());
-                    String token = userSessionContentMapper.getUserSessionContentByHash(userSessionVo.getTokenHash());
-                    userSessionJson.put("token", token);
-                    userSessionJson.put("authInfo", authInfo);
-                }
-                removeTokenList.add(userSessionJson);
-                UserSessionCache.removeItem(userSessionVo.getTokenHash());
-            }
-        }
-        JSONObject result = new JSONObject();
-        //清除其它节点的用户信息缓存
-        if (isPassive == 0) {
-            jsonObj.put("isPassive", 1);
-            result.put("resultArray", serverService.postOtherServersApi(jsonObj, Config.SCHEDULE_SERVER_ID));
-        }
-        result.put("serverId", Config.SCHEDULE_SERVER_ID);
-        result.put("removeTokenList", removeTokenList);
-        return result;
+        return userSessionService.clearUserSessionCache(userUuid, isPassive, removeTokenList);
     }
 }

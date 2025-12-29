@@ -27,10 +27,7 @@ import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
@@ -44,6 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@NoPasswordExpiredCheck
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class CurrentUserGetApi extends PrivateApiComponentBase {

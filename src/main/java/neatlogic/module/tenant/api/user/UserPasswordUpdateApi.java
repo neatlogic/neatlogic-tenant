@@ -22,72 +22,88 @@ import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.module.tenant.exception.user.UserCurrentPasswordException;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.module.tenant.service.UserSessionService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.TransactionStatus;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-@Transactional
+@NoPasswordExpiredCheck
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {
-	
-	@Autowired
-	UserMapper userMapper;
 
-	@Override
-	public String getToken() {
-		return "user/password/update";
-	}
+    @Resource
+    UserMapper userMapper;
+    @Resource
+    private UserSessionService userSessionService;
 
-	@Override
-	public String getName() {
-		return "修改用户密码接口";
-	}
+    @Override
+    public String getToken() {
+        return "user/password/update";
+    }
 
-	@Override
-	public String getConfig() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return "修改用户密码接口";
+    }
 
-	@Input({
-			@Param(name = "password",
-					type = ApiParamType.STRING,
-					desc = "用户新密码",
-					isRequired = true),
-			@Param(name = "oldPassword",
-			type = ApiParamType.STRING,
-			desc = "用户当前密码",
-			isRequired = true)
-			
-	})
-	@Output({})
-	@Description(desc = "修改用户密码接口")
-	@Override
-	public Object myDoService(JSONObject jsonObj) throws Exception {
-		String password = jsonObj.getString("password");
-		String oldPassword = jsonObj.getString("oldPassword");
-		String userUuid = UserContext.get().getUserUuid(true);
-		UserVo user = userMapper.getUserBaseInfoByUuid(userUuid);
-		UserVo oldUserVo = new UserVo();
-		oldUserVo.setUuid(userUuid);
-		oldUserVo.setUserId(user.getUserId());
-		oldUserVo.setPassword(oldPassword);
-		UserVo userVo = userMapper.getUserByUserIdAndPassword(oldUserVo);
-		if(userVo != null) {
-			userVo.setPassword(password);		
-			userMapper.updateUserPasswordActive(userUuid);
-			List<Long> idList = userMapper.getLimitUserPasswordIdList(userUuid);
-			if (idList != null && !idList.isEmpty()) {
-				userMapper.deleteUserPasswordByLimit(userUuid, idList);
-			}
-			userMapper.insertUserPassword(userVo);
-		}else {
-			throw new UserCurrentPasswordException();
-		}
-		return null;
-	}
+    @Override
+    public String getConfig() {
+        return null;
+    }
+
+    @Input({
+            @Param(name = "password",
+                    type = ApiParamType.STRING,
+                    desc = "用户新密码",
+                    isRequired = true),
+            @Param(name = "oldPassword",
+                    type = ApiParamType.STRING,
+                    desc = "用户当前密码",
+                    isRequired = true)
+
+    })
+    @Output({})
+    @Description(desc = "修改用户密码接口")
+    @Override
+    public Object myDoService(JSONObject jsonObj) throws Exception {
+        JSONObject result = new JSONObject();
+        String password = jsonObj.getString("password");
+        String oldPassword = jsonObj.getString("oldPassword");
+        String userUuid = UserContext.get().getUserUuid(true);
+        UserVo user = userMapper.getUserBaseInfoByUuid(userUuid);
+        UserVo oldUserVo = new UserVo();
+        oldUserVo.setUuid(userUuid);
+        oldUserVo.setUserId(user.getUserId());
+        oldUserVo.setPassword(oldPassword);
+        UserVo userVo = userMapper.getUserByUserIdAndPassword(oldUserVo);
+        if (userVo != null) {
+            TransactionStatus tx = null;
+            try {
+                tx = TransactionUtil.openTx();
+                userVo.setPassword(password);
+                userMapper.updateUserPasswordActive(userUuid);
+                List<Long> idList = userMapper.getLimitUserPasswordIdList(userUuid);
+                if (idList != null && !idList.isEmpty()) {
+                    userMapper.deleteUserPasswordByLimit(userUuid, idList);
+                }
+                userMapper.insertUserPassword(userVo);
+                TransactionUtil.commitTx(tx);
+            } catch (Exception e) {
+                if (tx != null) {
+                    TransactionUtil.rollbackTx(tx);
+                }
+                throw new RuntimeException(e);
+            }
+            result = userSessionService.deleteUserSessionAndCache(userUuid);
+        } else {
+            throw new UserCurrentPasswordException();
+        }
+        return result;
+    }
 }
