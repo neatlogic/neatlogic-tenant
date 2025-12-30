@@ -22,6 +22,7 @@ import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.module.framework.datawarehouse.integration.handler.DataWareHouseIntegrationHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -94,7 +95,7 @@ public class SearchDataSourceDbTypeApi extends PrivateApiComponentBase {
             databaseChildren.add(new JSONObject().fluentPut("value", databaseVo.getType() + "-" + databaseVo.getId()).fluentPut("text", databaseVo.getName()));
         }
         tbodyList.add(new JSONObject()
-                .fluentPut("value", "database").fluentPut("text", "common.datasource")
+                .fluentPut("value", "database").fluentPut("text", $.t("common.datasource"))
                 .fluentPut("children", databaseChildren));
 
         JSONArray integrationChildren = new JSONArray();
@@ -109,7 +110,7 @@ public class SearchDataSourceDbTypeApi extends PrivateApiComponentBase {
             integrationChildren.add(new JSONObject().fluentPut("value", "integration-" + integration.getUuid()).fluentPut("text", integration.getName()));
         }
         tbodyList.add(new JSONObject()
-                .fluentPut("value", "integration").fluentPut("text", "term.framework.integration")
+                .fluentPut("value", "integration").fluentPut("text", $.t("term.framework.integration"))
                 .fluentPut("children", integrationChildren));
         resultObj.put("tbodyList", tbodyList);
         return resultObj;
