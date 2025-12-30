@@ -24,12 +24,14 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.module.tenant.exception.user.UserCurrentPasswordException;
+import neatlogic.module.tenant.exception.user.UserPasswordRepeatException;
 import neatlogic.module.tenant.service.UserSessionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @NoPasswordExpiredCheck
@@ -75,6 +77,9 @@ public class UserPasswordUpdateApi extends PrivateApiComponentBase {
         JSONObject result = new JSONObject();
         String password = jsonObj.getString("password");
         String oldPassword = jsonObj.getString("oldPassword");
+        if(Objects.equals(password, oldPassword)){
+            throw new UserPasswordRepeatException();
+        }
         String userUuid = UserContext.get().getUserUuid(true);
         UserVo user = userMapper.getUserBaseInfoByUuid(userUuid);
         UserVo oldUserVo = new UserVo();
