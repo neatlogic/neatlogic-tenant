@@ -6,6 +6,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.Input;
@@ -13,14 +14,15 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.tenant.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 @AuthAction(action = AUTHORITY_MODIFY.class)
 public class UserActiveUpdateApi extends PrivateApiComponentBase {
@@ -28,7 +30,7 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
     @Resource
     private UserMapper userMapper;
     @Resource
-    UserSessionService userSessionService;
+    UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -62,7 +64,7 @@ public class UserActiveUpdateApi extends PrivateApiComponentBase {
                 }
                 userVo.setUuid(userUuid);
                 userMapper.updateUserActive(userVo);
-                userSessionService.deleteUserSessionAndCache(userUuid);
+                userSessionMapper.deleteUserSessionByUserUuid(userUuid);
             }
         }
         return null;

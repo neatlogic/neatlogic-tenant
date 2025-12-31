@@ -6,17 +6,19 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.tenant.service.UserSessionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @AuthAction(action = USER_MODIFY.class)
 @Service
+@Transactional
 @OperationType(type = OperationTypeEnum.DELETE)
 public class UserDeleteApi extends PrivateApiComponentBase {
 
@@ -24,7 +26,7 @@ public class UserDeleteApi extends PrivateApiComponentBase {
     private UserMapper userMapper;
 
     @Resource
-    UserSessionService userSessionService;
+    UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -53,7 +55,7 @@ public class UserDeleteApi extends PrivateApiComponentBase {
         List<String> userUuidList = userUuidArray.toJavaList(String.class);
         for (String userUuid : userUuidList) {
             userMapper.updateUserIsDeletedByUuid(userUuid);
-            userSessionService.deleteUserSessionAndCache(userUuid);
+            userSessionMapper.deleteUserSessionByUserUuid(userUuid);
         }
         return null;
     }

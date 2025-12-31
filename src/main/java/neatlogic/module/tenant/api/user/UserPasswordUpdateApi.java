@@ -18,6 +18,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -25,9 +26,9 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.module.tenant.exception.user.UserCurrentPasswordException;
 import neatlogic.module.tenant.exception.user.UserPasswordRepeatException;
-import neatlogic.module.tenant.service.UserSessionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Objects;
 
 @Service
 @NoPasswordExpiredCheck
+@Transactional
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class UserPasswordUpdateApi extends PrivateApiComponentBase {
@@ -42,7 +44,7 @@ public class UserPasswordUpdateApi extends PrivateApiComponentBase {
     @Resource
     UserMapper userMapper;
     @Resource
-    private UserSessionService userSessionService;
+    private UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -74,7 +76,6 @@ public class UserPasswordUpdateApi extends PrivateApiComponentBase {
     @Description(desc = "修改用户密码接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        JSONObject result = new JSONObject();
         String password = jsonObj.getString("password");
         String oldPassword = jsonObj.getString("oldPassword");
         if(Objects.equals(password, oldPassword)){
@@ -105,10 +106,10 @@ public class UserPasswordUpdateApi extends PrivateApiComponentBase {
                 }
                 throw new RuntimeException(e);
             }
-            result = userSessionService.deleteUserSessionAndCache(userUuid);
+            userSessionMapper.deleteUserSessionByUserUuid(userUuid);
         } else {
             throw new UserCurrentPasswordException();
         }
-        return result;
+        return null;
     }
 }

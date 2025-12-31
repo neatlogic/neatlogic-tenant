@@ -138,7 +138,9 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
                 String avatar = userInfoObj.getString("avatar");
                 userObj.put("avatar", avatar);
             }
-            return userObj;
+            JSONObject result = JSONObject.parseObject(JSONObject.toJSONString(userObj));
+            result.put("tokenHash", UserContext.get().getTokenHash());
+            return result;
         }
         return null;
     }

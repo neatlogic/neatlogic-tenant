@@ -17,22 +17,24 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.UserSessionMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.tenant.service.UserSessionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
 
 @Service
+@Transactional
 @AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DeleteUserSessionApi extends PrivateApiComponentBase {
     @Resource
-    UserSessionService userSessionService;
+    UserSessionMapper userSessionMapper;
 
     @Override
     public String getToken() {
@@ -60,7 +62,7 @@ public class DeleteUserSessionApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(userUuidArray)) {
             List<String> userUuidList = userUuidArray.toJavaList(String.class);
             for (String userUuid : userUuidList){
-                userSessionService.deleteUserSessionAndCache(userUuid);
+                userSessionMapper.deleteUserSessionByUserUuid(userUuid);
             }
         }
         return null;
