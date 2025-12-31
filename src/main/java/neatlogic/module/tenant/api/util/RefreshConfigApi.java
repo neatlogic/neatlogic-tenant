@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
+import neatlogic.framework.common.config.LocalConfig;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
@@ -38,9 +39,6 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class RefreshConfigApi extends PrivateApiComponentBase {
     @Resource
-    private Config config;
-
-    @Resource
     ServerService serverService;
 
     @Override
@@ -61,9 +59,9 @@ public class RefreshConfigApi extends PrivateApiComponentBase {
         }
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
             Properties prop = new Properties();
-            boolean flag = config.readProperties(prop);
-            Config.loadNacosProperties(prop);
-            if (flag) {
+            LocalConfig.loadProperties(prop);
+            Config.loadLocalOrNacosProperties(prop);
+            if (Objects.equals(LocalConfig.ConfigSource.NACOS,LocalConfig.getConfigSource())) {
                 resultObj.put("数据来源", "Nacos");
             } else {
                 resultObj.put("数据来源", "config.properties");

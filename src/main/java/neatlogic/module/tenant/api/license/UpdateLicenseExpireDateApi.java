@@ -65,9 +65,11 @@ public class UpdateLicenseExpireDateApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         int isPassive = jsonObj.getIntValue("isPassive");
-        if (!Objects.equals(LocalConfig.getPropertiesFrom(), "Nacos")) {
+        if (!Objects.equals(LocalConfig.getConfigSource(), LocalConfig.ConfigSource.NACOS)) {
             //重新获取本地配置
-            config.reloadLocalConfig();
+            Properties prop = new Properties();
+            LocalConfig.loadProperties(prop);
+            Config.loadLocalOrNacosProperties(prop);
         }
         Map<String, Long> licenseModulePolicyMap = new HashMap<>();
         LicenseVo licenseVo = LicenseUtil.deLicense(Config.LICENSE(), Config.LICENSE_PK());
