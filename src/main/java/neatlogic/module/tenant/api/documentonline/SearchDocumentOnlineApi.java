@@ -123,6 +123,7 @@ public class SearchDocumentOnlineApi extends PrivateApiComponentBase {
                     DocumentOnlineDirectoryVo directoryVo = DocumentOnlineManager.getDocumentOnlineDirectoryByFilePath(doc.get("filePath"));
                     if (directoryVo != null) {
                         documentOnlineVo.setConfigList(directoryVo.getConfigList());
+                        documentOnlineVo.setFilePath(directoryVo.getFilePath());
                     }
                     tbodyList.add(documentOnlineVo);
                 }
