@@ -20,19 +20,23 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
+import neatlogic.framework.matrix.constvalue.MatrixType;
 import neatlogic.framework.matrix.core.MatrixPrivateDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
+import neatlogic.framework.matrix.dto.MatrixViewVo;
 import neatlogic.framework.matrix.dto.MatrixVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program: neatlogic
@@ -137,6 +141,12 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             tbodyList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), fromIndex - privateCount, pageSize);
         }
         for (MatrixVo matrixVo : tbodyList) {
+            if (Objects.equals(matrixVo.getType(), MatrixType.VIEW.getValue())) {
+                MatrixViewVo matrixViewVo = matrixMapper.getMatrixViewByMatrixUuid(matrixVo.getUuid());
+                if (matrixViewVo != null && StringUtils.isNotBlank(matrixViewVo.getError())) {
+                    matrixVo.setError(matrixViewVo.getError());
+                }
+            }
             int referenceCount = DependencyManager.getDependencyCount(FrameworkFromType.MATRIX, matrixVo.getUuid());
             matrixVo.setReferenceCount(referenceCount);
         }
