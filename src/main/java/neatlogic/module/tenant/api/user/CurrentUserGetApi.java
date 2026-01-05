@@ -32,7 +32,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -133,14 +132,12 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
             userObj.put("teamUuidList", newTeamUuidList);
             userObj.put("roleUuidList", newRoleUuidList);
             userObj.put("userAuthList", userAuthList);
-            JSONObject userInfoObj = userVo.getUserInfoObj();
-            if (MapUtils.isNotEmpty(userInfoObj)) {
-                String avatar = userInfoObj.getString("avatar");
-                userObj.put("avatar", avatar);
-            }
-            JSONObject result = JSONObject.parseObject(JSONObject.toJSONString(userObj));
-            result.put("tokenHash", UserContext.get().getTokenHash());
-            return result;
+            userObj.put("avatar", userVo.getAvatar());
+            userObj.put("vipLevel", userVo.getVipLevel());
+            userObj.put("isActive", userVo.getIsActive());
+            userObj.put("isDelete", userVo.getIsDelete());
+            userObj.put("tokenHash", UserContext.get().getTokenHash());
+            return userObj;
         }
         return null;
     }
