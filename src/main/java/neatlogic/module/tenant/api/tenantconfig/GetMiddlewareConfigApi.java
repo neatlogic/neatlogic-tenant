@@ -73,14 +73,14 @@ public class GetMiddlewareConfigApi extends PrivateApiComponentBase {
                 url = url.replace("{dbname}", "neatlogic_" + tenantUuid);
                 datasourceObj.put("jdbcUrl", url);
                 datasourceObj.put("username", datasourceVo.getUsername());
-                datasourceObj.put("password", datasourceVo.getPasswordPlain());
+                datasourceObj.put("password", "*".repeat(datasourceVo.getPasswordPlain().length()));
                 resultObj.put("datasource", datasourceObj);
             }
             MongoDbVo mongoDbVo = mongoDbMapper.getTenantMongoDbByTenantUuid(tenantUuid);
             if (mongoDbVo != null) {
                 JSONObject mongoDbObj = new JSONObject();
                 String url = "mongodb://"
-                        + mongoDbVo.getUsername() + ":" + mongoDbVo.getPasswordPlain()
+                        + mongoDbVo.getUsername() + ":" + "*".repeat(mongoDbVo.getPasswordPlain().length())
                         + "@" + mongoDbVo.getHost() + "/" + mongoDbVo.getDatabase() + "?" + mongoDbVo.getOption();
                 mongoDbObj.put("url", url);
                 resultObj.put("mongodb", mongoDbObj);
@@ -90,7 +90,7 @@ public class GetMiddlewareConfigApi extends PrivateApiComponentBase {
                 JSONObject elasticsearchObj = new JSONObject(true);
                 elasticsearchObj.put("host", elasticsearchVo.getHost());
                 elasticsearchObj.put("username", elasticsearchVo.getUsername());
-                elasticsearchObj.put("password", elasticsearchVo.getPasswordPlain());
+                elasticsearchObj.put("password", "*".repeat(elasticsearchVo.getPasswordPlain().length()));
                 elasticsearchObj.put("config", elasticsearchVo.getConfig());
                 resultObj.put("elasticsearch", elasticsearchObj);
             }
