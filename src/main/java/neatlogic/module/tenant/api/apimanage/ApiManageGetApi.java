@@ -60,13 +60,10 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String token = jsonObj.getString("token");
 		ApiVo apiVo = ApiMapper.getApiByToken(token);
-        ApiVo api = PrivateApiComponentFactory.getApiByToken(token);
 		if(apiVo != null) {
-            if(api != null){
-                apiVo.setBasicSupport(api.getBasicSupport());
-            }
 			return apiVo;
 		}
+        ApiVo api = PrivateApiComponentFactory.getApiByToken(token);
 		if(api != null) {
 			return api;
 		}

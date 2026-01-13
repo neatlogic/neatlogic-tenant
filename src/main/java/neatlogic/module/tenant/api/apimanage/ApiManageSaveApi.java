@@ -26,6 +26,7 @@ import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.constvalue.ApiAuthType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -105,8 +106,8 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
         apiVo.setModuleId(apiHandlerVo.getModuleId());
 
         if (ApiKind.CUSTOM.getValue().equals(apiVo.getApiType())) {
-            if (PublicApiAuthType.getAuthenticateType(apiVo.getAuthtype()) == null) {
-                throw new ApiAuthTypeNotFoundException(apiVo.getAuthtype());
+            if (PublicApiAuthType.getAuthenticateType(ApiAuthType.BASIC.getValue()) == null) {
+                throw new ApiAuthTypeNotFoundException(ApiAuthType.BASIC.getValue());
             }
             if (ramApiVo != null) {
                 throw new ApiRepeatException("不可与系统接口使用同一个token");
