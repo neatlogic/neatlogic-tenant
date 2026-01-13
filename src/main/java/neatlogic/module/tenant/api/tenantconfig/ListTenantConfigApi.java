@@ -27,6 +27,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -54,6 +55,7 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         return null;
     }
     @Input({
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
@@ -66,6 +68,17 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         List<ITenantConfig> allTenantConfigList = TenantConfigFactory.getTenantConfigList();
+        String keyword = basePageVo.getKeyword();
+        if (StringUtils.isNotBlank(keyword)) {
+            keyword = keyword.toLowerCase();
+            for (int i = allTenantConfigList.size() - 1; i >= 0; i--) {
+                ITenantConfig tenantConfig = allTenantConfigList.get(i);
+                if (!tenantConfig.getKey().toLowerCase().contains(keyword)
+                        && !tenantConfig.getDescription().toLowerCase().contains(keyword)) {
+                    allTenantConfigList.remove(i);
+                }
+            }
+        }
         basePageVo.setRowNum(allTenantConfigList.size());
         List<ITenantConfig> tenantConfigList = PageUtil.subList(allTenantConfigList, basePageVo);
         if (CollectionUtils.isEmpty(tenantConfigList)) {
