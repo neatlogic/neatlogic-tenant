@@ -172,6 +172,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         for (ApiVo api : dbApiList) {
             if (apiMap.containsKey(api.getToken())) {
                 api.setIsDeletable(0);
+                api.setAuthTypeList(apiMap.get(api.getToken()).getAuthTypeList());
             }
             apiMap.put(api.getToken(), api);
         }
