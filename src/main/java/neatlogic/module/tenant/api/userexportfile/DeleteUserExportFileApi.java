@@ -36,7 +36,7 @@ public class DeleteUserExportFileApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "删除用户导出文件";
+        return "nmtau.deleteuserexportfileapi.getname";
     }
 
     @Input({
@@ -45,7 +45,7 @@ public class DeleteUserExportFileApi extends PrivateApiComponentBase {
     @Output({
 
     })
-    @Description(desc = "删除用户导出文件")
+    @Description(desc = "nmtau.deleteuserexportfileapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");

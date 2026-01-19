@@ -42,7 +42,7 @@ public class ExportUserExportFileApi extends PrivateBinaryStreamApiComponentBase
 
     @Override
     public String getName() {
-        return "导出用户文件";
+        return "nmtau.exportuserexportfileapi.getname";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class ExportUserExportFileApi extends PrivateBinaryStreamApiComponentBase
     @Output({
 
     })
-    @Description(desc = "导出用户文件")
+    @Description(desc = "nmtau.exportuserexportfileapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long id = paramObj.getLong("id");

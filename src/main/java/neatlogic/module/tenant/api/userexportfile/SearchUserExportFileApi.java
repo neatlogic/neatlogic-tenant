@@ -45,7 +45,7 @@ public class SearchUserExportFileApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "用户导出文件列表";
+        return "nmtau.searchuserexportfileapi.getname";
     }
 
     @Input({
@@ -57,14 +57,14 @@ public class SearchUserExportFileApi extends PrivateApiComponentBase {
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
-            @Param(name = "isAll", type = ApiParamType.ENUM, rule = "0,1", desc = "是否查看所有用户"),
+            @Param(name = "isAll", type = ApiParamType.ENUM, rule = "0,1", desc = "nmtau.searchuserexportfileapi.input.param.desc"),
             @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
     })
     @Output({
             @Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = BasePageVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "用户导出文件列表")
+    @Description(desc = "nmtau.searchuserexportfileapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);

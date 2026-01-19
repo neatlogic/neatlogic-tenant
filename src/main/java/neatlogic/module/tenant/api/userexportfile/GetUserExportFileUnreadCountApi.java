@@ -29,14 +29,14 @@ public class GetUserExportFileUnreadCountApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "用户导出文件未读个数";
+        return "nmtau.getuserexportfileunreadcountapi.getname";
     }
 
     @Input({})
     @Output({
-        @Param(name = "unreadCount", type = ApiParamType.INTEGER, isRequired = true, desc = "未读个数")
+        @Param(name = "unreadCount", type = ApiParamType.INTEGER, isRequired = true, desc = "common.unreadcount")
     })
-    @Description(desc = "用户导出文件未读个数")
+    @Description(desc = "nmtau.getuserexportfileunreadcountapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);

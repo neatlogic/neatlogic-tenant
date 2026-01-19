@@ -36,7 +36,7 @@ public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "更新用户导出文件为已读";
+        return "nmtau.updateuserexportfileisreadapi.getname";
     }
 
     @Input({
@@ -45,7 +45,7 @@ public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
     @Output({
 
     })
-    @Description(desc = "更新用户导出文件为已读")
+    @Description(desc = "nmtau.updateuserexportfileisreadapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONArray idArray = paramObj.getJSONArray("idList");
