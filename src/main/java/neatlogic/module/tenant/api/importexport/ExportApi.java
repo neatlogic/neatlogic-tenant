@@ -100,21 +100,16 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
 
         String prefix = null;
         String suffix = ".pak";
-//        String fileName = null;
         // 先检查导出对象及依赖对象有没有找不到数据，如果有就抛异常
         {
             List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
             dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, null);
             prefix = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ")";
-//            fileName = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak";
         }
         UserExportFileVo userExportFileVo = new UserExportFileVo(userExportFileType, prefix, ".xlsx", "application/zip");
         userExportFileMapper.insertUserExportFile(userExportFileVo);
         // 上面代码检查没有异常再进行导出压缩到文件
-//        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-//        fileName = FileUtil.getEncodedFileName(fileName);
-//        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
         DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(prefix, suffix);
         List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
         try (ZipOutputStream zipos = new ZipOutputStream(deferredFileOutputStream)) {

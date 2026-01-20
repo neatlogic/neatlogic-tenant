@@ -93,16 +93,11 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
 
-//        OutputStream os = response.getOutputStream();
         if (ExportFileType.CSV.getValue().equals(fileType)) {
             UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".csv", "application/text;charset=GBK");
             userExportFileMapper.insertUserExportFile(userExportFileVo);
             DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(matrixVo.getName(), ".csv");
-//            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".csv");
-//            response.setContentType("application/text;charset=GBK");
-//            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
             matrixDataSourceHandler.exportMatrix2CSV(matrixVo, deferredFileOutputStream);
-//            os.flush();
             UserExportFileUtil.saveDeferredFileOutputStream(deferredFileOutputStream, userExportFileVo, response);
         } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
             UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".xlsx", "application/vnd.ms-excel;charset=utf-8");
@@ -111,11 +106,6 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             if (workbook == null) {
                 workbook = new HSSFWorkbook();
             }
-//            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xlsx");
-//            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-//            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-//            workbook.write(os);
-//            os.flush();
             UserExportFileUtil.saveWorkbook(workbook, userExportFileVo, response);
         }
         return null;
