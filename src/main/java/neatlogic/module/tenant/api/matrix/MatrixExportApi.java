@@ -17,6 +17,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ExportFileType;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -29,7 +30,10 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.userexportfile.constvalue.FrameworkUserExportFileType;
+import neatlogic.framework.userexportfile.dto.UserExportFileVo;
+import neatlogic.framework.util.UserExportFileUtil;
+import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
@@ -51,6 +55,9 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 
     @Resource
     private MatrixMapper matrixMapper;
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getToken() {
@@ -85,23 +92,21 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
-        OutputStream os = response.getOutputStream();
+
         if (ExportFileType.CSV.getValue().equals(fileType)) {
-            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".csv");
-            response.setContentType("application/text;charset=GBK");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, os);
-            os.flush();
+            UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".csv", "application/text;charset=GBK");
+            userExportFileMapper.insertUserExportFile(userExportFileVo);
+            DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(matrixVo.getName(), ".csv");
+            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, deferredFileOutputStream);
+            UserExportFileUtil.saveDeferredFileOutputStream(deferredFileOutputStream, userExportFileVo, response);
         } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
+            UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".xlsx", "application/vnd.ms-excel;charset=utf-8");
+            userExportFileMapper.insertUserExportFile(userExportFileVo);
             Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
             if (workbook == null) {
                 workbook = new HSSFWorkbook();
             }
-            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".xlsx");
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
-            workbook.write(os);
-            os.flush();
+            UserExportFileUtil.saveWorkbook(workbook, userExportFileVo, response);
         }
         return null;
     }
