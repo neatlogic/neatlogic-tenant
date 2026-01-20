@@ -31,7 +31,7 @@ import java.util.Objects;
 
 @Service
 @AuthAction(action = NoAuth.class)
-@OperationType(type = OperationTypeEnum.DELETE)
+@OperationType(type = OperationTypeEnum.UPDATE)
 public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
 
     @Resource
