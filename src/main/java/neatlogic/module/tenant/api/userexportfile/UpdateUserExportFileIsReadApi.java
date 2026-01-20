@@ -60,8 +60,10 @@ public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(idList)) {
             userExportFileCrossoverMapper.updateUserExportFileIsReadByIdList(idList);
         }
+        int unreadCount = userExportFileCrossoverMapper.getUserExportFileUnreadCount(UserContext.get().getUserUuid());
         JSONObject resultObj = new JSONObject();
         resultObj.put("idList", idList);
+        resultObj.put("unreadCount", unreadCount);
         return resultObj;
     }
 
