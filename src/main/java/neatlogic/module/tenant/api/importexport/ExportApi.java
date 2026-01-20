@@ -16,6 +16,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.importexport.core.ImportExportHandler;
 import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
@@ -26,7 +28,12 @@ import neatlogic.framework.importexport.exception.ImportExportHandlerNotFoundExc
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
-import neatlogic.framework.util.FileUtil;
+import neatlogic.framework.userexportfile.core.IUserExportFileType;
+import neatlogic.framework.userexportfile.core.UserExportFileTypeFactory;
+import neatlogic.framework.userexportfile.dto.UserExportFileVo;
+import neatlogic.framework.userexportfile.exception.UserExportFileTypeNotFoundException;
+import neatlogic.framework.util.UserExportFileUtil;
+import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +77,10 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
         if (importExportHandler == null) {
             throw new ImportExportHandlerNotFoundException(type);
         }
+        IUserExportFileType userExportFileType = UserExportFileTypeFactory.getUserExportFileType(type);
+        if (userExportFileType == null) {
+            throw new UserExportFileTypeNotFoundException(type);
+        }
         if (primaryKey instanceof String) {
             String str = (String) primaryKey;
             if (StringUtils.length(str) != 32) {
@@ -84,20 +95,27 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
             throw new ExportNoAuthException();
         }
 
-        String fileName = null;
+        String prefix = null;
+        String suffix = ".pak";
+//        String fileName = null;
         // 先检查导出对象及依赖对象有没有找不到数据，如果有就抛异常
         {
             List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
             dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, null);
-            fileName = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak";
+            prefix = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ")";
+//            fileName = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak";
         }
+        UserExportFileVo userExportFileVo = new UserExportFileVo(userExportFileType, prefix, ".xlsx", "application/zip");
+        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
+        userExportFileCrossoverMapper.insertUserExportFile(userExportFileVo);
         // 上面代码检查没有异常再进行导出压缩到文件
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        fileName = FileUtil.getEncodedFileName(fileName);
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+//        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+//        fileName = FileUtil.getEncodedFileName(fileName);
+//        response.setHeader("Content-Disposition", " attachment; filename=\"" + fileName + "\"");
+        DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(prefix, suffix);
         List<ImportExportBaseInfoVo> dependencyBaseInfoList = new ArrayList<>();
-        try (ZipOutputStream zipos = new ZipOutputStream(response.getOutputStream())) {
+        try (ZipOutputStream zipos = new ZipOutputStream(deferredFileOutputStream)) {
             dependencyBaseInfoList.add(new ImportExportBaseInfoVo(type, primaryKey));
             ImportExportVo importExportVo = importExportHandler.exportData(primaryKey, dependencyBaseInfoList, zipos);
             dependencyBaseInfoList.remove(0);
@@ -109,6 +127,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
             logger.error(e.getMessage(), e);
             throw e;
         }
+        UserExportFileUtil.saveDeferredFileOutputStream(deferredFileOutputStream, userExportFileVo, response);
         return null;
     }
 
