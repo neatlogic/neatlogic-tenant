@@ -16,8 +16,7 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -25,6 +24,7 @@ import neatlogic.framework.userexportfile.dto.UserExportFileVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +33,9 @@ import java.util.Objects;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getName() {
@@ -49,18 +52,17 @@ public class UpdateUserExportFileIsReadApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONArray idArray = paramObj.getJSONArray("idList");
-        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
         List<Long> idList = new ArrayList<>();
-        List<UserExportFileVo> userExportFileList = userExportFileCrossoverMapper.getUserExportFileListByIdList(idArray.toJavaList(Long.class));
+        List<UserExportFileVo> userExportFileList = userExportFileMapper.getUserExportFileListByIdList(idArray.toJavaList(Long.class));
         for (UserExportFileVo userExportFileVo : userExportFileList) {
             if (Objects.equals(userExportFileVo.getUserUuid(), UserContext.get().getUserUuid())) {
                 idList.add(userExportFileVo.getId());
             }
         }
         if (CollectionUtils.isNotEmpty(idList)) {
-            userExportFileCrossoverMapper.updateUserExportFileIsReadByIdList(idList);
+            userExportFileMapper.updateUserExportFileIsReadByIdList(idList);
         }
-        int unreadCount = userExportFileCrossoverMapper.getUserExportFileUnreadCount(UserContext.get().getUserUuid());
+        int unreadCount = userExportFileMapper.getUserExportFileUnreadCount(UserContext.get().getUserUuid());
         JSONObject resultObj = new JSONObject();
         resultObj.put("idList", idList);
         resultObj.put("unreadCount", unreadCount);

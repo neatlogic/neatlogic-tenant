@@ -20,8 +20,7 @@ import neatlogic.framework.auth.label.USER_EXPORT_FILE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -33,6 +32,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +42,9 @@ import java.util.Objects;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchUserExportFileApi extends PrivateApiComponentBase {
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getName() {
@@ -67,13 +70,12 @@ public class SearchUserExportFileApi extends PrivateApiComponentBase {
     @Description(desc = "nmtau.searchuserexportfileapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
         List<UserExportFileVo> tbodyList = new ArrayList<>();
         UserExportFileSearchVo searchVo = paramObj.toJavaObject(UserExportFileSearchVo.class);
         JSONArray defaultValue = searchVo.getDefaultValue();
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<Long> idList = defaultValue.toJavaList(Long.class);
-            tbodyList = userExportFileCrossoverMapper.getUserExportFileListByIdList(idList);
+            tbodyList = userExportFileMapper.getUserExportFileListByIdList(idList);
         } else {
             //将时间范围转为 开始时间、结束时间
             if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
@@ -99,10 +101,10 @@ public class SearchUserExportFileApi extends PrivateApiComponentBase {
                     searchVo.setUserUuid(userUuid.substring(GroupSearch.USER.getValuePlugin().length()));
                 }
             }
-            int rowNum = userExportFileCrossoverMapper.getUserExportFileCount(searchVo);
+            int rowNum = userExportFileMapper.getUserExportFileCount(searchVo);
             if (rowNum > 0) {
                 searchVo.setRowNum(rowNum);
-                tbodyList = userExportFileCrossoverMapper.getUserExportFileList(searchVo);
+                tbodyList = userExportFileMapper.getUserExportFileList(searchVo);
             }
         }
         return TableResultUtil.getResult(tbodyList, searchVo);

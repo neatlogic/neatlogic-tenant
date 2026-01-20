@@ -17,8 +17,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ExportFileType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -57,6 +56,9 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
     @Resource
     private MatrixMapper matrixMapper;
 
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
+
     @Override
     public String getToken() {
         return "matrix/data/export";
@@ -94,8 +96,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 //        OutputStream os = response.getOutputStream();
         if (ExportFileType.CSV.getValue().equals(fileType)) {
             UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".csv", "application/text;charset=GBK");
-            IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
-            userExportFileCrossoverMapper.insertUserExportFile(userExportFileVo);
+            userExportFileMapper.insertUserExportFile(userExportFileVo);
             DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(matrixVo.getName(), ".csv");
 //            String fileName = FileUtil.getEncodedFileName(matrixVo.getName() + ".csv");
 //            response.setContentType("application/text;charset=GBK");
@@ -105,8 +106,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             UserExportFileUtil.saveDeferredFileOutputStream(deferredFileOutputStream, userExportFileVo, response);
         } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
             UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".xlsx", "application/vnd.ms-excel;charset=utf-8");
-            IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
-            userExportFileCrossoverMapper.insertUserExportFile(userExportFileVo);
+            userExportFileMapper.insertUserExportFile(userExportFileVo);
             Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
             if (workbook == null) {
                 workbook = new HSSFWorkbook();

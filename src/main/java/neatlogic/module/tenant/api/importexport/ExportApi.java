@@ -16,8 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.importexport.core.ImportExportHandler;
 import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
@@ -39,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -52,6 +52,9 @@ import java.util.zip.ZipOutputStream;
 public class ExportApi extends PrivateBinaryStreamApiComponentBase {
 
     private Logger logger = LoggerFactory.getLogger(ExportApi.class);
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getName() {
@@ -107,8 +110,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
 //            fileName = importExportHandler.getType().getText() + "-" + importExportVo.getName() + "(" + importExportVo.getPrimaryKey() + ").pak";
         }
         UserExportFileVo userExportFileVo = new UserExportFileVo(userExportFileType, prefix, ".xlsx", "application/zip");
-        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
-        userExportFileCrossoverMapper.insertUserExportFile(userExportFileVo);
+        userExportFileMapper.insertUserExportFile(userExportFileVo);
         // 上面代码检查没有异常再进行导出压缩到文件
 //        response.setContentType("application/vnd.ms-excel;charset=utf-8");
 //        fileName = FileUtil.getEncodedFileName(fileName);

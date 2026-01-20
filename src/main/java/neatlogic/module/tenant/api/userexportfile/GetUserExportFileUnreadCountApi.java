@@ -15,17 +15,21 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class GetUserExportFileUnreadCountApi extends PrivateApiComponentBase {
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getName() {
@@ -39,8 +43,7 @@ public class GetUserExportFileUnreadCountApi extends PrivateApiComponentBase {
     @Description(desc = "nmtau.getuserexportfileunreadcountapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
-        int unreadCount = userExportFileCrossoverMapper.getUserExportFileUnreadCount(UserContext.get().getUserUuid());
+        int unreadCount = userExportFileMapper.getUserExportFileUnreadCount(UserContext.get().getUserUuid());
         JSONObject resultObj = new JSONObject();
         resultObj.put("unreadCount", unreadCount);
         return resultObj;

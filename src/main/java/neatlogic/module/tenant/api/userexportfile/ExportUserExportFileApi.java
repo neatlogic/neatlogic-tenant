@@ -18,8 +18,7 @@ import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.auth.label.USER_EXPORT_FILE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.FileUtil;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IUserExportFileCrossoverMapper;
+import neatlogic.framework.dao.mapper.UserExportFileMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -29,6 +28,7 @@ import neatlogic.framework.userexportfile.exception.UserExportFileNotFoundExcept
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +39,9 @@ import java.util.Objects;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportUserExportFileApi extends PrivateBinaryStreamApiComponentBase {
+
+    @Resource
+    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getName() {
@@ -59,8 +62,7 @@ public class ExportUserExportFileApi extends PrivateBinaryStreamApiComponentBase
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long id = paramObj.getLong("id");
-        IUserExportFileCrossoverMapper userExportFileCrossoverMapper = CrossoverServiceFactory.getApi(IUserExportFileCrossoverMapper.class);
-        UserExportFileVo userExportFile = userExportFileCrossoverMapper.getUserExportFileById(id);
+        UserExportFileVo userExportFile = userExportFileMapper.getUserExportFileById(id);
         if (userExportFile != null) {
             if (!Objects.equals(userExportFile.getUserUuid(), UserContext.get().getUserUuid())) {
                 if (!AuthActionChecker.check(USER_EXPORT_FILE_MODIFY.class)) {
