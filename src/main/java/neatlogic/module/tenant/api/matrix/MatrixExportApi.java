@@ -17,7 +17,8 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ExportFileType;
-import neatlogic.framework.dao.mapper.UserExportFileMapper;
+import neatlogic.framework.common.constvalue.MimeType;
+import neatlogic.framework.common.constvalue.ResponseCode;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -31,17 +32,21 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.userexportfile.constvalue.FrameworkUserExportFileType;
-import neatlogic.framework.userexportfile.dto.UserExportFileVo;
-import neatlogic.framework.util.UserExportFileUtil;
+import neatlogic.framework.userexportfile.core.ExportFileManager;
+import neatlogic.framework.util.FileUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @program: neatlogic
@@ -53,11 +58,9 @@ import java.io.OutputStream;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
 
+    private final Logger logger = LoggerFactory.getLogger(MatrixExportApi.class);
     @Resource
     private MatrixMapper matrixMapper;
-
-    @Resource
-    private UserExportFileMapper userExportFileMapper;
 
     @Override
     public String getToken() {
@@ -93,20 +96,50 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
 
+        ExportFileManager exportFileManager = new ExportFileManager(FrameworkUserExportFileType.MATRIX_DATA);
         if (ExportFileType.CSV.getValue().equals(fileType)) {
-            UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".csv", "application/text;charset=GBK");
-            userExportFileMapper.insertUserExportFile(userExportFileVo);
-            DeferredFileOutputStream deferredFileOutputStream = UserExportFileUtil.getDeferredFileOutputStream(matrixVo.getName(), ".csv");
-            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, deferredFileOutputStream);
-            UserExportFileUtil.saveDeferredFileOutputStream(deferredFileOutputStream, userExportFileVo, response);
+            exportFileManager.withName(matrixVo.getName() + ".csv")
+                    .withMimeType(MimeType.STREAM);
+            exportFileManager.generateData((outputStream) -> {
+            matrixDataSourceHandler.exportMatrix2CSV(matrixVo, outputStream);
+            });
         } else if (ExportFileType.EXCEL.getValue().equals(fileType)) {
-            UserExportFileVo userExportFileVo = new UserExportFileVo(FrameworkUserExportFileType.MATRIX_DATA, matrixVo.getName(), ".xlsx", "application/vnd.ms-excel;charset=utf-8");
-            userExportFileMapper.insertUserExportFile(userExportFileVo);
+            exportFileManager.withName(matrixVo.getName() + ".xlsx")
+                    .withMimeType(MimeType.XLS);
+            exportFileManager.generateData((outputStream) -> {
             Workbook workbook = matrixDataSourceHandler.exportMatrix2Excel(matrixVo);
             if (workbook == null) {
                 workbook = new HSSFWorkbook();
             }
-            UserExportFileUtil.saveWorkbook(workbook, userExportFileVo, response);
+                workbook.write(outputStream);
+            });
+        }
+        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export(5, TimeUnit.SECONDS)) {
+            if (deferredFileOutputStream != null) {
+                try (OutputStream os = response.getOutputStream()) {
+                    response.setContentType(exportFileManager.getMimeType().getValue());
+                    String filename = FileUtil.getEncodedFileName(exportFileManager.getName());
+                    response.setHeader("Content-Disposition", " attachment; filename=\"" + filename + "\"");
+                    if (deferredFileOutputStream.isInMemory()) {
+                        try (InputStream inputStream = new ByteArrayInputStream(deferredFileOutputStream.getData())) {
+                            IOUtils.copyLarge(inputStream, os);
+                        }
+                    } else {
+                        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(deferredFileOutputStream.getFile()))) {
+                            IOUtils.copyLarge(inputStream, os);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
+                } finally {
+                    File tempFile = deferredFileOutputStream.getFile();
+                    if (tempFile.exists()) {
+                        boolean delete = tempFile.delete();
+                    }
+                }
+            } else {
+                response.setStatus(ResponseCode.EXPORT_TIMEOUT.getCode());
+            }
         }
         return null;
     }
