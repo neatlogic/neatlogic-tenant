@@ -18,6 +18,7 @@ import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.ExportFileType;
 import neatlogic.framework.common.constvalue.MimeType;
+import neatlogic.framework.common.constvalue.ResponseCode;
 import neatlogic.framework.matrix.core.IMatrixDataSourceHandler;
 import neatlogic.framework.matrix.core.MatrixDataSourceHandlerFactory;
 import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
@@ -32,7 +33,6 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.userexportfile.constvalue.FrameworkUserExportFileType;
 import neatlogic.framework.userexportfile.core.ExportFileManager;
-import neatlogic.framework.userexportfile.exception.UserExportTimeCostTooLongException;
 import neatlogic.framework.util.FileUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
@@ -138,7 +138,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
                     }
                 }
             } else {
-                throw new UserExportTimeCostTooLongException();
+                response.setStatus(ResponseCode.EXPORT_TIMEOUT.getCode());
             }
         }
         return null;

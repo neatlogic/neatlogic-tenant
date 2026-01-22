@@ -17,6 +17,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.MimeType;
+import neatlogic.framework.common.constvalue.ResponseCode;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.importexport.core.ImportExportHandler;
 import neatlogic.framework.importexport.core.ImportExportHandlerFactory;
@@ -31,7 +32,6 @@ import neatlogic.framework.userexportfile.core.ExportFileManager;
 import neatlogic.framework.userexportfile.core.IUserExportFileType;
 import neatlogic.framework.userexportfile.core.UserExportFileTypeFactory;
 import neatlogic.framework.userexportfile.exception.UserExportFileTypeNotFoundException;
-import neatlogic.framework.userexportfile.exception.UserExportTimeCostTooLongException;
 import neatlogic.framework.util.FileUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
@@ -152,7 +152,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
                     }
                 }
             } else {
-                throw new UserExportTimeCostTooLongException();
+                response.setStatus(ResponseCode.EXPORT_TIMEOUT.getCode());
             }
         }
         return null;
