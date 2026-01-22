@@ -110,6 +110,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
         ExportFileManager exportFileManager = new ExportFileManager(userExportFileType)
                 .withName(name)
                 .withMimeType(MimeType.XLS)
+                .withAwait(5, TimeUnit.SECONDS)
 //                .withUniqueKey(RequestContext.get().getUrl())
                 ;
         exportFileManager.generateData((outputStream) -> {
@@ -128,7 +129,7 @@ public class ExportApi extends PrivateBinaryStreamApiComponentBase {
             throw e;
         }
         });
-        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export(5, TimeUnit.SECONDS)) {
+        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export()) {
             if (deferredFileOutputStream != null) {
                 try (OutputStream os = response.getOutputStream()) {
                     response.setContentType(exportFileManager.getMimeType().getValue());

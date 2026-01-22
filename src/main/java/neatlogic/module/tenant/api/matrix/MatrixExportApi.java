@@ -96,7 +96,8 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
         }
 
-        ExportFileManager exportFileManager = new ExportFileManager(FrameworkUserExportFileType.MATRIX_DATA);
+        ExportFileManager exportFileManager = new ExportFileManager(FrameworkUserExportFileType.MATRIX_DATA)
+                .withAwait(5, TimeUnit.SECONDS);
         if (ExportFileType.CSV.getValue().equals(fileType)) {
             exportFileManager.withName(matrixVo.getName() + ".csv")
                     .withMimeType(MimeType.STREAM);
@@ -114,7 +115,7 @@ public class MatrixExportApi extends PrivateBinaryStreamApiComponentBase {
                 workbook.write(outputStream);
             });
         }
-        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export(5, TimeUnit.SECONDS)) {
+        try (DeferredFileOutputStream deferredFileOutputStream = exportFileManager.export()) {
             if (deferredFileOutputStream != null) {
                 try (OutputStream os = response.getOutputStream()) {
                     response.setContentType(exportFileManager.getMimeType().getValue());
