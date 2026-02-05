@@ -130,6 +130,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 api.setHandler(ramApi.getHandler());
                 api.setName($.t(ramApi.getName()));
                 api.setModuleId(ramApi.getModuleId());
+                api.setAuthTypeList(ramApi.getAuthTypeList());
                 ApiHandlerVo handler = PrivateApiComponentFactory.getApiHandlerByHandler(api.getHandler());
                 if (handler != null) api.setHandlerName($.t(handler.getName()));
             }
