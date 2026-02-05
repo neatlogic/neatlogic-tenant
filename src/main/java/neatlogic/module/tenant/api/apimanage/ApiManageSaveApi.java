@@ -29,9 +29,10 @@ import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.util.RegexUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 @Service
 @Transactional
@@ -39,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class ApiManageSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private ApiMapper ApiMapper;
 
     @Override
