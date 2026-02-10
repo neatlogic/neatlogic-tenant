@@ -79,25 +79,15 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
             throw new NoTenantException();
         }
         if (fileVo != null && fileVo.getType().equals("image")) {
-            ServletOutputStream os = null;
-            InputStream in = null;
-//			if (fileVo.getPath().startsWith("file:")) {
-//				File file = new File(Config.DATA_HOME() + fileVo.getPath().substring(5));
-//				if (file.exists() && file.isFile()) {
-//					in = new FileInputStream(file);
-//				}
-//			} else if(fileVo.getPath().startsWith("minio:")) {
-//				in = minioManager.getObject(Config.MINIO_BUCKET(),fileVo.getPath().replaceAll("minio:", ""));
-//			}
+            ServletOutputStream os;
+            InputStream in;
             in = FileUtil.getData(fileVo.getPath());
             if (in != null) {
                 response.setContentType(fileVo.getContentType());
                 os = response.getOutputStream();
                 IOUtils.copyLarge(in, os);
-                if (os != null) {
-                    os.flush();
-                    os.close();
-                }
+                os.flush();
+                os.close();
                 in.close();
             }
         } else {

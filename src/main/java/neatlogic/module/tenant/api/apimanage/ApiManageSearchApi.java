@@ -33,7 +33,6 @@ import neatlogic.framework.restful.enums.ApiKind;
 import neatlogic.framework.util.$;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -201,7 +200,6 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 
     }
 
-    @NotNull
     private static Predicate<ApiVo> getApiVoPredicate(String keyword, ApiVo apiParam, Map<String, ApiVo> dbApiMap) {
         return api -> {
 
