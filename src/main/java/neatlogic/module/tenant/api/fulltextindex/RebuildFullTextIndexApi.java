@@ -56,7 +56,7 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
     @Input({@Param(name = "type", desc = "索引类型", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "handler", desc = "处理器", rule = "database,elasticsearch", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "isAll", desc = "是否全部重建", type = ApiParamType.BOOLEAN, isRequired = true)})
-    @Description(desc = "重建检索索引接口")
+    @Description(desc = "重建检索索引")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String type = paramObj.getString("type");
