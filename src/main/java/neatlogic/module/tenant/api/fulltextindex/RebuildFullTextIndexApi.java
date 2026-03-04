@@ -18,6 +18,7 @@ import neatlogic.framework.auth.label.FULLTEXTINDEX_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.elasticsearch.ElasticSearchIndexNotFoundException;
 import neatlogic.framework.exception.fulltextindex.FullTextIndexHandlerNotFoundException;
+import neatlogic.framework.exception.qdrant.QdrantCollectionNotFoundException;
 import neatlogic.framework.fulltextindex.core.FullTextIndexHandlerFactory;
 import neatlogic.framework.fulltextindex.core.IFullTextIndexHandler;
 import neatlogic.framework.fulltextindex.enums.FullTextIndexHandlerType;
@@ -29,6 +30,8 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.store.elasticsearch.ElasticsearchIndexFactory;
 import neatlogic.framework.store.elasticsearch.IElasticsearchIndex;
+import neatlogic.framework.store.qdrant.IQdrantCollection;
+import neatlogic.framework.store.qdrant.QdrantCollectionFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -54,7 +57,7 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "type", desc = "索引类型", type = ApiParamType.STRING, isRequired = true),
-            @Param(name = "handler", desc = "处理器", rule = "database,elasticsearch", type = ApiParamType.STRING, isRequired = true),
+            @Param(name = "handler", desc = "处理器", rule = "database,elasticsearch,qdrant", type = ApiParamType.STRING, isRequired = true),
             @Param(name = "isAll", desc = "是否全部重建", type = ApiParamType.BOOLEAN, isRequired = true)})
     @Description(desc = "重建检索索引")
     @Override
@@ -74,6 +77,13 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
                 throw new ElasticSearchIndexNotFoundException(type);
             }
             fulltextHandler.rebuildDocument(isAll);
+        }
+        else if (Objects.equals(FullTextIndexHandlerType.QDRANT.getValue(), handler)) {
+            IQdrantCollection collection = QdrantCollectionFactory.getCollection(type);
+            if (collection == null) {
+                throw new QdrantCollectionNotFoundException(type);
+            }
+            collection.rebuildPoint(isAll);
         }
         return null;
     }
