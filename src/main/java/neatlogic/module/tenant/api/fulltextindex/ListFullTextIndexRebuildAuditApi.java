@@ -87,6 +87,7 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                     op.get().setIndexCount(fullTextIndexMapper.getFullTextIndexCountByType(typeVo));
                 }
             }
+            rebuildAuditList.removeIf(d -> fullTextIndexTypeList.stream().noneMatch(dd -> dd.getType().equalsIgnoreCase(d.getType())));
         } else if (Objects.equals(audit.getHandler(), FullTextIndexHandlerType.ELASTICSEARCH.getValue())) {
             List<IElasticsearchIndex> elasticsearchIndexList = ElasticsearchIndexFactory.getAllIndex();
             for (IElasticsearchIndex elasticsearchIndex : elasticsearchIndexList) {
@@ -104,6 +105,7 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                     op.get().setIndexCount(elasticsearchIndex.getDocumentCount());
                 }
             }
+            rebuildAuditList.removeIf(d -> elasticsearchIndexList.stream().noneMatch(dd -> dd.getName().equalsIgnoreCase(d.getType())));
         } else if (Objects.equals(audit.getHandler(), FullTextIndexHandlerType.QDRANT.getValue())) {
             List<IQdrantCollection> qdrantCollectionList = QdrantCollectionFactory.getAllCollection();
             for (IQdrantCollection collection : qdrantCollectionList) {
@@ -121,6 +123,7 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                     op.get().setIndexCount(collection.getPointCount());
                 }
             }
+            rebuildAuditList.removeIf(d -> qdrantCollectionList.stream().noneMatch(dd -> dd.getName().equalsIgnoreCase(d.getType())));
         }
         return rebuildAuditList;
     }
