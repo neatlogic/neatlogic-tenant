@@ -28,8 +28,8 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.store.elasticsearch.ElasticsearchIndexFactory;
-import neatlogic.framework.store.elasticsearch.IElasticsearchIndex;
+import neatlogic.framework.store.elasticsearch.ElasticsearchDocumentFactory;
+import neatlogic.framework.store.elasticsearch.IElasticsearchDocument;
 import neatlogic.framework.store.qdrant.IQdrantCollection;
 import neatlogic.framework.store.qdrant.QdrantCollectionFactory;
 import org.springframework.stereotype.Service;
@@ -72,7 +72,7 @@ public class RebuildFullTextIndexApi extends PrivateApiComponentBase {
             }
             fulltextHandler.rebuildIndex(type, isAll);
         } else if (Objects.equals(FullTextIndexHandlerType.ELASTICSEARCH.getValue(), handler)) {
-            IElasticsearchIndex fulltextHandler = ElasticsearchIndexFactory.getIndex(type);
+            IElasticsearchDocument fulltextHandler = ElasticsearchDocumentFactory.getIndex(type);
             if (fulltextHandler == null) {
                 throw new ElasticSearchIndexNotFoundException(type);
             }
