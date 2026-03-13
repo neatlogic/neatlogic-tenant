@@ -14,9 +14,13 @@ package neatlogic.module.tenant.api.integration;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
@@ -40,6 +44,8 @@ import javax.annotation.Resource;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class IntegrationRunApi extends PrivateApiComponentBase {
+
+    private static final String EXECUTE_ACTION = "execute";
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -71,6 +77,19 @@ public class IntegrationRunApi extends PrivateApiComponentBase {
         IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
         if (integrationVo == null) {
             throw new IntegrationNotFoundException(jsonObj.getString("uuid"));
+        }
+        UserContext userContext = UserContext.get();
+        if (!AuthActionChecker.check(INTEGRATION_MODIFY.class) || (userContext != null && !Boolean.TRUE.equals(userContext.getIsSuperAdmin()))) {
+            int matchCount = integrationMapper.checkUserHasIntegrationAuthority(
+                    integrationVo.getUuid(),
+                    EXECUTE_ACTION,
+                    userContext.getUserUuid(),
+                    userContext.getTeamUuidList(),
+                    userContext.getRoleUuidList()
+            );
+            if (matchCount == 0) {
+                throw new PermissionDeniedException();
+            }
         }
         jsonObj.remove("uuid");
         integrationVo.setParamObj(jsonObj);

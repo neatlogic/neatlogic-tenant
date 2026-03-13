@@ -18,8 +18,19 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.ParamType;
+import neatlogic.framework.common.constvalue.UserType;
 import neatlogic.framework.common.dto.BasePageVo;
+import neatlogic.framework.dao.mapper.RoleMapper;
+import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.AuthorityVo;
+import neatlogic.framework.dto.RoleVo;
+import neatlogic.framework.dto.TeamVo;
+import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.WorkAssignmentUnitVo;
+import neatlogic.framework.integration.dto.IntegrationAuthorityVo;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
@@ -33,8 +44,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = NoAuth.class)
@@ -43,6 +58,15 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
 
     @Resource
     private IntegrationMapper integrationMapper;
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private TeamMapper teamMapper;
+
+    @Resource
+    private RoleMapper roleMapper;
 
     @Override
     public String getToken() {
@@ -85,6 +109,21 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
         }
         //补充类型对应表达式信息
         if (CollectionUtils.isNotEmpty(integrationList)) {
+            List<String> integrationUuidList = integrationList.stream().map(IntegrationVo::getUuid).collect(Collectors.toList());
+            List<IntegrationAuthorityVo> authorityVoList = integrationMapper.getIntegrationAuthorityListByIntegrationUuidListAndAction(integrationUuidList, "execute");
+            Map<String, List<IntegrationAuthorityVo>> authorityMap = authorityVoList.stream().collect(Collectors.groupingBy(IntegrationAuthorityVo::getIntegrationUuid));
+            Set<String> userUuidSet = authorityVoList.stream().filter(o -> Objects.equals(o.getType(), GroupSearch.USER.getValue())).map(AuthorityVo::getUuid).collect(Collectors.toSet());
+            Set<String> teamUuidSet = authorityVoList.stream().filter(o -> Objects.equals(o.getType(), GroupSearch.TEAM.getValue())).map(AuthorityVo::getUuid).collect(Collectors.toSet());
+            Set<String> roleUuidSet = authorityVoList.stream().filter(o -> Objects.equals(o.getType(), GroupSearch.ROLE.getValue())).map(AuthorityVo::getUuid).collect(Collectors.toSet());
+            Map<String, UserVo> userMap = CollectionUtils.isNotEmpty(userUuidSet)
+                    ? userMapper.getUserListByUuidList(new ArrayList<>(userUuidSet)).stream().collect(Collectors.toMap(UserVo::getUuid, user -> user, (a, b) -> a))
+                    : null;
+            Map<String, TeamVo> teamMap = CollectionUtils.isNotEmpty(teamUuidSet)
+                    ? teamMapper.getTeamByUuidList(new ArrayList<>(teamUuidSet)).stream().collect(Collectors.toMap(TeamVo::getUuid, team -> team, (a, b) -> a))
+                    : null;
+            Map<String, RoleVo> roleMap = CollectionUtils.isNotEmpty(roleUuidSet)
+                    ? roleMapper.getRoleByUuidList(new ArrayList<>(roleUuidSet)).stream().collect(Collectors.toMap(RoleVo::getUuid, role -> role, (a, b) -> a))
+                    : null;
             for (IntegrationVo inte : integrationList) {
                 JSONObject paramJson = inte.getConfig().getJSONObject("param");
                 if (paramJson != null) {
@@ -109,6 +148,39 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                 }
                 int count = DependencyManager.getDependencyCount(FrameworkFromType.INTEGRATION, inte.getUuid());
                 inte.setReferenceCount(count);
+                JSONArray authorityVoArray = new JSONArray();
+                List<IntegrationAuthorityVo> currentAuthorityList = authorityMap.get(inte.getUuid());
+                if (currentAuthorityList == null) {
+                    currentAuthorityList = new ArrayList<>();
+                }
+                inte.setExecuteAuthorityList(AuthorityVo.getAuthorityList(new ArrayList<>(currentAuthorityList)));
+                if (CollectionUtils.isNotEmpty(currentAuthorityList)) {
+                    for (IntegrationAuthorityVo authorityVo : currentAuthorityList) {
+                        if (Objects.equals(authorityVo.getType(), GroupSearch.USER.getValue())) {
+                            UserVo userVo = userMap != null ? userMap.get(authorityVo.getUuid()) : null;
+                            if (userVo != null) {
+                                authorityVoArray.add(userVo);
+                            }
+                        } else if (Objects.equals(authorityVo.getType(), GroupSearch.TEAM.getValue())) {
+                            TeamVo teamVo = teamMap != null ? teamMap.get(authorityVo.getUuid()) : null;
+                            if (teamVo != null) {
+                                authorityVoArray.add(teamVo);
+                            }
+                        } else if (Objects.equals(authorityVo.getType(), GroupSearch.ROLE.getValue())) {
+                            RoleVo roleVo = roleMap != null ? roleMap.get(authorityVo.getUuid()) : null;
+                            if (roleVo != null) {
+                                authorityVoArray.add(roleVo);
+                            }
+                        } else if (Objects.equals(authorityVo.getType(), GroupSearch.COMMON.getValue())) {
+                            WorkAssignmentUnitVo workAssignmentUnitVo = new WorkAssignmentUnitVo();
+                            workAssignmentUnitVo.setUuid(authorityVo.getUuid());
+                            workAssignmentUnitVo.setName(UserType.getText(authorityVo.getUuid()));
+                            workAssignmentUnitVo.setInitType(GroupSearch.COMMON.getValue());
+                            authorityVoArray.add(workAssignmentUnitVo);
+                        }
+                    }
+                }
+                inte.setExecuteAuthorityVoList(authorityVoArray);
             }
         }
         return TableResultUtil.getResult(integrationList, integrationVo);

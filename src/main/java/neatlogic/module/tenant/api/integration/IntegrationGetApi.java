@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.dependency.constvalue.FrameworkFromType;
 import neatlogic.framework.dependency.core.DependencyManager;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
@@ -26,6 +27,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = NoAuth.class)
@@ -58,6 +60,8 @@ public class IntegrationGetApi extends PrivateApiComponentBase {
 		IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
 		int count = DependencyManager.getDependencyCount(FrameworkFromType.INTEGRATION, integrationVo.getUuid());
 		integrationVo.setReferenceCount(count);
+        List<AuthorityVo> authorityVoList = integrationMapper.getIntegrationAuthorityListByIntegrationUuidAndAction(integrationVo.getUuid(), "execute");
+        integrationVo.setExecuteAuthorityList(AuthorityVo.getAuthorityList(authorityVoList));
 		return integrationVo;
 	}
 }
