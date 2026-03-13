@@ -15,7 +15,6 @@ package neatlogic.module.tenant.api.integration;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
-import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
@@ -49,7 +48,7 @@ public class AuthIntegrationApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "集成执行授权保存接口";
+        return "nmtai.authintegrationapi.getname";
     }
 
     @Override
@@ -58,10 +57,10 @@ public class AuthIntegrationApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "集成uuid"),
-            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "授权对象，可多选，格式[\"user#userUuid\",\"team#teamUuid\",\"role#roleUuid\",\"common#alluser\"]")
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.integrationuuid"),
+            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "nmtai.authintegrationapi.input.param.desc.authoritylist")
     })
-    @Description(desc = "集成执行授权保存接口")
+    @Description(desc = "nmtai.authintegrationapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String integrationUuid = jsonObj.getString("uuid");
