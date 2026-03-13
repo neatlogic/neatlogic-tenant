@@ -43,7 +43,7 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class IntegrationRunApi extends PrivateApiComponentBase {
+public class RunIntegrationApi extends PrivateApiComponentBase {
 
     private static final String EXECUTE_ACTION = "execute";
 

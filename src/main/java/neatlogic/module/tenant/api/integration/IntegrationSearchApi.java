@@ -159,17 +159,17 @@ public class IntegrationSearchApi extends PrivateApiComponentBase {
                         if (Objects.equals(authorityVo.getType(), GroupSearch.USER.getValue())) {
                             UserVo userVo = userMap != null ? userMap.get(authorityVo.getUuid()) : null;
                             if (userVo != null) {
-                                authorityVoArray.add(userVo);
+                                authorityVoArray.add(new WorkAssignmentUnitVo(userVo));
                             }
                         } else if (Objects.equals(authorityVo.getType(), GroupSearch.TEAM.getValue())) {
                             TeamVo teamVo = teamMap != null ? teamMap.get(authorityVo.getUuid()) : null;
                             if (teamVo != null) {
-                                authorityVoArray.add(teamVo);
+                                authorityVoArray.add(new WorkAssignmentUnitVo(teamVo));
                             }
                         } else if (Objects.equals(authorityVo.getType(), GroupSearch.ROLE.getValue())) {
                             RoleVo roleVo = roleMap != null ? roleMap.get(authorityVo.getUuid()) : null;
                             if (roleVo != null) {
-                                authorityVoArray.add(roleVo);
+                                authorityVoArray.add(new WorkAssignmentUnitVo(roleVo));
                             }
                         } else if (Objects.equals(authorityVo.getType(), GroupSearch.COMMON.getValue())) {
                             WorkAssignmentUnitVo workAssignmentUnitVo = new WorkAssignmentUnitVo();
