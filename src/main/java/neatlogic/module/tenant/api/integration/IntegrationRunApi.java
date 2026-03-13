@@ -15,7 +15,7 @@ package neatlogic.module.tenant.api.integration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
@@ -37,8 +37,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = INTEGRATION_MODIFY.class)
-@OperationType(type = OperationTypeEnum.CREATE)
+@AuthAction(action = NoAuth.class)
+@OperationType(type = OperationTypeEnum.OPERATE)
 public class IntegrationRunApi extends PrivateApiComponentBase {
 
     @Resource
