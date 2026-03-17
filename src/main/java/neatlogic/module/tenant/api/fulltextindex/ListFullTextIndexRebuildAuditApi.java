@@ -26,8 +26,10 @@ import neatlogic.framework.fulltextindex.enums.FullTextIndexHandlerType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.store.elasticsearch.ElasticsearchIndexFactory;
-import neatlogic.framework.store.elasticsearch.IElasticsearchIndex;
+import neatlogic.framework.store.elasticsearch.ElasticsearchDocumentFactory;
+import neatlogic.framework.store.elasticsearch.IElasticsearchDocument;
+import neatlogic.framework.store.qdrant.IQdrantCollection;
+import neatlogic.framework.store.qdrant.QdrantCollectionFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -61,7 +63,7 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "typeList", type = ApiParamType.JSONARRAY, desc = "类型列表"),
-            @Param(name = "handler", isRequired = true, rule = "database,elasticsearch", type = ApiParamType.STRING, desc = "处理器")})
+            @Param(name = "handler", isRequired = true, rule = "database,elasticsearch,qdrant", type = ApiParamType.STRING, desc = "处理器")})
     @Output({@Param(explode = FullTextIndexRebuildAuditVo[].class)})
     @Description(desc = "获取索引重建记录列表")
     @Override
@@ -72,7 +74,7 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
             List<FullTextIndexTypeVo> fullTextIndexTypeList = FullTextIndexHandlerFactory.getAllTypeList();
             for (FullTextIndexTypeVo typeVo : fullTextIndexTypeList) {
                 Optional<FullTextIndexRebuildAuditVo> op = rebuildAuditList.stream().filter(d -> d.getType().equals(typeVo.getType())).findFirst();
-                if (!op.isPresent()) {
+                if (op.isEmpty()) {
                     FullTextIndexRebuildAuditVo auditVo = new FullTextIndexRebuildAuditVo();
                     auditVo.setType(typeVo.getType());
                     auditVo.setTypeName(typeVo.getTypeName());
@@ -85,11 +87,12 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                     op.get().setIndexCount(fullTextIndexMapper.getFullTextIndexCountByType(typeVo));
                 }
             }
+            rebuildAuditList.removeIf(d -> fullTextIndexTypeList.stream().noneMatch(dd -> dd.getType().equalsIgnoreCase(d.getType())));
         } else if (Objects.equals(audit.getHandler(), FullTextIndexHandlerType.ELASTICSEARCH.getValue())) {
-            List<IElasticsearchIndex> elasticsearchIndexList = ElasticsearchIndexFactory.getAllIndex();
-            for (IElasticsearchIndex elasticsearchIndex : elasticsearchIndexList) {
+            List<IElasticsearchDocument> elasticsearchIndexList = ElasticsearchDocumentFactory.getAllIndex();
+            for (IElasticsearchDocument elasticsearchIndex : elasticsearchIndexList) {
                 Optional<FullTextIndexRebuildAuditVo> op = rebuildAuditList.stream().filter(d -> d.getType().equals(elasticsearchIndex.getName())).findFirst();
-                if (!op.isPresent()) {
+                if (op.isEmpty()) {
                     FullTextIndexRebuildAuditVo auditVo = new FullTextIndexRebuildAuditVo();
                     auditVo.setType(elasticsearchIndex.getName());
                     auditVo.setTypeName(elasticsearchIndex.getLabel());
@@ -102,6 +105,25 @@ public class ListFullTextIndexRebuildAuditApi extends PrivateApiComponentBase {
                     op.get().setIndexCount(elasticsearchIndex.getDocumentCount());
                 }
             }
+            rebuildAuditList.removeIf(d -> elasticsearchIndexList.stream().noneMatch(dd -> dd.getName().equalsIgnoreCase(d.getType())));
+        } else if (Objects.equals(audit.getHandler(), FullTextIndexHandlerType.QDRANT.getValue())) {
+            List<IQdrantCollection> qdrantCollectionList = QdrantCollectionFactory.getAllCollection();
+            for (IQdrantCollection collection : qdrantCollectionList) {
+                Optional<FullTextIndexRebuildAuditVo> op = rebuildAuditList.stream().filter(d -> d.getType().equals(collection.getName())).findFirst();
+                if (op.isEmpty()) {
+                    FullTextIndexRebuildAuditVo auditVo = new FullTextIndexRebuildAuditVo();
+                    auditVo.setType(collection.getName());
+                    auditVo.setTypeName(collection.getLabel());
+                    auditVo.setHandler(FullTextIndexHandlerType.QDRANT.getValue());
+                    auditVo.setIndexCount(collection.getPointCount());
+                    rebuildAuditList.add(auditVo);
+                } else {
+                    op.get().setHandler(FullTextIndexHandlerType.QDRANT.getValue());
+                    op.get().setTypeName(collection.getLabel());
+                    op.get().setIndexCount(collection.getPointCount());
+                }
+            }
+            rebuildAuditList.removeIf(d -> qdrantCollectionList.stream().noneMatch(dd -> dd.getName().equalsIgnoreCase(d.getType())));
         }
         return rebuildAuditList;
     }

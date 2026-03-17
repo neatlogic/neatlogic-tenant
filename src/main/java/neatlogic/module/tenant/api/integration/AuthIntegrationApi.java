@@ -12,51 +12,43 @@
 
 package neatlogic.module.tenant.api.integration;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
+import neatlogic.framework.dto.AuthorityVo;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
-import neatlogic.framework.integration.core.IIntegrationHandler;
-import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
-import neatlogic.framework.integration.dto.IntegrationResultVo;
-import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = INTEGRATION_MODIFY.class)
-@OperationType(type = OperationTypeEnum.CREATE)
-public class IntegrationRunApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.UPDATE)
+public class AuthIntegrationApi extends PrivateApiComponentBase {
+
+    private static final String EXECUTE_ACTION = "execute";
 
     @Resource
     private IntegrationMapper integrationMapper;
 
     @Override
     public String getToken() {
-        return "integration/run/{uuid}";
-    }
-
-    @Override
-    public boolean isRaw() {
-        return true;
+        return "integration/auth/save";
     }
 
     @Override
     public String getName() {
-        return "nmtai.integrationrunapi.getname";
+        return "nmtai.authintegrationapi.getname";
     }
 
     @Override
@@ -64,26 +56,27 @@ public class IntegrationRunApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "uuid", type = ApiParamType.STRING, desc = "集成配置uuid", isRequired = true)})
-    @Description(desc = "nmtai.integrationrunapi.getname")
+    @Input({
+            @Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "term.framework.integrationuuid"),
+            @Param(name = "authorityList", type = ApiParamType.JSONARRAY, desc = "nmtai.authintegrationapi.input.param.desc.authoritylist")
+    })
+    @Description(desc = "nmtai.authintegrationapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        IntegrationVo integrationVo = integrationMapper.getIntegrationByUuid(jsonObj.getString("uuid"));
-        if (integrationVo == null) {
-            throw new IntegrationNotFoundException(jsonObj.getString("uuid"));
+        String integrationUuid = jsonObj.getString("uuid");
+        if (integrationMapper.checkIntegrationExists(integrationUuid) == 0) {
+            throw new IntegrationNotFoundException(integrationUuid);
         }
-        jsonObj.remove("uuid");
-        integrationVo.setParamObj(jsonObj);
-        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
-        if (handler == null) {
-            throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+        integrationMapper.deleteIntegrationAuthorityByIntegrationUuidAndAction(integrationUuid, EXECUTE_ACTION);
+        List<String> authorityList = jsonObj.getJSONArray("authorityList") != null
+                ? jsonObj.getJSONArray("authorityList").toJavaList(String.class)
+                : null;
+        if (CollectionUtils.isNotEmpty(authorityList)) {
+            List<AuthorityVo> authorityVoList = AuthorityVo.getAuthorityVoList(authorityList, EXECUTE_ACTION);
+            for (AuthorityVo authorityVo : authorityVoList) {
+                integrationMapper.insertIntegrationAuthority(integrationUuid, authorityVo);
+            }
         }
-
-        IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.API);
-        String resultJson = resultVo.getTransformedResult();
-        if (StringUtils.isBlank(resultJson)) {
-            resultJson = resultVo.getRawResult();
-        }
-        return JSON.parse(resultJson);
+        return null;
     }
 }
