@@ -80,6 +80,7 @@ public class MatrixColumnDataSearchForBatchApi extends PrivateApiComponentBase {
             if (CollectionUtils.isEmpty(defaultValue)) {
                 throw new ParamNotExistsException("searchParamList[" + i + "].defaultValue");
             }
+            JSONArray filterArray = searchParamObj.getJSONArray("filterList");
             MatrixVo matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(matrixUuid);
             if (matrixVo == null) {
                 matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
@@ -139,6 +140,9 @@ public class MatrixColumnDataSearchForBatchApi extends PrivateApiComponentBase {
                 dataVo.setColumnList(columnList);
                 dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
                 dataVo.setDefaultValueFilterList(defaultValueFilterList);
+                if (CollectionUtils.isNotEmpty(filterArray)) {
+                    dataVo.setFilterList(filterArray.toJavaList(MatrixFilterVo.class));
+                }
                 List<Map<String, JSONObject>> list = matrixDataSourceHandler.searchTableDataNew(dataVo);
                 for (String text : textList) {
                     for (Map<String, JSONObject> e : list) {
