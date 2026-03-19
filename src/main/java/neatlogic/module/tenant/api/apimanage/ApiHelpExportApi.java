@@ -29,7 +29,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IApiComponent;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
-import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.framework.util.pdf.*;

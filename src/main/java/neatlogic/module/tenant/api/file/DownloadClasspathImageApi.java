@@ -25,7 +25,7 @@ import neatlogic.framework.exception.user.NoTenantException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
-import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
