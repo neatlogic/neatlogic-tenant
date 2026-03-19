@@ -79,7 +79,7 @@ public class RunIntegrationApi extends PrivateApiComponentBase {
             throw new IntegrationNotFoundException(jsonObj.getString("uuid"));
         }
         UserContext userContext = UserContext.get();
-        if (!AuthActionChecker.check(INTEGRATION_MODIFY.class) || (userContext != null && !Boolean.TRUE.equals(userContext.getIsSuperAdmin()))) {
+        if (!AuthActionChecker.check(INTEGRATION_MODIFY.class)) {
             int matchCount = integrationMapper.checkUserHasIntegrationAuthority(
                     integrationVo.getUuid(),
                     EXECUTE_ACTION,
