@@ -126,7 +126,6 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             dataVo.setPageSize(pageSize);
             int startNum = dataVo.getStartNum();
             int currentPageBackup = dataVo.getCurrentPage();
-//            int pageSize = dataVo.getPageSize();
             if (Objects.equals(needPage, false)) {
                 dataVo.setNeedPage(needPage);
                 dataVo.getPageSize();
