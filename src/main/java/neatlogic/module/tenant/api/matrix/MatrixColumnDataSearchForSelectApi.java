@@ -105,7 +105,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                                 .fluentPut("uniqueIdentifier", "owner")
                                 .fluentPut("expression", "equal")
                                 .fluentPut("description", "uuid与uniqueIdentifier字段二选一，expression选项有like|notlike|equal|unequal|include|exclude|between|greater-than|less-than|is-null|match|is-not-null")
-                                .fluentPut("valueList", new JSONArray().fluentAdd("admin"))
+                                .fluentPut("valueList", new JSONArray().fluentAdd("管理员"))
                 ))
                 .fluentPut("matrixLabel", "cmdbAppOwner")
                 .fluentPut("keywordColumnUniqueIdentifier", "name")
