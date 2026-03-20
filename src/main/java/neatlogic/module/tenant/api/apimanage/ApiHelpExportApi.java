@@ -31,6 +31,7 @@ import neatlogic.framework.restful.core.IApiComponent;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
+import neatlogic.framework.restful.enums.ApiType;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.framework.util.pdf.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -249,7 +250,7 @@ public class ApiHelpExportApi extends PrivateBinaryStreamApiComponentBase {
                 }
                 Chapter chapter = new Chapter(new Paragraph(new Chunk(moduleGroupVo.getGroupName(), charterFont).setLocalDestination(moduleGroupVo.getGroup())), firstIndex);
                 for (ApiVo api : apiList) {
-                    IApiComponent apiComponent = PrivateApiComponentFactory.getInstance(api.getHandler());
+                    IApiComponent apiComponent = PrivateApiComponentFactory.getComponent(api.getHandler(), ApiType.OBJECT, IApiComponent.class);
                     if (apiComponent == null) {
                         continue;
                     }
