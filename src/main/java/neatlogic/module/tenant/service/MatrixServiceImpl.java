@@ -130,6 +130,8 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                 dataVo.setNeedPage(needPage);
                 dataVo.getPageSize();
                 pageSize = Integer.MAX_VALUE;
+            } else {
+                pageSize = dataVo.getPageSize();
             }
             int page = 0;
             while (resultList.size() < pageSize) {
@@ -230,9 +232,12 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             }
             uniqueIdentifierToUuidMap.put(uniqueIdentifier, matrixAttributeVo.getUuid());
         }
-        String keywordColumn = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
-        if (StringUtils.isBlank(keywordColumn)) {
-            throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
+        String keywordColumn = null;
+        if (StringUtils.isNotBlank(keyword) && StringUtils.isNotBlank(keywordColumnUniqueIdentifier)) {
+            keywordColumn = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
+            if (StringUtils.isBlank(keywordColumn)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
+            }
         }
         String valueField = uniqueIdentifierToUuidMap.get(valueFieldUniqueIdentifier);
         if (StringUtils.isBlank(valueField)) {
