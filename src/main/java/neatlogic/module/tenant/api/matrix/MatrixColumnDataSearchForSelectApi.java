@@ -154,21 +154,18 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVo(matrixUuid);
             if (matrixVo == null) {
                 matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
-                if (matrixVo == null) {
-                    throw new MatrixNotFoundException(matrixUuid);
-                }
             }
         } else if (StringUtils.isNotBlank(matrixLabel)) {
             matrixVo = MatrixPrivateDataSourceHandlerFactory.getMatrixVoByLabel(matrixLabel);
             if (matrixVo == null) {
                 matrixVo = matrixMapper.getMatrixByLabel(matrixLabel);
-                if (matrixVo == null) {
-                    throw new MatrixNotFoundException(matrixLabel);
-                }
             }
+        }
+        if (matrixVo == null) {
+            throw new MatrixNotFoundException(StringUtils.defaultIfBlank(matrixUuid, matrixLabel));
+        } else {
             matrixUuid = matrixVo.getUuid();
         }
-
         IMatrixDataSourceHandler matrixDataSourceHandler = MatrixDataSourceHandlerFactory.getHandler(matrixVo.getType());
         if (matrixDataSourceHandler == null) {
             throw new MatrixDataSourceHandlerNotFoundException(matrixVo.getType());
@@ -189,27 +186,23 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         List<MatrixFilterVo> filterList = new ArrayList<>();
         JSONArray filterArray = jsonObj.getJSONArray("filterList");
         if (CollectionUtils.isNotEmpty(filterArray)) {
-            filterList = filterArray.toJavaList(MatrixFilterVo.class);
-            Iterator<MatrixFilterVo> iterator = filterList.iterator();
-            while (iterator.hasNext()) {
-                MatrixFilterVo matrixFilterVo = iterator.next();
-                if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    if (StringUtils.isBlank(matrixFilterVo.getUniqueIdentifier())) {
-                        iterator.remove();
-                        continue;
+            for (int i = 0; i < filterArray.size(); i++) {
+                MatrixFilterVo matrixFilterVo = filterArray.getObject(i, MatrixFilterVo.class);
+                if (matrixFilterVo != null) {
+                    String uuid = matrixFilterVo.getUuid();
+                    if (StringUtils.isBlank(uuid)) {
+                        if (StringUtils.isNotBlank(matrixFilterVo.getUniqueIdentifier())) {
+                            uuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
+                        }
                     }
-                    String attrUuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
-                    if (StringUtils.isBlank(attrUuid)) {
-                        iterator.remove();
-                        continue;
+                    if (StringUtils.isNotBlank(uuid)) {
+                        if (CollectionUtils.isNotEmpty(matrixFilterVo.getValueList())
+                                || Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
+                                || Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
+                        ) {
+                            filterList.add(new MatrixFilterVo(uuid, matrixFilterVo.getType(), matrixFilterVo.getExpression(), matrixFilterVo.getValueList()));
+                        }
                     }
-                    matrixFilterVo.setUuid(attrUuid);
-                }
-                if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())
-                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
-                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
-                ) {
-                    iterator.remove();
                 }
             }
         }
@@ -277,7 +270,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         }
         String keywordColumn = jsonObj.getString("keywordColumn");
         String keywordColumnUniqueIdentifier = jsonObj.getString("keywordColumnUniqueIdentifier");
-        if (StringUtils.isBlank(keywordColumn) && StringUtils.isNotBlank(keywordColumnUniqueIdentifier)) {
+        if (StringUtils.isNotBlank(keywordColumn)) {
+            if (!attributeList.contains(keywordColumn)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumn);
+            }
+        } else if (StringUtils.isNotBlank(keywordColumnUniqueIdentifier)) {
             String attrUuid = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
             if (StringUtils.isBlank(attrUuid)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
@@ -285,8 +282,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             keywordColumn = attrUuid;
         }
         Boolean needPage = jsonObj.getBoolean("needPage");
+        needPage = needPage != null ? needPage : true;
         Integer currentPage = jsonObj.getInteger("currentPage");
+        currentPage = currentPage != null ? currentPage : 1;
         Integer pageSize = jsonObj.getInteger("pageSize");
+        pageSize = pageSize != null ? pageSize : 20;
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         return matrixService.searchMatrixColumnDataForSelect(
                 matrixUuid,
