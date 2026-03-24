@@ -68,14 +68,14 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
         }
         MatrixDataVo dataVo = new MatrixDataVo();
         dataVo.setMatrixUuid(matrixUuid);
-        List<String> columnList = new ArrayList<>();
-        columnList.add(valueField);
-        columnList.add(textField);
+        Set<String> columnSet = new LinkedHashSet<>();
+        columnSet.add(valueField);
+        columnSet.add(textField);
         if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
-            columnList.addAll(hiddenFieldList);
+            columnSet.addAll(hiddenFieldList);
         }
-        dataVo.setColumnList(columnList);
-        Set<String> notNullColumnSet = new HashSet<>();
+        dataVo.setColumnList(new ArrayList<>(columnSet));
+        Set<String> notNullColumnSet = new LinkedHashSet<>();
         notNullColumnSet.add(valueField);
         notNullColumnSet.add(textField);
         dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
@@ -157,6 +157,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             }
             if (Objects.equals(needPage, false)) {
                 dataVo.setPageCount(1);
+                pageSize = dataVo.getRowNum();
             }
             dataVo.setCurrentPage(currentPageBackup);
         }
