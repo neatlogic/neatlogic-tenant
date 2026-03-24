@@ -68,14 +68,14 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
         }
         MatrixDataVo dataVo = new MatrixDataVo();
         dataVo.setMatrixUuid(matrixUuid);
-        List<String> columnList = new ArrayList<>();
-        columnList.add(valueField);
-        columnList.add(textField);
+        Set<String> columnSet = new LinkedHashSet<>();
+        columnSet.add(valueField);
+        columnSet.add(textField);
         if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
-            columnList.addAll(hiddenFieldList);
+            columnSet.addAll(hiddenFieldList);
         }
-        dataVo.setColumnList(columnList);
-        Set<String> notNullColumnSet = new HashSet<>();
+        dataVo.setColumnList(new ArrayList<>(columnSet));
+        Set<String> notNullColumnSet = new LinkedHashSet<>();
         notNullColumnSet.add(valueField);
         notNullColumnSet.add(textField);
         dataVo.setNotNullColumnList(new ArrayList<>(notNullColumnSet));
@@ -94,6 +94,9 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
         if (CollectionUtils.isNotEmpty(defaultValue)) {
             List<MatrixDefaultValueFilterVo> defaultValueFilterList = new ArrayList<>();
             for (Object defaultValueObject : defaultValue) {
+                if (defaultValueObject == null) {
+                    continue;
+                }
                 if (defaultValueObject instanceof JSONObject defaultValueObj) {
                     String value = defaultValueObj.getString("value");
                     String text = defaultValueObj.getString("text");
@@ -130,6 +133,8 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                 dataVo.setNeedPage(needPage);
                 dataVo.getPageSize();
                 pageSize = Integer.MAX_VALUE;
+            } else {
+                pageSize = dataVo.getPageSize();
             }
             int page = 0;
             while (resultList.size() < pageSize) {
@@ -152,6 +157,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             }
             if (Objects.equals(needPage, false)) {
                 dataVo.setPageCount(1);
+                pageSize = dataVo.getRowNum();
             }
             dataVo.setCurrentPage(currentPageBackup);
         }
@@ -169,14 +175,16 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                     String textStr = textObj.getString("text");
                     element.put("text", textStr);
                 }
-                for (String hiddenField : hiddenFieldList) {
-                    if (StringUtils.isBlank(hiddenField)) {
-                        continue;
-                    }
-                    JSONObject hiddenFieldObj = result.get(hiddenField);
-                    if (MapUtils.isNotEmpty(hiddenFieldObj)) {
-                        String hiddenFieldValue = hiddenFieldObj.getString("value");
-                        element.put(hiddenField, hiddenFieldValue);
+                if (CollectionUtils.isNotEmpty(hiddenFieldList)) {
+                    for (String hiddenField : hiddenFieldList) {
+                        if (StringUtils.isBlank(hiddenField)) {
+                            continue;
+                        }
+                        JSONObject hiddenFieldObj = result.get(hiddenField);
+                        if (MapUtils.isNotEmpty(hiddenFieldObj)) {
+                            String hiddenFieldValue = hiddenFieldObj.getString("value");
+                            element.put(hiddenField, hiddenFieldValue);
+                        }
                     }
                 }
                 dataList.add(element);
@@ -185,7 +193,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
         JSONObject returnObj = new JSONObject();
         returnObj.put("dataList", dataList);
         returnObj.put("currentPage", dataVo.getCurrentPage());
-        returnObj.put("pageSize", dataVo.getPageSize());
+        returnObj.put("pageSize", pageSize);
         returnObj.put("pageCount", dataVo.getPageCount());
         returnObj.put("rowNum", dataVo.getRowNum());
         return returnObj;
@@ -230,9 +238,12 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             }
             uniqueIdentifierToUuidMap.put(uniqueIdentifier, matrixAttributeVo.getUuid());
         }
-        String keywordColumn = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
-        if (StringUtils.isBlank(keywordColumn)) {
-            throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
+        String keywordColumn = null;
+        if (StringUtils.isNotBlank(keyword) && StringUtils.isNotBlank(keywordColumnUniqueIdentifier)) {
+            keywordColumn = uniqueIdentifierToUuidMap.get(keywordColumnUniqueIdentifier);
+            if (StringUtils.isBlank(keywordColumn)) {
+                throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
+            }
         }
         String valueField = uniqueIdentifierToUuidMap.get(valueFieldUniqueIdentifier);
         if (StringUtils.isBlank(valueField)) {
@@ -243,37 +254,34 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             throw new MatrixAttributeNotFoundException(matrixVo.getName(), textFieldUniqueIdentifier);
         }
         List<String> hiddenFieldList = new ArrayList<>();
-        for (String hiddenFieldUniqueIdentifier : hiddenFieldUniqueIdentifierList) {
-            if (StringUtils.isBlank(hiddenFieldUniqueIdentifier)) {
-                continue;
-            }
-            String hiddenField = uniqueIdentifierToUuidMap.get(hiddenFieldUniqueIdentifier);
-            if (StringUtils.isBlank(hiddenField)) {
-                throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldUniqueIdentifier);
-            }
-            hiddenFieldList.add(hiddenField);
-        }
-        if (CollectionUtils.isNotEmpty(filterList)) {
-            Iterator<MatrixFilterVo> iterator = filterList.iterator();
-            while (iterator.hasNext()) {
-                MatrixFilterVo matrixFilterVo = iterator.next();
-                if (StringUtils.isBlank(matrixFilterVo.getUuid())) {
-                    if (StringUtils.isBlank(matrixFilterVo.getUniqueIdentifier())) {
-                        iterator.remove();
-                        continue;
-                    }
-                    String attrUuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
-                    if (StringUtils.isBlank(attrUuid)) {
-                        iterator.remove();
-                        continue;
-                    }
-                    matrixFilterVo.setUuid(attrUuid);
+        if (CollectionUtils.isNotEmpty(hiddenFieldUniqueIdentifierList)) {
+            for (String hiddenFieldUniqueIdentifier : hiddenFieldUniqueIdentifierList) {
+                if (StringUtils.isBlank(hiddenFieldUniqueIdentifier)) {
+                    continue;
                 }
-                if (CollectionUtils.isEmpty(matrixFilterVo.getValueList())
-                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
-                        && !Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
-                ) {
-                    iterator.remove();
+                String hiddenField = uniqueIdentifierToUuidMap.get(hiddenFieldUniqueIdentifier);
+                if (StringUtils.isBlank(hiddenField)) {
+                    throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldUniqueIdentifier);
+                }
+                hiddenFieldList.add(hiddenField);
+            }
+        }
+        List<MatrixFilterVo> newFilterList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(filterList)) {
+            for (MatrixFilterVo matrixFilterVo : filterList) {
+                String uuid = matrixFilterVo.getUuid();
+                if (StringUtils.isBlank(uuid)) {
+                    if (StringUtils.isNotBlank(matrixFilterVo.getUniqueIdentifier())) {
+                        uuid = uniqueIdentifierToUuidMap.get(matrixFilterVo.getUniqueIdentifier());
+                    }
+                }
+                if (StringUtils.isNotBlank(uuid)) {
+                    if (CollectionUtils.isNotEmpty(matrixFilterVo.getValueList())
+                            || Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NULL.getExpression())
+                            || Objects.equals(matrixFilterVo.getExpression(), SearchExpression.NOTNULL.getExpression())
+                    ) {
+                        newFilterList.add(new MatrixFilterVo(uuid, matrixFilterVo.getType(), matrixFilterVo.getExpression(), matrixFilterVo.getValueList()));
+                    }
                 }
             }
         }
@@ -283,7 +291,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                 valueField,
                 textField,
                 hiddenFieldList,
-                filterList,
+                newFilterList,
                 keyword,
                 currentPage,
                 pageSize,
@@ -292,8 +300,8 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
     }
 
     private void deduplicateData(List<Map<String, JSONObject>> previousPageList, String valueField, String textField, List<Map<String, JSONObject>> resultList) {
-        List<String> duplicateValue = new ArrayList<>();
-        List<String> duplicateText = new ArrayList<>();
+        Set<String> duplicateValue = new HashSet<>();
+        Set<String> duplicateText = new HashSet<>();
         if (CollectionUtils.isNotEmpty(previousPageList)) {
             for (Map<String, JSONObject> resultObj : previousPageList) {
                 JSONObject firstObj = resultObj.get(valueField);
@@ -311,9 +319,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                     duplicateValue.add(value);
                 }
                 String text = secondObj.getString("text");
-                if (!duplicateText.contains(text)) {
-                    duplicateText.add(text);
-                }
+                duplicateText.add(text);
             }
         }
         Iterator<Map<String, JSONObject>> iterator = resultList.iterator();
