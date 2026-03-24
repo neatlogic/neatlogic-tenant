@@ -252,7 +252,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                     if (!attributeList.contains(hiddenField)) {
                         throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenField);
                     }
-                    hiddenFieldList.add(hiddenField);
+                    if (!hiddenFieldList.contains(hiddenField)) {
+                        hiddenFieldList.add(hiddenField);
+                    }
                 }
             }
         } else if (CollectionUtils.isNotEmpty(hiddenFieldUniqueIdentifierList)) {
@@ -265,7 +267,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 if (StringUtils.isBlank(hiddenField)) {
                     throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldUniqueIdentifier);
                 }
-                hiddenFieldList.add(hiddenField);
+                if (!hiddenFieldList.contains(hiddenField)) {
+                    hiddenFieldList.add(hiddenField);
+                }
             }
         }
         String keywordColumn = jsonObj.getString("keywordColumn");
@@ -284,9 +288,9 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         Boolean needPage = jsonObj.getBoolean("needPage");
         needPage = needPage != null ? needPage : true;
         Integer currentPage = jsonObj.getInteger("currentPage");
-        currentPage = currentPage != null ? currentPage : 1;
+        currentPage = currentPage == null || currentPage < 1 ? 1 : currentPage;
         Integer pageSize = jsonObj.getInteger("pageSize");
-        pageSize = pageSize != null ? pageSize : 20;
+        pageSize = pageSize == null || pageSize < 0? 20 : pageSize;
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
         return matrixService.searchMatrixColumnDataForSelect(
                 matrixUuid,
