@@ -22,6 +22,7 @@ import neatlogic.framework.mq.dto.TopicVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +34,8 @@ public class GetTopicApi extends PrivateApiComponentBase {
 
     @Resource
     private MqTopicMapper mqTopicMapper;
+    @Autowired
+    private TopicFactory topicFactory;
 
     @Override
     public String getToken() {
@@ -55,16 +58,8 @@ public class GetTopicApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String name = jsonObj.getString("name");
-        TopicVo topicVo = TopicFactory.getTopicByName(name);
-        TopicVo topicSettingVo = mqTopicMapper.getTopicByName(name);
-        if (topicVo == null) {
-            topicVo = topicSettingVo;
-        } else {
-            if (topicSettingVo != null) {
-                topicVo.setConfig(topicSettingVo.getConfig());
-            }
-        }
-        return topicVo;
+        TopicVo topicVo = mqTopicMapper.getTopicByName(name);
+        return topicVo != null ? topicVo : TopicFactory.getTopicByName(name);
     }
 
 }
