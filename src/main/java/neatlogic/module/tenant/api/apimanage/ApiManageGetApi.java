@@ -22,6 +22,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
+import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,11 +60,27 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		String token = jsonObj.getString("token");
-        ApiVo api = PrivateApiComponentFactory.getApiByToken(token);
+		String normalizedToken = token;
+		if (normalizedToken != null && normalizedToken.startsWith("/")) {
+			normalizedToken = normalizedToken.substring(1);
+		}
+		if (normalizedToken != null && normalizedToken.endsWith("/")) {
+			normalizedToken = normalizedToken.substring(0, normalizedToken.length() - 1);
+		}
+		ApiVo api = PrivateApiComponentFactory.getApiByToken(normalizedToken);
 		ApiVo apiVo = ApiMapper.getApiByToken(token);
 		if(apiVo != null) {
             if(api != null){
                 apiVo.setAuthTypeList(api.getAuthTypeList());
+                apiVo.setHandler(api.getHandler());
+                apiVo.setModuleId(api.getModuleId());
+                apiVo.setType(api.getType());
+            } else if (apiVo.getHandler() != null) {
+                ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
+                if (apiHandlerVo != null) {
+                    apiVo.setType(apiHandlerVo.getType());
+                    apiVo.setModuleId(apiHandlerVo.getModuleId());
+                }
             }
 			return apiVo;
 
