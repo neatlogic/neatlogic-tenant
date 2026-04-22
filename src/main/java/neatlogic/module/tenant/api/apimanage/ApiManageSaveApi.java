@@ -18,6 +18,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.type.ApiNotFoundException;
+import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -28,11 +29,13 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
+import neatlogic.framework.restful.enums.ApiType;
 import neatlogic.framework.util.RegexUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -63,6 +66,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
             @Param(name = "name", type = ApiParamType.STRING, maxLength = 50, isRequired = true, desc = "common.name"),
             @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "nmtaa.apimanagesaveapi.input.param.desc.handler"),
             @Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "nmtaa.apimanagesaveapi.input.param.desc.needaudit"),
+            @Param(name = "isMcp", type = ApiParamType.ENUM, rule = "0,1", desc = "是否MCP服务"),
             @Param(name = "isActive", type = ApiParamType.ENUM, rule = "0,1", isRequired = true, desc = "common.isactive"),
             @Param(name = "timeout", type = ApiParamType.INTEGER, desc = "nmtaa.apimanagesaveapi.input.param.desc.timeout"),
             @Param(name = "qps", type = ApiParamType.INTEGER, desc = "nmtaa.apimanagesaveapi.input.param.desc.qps"),
@@ -71,7 +75,6 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
             @Param(name = "username", type = ApiParamType.STRING, desc = "nmtaa.apimanagesaveapi.input.param.desc.username"),
             @Param(name = "password", type = ApiParamType.REGEX, rule = RegexUtils.PASSWORD, desc = "common.password"),
             @Param(name = "description", type = ApiParamType.STRING, desc = "common.description"),
-            @Param(name = "apiType", type = ApiParamType.STRING, desc = "nmtaa.apimanagesaveapi.input.param.desc.apitype", isRequired = true),
     })
     @Description(desc = "nmtaa.apimanagesaveapi.getname")
     @Override
@@ -79,11 +82,18 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
         ApiVo apiVo = JSON.toJavaObject(jsonObj,ApiVo.class);
         ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
         ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
+        if (apiHandlerVo == null) {
+            throw new ParamIrregularException("handler");
+        }
         apiVo.setType(apiHandlerVo.getType());
         apiVo.setModuleId(apiHandlerVo.getModuleId());
+        if (Objects.equals(apiVo.getIsMcp(), 1) && !ApiType.OBJECT.getValue().equals(apiHandlerVo.getType())) {
+            throw new ParamIrregularException("isMcp", "only object api can enable mcp");
+        }
         if (ramApiVo == null) {
             throw new ApiNotFoundException(apiVo.getToken());
         }
+        apiVo.setApiType(ramApiVo.getApiType());
 
         ApiMapper.replaceApi(apiVo);
 

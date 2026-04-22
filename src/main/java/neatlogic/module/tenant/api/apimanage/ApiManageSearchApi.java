@@ -69,6 +69,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存记录"),
+            @Param(name = "isMcp", type = ApiParamType.ENUM, rule = "0,1", desc = "是否MCP服务"),
             @Param(name = "keyword", type = ApiParamType.STRING, xss = true, desc = "关键字，接口名模糊查询"),
             @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "接口所属模块组"),
             @Param(name = "funcId", type = ApiParamType.STRING, desc = "接口所属功能"),
@@ -86,6 +87,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         ApiVo apiParam = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<>() {
         });
         String keyword = StringUtils.trimToNull(jsonObj.getString("keyword"));
+        Integer isMcp = jsonObj.containsKey("isMcp") ? jsonObj.getInteger("isMcp") : null;
         if (keyword != null && keyword.startsWith("/")) {
             keyword = keyword.substring(1);
         }
@@ -102,7 +104,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 .collect(Collectors.toMap(ApiVo::getToken, Function.identity(), (a, b) -> a));
 
         // ---------- 3. 构建统一过滤器 ----------
-        Predicate<ApiVo> apiFilter = getApiVoPredicate(keyword, apiParam, dbApiMap);
+        Predicate<ApiVo> apiFilter = getApiVoPredicate(keyword, apiParam, dbApiMap, isMcp);
 
         // ---------- 4. RAM API ----------
         List<ApiVo> ramApiList = new ArrayList<>();
@@ -129,9 +131,17 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 api.setHandler(ramApi.getHandler());
                 api.setName($.t(ramApi.getName()));
                 api.setModuleId(ramApi.getModuleId());
+                api.setType(ramApi.getType());
                 api.setAuthTypeList(ramApi.getAuthTypeList());
                 ApiHandlerVo handler = PrivateApiComponentFactory.getApiHandlerByHandler(api.getHandler());
                 if (handler != null) api.setHandlerName($.t(handler.getName()));
+            } else if (api.getHandler() != null) {
+                ApiHandlerVo handler = PrivateApiComponentFactory.getApiHandlerByHandler(api.getHandler());
+                if (handler != null) {
+                    api.setType(handler.getType());
+                    api.setModuleId(handler.getModuleId());
+                    api.setHandlerName($.t(handler.getName()));
+                }
             }
 
             if (!apiFilter.test(api)) continue;
@@ -200,7 +210,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
 
     }
 
-    private static Predicate<ApiVo> getApiVoPredicate(String keyword, ApiVo apiParam, Map<String, ApiVo> dbApiMap) {
+    private static Predicate<ApiVo> getApiVoPredicate(String keyword, ApiVo apiParam, Map<String, ApiVo> dbApiMap, Integer isMcp) {
         return api -> {
 
             if (apiParam.getIsActive() != null && !apiParam.getIsActive().equals(api.getIsActive())) {
@@ -233,6 +243,13 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
                 ApiVo dbApi = dbApiMap.get(api.getToken());
                 Integer needAudit = dbApi != null ? dbApi.getNeedAudit() : api.getNeedAudit();
                 if(!Objects.equals(apiParam.getNeedAudit(), needAudit)){
+                    return false;
+                }
+            }
+            if (isMcp != null) {
+                ApiVo dbApi = dbApiMap.get(api.getToken());
+                Integer apiIsMcp = dbApi != null ? dbApi.getIsMcp() : api.getIsMcp();
+                if (!Objects.equals(isMcp, apiIsMcp)) {
                     return false;
                 }
             }
