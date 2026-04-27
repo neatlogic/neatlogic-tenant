@@ -26,7 +26,6 @@ import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.HttpRequestUtil;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -68,11 +67,7 @@ public class GetRunnerWaitingDetailApi extends PrivateApiComponentBase {
             throw new RunnerHttpRequestException("Request failed! " + url + ":" + requestUtil.getError());
         }
         JSONObject resultJson = requestUtil.getResultJson();
-        JSONObject queueJson = resultJson.getJSONObject("Return");
-        if (MapUtils.isNotEmpty(queueJson)) {
-            result.put("queueCount", queueJson);
-        }
-        return result;
+        return resultJson.getJSONObject("Return");
     }
 
     @Override
