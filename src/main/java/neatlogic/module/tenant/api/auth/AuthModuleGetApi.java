@@ -30,11 +30,13 @@ import neatlogic.framework.config.FrameworkTenantConfig;
 import neatlogic.framework.dao.mapper.HomePageMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.*;
+import neatlogic.framework.dto.module.ModuleManageSettingVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.module.tenant.dao.mapper.ModuleManageSettingMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,9 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
     @Resource
     HomePageMapper homePageMapper;
 
+    @Resource
+    private ModuleManageSettingMapper moduleManageSettingMapper;
+
     @Override
     public String getToken() {
         return "auth/module/get";
@@ -60,7 +65,7 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取用户模块对应权限";
+        return "nmtaa.authmodulegetapi.getname";
     }
 
     @Override
@@ -74,13 +79,13 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
 
     @Output({
             @Param(explode = ModuleGroupVo.class),
-            @Param(name = "authList[].authDisplayName", desc = "权限名", type = ApiParamType.STRING),
-            @Param(name = "authList[].authGroup", desc = "模块分组", type = ApiParamType.STRING),
-            @Param(name = "authList[].authIntroduction", desc = "权限介绍", type = ApiParamType.STRING),
-            @Param(name = "authList[].authName", desc = "权限", type = ApiParamType.STRING),
+            @Param(name = "authList[].authDisplayName", desc = "nmtaa.authmodulegetapi.output.param.desc.authdisplayname", type = ApiParamType.STRING),
+            @Param(name = "authList[].authGroup", desc = "common.module.group", type = ApiParamType.STRING),
+            @Param(name = "authList[].authIntroduction", desc = "nmtaa.authmodulegetapi.output.param.desc.authintroduction", type = ApiParamType.STRING),
+            @Param(name = "authList[].authName", desc = "nfdc.deployappconfigaction.auth", type = ApiParamType.STRING),
     })
 
-    @Description(desc = "根据用户获取模块以及对应的权限列表")
+    @Description(desc = "nmtaa.authmodulegetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray returnArray = new JSONArray();
@@ -148,6 +153,20 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
         //****获取用户默认模块首页结束****
         Map<String, List<AuthBase>> authModuleMap = AuthFactory.getAuthGroupMap();
         List<ModuleGroupVo> activeModuleGroupList = TenantContext.get().getActiveModuleGroupList();
+        Map<String, JSONObject> moduleManageSettingMap = new HashMap<>(16);
+        ModuleManageSettingVo moduleManageSettingVo = moduleManageSettingMapper.getModuleManageSetting();
+        if (moduleManageSettingVo != null && moduleManageSettingVo.getConfig() != null) {
+            JSONArray groupList = moduleManageSettingVo.getConfig().getJSONArray("groupList");
+            if (CollectionUtils.isNotEmpty(groupList)) {
+                for (int i = 0; i < groupList.size(); i++) {
+                    JSONObject groupSetting = groupList.getJSONObject(i);
+                    String group = groupSetting.getString("group");
+                    if (StringUtils.isNotBlank(group)) {
+                        moduleManageSettingMap.put(group, groupSetting);
+                    }
+                }
+            }
+        }
         for (ModuleGroupVo moduleGroupVo : activeModuleGroupList) {
             String disabledModuleGroupListStr = ConfigManager.getConfig(FrameworkTenantConfig.DISABLED_MODULEGROUPLIST);
             if(StringUtils.isNotBlank(disabledModuleGroupListStr)){
@@ -156,6 +175,9 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
                     continue;
                 }
             }
+            JSONObject moduleManageSetting = moduleManageSettingMap.get(moduleGroupVo.getGroup());
+            String alias = moduleManageSetting == null ? null : moduleManageSetting.getString("alias");
+            Integer groupSort = moduleManageSetting == null ? null : moduleManageSetting.getInteger("sort");
             JSONObject moduleGroupJson = new JSONObject();
             //把用户默认模块首页配置放入moduleGroupJson中
             Map<String, Object> map = OuterMap.get(moduleGroupVo.getGroup());
@@ -167,8 +189,9 @@ public class AuthModuleGetApi extends PrivateApiComponentBase {
                 moduleGroupJson.put("defaultPage", "");
             }
             moduleGroupJson.put("group", moduleGroupVo.getGroup());
-            moduleGroupJson.put("groupName", moduleGroupVo.getGroupName());
-            moduleGroupJson.put("groupSort", moduleGroupVo.getGroupSort());
+            moduleGroupJson.put("groupName", StringUtils.isNotBlank(alias) ? alias : moduleGroupVo.getGroupName());
+            moduleGroupJson.put("alias", alias);
+            moduleGroupJson.put("groupSort", groupSort == null ? moduleGroupVo.getGroupSort() + 100000 : groupSort);
             moduleGroupJson.put("description", ModuleUtil.getModuleGroup(moduleGroupVo.getGroup()).getGroupDescription());
             returnArray.add(moduleGroupJson);
 
