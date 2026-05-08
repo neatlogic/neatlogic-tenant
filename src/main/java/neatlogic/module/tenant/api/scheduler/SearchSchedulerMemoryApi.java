@@ -16,12 +16,18 @@ import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.scheduler.core.SchedulerManager;
+import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
+import neatlogic.framework.scheduler.dto.JobClassVo;
 import neatlogic.framework.scheduler.dto.JobInfoVo;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.dto.JobStatusVo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
@@ -46,6 +52,8 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
 
     @Resource
     private SchedulerFactoryBean schedulerFactoryBean;
+    @Resource
+    private SchedulerMapper schedulerMapper;
 
     @Override
     public String getName() {
@@ -65,7 +73,12 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
     @Input({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
             @Param(name = "jobName", type = ApiParamType.STRING, desc = "作业名(精确查询),jobName不为空时，jobGroupName也不可以为空"),
-            @Param(name = "jobGroupName", type = ApiParamType.STRING, desc = "作业组名")
+            @Param(name = "jobGroupName", type = ApiParamType.STRING, desc = "作业组名"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "作业组件"),
+            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "term.cmdb.moduleid"),
+            @Param(name = "state", type = ApiParamType.STRING, desc = "作业状态"),
+            @Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存执行记录(0:不保存，1:保存)")
     })
     @Output({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
@@ -79,9 +92,27 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         String jobGroupName = paramObj.getString("jobGroupName");
         String jobName = paramObj.getString("jobName");
+        String keyword = paramObj.getString("keyword");
+        String handler = paramObj.getString("handler");
+        String moduleId = paramObj.getString("moduleId");
+        String state = paramObj.getString("state");
+        Integer needAudit = paramObj.getInteger("needAudit");
+        List<String> moduleIdList = new ArrayList<>();
+        if (StringUtils.isNotBlank(moduleId)) {
+            ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(moduleId);
+            if (moduleGroupVo != null) {
+                moduleIdList = moduleGroupVo.getModuleIdList();
+            }
+        }
         List<JobInfoVo> returnList = getAllJob();
-        returnList = returnList.stream().filter(j -> (StringUtils.isBlank(jobGroupName) || j.getJobGroup().equals(jobGroupName))
-                && (StringUtils.isBlank(jobName) || j.getJobName().equals(jobName))
+        List<String> finalModuleIdList = moduleIdList;
+        returnList = returnList.stream().filter(j -> (StringUtils.isBlank(jobGroupName) || jobGroupName.equals(j.getJobGroup()))
+                && (StringUtils.isBlank(jobName) || jobName.equals(j.getJobName()))
+                && (StringUtils.isBlank(handler) || handler.equals(j.getJobHandler()))
+                && (StringUtils.isBlank(moduleId) || (CollectionUtils.isNotEmpty(finalModuleIdList) && finalModuleIdList.contains(j.getModuleId())))
+                && (StringUtils.isBlank(state) || state.equals(j.getState()))
+                && (needAudit == null || needAudit.equals(j.getNeedAudit()))
+                && (StringUtils.isBlank(keyword) || StringUtils.contains(j.getJobName(), keyword) || StringUtils.contains(j.getJobGroup(), keyword) || StringUtils.contains(j.getJobHandler(), keyword))
         ).collect(Collectors.toList());
 
         JSONObject resultObj = new JSONObject();
@@ -115,11 +146,23 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
             }
             if (jobObject != null) {
                 JobInfoVo jobInfoVo = new JobInfoVo(jobObject);
+                JobStatusVo jobStatusVo = schedulerMapper.getJobStatusByJobNameGroup(jobObject.getJobName(), jobObject.getJobGroup(), System.currentTimeMillis());
+                if (jobStatusVo != null) {
+                    jobInfoVo.setExecCount(jobStatusVo.getExecCount());
+                    jobInfoVo.setLastFireTime(jobStatusVo.getLastFireTime());
+                    jobInfoVo.setLastFinishTime(jobStatusVo.getLastFinishTime());
+                }
                 if (trigger != null) {
                     Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
                     jobInfoVo.setState(triggerState.name());
                     jobInfoVo.setNextFireTime(trigger.getNextFireTime());
-                    jobInfoVo.setLastFireTime(trigger.getPreviousFireTime());
+                    if (jobInfoVo.getLastFireTime() == null) {
+                        jobInfoVo.setLastFireTime(trigger.getPreviousFireTime());
+                    }
+                }
+                JobClassVo jobClassVo = SchedulerManager.getJobClassByClassName(jobObject.getJobHandler());
+                if (jobClassVo != null && StringUtils.isNotBlank(jobClassVo.getName())) {
+                    jobInfoVo.setJobHandlerName(jobClassVo.getName());
                 }
                 returnList.add(jobInfoVo);
             }
