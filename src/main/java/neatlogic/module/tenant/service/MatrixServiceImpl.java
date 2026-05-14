@@ -371,6 +371,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
         for (Map<String, JSONObject> map : list) {
             Map<String, JSONObject> newMap = new HashMap<>();
             for (MatrixDefaultValueFilterVo matrixDefaultValueFilterVo : defaultValueFilterList) {
+                MatrixKeywordFilterVo textFieldFilter = matrixDefaultValueFilterVo.getTextFieldFilter();
                 MatrixKeywordFilterVo valueFieldFilter = matrixDefaultValueFilterVo.getValueFieldFilter();
                 if (valueFieldFilter != null) {
                     JSONObject valueObj = map.get(valueFieldFilter.getUuid());
@@ -378,7 +379,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                         String value = valueObj.getString("value");
                         if (value != null && value.equalsIgnoreCase(valueFieldFilter.getValue())) {
                             String text = valueObj.getString("text");
-                            if (Objects.equals(text, value)) {
+                            if (textFieldFilter == null && Objects.equals(text, value)) {
                                 text = valueFieldFilter.getValue();
                             }
                             newMap.put(valueFieldFilter.getUuid(), new JSONObject().fluentPutAll(valueObj)
@@ -389,7 +390,6 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                         }
                     }
                 }
-                MatrixKeywordFilterVo textFieldFilter = matrixDefaultValueFilterVo.getTextFieldFilter();
                 if (textFieldFilter != null) {
                     JSONObject valueObj = newMap.get(textFieldFilter.getUuid());
                     if (valueObj == null) {
