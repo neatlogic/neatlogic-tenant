@@ -122,6 +122,7 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
             }
             dataVo.setDefaultValueFilterList(defaultValueFilterList);
             resultList = matrixDataSourceHandler.searchTableDataNew(dataVo);
+            resultList = adjustLetterCases(resultList, defaultValueFilterList);
             deduplicateData(null, valueField, textField, resultList);
         } else {
             List<Map<String, JSONObject>> previousPageList = new ArrayList<>();
@@ -357,5 +358,65 @@ public class MatrixServiceImpl implements MatrixService, IMatrixCrossoverService
                 duplicateText.add(text);
             }
         }
+    }
+
+    /**
+     * 调整字母大小写
+     * @param list
+     * @param defaultValueFilterList
+     * @return
+     */
+    private List<Map<String, JSONObject>> adjustLetterCases(List<Map<String, JSONObject>> list, List<MatrixDefaultValueFilterVo> defaultValueFilterList) {
+        List<Map<String, JSONObject>> resultList = new ArrayList<>();
+        for (Map<String, JSONObject> map : list) {
+            Map<String, JSONObject> newMap = new HashMap<>();
+            for (MatrixDefaultValueFilterVo matrixDefaultValueFilterVo : defaultValueFilterList) {
+                MatrixKeywordFilterVo textFieldFilter = matrixDefaultValueFilterVo.getTextFieldFilter();
+                MatrixKeywordFilterVo valueFieldFilter = matrixDefaultValueFilterVo.getValueFieldFilter();
+                if (valueFieldFilter != null) {
+                    JSONObject valueObj = map.get(valueFieldFilter.getUuid());
+                    if (MapUtils.isNotEmpty(valueObj)) {
+                        String value = valueObj.getString("value");
+                        if (value != null && value.equalsIgnoreCase(valueFieldFilter.getValue())) {
+                            String text = valueObj.getString("text");
+                            if (textFieldFilter == null && Objects.equals(text, value)) {
+                                text = valueFieldFilter.getValue();
+                            }
+                            newMap.put(valueFieldFilter.getUuid(), new JSONObject().fluentPutAll(valueObj)
+                                    .fluentPut("value", valueFieldFilter.getValue())
+                                    .fluentPut("text", text));
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+                if (textFieldFilter != null) {
+                    JSONObject valueObj = newMap.get(textFieldFilter.getUuid());
+                    if (valueObj == null) {
+                        valueObj = map.get(textFieldFilter.getUuid());
+                    }
+                    if (MapUtils.isNotEmpty(valueObj)) {
+                        String text = valueObj.getString("text");
+                        if (text != null && text.equalsIgnoreCase(textFieldFilter.getValue())) {
+                            newMap.put(textFieldFilter.getUuid(), new JSONObject().fluentPutAll(valueObj).fluentPut("text", textFieldFilter.getValue()));
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+                if (MapUtils.isNotEmpty(newMap)) {
+                    break;
+                }
+            }
+            if (MapUtils.isNotEmpty(newMap)) {
+                for (Map.Entry<String, JSONObject> entry : map.entrySet()) {
+                    if (!newMap.containsKey(entry.getKey())) {
+                        newMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                resultList.add(newMap);
+            }
+        }
+        return resultList;
     }
 }
