@@ -20,6 +20,7 @@ import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.exception.integration.HttpMethodNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNameRepeatsException;
+import neatlogic.framework.exception.integration.IntegrationRateLimitConfigInvalidException;
 import neatlogic.framework.integration.authentication.enums.HttpMethod;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
@@ -84,6 +85,7 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         if (integrationVo.getUrl().contains("integration/run/")) {
             throw new IntegrationUrlIllegalException(integrationVo.getUrl());
         }
+        validateRateLimitConfig(integrationVo);
         integrationVo.setIsActive(1);
         if (StringUtils.isNotBlank(jsonObj.getString("uuid"))) {
             integrationMapper.updateIntegration(integrationVo);
@@ -101,5 +103,25 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
             }
             return new FieldValidResultVo();
         };
+    }
+
+    private void validateRateLimitConfig(IntegrationVo integrationVo) {
+        if (integrationVo.getConfig() == null) {
+            return;
+        }
+        JSONObject otherConfig = integrationVo.getConfig().getJSONObject("other");
+        if (otherConfig == null) {
+            return;
+        }
+        Integer interval = otherConfig.getInteger("rateLimitIntervalSeconds");
+        Integer count = otherConfig.getInteger("rateLimitCount");
+        boolean hasInterval = interval != null && interval > 0;
+        boolean hasCount = count != null && count > 0;
+        if (hasInterval != hasCount) {
+            throw new IntegrationRateLimitConfigInvalidException();
+        }
+        if ((interval != null && interval < 0) || (count != null && count < 0)) {
+            throw new IntegrationRateLimitConfigInvalidException();
+        }
     }
 }

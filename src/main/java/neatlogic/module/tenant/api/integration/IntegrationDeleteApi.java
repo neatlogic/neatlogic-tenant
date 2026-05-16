@@ -60,6 +60,7 @@ public class IntegrationDeleteApi extends PrivateApiComponentBase {
 		if(DependencyManager.getDependencyCount(FrameworkFromType.INTEGRATION, uuid) > 0){
 			throw new IntegrationReferencedCannotBeDeletedException(uuid);
 		}
+		integrationMapper.deleteIntegrationRateLimitByIntegrationUuid(uuid);
 		integrationMapper.deleteIntegrationByUuid(uuid);
 		return null;
 	}
