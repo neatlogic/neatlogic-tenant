@@ -55,6 +55,8 @@ public class GetDatasourceInfoApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         NeatLogicBasicDataSource datasource = DatasourceManager.getDatasource();
         DataSourceInfoVo dataSourceInfoVo = new DataSourceInfoVo();
+        dataSourceInfoVo.setDatabase(DatasourceManager.getDatabaseId());
+        dataSourceInfoVo.setDatabaseVersion(DatasourceManager.getDatabaseVersion());
         dataSourceInfoVo.setPoolName(datasource.getPoolName());
         if (datasource.getHikariPoolMXBean() != null) {
             dataSourceInfoVo.setIdleConnections(datasource.getHikariPoolMXBean().getIdleConnections());
