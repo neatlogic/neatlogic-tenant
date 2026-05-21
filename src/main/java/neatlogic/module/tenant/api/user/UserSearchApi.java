@@ -62,6 +62,8 @@ public class UserSearchApi extends PrivateApiComponentBase {
             @Param(name = "isOnline", type = ApiParamType.INTEGER, desc = "是否在线"),
             @Param(name = "teamUuid", type = ApiParamType.STRING, desc = "common.teamuuid"),
             @Param(name = "roleUuid", type = ApiParamType.STRING, desc = "common.roleuuid"),
+            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
+            @Param(name = "roleUuidList", type = ApiParamType.JSONARRAY, desc = "common.roleuuidlist"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
             @Param(name = "defaultValue", type = ApiParamType.JSONARRAY, desc = "common.defaultvalue")
