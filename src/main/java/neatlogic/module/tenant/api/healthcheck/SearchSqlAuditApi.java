@@ -67,8 +67,8 @@ public class SearchSqlAuditApi extends PrivateApiComponentBase {
             @Param(name = "requestCurrentPage", type = ApiParamType.INTEGER, desc = "URL监控当前页")
     })
     @Output({
-            @Param(name = "sqlAuditData", explode = BasePageVo.class),
-            @Param(name = "requestSqlAuditData", explode = BasePageVo.class)
+            @Param(name = "sqlAuditData", type = ApiParamType.JSONOBJECT, desc = "SQL ID监控数据"),
+            @Param(name = "requestSqlAuditData", type = ApiParamType.JSONOBJECT, desc = "URL监控数据")
     })
     @Description(desc = "获取SQL耗时接口")
     @Override
