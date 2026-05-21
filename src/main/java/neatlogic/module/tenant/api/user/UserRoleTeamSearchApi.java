@@ -56,7 +56,9 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
             @Param(name = "includeList", type = ApiParamType.JSONARRAY, desc = "common.includelist", help = "‘当前登录人：common#loginuser’"),
             @Param(name = "groupList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "common.grouplist", help = "['processUserType','user','team','role']"),
             @Param(name = "rangeList", type = ApiParamType.JSONARRAY, desc = "common.rangelist", help = "['user#xxx','team#xxx','role#xxxx']"),
-            @Param(name = "total", type = ApiParamType.INTEGER, desc = "common.rownum")
+            @Param(name = "total", type = ApiParamType.INTEGER, desc = "common.rownum"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
     })
     @Output({
             @Param(explode = GroupSearchGroupVo[].class, desc = "common.tbodylist")
@@ -65,6 +67,11 @@ public class UserRoleTeamSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         GroupSearchVo groupSearchVo = jsonObj.toJavaObject(GroupSearchVo.class);
+        Integer pageSize = jsonObj.getInteger("pageSize");
+        Integer total = jsonObj.getInteger("total");
+        if (pageSize == null && total != null) {
+            groupSearchVo.setPageSize(total);
+        }
         return userRoleTeamService.searchUserRoleTeam(groupSearchVo);
     }
 
