@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dao.mapper.healthcheck.SqlStatusMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -37,6 +38,7 @@ public class GetSqlExplainApi extends PrivateApiComponentBase {
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "SQL执行计划表格数据"),
+            @Param(explode = BasePageVo.class),
             @Param(name = "sql", type = ApiParamType.STRING, desc = "EXPLAIN SQL语句"),
     })
     @Description(desc = "获取SQL执行计划")
@@ -45,12 +47,20 @@ public class GetSqlExplainApi extends PrivateApiComponentBase {
         JSONObject resultObj = new JSONObject();
         String sql = paramObj.getString("sql");
         resultObj.put("sql", sql);
+        resultObj.put("currentPage", 1);
+        resultObj.put("pageCount", 1);
+        int rowNum = 0;
+        int pageSize = 0;
         if (StringUtils.isNotBlank(sql)) {
             // SQL监控前端传入原始SQL，这里统一拼接EXPLAIN后查询执行计划
             sql = "EXPLAIN " + sql;
             List<Map<String, Object>> linkedHashMapList = sqlStatusMapper.selectListBySql(sql);
             resultObj.put("tbodyList", linkedHashMapList);
+            rowNum = linkedHashMapList.size();
+            pageSize = (rowNum / 20 + 1) * 20;
         }
+        resultObj.put("pageSize", pageSize);
+        resultObj.put("rowNum", rowNum);
         return resultObj;
     }
 
