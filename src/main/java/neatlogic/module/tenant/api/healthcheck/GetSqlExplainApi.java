@@ -39,14 +39,14 @@ public class GetSqlExplainApi extends PrivateApiComponentBase {
     private SqlStatusMapper sqlStatusMapper;
 
     @Input({
-            @Param(name = "sql", type = ApiParamType.STRING, desc = "sql语句"),
+            @Param(name = "sql", type = ApiParamType.STRING, desc = "common.sql"),
     })
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "SQL执行计划表格数据"),
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist"),
             @Param(explode = BasePageVo.class),
-            @Param(name = "sql", type = ApiParamType.STRING, desc = "EXPLAIN SQL语句"),
+            @Param(name = "sql", type = ApiParamType.STRING, desc = "common.sql"),
     })
-    @Description(desc = "获取SQL执行计划")
+    @Description(desc = "nmtah.getsqlexplainapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultObj = new JSONObject();
@@ -106,6 +106,6 @@ public class GetSqlExplainApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取SQL执行计划";
+        return "nmtah.getsqlexplainapi.getname";
     }
 }

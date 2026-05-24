@@ -51,7 +51,7 @@ public class SearchSqlAuditApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取SQL耗时";
+        return "nmtah.searchsqlauditapi.getname";
     }
 
     @Override
@@ -59,18 +59,18 @@ public class SearchSqlAuditApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param(name = "tenant", type = ApiParamType.STRING, desc = "租户"),
-            @Param(name = "userId", type = ApiParamType.STRING, desc = "用户"),
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "tenant", type = ApiParamType.STRING, desc = "common.tenant"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "common.userid"),
             @Param(name = "orderBy", type = ApiParamType.ENUM, rule = "timecost,runtime", desc = "排序，只支持timecost和runtime"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "SQL ID监控当前页"),
-            @Param(name = "requestCurrentPage", type = ApiParamType.INTEGER, desc = "URL监控当前页")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "requestCurrentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
     })
     @Output({
-            @Param(name = "sqlAuditData", type = ApiParamType.JSONOBJECT, desc = "SQL ID监控数据"),
-            @Param(name = "requestSqlAuditData", type = ApiParamType.JSONOBJECT, desc = "URL监控数据")
+            @Param(name = "sqlAuditData", type = ApiParamType.JSONOBJECT, desc = "common.tbodylist"),
+            @Param(name = "requestSqlAuditData", type = ApiParamType.JSONOBJECT, desc = "common.tbodylist")
     })
-    @Description(desc = "获取SQL耗时接口")
+    @Description(desc = "nmtah.searchsqlauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String orderBy = StringUtils.isNotBlank(paramObj.getString("orderBy")) ? paramObj.getString("orderBy") : "runtime";

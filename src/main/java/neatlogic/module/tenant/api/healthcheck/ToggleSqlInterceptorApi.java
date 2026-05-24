@@ -39,7 +39,7 @@ public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "控制系统SQL追踪";
+        return "nmtah.togglesqlinterceptorapi.getname";
     }
 
     @Override
@@ -48,9 +48,9 @@ public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
     }
 
     @Input({@Param(name = "action", type = ApiParamType.ENUM, isRequired = true, rule = "insert,remove,clear", desc = "insert：激活追踪，remove：取消追踪，clear：取消全部追踪"),
-            @Param(name = "id", type = ApiParamType.STRING, desc = "mapper配置文件中的sql id"),
-            @Param(name = "url", type = ApiParamType.STRING, desc = "需要按HTTP请求统计SQL的URL，*代表全部URL")})
-    @Description(desc = "打开指定SQL或URL监控，统计最终执行SQL和执行时间")
+            @Param(name = "id", type = ApiParamType.STRING, desc = "nmtah.togglesqlinterceptorapi.input.param.desc"),
+            @Param(name = "url", type = ApiParamType.STRING, desc = "nmtah.togglesqlinterceptorapi.input.param.desc")})
+    @Description(desc = "nmtah.togglesqlinterceptorapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String action = jsonObj.getString("action");
