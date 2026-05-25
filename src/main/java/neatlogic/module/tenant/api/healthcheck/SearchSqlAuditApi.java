@@ -16,12 +16,16 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.PageUtil;
 import neatlogic.framework.dao.plugin.SqlCostInterceptor;
+import neatlogic.framework.dto.healthcheck.RequestSqlAuditVo;
 import neatlogic.framework.dto.healthcheck.SqlAuditVo;
 import neatlogic.framework.healthcheck.SqlAuditManager;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.lang3.StringUtils;
@@ -30,12 +34,15 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class SearchSqlAuditApi extends PrivateApiComponentBase {
+
+    private static final int PAGE_SIZE = 20;
 
     @Override
     public String getToken() {
@@ -44,7 +51,7 @@ public class SearchSqlAuditApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取SQL耗时";
+        return "nmtah.searchsqlauditapi.getname";
     }
 
     @Override
@@ -52,68 +59,124 @@ public class SearchSqlAuditApi extends PrivateApiComponentBase {
         return null;
     }
 
-
-    @Input({@Param(name = "id", type = ApiParamType.STRING, desc = "sql语句id"),
-            @Param(name = "orderBy", type = ApiParamType.ENUM, rule = "timecost,runtime", desc = "排序，只支持timecost和rumtime"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页")
+    @Input({@Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "tenant", type = ApiParamType.STRING, desc = "common.tenant"),
+            @Param(name = "userId", type = ApiParamType.STRING, desc = "common.userid"),
+            @Param(name = "orderBy", type = ApiParamType.ENUM, rule = "timecost,runtime", desc = "排序，只支持timecost和runtime"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "requestCurrentPage", type = ApiParamType.INTEGER, desc = "common.currentpage")
     })
     @Output({
-            @Param(name = "tbodyList", explode = SqlAuditVo[].class),
-            @Param(explode = BasePageVo.class)
+            @Param(name = "sqlAuditData", type = ApiParamType.JSONOBJECT, desc = "common.tbodylist"),
+            @Param(name = "requestSqlAuditData", type = ApiParamType.JSONOBJECT, desc = "common.tbodylist")
     })
-    @Description(desc = "获取SQL耗时接口")
+    @Description(desc = "nmtah.searchsqlauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        //复制一个新列表，不改变原来的列表
-        List<SqlAuditVo> sqlAuditList = new ArrayList<>(SqlAuditManager.getSqlAuditList());
         String orderBy = StringUtils.isNotBlank(paramObj.getString("orderBy")) ? paramObj.getString("orderBy") : "runtime";
-        String id = paramObj.getString("id");
-        int pageSize = 20;
-        int currentPage = paramObj.getIntValue("currentPage");
-        if (StringUtils.isNotBlank(id)) {
-            sqlAuditList = sqlAuditList.stream().filter(d -> d.getId().toLowerCase(Locale.ROOT).contains(id.toLowerCase(Locale.ROOT))).collect(Collectors.toList());
+        String keyword = paramObj.getString("keyword");
+        String tenant = paramObj.getString("tenant");
+        String userId = paramObj.getString("userId");
+        // SQL ID监控和URL监控共用keyword、tenant、userId过滤条件，但仍分别分页避免两个Tab互相影响页码
+        JSONObject sqlAuditData = buildSqlAuditData(keyword, tenant, userId, orderBy, paramObj.getIntValue("currentPage"));
+        JSONObject requestSqlAuditData = buildRequestSqlAuditData(keyword, tenant, userId, orderBy, paramObj.getIntValue("requestCurrentPage"));
+        JSONObject returnObj = new JSONObject();
+        returnObj.put("sqlAuditData", sqlAuditData);
+        returnObj.put("requestSqlAuditData", requestSqlAuditData);
+        returnObj.put("maxTimeCost", sqlAuditData.getLongValue("maxTimeCost"));
+        returnObj.put("maxRequestTimeCost", requestSqlAuditData.getLongValue("maxRequestTimeCost"));
+        returnObj.put("sqlIdList", SqlCostInterceptor.SqlIdMap.getSqlIdList());
+        returnObj.put("urlList", SqlCostInterceptor.UrlMap.getUrlList());
+        return returnObj;
+    }
+
+    private JSONObject buildSqlAuditData(String keyword, String tenant, String userId, String orderBy, int currentPage) {
+        // 复制新列表，避免前端分页和排序影响内存中的原始审计列表
+        List<SqlAuditVo> sqlAuditList = new ArrayList<>(SqlAuditManager.getSqlAuditList());
+        if (StringUtils.isNotBlank(keyword)) {
+            // SQL ID表的关键字沿用原id搜索语义，统一从keyword入参取值
+            sqlAuditList = sqlAuditList.stream().filter(d -> containsIgnoreCase(d.getId(), keyword)).collect(Collectors.toList());
         }
-        if (StringUtils.isNotBlank(orderBy)) {
-            if (orderBy.equals("timecost")) {
-                sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getTimeCost().compareTo(o1.getTimeCost())).collect(Collectors.toList());
-            } else {
-                sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getRunTime().compareTo(o1.getRunTime())).collect(Collectors.toList());
-            }
+        if (StringUtils.isNotBlank(tenant)) {
+            // SQL ID表按租户精确过滤，便于定位指定租户的SQL记录
+            sqlAuditList = sqlAuditList.stream().filter(d -> Objects.equals(d.getTenant(), tenant)).collect(Collectors.toList());
+        }
+        if (StringUtils.isNotBlank(userId)) {
+            // SQL ID表按用户精确过滤，便于定位指定用户触发的SQL记录
+            sqlAuditList = sqlAuditList.stream().filter(d -> Objects.equals(d.getUserId(), userId)).collect(Collectors.toList());
+        }
+        if (Objects.equals(orderBy, "timecost")) {
+            sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getTimeCost().compareTo(o1.getTimeCost())).collect(Collectors.toList());
+        } else {
+            sqlAuditList = sqlAuditList.stream().sorted((o1, o2) -> o2.getRunTime().compareTo(o1.getRunTime())).collect(Collectors.toList());
         }
         long maxTimeCost = 0;
         for (SqlAuditVo sqlAuditVo : sqlAuditList) {
-            if (maxTimeCost < sqlAuditVo.getTimeCost()) {
+            if (sqlAuditVo.getTimeCost() != null && maxTimeCost < sqlAuditVo.getTimeCost()) {
                 maxTimeCost = sqlAuditVo.getTimeCost();
             }
         }
-        int rowNum = sqlAuditList.size();
-        int pageCount = PageUtil.getPageCount(rowNum, pageSize);
+        JSONObject data = pageList(sqlAuditList, currentPage);
+        data.put("maxTimeCost", maxTimeCost);
+        return data;
+    }
+
+    private JSONObject buildRequestSqlAuditData(String keyword, String tenant, String userId, String orderBy, int currentPage) {
+        // URL监控列表按一次HTTP请求一行展示，和SQL ID明细列表完全分开
+        List<RequestSqlAuditVo> requestSqlAuditList = new ArrayList<>(SqlAuditManager.getRequestSqlAuditList());
+        if (StringUtils.isNotBlank(keyword)) {
+            // URL表的关键字沿用原url搜索语义，统一从keyword入参取值
+            requestSqlAuditList = requestSqlAuditList.stream().filter(d -> containsIgnoreCase(d.getUrl(), keyword)).collect(Collectors.toList());
+        }
+        if (StringUtils.isNotBlank(tenant)) {
+            // URL表按租户精确过滤，和SQL ID表保持一致
+            requestSqlAuditList = requestSqlAuditList.stream().filter(d -> Objects.equals(d.getTenant(), tenant)).collect(Collectors.toList());
+        }
+        if (StringUtils.isNotBlank(userId)) {
+            // URL表按用户精确过滤，和SQL ID表保持一致
+            requestSqlAuditList = requestSqlAuditList.stream().filter(d -> Objects.equals(d.getUserId(), userId)).collect(Collectors.toList());
+        }
+        if (Objects.equals(orderBy, "timecost")) {
+            requestSqlAuditList = requestSqlAuditList.stream().sorted((o1, o2) -> Long.compare(o2.getTotalTimeCost(), o1.getTotalTimeCost())).collect(Collectors.toList());
+        } else {
+            requestSqlAuditList = requestSqlAuditList.stream().sorted((o1, o2) -> o2.getRunTime().compareTo(o1.getRunTime())).collect(Collectors.toList());
+        }
+        long maxRequestTimeCost = 0;
+        for (RequestSqlAuditVo requestSqlAuditVo : requestSqlAuditList) {
+            if (maxRequestTimeCost < requestSqlAuditVo.getTotalTimeCost()) {
+                maxRequestTimeCost = requestSqlAuditVo.getTotalTimeCost();
+            }
+        }
+        JSONObject data = pageList(requestSqlAuditList, currentPage);
+        data.put("maxRequestTimeCost", maxRequestTimeCost);
+        return data;
+    }
+
+    private boolean containsIgnoreCase(String source, String keyword) {
+        // SQL监控关键字统一使用忽略大小写的包含匹配，兼容原SQL ID和URL搜索体验
+        return StringUtils.isNotBlank(source) && StringUtils.isNotBlank(keyword) && source.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
+    }
+
+    private JSONObject pageList(List<?> list, int currentPage) {
+        int rowNum = list.size();
+        int pageCount = PageUtil.getPageCount(rowNum, PAGE_SIZE);
+        // 空列表也返回第1页，避免前端表格收到currentPage=0
+        pageCount = Math.max(1, pageCount);
         currentPage = Math.max(1, currentPage);
         currentPage = Math.min(currentPage, pageCount);
+        List<?> tbodyList;
         try {
-            //因为数据可能在访问途中被清空掉，所以如果有异常直接返回空的列表
-            sqlAuditList = sqlAuditList.stream().skip((long) (currentPage - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
+            // 审计数据可能在请求途中被清空，分页异常时直接返回空列表
+            tbodyList = list.stream().skip((long) (currentPage - 1) * PAGE_SIZE).limit(PAGE_SIZE).collect(Collectors.toList());
         } catch (Exception ex) {
-            sqlAuditList = new ArrayList<>();
+            tbodyList = new ArrayList<>();
         }
         JSONObject returnObj = new JSONObject();
         returnObj.put("pageCount", pageCount);
         returnObj.put("currentPage", currentPage);
-        returnObj.put("pageSize", pageSize);
+        returnObj.put("pageSize", PAGE_SIZE);
         returnObj.put("rowNum", rowNum);
-        returnObj.put("tbodyList", sqlAuditList);
-        returnObj.put("maxTimeCost", maxTimeCost);//用来给前端计算进度条
-        returnObj.put("sqlIdList", SqlCostInterceptor.SqlIdMap.getSqlIdList());
+        returnObj.put("tbodyList", tbodyList);
         return returnObj;
     }
-
-
-   /* public static void main(String[] a) {
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            list.add(Integer.toString(i));
-        }
-        list = list.stream().skip(1).limit(1).collect(Collectors.toList());
-        System.out.println(String.join(",", list));
-    }*/
 }

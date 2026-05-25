@@ -39,7 +39,7 @@ public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "控制系统SQL追踪";
+        return "nmtah.togglesqlinterceptorapi.getname";
     }
 
     @Override
@@ -47,22 +47,40 @@ public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "action", type = ApiParamType.ENUM, isRequired = true, rule = "insert,remove,clear", desc = "insert：激活追踪指定SQL，remove：取消追踪指定SQL，clear：取消追踪所有SQL"),
-            @Param(name = "id", type = ApiParamType.STRING, desc = "mapper配置文件中的sql id")})
-    @Description(desc = "打开指定SQL日志，在标准输出中能查看最终执行SQL和执行时间")
+    @Input({@Param(name = "action", type = ApiParamType.ENUM, isRequired = true, rule = "insert,remove,clear", desc = "insert：激活追踪，remove：取消追踪，clear：取消全部追踪"),
+            @Param(name = "id", type = ApiParamType.STRING, desc = "nmtah.togglesqlinterceptorapi.input.param.desc"),
+            @Param(name = "url", type = ApiParamType.STRING, desc = "nmtah.togglesqlinterceptorapi.input.param.desc")})
+    @Description(desc = "nmtah.togglesqlinterceptorapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String action = jsonObj.getString("action");
         String id = jsonObj.getString("id");
+        String url = jsonObj.getString("url");
         if (StringUtils.isNotBlank(action)) {
             if (action.equalsIgnoreCase("clear")) {
+                // 清空时同时清理sqlId和URL两类监控配置及两类审计数据
                 SqlCostInterceptor.SqlIdMap.clear();
+                SqlCostInterceptor.UrlMap.clear();
                 SqlAuditManager.clearSqlAudit();
-            } else if (action.equalsIgnoreCase("insert") && StringUtils.isNotBlank(id)) {
-                SqlCostInterceptor.SqlIdMap.addId(id);
-            } else if (action.equalsIgnoreCase("remove") && StringUtils.isNotBlank(id)) {
-                SqlCostInterceptor.SqlIdMap.removeId(id);
-                SqlAuditManager.removeSqlAudit(id);
+                SqlAuditManager.clearRequestSqlAudit();
+            } else if (action.equalsIgnoreCase("insert")) {
+                // 添加监控时允许sql id和url同时填写，分别进入不同监控集合
+                if (StringUtils.isNotBlank(id)) {
+                    SqlCostInterceptor.SqlIdMap.addId(id);
+                }
+                if (StringUtils.isNotBlank(url)) {
+                    SqlCostInterceptor.UrlMap.addUrl(url);
+                }
+            } else if (action.equalsIgnoreCase("remove")) {
+                // 删除监控时分别清理sql id和url对应的历史审计记录
+                if (StringUtils.isNotBlank(id)) {
+                    SqlCostInterceptor.SqlIdMap.removeId(id);
+                    SqlAuditManager.removeSqlAudit(id);
+                }
+                if (StringUtils.isNotBlank(url)) {
+                    SqlCostInterceptor.UrlMap.removeUrl(url);
+                    SqlAuditManager.removeRequestSqlAudit(url);
+                }
             }
         }
         return null;
