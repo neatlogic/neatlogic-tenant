@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.restful.annotation.*;
@@ -123,8 +124,11 @@ public class JobSaveApi extends PrivateApiComponentBase {
         if (schedulerMapper.checkJobNameIsExists(job) > 0) {
             throw new ScheduleJobNameRepeatException(job.getName());
         }
+        job.setSourceServerId(Config.SCHEDULE_SERVER_ID);
         JobVo oldJobVo = schedulerMapper.getJobBaseInfoByUuid(uuid);
         if (oldJobVo == null) {
+            // 新建作业时记录创建它的应用服务器；后续列表按该服务器所属服务组过滤。
+            job.setSourceServerId(Config.SCHEDULE_SERVER_ID);
             schedulerMapper.insertJob(job);
         } else {
             if (oldJobVo.getIsActive() == 1) {

@@ -20,11 +20,14 @@ package neatlogic.module.tenant.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
+import neatlogic.framework.common.config.Config;
+import neatlogic.framework.crossover.IServerCrossoverService;
 import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.util.$;
 import neatlogic.framework.util.HttpRequestUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -32,10 +35,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ServerServiceImpl implements ServerService {
+public class ServerServiceImpl implements ServerService, IServerCrossoverService {
     @Resource
     ServerMapper serverMapper;
 
@@ -146,6 +150,23 @@ public class ServerServiceImpl implements ServerService {
             errorMessage = $.t("nmts.serverserviceimpl.postotherserverapi.nothost", serverClusterVo.getServerId());
         }
         return errorMessage;
+    }
+
+    /**
+     * 使用全量同组服务器而不是仅 startup，避免停机服务器创建的作业在同组内不可见。
+     *
+     * @return
+     */
+    @Override
+    public List<Integer> getCurrentGroupServerIdList() {
+        List<Integer> serverIdList = serverMapper.getServerIdListByGroup(Config.SCHEDULE_SERVER_GROUP());
+        if (CollectionUtils.isEmpty(serverIdList)) {
+            serverIdList = new ArrayList<>();
+        }
+        if (!serverIdList.contains(Config.SCHEDULE_SERVER_ID)) {
+            serverIdList.add(Config.SCHEDULE_SERVER_ID);
+        }
+        return serverIdList;
     }
 
 
