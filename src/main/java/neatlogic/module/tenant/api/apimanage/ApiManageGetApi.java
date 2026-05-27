@@ -24,15 +24,16 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.dao.mapper.ApiMapper;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ApiManageGetApi extends PrivateApiComponentBase {
 
-	@Autowired
+	@Resource
 	private ApiMapper ApiMapper;
 	
 	@Override
