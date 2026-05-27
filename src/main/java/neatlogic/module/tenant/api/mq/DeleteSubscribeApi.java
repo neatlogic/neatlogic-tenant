@@ -16,7 +16,9 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.mq.SubscribeIsSystemException;
 import neatlogic.framework.exception.mq.SubscribeNotFoundException;
+import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -62,6 +64,9 @@ public class DeleteSubscribeApi extends PrivateApiComponentBase {
         SubscribeVo subVo = mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
         if (subVo == null) {
             throw new SubscribeNotFoundException(jsonObj.getLong("id"));
+        }
+        if (SubscribeHandlerFactory.hasSystemSubscribe(subVo.getName())) {
+            throw new SubscribeIsSystemException(subVo.getName());
         }
         mqSubscribeMapper.deleteSubscribeById(jsonObj.getLong("id"));
         SubscribeManager.destroy(subVo);

@@ -18,8 +18,11 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.MQ_MODIFY;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.exception.mq.SubscribeHandlerIsEmbedException;
+import neatlogic.framework.exception.mq.SubscribeIsSystemException;
 import neatlogic.framework.exception.mq.SubscribeNameIsExistsException;
 import neatlogic.framework.exception.mq.SubscribeNotFoundException;
+import neatlogic.framework.mq.core.SubscribeHandlerFactory;
 import neatlogic.framework.mq.core.SubscribeManager;
 import neatlogic.framework.mq.dao.mapper.MqSubscribeMapper;
 import neatlogic.framework.mq.dto.SubscribeVo;
@@ -75,11 +78,21 @@ public class SaveSubscribeApi extends PrivateApiComponentBase {
         if (mqSubscribeMapper.checkSubscribeNameIsExists(subscribeVo) > 0) {
             throw new SubscribeNameIsExistsException(subscribeVo.getName());
         }
-        if (jsonObj.getLong("id") != null) {
-            SubscribeVo oldSubVo = mqSubscribeMapper.getSubscribeById(jsonObj.getLong("id"));
+        Long id = jsonObj.getLong("id");
+        SubscribeVo oldSubVo = null;
+        if (id != null) {
+            oldSubVo = mqSubscribeMapper.getSubscribeById(id);
             if (oldSubVo == null) {
-                throw new SubscribeNotFoundException(jsonObj.getLong("id"));
+                throw new SubscribeNotFoundException(id);
             }
+            if (SubscribeHandlerFactory.hasSystemSubscribe(oldSubVo.getName())) {
+                throw new SubscribeIsSystemException(oldSubVo.getName());
+            }
+        }
+        if (SubscribeHandlerFactory.isEmbedSubscribeHandler(subscribeVo.getClassName())) {
+            throw new SubscribeHandlerIsEmbedException(subscribeVo.getClassName());
+        }
+        if (oldSubVo != null) {
             SubscribeManager.destroy(oldSubVo);
         }
         if (subscribeVo.getIsActive().equals(1)) {
