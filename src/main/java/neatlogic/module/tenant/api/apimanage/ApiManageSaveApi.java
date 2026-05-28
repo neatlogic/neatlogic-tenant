@@ -80,7 +80,7 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
     @Description(desc = "nmtaa.apimanagesaveapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        ApiVo apiVo = JSON.toJavaObject(jsonObj,ApiVo.class);
+        ApiVo apiVo = JSON.toJavaObject(jsonObj, ApiVo.class);
         ApiHandlerVo apiHandlerVo = PrivateApiComponentFactory.getApiHandlerByHandler(apiVo.getHandler());
         ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
         if (apiHandlerVo == null) {
@@ -91,9 +91,16 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
         if (Objects.equals(apiVo.getIsMcp(), 1) && !ApiType.OBJECT.getValue().equals(apiHandlerVo.getType())) {
             throw new ParamIrregularException("isMcp", "only object api can enable mcp");
         }
-        ApiVo dbApiVo = ApiMapper.getApiByToken(apiVo.getToken());
-        if (StringUtils.isNotBlank(apiVo.getUsername()) && StringUtils.isBlank(apiVo.getPassword()) && dbApiVo != null) {
-            apiVo.setPasswordCipher(dbApiVo.getPasswordCipher());
+        /*
+        username 为空、密码为空，replaceApi 会把旧密文清掉
+        username 非空、密码为空：从 DB 取旧 passwordCipher 塞回去，保留旧密码
+        username 非空、密码非空：走 ApiVo#getPasswordCipher()，覆盖成新密文
+         */
+        if (StringUtils.isNotBlank(apiVo.getUsername()) && StringUtils.isBlank(apiVo.getPassword())) {
+            ApiVo dbApiVo = ApiMapper.getApiByToken(apiVo.getToken());
+            if (dbApiVo != null) {
+                apiVo.setPasswordCipher(dbApiVo.getPasswordCipher());
+            }
         }
         if (ramApiVo == null) {
             throw new ApiNotFoundException(apiVo.getToken());
