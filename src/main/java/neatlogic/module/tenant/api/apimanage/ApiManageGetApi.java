@@ -69,7 +69,7 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 			normalizedToken = normalizedToken.substring(0, normalizedToken.length() - 1);
 		}
 		ApiVo api = PrivateApiComponentFactory.getApiByToken(normalizedToken);
-		ApiVo apiVo = ApiMapper.getApiByToken(token);
+		ApiVo apiVo = ApiMapper.getApiByTokenWithoutPsw(token);
 		if(apiVo != null) {
             if(api != null){
                 apiVo.setAuthTypeList(api.getAuthTypeList());

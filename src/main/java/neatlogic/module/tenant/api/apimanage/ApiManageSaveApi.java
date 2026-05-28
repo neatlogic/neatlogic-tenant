@@ -31,6 +31,7 @@ import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.restful.enums.ApiType;
 import neatlogic.framework.util.RegexUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +90,10 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
         apiVo.setModuleId(apiHandlerVo.getModuleId());
         if (Objects.equals(apiVo.getIsMcp(), 1) && !ApiType.OBJECT.getValue().equals(apiHandlerVo.getType())) {
             throw new ParamIrregularException("isMcp", "only object api can enable mcp");
+        }
+        ApiVo dbApiVo = ApiMapper.getApiByToken(apiVo.getToken());
+        if (StringUtils.isNotBlank(apiVo.getUsername()) && StringUtils.isBlank(apiVo.getPassword()) && dbApiVo != null) {
+            apiVo.setPasswordCipher(dbApiVo.getPasswordCipher());
         }
         if (ramApiVo == null) {
             throw new ApiNotFoundException(apiVo.getToken());
