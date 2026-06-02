@@ -96,6 +96,13 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
                 configVo.setValue(tenantConfig.getValue());
             }
             configVo.setDescription(tenantConfig.getDescription());
+            ApiParamType type = tenantConfig.getType();
+            if (type != null) {
+                configVo.setType(type.getValue());
+                if (type == ApiParamType.PASSWORD && StringUtils.isNotBlank(configVo.getValue())) {
+                    configVo.setValue("******");
+                }
+            }
             tbodyList.add(configVo);
         }
 

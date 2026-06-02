@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.config.ITenantConfig;
 import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
@@ -70,6 +71,9 @@ public class SaveTenantConfigApi extends PrivateApiComponentBase {
                 if (!authInstance.validate(configVo.getValue(), null)) {
                     throw new ParamIrregularException("value(值)");
                 }
+            }
+            if (type == ApiParamType.PASSWORD && configVo.getValue() != null) {
+                configVo.setValue(RC4Util.encrypt(configVo.getValue()));
             }
         }
         configMapper.insertConfig(configVo);
