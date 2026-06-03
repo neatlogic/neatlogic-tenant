@@ -20,6 +20,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.config.ITenantConfig;
 import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
@@ -42,6 +43,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,6 +82,7 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         BasePageVo basePageVo = paramObj.toJavaObject(BasePageVo.class);
         List<ITenantConfig> allTenantConfigList = TenantConfigFactory.getTenantConfigList();
         Map<String, ModuleGroupVo> moduleGroupMap = ModuleUtil.getModuleGroupMap();
+        filterInactiveModuleGroup(allTenantConfigList);
         String keyword = basePageVo.getKeyword();
         String moduleGroup = paramObj.getString("moduleGroup");
         if (StringUtils.isNotBlank(keyword)) {
@@ -119,6 +122,19 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         tbodyList.sort(Comparator.comparing(ConfigVo::getKey));
 
         return TableResultUtil.getResult(tbodyList, basePageVo);
+    }
+
+    private void filterInactiveModuleGroup(List<ITenantConfig> tenantConfigList) {
+        Set<String> activeModuleGroupSet = TenantContext.get().getActiveModuleGroupList().stream()
+                .map(ModuleGroupVo::getGroup)
+                .collect(Collectors.toSet());
+        activeModuleGroupSet.add("framework");
+        for (int i = tenantConfigList.size() - 1; i >= 0; i--) {
+            ITenantConfig tenantConfig = tenantConfigList.get(i);
+            if (!activeModuleGroupSet.contains(tenantConfig.getModuleGroup())) {
+                tenantConfigList.remove(i);
+            }
+        }
     }
 
     private Object getGroupByModuleResult(List<ITenantConfig> tenantConfigList, BasePageVo basePageVo, Map<String, ModuleGroupVo> moduleGroupMap, Map<String, Integer> moduleGroupOrderMap) {
