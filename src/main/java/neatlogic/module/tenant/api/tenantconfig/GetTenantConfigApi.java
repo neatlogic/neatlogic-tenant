@@ -16,15 +16,17 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.util.RC4Util;
+import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.config.ITenantConfig;
 import neatlogic.framework.config.TenantConfigFactory;
 import neatlogic.framework.dao.mapper.ConfigMapper;
 import neatlogic.framework.dto.ConfigVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.exception.tenantconfig.TenantConfigNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -75,6 +77,11 @@ public class GetTenantConfigApi extends PrivateApiComponentBase {
                 configVo.setValue(RC4Util.decrypt(configVo.getValue()));
             }
         }
+        String moduleGroup = tenantConfig.getModuleGroup();
+        ModuleGroupVo moduleGroupVo = StringUtils.isBlank(moduleGroup) ? null : ModuleUtil.getModuleGroup(moduleGroup);
+        configVo.setModuleGroup(moduleGroup);
+        configVo.setModuleGroupName(moduleGroupVo == null ? moduleGroup : moduleGroupVo.getGroupName());
+        configVo.setModuleGroupSort(moduleGroupVo == null ? null : moduleGroupVo.getGroupSort());
         return configVo;
     }
 
