@@ -113,6 +113,9 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         List<ConfigVo> tbodyList = new ArrayList<>();
         List<String> keyList = tenantConfigList.stream().map(ITenantConfig::getKey).collect(Collectors.toList());
         List<ConfigVo> configList = configMapper.getConfigListByKeyList(keyList);
+
+
+
         Map<String, ConfigVo> configMap = configList.stream().collect(Collectors.toMap(e -> e.getKey(), e -> e));
         for (ITenantConfig tenantConfig : tenantConfigList) {
             tbodyList.add(buildConfigVo(tenantConfig, configMap, moduleGroupMap));
@@ -210,6 +213,9 @@ public class ListTenantConfigApi extends PrivateApiComponentBase {
         ApiParamType type = tenantConfig.getType();
         if (type != null) {
             configVo.setType(type.getText());
+            if (type == ApiParamType.PASSWORD && StringUtils.isNotBlank(configVo.getValue())) {
+                configVo.setValue("******");
+            }
         }
         String moduleGroup = tenantConfig.getModuleGroup();
         ModuleGroupVo moduleGroupVo = StringUtils.isBlank(moduleGroup) ? null : moduleGroupMap.get(moduleGroup);
