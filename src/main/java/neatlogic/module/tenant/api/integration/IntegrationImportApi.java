@@ -23,6 +23,7 @@ import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
+import neatlogic.framework.integration.core.IntegrationRateLimitManager;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -35,6 +36,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -53,6 +55,7 @@ import java.util.zip.ZipInputStream;
 @Service
 @AuthAction(action = INTEGRATION_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
+@Transactional
 public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
 
     static final Pattern urlPattern = Pattern.compile("^((http|ftp|https)://)(([a-zA-Z0-9\\._-]+)|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?");
@@ -166,6 +169,7 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
                 } else {
                     integrationMapper.updateIntegration(integrationVo);
                 }
+                IntegrationRateLimitManager.resetState(integrationVo.getUuid());
             } else {
                 JSONObject result = new JSONObject();
                 result.put("item", "导入：" + name + "时出现如下问题：");
