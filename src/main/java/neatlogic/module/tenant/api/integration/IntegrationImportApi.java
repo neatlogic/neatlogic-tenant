@@ -21,7 +21,6 @@ import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileNotUploadException;
-import neatlogic.framework.integration.authentication.enums.HttpMethod;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
@@ -152,7 +151,7 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
             if (handler == null) {
                 failReasonList.add("不存在的集成配置处理器：" + integrationVo.getHandler());
             }
-            if (HttpMethod.getHttpMethod(integrationVo.getMethod()) == null) {
+            if (!isMethodSupported(handler, integrationVo.getMethod())) {
                 failReasonList.add("不存在的请求方式：" + integrationVo.getMethod());
             }
             if (!urlPattern.matcher(integrationVo.getUrl()).matches()) {
@@ -180,6 +179,22 @@ public class IntegrationImportApi extends PrivateBinaryStreamApiComponentBase {
             return result;
         }
         return null;
+    }
+
+    private boolean isMethodSupported(IIntegrationHandler handler, String method) {
+        if (handler == null || StringUtils.isBlank(method)) {
+            return false;
+        }
+        String[] methodList = handler.getMethod();
+        if (methodList == null) {
+            return false;
+        }
+        for (String supportMethod : methodList) {
+            if (method.equalsIgnoreCase(supportMethod)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
