@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
 
-    private static final int EXPORT_PAGE_SIZE = 1000;
+    private static final int EXPORT_PAGE_SIZE = 100;
     private static final List<String> HEADER_LIST = Arrays.asList("用户", "用户组", "IP", "登录时间", "登录方式");
     private static final List<String> COLUMN_LIST = Arrays.asList("user", "teamNameList", "ip", "loginTime", "loginMethod");
 
@@ -71,7 +71,7 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "导出登录记录列表";
+        return "nmtal.exportloginauditapi.getname";
     }
 
     @Input({
@@ -82,7 +82,7 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
             @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
     })
-    @Description(desc = "导出登录记录列表")
+    @Description(desc = "nmtal.exportloginauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LoginAuditSearchVo searchVo = paramObj.toJavaObject(LoginAuditSearchVo.class);
@@ -132,7 +132,6 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
             return;
         }
         searchVo.setRowNum(rowNum);
-        searchVo.setPageSize(100);
         Integer pageCount = searchVo.getPageCount();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Map<String, List<String>> userUuid2teamNameListMap = new HashMap<>();
