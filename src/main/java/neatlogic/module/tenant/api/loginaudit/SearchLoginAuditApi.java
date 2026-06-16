@@ -21,9 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -75,13 +73,20 @@ public class SearchLoginAuditApi extends PrivateApiComponentBase {
         int rowNum = loginMapper.getLoginAuditCount(searchVo);
         if (rowNum > 0) {
             searchVo.setRowNum(rowNum);
+            Map<String, List<String>> userUuid2teamNameListMap = new HashMap<>();
             tbodyList = loginMapper.getLoginAuditList(searchVo);
             for (LoginAuditVo loginAuditVo : tbodyList) {
                 if (StringUtils.isNotBlank(loginAuditVo.getUserUuid())) {
-                    List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(loginAuditVo.getUserUuid());
-                    if (CollectionUtils.isNotEmpty(teamList)) {
-                        loginAuditVo.setTeamNameList(teamList.stream().map(TeamVo::getName).collect(Collectors.toList()));
+                    List<String> teamNameList = userUuid2teamNameListMap.get(loginAuditVo.getUserUuid());
+                    if (teamNameList == null) {
+                        teamNameList = new ArrayList<>();
+                        List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(loginAuditVo.getUserUuid());
+                        if (CollectionUtils.isNotEmpty(teamList)) {
+                            teamNameList = teamList.stream().map(TeamVo::getName).collect(Collectors.toList());
+                        }
+                        userUuid2teamNameListMap.put(loginAuditVo.getUserUuid(), teamNameList);
                     }
+                    loginAuditVo.setTeamNameList(new ArrayList<>(teamNameList));
                 }
             }
         }
