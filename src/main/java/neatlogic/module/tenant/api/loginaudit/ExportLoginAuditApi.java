@@ -31,15 +31,12 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.framework.util.TimeUtil;
+import neatlogic.framework.util.excel.ExcelBuilder;
+import neatlogic.framework.util.excel.SheetBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +45,11 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -58,7 +58,8 @@ import java.util.stream.Collectors;
 public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
 
     private static final int EXPORT_PAGE_SIZE = 1000;
-    private static final String[] HEADER_ARRAY = {"用户", "用户组", "IP", "登录时间", "登录方式"};
+    private static final List<String> HEADER_LIST = Arrays.asList("用户", "用户组", "IP", "登录时间", "登录方式");
+    private static final List<String> COLUMN_LIST = Arrays.asList("user", "teamNameList", "ip", "loginTime", "loginMethod");
 
     @Resource
     private LoginMapper loginMapper;
@@ -92,14 +93,23 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         buildSearchParam(searchVo, paramObj);
 
         response.setContentType(MimeType.XLSX.getValue() + ";charset=utf-8");
-        response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName("登录记录.xlsx") + "\"");
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook(EXPORT_PAGE_SIZE);
+        String fileName = "登录记录" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xlsx";
+        response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(fileName) + "\"");
+        ExcelBuilder builder = new ExcelBuilder(SXSSFWorkbook.class)
+                .withBorderColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT)
+                .withHeadFontColor(HSSFColor.HSSFColorPredefined.WHITE)
+                .withHeadBgColor(HSSFColor.HSSFColorPredefined.DARK_BLUE)
+                .withColumnWidth(24);
+        SheetBuilder sheetBuilder = builder.addSheet("sheet1")
+                .withHeaderList(HEADER_LIST)
+                .withColumnList(COLUMN_LIST);
+        try (Workbook workbook = builder.build();
              ServletOutputStream os = response.getOutputStream()) {
-            Sheet sheet = workbook.createSheet("登录记录");
-            writeHeader(workbook, sheet);
-            writeData(sheet, searchVo);
+            writeData(sheetBuilder, searchVo);
             workbook.write(os);
-            workbook.dispose();
+            if (workbook instanceof SXSSFWorkbook) {
+                ((SXSSFWorkbook) workbook).dispose();
+            }
         }
         return null;
     }
@@ -120,44 +130,29 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         searchVo.setPageSize(EXPORT_PAGE_SIZE);
     }
 
-    private void writeHeader(SXSSFWorkbook workbook, Sheet sheet) {
-        CellStyle headerStyle = workbook.createCellStyle();
-        headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
-        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        Font headerFont = workbook.createFont();
-        headerFont.setColor(IndexedColors.WHITE.getIndex());
-        headerStyle.setFont(headerFont);
-
-        Row headerRow = sheet.createRow(0);
-        for (int i = 0; i < HEADER_ARRAY.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(HEADER_ARRAY[i]);
-            cell.setCellStyle(headerStyle);
-            sheet.setColumnWidth(i, 24 * 256);
-        }
-    }
-
-    private void writeData(Sheet sheet, LoginAuditSearchVo searchVo) {
+    private void writeData(SheetBuilder sheetBuilder, LoginAuditSearchVo searchVo) {
         int rowNum = loginMapper.getLoginAuditCount(searchVo);
         if (rowNum <= 0) {
             return;
         }
         searchVo.setRowNum(rowNum);
-        int rowIndex = 1;
+        searchVo.setPageSize(100);
+        Integer pageCount = searchVo.getPageCount();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (int currentPage = 1; currentPage <= searchVo.getPageCount(); currentPage++) {
+        for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
             searchVo.setCurrentPage(currentPage);
             List<LoginAuditVo> loginAuditList = loginMapper.getLoginAuditList(searchVo);
             if (CollectionUtils.isEmpty(loginAuditList)) {
                 continue;
             }
             for (LoginAuditVo loginAuditVo : loginAuditList) {
-                Row row = sheet.createRow(rowIndex++);
-                row.createCell(0).setCellValue(getUserText(loginAuditVo.getUserUuid()));
-                row.createCell(1).setCellValue(getTeamText(loginAuditVo.getUserUuid()));
-                row.createCell(2).setCellValue(StringUtils.defaultString(loginAuditVo.getIp()));
-                row.createCell(3).setCellValue(loginAuditVo.getLoginTime() == null ? StringUtils.EMPTY : dateFormat.format(loginAuditVo.getLoginTime()));
-                row.createCell(4).setCellValue(StringUtils.defaultString(loginAuditVo.getLoginMethod()));
+                Map<String, Object> dataMap = new LinkedHashMap<>();
+                dataMap.put("user", getUserText(loginAuditVo.getUserUuid()));
+                dataMap.put("teamNameList", getTeamText(loginAuditVo.getUserUuid()));
+                dataMap.put("ip", StringUtils.defaultString(loginAuditVo.getIp()));
+                dataMap.put("loginTime", loginAuditVo.getLoginTime() == null ? StringUtils.EMPTY : dateFormat.format(loginAuditVo.getLoginTime()));
+                dataMap.put("loginMethod", StringUtils.defaultString(loginAuditVo.getLoginMethod()));
+                sheetBuilder.addData(dataMap);
             }
         }
     }
