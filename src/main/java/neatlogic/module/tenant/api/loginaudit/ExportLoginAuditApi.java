@@ -45,11 +45,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -139,16 +135,41 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         searchVo.setPageSize(100);
         Integer pageCount = searchVo.getPageCount();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Map<String, List<String>> userUuid2teamNameListMap = new HashMap<>();
+        Map<String, UserVo> userMap = new HashMap<>();
         for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
             searchVo.setCurrentPage(currentPage);
             List<LoginAuditVo> loginAuditList = loginMapper.getLoginAuditList(searchVo);
             if (CollectionUtils.isEmpty(loginAuditList)) {
                 continue;
             }
+            Set<String> userUuidSet = new HashSet<>();
+            for (LoginAuditVo loginAuditVo : loginAuditList) {
+                if (StringUtils.isNotBlank(loginAuditVo.getUserUuid())) {
+                    if (!userMap.containsKey(loginAuditVo.getUserUuid())) {
+                        userUuidSet.add(loginAuditVo.getUserUuid());
+                    }
+                    List<String> teamNameList = userUuid2teamNameListMap.get(loginAuditVo.getUserUuid());
+                    if (teamNameList == null) {
+                        teamNameList = new ArrayList<>();
+                        List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(loginAuditVo.getUserUuid());
+                        if (CollectionUtils.isNotEmpty(teamList)) {
+                            teamNameList = teamList.stream().map(TeamVo::getName).collect(Collectors.toList());
+                        }
+                        userUuid2teamNameListMap.put(loginAuditVo.getUserUuid(), teamNameList);
+                    }
+                }
+            }
+            if (CollectionUtils.isNotEmpty(userUuidSet)) {
+                List<UserVo> userList = userMapper.getUserByUserUuidList(new ArrayList<>(userUuidSet));
+                for (UserVo userVo : userList) {
+                    userMap.put(userVo.getUuid(), userVo);
+                }
+            }
             for (LoginAuditVo loginAuditVo : loginAuditList) {
                 Map<String, Object> dataMap = new LinkedHashMap<>();
-                dataMap.put("user", getUserText(loginAuditVo.getUserUuid()));
-                dataMap.put("teamNameList", getTeamText(loginAuditVo.getUserUuid()));
+                dataMap.put("user", getUserText(loginAuditVo.getUserUuid(), userMap.get(loginAuditVo.getUserUuid())));
+                dataMap.put("teamNameList", getTeamText(userUuid2teamNameListMap.get(loginAuditVo.getUserUuid())));
                 dataMap.put("ip", StringUtils.defaultString(loginAuditVo.getIp()));
                 dataMap.put("loginTime", loginAuditVo.getLoginTime() == null ? StringUtils.EMPTY : dateFormat.format(loginAuditVo.getLoginTime()));
                 dataMap.put("loginMethod", StringUtils.defaultString(loginAuditVo.getLoginMethod()));
@@ -157,11 +178,10 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         }
     }
 
-    private String getUserText(String userUuid) {
+    private String getUserText(String userUuid, UserVo userVo) {
         if (StringUtils.isBlank(userUuid)) {
             return StringUtils.EMPTY;
         }
-        UserVo userVo = userMapper.getUserBaseInfoByUuid(userUuid);
         if (userVo == null) {
             return userUuid;
         }
@@ -171,15 +191,11 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         return StringUtils.defaultIfBlank(userVo.getUserName(), StringUtils.defaultIfBlank(userVo.getUserId(), userUuid));
     }
 
-    private String getTeamText(String userUuid) {
-        if (StringUtils.isBlank(userUuid)) {
+    private String getTeamText(List<String> teamNameList) {
+        if (CollectionUtils.isEmpty(teamNameList)) {
             return StringUtils.EMPTY;
         }
-        List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
-        if (CollectionUtils.isEmpty(teamList)) {
-            return StringUtils.EMPTY;
-        }
-        return teamList.stream().map(TeamVo::getName).collect(Collectors.joining(","));
+        return String.join(",", teamNameList);
     }
 
     @Override
