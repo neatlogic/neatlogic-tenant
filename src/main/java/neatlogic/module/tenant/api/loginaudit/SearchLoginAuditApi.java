@@ -57,10 +57,10 @@ public class SearchLoginAuditApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         LoginAuditSearchVo searchVo = paramObj.toJavaObject(LoginAuditSearchVo.class);
-        //将时间范围转为 开始时间、结束时间
         if (CollectionUtils.isNotEmpty(searchVo.getTeamUuidList())) {
             searchVo.setTeamUuidList(searchVo.getTeamUuidList().stream().map(GroupSearch::removePrefix).collect(Collectors.toList()));
         }
+        //将时间范围转为 开始时间、结束时间
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = paramObj.getInteger("timeRange");
             String timeUnit = paramObj.getString("timeUnit");
