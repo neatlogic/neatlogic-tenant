@@ -72,7 +72,6 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
             @Param(name = "startTime", type = ApiParamType.LONG, isRequired = true, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "common.endtime"),
             @Param(name = "duration", type = ApiParamType.LONG, isRequired = true, desc = "common.duration"),
-            @Param(name = "url", type = ApiParamType.STRING, desc = "full url")
     })
     @Output({
             @Param(name = "id", type = ApiParamType.LONG, desc = "common.id")
