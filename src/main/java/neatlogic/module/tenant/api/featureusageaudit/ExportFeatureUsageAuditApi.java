@@ -68,21 +68,21 @@ public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentB
 
     @Override
     public String getName() {
-        return "导出功能使用统计数据";
+        return "nmtaf.exportfeatureusageauditapi.getname";
     }
 
     @Input({
-            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户UUID"),
-            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "模块列表"),
-            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "功能列表"),
+            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.duration"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
     })
     @Output({})
-    @Description(desc = "导出功能使用统计数据")
+    @Description(desc = "nmtaf.exportfeatureusageauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);

@@ -43,13 +43,13 @@ public class SearchLoginAuditApi extends PrivateApiComponentBase {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.duration"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
             @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
             @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
-            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "功能"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
     })
     @Output({
             @Param(name = "tbodylist", explode = LoginAuditVo[].class, desc = "common.tbodylist"),

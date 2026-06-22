@@ -57,7 +57,7 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "保存功能使用审计";
+        return "nmtaf.savefeatureusageauditapi.getname";
     }
 
     @Override
@@ -66,18 +66,18 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = false, desc = "模块组"),
-            @Param(name = "featurePath", type = ApiParamType.STRING, isRequired = true, desc = "menu path"),
-            @Param(name = "featureName", type = ApiParamType.STRING, isRequired = true, desc = "menu name"),
-            @Param(name = "startTime", type = ApiParamType.LONG, isRequired = true, desc = "start time"),
-            @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "end time"),
-            @Param(name = "duration", type = ApiParamType.LONG, isRequired = true, desc = "duration in milliseconds"),
+            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = true, desc = "common.modulegroup"),
+            @Param(name = "featurePath", type = ApiParamType.STRING, isRequired = true, desc = "common.featurepath"),
+            @Param(name = "featureName", type = ApiParamType.STRING, isRequired = true, desc = "common.featurename"),
+            @Param(name = "startTime", type = ApiParamType.LONG, isRequired = true, desc = "common.starttime"),
+            @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "common.endtime"),
+            @Param(name = "duration", type = ApiParamType.LONG, isRequired = true, desc = "common.duration"),
             @Param(name = "url", type = ApiParamType.STRING, desc = "full url")
     })
     @Output({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "audit id")
+            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id")
     })
-    @Description(desc = "保存功能使用审计")
+    @Description(desc = "nmtaf.savefeatureusageauditapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         FeatureUsageAuditVo auditVo = JSON.toJavaObject(jsonObj, FeatureUsageAuditVo.class);

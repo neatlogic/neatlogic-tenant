@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditSearchVo;
@@ -47,25 +48,26 @@ public class SearchFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询功能使用审计列表";
+        return "nmtaf.searchfeatureusageauditapi.getname";
     }
 
     @Input({
-            @Param(name = "loginAuditId", type = ApiParamType.LONG, isRequired = false, desc = "登录记录ID"),
-            @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = false, desc = "模块组"),
-            @Param(name = "featurePath", type = ApiParamType.STRING, isRequired = false, desc = "menu path"),
+            @Param(name = "loginAuditId", type = ApiParamType.LONG, desc = "common.id"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.duration"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
     })
     @Output({
-            @Param(name = "id", type = ApiParamType.LONG, desc = "audit id")
+            @Param(explode = BasePageVo.class),
+            @Param(name = "tbodyList", explode = FeatureUsageAuditVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "查询功能使用审计列表")
+    @Description(desc = "nmtaf.searchfeatureusageauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);

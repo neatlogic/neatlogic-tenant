@@ -15,6 +15,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
+import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditSearchVo;
@@ -52,32 +53,32 @@ public class SearchFeatureApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "统计功能使用次数列表";
+        return "nmtaf.searchfeatureapi.getname";
     }
 
     @Input({
-            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户UUID"),
-            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "模块列表"),
-            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "功能列表"),
+            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.duration"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
     })
     @Output({
+            @Param(explode = BasePageVo.class),
             @Param(name = "tbodyList", explode = FeatureUsageAuditVo[].class, desc = "common.tbodylist")
     })
-    @Description(desc = "统计功能使用次数列表")
+    @Description(desc = "nmtaf.searchfeatureapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);
         String userUuid = paramObj.getString("userUuid");
         if (StringUtils.isNotBlank(userUuid) && userUuid.startsWith(GroupSearch.USER.getValuePlugin())) {
-            userUuid = GroupSearch.removePrefix(userUuid);
-            searchVo.setUserUuid(userUuid);
+            searchVo.setUserUuid(GroupSearch.removePrefix(userUuid));
         }
         // 将相对时间范围转换为开始时间和结束时间，供统计查询统一使用。
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
