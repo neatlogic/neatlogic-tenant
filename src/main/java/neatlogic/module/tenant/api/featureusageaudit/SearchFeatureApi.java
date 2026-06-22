@@ -56,7 +56,7 @@ public class SearchFeatureApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "userUuid", type = ApiParamType.STRING, desc = "用户UUID"),
             @Param(name = "moduleGroup", type = ApiParamType.STRING, desc = "模块"),
-            @Param(name = "menuPath", type = ApiParamType.STRING, desc = "菜单路径"),
+            @Param(name = "featurePath", type = ApiParamType.STRING, desc = "菜单路径"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),

@@ -51,7 +51,7 @@ public class SearchFeatureUsageAuditApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "loginAuditId", type = ApiParamType.LONG, isRequired = false, desc = "登录记录ID"),
             @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = false, desc = "模块组"),
-            @Param(name = "menuPath", type = ApiParamType.STRING, isRequired = false, desc = "menu path"),
+            @Param(name = "featurePath", type = ApiParamType.STRING, isRequired = false, desc = "menu path"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),

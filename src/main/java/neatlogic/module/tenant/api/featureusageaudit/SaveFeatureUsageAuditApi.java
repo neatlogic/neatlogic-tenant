@@ -67,8 +67,8 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "moduleGroup", type = ApiParamType.STRING, isRequired = false, desc = "模块组"),
-            @Param(name = "menuPath", type = ApiParamType.STRING, isRequired = true, desc = "menu path"),
-            @Param(name = "menuName", type = ApiParamType.STRING, isRequired = true, desc = "menu name"),
+            @Param(name = "featurePath", type = ApiParamType.STRING, isRequired = true, desc = "menu path"),
+            @Param(name = "featureName", type = ApiParamType.STRING, isRequired = true, desc = "menu name"),
             @Param(name = "startTime", type = ApiParamType.LONG, isRequired = true, desc = "start time"),
             @Param(name = "endTime", type = ApiParamType.LONG, isRequired = true, desc = "end time"),
             @Param(name = "duration", type = ApiParamType.LONG, isRequired = true, desc = "duration in milliseconds"),
@@ -99,8 +99,8 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(auditVo.getModuleGroup())) {
             throw new ParamInvalidException("moduleGroup", auditVo.getModuleGroup());
         }
-        if (StringUtils.isBlank(auditVo.getMenuPath())) {
-            throw new ParamInvalidException("menuPath", auditVo.getMenuPath());
+        if (StringUtils.isBlank(auditVo.getFeaturePath())) {
+            throw new ParamInvalidException("featurePath", auditVo.getFeaturePath());
         }
         if (auditVo.getStartTime() == null) {
             throw new ParamInvalidException("startTime", null);
