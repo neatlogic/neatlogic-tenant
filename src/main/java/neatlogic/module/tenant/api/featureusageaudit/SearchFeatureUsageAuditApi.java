@@ -14,9 +14,11 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditSearchVo;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -87,6 +89,13 @@ public class SearchFeatureUsageAuditApi extends PrivateApiComponentBase {
     }
 
     private void handleTbodyList(List<FeatureUsageAuditVo> tbodyList) {
-
+        for (FeatureUsageAuditVo featureUsageAuditVo : tbodyList) {
+            ModuleGroupVo groupVo = ModuleUtil.getModuleGroup(featureUsageAuditVo.getModuleGroup());
+            if (groupVo != null) {
+                featureUsageAuditVo.setModuleGroupName(groupVo.getGroupName());
+            } else {
+                featureUsageAuditVo.setModuleGroupName(featureUsageAuditVo.getModuleGroup());
+            }
+        }
     }
 }
