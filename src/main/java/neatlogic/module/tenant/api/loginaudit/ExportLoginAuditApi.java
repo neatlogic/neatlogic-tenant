@@ -81,6 +81,8 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
             @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "功能"),
     })
     @Description(desc = "nmtal.exportloginauditapi.getname")
     @Override
