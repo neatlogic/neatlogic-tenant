@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
@@ -71,6 +72,10 @@ public class SearchFeatureUsageAuditApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);
+        String userUuid = paramObj.getString("userUuid");
+        if (StringUtils.isNotBlank(userUuid) && userUuid.startsWith(GroupSearch.USER.getValuePlugin())) {
+            searchVo.setUserUuid(GroupSearch.removePrefix(userUuid));
+        }
         //将时间范围转为 开始时间、结束时间
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = paramObj.getInteger("timeRange");
