@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2025  TechSure Co., Ltd.  All Rights Reserved.
  * This file is part of the NeatLogic software.
- * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x – 2025.
+ * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x - 2025.
  * You may use this file only in compliance with the License.
  * See the LICENSE file distributed with this work for the full license text.
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,8 +55,8 @@ import java.util.Map;
 public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentBase {
 
     private static final int EXPORT_PAGE_SIZE = 100;
-    private static final List<String> HEADER_LIST = Arrays.asList("模块", "功能名称", "使用次数");
-    private static final List<String> COLUMN_LIST = Arrays.asList("moduleGroupName", "featureName", "usedCount");
+    private static final List<String> HEADER_LIST = Arrays.asList("模块", "功能名称", "使用时长", "使用次数");
+    private static final List<String> COLUMN_LIST = Arrays.asList("moduleGroupName", "featureName", "duration", "usedCount");
 
     @Resource
     private FeatureUsageAuditMapper featureUsageAuditMapper;
@@ -142,6 +142,7 @@ public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentB
                 Map<String, Object> dataMap = new LinkedHashMap<>();
                 dataMap.put("moduleGroupName", getModuleGroupName(featureUsageAuditVo.getModuleGroup()));
                 dataMap.put("featureName", StringUtils.defaultString(featureUsageAuditVo.getFeatureName()));
+                dataMap.put("duration", getDurationText(featureUsageAuditVo.getDuration()));
                 dataMap.put("usedCount", featureUsageAuditVo.getUsedCount() == null ? 0 : featureUsageAuditVo.getUsedCount());
                 sheetBuilder.addData(dataMap);
             }
@@ -154,6 +155,13 @@ public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentB
             return groupVo.getGroupName();
         }
         return StringUtils.defaultString(moduleGroup);
+    }
+
+    private String getDurationText(Long duration) {
+        if (duration == null) {
+            return StringUtils.EMPTY;
+        }
+        return TimeUtil.millisecondsTransferMaxTimeUnit(duration);
     }
 
     @Override
