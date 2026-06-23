@@ -13,6 +13,7 @@ package neatlogic.module.tenant.api.featureusageaudit;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.BasePageVo;
@@ -35,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@AuthAction(action = NoAuth.class)
+@AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchFeatureUsageAuditApi extends PrivateApiComponentBase {
 

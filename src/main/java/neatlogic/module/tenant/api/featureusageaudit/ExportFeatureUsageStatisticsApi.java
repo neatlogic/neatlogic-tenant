@@ -13,6 +13,7 @@ package neatlogic.module.tenant.api.featureusageaudit;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.MimeType;
@@ -42,7 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Component
-@AuthAction(action = NoAuth.class)
+@AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ExportFeatureUsageStatisticsApi extends PrivateBinaryStreamApiComponentBase {
 

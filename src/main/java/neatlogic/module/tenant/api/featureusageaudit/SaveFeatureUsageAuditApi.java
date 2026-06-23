@@ -31,7 +31,6 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.SnowflakeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
-//@Transactional
 public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     private static final long MAX_DURATION = TimeUnit.DAYS.toMillis(1);
