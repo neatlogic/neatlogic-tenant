@@ -18,23 +18,16 @@ import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.MimeType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
-import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditSearchVo;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
 import neatlogic.framework.dto.module.ModuleGroupVo;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
-import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.FileUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.framework.util.excel.ExcelBuilder;
 import neatlogic.framework.util.excel.SheetBuilder;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -51,25 +44,23 @@ import java.util.*;
 @Component
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentBase {
+public class ExportFeatureUsageStatisticsApi extends PrivateBinaryStreamApiComponentBase {
 
     private static final int EXPORT_PAGE_SIZE = 100;
-    private static final List<String> HEADER_LIST = Arrays.asList("用户", "模块", "功能名称", "开始时间", "结束时间", "使用时长");
-    private static final List<String> COLUMN_LIST = Arrays.asList("user", "moduleGroupName", "featureName", "startTime", "endTime", "duration");
+    private static final List<String> HEADER_LIST = Arrays.asList("模块", "功能名称", "使用时长", "使用次数");
+    private static final List<String> COLUMN_LIST = Arrays.asList("moduleGroupName", "featureName", "duration", "usedCount");
 
     @Resource
     private FeatureUsageAuditMapper featureUsageAuditMapper;
-    @Resource
-    private UserMapper userMapper;
 
     @Override
     public String getToken() {
-        return "feature/usage/audit/export";
+        return "feature/usage/statistics/export";
     }
 
     @Override
     public String getName() {
-        return "nmtaf.exportfeatureusageauditapi.getname";
+        return "nmtaf.exportfeatureusagestatisticsapi.getname";
     }
 
     @Input({
@@ -83,14 +74,14 @@ public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentB
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
     })
     @Output({})
-    @Description(desc = "nmtaf.exportfeatureusageauditapi.getname")
+    @Description(desc = "nmtaf.exportfeatureusagestatisticsapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);
         buildSearchParam(searchVo, paramObj);
 
         response.setContentType(MimeType.XLSX.getValue() + ";charset=utf-8");
-        String fileName = "功能使用记录" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xlsx";
+        String fileName = "功能使用统计" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xlsx";
         response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(fileName) + "\"");
         ExcelBuilder builder = new ExcelBuilder(SXSSFWorkbook.class)
                 .withBorderColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT)
@@ -130,55 +121,24 @@ public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentB
     }
 
     private void writeData(SheetBuilder sheetBuilder, FeatureUsageAuditSearchVo searchVo) {
-        int rowNum = featureUsageAuditMapper.getFeatureUsageAuditCount(searchVo);
+        int rowNum = featureUsageAuditMapper.getFeatureCount(searchVo);
         if (rowNum <= 0) {
             return;
         }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Map<String, UserVo> userMap = new HashMap<>();
         searchVo.setRowNum(rowNum);
         Integer pageCount = searchVo.getPageCount();
         for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
             searchVo.setCurrentPage(currentPage);
-            List<FeatureUsageAuditVo> featureUsageAuditList = featureUsageAuditMapper.getFeatureUsageAuditList(searchVo);
-            Set<String> userUuidSet = new HashSet<>();
-            for (FeatureUsageAuditVo featureUsageAuditVo : featureUsageAuditList) {
-                if (StringUtils.isNotBlank(featureUsageAuditVo.getUserUuid())) {
-                    if (!userMap.containsKey(featureUsageAuditVo.getUserUuid())) {
-                        userUuidSet.add(featureUsageAuditVo.getUserUuid());
-                    }
-                }
-            }
-            if (CollectionUtils.isNotEmpty(userUuidSet)) {
-                List<UserVo> userList = userMapper.getUserByUserUuidList(new ArrayList<>(userUuidSet));
-                for (UserVo userVo : userList) {
-                    userMap.put(userVo.getUuid(), userVo);
-                }
-            }
+            List<FeatureUsageAuditVo> featureUsageAuditList = featureUsageAuditMapper.getFeatureList(searchVo);
             for (FeatureUsageAuditVo featureUsageAuditVo : featureUsageAuditList) {
                 Map<String, Object> dataMap = new LinkedHashMap<>();
-                dataMap.put("user", getUserText(featureUsageAuditVo.getUserUuid(), userMap.get(featureUsageAuditVo.getUserUuid())));
                 dataMap.put("moduleGroupName", getModuleGroupName(featureUsageAuditVo.getModuleGroup()));
                 dataMap.put("featureName", StringUtils.defaultString(featureUsageAuditVo.getFeatureName()));
-                dataMap.put("startTime", dateFormat.format(featureUsageAuditVo.getStartTime()));
-                dataMap.put("endTime", dateFormat.format(featureUsageAuditVo.getEndTime()));
                 dataMap.put("duration", getDurationText(featureUsageAuditVo.getDuration()));
+                dataMap.put("usedCount", featureUsageAuditVo.getUsedCount() == null ? 0 : featureUsageAuditVo.getUsedCount());
                 sheetBuilder.addData(dataMap);
             }
         }
-    }
-
-    private String getUserText(String userUuid, UserVo userVo) {
-        if (StringUtils.isBlank(userUuid)) {
-            return StringUtils.EMPTY;
-        }
-        if (userVo == null) {
-            return userUuid;
-        }
-        if (StringUtils.isNotBlank(userVo.getUserName()) && StringUtils.isNotBlank(userVo.getUserId())) {
-            return userVo.getUserName() + "(" + userVo.getUserId() + ")";
-        }
-        return StringUtils.defaultIfBlank(userVo.getUserName(), StringUtils.defaultIfBlank(userVo.getUserId(), userUuid));
     }
 
     private String getModuleGroupName(String moduleGroup) {
