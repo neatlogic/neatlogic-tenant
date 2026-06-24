@@ -35,7 +35,7 @@ public class DelayedItem implements Delayed {
 	/**
 	 * 延迟5分钟
 	 **/
-	private final long delayTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+	private final long delayTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
 	/* 延迟10毫秒，测试时使用**/
 //	private long delayTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.toMillis(10);
 
