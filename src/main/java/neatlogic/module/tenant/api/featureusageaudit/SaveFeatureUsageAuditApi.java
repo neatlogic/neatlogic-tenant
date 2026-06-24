@@ -16,7 +16,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dao.mapper.LoginMapper;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
 import neatlogic.framework.dto.loginaudit.LoginAuditVo;
@@ -42,9 +41,6 @@ import java.util.concurrent.TimeUnit;
 public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     private static final long MAX_DURATION = TimeUnit.DAYS.toMillis(1);
-
-//    @Resource
-//    private FeatureUsageAuditMapper featureUsageAuditMapper;
 
     @Resource
     private FeatureUsageService featureUsageService;
@@ -81,19 +77,22 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
     @Description(desc = "nmtaf.savefeatureusageauditapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        FeatureUsageAuditVo auditVo = JSON.toJavaObject(jsonObj, FeatureUsageAuditVo.class);
-        validate(auditVo);
-        String userUuid = UserContext.get().getUserUuid();
-        auditVo.setUserUuid(userUuid);
-        auditVo.setId(SnowflakeUtil.uniqueLong());
-        LoginAuditVo lastLoginAudit = loginMapper.getLastLoginAuditByUserUuid(userUuid);
-        if (lastLoginAudit != null) {
-            auditVo.setLoginAuditId(lastLoginAudit.getId());
-        }
-//        featureUsageAuditMapper.insertFeatureUsageAudit(auditVo);
-        featureUsageService.addFeatureUsageAuditVo(auditVo);
         JSONObject resultObj = new JSONObject();
-        resultObj.put("id", auditVo.getId());
+        String userUuid = UserContext.get().getUserUuid();
+        if (StringUtils.isNotBlank(userUuid)) {
+            FeatureUsageAuditVo auditVo = JSON.toJavaObject(jsonObj, FeatureUsageAuditVo.class);
+            validate(auditVo);
+            auditVo.setUserUuid(userUuid);
+            auditVo.setId(SnowflakeUtil.uniqueLong());
+            LoginAuditVo lastLoginAudit = loginMapper.getLastLoginAuditByUserUuid(userUuid);
+            if (lastLoginAudit != null) {
+                auditVo.setLoginAuditId(lastLoginAudit.getId());
+            } else {
+                auditVo.setLoginAuditId(-1L);
+            }
+            featureUsageService.addFeatureUsageAuditVo(auditVo);
+            resultObj.put("id", auditVo.getId());
+        }
         return resultObj;
     }
 
@@ -103,6 +102,9 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
         }
         if (StringUtils.isBlank(auditVo.getFeaturePath())) {
             throw new ParamInvalidException("featurePath", auditVo.getFeaturePath());
+        }
+        if (StringUtils.isBlank(auditVo.getFeatureName())) {
+            throw new ParamInvalidException("featureName", auditVo.getFeatureName());
         }
         if (auditVo.getStartTime() == null) {
             throw new ParamInvalidException("startTime", null);
