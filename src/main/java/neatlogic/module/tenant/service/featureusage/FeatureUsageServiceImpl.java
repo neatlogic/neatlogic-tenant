@@ -14,12 +14,15 @@ import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
@@ -27,6 +30,7 @@ import java.util.concurrent.DelayQueue;
 @Service
 public class FeatureUsageServiceImpl implements FeatureUsageService {
     private static final Logger logger = LoggerFactory.getLogger(FeatureUsageServiceImpl.class);
+    private static final int INSERT_BATCH_SIZE = 500;
     /**
      * 统计延迟对象，默认初始化一个失效的延迟对象
      **/
@@ -60,8 +64,23 @@ public class FeatureUsageServiceImpl implements FeatureUsageService {
                         /** 业务代码开始**/
                         for (Map.Entry<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantAccessTokenEntry : take.getTenantMap().entrySet()) {
                             TenantContext.init(tenantAccessTokenEntry.getKey());
+                            // 按租户批量写入功能使用审计，分片避免单条 SQL 过大。
+//                            List<FeatureUsageAuditVo> featureUsageAuditVoList = new ArrayList<>(tenantAccessTokenEntry.getValue().keySet());
+//                            for (int fromIndex = 0; fromIndex < featureUsageAuditVoList.size(); fromIndex += INSERT_BATCH_SIZE) {
+//                                int toIndex = Math.min(fromIndex + INSERT_BATCH_SIZE, featureUsageAuditVoList.size());
+//                                featureUsageAuditMapper.insertFeatureUsageAuditList(featureUsageAuditVoList.subList(fromIndex, toIndex));
+//                            }
+                            List<FeatureUsageAuditVo> featureUsageAuditVoList = new ArrayList<>();
                             for (Map.Entry<FeatureUsageAuditVo, Object> entry : tenantAccessTokenEntry.getValue().entrySet()) {
-                                featureUsageAuditMapper.insertFeatureUsageAudit(entry.getKey());
+                                featureUsageAuditVoList.add(entry.getKey());
+                                if (featureUsageAuditVoList.size() >= 100) {
+                                    featureUsageAuditMapper.insertFeatureUsageAuditList(featureUsageAuditVoList);
+                                    featureUsageAuditVoList.clear();
+                                }
+                            }
+                            if (CollectionUtils.isNotEmpty(featureUsageAuditVoList)) {
+                                featureUsageAuditMapper.insertFeatureUsageAuditList(featureUsageAuditVoList);
+                                featureUsageAuditVoList.clear();
                             }
                         }
                         /** 业务代码结束**/
