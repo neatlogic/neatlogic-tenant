@@ -48,10 +48,8 @@ public class FeatureUsageServiceImpl implements FeatureUsageService {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         DelayedItem take = delayQueue.take();
-                        //	Thread.sleep(1);//测试时使用
                         /* 从延迟队列取出延迟对象后，将延迟对象设置为失效，通知其他线程不要再往该对象写数据了 **/
                         take.setExpired(true);
-                        //	Thread.sleep(1);//测试时使用
                         while (take.getWritingDataThreadNum() > 0) {
                             /* 如果还有线程正在往当前延迟对象中写数据 **/
                             synchronized (take.getLock()) {
@@ -59,48 +57,11 @@ public class FeatureUsageServiceImpl implements FeatureUsageService {
                                 take.getLock().wait();
                             }
                         }
-
-                        /**测试代码开始 **/
-//                        Thread.sleep(10);//测试时使用
-//                        for(Entry<String, ConcurrentMap<String, AtomicInteger>> tenantAccessTokenEntry : take.getTenantAccessTokenMap().entrySet()) {
-//                            String tenantUuid = tenantAccessTokenEntry.getKey();
-//                            for(Entry<String, AtomicInteger> entry : tenantAccessTokenEntry.getValue().entrySet()) {
-//                                String token = entry.getKey();
-//                                ConcurrentMap<String, ConcurrentMap<String, AtomicInteger>> tenantAccessTokenMap2 = Test.getTenantAccessTokenMap();
-//                                ConcurrentMap<String, AtomicInteger> accessTokenCounterMap = tenantAccessTokenMap2.get(tenantUuid);
-//                                if(accessTokenCounterMap == null) {
-//                                    synchronized(tenantAccessTokenMap2){
-//                                        accessTokenCounterMap = tenantAccessTokenMap2.get(tenantUuid);
-//                                        if(accessTokenCounterMap == null) {
-//                                            accessTokenCounterMap = new ConcurrentHashMap<>();
-//                                            tenantAccessTokenMap2.put(tenantUuid, accessTokenCounterMap);
-//                                        }
-//                                    }
-//                                }
-//
-//                                AtomicInteger counter = accessTokenCounterMap.get(token);
-//                                if(counter == null) {
-//                                    synchronized(accessTokenCounterMap){
-//                                        counter = accessTokenCounterMap.get(token);
-//                                        if(counter == null) {
-//                                            accessTokenCounterMap.put(token, new AtomicInteger(entry.getValue().get()));
-//                                        }else {
-//                                            counter.getAndAdd(entry.getValue().get());
-//                                        }
-//                                    }
-//                                }else {
-//                                    counter.getAndAdd(entry.getValue().get());
-//                                }
-//
-//                            }
-//                        }
-                        /** 测试代码结束 **/
                         /** 业务代码开始**/
-                        for (Map.Entry<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantAccessTokenEntry : take.getTenantAccessTokenMap().entrySet()) {
+                        for (Map.Entry<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantAccessTokenEntry : take.getTenantMap().entrySet()) {
                             TenantContext.init(tenantAccessTokenEntry.getKey());
                             for (Map.Entry<FeatureUsageAuditVo, Object> entry : tenantAccessTokenEntry.getValue().entrySet()) {
                                 featureUsageAuditMapper.insertFeatureUsageAudit(entry.getKey());
-//                                apiAuditMapper.insertApiAccessCount(entry.getKey(), entry.getValue().get());
                             }
                         }
                         /** 业务代码结束**/
@@ -120,17 +81,15 @@ public class FeatureUsageServiceImpl implements FeatureUsageService {
     @Override
     public void addFeatureUsageAuditVo(FeatureUsageAuditVo featureUsageAuditVo) {
         try {
-            /* 判断延迟对象是否失效 **/
+            /** 判断延迟对象是否失效 **/
             if (!delayedItem.addFeatureUsageAuditVo(featureUsageAuditVo)) {
-//				Thread.sleep(1);//测试时使用
-                /* 初始化延迟对象时，必须加锁，否则会出现多个线程相互覆盖情况 **/
+                /** 初始化延迟对象时，必须加锁，否则会出现多个线程相互覆盖情况 **/
                 synchronized (this) {
                     if (delayedItem.isExpired()) {
                         delayedItem = new DelayedItem();
                         delayQueue.add(delayedItem);
                     }
                 }
-//				Thread.sleep(1);//测试时使用
                 delayedItem.addFeatureUsageAuditVo(featureUsageAuditVo);
             }
         } catch (Exception e) {

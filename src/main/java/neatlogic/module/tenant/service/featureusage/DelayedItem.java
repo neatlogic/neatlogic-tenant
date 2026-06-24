@@ -23,28 +23,20 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @Time:2020年7月17日
- * @ClassName: DelayedItem
- * @Description: 统计次数延迟类
- */
 public class DelayedItem implements Delayed {
 	private static final Logger logger = LoggerFactory.getLogger(DelayedItem.class);
 	/**
 	 * 延迟5分钟
 	 **/
 	private final long delayTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
-	/* 延迟10毫秒，测试时使用**/
-//	private long delayTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.toMillis(10);
 
 	/**
 	 * 缓存租户访问记录
 	 **/
-	private final ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantAccessTokenMap = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantMap = new ConcurrentHashMap<>();
 	/**
-	 * 标记正在往当前延迟对象的缓存tenantAccessTokenMap中写数据的线程数
+	 * 标记正在往当前延迟对象的缓存tenantMap中写数据的线程数
 	 **/
 	private final AtomicInteger writingDataThreadNum = new AtomicInteger();
 	/**
@@ -82,17 +74,16 @@ public class DelayedItem implements Delayed {
 			try {
 				/* 写数据前加1**/
 				writingDataThreadNum.incrementAndGet();
-//				Thread.sleep(1);//测试时使用
 				String tenantUuid = TenantContext.get().getTenantUuid();
 				/* 从缓存中获取当前租户访问记录 **/
-				ConcurrentMap<FeatureUsageAuditVo, Object> accessTokenCounterMap = tenantAccessTokenMap.get(tenantUuid);
+				ConcurrentMap<FeatureUsageAuditVo, Object> accessTokenCounterMap = tenantMap.get(tenantUuid);
 				if (accessTokenCounterMap == null) {
 					/* 初始化某个租户访问记录缓存时，必须加锁，否则会出现多个线程相互覆盖情况 **/
 					synchronized (this) {
-						accessTokenCounterMap = tenantAccessTokenMap.get(tenantUuid);
+						accessTokenCounterMap = tenantMap.get(tenantUuid);
 						if (accessTokenCounterMap == null) {
 							accessTokenCounterMap = new ConcurrentHashMap<>();
-							tenantAccessTokenMap.put(tenantUuid, accessTokenCounterMap);
+							tenantMap.put(tenantUuid, accessTokenCounterMap);
 						}
 					}
 				}
@@ -101,23 +92,8 @@ public class DelayedItem implements Delayed {
 			}catch(Exception e) {
 				logger.error(e.getMessage(), e);
 			}finally {
-//			try {
-//				Thread.sleep(1);//测试时使用
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
 				if(writingDataThreadNum.decrementAndGet() <= 0) {
-//				try {
-//					Thread.sleep(1);//测试时使用
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
 					if(expired.get()) {
-//					try {
-//						Thread.sleep(1);//测试时使用
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
 						/* 如果当前延迟对象已失效且没有线程往延迟对象写数据，就唤醒lock对象monitor的wait set中的线程，只有一个 **/
 						synchronized(lock) {
 							lock.notify();
@@ -129,8 +105,8 @@ public class DelayedItem implements Delayed {
 		}
 	}
 
-	public ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> getTenantAccessTokenMap() {
-		return tenantAccessTokenMap;
+	public ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> getTenantMap() {
+		return tenantMap;
 	}
 
 	public int getWritingDataThreadNum() {
