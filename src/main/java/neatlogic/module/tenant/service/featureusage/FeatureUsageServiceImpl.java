@@ -45,7 +45,7 @@ public class FeatureUsageServiceImpl implements FeatureUsageService {
 
     @PostConstruct
     public void init() {
-        Thread t = new Thread(new NeatLogicThread("API-ACCESS-COUNT-MANAGER") {
+        Thread t = new Thread(new NeatLogicThread("FEATURE-USAGE-MANAGER") {
 
             @Override
             protected void execute() {
