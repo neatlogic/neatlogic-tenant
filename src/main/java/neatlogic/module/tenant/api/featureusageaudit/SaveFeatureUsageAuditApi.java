@@ -29,6 +29,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.SnowflakeUtil;
+import neatlogic.module.tenant.service.featureusage.FeatureUsageService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,11 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
 
     private static final long MAX_DURATION = TimeUnit.DAYS.toMillis(1);
 
+//    @Resource
+//    private FeatureUsageAuditMapper featureUsageAuditMapper;
+
     @Resource
-    private FeatureUsageAuditMapper featureUsageAuditMapper;
+    private FeatureUsageService featureUsageService;
 
     @Resource
     private LoginMapper loginMapper;
@@ -86,7 +90,8 @@ public class SaveFeatureUsageAuditApi extends PrivateApiComponentBase {
         if (lastLoginAudit != null) {
             auditVo.setLoginAuditId(lastLoginAudit.getId());
         }
-        featureUsageAuditMapper.insertFeatureUsageAudit(auditVo);
+//        featureUsageAuditMapper.insertFeatureUsageAudit(auditVo);
+        featureUsageService.addFeatureUsageAuditVo(auditVo);
         JSONObject resultObj = new JSONObject();
         resultObj.put("id", auditVo.getId());
         return resultObj;
