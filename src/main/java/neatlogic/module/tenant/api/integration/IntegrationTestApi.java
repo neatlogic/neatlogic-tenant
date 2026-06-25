@@ -30,6 +30,7 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.module.framework.integration.handler.FrameworkRequestFrom;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -65,6 +66,9 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
         if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         }
+        if (!isMethodSupported(handler, integrationVo.getMethod())) {
+            throw new ApiRuntimeException("当前集成处理器不支持请求方式：" + integrationVo.getMethod());
+        }
         IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
         try {
             handler.validate(resultVo);
@@ -72,5 +76,21 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
             resultVo.appendError(ex.getMessage());
         }
         return resultVo;
+    }
+
+    private boolean isMethodSupported(IIntegrationHandler handler, String method) {
+        if (handler == null || StringUtils.isBlank(method)) {
+            return false;
+        }
+        String[] methodList = handler.getMethod();
+        if (methodList == null) {
+            return false;
+        }
+        for (String supportMethod : methodList) {
+            if (method.equalsIgnoreCase(supportMethod)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

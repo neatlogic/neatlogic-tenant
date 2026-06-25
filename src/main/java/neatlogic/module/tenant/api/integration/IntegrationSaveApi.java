@@ -21,8 +21,9 @@ import neatlogic.framework.exception.integration.HttpMethodNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNameRepeatsException;
 import neatlogic.framework.exception.integration.IntegrationRateLimitConfigInvalidException;
-import neatlogic.framework.integration.authentication.enums.HttpMethod;
+import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
+import neatlogic.framework.integration.core.IntegrationRateLimitManager;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -36,12 +37,14 @@ import neatlogic.framework.util.RegexUtils;
 import neatlogic.module.tenant.exception.integration.IntegrationUrlIllegalException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = INTERFACE_MODIFY.class)
 @OperationType(type = OperationTypeEnum.CREATE)
+@Transactional
 public class IntegrationSaveApi extends PrivateApiComponentBase {
 
     @Resource
@@ -76,10 +79,11 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         if (integrationMapper.checkNameIsRepeats(integrationVo) > 0) {
             throw new IntegrationNameRepeatsException(integrationVo.getName());
         }
-        if (IntegrationHandlerFactory.getHandler(integrationVo.getHandler()) == null) {
+        IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
+        if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
         }
-        if (HttpMethod.getHttpMethod(integrationVo.getMethod()) == null) {
+        if (!isMethodSupported(handler, integrationVo.getMethod())) {
             throw new HttpMethodNotFoundException(integrationVo.getMethod());
         }
         if (integrationVo.getUrl().contains("integration/run/")) {
@@ -92,6 +96,7 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         } else {
             integrationMapper.insertIntegration(integrationVo);
         }
+        IntegrationRateLimitManager.resetState(integrationVo.getUuid());
         return null;
     }
 
@@ -123,5 +128,21 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         if ((interval != null && interval < 0) || (count != null && count < 0)) {
             throw new IntegrationRateLimitConfigInvalidException();
         }
+    }
+
+    private boolean isMethodSupported(IIntegrationHandler handler, String method) {
+        if (handler == null || StringUtils.isBlank(method)) {
+            return false;
+        }
+        String[] methodList = handler.getMethod();
+        if (methodList == null) {
+            return false;
+        }
+        for (String supportMethod : methodList) {
+            if (method.equalsIgnoreCase(supportMethod)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

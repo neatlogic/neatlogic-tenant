@@ -20,9 +20,10 @@ import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.exception.type.PermissionDeniedException;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
+import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
@@ -96,6 +97,9 @@ public class RunIntegrationApi extends PrivateApiComponentBase {
         IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());
         if (handler == null) {
             throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
+        }
+        if ("mcp".equalsIgnoreCase(integrationVo.getMethod())) {
+            throw new ApiRuntimeException("MCP类型集成暂不支持通过integration/run直接调用");
         }
 
         IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.API);
