@@ -20,7 +20,11 @@ import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dto.FieldValidResultVo;
-import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.Input;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -41,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
-
 @Transactional
 @OperationType(type = OperationTypeEnum.CREATE)
 public class JobSaveApi extends PrivateApiComponentBase {
@@ -71,12 +74,13 @@ public class JobSaveApi extends PrivateApiComponentBase {
             @Param(name = "handler", type = ApiParamType.STRING, isRequired = true, desc = "定时作业组件"),
             @Param(name = "beginTime", type = ApiParamType.LONG, isRequired = false, desc = "开始时间"),
             @Param(name = "endTime", type = ApiParamType.LONG, isRequired = false, desc = "结束时间"),
-            @Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "corn表达式"),
-            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1：激活)"),
+            @Param(name = "cron", type = ApiParamType.STRING, isRequired = true, desc = "cron表达式"),
+            @Param(name = "isActive", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否激活(0:禁用，1:激活)"),
             @Param(name = "needAudit", type = ApiParamType.ENUM, isRequired = true, rule = "0,1", desc = "是否保存执行记录(0:不保存，1:保存)"),
-            @Param(name = "propList", type = ApiParamType.JSONARRAY, desc = "属性列表, 是否必填由定时作业组件决定"),
+            @Param(name = "propList", type = ApiParamType.JSONARRAY, desc = "属性列表，是否必填由定时作业组件决定"),
             @Param(name = "propList[0].name", type = ApiParamType.STRING, desc = "属性名"),
-            @Param(name = "propList[0].value", type = ApiParamType.STRING, desc = "属性值")})
+            @Param(name = "propList[0].value", type = ApiParamType.STRING, desc = "属性值")
+    })
     @Output({@Param(name = "uuid", type = ApiParamType.STRING, isRequired = true, desc = "定时作业uuid")})
     @Description(desc = "保存定时作业信息")
     @Override
@@ -107,7 +111,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
                 .needAudit(jobVo.getNeedAudit())
                 .withPropList(jobVo.getPropList())
                 .setType("public").build();
-
+        schedulerManager.saveJobSource(jobObject);
         if (jobVo.getIsActive() == 1) {
             schedulerManager.loadJob(jobObject);
         } else {
@@ -124,11 +128,8 @@ public class JobSaveApi extends PrivateApiComponentBase {
         if (schedulerMapper.checkJobNameIsExists(job) > 0) {
             throw new ScheduleJobNameRepeatException(job.getName());
         }
-        job.setSourceServerId(Config.SCHEDULE_SERVER_ID);
         JobVo oldJobVo = schedulerMapper.getJobBaseInfoByUuid(uuid);
         if (oldJobVo == null) {
-            // 新建作业时记录创建它的应用服务器；后续列表按该服务器所属服务组过滤。
-            job.setSourceServerId(Config.SCHEDULE_SERVER_ID);
             schedulerMapper.insertJob(job);
         } else {
             if (oldJobVo.getIsActive() == 1) {

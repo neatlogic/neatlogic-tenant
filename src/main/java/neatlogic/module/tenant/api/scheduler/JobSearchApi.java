@@ -16,11 +16,10 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.common.util.PageUtil;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
-import neatlogic.framework.crossover.IServerCrossoverService;
 import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -109,9 +108,8 @@ public class JobSearchApi extends PrivateApiComponentBase {
             }
             jobVo.setHandlerList(handlerList);
         }
-        // 管理页只展示当前应用服务分组内服务器创建的作业；source_server_id 为空的历史数据由 Mapper 兼容放行。
-        IServerCrossoverService serverCrossoverService = CrossoverServiceFactory.getApi(IServerCrossoverService.class);
-        jobVo.setSourceServerIdList(serverCrossoverService.getCurrentGroupServerIdList());
+        // 管理页只展示当前应用服务分组内服务器创建的作业
+        jobVo.setSourceServerGroup(Config.SCHEDULE_SERVER_GROUP());
         int rowNum = schedulerMapper.searchJobCount(jobVo);
         int pageCount = PageUtil.getPageCount(rowNum, jobVo.getPageSize());
         jobVo.setPageCount(pageCount);
