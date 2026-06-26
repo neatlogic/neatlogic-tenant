@@ -35,6 +35,7 @@ import neatlogic.framework.scheduler.dto.JobClassVo;
 import neatlogic.framework.scheduler.dto.JobObject;
 import neatlogic.framework.scheduler.dto.JobPropVo;
 import neatlogic.framework.scheduler.dto.JobVo;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.scheduler.exception.ScheduleIllegalParameterException;
 import neatlogic.framework.scheduler.exception.ScheduleJobNameRepeatException;
@@ -113,7 +114,7 @@ public class JobSaveApi extends PrivateApiComponentBase {
                 .setType("public").build();
         schedulerManager.saveJobSource(jobObject);
         if (jobVo.getIsActive() == 1) {
-            schedulerManager.loadJob(jobObject);
+            schedulerManager.loadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
         } else {
             schedulerManager.unloadJob(jobObject);
         }

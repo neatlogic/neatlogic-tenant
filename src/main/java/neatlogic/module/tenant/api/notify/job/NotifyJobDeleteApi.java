@@ -76,6 +76,7 @@ public class NotifyJobDeleteApi extends PrivateApiComponentBase {
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), handler.getGroupName(), handler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
 		schedulerManager.unloadJob(newJobObject);
+		schedulerManager.deleteJobSource(newJobObject);
 		schedulerMapper.deleteJobAuditByJobUuid(id.toString());
 		notifyJobMapper.deleteJobById(id);
 		notifyJobMapper.deleteReceiverByJobId(id);

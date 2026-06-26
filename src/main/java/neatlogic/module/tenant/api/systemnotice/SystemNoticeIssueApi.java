@@ -26,6 +26,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
 import neatlogic.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import neatlogic.framework.systemnotice.dto.SystemNoticeVo;
@@ -190,7 +191,7 @@ public class SystemNoticeIssueApi extends PrivateApiComponentBase {
                     .withIntervalInSeconds(60 * 60)
                     .withRepeatCount(0)
                     .build();
-            schedulerManager.loadJob(jobObject);
+            schedulerManager.loadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
         }
         systemNoticeMapper.updateSystemNoticeIssueInfo(vo);
         return null;
