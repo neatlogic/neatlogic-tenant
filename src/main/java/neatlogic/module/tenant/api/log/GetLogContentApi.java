@@ -74,6 +74,10 @@ public class GetLogContentApi extends PrivateApiComponentBase {
         Integer serverId = paramObj.getInteger("serverId");
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
             String fileName = paramObj.getString("fileName");
+            int lastIndex = fileName.lastIndexOf(File.separator);
+            if (lastIndex != -1) {
+                fileName = fileName.substring(lastIndex + 1);
+            }
             String log4jHome = System.getProperties().getProperty(SystemProperty.LOG4J_HOME);
             if (log4jHome != null) {
                 File file = new File(log4jHome + File.separator + fileName);
@@ -93,10 +97,10 @@ public class GetLogContentApi extends PrivateApiComponentBase {
                         resultObj.put("serverId", serverId);
                         return resultObj;
                     } else {
-                        throw new FileNotFoundException(FileNotFoundException.Type.DIRECTORY, log4jHome);
+                        throw new FileNotFoundException(FileNotFoundException.Type.DIRECTORY, file.getAbsolutePath());
                     }
                 } else {
-                    throw new FileNotFoundException(FileNotFoundException.Type.NONEXISTENT, log4jHome);
+                    throw new FileNotFoundException(FileNotFoundException.Type.NONEXISTENT, file.getAbsolutePath());
                 }
             } else {
                 throw new SystemPropertyNotFoundException(SystemProperty.LOG4J_HOME);

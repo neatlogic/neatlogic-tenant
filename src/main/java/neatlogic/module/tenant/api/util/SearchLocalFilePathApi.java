@@ -18,6 +18,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -78,7 +79,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                         if (resource.isFile()) {
                             File file = resource.getFile();
                             JSONObject pathObj = new JSONObject();
-                            pathObj.put("path", file.getPath());
+                            pathObj.put("path", RC4Util.encrypt(file.getPath()).replace(RC4Util.PRE, ""));
                             pathObj.put("canRead", file.canRead());
                             pathObj.put("canWrite", file.canWrite());
                             pathObj.put("isHidden", file.isHidden());
@@ -86,7 +87,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                             filePathList.add(pathObj);
                         } else {
                             JSONObject pathObj = new JSONObject();
-                            pathObj.put("path", resource.getURL().toString());
+                            pathObj.put("path", RC4Util.encrypt(resource.getURL().toString()).replace(RC4Util.PRE, ""));
                             pathObj.put("canRead", resource.isReadable());
                             otherPathList.add(pathObj);
                         }
@@ -122,7 +123,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                                     if (resource.isFile()) {
                                         File file = resource.getFile();
                                         JSONObject pathObj = new JSONObject();
-                                        pathObj.put("path", file.getPath());
+                                        pathObj.put("path", RC4Util.encrypt(file.getPath()).replace(RC4Util.PRE, ""));
                                         pathObj.put("canRead", file.canRead());
                                         pathObj.put("canWrite", file.canWrite());
                                         pathObj.put("isHidden", file.isHidden());
@@ -130,7 +131,7 @@ public class SearchLocalFilePathApi extends PrivateApiComponentBase {
                                         filePathList.add(pathObj);
                                     } else {
                                         JSONObject pathObj = new JSONObject();
-                                        pathObj.put("path", resource.getURL().toString());
+                                        pathObj.put("path", RC4Util.encrypt(resource.getURL().toString()).replace(RC4Util.PRE, ""));
                                         pathObj.put("canRead", resource.isReadable());
                                         otherPathList.add(pathObj);
                                     }
