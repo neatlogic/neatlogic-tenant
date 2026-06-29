@@ -1,0 +1,128 @@
+/*
+ *
+ * Copyright (C) 2025  TechSure Co., Ltd.  All Rights Reserved.
+ * This file is part of the NeatLogic software.
+ * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x – 2025.
+ * You may use this file only in compliance with the License.
+ * See the LICENSE file distributed with this work for the full license text.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ */
+
+package neatlogic.module.tenant.service.featureusage;
+
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
+import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class DelayedItem implements Delayed {
+	private static final Logger logger = LoggerFactory.getLogger(DelayedItem.class);
+	/**
+	 * 延迟5分钟
+	 **/
+	private final long delayTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1);
+
+	/**
+	 * 缓存租户访问记录
+	 **/
+	private final ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> tenantMap = new ConcurrentHashMap<>();
+	/**
+	 * 标记正在往当前延迟对象的缓存tenantMap中写数据的线程数
+	 **/
+	private final AtomicInteger writingDataThreadNum = new AtomicInteger();
+	/**
+	 * 延迟对象是否失效，未放进延迟队列或已从延迟队列取出的延迟对象会被标记为true
+	 **/
+	private final AtomicBoolean expired = new AtomicBoolean();
+	/**
+	 * 等待延迟对象收集数据完毕锁
+	 **/
+	private final Object lock = new Object();
+
+	public DelayedItem() {
+
+	}
+
+	public DelayedItem(boolean expired) {
+		this.expired.set(expired);
+	}
+
+	@Override
+	public int compareTo(Delayed o) {
+		DelayedItem item = (DelayedItem) o;
+		return Long.compare(this.delayTime, item.delayTime);
+	}
+
+	@Override
+	public long getDelay(TimeUnit unit) {
+		return delayTime - System.currentTimeMillis();
+	}
+
+	public boolean addFeatureUsageAuditVo(FeatureUsageAuditVo featureUsageAuditVo) {
+		if(expired.get()) {
+			return false;
+		}else {
+			try {
+				/* 写数据前加1**/
+				writingDataThreadNum.incrementAndGet();
+				String tenantUuid = TenantContext.get().getTenantUuid();
+				/* 从缓存中获取当前租户访问记录 **/
+				ConcurrentMap<FeatureUsageAuditVo, Object> accessTokenCounterMap = tenantMap.get(tenantUuid);
+				if (accessTokenCounterMap == null) {
+					/* 初始化某个租户访问记录缓存时，必须加锁，否则会出现多个线程相互覆盖情况 **/
+					synchronized (this) {
+						accessTokenCounterMap = tenantMap.get(tenantUuid);
+						if (accessTokenCounterMap == null) {
+							accessTokenCounterMap = new ConcurrentHashMap<>();
+							tenantMap.put(tenantUuid, accessTokenCounterMap);
+						}
+					}
+				}
+				accessTokenCounterMap.put(featureUsageAuditVo, new Object());
+
+			}catch(Exception e) {
+				logger.error(e.getMessage(), e);
+			}finally {
+				if(writingDataThreadNum.decrementAndGet() <= 0) {
+					if(expired.get()) {
+						/* 如果当前延迟对象已失效且没有线程往延迟对象写数据，就唤醒lock对象monitor的wait set中的线程，只有一个 **/
+						synchronized(lock) {
+							lock.notify();
+						}
+					}
+				}
+			}
+			return true;
+		}
+	}
+
+	public ConcurrentMap<String, ConcurrentMap<FeatureUsageAuditVo, Object>> getTenantMap() {
+		return tenantMap;
+	}
+
+	public int getWritingDataThreadNum() {
+		return writingDataThreadNum.get();
+	}
+
+	public boolean isExpired() {
+		return expired.get();
+	}
+
+	public void setExpired(boolean expired) {
+		this.expired.set(expired);;
+	}
+
+	public Object getLock() {
+		return lock;
+	}
+
+}

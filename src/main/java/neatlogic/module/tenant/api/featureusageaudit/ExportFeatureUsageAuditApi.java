@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2025  TechSure Co., Ltd.  All Rights Reserved.
  * This file is part of the NeatLogic software.
- * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x 2025.
+ * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x - 2025.
  * You may use this file only in compliance with the License.
  * See the LICENSE file distributed with this work for the full license text.
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 
-package neatlogic.module.tenant.api.loginaudit;
+package neatlogic.module.tenant.api.featureusageaudit;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -17,16 +17,17 @@ import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.constvalue.MimeType;
-import neatlogic.framework.dao.mapper.LoginMapper;
-import neatlogic.framework.dao.mapper.TeamMapper;
+import neatlogic.framework.common.util.ModuleUtil;
+import neatlogic.framework.dao.mapper.FeatureUsageAuditMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.dto.loginaudit.LoginAuditSearchVo;
-import neatlogic.framework.dto.loginaudit.LoginAuditVo;
+import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditSearchVo;
+import neatlogic.framework.dto.featureusageaudit.FeatureUsageAuditVo;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
@@ -47,52 +48,50 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
+public class ExportFeatureUsageAuditApi extends PrivateBinaryStreamApiComponentBase {
 
     private static final int EXPORT_PAGE_SIZE = 100;
-    private static final List<String> HEADER_LIST = Arrays.asList("用户", "用户组", "IP", "登录时间", "登录方式");
-    private static final List<String> COLUMN_LIST = Arrays.asList("user", "teamNameList", "ip", "loginTime", "loginMethod");
+    private static final List<String> HEADER_LIST = Arrays.asList("用户", "模块", "功能名称", "开始时间", "结束时间", "使用时长");
+    private static final List<String> COLUMN_LIST = Arrays.asList("user", "moduleGroupName", "featureName", "startTime", "endTime", "duration");
 
     @Resource
-    private LoginMapper loginMapper;
-    @Resource
-    private TeamMapper teamMapper;
+    private FeatureUsageAuditMapper featureUsageAuditMapper;
     @Resource
     private UserMapper userMapper;
 
     @Override
     public String getToken() {
-        return "login/audit/export";
+        return "feature/usage/audit/export";
     }
 
     @Override
     public String getName() {
-        return "nmtal.exportloginauditapi.getname";
+        return "nmtaf.exportfeatureusageauditapi.getname";
     }
 
     @Input({
+            @Param(name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
-            @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
-            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
-            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
     })
-    @Description(desc = "nmtal.exportloginauditapi.getname")
+    @Output({})
+    @Description(desc = "nmtaf.exportfeatureusageauditapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        LoginAuditSearchVo searchVo = paramObj.toJavaObject(LoginAuditSearchVo.class);
+        FeatureUsageAuditSearchVo searchVo = paramObj.toJavaObject(FeatureUsageAuditSearchVo.class);
         buildSearchParam(searchVo, paramObj);
 
         response.setContentType(MimeType.XLSX.getValue() + ";charset=utf-8");
-        String fileName = "登录记录" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xlsx";
+        String fileName = "功能使用记录" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xlsx";
         response.setHeader("Content-Disposition", " attachment; filename=\"" + FileUtil.getEncodedFileName(fileName) + "\"");
         ExcelBuilder builder = new ExcelBuilder(SXSSFWorkbook.class)
                 .withBorderColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT)
@@ -113,10 +112,12 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    private void buildSearchParam(LoginAuditSearchVo searchVo, JSONObject paramObj) {
-        if (CollectionUtils.isNotEmpty(searchVo.getTeamUuidList())) {
-            searchVo.setTeamUuidList(searchVo.getTeamUuidList().stream().map(GroupSearch::removePrefix).collect(Collectors.toList()));
+    private void buildSearchParam(FeatureUsageAuditSearchVo searchVo, JSONObject paramObj) {
+        String userUuid = paramObj.getString("userUuid");
+        if (StringUtils.isNotBlank(userUuid) && userUuid.startsWith(GroupSearch.USER.getValuePlugin())) {
+            searchVo.setUserUuid(GroupSearch.removePrefix(userUuid));
         }
+        // 将相对时间范围转换为开始时间和结束时间，导出与列表查询使用同一套时间条件。
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = paramObj.getInteger("timeRange");
             String timeUnit = paramObj.getString("timeUnit");
@@ -129,36 +130,23 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         searchVo.setPageSize(EXPORT_PAGE_SIZE);
     }
 
-    private void writeData(SheetBuilder sheetBuilder, LoginAuditSearchVo searchVo) {
-        int rowNum = loginMapper.getLoginAuditCount(searchVo);
+    private void writeData(SheetBuilder sheetBuilder, FeatureUsageAuditSearchVo searchVo) {
+        int rowNum = featureUsageAuditMapper.getFeatureUsageAuditCount(searchVo);
         if (rowNum <= 0) {
             return;
         }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Map<String, UserVo> userMap = new HashMap<>();
         searchVo.setRowNum(rowNum);
         Integer pageCount = searchVo.getPageCount();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Map<String, List<String>> userUuid2teamNameListMap = new HashMap<>();
-        Map<String, UserVo> userMap = new HashMap<>();
         for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
             searchVo.setCurrentPage(currentPage);
-            List<LoginAuditVo> loginAuditList = loginMapper.getLoginAuditList(searchVo);
-            if (CollectionUtils.isEmpty(loginAuditList)) {
-                continue;
-            }
+            List<FeatureUsageAuditVo> featureUsageAuditList = featureUsageAuditMapper.getFeatureUsageAuditList(searchVo);
             Set<String> userUuidSet = new HashSet<>();
-            for (LoginAuditVo loginAuditVo : loginAuditList) {
-                if (StringUtils.isNotBlank(loginAuditVo.getUserUuid())) {
-                    if (!userMap.containsKey(loginAuditVo.getUserUuid())) {
-                        userUuidSet.add(loginAuditVo.getUserUuid());
-                    }
-                    List<String> teamNameList = userUuid2teamNameListMap.get(loginAuditVo.getUserUuid());
-                    if (teamNameList == null) {
-                        teamNameList = new ArrayList<>();
-                        List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(loginAuditVo.getUserUuid());
-                        if (CollectionUtils.isNotEmpty(teamList)) {
-                            teamNameList = teamList.stream().map(TeamVo::getName).collect(Collectors.toList());
-                        }
-                        userUuid2teamNameListMap.put(loginAuditVo.getUserUuid(), teamNameList);
+            for (FeatureUsageAuditVo featureUsageAuditVo : featureUsageAuditList) {
+                if (StringUtils.isNotBlank(featureUsageAuditVo.getUserUuid())) {
+                    if (!userMap.containsKey(featureUsageAuditVo.getUserUuid())) {
+                        userUuidSet.add(featureUsageAuditVo.getUserUuid());
                     }
                 }
             }
@@ -168,13 +156,14 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
                     userMap.put(userVo.getUuid(), userVo);
                 }
             }
-            for (LoginAuditVo loginAuditVo : loginAuditList) {
+            for (FeatureUsageAuditVo featureUsageAuditVo : featureUsageAuditList) {
                 Map<String, Object> dataMap = new LinkedHashMap<>();
-                dataMap.put("user", getUserText(loginAuditVo.getUserUuid(), userMap.get(loginAuditVo.getUserUuid())));
-                dataMap.put("teamNameList", getTeamText(userUuid2teamNameListMap.get(loginAuditVo.getUserUuid())));
-                dataMap.put("ip", StringUtils.defaultString(loginAuditVo.getIp()));
-                dataMap.put("loginTime", loginAuditVo.getLoginTime() == null ? StringUtils.EMPTY : dateFormat.format(loginAuditVo.getLoginTime()));
-                dataMap.put("loginMethod", StringUtils.defaultString(loginAuditVo.getLoginMethod()));
+                dataMap.put("user", getUserText(featureUsageAuditVo.getUserUuid(), userMap.get(featureUsageAuditVo.getUserUuid())));
+                dataMap.put("moduleGroupName", getModuleGroupName(featureUsageAuditVo.getModuleGroup()));
+                dataMap.put("featureName", StringUtils.defaultString(featureUsageAuditVo.getFeatureName()));
+                dataMap.put("startTime", dateFormat.format(featureUsageAuditVo.getStartTime()));
+                dataMap.put("endTime", dateFormat.format(featureUsageAuditVo.getEndTime()));
+                dataMap.put("duration", getDurationText(featureUsageAuditVo.getDuration()));
                 sheetBuilder.addData(dataMap);
             }
         }
@@ -193,11 +182,19 @@ public class ExportLoginAuditApi extends PrivateBinaryStreamApiComponentBase {
         return StringUtils.defaultIfBlank(userVo.getUserName(), StringUtils.defaultIfBlank(userVo.getUserId(), userUuid));
     }
 
-    private String getTeamText(List<String> teamNameList) {
-        if (CollectionUtils.isEmpty(teamNameList)) {
+    private String getModuleGroupName(String moduleGroup) {
+        ModuleGroupVo groupVo = ModuleUtil.getModuleGroup(moduleGroup);
+        if (groupVo != null) {
+            return groupVo.getGroupName();
+        }
+        return StringUtils.defaultString(moduleGroup);
+    }
+
+    private String getDurationText(Long duration) {
+        if (duration == null) {
             return StringUtils.EMPTY;
         }
-        return String.join(",", teamNameList);
+        return TimeUtil.millisecondsTransferMaxTimeUnit(duration);
     }
 
     @Override

@@ -18,6 +18,7 @@ import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.FileUtil;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -72,6 +73,7 @@ public class DownloadLocalFileApi extends PrivateBinaryStreamApiComponentBase {
         if (Objects.equals(serverId, Config.SCHEDULE_SERVER_ID)) {
             String fileName = null;
             String path = paramObj.getString("path");
+            path = RC4Util.decrypt(RC4Util.PRE + path);
             int index = -1;
             if (path.contains(File.separator)) {
                 index = path.lastIndexOf(File.separator);

@@ -3,6 +3,7 @@ package neatlogic.module.tenant.api.loginaudit;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.GroupSearch;
 import neatlogic.framework.common.dto.BasePageVo;
@@ -25,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@AuthAction(action = NoAuth.class)
+@AuthAction(action = USER_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchLoginAuditApi extends PrivateApiComponentBase {
 
@@ -43,11 +44,13 @@ public class SearchLoginAuditApi extends PrivateApiComponentBase {
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.duration"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
             @Param(name = "timeUnit", type = ApiParamType.STRING, desc = "common.timeunit"),
             @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
             @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
             @Param(name = "teamUuidList", type = ApiParamType.JSONARRAY, desc = "common.teamuuidlist"),
+            @Param(name = "moduleGroupList", type = ApiParamType.JSONARRAY, desc = "common.modulegroup"),
+            @Param(name = "featureNameList", type = ApiParamType.JSONARRAY, desc = "common.featurename"),
     })
     @Output({
             @Param(name = "tbodylist", explode = LoginAuditVo[].class, desc = "common.tbodylist"),
@@ -57,10 +60,10 @@ public class SearchLoginAuditApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         LoginAuditSearchVo searchVo = paramObj.toJavaObject(LoginAuditSearchVo.class);
-        //将时间范围转为 开始时间、结束时间
         if (CollectionUtils.isNotEmpty(searchVo.getTeamUuidList())) {
             searchVo.setTeamUuidList(searchVo.getTeamUuidList().stream().map(GroupSearch::removePrefix).collect(Collectors.toList()));
         }
+        //将时间范围转为 开始时间、结束时间
         if (searchVo.getStartTime() == null && searchVo.getEndTime() == null) {
             Integer timeRange = paramObj.getInteger("timeRange");
             String timeUnit = paramObj.getString("timeUnit");
