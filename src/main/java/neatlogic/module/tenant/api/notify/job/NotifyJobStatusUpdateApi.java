@@ -27,6 +27,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.module.framework.notify.schedule.handler.NotifyContentJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,8 +79,9 @@ public class NotifyJobStatusUpdateApi extends PrivateApiComponentBase {
 		IJob handler = SchedulerManager.getHandler(NotifyContentJob.class.getName());
 		String tenantUuid = TenantContext.get().getTenantUuid();
 		JobObject newJobObject = new JobObject.Builder(job.getId().toString(), handler.getGroupName(), handler.getClassName(), tenantUuid).withCron(job.getCron()).addData("notifyContentJobId",job.getId()).build();
+		schedulerManager.saveJobSource(newJobObject);
 		if(job.getIsActive().intValue() == 1){
-			schedulerManager.loadJob(newJobObject);
+			schedulerManager.loadJob(newJobObject, JobLoadTriggerType.INITIAL_CREATE);
 		}else{
 			schedulerManager.unloadJob(newJobObject);
 		}

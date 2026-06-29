@@ -75,6 +75,7 @@ public class JobDeleteApi extends PrivateApiComponentBase {
         if (jobHandler != null) {
             JobObject jobObject = new JobObject.Builder(jobUuid, jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid).build();
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.deleteJobSource(jobObject);
         }
         schedulerMapper.deleteJobAuditByJobUuid(jobUuid);
         schedulerMapper.deleteJobPropByJobUuid(jobUuid);

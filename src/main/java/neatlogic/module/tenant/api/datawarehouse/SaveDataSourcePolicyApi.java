@@ -26,6 +26,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.core.IJob;
 import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dto.JobObject;
+import neatlogic.framework.scheduler.enums.JobLoadTriggerType;
 import neatlogic.module.framework.scheduler.datawarehouse.ReportDataSourceJob;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -88,8 +89,9 @@ public class SaveDataSourcePolicyApi extends PrivateApiComponentBase {
                 .withCron(reportDataSourceVo.getCronExpression())
                 .addData("datasourceId", reportDataSourceVo.getId())
                 .build();
+        schedulerManager.saveJobSource(jobObject);
         if (StringUtils.isNotBlank(reportDataSourceVo.getCronExpression())) {
-            schedulerManager.loadJob(jobObject);
+            schedulerManager.loadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         } else {
             schedulerManager.unloadJob(jobObject);
         }

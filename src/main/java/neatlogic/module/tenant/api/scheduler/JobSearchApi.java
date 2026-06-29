@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.SCHEDULE_JOB_MODIFY;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.common.util.PageUtil;
@@ -107,6 +108,8 @@ public class JobSearchApi extends PrivateApiComponentBase {
             }
             jobVo.setHandlerList(handlerList);
         }
+        // 管理页只展示当前应用服务分组内服务器创建的作业
+        jobVo.setSourceServerGroup(Config.SCHEDULE_SERVER_GROUP());
         int rowNum = schedulerMapper.searchJobCount(jobVo);
         int pageCount = PageUtil.getPageCount(rowNum, jobVo.getPageSize());
         jobVo.setPageCount(pageCount);

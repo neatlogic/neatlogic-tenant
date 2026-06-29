@@ -89,6 +89,7 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
             JobObject jobObject = new JobObject.Builder(vo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
                     .build();
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.deleteJobSource(jobObject);
         }
         {
             IJob jobHandler = SchedulerManager.getHandler(StopSystemNoticeJob.class.getName());
@@ -99,6 +100,7 @@ public class SystemNoticeDeleteApi extends PrivateApiComponentBase {
             JobObject jobObject = new JobObject.Builder(vo.getId().toString(), jobHandler.getGroupName(), jobHandler.getClassName(), tenantUuid)
                     .build();
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.deleteJobSource(jobObject);
         }
         return null;
     }
