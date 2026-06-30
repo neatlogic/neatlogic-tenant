@@ -89,11 +89,11 @@ public class SaveDataSourcePolicyApi extends PrivateApiComponentBase {
                 .withCron(reportDataSourceVo.getCronExpression())
                 .addData("datasourceId", reportDataSourceVo.getId())
                 .build();
-        schedulerManager.saveJobSource(jobObject);
         if (StringUtils.isNotBlank(reportDataSourceVo.getCronExpression())) {
             schedulerManager.loadJob(jobObject, JobLoadTriggerType.SERVER_RESTART);
         } else {
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.saveJobSource(jobObject);
         }
         return null;
     }

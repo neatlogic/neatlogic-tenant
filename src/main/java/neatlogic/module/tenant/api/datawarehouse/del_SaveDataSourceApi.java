@@ -86,11 +86,11 @@ public class del_SaveDataSourceApi extends PrivateApiComponentBase {
                 .withCron(reportDataSourceVo.getCronExpression())
                 .addData("datasourceId", reportDataSourceVo.getId())
                 .build();
-        schedulerManager.saveJobSource(jobObject);
         if (StringUtils.isNotBlank(reportDataSourceVo.getCronExpression())) {
             schedulerManager.loadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
         } else {
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.saveJobSource(jobObject);
         }
         return null;
     }

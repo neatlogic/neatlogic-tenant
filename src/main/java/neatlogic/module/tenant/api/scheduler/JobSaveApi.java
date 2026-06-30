@@ -112,11 +112,11 @@ public class JobSaveApi extends PrivateApiComponentBase {
                 .needAudit(jobVo.getNeedAudit())
                 .withPropList(jobVo.getPropList())
                 .setType("public").build();
-        schedulerManager.saveJobSource(jobObject);
         if (jobVo.getIsActive() == 1) {
             schedulerManager.loadJob(jobObject, JobLoadTriggerType.INITIAL_CREATE);
         } else {
             schedulerManager.unloadJob(jobObject);
+            schedulerManager.saveJobSource(jobObject);
         }
 
         JSONObject resultObj = new JSONObject();
