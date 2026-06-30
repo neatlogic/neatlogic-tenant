@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BaseEditorVo;
 import neatlogic.framework.common.util.PageUtil;
@@ -98,6 +99,7 @@ public class NotifyJobSearchApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		JSONObject returnObj = new JSONObject();
 		NotifyJobVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<NotifyJobVo>(){});
+		vo.setSourceServerGroup(Config.SCHEDULE_SERVER_GROUP());
 		if(vo.getNeedPage()){
 			int rowNum = notifyJobMapper.searchJobCount(vo);
 			returnObj.put("pageSize", vo.getPageSize());
