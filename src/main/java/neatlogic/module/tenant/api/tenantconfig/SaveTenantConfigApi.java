@@ -68,7 +68,7 @@ public class SaveTenantConfigApi extends PrivateApiComponentBase {
         if (type != null) {
             ApiParamValidatorBase authInstance = ParamValidatorFactory.getAuthInstance(type);
             if (authInstance != null) {
-                if (!authInstance.validate(configVo.getValue(), null)) {
+                if (!authInstance.validate(configVo.getValue(), tenantConfig.getRule())) {
                     throw new ParamIrregularException("value(值)");
                 }
             }
