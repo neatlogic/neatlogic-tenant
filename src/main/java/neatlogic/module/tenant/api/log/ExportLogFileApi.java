@@ -31,6 +31,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
+import neatlogic.framework.util.FileSafeUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.tenant.service.ServerService;
 import org.apache.commons.io.IOUtils;
@@ -84,10 +85,10 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
             String log4jHome = System.getProperties().getProperty(SystemProperty.LOG4J_HOME);
             if (log4jHome != null) {
                 String fileName = paramObj.getString("fileName");
-                String path = log4jHome + File.separator + fileName;
-                File file = new File(path);
+                File file = FileSafeUtil.getDownloadFile(fileName, log4jHome);
                 if (file.exists()) {
                     if (file.isFile()) {
+                        String path = file.getPath();
                         if (!path.startsWith("file:")) {
                             path = "file:" + path;
                         }
@@ -99,7 +100,7 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                                         prefix = serverClusterVo.getIp() + "-" + prefix;
                                     }
                                     response.setContentType("application/octet-stream");
-                                    response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + fileName) + "\"");
+                                    response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + file.getName()) + "\"");
                                     IOUtils.copyLarge(in, os);
                                     os.flush();
                                 }

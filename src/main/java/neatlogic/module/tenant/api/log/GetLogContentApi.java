@@ -23,6 +23,7 @@ import neatlogic.framework.exception.file.FileNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.FileSafeUtil;
 import neatlogic.module.tenant.service.ServerService;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +81,7 @@ public class GetLogContentApi extends PrivateApiComponentBase {
             }
             String log4jHome = System.getProperties().getProperty(SystemProperty.LOG4J_HOME);
             if (log4jHome != null) {
-                File file = new File(log4jHome + File.separator + fileName);
+                File file = FileSafeUtil.getDownloadFile(fileName, log4jHome);
                 if (file.exists()) {
                     if (file.isFile()) {
                         long length = file.length();
