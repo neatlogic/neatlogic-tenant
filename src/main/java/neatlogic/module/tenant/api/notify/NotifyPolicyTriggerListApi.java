@@ -96,13 +96,13 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
             throw new NotifyPolicyHandlerNotFoundException(notifyPolicyVo.getHandler());
         }
         List<NotifyTriggerVo> systemTriggerList = notifyPolicyHandler.getNotifyTriggerList();
-        /** 获取工单干系人枚举 */
-        //TODO 没有兼容多模块
+        /** 根据通知处理器所属模块加载动态通知对象。 */
+        String notifyModuleGroup = NotifyPolicyHandlerFactory.getModuleGroupIdByHandler(notifyPolicyVo.getHandler());
         Map<String, UserTypeVo> userTypeVoMap = UserTypeFactory.getUserTypeMap();
-        UserTypeVo UsertypeVo = userTypeVoMap.get("process");
-        final Map<String, String> processUserType = new HashMap<>();
-        if (UsertypeVo != null && UsertypeVo.getValues() != null) {
-            processUserType.putAll(UsertypeVo.getValues());
+        UserTypeVo userTypeVo = userTypeVoMap.get(notifyModuleGroup);
+        final Map<String, String> moduleUserType = new HashMap<>();
+        if (userTypeVo != null && userTypeVo.getValues() != null) {
+            moduleUserType.putAll(userTypeVo.getValues());
         }
 
         NotifyPolicyConfigVo config = notifyPolicyVo.getConfig();
@@ -137,7 +137,7 @@ public class NotifyPolicyTriggerListApi extends PrivateApiComponentBase {
                 continue;
             }
             /** 补充通知对象详细信息 */
-            notifyPolicyService.addReceiverExtraInfo(processUserType, vo);
+            notifyPolicyService.addReceiverExtraInfo(moduleUserType, vo);
 
             resultList.add(vo);
         }

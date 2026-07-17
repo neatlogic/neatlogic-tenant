@@ -32,7 +32,7 @@ public class NotifyPolicyServiceImpl implements NotifyPolicyService {
 	private RoleMapper roleMapper;
 
 	@Override
-	public void addReceiverExtraInfo(Map<String, String> processUserType, NotifyTriggerVo triggerObj) {
+	public void addReceiverExtraInfo(Map<String, String> moduleUserType, NotifyTriggerVo triggerObj) {
 		List<NotifyTriggerNotifyVo> notifyTriggerNotifyVos = triggerObj.getNotifyList();
 		if(CollectionUtils.isNotEmpty(notifyTriggerNotifyVos)){
 			for(NotifyTriggerNotifyVo triggerNotifyVo : notifyTriggerNotifyVos){
@@ -68,7 +68,7 @@ public class NotifyPolicyServiceImpl implements NotifyPolicyService {
 										receiverObj.put("name",role.getName());//统一成name，方便前端组件渲染
 									}
 								}else{
-									receiverObj.put("name",processUserType.get(split[1]));//统一成name，方便前端组件渲染
+									receiverObj.put("name",moduleUserType.get(split[1]));//统一成name，方便前端组件渲染
 								}
 								receiverObjList.add(receiverObj);
 							}
