@@ -13,20 +13,29 @@
 package neatlogic.module.tenant.api.scheduler;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.ModuleUtil;
 import neatlogic.framework.common.util.PageUtil;
+import neatlogic.framework.dto.module.ModuleGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.JobAuditVo;
+import neatlogic.framework.scheduler.dto.JobClassVo;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -54,7 +63,13 @@ public class JobAuditSearchApi extends PrivateApiComponentBase {
 
     @Input({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "jobUuid", type = ApiParamType.STRING, desc = "定时作业uuid，不提供则搜索所有作业的执行记录")})
+            @Param(name = "jobUuid", type = ApiParamType.STRING, desc = "定时作业uuid，不提供则搜索所有作业的执行记录"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "作业名"),
+            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "所属模块id"),
+            @Param(name = "jobHandler", type = ApiParamType.STRING, desc = "作业组件类路径"),
+            @Param(name = "jobGroupName", type = ApiParamType.STRING, desc = "作业组名"),
+            @Param(name = "status", type = ApiParamType.STRING, desc = "执行状态"),
+            @Param(name = "startTimeRange", type = ApiParamType.JSONOBJECT, desc = "开始时间范围")})
     @Description(desc = "查询定时作业执行记录列表")
     @Output({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, isRequired = true, desc = "当前页码"),
@@ -66,6 +81,22 @@ public class JobAuditSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JobAuditVo jobAuditVo = JSONObject.toJavaObject(jsonObj, JobAuditVo.class);
+        // 所属模块是运行时信息，需要先转换为对应的作业组件类路径，再交给数据库统一过滤。
+        String moduleId = jsonObj.getString("moduleId");
+        if (StringUtils.isNotBlank(moduleId)) {
+            List<String> moduleIdList = new ArrayList<>();
+            ModuleGroupVo moduleGroupVo = ModuleUtil.getModuleGroup(moduleId);
+            if (moduleGroupVo != null) {
+                moduleIdList = moduleGroupVo.getModuleIdList();
+            }
+            List<String> finalModuleIdList = moduleIdList;
+            List<String> jobHandlerList = SchedulerManager.getAllJobClassList().stream()
+                    .filter(jobClassVo -> TenantContext.get().containsModule(jobClassVo.getModuleId()))
+                    .filter(jobClassVo -> CollectionUtils.isNotEmpty(finalModuleIdList) && finalModuleIdList.contains(jobClassVo.getModuleId()))
+                    .map(JobClassVo::getClassName)
+                    .collect(Collectors.toList());
+            jobAuditVo.setJobHandlerList(jobHandlerList);
+        }
         //通用接口无需校验
         /*if (StringUtils.isNotBlank(jobAuditVo.getJobUuid())) {
             JobVo job = schedulerMapper.getJobByUuid(jobAuditVo.getJobUuid());
