@@ -15,8 +15,11 @@ package neatlogic.module.tenant.api;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserSessionMapper;
+import neatlogic.framework.dto.UserSessionVo;
+import neatlogic.framework.filter.JsonWebTokenValidFilter;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -57,6 +60,16 @@ public class HeartbeatApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         String tokenHash = paramObj.getString("tokenHash");
         userSessionMapper.updateUserSession(tokenHash);
-        return null;
+        //返回服务器时间和用户会话失效时间，用于前端回显用户会话失效倒计时
+        UserSessionVo userSessionVo = userSessionMapper.getUserSessionByTokenHashWithoutCache(tokenHash);
+        if (userSessionVo == null || userSessionVo.getSessionTime() == null) {
+            return null;
+        }
+        long serverTime = System.currentTimeMillis();
+        long expireTime = userSessionVo.getSessionTime().getTime() + (Config.USER_EXPIRETIME() * 60L + JsonWebTokenValidFilter.WEB_HEARTBEAT_INTERVAL) * 1000L;
+        JSONObject result = new JSONObject();
+        result.put("serverTime", serverTime);
+        result.put("expireTime", expireTime);
+        return result;
     }
 }
