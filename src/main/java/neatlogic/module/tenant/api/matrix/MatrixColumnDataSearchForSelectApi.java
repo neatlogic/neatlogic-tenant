@@ -143,6 +143,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
     @Description(desc = "矩阵属性数据查询-下拉级联接口")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
+        boolean fieldKeyUseUniqueIdentifier = false;
         String keyword = jsonObj.getString("keyword");
         String matrixUuid = jsonObj.getString("matrixUuid");
         String matrixLabel = jsonObj.getString("matrixLabel");
@@ -175,6 +176,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         if (CollectionUtils.isEmpty(matrixAttributeList)) {
             return new JSONObject();
         }
+        Map<String, String> uuidToUniqueIdentifierMap = new HashMap<>();
         Map<String, String> uniqueIdentifierToUuidMap = new HashMap<>();
         for (MatrixAttributeVo matrixAttributeVo : matrixAttributeList) {
             String uniqueIdentifier = matrixAttributeVo.getUniqueIdentifier();
@@ -182,6 +184,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 continue;
             }
             uniqueIdentifierToUuidMap.put(uniqueIdentifier, matrixAttributeVo.getUuid());
+            uuidToUniqueIdentifierMap.put(matrixAttributeVo.getUuid(), uniqueIdentifier);
         }
         List<MatrixFilterVo> filterList = new ArrayList<>();
         JSONArray filterArray = jsonObj.getJSONArray("filterList");
@@ -222,6 +225,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             if (StringUtils.isBlank(attrUuid)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), valueFieldUniqueIdentifier);
             }
+            fieldKeyUseUniqueIdentifier = true;
             valueField = attrUuid;
         }
 
@@ -239,6 +243,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             if (StringUtils.isBlank(attrUuid)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), textFieldUniqueIdentifier);
             }
+            fieldKeyUseUniqueIdentifier = true;
             textField = attrUuid;
         }
 
@@ -268,6 +273,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                     throw new MatrixAttributeNotFoundException(matrixVo.getName(), hiddenFieldUniqueIdentifier);
                 }
                 if (!hiddenFieldList.contains(hiddenField)) {
+                    fieldKeyUseUniqueIdentifier = true;
                     hiddenFieldList.add(hiddenField);
                 }
             }
@@ -283,6 +289,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
             if (StringUtils.isBlank(attrUuid)) {
                 throw new MatrixAttributeNotFoundException(matrixVo.getName(), keywordColumnUniqueIdentifier);
             }
+            fieldKeyUseUniqueIdentifier = true;
             keywordColumn = attrUuid;
         }
         Boolean needPage = jsonObj.getBoolean("needPage");
@@ -292,7 +299,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         Integer pageSize = jsonObj.getInteger("pageSize");
         pageSize = pageSize == null || pageSize < 0? 20 : pageSize;
         JSONArray defaultValue = jsonObj.getJSONArray("defaultValue");
-        return matrixService.searchMatrixColumnDataForSelect(
+        JSONObject resultObj = matrixService.searchMatrixColumnDataForSelect(
                 matrixUuid,
                 keywordColumn,
                 valueField,
@@ -304,5 +311,26 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                 pageSize,
                 needPage,
                 defaultValue);
+        if (fieldKeyUseUniqueIdentifier) {
+            JSONArray dataList = resultObj.getJSONArray("dataList");
+            if (CollectionUtils.isNotEmpty(dataList)) {
+                for (int i = 0; i < dataList.size(); i++) {
+                    JSONObject dataObj = dataList.getJSONObject(i);
+                    List<String> keyList = new ArrayList<>(dataObj.keySet());
+                    for (String key : keyList) {
+                        if (!Objects.equals(key, "value") && !Objects.equals(key, "text")) {
+                            String uniqueIdentifier = uuidToUniqueIdentifierMap.get(key);
+                            if (StringUtils.isBlank(uniqueIdentifier)) {
+                                throw new MatrixAttributeNotFoundException(matrixVo.getName(), uniqueIdentifier);
+                            }
+                            Object obj = dataObj.get(key);
+                            dataObj.put(uniqueIdentifier, obj);
+                            dataObj.remove(key);
+                        }
+                    }
+                }
+            }
+        }
+        return resultObj;
     }
 }
