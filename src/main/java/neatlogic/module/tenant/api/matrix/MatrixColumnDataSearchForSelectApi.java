@@ -325,7 +325,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                             }
                             Object obj = dataObj.get(key);
                             dataObj.put(uniqueIdentifier, obj);
-                            dataObj.remove(key);
+//                            dataObj.remove(key);
                         }
                     }
                 }
