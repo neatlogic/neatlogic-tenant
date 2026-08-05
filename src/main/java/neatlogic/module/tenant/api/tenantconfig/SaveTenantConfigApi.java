@@ -28,6 +28,7 @@ import neatlogic.framework.param.validate.core.ParamValidatorFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -63,6 +64,11 @@ public class SaveTenantConfigApi extends PrivateApiComponentBase {
         ITenantConfig tenantConfig = TenantConfigFactory.getTenantConfigByKey(configVo.getKey());
         if (tenantConfig == null) {
             throw new TenantConfigNotFoundException(configVo.getKey());
+        }
+        // 系统参数留空表示删除租户覆盖配置，后续使用参数的代码内置默认值。
+        if (StringUtils.isBlank(configVo.getValue())) {
+            configMapper.deleteConfigByKey(configVo.getKey());
+            return null;
         }
         ApiParamType type = tenantConfig.getType();
         if (type != null) {
