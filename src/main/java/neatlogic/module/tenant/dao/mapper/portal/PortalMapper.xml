@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="neatlogic.module.tenant.dao.mapper.portal.PortalMapper">
+    <sql id="portalWhere">
+        <where>
+            (
+                (
+                    `type` = #{type}
+                    <if test="type == 'personal'">
+                        and `fcu` = #{fcu}
+                    </if>
+                )
+                <if test="globalPortalIdList != null and globalPortalIdList.size() > 0">
+                OR `id` IN
+                <foreach collection="globalPortalIdList" item="globalPortalId" open="(" separator="," close=")">
+                    #{globalPortalId}
+                </foreach>
+                </if>
+            )
+            AND `module_group` = #{moduleGroup}
+            <if test="keyword != null and keyword != ''">
+                AND `name` LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="isActive != null">
+                AND `is_active` = #{isActive}
+            </if>
+        </where>
+    </sql>
+
+    <select id="getPortalById" parameterType="java.lang.Long" resultType="neatlogic.module.tenant.dto.portal.PortalVo">
+        SELECT `id`, `name`, `is_active` AS isActive, `config` AS configStr, `sort`, `type`, `module_group` AS moduleGroup, `fcu`, `fcd`, `lcu`, `lcd`
+        FROM `portal` WHERE `id` = #{value}
+    </select>
+
+    <select id="getPortalCount" parameterType="neatlogic.module.tenant.dto.portal.PortalSearchVo" resultType="int">
+        SELECT COUNT(1) FROM `portal` <include refid="portalWhere"/>
+    </select>
+
+    <select id="searchPortal" parameterType="neatlogic.module.tenant.dto.portal.PortalSearchVo" resultType="neatlogic.module.tenant.dto.portal.PortalVo">
+        SELECT `id`, `name`, `is_active` AS isActive, `config` AS configStr, `sort`, `type`, `module_group` AS moduleGroup, `fcu`, `fcd`, `lcu`, `lcd`
+        FROM `portal`
+        <include refid="portalWhere"/>
+        ORDER BY `type` desc , `id` desc
+        LIMIT #{startNum}, #{pageSize}
+    </select>
+
+    <select id="getMaxSort" resultType="java.lang.Integer" useCache="false">
+        SELECT MAX(`sort`) FROM `portal` FOR UPDATE
+    </select>
+
+    <select id="getPortalAuthorityListByPortalId" parameterType="java.lang.Long" resultType="neatlogic.framework.dto.AuthorityVo">
+        SELECT `uuid`, `type` FROM `portal_authority` WHERE `portal_id` = #{value}
+    </select>
+
+    <insert id="insertPortal" parameterType="neatlogic.module.tenant.dto.portal.PortalVo">
+        INSERT INTO `portal` (`id`, `name`, `is_active`, `config`, `sort`, `type`, `module_group`, `fcu`, `fcd`, `lcu`, `lcd`)
+        VALUES (#{id}, #{name}, #{isActive}, #{configStr, typeHandler=CompressHandler}, #{sort}, #{type}, #{moduleGroup}, #{fcu}, NOW(3), #{lcu}, NOW(3))
+        ON DUPLICATE KEY UPDATE `name` = #{name}, `is_active` = #{isActive}, `config` = #{configStr, typeHandler=CompressHandler}, `sort` = #{sort}, `lcu` = #{lcu}, `lcd` = NOW(3)
+    </insert>
+
+    <insert id="insertPortalAuthority">
+        INSERT INTO `portal_authority` (`portal_id`, `uuid`, `type`)
+        VALUES (#{portalId}, #{authorityVo.uuid}, #{authorityVo.type})
+    </insert>
+
+    <update id="updatePortalActive" parameterType="neatlogic.module.tenant.dto.portal.PortalVo">
+        UPDATE `portal`
+        SET `is_active` = #{isActive}
+        WHERE `id` = #{id}
+    </update>
+
+    <delete id="deletePortalById" parameterType="java.lang.Long">
+        DELETE FROM `portal` WHERE `id` = #{value}
+    </delete>
+
+    <delete id="deletePortalAuthorityByPortalId" parameterType="java.lang.Long">
+        DELETE FROM `portal_authority` WHERE `portal_id` = #{value}
+    </delete>
+
+    <select id="getPortalWidgetAuthorityListByName" parameterType="java.lang.String" resultType="neatlogic.framework.dto.AuthorityVo">
+        SELECT `uuid`, `type`
+        FROM `portal_widget_authority`
+        WHERE `portal_widget_name` = #{value}
+    </select>
+
+    <select id="getPortalWidgetNameListByAuthority" parameterType="neatlogic.framework.dto.AuthenticationInfoVo" resultType="java.lang.String">
+        SELECT DISTINCT `portal_widget_name`
+        FROM `portal_widget_authority`
+        WHERE (`type` = 'common' AND `uuid` = 'alluser')
+        <if test="userUuid != null and userUuid != ''">
+            OR (`type` = 'user' AND `uuid` = #{userUuid})
+        </if>
+        <if test="teamUuidList != null and teamUuidList.size() > 0">
+            OR (`type` = 'team' AND `uuid` IN
+            <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="roleUuidList != null and roleUuidList.size() > 0">
+            OR (`type` = 'role' AND `uuid` IN
+            <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <select id="getPortalIdListByAuthority" parameterType="neatlogic.framework.dto.AuthenticationInfoVo" resultType="java.lang.Long">
+        SELECT DISTINCT `portal_id`
+        FROM `portal_authority`
+        WHERE (`type` = 'common' AND `uuid` = 'alluser')
+        <if test="userUuid != null and userUuid != ''">
+            OR (`type` = 'user' AND `uuid` = #{userUuid})
+        </if>
+        <if test="teamUuidList != null and teamUuidList.size() > 0">
+            OR (`type` = 'team' AND `uuid` IN
+            <foreach collection="teamUuidList" item="teamUuid" open="(" separator="," close=")">
+                #{teamUuid}
+            </foreach>
+            )
+        </if>
+        <if test="roleUuidList != null and roleUuidList.size() > 0">
+            OR (`type` = 'role' AND `uuid` IN
+            <foreach collection="roleUuidList" item="roleUuid" open="(" separator="," close=")">
+                #{roleUuid}
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <select id="getUserEnablePortalId" resultType="java.lang.Long">
+        SELECT `portal_id`
+        FROM `portal_user`
+        WHERE `user_uuid` = #{userUuid}
+          AND `module_group` = #{moduleGroup}
+    </select>
+
+    <delete id="deleteUserEnablePortal">
+        DELETE FROM `portal_user`
+        WHERE `user_uuid` = #{userUuid}
+          AND `module_group` = #{moduleGroup}
+    </delete>
+
+    <insert id="insertUserEnablePortal">
+        INSERT INTO `portal_user` (`user_uuid`, `module_group`, `portal_id`)
+        VALUES (#{userUuid}, #{moduleGroup}, #{portalId})
+        ON DUPLICATE KEY UPDATE `portal_id` = #{portalId}
+    </insert>
+
+    <insert id="insertPortalWidgetAuthority">
+        INSERT INTO `portal_widget_authority` (`portal_widget_name`, `uuid`, `type`)
+        VALUES (#{portalWidgetName}, #{authorityVo.uuid}, #{authorityVo.type})
+    </insert>
+
+    <delete id="deletePortalWidgetAuthorityByName" parameterType="java.lang.String">
+        DELETE FROM `portal_widget_authority` WHERE `portal_widget_name` = #{value}
+    </delete>
+
+</mapper>
