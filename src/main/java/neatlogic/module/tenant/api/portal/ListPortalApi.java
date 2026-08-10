@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-//@AuthAction(action = PORTAL_MANAGE.class)
-//@AuthAction(action = ADMIN.class)
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class ListPortalApi extends PrivateApiComponentBase {
