@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -113,7 +114,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
                 && (StringUtils.isBlank(state) || state.equals(j.getState()))
                 && (needAudit == null || needAudit.equals(j.getNeedAudit()))
                 && (StringUtils.isBlank(keyword) || StringUtils.contains(j.getJobName(), keyword) || StringUtils.contains(j.getJobGroup(), keyword) || StringUtils.contains(j.getJobHandler(), keyword))
-        ).collect(Collectors.toList());
+        ).filter(e -> Objects.equals(e.getTenantUuid(), TenantContext.get().getTenantUuid())).collect(Collectors.toList());
 
         JSONObject resultObj = new JSONObject();
         int currentPage = paramObj.getInteger("currentPage") != null ? paramObj.getInteger("currentPage") : 1;
