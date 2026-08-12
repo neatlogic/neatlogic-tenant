@@ -39,9 +39,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 查询定时作业来源管理列表。
- */
 @Service
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -117,17 +114,6 @@ public class JobSourceSearchApi extends PrivateApiComponentBase {
         JSONObject resultObj = TableResultUtil.getResult(jobSourceList, searchVo);
         return resultObj;
     }
-
-//    private List<ScheduleJobSourceVo> searchJobSource(ScheduleJobSourceSearchVo searchVo) {
-//        int rowNum = schedulerMapper.searchJobSourceCount(searchVo);
-//        // 没有数据时跳过分页SQL，降低空列表查询开销。
-//        List<ScheduleJobSourceVo> jobSourceList = new ArrayList<>();
-//        if (rowNum > 0) {
-//            searchVo.setRowNum(rowNum);
-//            jobSourceList = schedulerMapper.searchJobSource(searchVo);
-//        }
-//        return jobSourceList;
-//    }
 
     private List<ScheduleJobSourceVo> searchJobSource(BasePageVo searchVo, Set<String> handlerSet) {
         List<ScheduleJobSourceVo> resultList = new ArrayList<>();

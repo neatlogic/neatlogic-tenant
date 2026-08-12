@@ -30,9 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * 单行或批量修改定时作业来源的服务器组。
- */
 @Service
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @Transactional
