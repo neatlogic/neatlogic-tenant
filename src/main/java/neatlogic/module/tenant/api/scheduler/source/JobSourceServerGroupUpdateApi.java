@@ -23,7 +23,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.ScheduleJobSourceVo;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,22 +58,20 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "jobSourceList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "待修改的作业来源列表"),
+            @Param(name = "jobSourceList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "待修改的作业来源列表"),
             @Param(name = "serverGroup", type = ApiParamType.STRING, maxLength = 100, desc = "目标服务器组，空值表示不指定服务器组")
     })
     @Description(desc = "修改定时作业来源服务器组")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ScheduleJobSourceVo> jobSourceList = jsonObj.getJSONArray("jobSourceList").toJavaList(ScheduleJobSourceVo.class);
-        // 空列表不生成MyBatis foreach SQL，避免出现空的IN条件。
-        if (CollectionUtils.isEmpty(jobSourceList)) {
-            return null;
-        }
         String serverGroup = jsonObj.getString("serverGroup");
         for (ScheduleJobSourceVo jobSourceVo : jobSourceList) {
             jobSourceVo.setServerId(-1);
             jobSourceVo.setFcu(UserContext.get().getUserUuid());
-            jobSourceVo.setServerGroup(serverGroup);
+            if (StringUtils.isNotBlank(serverGroup)) {
+                jobSourceVo.setServerGroup(serverGroup);
+            }
         }
         schedulerMapper.insertJobSourceList(jobSourceList);
         return null;
