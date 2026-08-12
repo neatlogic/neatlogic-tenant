@@ -30,6 +30,7 @@ import neatlogic.framework.scheduler.core.SchedulerManager;
 import neatlogic.framework.scheduler.dao.mapper.SchedulerMapper;
 import neatlogic.framework.scheduler.dto.*;
 import neatlogic.framework.scheduler.exception.ScheduleHandlerNotFoundException;
+import neatlogic.framework.util.$;
 import neatlogic.framework.util.TableResultUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -140,7 +141,7 @@ public class JobSourceSearchApi extends PrivateApiComponentBase {
             }
             JobClassVo jobClassVo = SchedulerManager.getJobClassByClassName(jobSourceVo.getHandler());
             if (jobClassVo != null && StringUtils.isNotBlank(jobClassVo.getName())) {
-                jobSourceVo.setHandlerName(jobClassVo.getName());
+                jobSourceVo.setHandlerName($.t(jobClassVo.getName()));
             } else {
                 jobSourceVo.setHandlerName(jobSourceVo.getHandler().substring(jobSourceVo.getHandler().lastIndexOf(".") + 1));
             }
