@@ -69,6 +69,7 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
         for (ScheduleJobSourceVo jobSourceVo : jobSourceList) {
             jobSourceVo.setServerId(-1);
             jobSourceVo.setFcu(UserContext.get().getUserUuid());
+            jobSourceVo.setLcu(UserContext.get().getUserUuid());
             if (StringUtils.isNotBlank(serverGroup)) {
                 jobSourceVo.setServerGroup(serverGroup);
             }
