@@ -59,7 +59,7 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "jobSourceList", type = ApiParamType.JSONARRAY, isRequired = true, desc = "待修改的作业来源列表"),
-            @Param(name = "serverGroup", type = ApiParamType.STRING, maxLength = 99, desc = "目标服务器组，空值表示不指定服务器组")
+            @Param(name = "serverGroup", type = ApiParamType.STRING, maxLength = 100, desc = "目标服务器组，空值表示不指定服务器组")
     })
     @Description(desc = "修改定时作业来源服务器组")
     @Override
