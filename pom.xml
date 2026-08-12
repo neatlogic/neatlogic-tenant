@@ -23,7 +23,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>template/**</include>
+                    <include>**</include>
                 </includes>
             </resource>
         </resources>
