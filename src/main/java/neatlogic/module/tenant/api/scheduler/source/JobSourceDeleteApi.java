@@ -29,7 +29,7 @@ import javax.annotation.Resource;
 /**
  * 删除指定定时作业的来源记录，不删除作业配置及运行记录。
  */
-@Service
+//@Service
 @AuthAction(action = SCHEDULE_JOB_MODIFY.class)
 @Transactional
 @OperationType(type = OperationTypeEnum.DELETE)

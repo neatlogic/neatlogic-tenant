@@ -53,8 +53,8 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
     }
 
     @Override
-    public String getConfig() {
-        return null;
+    public int needAudit() {
+        return 1;
     }
 
     @Input({
@@ -70,11 +70,6 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
             return null;
         }
         String serverGroup = jsonObj.getString("serverGroup");
-        // 数据库字段长度为100，后端同步校验可防止绕过前端直接提交超长值。
-//        if (StringUtils.length(serverGroup) > 100) {
-//            throw new ApiRuntimeException("服务器组长度不能超过100个字符");
-//        }
-//        schedulerMapper.updateJobSourceServerGroup(jobSourceList, serverGroup);
         for (ScheduleJobSourceVo jobSourceVo : jobSourceList) {
             jobSourceVo.setServerId(-1);
             jobSourceVo.setFcu(UserContext.get().getUserUuid());
