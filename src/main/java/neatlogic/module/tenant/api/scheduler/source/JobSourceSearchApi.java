@@ -54,7 +54,7 @@ public class JobSourceSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询定时作业来源列表";
+        return "nmtass.jobsourcesearchapi.getname";
     }
 
     @Override
@@ -63,16 +63,16 @@ public class JobSourceSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页条数"),
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "名称、作业模块、服务器ID或服务器组关键字"),
-            @Param(name = "handler", type = ApiParamType.STRING, desc = "nmtas.jobsearchapi.input.param.desc.handler"),
-            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "term.cmdb.moduleid"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "common.keyword"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "common.handler"),
+            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "common.modulegroupa"),
     })
     @Output({
-            @Param(name = "tbodyList", explode = ScheduleJobSourceVo[].class, desc = "作业来源列表"),
+            @Param(name = "tbodyList", explode = ScheduleJobSourceVo[].class, desc = "common.tbodylist"),
     })
-    @Description(desc = "查询定时作业来源列表")
+    @Description(desc = "nmtass.jobsourcesearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         BasePageVo searchVo = JSONObject.toJavaObject(jsonObj, BasePageVo.class);

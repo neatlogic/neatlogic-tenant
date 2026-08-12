@@ -46,7 +46,7 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "修改定时作业来源服务器组";
+        return "nmtass.jobsourceservergroupupdateapi.getname";
     }
 
     @Override
@@ -55,10 +55,10 @@ public class JobSourceServerGroupUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "jobSourceList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "待修改的作业来源列表"),
-            @Param(name = "serverGroup", type = ApiParamType.STRING, maxLength = 100, desc = "目标服务器组，空值表示不指定服务器组")
+            @Param(name = "jobSourceList", type = ApiParamType.JSONARRAY, isRequired = true, minSize = 1, desc = "nmtass.jobsourceservergroupupdateapi.input.param.desc.jobsourcelist"),
+            @Param(name = "serverGroup", type = ApiParamType.STRING, maxLength = 100, desc = "common.servergroup")
     })
-    @Description(desc = "修改定时作业来源服务器组")
+    @Description(desc = "nmtass.jobsourceservergroupupdateapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ScheduleJobSourceVo> jobSourceList = jsonObj.getJSONArray("jobSourceList").toJavaList(ScheduleJobSourceVo.class);
