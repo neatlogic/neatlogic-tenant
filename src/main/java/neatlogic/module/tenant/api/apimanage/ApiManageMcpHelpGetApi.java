@@ -66,7 +66,7 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         resultObj.put("enabled", dbApi != null && Objects.equals(dbApi.getIsMcp(), 1));
         resultObj.put("available", isAvailable(ramApi, dbApi));
         resultObj.put("unavailableReason", getUnavailableReason(ramApi, dbApi));
-        String endpoint = "/mcp/api/" + TenantContext.get().getTenantUuid();
+        String endpoint = "/api/mcp/" + TenantContext.get().getTenantUuid();
         String scopedEndpoint;
         if (StringUtils.isBlank(api.getModuleGroup())) {
             scopedEndpoint = endpoint;
