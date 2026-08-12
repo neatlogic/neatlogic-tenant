@@ -1,6 +1,7 @@
 package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -65,8 +66,16 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         resultObj.put("enabled", dbApi != null && Objects.equals(dbApi.getIsMcp(), 1));
         resultObj.put("available", isAvailable(ramApi, dbApi));
         resultObj.put("unavailableReason", getUnavailableReason(ramApi, dbApi));
-        resultObj.put("endpoint", "/api/mcp");
-        resultObj.put("scopedEndpoint", StringUtils.isBlank(api.getModuleGroup()) ? "/api/mcp" : "/api/mcp/" + api.getModuleGroup());
+        String endpoint = "/api/mcp/" + TenantContext.get().getTenantUuid();
+        String scopedEndpoint;
+        if (StringUtils.isBlank(api.getModuleGroup())) {
+            scopedEndpoint = endpoint;
+        } else {
+            scopedEndpoint = endpoint + "/" + api.getModuleGroup();
+        }
+        resultObj.put("endpoint", endpoint);
+        resultObj.put("scopedEndpoint", scopedEndpoint);
+        resultObj.put("requestHeaders", getRequestHeaders());
         resultObj.put("token", api.getToken());
         resultObj.put("toolName", McpToolMetadataBuilder.getToolName(api));
         resultObj.put("title", $.t(api.getName()));
@@ -82,7 +91,7 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         resultObj.put("meta", toolObj.getJSONObject("_meta"));
         resultObj.put("example", McpToolMetadataBuilder.getExample(api));
         resultObj.put("initializeExample", getInitializeExample());
-        resultObj.put("listToolsExample", getListToolsExample(api.getModuleGroup()));
+        resultObj.put("listToolsExample", getListToolsExample());
         resultObj.put("callToolExample", getCallToolExample(api));
         return resultObj;
     }
@@ -100,7 +109,12 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
 
     private ApiVo buildApiForMetadata(ApiVo ramApi, ApiVo dbApi) throws CloneNotSupportedException {
         // 元数据以运行时API为准，再叠加DB里的MCP开关和审计等管理配置。
-        ApiVo api = ramApi != null ? ramApi.clone() : dbApi;
+        ApiVo api;
+        if (ramApi != null) {
+            api = ramApi.clone();
+        } else {
+            api = dbApi;
+        }
         if (dbApi != null) {
             api.setIsMcp(dbApi.getIsMcp());
             api.setIsActive(dbApi.getIsActive());
@@ -144,17 +158,33 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         requestObj.put("method", "initialize");
         JSONObject paramsObj = new JSONObject();
         paramsObj.put("protocolVersion", "2025-11-25");
+        paramsObj.put("capabilities", new JSONObject());
+        JSONObject clientInfo = new JSONObject();
+        clientInfo.put("name", "example-mcp-client");
+        clientInfo.put("version", "1.0.0");
+        paramsObj.put("clientInfo", clientInfo);
         requestObj.put("params", paramsObj);
         return requestObj;
     }
 
-    private JSONObject getListToolsExample(String moduleGroup) {
+    private JSONObject getListToolsExample() {
         JSONObject requestObj = new JSONObject();
         requestObj.put("jsonrpc", "2.0");
         requestObj.put("id", 2);
         requestObj.put("method", "tools/list");
-        requestObj.put("endpoint", StringUtils.isBlank(moduleGroup) ? "/api/mcp" : "/api/mcp/" + moduleGroup);
         return requestObj;
+    }
+
+    /**
+     * 返回初始化后 MCP 请求所需的标准请求头示例。
+     */
+    private JSONObject getRequestHeaders() {
+        JSONObject headers = new JSONObject();
+        headers.put("Authorization", "Bearer <PAT>");
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "application/json, text/event-stream");
+        headers.put("MCP-Protocol-Version", "2025-11-25");
+        return headers;
     }
 
     private JSONObject getCallToolExample(ApiVo api) {
