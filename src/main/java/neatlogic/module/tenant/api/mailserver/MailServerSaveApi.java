@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NOTIFY_CONFIG_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.util.RC4Util;
 import neatlogic.framework.dao.mapper.NotifyConfigMapper;
 import neatlogic.framework.dto.MailServerVo;
 import neatlogic.framework.dto.NotifyConfigVo;
@@ -26,6 +27,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.RegexUtils;
 import neatlogic.framework.util.SnowflakeUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,6 +73,9 @@ public class MailServerSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         MailServerVo mailServerVo = jsonObj.toJavaObject(MailServerVo.class);
+        if (StringUtils.isNotBlank(mailServerVo.getPassword())) {
+            mailServerVo.setPassword(RC4Util.encrypt(mailServerVo.getPassword()));
+        }
         NotifyConfigVo notifyConfigVo = new NotifyConfigVo();
         if (mailServerVo.getId() != null) {
             notifyConfigVo.setId(mailServerVo.getId());
