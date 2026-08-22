@@ -122,7 +122,7 @@ public class MatrixAttributeSearchApi extends PrivateApiComponentBase {
             if (matrixVo == null) {
                 matrixVo = matrixMapper.getMatrixByUuid(matrixUuid);
             }
-            if (MatrixType.EXTERNAL.getValue().equals(matrixVo.getType())) {
+            if ("external".equals(matrixVo.getType())) {// MatrixType.EXTERNAL.getValue()
                 MatrixExternalVo externalVo = matrixMapper.getMatrixExternalByMatrixUuid(matrixUuid);
                 if (externalVo == null) {
                     return new FieldValidResultVo(new MatrixExternalNotFoundException(matrixVo.getName()));

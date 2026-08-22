@@ -141,7 +141,7 @@ public class MatrixSearchApi extends PrivateApiComponentBase {
             tbodyList = matrixMapper.searchMatrix(searchVo.getKeyword(), searchVo.getType(), fromIndex - privateCount, pageSize);
         }
         for (MatrixVo matrixVo : tbodyList) {
-            if (Objects.equals(matrixVo.getType(), MatrixType.VIEW.getValue())) {
+            if (Objects.equals(matrixVo.getType(), "view")) {// MatrixType.VIEW.getValue()
                 MatrixViewVo matrixViewVo = matrixMapper.getMatrixViewByMatrixUuid(matrixVo.getUuid());
                 if (matrixViewVo != null && StringUtils.isNotBlank(matrixViewVo.getError())) {
                     matrixVo.setError(matrixViewVo.getError());
