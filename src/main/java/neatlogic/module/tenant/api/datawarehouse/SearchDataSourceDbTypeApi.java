@@ -17,15 +17,12 @@ import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.datawarehouse.core.DataSourceServiceHandlerFactory;
 import neatlogic.framework.datawarehouse.core.IDataSourceServiceHandler;
-import neatlogic.framework.datawarehouse.dao.mapper.DatabaseMapper;
-import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Service
@@ -33,14 +30,14 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class SearchDataSourceDbTypeApi extends PrivateApiComponentBase {
 
-    private final String MYSQL = "mysql";
-    private final String MONGODB = "mongodb";
-    private final String ELASTICSEARCH = "elasticsearch";
-    @Resource
-    private DatabaseMapper databaseMapper;
-
-    @Resource
-    private IntegrationMapper integrationMapper;
+//    private final String MYSQL = "mysql";
+//    private final String MONGODB = "mongodb";
+//    private final String ELASTICSEARCH = "elasticsearch";
+//    @Resource
+//    private DatabaseMapper databaseMapper;
+//
+//    @Resource
+//    private IntegrationMapper integrationMapper;
 
     @Override
     public String getName() {
