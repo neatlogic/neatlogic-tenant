@@ -57,7 +57,7 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "接口调用记录列表接口";
+        return "nmtaa.apimanageauditlistapi.getname";
     }
 
     @Override
@@ -66,24 +66,25 @@ public class ApiManageAuditListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "token", type = ApiParamType.STRING, isRequired = true, desc = "接口token"),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码，默认值1"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小，默认值10"),
-            @Param(name = "startTime", type = ApiParamType.LONG, desc = "开始时间"),
-            @Param(name = "endTime", type = ApiParamType.LONG, desc = "结束时间"),
-            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "时间范围"),
-            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "时间范围单位"),
-            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "用户uuid列表"),
-            @Param(name = "statusList", type = ApiParamType.JSONARRAY, desc = "状态列表"),
+            @Param(name = "token", type = ApiParamType.STRING, isRequired = true, desc = "nmtaa.apimanageauditlistapi.input.param.desc.token"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage", help = "nmtaa.apimanageauditlistapi.input.param.help.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize", help = "nmtaa.apimanageauditlistapi.input.param.help.pagesize"),
+            @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
+            @Param(name = "endTime", type = ApiParamType.LONG, desc = "common.endtime"),
+            @Param(name = "timeRange", type = ApiParamType.INTEGER, desc = "common.timerange"),
+            @Param(name = "timeUnit", type = ApiParamType.ENUM, rule = "year,month,week,day,hour", desc = "common.timeunit"),
+            @Param(name = "userUuidList", type = ApiParamType.JSONARRAY, desc = "common.useruuidlist"),
+            @Param(name = "statusList", type = ApiParamType.JSONARRAY, desc = "common.statuslist"),
+            @Param(name = "type", type = ApiParamType.ENUM, rule = "rest,mcp", desc = "common.accesstype")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-            @Param(name = "tbodyList", explode = ApiAuditVo[].class, isRequired = true, desc = "接口调用记录列表")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "common.pagecount"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "common.rownum"),
+            @Param(name = "tbodyList", explode = ApiAuditVo[].class, isRequired = true, desc = "nmtaa.apimanageauditlistapi.output.param.desc.tbodylist")
     })
-    @Description(desc = "接口调用记录列表接口")
+    @Description(desc = "nmtaa.apimanageauditlistapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ApiAuditVo> apiAuditList = new ArrayList<>();
