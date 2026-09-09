@@ -1,5 +1,6 @@
 package neatlogic.module.tenant.api.team;
 
+import neatlogic.framework.restful.dto.ApiExampleVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -58,8 +59,9 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /** 通过代码组装请求示例，返回带标题和说明的场景列表。 */
     @Override
-    public JSONObject example() {
+    public java.util.List<ApiExampleVo> example() {
         JSONObject defaultJson = new JSONObject(true);
         defaultJson.put("uuid", "组uuid，不更新，只是用于查找。uuid和name入参两者必须有一个有值，如果都有值则按uuid查找");
         defaultJson.put("name", "组名，不更新，只是用于查找。uuid和name入参两者必须有一个有值，如果都有值则按uuid查找");
@@ -74,7 +76,7 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
                 }});
             }});
         }});
-        return defaultJson;
+        return java.util.Collections.singletonList(new ApiExampleVo("common.example", "nf.api.example.replacevalues", defaultJson));
     }
 
     @Input({
@@ -169,6 +171,5 @@ public class TeamUpdateApi extends PrivateApiComponentBase {
 
         return teamVo.getUuid();
     }
-
 
 }

@@ -12,6 +12,7 @@
 
 package neatlogic.module.tenant.api.matrix;
 
+import neatlogic.framework.restful.dto.ApiExampleVo;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
@@ -76,9 +77,11 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
      *
      * @return 参数范例json
      */
+
+    /** 通过代码组装请求示例，返回带标题和说明的场景列表。 */
     @Override
-    public JSONObject example() {
-        return new JSONObject()
+    public java.util.List<ApiExampleVo> example() {
+        return java.util.Collections.singletonList(new ApiExampleVo("common.example", "nf.api.example.replacevalues", new JSONObject()
                 .fluentPut("matrixUuid", "8d8daee892404f08b6aeb3fac52031c8")
                 .fluentPut("keyword", "系统")
                 .fluentPut("keywordColumn", "67f6055224d233cba5c2833035d66101")
@@ -113,7 +116,7 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
                         .fluentAdd("abbrName")
                         .fluentAdd("owner")
                 )
-                ;
+                ));
     }
 
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
@@ -333,4 +336,5 @@ public class MatrixColumnDataSearchForSelectApi extends PrivateApiComponentBase 
         }
         return resultObj;
     }
+
 }

@@ -1,6 +1,7 @@
 package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
@@ -79,20 +80,23 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         resultObj.put("token", api.getToken());
         resultObj.put("toolName", McpToolMetadataBuilder.getToolName(api));
         resultObj.put("title", $.t(api.getName()));
-        resultObj.put("description", api.getDescription());
+
         resultObj.put("moduleId", api.getModuleId());
         resultObj.put("moduleGroup", api.getModuleGroup());
         resultObj.put("moduleGroupName", api.getModuleGroupName());
 
         JSONObject toolObj = McpToolMetadataBuilder.buildTool(api);
+        // 页面通过场景 Tab 展示示例，基础描述不重复拼接模型专用的调用示例。
+        resultObj.put("description", $.t(api.getDescription()));
         resultObj.put("inputSchema", toolObj.getJSONObject("inputSchema"));
         resultObj.put("outputSchema", toolObj.getJSONObject("outputSchema"));
         resultObj.put("annotations", toolObj.getJSONObject("annotations"));
         resultObj.put("meta", toolObj.getJSONObject("_meta"));
-        resultObj.put("example", McpToolMetadataBuilder.getExample(api));
+        JSONArray examples = McpToolMetadataBuilder.getExamples(api);
+        resultObj.put("example", examples);
         resultObj.put("initializeExample", getInitializeExample());
         resultObj.put("listToolsExample", getListToolsExample());
-        resultObj.put("callToolExample", getCallToolExample(api));
+        resultObj.put("callToolExamples", McpToolMetadataBuilder.getCallToolExamples(toolObj.getString("name"), examples));
         return resultObj;
     }
 
@@ -187,15 +191,4 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
         return headers;
     }
 
-    private JSONObject getCallToolExample(ApiVo api) {
-        JSONObject requestObj = new JSONObject();
-        requestObj.put("jsonrpc", "2.0");
-        requestObj.put("id", 3);
-        requestObj.put("method", "tools/call");
-        JSONObject paramsObj = new JSONObject();
-        paramsObj.put("name", McpToolMetadataBuilder.getToolName(api));
-        paramsObj.put("arguments", new JSONObject());
-        requestObj.put("params", paramsObj);
-        return requestObj;
-    }
 }

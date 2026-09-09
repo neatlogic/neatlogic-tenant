@@ -55,51 +55,7 @@ public class GetChangeLogVersionApi extends PrivateApiComponentBase {
             @Param(name = "version", type = ApiParamType.JSONARRAY, desc = "nmtac.getchangelogversionapi.output.param.version")
     })
 
-    @Example(example = "{\n" +
-            "    \"Status\": \"OK\",\n" +
-            "    \"Return\": {\n" +
-            "        \"dml\": [\n" +
-            "            \"select * from user\"\n" +
-            "        ],\n" +
-            "        \"dll\": [\n" +
-            "            \"CREATE TABLE IF NOT EXISTS `api_access_count` (\",\n" +
-            "            \"  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'token',\",\n" +
-            "            \"  `count` int DEFAULT NULL COMMENT '访问次数',\",\n" +
-            "            \"  PRIMARY KEY (`token`) USING BTREE\",\n" +
-            "            \") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='接口访问次数表';\"\n" +
-            "        ],\n" +
-            "        \"version\": {\n" +
-            "            \"content\": [\n" +
-            "                {\n" +
-            "                    \"detail\": [\n" +
-            "                        {\n" +
-            "                            \"msg\": \"1.增加版本日志。\"\n" +
-            "                        },\n" +
-            "                        {\n" +
-            "                            \"msg\": \"2.增加流水线导入导出。\"\n" +
-            "                        }\n" +
-            "                    ],\n" +
-            "                    \"type\": \"新增功能\"\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"detail\": [\n" +
-            "                        {\n" +
-            "                            \"msg\": \"1.修复自定义工具库-编辑自定义工具并保存为草稿成功，返回路由丢失的问题\"\n" +
-            "                        },\n" +
-            "                        {\n" +
-            "                            \"msg\": \"2.修复工具分类-修改授权对象并保存，再次编辑时授权对象没有变化的问题。\"\n" +
-            "                        },\n" +
-            "                        {\n" +
-            "                            \"msg\": \"3.修复组合工具作业引用矩阵参数默认值异常的问题。\"\n" +
-            "                        }\n" +
-            "                    ],\n" +
-            "                    \"type\": \"修复缺陷\"\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        }\n" +
-            "    },\n" +
-            "    \"TimeCost\": 5\n" +
-            "}")
+    @Example(title = "common.example", description = "nf.api.example.replacevalues", example = "{\"moduleId\":\"framework\",\"date\":\"2026-09-01\"}")
     @Description(desc = "nmtac.getchangelogversionapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

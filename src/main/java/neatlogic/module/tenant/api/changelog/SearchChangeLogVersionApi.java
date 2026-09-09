@@ -49,12 +49,7 @@ public class SearchChangeLogVersionApi extends PrivateApiComponentBase {
             @Param(name = "versionList", type = ApiParamType.JSONARRAY, desc = "nmtac.searchchangelogversionapi.output.param.desc")
     })
 
-    @Example(example = "{\n" +
-            "    \"Status\": \"OK\",\n" +
-            "    \"Return\": {\n" +
-            "        \"versionList\": [\"2023-09-14\",\"2023-09-10\"]\n" +
-            "    }\n" +
-            "}")
+    @Example(title = "common.example", description = "nf.api.example.replacevalues", example = "{\"moduleId\":\"framework\"}")
     @Description(desc = "nmtac.getchangelogversionapi.description.desc")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
