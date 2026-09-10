@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.FORM_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.FieldValidResultVo;
 import neatlogic.framework.form.attribute.core.FormAttributeHandlerFactory;
 import neatlogic.framework.form.attribute.core.IFormAttributeHandler;
@@ -14,6 +15,8 @@ import neatlogic.framework.form.dto.FormVo;
 import neatlogic.framework.form.exception.FormAttributeNameIsRepeatException;
 import neatlogic.framework.form.exception.FormNameRepeatException;
 import neatlogic.framework.form.exception.FormVersionNotFoundException;
+import neatlogic.framework.form.service.IFormCrossoverService;
+import neatlogic.framework.matrix.dao.mapper.MatrixMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.IValid;
@@ -37,7 +40,6 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
-
     @Override
     public String getToken() {
         return "form/save";
@@ -68,6 +70,9 @@ public class FormSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject resultObj = new JSONObject();
         FormVo formVo = jsonObj.toJavaObject(FormVo.class);
+        // 即使表单配置未改变也需要重新校验，且必须早于依赖删除、数据库写入和直接返回。
+        IFormCrossoverService formCrossoverService = CrossoverServiceFactory.getApi(IFormCrossoverService.class);
+        formCrossoverService.validateMatrixDataSource(formVo.getFormConfig());
         String formUuid = formVo.getUuid();
         String currentVersionUuid = formVo.getCurrentVersionUuid();
         resultObj.put("uuid", formUuid);
