@@ -39,6 +39,7 @@ public class FormSaveApi extends PrivateApiComponentBase {
 
     @Resource
     private FormMapper formMapper;
+
     @Override
     public String getToken() {
         return "form/save";
