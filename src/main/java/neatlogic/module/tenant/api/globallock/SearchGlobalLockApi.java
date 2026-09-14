@@ -39,7 +39,7 @@ public class SearchGlobalLockApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "搜索全局锁";
+        return "globallock.search";
     }
 
     @Override
@@ -48,15 +48,16 @@ public class SearchGlobalLockApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keywordParam", type = ApiParamType.JSONOBJECT, desc = "过滤关键词", xss = true),
-            @Param(name = "handler", type = ApiParamType.STRING, desc = "处理器", xss = true),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目")
+            @Param(name = "keywordParam", type = ApiParamType.JSONOBJECT, desc = "globallock.filters", help = "globallock.filtershelp", xss = true),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "globallock.handler", xss = true),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "globallock.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "globallock.pagesize")
     })
     @Output({
-            @Param(name = "tbodyList", explode = GlobalLockVo.class, desc = "锁i"),
+            @Param(name = "tbodyList", explode = GlobalLockVo.class, desc = "globallock.locks"),
     })
-    @Description(desc = "搜索全局锁接口")
+    @Description(desc = "globallock.search")
+    /** 校验请求并执行当前租户范围内的锁操作。 */
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         GlobalLockVo globalLockVo = JSON.toJavaObject(jsonObj, GlobalLockVo.class);

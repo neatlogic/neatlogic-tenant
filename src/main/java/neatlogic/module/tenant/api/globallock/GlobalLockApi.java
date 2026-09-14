@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.exception.type.ParamIrregularException;
+import neatlogic.framework.util.$;
 import neatlogic.framework.form.dao.mapper.FormMapper;
 import neatlogic.framework.globallock.GlobalLockManager;
 import neatlogic.framework.globallock.core.GlobalLockHandlerFactory;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Objects;
+import neatlogic.framework.globallock.GlobalLockOperationManager;
 
 @Service
 @AuthUser(SystemUser.AUTOEXEC)
@@ -25,7 +27,7 @@ import java.util.Objects;
 public class GlobalLockApi extends PrivateApiComponentBase {
 
     @Resource
-    private FormMapper formMapper;
+    private GlobalLockOperationManager operations;
 
     @Override
     public String getToken() {
@@ -34,7 +36,7 @@ public class GlobalLockApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "全局锁";
+        return "globallock.api";
     }
 
     @Override
@@ -43,27 +45,37 @@ public class GlobalLockApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "operType", type = ApiParamType.ENUM, rule = "auto,deploy", desc = "来源类型"),
-            @Param(name = "action", type = ApiParamType.ENUM, rule = "lock,unlock,cancel,retry", isRequired = true, desc = "执行动作"),
-            @Param(name = "lockId", type = ApiParamType.LONG, desc = "锁id")
+            @Param(name = "operType", type = ApiParamType.ENUM, rule = "auto,deploy", desc = "globallock.handler"),
+            @Param(name = "action", type = ApiParamType.ENUM, rule = "lock,unlock,cancel,retry", isRequired = true, desc = "globallock.action"),
+            @Param(name = "lockId", type = ApiParamType.LONG, desc = "globallock.lockid"),
+            @Param(name = "operationId", type = ApiParamType.STRING, desc = "globallock.operationid")
     })
     @Output({
-            @Param(name = "lockId", type = ApiParamType.LONG, desc = "锁id"),
-            @Param(name = "wait", type = ApiParamType.LONG, desc = "0：获取锁成功；1：进入等待队列"),
-            @Param(name = "message", type = ApiParamType.LONG, desc = "wait 原因"),
+            @Param(name = "lockId", type = ApiParamType.LONG, desc = "globallock.lockid"),
+            @Param(name = "wait", type = ApiParamType.LONG, desc = "globallock.wait"),
+            @Param(name = "message", type = ApiParamType.STRING, desc = "globallock.waitreason"),
     })
-    @Description(desc = "全局锁接口")
+    @Description(desc = "globallock.api")
+    /** 校验请求并执行当前租户范围内的锁操作。 */
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         String action = jsonObj.getString("action");
         Long lockId = jsonObj.getLong("lockId");
         String handler = jsonObj.getString("operType");
+        String operationId = jsonObj.getString("operationId");
+        if (operationId != null) {
+            if (!("unlock".equals(action) || "cancel".equals(action))) throw new ParamIrregularException("action",
+                    $.t("globallock.error.operationaction", operationId, lockId, action));
+            if (!operations.claim(operationId, lockId, action)) return operations.get(operationId);
+            GlobalLockManager.release(lockId, jsonObj, "unlock".equals(action));
+            return operations.get(operationId);
+        }
         if (Objects.equals(action, "cancel")) {
             GlobalLockManager.cancelLock(lockId);
         } else {
             IGlobalLockHandler globalLockHandler = GlobalLockHandlerFactory.getHandler(handler);
             if(globalLockHandler == null){
-                throw new ParamIrregularException("operType");
+                throw new ParamIrregularException("operType", $.t("globallock.error.handlerunknown", handler, lockId, action));
             }
             switch (action) {
                 case "lock":
@@ -72,7 +84,7 @@ public class GlobalLockApi extends PrivateApiComponentBase {
                     return globalLockHandler.unLock(lockId, jsonObj);
                 case "retry":
                     return globalLockHandler.retryLock(lockId, jsonObj);
-                default: throw new ParamIrregularException("action");
+                default: throw new ParamIrregularException("action", $.t("globallock.error.actioninvalid", action, lockId, handler));
             }
         }
         return null;
