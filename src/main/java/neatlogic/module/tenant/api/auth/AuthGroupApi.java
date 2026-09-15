@@ -13,6 +13,7 @@
 package neatlogic.module.tenant.api.auth;
 
 import com.alibaba.fastjson.JSONArray;
+import neatlogic.framework.util.$;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -38,6 +39,7 @@ import java.util.Set;
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
+/** 提供当前租户的权限模块筛选项，并按请求语言返回展示文案。 */
 public class AuthGroupApi extends PrivateApiComponentBase {
 
     @Override
@@ -45,9 +47,10 @@ public class AuthGroupApi extends PrivateApiComponentBase {
         return "auth/group";
     }
 
+    /** 返回权限组查询接口的国际化名称。 */
     @Override
     public String getName() {
-        return "获取权限组列表";
+        return "auth.group.list";
     }
 
     @Override
@@ -55,17 +58,18 @@ public class AuthGroupApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /** 返回所有选项及包含权限定义的已启用模块。 */
     @Output({
-            @Param(name = "groupList", type = ApiParamType.JSONARRAY, desc = "权限组列表")
+            @Param(name = "groupList", type = ApiParamType.JSONARRAY, desc = "auth.group.items")
     })
-    @Description(desc = "获取权限组列表")
+    @Description(desc = "auth.group.list")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
         JSONArray groupArray = new JSONArray();
         groupArray.add(new JSONObject() {
             {
-                this.put("text", "所有");
+                this.put("text", $.t("common.all"));
                 this.put("value", "all");
             }
         });
