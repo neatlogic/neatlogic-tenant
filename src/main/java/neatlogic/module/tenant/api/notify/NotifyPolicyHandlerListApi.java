@@ -79,12 +79,12 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
         for (ModuleGroupVo moduleGroupVo : moduleGroupList) {
             JSONArray children = new JSONArray();
             for (INotifyPolicyHandler notifyPolicyHandler : handlerList) {
-                /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
-                if (!AuthActionChecker.check(notifyPolicyHandler.getAuthName())) {
-                    continue;
-                }
                 String moduleGroup = NotifyPolicyHandlerFactory.getModuleGroupIdByHandler(notifyPolicyHandler.getClassName());
                 if (!Objects.equals(moduleGroup, moduleGroupVo.getGroup())) {
+                    continue;
+                }
+                /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
+                if (!AuthActionChecker.check(notifyPolicyHandler.getAuthName())) {
                     continue;
                 }
                 JSONObject child = new JSONObject();
