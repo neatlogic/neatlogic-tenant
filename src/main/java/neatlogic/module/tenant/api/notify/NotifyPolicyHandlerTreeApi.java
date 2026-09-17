@@ -14,6 +14,7 @@ package neatlogic.module.tenant.api.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.notify.core.INotifyPolicyHandler;
 import neatlogic.framework.notify.core.NotifyPolicyHandlerFactory;
 import neatlogic.framework.notify.dto.NotifyTreeVo;
@@ -88,7 +89,8 @@ public class NotifyPolicyHandlerTreeApi extends PrivateApiComponentBase {
 				}
 			}else{
 				/** 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
-				if(!AuthActionChecker.check(handler.getAuthName())){
+				Class<? extends AuthBase> authClass = handler.getAuthClass();
+				if(authClass == null || !AuthActionChecker.check(authClass)){
 					iterator.remove();
 				}
 			}

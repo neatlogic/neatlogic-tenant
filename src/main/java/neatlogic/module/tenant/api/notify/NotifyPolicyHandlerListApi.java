@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.label.NOTIFY_JOB_MODIFY;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.dto.ValueTextVo;
@@ -84,7 +85,8 @@ public class NotifyPolicyHandlerListApi extends PrivateApiComponentBase {
                     continue;
                 }
                 /* 通知策略与权限绑定，例如没有流程管理权限则无法编辑流程及流程步骤通知策略 */
-                if (!AuthActionChecker.check(notifyPolicyHandler.getAuthName())) {
+                Class<? extends AuthBase> authClass = notifyPolicyHandler.getAuthClass();
+                if (authClass == null || !AuthActionChecker.check(authClass)) {
                     continue;
                 }
                 JSONObject child = new JSONObject();
