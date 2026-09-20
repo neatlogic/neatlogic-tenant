@@ -1,0 +1,936 @@
+{
+  "auth": {
+    "group": {
+      "items": "Permission Group List",
+      "list": "Get Permission Group List"
+    }
+  },
+  "globallock": {
+    "api": "Global Lock Operation",
+    "currentpage": "Current Page",
+    "error": {
+      "actioninvalid": "Unsupported global lock action={0}; lockId={1}, handler={2}. Allowed actions: lock, unlock, cancel, retry.",
+      "handlerunknown": "Global lock handler={0} is not registered; lockId={1}, action={2}. Check operType and the handler registration.",
+      "operationaction": "Interactive lock operations support only unlock or cancel; operationId={0}, lockId={1}, actual action={2}."
+    },
+    "filters": "Filters",
+    "filtershelp": "Filter fields and their semantics are defined by the selected handler.",
+    "getgloballockapi": "View Resource Lock",
+    "getgloballockoperationapi": "Get Resource Lock Operation Progress",
+    "handler": "Handler",
+    "lockid": "Lock ID",
+    "locks": "Locks",
+    "operationid": "Operation ID",
+    "pagesize": "Page Size",
+    "preparegloballockoperationapi": "Prepare Resource Lock Operation",
+    "search": "Search Global Locks",
+    "wait": "Waiting",
+    "waitreason": "Wait Reason"
+  },
+  "nmta": {
+    "heartbeatapi": {
+      "getname": "heartbeat"
+    }
+  },
+  "nmtaa": {
+    "apiauditdetaildownloadapi": {
+      "getname": "Download interface call records"
+    },
+    "apiauditdetailgetapi": {
+      "getname": "Obtain interface call records"
+    },
+    "apihelpexportapi": {
+      "getname": "Export Interface Help Document",
+      "input": {
+        "param": {
+          "desc": {
+            "funcid": "Function of the interface"
+          }
+        }
+      }
+    },
+    "apimanageauditlistapi": {
+      "getname": "Search API Call Records",
+      "input": {
+        "param": {
+          "desc": {
+            "token": "API Token"
+          },
+          "help": {
+            "currentpage": "The default value is 1.",
+            "pagesize": "The default value is 10."
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "API Call Record List"
+          }
+        }
+      }
+    },
+    "apimanagesaveapi": {
+      "getname": "Save interface configuration information",
+      "input": {
+        "param": {
+          "desc": {
+            "apitype": "API type",
+            "config": "JSON format, configuration information",
+            "expire": "Validity period",
+            "handler": "processor",
+            "needaudit": "Do you want to save the call record",
+            "qps": "Visited several times per second, effective if greater than 0",
+            "timeout": "prescription of claim",
+            "username": "Username"
+          }
+        }
+      }
+    },
+    "authmanagesearchapi": {
+      "getname": "Permission Management List Query Interface",
+      "input": {
+        "param": {
+          "desc": {
+            "defaultvalue": "Default value",
+            "groupname": "Permission group name"
+          }
+        }
+      }
+    },
+    "authmodulegetapi": {
+      "description": {
+        "desc": "According to the user's module and corresponding permission list"
+      },
+      "getname": "Obtain the corresponding permissions for the user module",
+      "output": {
+        "param": {
+          "desc": {
+            "authdisplayname": "permission name",
+            "authintroduction": "Permission Introduction"
+          }
+        }
+      }
+    }
+  },
+  "nmtac": {
+    "getchangelogversionapi": {
+      "description": {
+        "desc": "Interface for querying the change version log list"
+      },
+      "getname": "Query Change Version Log Details",
+      "output": {
+        "param": {
+          "neatlogic": "Primary Database",
+          "neatlogictenant": "Tenant Database",
+          "version": "Version Log"
+        }
+      }
+    },
+    "searchchangelogauditlistapi": {
+      "getname": "Query the list of database change records"
+    },
+    "searchchangelogversionapi": {
+      "getname": "Query Change Version Log List",
+      "output": {
+        "param": {
+          "desc": "Version List"
+        }
+      }
+    }
+  },
+  "nmtad": {
+    "activedatasourceapi": {
+      "getname": "Activate data warehouse data source"
+    },
+    "adddocumentonlineconfigapi": {
+      "getname": "Add mapping relationship between online help documents and module menus"
+    },
+    "deletedocumentonlineconfigapi": {
+      "getname": "Delete the mapping relationship between online help documents and module menus"
+    },
+    "executedatasourceapi": {
+      "getname": "Perform data warehouse data source data synchronization"
+    },
+    "exportdocumentonlineconfigapi": {
+      "getname": "Export online help document configuration file"
+    },
+    "getdocumentonlineapi": {
+      "getname": "Obtain a single online help document"
+    },
+    "getdocumentonlinedirectoryapi": {
+      "getname": "Online Help Document Directory"
+    },
+    "getdocumentonlinelistapi": {
+      "getname": "Query the list of online help documents"
+    },
+    "getdocumentonlinetablelistapi": {
+      "getname": "Display document list grouped by first level directory"
+    },
+    "getdocumentonlineunclassifiedlistapi": {
+      "getname": "Query the list of unclassified online help documents"
+    },
+    "importdocumentonlinejarapi": {
+      "getname": "Import online help document jar package"
+    },
+    "loaddocumentonlineoutsidewarapi": {
+      "getname": "Load online documents from outside the war package"
+    },
+    "loaddocumentonlinewithinwarapi": {
+      "getname": "Load online documents from within the war package"
+    },
+    "savedocumentonlineconfigapi": {
+      "getname": "Save the mapping relationship between online help documents and module menus"
+    },
+    "searchdatasourceapi": {
+      "getname": "Query Data Warehouse Data Source"
+    },
+    "searchdatasourcedbtypeapi": {
+      "getname": "Search for data warehouse database types"
+    },
+    "searchdocumentonlineapi": {
+      "getname": "Keyword search for online help documents",
+      "mydoservice": {
+        "error": "Unable to find document with docID {0}"
+      }
+    }
+  },
+  "nmtae": {
+    "extramenuapi": {
+      "getname": "Obtain the interface for adding menu lists with permissions"
+    },
+    "extramenudeleteapi": {
+      "getname": "Delete specified extra menu/directory interface"
+    },
+    "extramenugetapi": {
+      "getname": "Interface for obtaining specified ID extra menu/directory information"
+    },
+    "extramenumoveapi": {
+      "getname": "Extra menu move position interface",
+      "input": {
+        "param": {
+          "id": {
+            "desc": "The ID of the service channel being moved"
+          },
+          "movetype": {
+            "desc": "Mobile type"
+          },
+          "targetid": {
+            "desc": "Target node ID"
+          }
+        }
+      }
+    },
+    "extramenusaveapi": {
+      "getname": "Save extra menu/directory information interface",
+      "input": {
+        "param": {
+          "type": {
+            "desc": "0: Directory, 1: Menu"
+          }
+        }
+      }
+    },
+    "extramenutreeapi": {
+      "getname": "Get Extra Menu Tree Interface"
+    }
+  },
+  "nmtaf": {
+    "downloadimageapi": {
+      "getname": "Image download interface"
+    },
+    "exportfeatureusageauditapi": {
+      "getname": "Export function usage record data"
+    },
+    "exportfeatureusagestatisticsapi": {
+      "getname": "Export function uses statistical data"
+    },
+    "formcopyapi": {
+      "getname": "Copy Form"
+    },
+    "formdeleteapi": {
+      "getname": "delete form"
+    },
+    "formdependencytabledataupdateapi": {
+      "getname": "Update the data of the form dependency matrix"
+    },
+    "formexportapi": {
+      "getname": "Form export interface"
+    },
+    "formimportapi": {
+      "getname": "Form import interface",
+      "output": {
+        "param": {
+          "desc": {
+            "return": "Import Results"
+          }
+        }
+      }
+    },
+    "formsaveapi": {
+      "getname": "Save Form"
+    },
+    "formversiondeleteapi": {
+      "getname": "Delete form version"
+    },
+    "formversionexportapi": {
+      "getname": "Form version export interface"
+    },
+    "formversionimportapi": {
+      "getname": "Form version import interface"
+    },
+    "getformattributelistapi": {
+      "getname": "Query Form Property List"
+    },
+    "listformtagapi": {
+      "getname": "Form Extended Data Label List"
+    },
+    "savefeatureusageauditapi": {
+      "getname": "Save function usage audit"
+    },
+    "saveformversiondefaultsceneapi": {
+      "getname": "Set the default scenario for form version"
+    },
+    "saveformversionscenereadonlyapi": {
+      "getname": "Set form version scenario read-only"
+    },
+    "searchfeatureapi": {
+      "getname": "List of usage times for query and statistics function"
+    },
+    "searchfeatureusageauditapi": {
+      "getname": "Query function using audit list"
+    }
+  },
+  "nmtah": {
+    "activehomepageapi": {
+      "getname": "Activate homepage configuration information"
+    },
+    "deletehomepageapi": {
+      "getname": "Delete homepage configuration information"
+    },
+    "gethomepageapi": {
+      "getname": "Get homepage configuration information"
+    },
+    "getsqlexplainapi": {
+      "getname": "Get SQL Execution Plan"
+    },
+    "getusersessionqueueinfoapi": {
+      "getname": "Retrieve user session queue information"
+    },
+    "listhomepageapi": {
+      "getname": "Homepage Configuration List"
+    },
+    "movehomepageapi": {
+      "getname": "Mobile homepage configuration location"
+    },
+    "savehomepageapi": {
+      "getname": "Save homepage configuration information"
+    },
+    "searchsqlauditapi": {
+      "getname": "Time consumption for obtaining SQL"
+    },
+    "togglesqlinterceptorapi": {
+      "getname": "Control System SQL Tracking",
+      "input": {
+        "param": {
+          "desc": "Need to count SQL URLs based on HTTP requests, where * represents all URLs"
+        }
+      }
+    }
+  },
+  "nmtai": {
+    "authintegrationapi": {
+      "getname": "Integrated execution authorization save interface",
+      "input": {
+        "param": {
+          "desc": {
+            "authoritylist": "Authorized objects, multiple choices allowed, format [\\ \"user # userUuid \\\", \\ \"team # teamUuid \\\", \\ \"role # roleUuid \\\", \\ \"common # alluser \\\"]"
+          }
+        }
+      }
+    },
+    "exportapi": {
+      "getname": "Universal export interface"
+    },
+    "importapi": {
+      "getname": "Universal import interface"
+    },
+    "integrationauditdetaildownloadapi": {
+      "getname": "Download integrated management call records"
+    },
+    "integrationauditdetailgetapi": {
+      "getname": "Obtain integrated management audit content"
+    },
+    "integrationgetapi": {
+      "getname": "Get Integration Settings Information"
+    },
+    "integrationrunapi": {
+      "getname": "Execute Integration"
+    },
+    "integrationsearchapi": {
+      "getname": "Search Integration Configuration"
+    },
+    "integrationtestapi": {
+      "address": "Target address",
+      "component": "assembly",
+      "getname": "Integrated configuration testing"
+    }
+  },
+  "nmtal": {
+    "exportlogfileapi": {
+      "getname": "Export Log File"
+    },
+    "exportloginauditapi": {
+      "getname": "Export login record list"
+    },
+    "getlicenseapi": {
+      "getname": "Obtaining License Information"
+    },
+    "getlogcontentapi": {
+      "getname": "Retrieve the content of the application log file"
+    },
+    "getlogfilenamelistapi": {
+      "getname": "Get a list of application log file names"
+    },
+    "getloggerstatusapi": {
+      "getname": "Query log status"
+    },
+    "searchloginauditapi": {
+      "getname": "Login record list"
+    },
+    "updatelicenseexpiredateapi": {
+      "getname": "Modify license expiration date"
+    },
+    "updateloggerlevelapi": {
+      "getname": "Modify log level"
+    }
+  },
+  "nmtam": {
+    "deletemailserverapi": {
+      "getname": "Delete mail server"
+    },
+    "exportmatrixapi": {
+      "getname": "Export Matrix"
+    },
+    "getmodulemanagesettingapi": {
+      "getname": "Get module management display settings"
+    },
+    "importmatrixapi": {
+      "getname": "Import Matrix",
+      "output": {
+        "param": {
+          "desc": {
+            "labelduplication": "Label already exists",
+            "nameduplication": "Name already exists",
+            "uuidduplication": "Same matrix exists"
+          }
+        }
+      }
+    },
+    "listmailserverapi": {
+      "getname": "Query the email server information list"
+    },
+    "mailservergetapi": {
+      "getname": "Email server information acquisition interface"
+    },
+    "mailserversaveapi": {
+      "getname": "Save Mail Server Information"
+    },
+    "mailservertestapi": {
+      "getname": "Test whether the mail server can send mail normally"
+    },
+    "matrixattributesearchapi": {
+      "getname": "Query matrix properties"
+    },
+    "matrixcolumndatasearchforbatchapi": {
+      "getname": "Batch Matrix Attribute Data Query - Dropdown Interface",
+      "input": {
+        "param": {
+          "desc": {
+            "searchparamlist": "Query parameter list"
+          }
+        }
+      }
+    },
+    "matrixexportapi": {
+      "getname": "Export matrix data"
+    },
+    "matriximportapi": {
+      "getname": "Import matrix data",
+      "mydoservice": {
+        "filevalidtip": "The following problem occurred while importing [{0}]:",
+        "validrepeattip": "The value of \"{2}\" in row {0} and column {1} matches multiple pieces of data",
+        "validtip": "The value in row {0} and column {1} is not exist: \"{2}\""
+      }
+    },
+    "matrixsaveapi": {
+      "getname": "Save Matrix"
+    },
+    "matrixsearchapi": {
+      "getname": "Query matrix list"
+    },
+    "savemodulemanagesettingapi": {
+      "getname": "Save module management display settings"
+    },
+    "updatemailserverisactiveapi": {
+      "getname": "Update the activation status of the email server"
+    },
+    "updatemailserverisdefaultapi": {
+      "getname": "Is updating the email server default"
+    }
+  },
+  "nmtan": {
+    "getdefaultnotifypolicyapi": {
+      "getname": "Get default notification policy information"
+    },
+    "getnotifypolicydefaulttemplateapi": {
+      "getname": "Obtain default template for notification policy trigger points"
+    },
+    "importnotifypolicyapi": {
+      "getname": "Import notification policy"
+    },
+    "notifypolicycopyapi": {
+      "getname": "Copy notification policy"
+    },
+    "notifypolicygetapi": {
+      "getname": "Get notification policy information"
+    },
+    "notifypolicyhandlerlistapi": {
+      "getname": "Notification Policy Classification List"
+    },
+    "notifypolicysaveapi": {
+      "getname": "Save notification policy information"
+    },
+    "notifypolicysearchapi": {
+      "getname": "Search notification policy"
+    },
+    "notifypolicysystemparamlist": {
+      "getname": "Get the list of notification policy system parameters"
+    }
+  },
+  "nmtar": {
+    "checkrunnerstatusapi": {
+      "getname": "Check the status of the runner"
+    },
+    "deleteregionapi": {
+      "getname": "Delete Region"
+    },
+    "deleteregionteamapi": {
+      "getname": "Delete Regional Grouping",
+      "input": {
+        "param": {
+          "desc": {
+            "teamuuidlist": "Group uuid list"
+          }
+        }
+      }
+    },
+    "getrunnerversionapi": {
+      "description": "Get runner version information",
+      "getname": "Get runner version information",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "runner id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "Version information list"
+          }
+        }
+      }
+    },
+    "getrunnerwaitingdetailapi": {
+      "getname": "Get runner queue details"
+    },
+    "moveregiontreeapi": {
+      "getname": "Mobile Region Tree",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "The ID of the region being moved",
+            "targetid": "Target Region ID"
+          }
+        }
+      }
+    },
+    "roledeleteapi": {
+      "getname": "Delete Role"
+    },
+    "rolesaveapi": {
+      "getname": "Save role information"
+    },
+    "runnergroupsaveapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "groupnetworklist": "Runner Group Network Segment List",
+            "name": "Runner group name",
+            "rule": "Runner rules",
+            "runnerlist": "Associated runner list"
+          }
+        }
+      }
+    },
+    "runnerregisterapi": {
+      "description": {
+        "desc": "Runner registration interface, directly determining a runner by IP"
+      },
+      "getname": "Register Runner",
+      "input": {
+        "param": {
+          "nettyport": "Heartbeat Port",
+          "port": "Command Port"
+        }
+      }
+    },
+    "runnersaveapi": {
+      "getname": "Save runner",
+      "input": {
+        "param": {
+          "authlist": "Runner external authentication information",
+          "isauth": "Is it certified"
+        }
+      }
+    },
+    "saveregionapi": {
+      "getname": "Save Region"
+    },
+    "saveregionteamapi": {
+      "getname": "Save region and group mappings"
+    },
+    "searchregionapi": {
+      "getname": "Query Region"
+    },
+    "searchregionteamapi": {
+      "getname": "Query geographical mapping grouping",
+      "input": {
+        "param": {
+          "desc": {
+            "regionid": "Regional ID",
+            "type": "Regional mapping type"
+          }
+        }
+      }
+    },
+    "searchregiontreeapi": {
+      "getname": "Query Region Tree"
+    }
+  },
+  "nmtas": {
+    "getserverlistapi": {
+      "getname": "Obtain a list of server information"
+    },
+    "jobclassgetapi": {
+      "getname": "Obtain timed job component information"
+    },
+    "jobclasssearchapi": {
+      "getname": "Query the list of scheduled homework components",
+      "output": {
+        "param": {
+          "desc": "Assignment components"
+        }
+      }
+    },
+    "jobgetapi": {
+      "getname": "Obtain public scheduled job information"
+    },
+    "jobsearchapi": {
+      "getname": "Query scheduled homework list",
+      "input": {
+        "param": {
+          "desc": {
+            "handler": "Timed homework component className"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": "Timed homework"
+        }
+      }
+    },
+    "jobtestapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "jobgroup": "Timed homework grouping",
+            "jobhandlerclassname": "HandlerClassName corresponding to timed assignments",
+            "jobid": "Scheduled Job Unique Key",
+            "type": "Private: Internal jobs refer to jobs that start automatically upon system startup (jobBase), while public: External jobs refer to jobs dynamically added to a page (PublicJobBase). Default private internal job"
+          }
+        }
+      }
+    },
+    "saveserverapi": {
+      "getname": "Save server information"
+    },
+    "systemnoticepullapi": {
+      "getname": "Pull system announcement",
+      "input": {
+        "param": {
+          "desc": {
+            "direction": "Before: Find the announcement before issueTime"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "popupnoticeidlist": "List of announcement IDs that need to pop up"
+          }
+        }
+      }
+    }
+  },
+  "nmtass": {
+    "jobsourcesearchapi": {
+      "getname": "Query the source list of scheduled assignments"
+    },
+    "jobsourceservergroupupdateapi": {
+      "getname": "Modify the source server group for scheduled assignments",
+      "input": {
+        "param": {
+          "desc": {
+            "jobsourcelist": "List of homework sources to be modified"
+          }
+        }
+      }
+    }
+  },
+  "nmtat": {
+    "deleteteamtagapi": {
+      "getname": "Delete group labels"
+    },
+    "deleteteamtagteamapi": {
+      "getname": "Delete label grouping",
+      "input": {
+        "param": {
+          "desc": {
+            "teamuuid": "Group uuid"
+          }
+        }
+      }
+    },
+    "getmiddlewareconfigapi": {
+      "getname": "Query middleware configuration"
+    },
+    "gettenantconfigapi": {
+      "getname": "Obtain current tenant configuration information"
+    },
+    "listactivetenantapi": {
+      "getname": "Get the current activated tenant"
+    },
+    "listtenantconfigapi": {
+      "getname": "List of current tenant configuration information"
+    },
+    "saveteamtagapi": {
+      "getname": "Save group labels",
+      "input": {
+        "param": {
+          "desc": {
+            "matrixattrvalue": "Matrix attribute values"
+          }
+        }
+      }
+    },
+    "saveteamtagteamapi": {
+      "getname": "Save labels and group mappings"
+    },
+    "savetenantconfigapi": {
+      "getname": "Save current tenant configuration information"
+    },
+    "searchteamtagapi": {
+      "getname": "Get group labels"
+    },
+    "teamdeleteapi": {
+      "getname": "Delete Group"
+    },
+    "teamsaveapi": {
+      "getname": "Save group information"
+    }
+  },
+  "nmtau": {
+    "cleansubmitkeyapi": {
+      "getname": "Manually clear duplicate SubmitKeyMap submissions"
+    },
+    "deleteuserdataapi": {
+      "getname": "Delete user data"
+    },
+    "deleteuserexportfileapi": {
+      "getname": "Delete user exported files"
+    },
+    "deleteusersessionapi": {
+      "getname": "Delete user session",
+      "input": {
+        "param": {
+          "uuidlist": "User uuidList"
+        }
+      }
+    },
+    "exportuserexportfileapi": {
+      "getname": "Export user files"
+    },
+    "getcurrentusertokenapi": {
+      "getname": "Obtain the user's own token"
+    },
+    "getserverinfoapi": {
+      "getname": "Retrieve server information"
+    },
+    "getsubmitkeyinfoapi": {
+      "getname": "Get duplicate SubmitKeyMap submissions"
+    },
+    "getuserdataapi": {
+      "getname": "Obtain user data"
+    },
+    "getuserexportfileunreadcountapi": {
+      "getname": "Number of unread user exported files"
+    },
+    "getusertokenapi": {
+      "getname": "Obtain the user's token"
+    },
+    "resetcurrentusertokenapi": {
+      "getname": "Reset the user's own token",
+      "output": {
+        "param": {
+          "return": {
+            "desc": "New token"
+          }
+        }
+      }
+    },
+    "resetusertokenapi": {
+      "getname": "Reset user's token"
+    },
+    "searchuserexportfileapi": {
+      "getname": "User exported file list",
+      "input": {
+        "param": {
+          "desc": "Do you want to view everyone's data"
+        }
+      }
+    },
+    "updateuserexportfileisreadapi": {
+      "getname": "Update user exported files to read"
+    },
+    "userdatasaveapi": {
+      "getname": "Save user data"
+    },
+    "userdeleteapi": {
+      "getname": "Delete User Interface"
+    },
+    "usergetapi": {
+      "description": {
+        "desc": "Query user details based on user ID"
+      },
+      "getname": "Interface for querying user details based on user ID",
+      "input": {
+        "param": {
+          "desc": {
+            "isrulerole": "Default to true, filter out roles that do not comply with the rules"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "user": "User details"
+          }
+        }
+      }
+    },
+    "usergetforeditapi": {
+      "getname": "Retrieve user information (dedicated for editing page display)"
+    },
+    "userprofilelistapi": {
+      "getname": "User personalized query list interface"
+    },
+    "userprofilesaveapi": {
+      "getname": "Save user personalization settings",
+      "input": {
+        "param": {
+          "checked": {
+            "desc": "Check the personalized options for operation"
+          },
+          "name": {
+            "desc": "Personalized item name for operation"
+          },
+          "operate": {
+            "desc": "Personalized options for specific operations"
+          }
+        }
+      }
+    },
+    "usersaveapi": {
+      "getname": "Save User Interface"
+    },
+    "usersearchapi": {
+      "getname": "Query Users"
+    },
+    "usersearchforselectapi": {
+      "getname": "Query Users_ drop-down ",
+      "input": {
+        "param": {
+          "desc": {
+            "needteam": "Do you need group information"
+          }
+        }
+      }
+    }
+  },
+  "nmtaw": {
+    "getwechatapi": {
+      "getname": "Obtaining Enterprise WeChat Data"
+    },
+    "savewechatapi": {
+      "getname": "Saving Enterprise WeChat Data"
+    },
+    "testwechatapi": {
+      "getname": "Testing Enterprise WeChat Sending Messages",
+      "input": {
+        "param": {
+          "desc": {
+            "touser": "Enterprise WeChat account"
+          }
+        }
+      }
+    },
+    "worktimecalendarsaveapi": {
+      "getname": "Save work calendar information"
+    },
+    "worktimesaveapi": {
+      "getname": "Save working time window information"
+    }
+  },
+  "nmteu": {
+    "userpasswordrepeatexception": {
+      "userpasswordrepeatexception": "The new password is the same as the old password. Please confirm and try again"
+    }
+  },
+  "nmts": {
+    "serverserviceimpl": {
+      "postotherserverapi": {
+        "notfound": "Cannot find application server with server ID '{0}'",
+        "nothost": "The corresponding data in the 'serverless' table of the application server with server ID' {0} 'is not configured with a host"
+      }
+    }
+  },
+  "term": {
+    "framework": {
+      "calendarlist": "Work Calendar List",
+      "documentonlineinfo": "Online Help Document Information",
+      "issuetime": "Issuance time",
+      "matrixuuid": "Matrix uuid",
+      "notifypolicydefaulttemplateinfo": "Notification default template information",
+      "savetopic": "Save Message Queue Theme",
+      "serveripport": "server address",
+      "togglemqtopicisactive": "Update message queue topic activation status"
+    },
+    "tenant": {
+      "name": "Tenant"
+    }
+  }
+}

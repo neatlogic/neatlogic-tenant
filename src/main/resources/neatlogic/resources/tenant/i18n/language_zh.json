@@ -1,0 +1,936 @@
+{
+  "auth": {
+    "group": {
+      "items": "权限组列表",
+      "list": "获取权限组列表"
+    }
+  },
+  "globallock": {
+    "api": "全局锁操作",
+    "currentpage": "当前页",
+    "error": {
+      "actioninvalid": "不支持全局锁操作 action={0}；lockId={1}，handler={2}。允许的操作为 lock、unlock、cancel、retry。",
+      "handlerunknown": "未注册全局锁处理器 handler={0}；lockId={1}，action={2}。请核对 operType 及处理器注册配置。",
+      "operationaction": "交互式锁操作仅支持 unlock 或 cancel；operationId={0}，lockId={1}，实际 action={2}。"
+    },
+    "filters": "筛选条件",
+    "filtershelp": "筛选字段及其语义由 handler 对应的处理器定义。",
+    "getgloballockapi": "查看资源锁详情",
+    "getgloballockoperationapi": "查询资源锁操作进度",
+    "handler": "处理器",
+    "lockid": "锁 ID",
+    "locks": "锁列表",
+    "operationid": "操作 ID",
+    "pagesize": "每页数量",
+    "preparegloballockoperationapi": "准备资源锁操作",
+    "search": "搜索全局锁",
+    "wait": "是否等待",
+    "waitreason": "等待原因"
+  },
+  "nmta": {
+    "heartbeatapi": {
+      "getname": "心跳"
+    }
+  },
+  "nmtaa": {
+    "apiauditdetaildownloadapi": {
+      "getname": "下载接口调用记录"
+    },
+    "apiauditdetailgetapi": {
+      "getname": "获取接口调用记录"
+    },
+    "apihelpexportapi": {
+      "getname": "导出接口帮助文档",
+      "input": {
+        "param": {
+          "desc": {
+            "funcid": "接口所属功能"
+          }
+        }
+      }
+    },
+    "apimanageauditlistapi": {
+      "getname": "查询API调用记录",
+      "input": {
+        "param": {
+          "desc": {
+            "token": "API Token"
+          },
+          "help": {
+            "currentpage": "默认值为1",
+            "pagesize": "默认值为10"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "API调用记录列表"
+          }
+        }
+      }
+    },
+    "apimanagesaveapi": {
+      "getname": "保存接口配置信息",
+      "input": {
+        "param": {
+          "desc": {
+            "apitype": "API类型",
+            "config": "json格式,配置信息",
+            "expire": "使用期限",
+            "handler": "处理器",
+            "needaudit": "是否保存调用记录",
+            "qps": "每秒访问几次，大于0生效",
+            "timeout": "请求时效",
+            "username": "用户名称"
+          }
+        }
+      }
+    },
+    "authmanagesearchapi": {
+      "getname": "权限管理列表查询接口",
+      "input": {
+        "param": {
+          "desc": {
+            "defaultvalue": "默认值",
+            "groupname": "权限组名"
+          }
+        }
+      }
+    },
+    "authmodulegetapi": {
+      "description": {
+        "desc": "根据用户获取模块以及对应的权限列表"
+      },
+      "getname": "获取用户模块对应权限",
+      "output": {
+        "param": {
+          "desc": {
+            "authdisplayname": "权限名",
+            "authintroduction": "权限介绍"
+          }
+        }
+      }
+    }
+  },
+  "nmtac": {
+    "getchangelogversionapi": {
+      "description": {
+        "desc": "查询变更版本日志列表接口"
+      },
+      "getname": "查询变更版本日志详情",
+      "output": {
+        "param": {
+          "neatlogic": "主库",
+          "neatlogictenant": "租户库",
+          "version": "版本日志"
+        }
+      }
+    },
+    "searchchangelogauditlistapi": {
+      "getname": "查询数据库变更记录列表"
+    },
+    "searchchangelogversionapi": {
+      "getname": "查询变更版本日志列表",
+      "output": {
+        "param": {
+          "desc": "版本列表"
+        }
+      }
+    }
+  },
+  "nmtad": {
+    "activedatasourceapi": {
+      "getname": "激活数据仓库数据源"
+    },
+    "adddocumentonlineconfigapi": {
+      "getname": "添加在线帮助文档与模块菜单的映射关系"
+    },
+    "deletedocumentonlineconfigapi": {
+      "getname": "删除在线帮助文档与模块菜单的映射关系"
+    },
+    "executedatasourceapi": {
+      "getname": "执行数据仓库数据源数据同步"
+    },
+    "exportdocumentonlineconfigapi": {
+      "getname": "导出在线帮助文档配置文件"
+    },
+    "getdocumentonlineapi": {
+      "getname": "获取单个在线帮助文档"
+    },
+    "getdocumentonlinedirectoryapi": {
+      "getname": "在线帮助文档目录"
+    },
+    "getdocumentonlinelistapi": {
+      "getname": "查询在线帮助文档列表"
+    },
+    "getdocumentonlinetablelistapi": {
+      "getname": "按第一层目录分组显示文档列表"
+    },
+    "getdocumentonlineunclassifiedlistapi": {
+      "getname": "查询未分类的在线帮助文档列表"
+    },
+    "importdocumentonlinejarapi": {
+      "getname": "导入在线帮助文档jar包"
+    },
+    "loaddocumentonlineoutsidewarapi": {
+      "getname": "从war包外部加载在线文档"
+    },
+    "loaddocumentonlinewithinwarapi": {
+      "getname": "从war包内部加载在线文档"
+    },
+    "savedocumentonlineconfigapi": {
+      "getname": "保存在线帮助文档与模块菜单的映射关系"
+    },
+    "searchdatasourceapi": {
+      "getname": "查询数据仓库数据源"
+    },
+    "searchdatasourcedbtypeapi": {
+      "getname": "搜索数据仓库数据库类型"
+    },
+    "searchdocumentonlineapi": {
+      "getname": "关键字搜索在线帮助文档",
+      "mydoservice": {
+        "error": "找不到docID为{0}的文档"
+      }
+    }
+  },
+  "nmtae": {
+    "extramenuapi": {
+      "getname": "获取拥有权限的附加菜单列表接口"
+    },
+    "extramenudeleteapi": {
+      "getname": "删除指定附加菜单/目录接口"
+    },
+    "extramenugetapi": {
+      "getname": "获取指定ID附加菜单/目录信息接口"
+    },
+    "extramenumoveapi": {
+      "getname": "附加菜单移动位置接口",
+      "input": {
+        "param": {
+          "id": {
+            "desc": "被移动的服务通道id"
+          },
+          "movetype": {
+            "desc": "移动类型"
+          },
+          "targetid": {
+            "desc": "目标节点id"
+          }
+        }
+      }
+    },
+    "extramenusaveapi": {
+      "getname": "保存附加菜单/目录信息接口",
+      "input": {
+        "param": {
+          "type": {
+            "desc": "0：目录，1：菜单"
+          }
+        }
+      }
+    },
+    "extramenutreeapi": {
+      "getname": "获取附加菜单目录树接口"
+    }
+  },
+  "nmtaf": {
+    "downloadimageapi": {
+      "getname": "图片下载接口"
+    },
+    "exportfeatureusageauditapi": {
+      "getname": "导出功能使用记录数据"
+    },
+    "exportfeatureusagestatisticsapi": {
+      "getname": "导出功能使用统计数据"
+    },
+    "formcopyapi": {
+      "getname": "复制表单"
+    },
+    "formdeleteapi": {
+      "getname": "删除表单"
+    },
+    "formdependencytabledataupdateapi": {
+      "getname": "更新表单依赖矩阵的数据"
+    },
+    "formexportapi": {
+      "getname": "表单导出接口"
+    },
+    "formimportapi": {
+      "getname": "表单导入接口",
+      "output": {
+        "param": {
+          "desc": {
+            "return": "导入结果"
+          }
+        }
+      }
+    },
+    "formsaveapi": {
+      "getname": "保存表单"
+    },
+    "formversiondeleteapi": {
+      "getname": "删除表单版本"
+    },
+    "formversionexportapi": {
+      "getname": "表单版本导出接口"
+    },
+    "formversionimportapi": {
+      "getname": "表单版本导入接口"
+    },
+    "getformattributelistapi": {
+      "getname": "查询表单属性列表"
+    },
+    "listformtagapi": {
+      "getname": "表单扩展数据标签列表"
+    },
+    "savefeatureusageauditapi": {
+      "getname": "保存功能使用审计"
+    },
+    "saveformversiondefaultsceneapi": {
+      "getname": "设置表单版本默认场景"
+    },
+    "saveformversionscenereadonlyapi": {
+      "getname": "设置表单版本场景只读"
+    },
+    "searchfeatureapi": {
+      "getname": "查询统计功能使用次数列表"
+    },
+    "searchfeatureusageauditapi": {
+      "getname": "查询功能使用审计列表"
+    }
+  },
+  "nmtah": {
+    "activehomepageapi": {
+      "getname": "激活默认首页配置信息"
+    },
+    "deletehomepageapi": {
+      "getname": "删除默认首页配置信息"
+    },
+    "gethomepageapi": {
+      "getname": "获取默认首页配置信息"
+    },
+    "getsqlexplainapi": {
+      "getname": "获取SQL执行计划"
+    },
+    "getusersessionqueueinfoapi": {
+      "getname": "获取用户会话队列信息"
+    },
+    "listhomepageapi": {
+      "getname": "默认首页配置列表"
+    },
+    "movehomepageapi": {
+      "getname": "移动默认首页配置位置"
+    },
+    "savehomepageapi": {
+      "getname": "保存默认首页配置信息"
+    },
+    "searchsqlauditapi": {
+      "getname": "获取SQL耗时"
+    },
+    "togglesqlinterceptorapi": {
+      "getname": "控制系统SQL追踪",
+      "input": {
+        "param": {
+          "desc": "需要按HTTP请求统计SQL的URL，*代表全部URL"
+        }
+      }
+    }
+  },
+  "nmtai": {
+    "authintegrationapi": {
+      "getname": "集成执行授权保存接口",
+      "input": {
+        "param": {
+          "desc": {
+            "authoritylist": "授权对象，可多选，格式[\\\"user#userUuid\\\",\\\"team#teamUuid\\\",\\\"role#roleUuid\\\",\\\"common#alluser\\\"]"
+          }
+        }
+      }
+    },
+    "exportapi": {
+      "getname": "通用导出接口"
+    },
+    "importapi": {
+      "getname": "通用导入接口"
+    },
+    "integrationauditdetaildownloadapi": {
+      "getname": "下载集成管理调用记录"
+    },
+    "integrationauditdetailgetapi": {
+      "getname": "获取集成管理审计内容"
+    },
+    "integrationgetapi": {
+      "getname": "获取集成设置信息"
+    },
+    "integrationrunapi": {
+      "getname": "执行集成"
+    },
+    "integrationsearchapi": {
+      "getname": "搜索集成配置"
+    },
+    "integrationtestapi": {
+      "address": "目标地址",
+      "component": "组件",
+      "getname": "集成配置测试"
+    }
+  },
+  "nmtal": {
+    "exportlogfileapi": {
+      "getname": "导出日志文件"
+    },
+    "exportloginauditapi": {
+      "getname": "导出登录记录列表"
+    },
+    "getlicenseapi": {
+      "getname": "获取许可信息"
+    },
+    "getlogcontentapi": {
+      "getname": "获取应用日志文件内容"
+    },
+    "getlogfilenamelistapi": {
+      "getname": "获取应用日志文件名称列表"
+    },
+    "getloggerstatusapi": {
+      "getname": "查询日志状态"
+    },
+    "searchloginauditapi": {
+      "getname": "登录记录列表"
+    },
+    "updatelicenseexpiredateapi": {
+      "getname": "修改许可截止日期"
+    },
+    "updateloggerlevelapi": {
+      "getname": "修改日志级别"
+    }
+  },
+  "nmtam": {
+    "deletemailserverapi": {
+      "getname": "删除邮件服务器"
+    },
+    "exportmatrixapi": {
+      "getname": "导出矩阵"
+    },
+    "getmodulemanagesettingapi": {
+      "getname": "获取模块管理显示设置"
+    },
+    "importmatrixapi": {
+      "getname": "导入矩阵",
+      "output": {
+        "param": {
+          "desc": {
+            "labelduplication": "标签已存在",
+            "nameduplication": "名称已存在",
+            "uuidduplication": "存在相同的矩阵"
+          }
+        }
+      }
+    },
+    "listmailserverapi": {
+      "getname": "查询邮件服务器信息列表"
+    },
+    "mailservergetapi": {
+      "getname": "邮件服务器信息获取接口"
+    },
+    "mailserversaveapi": {
+      "getname": "保存邮件服务器信息"
+    },
+    "mailservertestapi": {
+      "getname": "测试邮件服务器能否正常发送邮件"
+    },
+    "matrixattributesearchapi": {
+      "getname": "查询矩阵属性"
+    },
+    "matrixcolumndatasearchforbatchapi": {
+      "getname": "批量矩阵属性数据查询-下拉接口",
+      "input": {
+        "param": {
+          "desc": {
+            "searchparamlist": "查询参数列表"
+          }
+        }
+      }
+    },
+    "matrixexportapi": {
+      "getname": "导出矩阵数据"
+    },
+    "matriximportapi": {
+      "getname": "导入矩阵数据",
+      "mydoservice": {
+        "filevalidtip": "导入【{0}】时出现如下问题：",
+        "validrepeattip": "第{0}行，第{1}列的值：“{2}”匹配到多条数据",
+        "validtip": "第{0}行，第{1}列的值：”{2}“不存在"
+      }
+    },
+    "matrixsaveapi": {
+      "getname": "保存矩阵"
+    },
+    "matrixsearchapi": {
+      "getname": "查询矩阵列表"
+    },
+    "savemodulemanagesettingapi": {
+      "getname": "保存模块管理显示设置"
+    },
+    "updatemailserverisactiveapi": {
+      "getname": "更新邮件服务器激活状态"
+    },
+    "updatemailserverisdefaultapi": {
+      "getname": "更新邮件服务器是否是默认的"
+    }
+  },
+  "nmtan": {
+    "getdefaultnotifypolicyapi": {
+      "getname": "获取默认通知策略信息"
+    },
+    "getnotifypolicydefaulttemplateapi": {
+      "getname": "获取通知策略触发点默认模板"
+    },
+    "importnotifypolicyapi": {
+      "getname": "导入通知策略"
+    },
+    "notifypolicycopyapi": {
+      "getname": "复制通知策略"
+    },
+    "notifypolicygetapi": {
+      "getname": "获取通知策略信息"
+    },
+    "notifypolicyhandlerlistapi": {
+      "getname": "通知策略分类列表"
+    },
+    "notifypolicysaveapi": {
+      "getname": "保存通知策略信息"
+    },
+    "notifypolicysearchapi": {
+      "getname": "搜索通知策略"
+    },
+    "notifypolicysystemparamlist": {
+      "getname": "获取通知策略系统参数列表"
+    }
+  },
+  "nmtar": {
+    "checkrunnerstatusapi": {
+      "getname": "检查runner状态"
+    },
+    "deleteregionapi": {
+      "getname": "删除地域"
+    },
+    "deleteregionteamapi": {
+      "getname": "删除地域分组",
+      "input": {
+        "param": {
+          "desc": {
+            "teamuuidlist": "分组uuid列表"
+          }
+        }
+      }
+    },
+    "getrunnerversionapi": {
+      "description": "获取执行器版本信息",
+      "getname": "获取执行器版本信息",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "runner id"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "tbodylist": "版本信息列表"
+          }
+        }
+      }
+    },
+    "getrunnerwaitingdetailapi": {
+      "getname": "获取 runner 排队详情"
+    },
+    "moveregiontreeapi": {
+      "getname": "移动地域树",
+      "input": {
+        "param": {
+          "desc": {
+            "id": "被移动的地域id",
+            "targetid": "目标地域id"
+          }
+        }
+      }
+    },
+    "roledeleteapi": {
+      "getname": "删除角色"
+    },
+    "rolesaveapi": {
+      "getname": "保存角色信息"
+    },
+    "runnergroupsaveapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "groupnetworklist": "runner组 网段列表",
+            "name": "runner 分组名",
+            "rule": "runner 规则",
+            "runnerlist": "关联的runner列表"
+          }
+        }
+      }
+    },
+    "runnerregisterapi": {
+      "description": {
+        "desc": "runner 注册接口,直接由ip确定一个runner"
+      },
+      "getname": "注册runner",
+      "input": {
+        "param": {
+          "nettyport": "心跳端口",
+          "port": "命令端口"
+        }
+      }
+    },
+    "runnersaveapi": {
+      "getname": "保存runner",
+      "input": {
+        "param": {
+          "authlist": "runner外部认证信息",
+          "isauth": "是否认证"
+        }
+      }
+    },
+    "saveregionapi": {
+      "getname": "保存地域"
+    },
+    "saveregionteamapi": {
+      "getname": "保存地域和分组映射"
+    },
+    "searchregionapi": {
+      "getname": "查询地域"
+    },
+    "searchregionteamapi": {
+      "getname": "查询地域映射分组",
+      "input": {
+        "param": {
+          "desc": {
+            "regionid": "地域id",
+            "type": "地域映射类型"
+          }
+        }
+      }
+    },
+    "searchregiontreeapi": {
+      "getname": "查询地域树"
+    }
+  },
+  "nmtas": {
+    "getserverlistapi": {
+      "getname": "获取服务器信息列表"
+    },
+    "jobclassgetapi": {
+      "getname": "获取定时作业组件信息"
+    },
+    "jobclasssearchapi": {
+      "getname": "查询定时作业组件列表",
+      "output": {
+        "param": {
+          "desc": "作业组件"
+        }
+      }
+    },
+    "jobgetapi": {
+      "getname": "获取公共定时作业信息"
+    },
+    "jobsearchapi": {
+      "getname": "查询定时作业列表",
+      "input": {
+        "param": {
+          "desc": {
+            "handler": "定时作业组件className"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": "定时作业"
+        }
+      }
+    },
+    "jobtestapi": {
+      "input": {
+        "param": {
+          "desc": {
+            "jobgroup": "定时作业分组",
+            "jobhandlerclassname": "定时作业对应的handlerClassName",
+            "jobid": "定时作业唯一键",
+            "type": "private：内部作业即系统启动就自启动的作业（jobBase），public：外部作业即页面动态添加的作业（PublicJobBase）。默认private内部作业"
+          }
+        }
+      }
+    },
+    "saveserverapi": {
+      "getname": "保存服务器信息"
+    },
+    "systemnoticepullapi": {
+      "getname": "拉取系统公告",
+      "input": {
+        "param": {
+          "desc": {
+            "direction": "before:找issueTime之前的公告"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "popupnoticeidlist": "需要弹窗的公告ID列表"
+          }
+        }
+      }
+    }
+  },
+  "nmtass": {
+    "jobsourcesearchapi": {
+      "getname": "查询定时作业来源列表"
+    },
+    "jobsourceservergroupupdateapi": {
+      "getname": "修改定时作业来源服务器组",
+      "input": {
+        "param": {
+          "desc": {
+            "jobsourcelist": "待修改的作业来源列表"
+          }
+        }
+      }
+    }
+  },
+  "nmtat": {
+    "deleteteamtagapi": {
+      "getname": "删除分组标签"
+    },
+    "deleteteamtagteamapi": {
+      "getname": "删除标签分组",
+      "input": {
+        "param": {
+          "desc": {
+            "teamuuid": "分组uuid"
+          }
+        }
+      }
+    },
+    "getmiddlewareconfigapi": {
+      "getname": "查询中间件配置"
+    },
+    "gettenantconfigapi": {
+      "getname": "获取当前租户配置信息"
+    },
+    "listactivetenantapi": {
+      "getname": "获取当前激活租户"
+    },
+    "listtenantconfigapi": {
+      "getname": "当前租户配置信息列表"
+    },
+    "saveteamtagapi": {
+      "getname": "保存分组标签",
+      "input": {
+        "param": {
+          "desc": {
+            "matrixattrvalue": "矩阵属性值"
+          }
+        }
+      }
+    },
+    "saveteamtagteamapi": {
+      "getname": "保存标签和分组映射"
+    },
+    "savetenantconfigapi": {
+      "getname": "保存当前租户配置信息"
+    },
+    "searchteamtagapi": {
+      "getname": "获取分组标签"
+    },
+    "teamdeleteapi": {
+      "getname": "删除分组"
+    },
+    "teamsaveapi": {
+      "getname": "保存组信息"
+    }
+  },
+  "nmtau": {
+    "cleansubmitkeyapi": {
+      "getname": "手动清理重复提交SubmitKeyMap"
+    },
+    "deleteuserdataapi": {
+      "getname": "删除用户数据"
+    },
+    "deleteuserexportfileapi": {
+      "getname": "删除用户导出文件"
+    },
+    "deleteusersessionapi": {
+      "getname": "删除用户会话",
+      "input": {
+        "param": {
+          "uuidlist": "用户uuidList"
+        }
+      }
+    },
+    "exportuserexportfileapi": {
+      "getname": "导出用户文件"
+    },
+    "getcurrentusertokenapi": {
+      "getname": "获取用户自己的令牌"
+    },
+    "getserverinfoapi": {
+      "getname": "获取服务器信息"
+    },
+    "getsubmitkeyinfoapi": {
+      "getname": "获取重复提交SubmitKeyMap"
+    },
+    "getuserdataapi": {
+      "getname": "获取用户数据"
+    },
+    "getuserexportfileunreadcountapi": {
+      "getname": "用户导出文件未读个数"
+    },
+    "getusertokenapi": {
+      "getname": "获取用户的令牌"
+    },
+    "resetcurrentusertokenapi": {
+      "getname": "重置用户自己的令牌",
+      "output": {
+        "param": {
+          "return": {
+            "desc": "新的令牌"
+          }
+        }
+      }
+    },
+    "resetusertokenapi": {
+      "getname": "重置用户的令牌"
+    },
+    "searchuserexportfileapi": {
+      "getname": "用户导出文件列表",
+      "input": {
+        "param": {
+          "desc": "是否查看所有人的数据"
+        }
+      }
+    },
+    "updateuserexportfileisreadapi": {
+      "getname": "更新用户导出文件为已读"
+    },
+    "userdatasaveapi": {
+      "getname": "保存用户数据"
+    },
+    "userdeleteapi": {
+      "getname": "删除用户接口"
+    },
+    "usergetapi": {
+      "description": {
+        "desc": "根据用户Id查询用户详情"
+      },
+      "getname": "根据用户id查询用户详情接口",
+      "input": {
+        "param": {
+          "desc": {
+            "isrulerole": "默认为true，过滤掉不符合规则的角色"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "user": "用户详情"
+          }
+        }
+      }
+    },
+    "usergetforeditapi": {
+      "getname": "获取用户信息(编辑页面回显专用)"
+    },
+    "userprofilelistapi": {
+      "getname": "用户个性化查询列表接口"
+    },
+    "userprofilesaveapi": {
+      "getname": "保存用户个性化设置",
+      "input": {
+        "param": {
+          "checked": {
+            "desc": "操作个性化选项勾选"
+          },
+          "name": {
+            "desc": "操作个性化选项名"
+          },
+          "operate": {
+            "desc": "具体操作个性化选项"
+          }
+        }
+      }
+    },
+    "usersaveapi": {
+      "getname": "保存用户接口"
+    },
+    "usersearchapi": {
+      "getname": "查询用户"
+    },
+    "usersearchforselectapi": {
+      "getname": "查询用户_下拉",
+      "input": {
+        "param": {
+          "desc": {
+            "needteam": "是否需要组信息"
+          }
+        }
+      }
+    }
+  },
+  "nmtaw": {
+    "getwechatapi": {
+      "getname": "获取企业微信数据"
+    },
+    "savewechatapi": {
+      "getname": "保存企业微信数据"
+    },
+    "testwechatapi": {
+      "getname": "测试企业微信发送消息",
+      "input": {
+        "param": {
+          "desc": {
+            "touser": "企业微信账号"
+          }
+        }
+      }
+    },
+    "worktimecalendarsaveapi": {
+      "getname": "保存工作日历信息"
+    },
+    "worktimesaveapi": {
+      "getname": "保存工作时间窗口信息"
+    }
+  },
+  "nmteu": {
+    "userpasswordrepeatexception": {
+      "userpasswordrepeatexception": "新密码和旧密码相同,请确认后重试"
+    }
+  },
+  "nmts": {
+    "serverserviceimpl": {
+      "postotherserverapi": {
+        "notfound": "找不到serverId为“{0}”的应用服务器",
+        "nothost": "serverId为“{0}”的应用服务器的`server_status`表中对应数据没有配置host"
+      }
+    }
+  },
+  "term": {
+    "framework": {
+      "calendarlist": "工作日历列表",
+      "documentonlineinfo": "在线帮助文档信息",
+      "issuetime": "下发时间",
+      "matrixuuid": "矩阵uuid",
+      "notifypolicydefaulttemplateinfo": "通知默认模板信息",
+      "savetopic": "保存消息队列主题",
+      "serveripport": "服务器地址",
+      "togglemqtopicisactive": "更新消息队列主题激活状态"
+    },
+    "tenant": {
+      "name": "系统配置"
+    }
+  }
+}
