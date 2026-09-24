@@ -105,6 +105,9 @@ public class TeamSaveApi extends PrivateApiComponentBase {
             }
             teamVo.setUuid(uuid);
             teamMapper.updateTeamByUuid(teamVo);
+            if (!Objects.equals(oldTeam.getName(), teamVo.getName())) {
+                teamMapper.updateUpwardNamePathByLftRht(oldTeam.getLft(), oldTeam.getRht());
+            }
             teamService.deleteTeamUserTitleByTeamUuid(uuid);
         } else {
             String parentUuid = jsonObj.getString("parentUuid");
