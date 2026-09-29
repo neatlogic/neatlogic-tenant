@@ -35,6 +35,7 @@ import neatlogic.framework.systemnotice.dao.mapper.SystemNoticeMapper;
 import neatlogic.framework.systemnotice.dto.SystemNoticeRecipientVo;
 import neatlogic.framework.systemnotice.dto.SystemNoticeVo;
 import neatlogic.framework.util.HtmlUtil;
+import neatlogic.framework.util.$;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class SystemNoticeSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询系统公告";
+        return $.t("nmtas.systemnoticesearchapi.getname");
     }
 
     @Override
@@ -75,16 +76,16 @@ public class SystemNoticeSearchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字", xss=true),
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
-            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmtas.systemnoticesearchapi.input.param.desc.keyword", xss=true),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmtas.systemnoticesearchapi.input.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmtas.systemnoticesearchapi.input.param.desc.pagesize"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "nmtas.systemnoticesearchapi.input.param.desc.needpage")
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, explode = SystemNoticeVo.class),
             @Param(explode = BasePageVo.class)
     })
-    @Description(desc = "查询系统公告")
+    @Description(desc = "nmtas.systemnoticesearchapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         SystemNoticeVo vo = JSON.parseObject(jsonObj.toJSONString(), new TypeReference<SystemNoticeVo>() {});

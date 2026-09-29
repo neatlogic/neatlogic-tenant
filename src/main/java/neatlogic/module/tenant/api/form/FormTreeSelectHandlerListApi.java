@@ -10,6 +10,7 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class FormTreeSelectHandlerListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取树形下拉框数据源列表";
+        return $.t("nmta.formtreeselecthandlerlistapi.getname");
     }
 
     @Override
@@ -43,7 +44,7 @@ public class FormTreeSelectHandlerListApi extends PrivateApiComponentBase {
     @Output({
 
     })
-    @Description(desc = "获取树形下拉框数据源列表接口")
+    @Description(desc = "nmta.formtreeselecthandlerlistapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONArray jsonArray = new JSONArray();

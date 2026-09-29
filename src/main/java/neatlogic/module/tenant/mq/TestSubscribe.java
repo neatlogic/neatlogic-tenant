@@ -15,6 +15,7 @@ package neatlogic.module.tenant.mq;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.mq.core.SubscribeHandlerBase;
 import neatlogic.framework.mq.dto.SubscribeVo;
+import neatlogic.framework.util.$;
 import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
@@ -47,6 +48,6 @@ public class TestSubscribe extends SubscribeHandlerBase {
 
     @Override
     public String getLabel() {
-        return "测试处理器";
+        return $.t("nmtas.testsubscribe.label");
     }
 }

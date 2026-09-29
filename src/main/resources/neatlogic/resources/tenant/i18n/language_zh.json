@@ -28,6 +28,12 @@
     "waitreason": "等待原因"
   },
   "nmta": {
+    "formtreeselecthandlerlistapi": {
+      "description": {
+        "desc": "获取树形下拉框数据源列表接口"
+      },
+      "getname": "获取树形下拉框数据源列表"
+    },
     "heartbeatapi": {
       "getname": "心跳"
     }
@@ -187,6 +193,24 @@
     },
     "searchdatasourcedbtypeapi": {
       "getname": "搜索数据仓库数据库类型"
+    },
+    "searchdatasourcedataapi": {
+      "getname": "查询数据源数据",
+      "header": {
+        "expiretime": "过期时间",
+        "inserttime": "同步时间"
+      },
+      "input": {
+        "param": {
+          "desc": {
+            "conditionlist": "条件列表",
+            "datasourceid": "数据源 ID",
+            "isexpired": "是否过期（0：未过期；1：已过期）",
+            "limit": "返回数据限制",
+            "sortlist": "排序"
+          }
+        }
+      }
     },
     "searchdocumentonlineapi": {
       "getname": "关键字搜索在线帮助文档",
@@ -668,6 +692,19 @@
     "saveserverapi": {
       "getname": "保存服务器信息"
     },
+    "systemnoticesearchapi": {
+      "getname": "查询系统公告",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字",
+            "needpage": "是否需要分页，默认值为 true",
+            "pagesize": "每页数据条目"
+          }
+        }
+      }
+    },
     "systemnoticepullapi": {
       "getname": "拉取系统公告",
       "input": {
@@ -684,6 +721,9 @@
           }
         }
       }
+    },
+    "testsubscribe": {
+      "label": "测试处理器"
     }
   },
   "nmtass": {

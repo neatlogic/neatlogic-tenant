@@ -28,6 +28,12 @@
     "waitreason": "Wait Reason"
   },
   "nmta": {
+    "formtreeselecthandlerlistapi": {
+      "description": {
+        "desc": "API for listing tree select data sources"
+      },
+      "getname": "List Tree Select Data Sources"
+    },
     "heartbeatapi": {
       "getname": "heartbeat"
     }
@@ -187,6 +193,24 @@
     },
     "searchdatasourcedbtypeapi": {
       "getname": "Search for data warehouse database types"
+    },
+    "searchdatasourcedataapi": {
+      "getname": "Query Data Source Data",
+      "header": {
+        "expiretime": "Expiration Time",
+        "inserttime": "Sync Time"
+      },
+      "input": {
+        "param": {
+          "desc": {
+            "conditionlist": "Condition List",
+            "datasourceid": "Data Source ID",
+            "isexpired": "Expiration Status (0: Not Expired; 1: Expired)",
+            "limit": "Result Limit",
+            "sortlist": "Sort Order"
+          }
+        }
+      }
     },
     "searchdocumentonlineapi": {
       "getname": "Keyword search for online help documents",
@@ -668,6 +692,19 @@
     "saveserverapi": {
       "getname": "Save server information"
     },
+    "systemnoticesearchapi": {
+      "getname": "Query System Notices",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Whether pagination is required; defaults to true",
+            "pagesize": "Number of Items per Page"
+          }
+        }
+      }
+    },
     "systemnoticepullapi": {
       "getname": "Pull system announcement",
       "input": {
@@ -684,6 +721,9 @@
           }
         }
       }
+    },
+    "testsubscribe": {
+      "label": "Test Handler"
     }
   },
   "nmtass": {

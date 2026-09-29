@@ -28,6 +28,7 @@ import neatlogic.framework.datawarehouse.exceptions.DataSourceIsNotFoundExceptio
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询数据源数据";
+        return $.t("nmtad.searchdatasourcedataapi.getname");
     }
 
     @Override
@@ -61,13 +62,13 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "dataSourceId", type = ApiParamType.LONG, desc = "数据源id", isRequired = true),
-            @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "条件列表"),
-            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "排序"),
-            @Param(name = "limit", type = ApiParamType.INTEGER, desc = "返回数据限制"),
-            @Param(name = "isExpired", type = ApiParamType.INTEGER, desc = "是否过期，0未过期，1已过期")})
+    @Input({@Param(name = "dataSourceId", type = ApiParamType.LONG, desc = "nmtad.searchdatasourcedataapi.input.param.desc.datasourceid", isRequired = true),
+            @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "nmtad.searchdatasourcedataapi.input.param.desc.conditionlist"),
+            @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "nmtad.searchdatasourcedataapi.input.param.desc.sortlist"),
+            @Param(name = "limit", type = ApiParamType.INTEGER, desc = "nmtad.searchdatasourcedataapi.input.param.desc.limit"),
+            @Param(name = "isExpired", type = ApiParamType.INTEGER, desc = "nmtad.searchdatasourcedataapi.input.param.desc.isexpired")})
     @Output({@Param(explode = BasePageVo.class)})
-    @Description(desc = "查询数据源数据")
+    @Description(desc = "nmtad.searchdatasourcedataapi.getname")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         DataSourceDataVo reportDataSourceDataVo = JSON.toJavaObject(jsonObj, DataSourceDataVo.class);
@@ -100,13 +101,13 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
             JSONObject insertTimeHeadObj = new JSONObject();
             insertTimeHeadObj.put("key", "insertTime");
-            insertTimeHeadObj.put("title", "同步时间");
+            insertTimeHeadObj.put("title", $.t("nmtad.searchdatasourcedataapi.header.inserttime"));
             insertTimeHeadObj.put("type", "time");
             headerList.add(insertTimeHeadObj);
 
             JSONObject expiredTimeHeadObj = new JSONObject();
             expiredTimeHeadObj.put("key", "expireTime");
-            expiredTimeHeadObj.put("title", "过期时间");
+            expiredTimeHeadObj.put("title", $.t("nmtad.searchdatasourcedataapi.header.expiretime"));
             expiredTimeHeadObj.put("type", "time");
             headerList.add(expiredTimeHeadObj);
 
