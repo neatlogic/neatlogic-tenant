@@ -191,9 +191,6 @@
     "searchdatasourceapi": {
       "getname": "查询数据仓库数据源"
     },
-    "searchdatasourcedbtypeapi": {
-      "getname": "搜索数据仓库数据库类型"
-    },
     "searchdatasourcedataapi": {
       "getname": "查询数据源数据",
       "header": {
@@ -211,6 +208,9 @@
           }
         }
       }
+    },
+    "searchdatasourcedbtypeapi": {
+      "getname": "搜索数据仓库数据库类型"
     },
     "searchdocumentonlineapi": {
       "getname": "关键字搜索在线帮助文档",

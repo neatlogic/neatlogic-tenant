@@ -191,9 +191,6 @@
     "searchdatasourceapi": {
       "getname": "Query Data Warehouse Data Source"
     },
-    "searchdatasourcedbtypeapi": {
-      "getname": "Search for data warehouse database types"
-    },
     "searchdatasourcedataapi": {
       "getname": "Query Data Source Data",
       "header": {
@@ -211,6 +208,9 @@
           }
         }
       }
+    },
+    "searchdatasourcedbtypeapi": {
+      "getname": "Search for data warehouse database types"
     },
     "searchdocumentonlineapi": {
       "getname": "Keyword search for online help documents",
