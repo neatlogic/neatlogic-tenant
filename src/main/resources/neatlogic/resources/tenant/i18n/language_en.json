@@ -3,6 +3,9 @@
     "group": {
       "items": "Permission Group List",
       "list": "Get Permission Group List"
+    },
+    "systemuser": {
+      "search": "Search built-in system users for permissions"
     }
   },
   "globallock": {
@@ -844,6 +847,9 @@
     },
     "resetusertokenapi": {
       "getname": "Reset user's token"
+    },
+    "searchsystemuserapi": {
+      "getname": "Search built-in system users"
     },
     "searchuserexportfileapi": {
       "getname": "User exported file list",

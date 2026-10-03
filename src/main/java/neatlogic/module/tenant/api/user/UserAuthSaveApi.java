@@ -1,26 +1,28 @@
 package neatlogic.module.tenant.api.user;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.ISystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.user.UserNotFoundException;
-import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +34,7 @@ import java.util.Set;
 @OperationType(type = OperationTypeEnum.CREATE)
 public class UserAuthSaveApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
     @Override
@@ -50,6 +52,9 @@ public class UserAuthSaveApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /**
+     * 保存普通用户或已注册系统内置用户的直接权限，整批目标校验通过后才执行写入。
+     */
     @Input({
             @Param(name = "userUuidList",
             type = ApiParamType.JSONARRAY,
@@ -68,12 +73,18 @@ public class UserAuthSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
     	List<String> userUuidList = JSON.parseArray(jsonObj.getString("userUuidList"), String.class);
-//        JSONArray userUuidArray = jsonObj.getJSONArray("userUuidList");
         String action = jsonObj.getString("action");
+        Set<String> systemUserUuidSet = new HashSet<>();
+        for (ISystemUser systemUser : SystemUserFactory.getSystemUserList()) {
+            systemUserUuidSet.add(systemUser.getUserUuid());
+        }
+        // 写入前校验全部目标；系统内置用户仅接受注册 UUID，不接受用户 ID 别名。
+        for (String userUuid : userUuidList) {
+            if (!systemUserUuidSet.contains(userUuid) && userMapper.checkUserIsExists(userUuid) == 0) {
+                throw new UserNotFoundException(userUuid);
+            }
+        }
         for (String userUuid : userUuidList){
-        	if(userMapper.checkUserIsExists(userUuid) == 0) {
-        		throw new UserNotFoundException(userUuid);
-        	}
             UserVo userVo = new UserVo();
             userVo.setUuid(userUuid);
             JSONObject userAuthObj = jsonObj.getJSONObject("userAuthList");

@@ -3,6 +3,9 @@
     "group": {
       "items": "权限组列表",
       "list": "获取权限组列表"
+    },
+    "systemuser": {
+      "search": "查询权限系统内置用户"
     }
   },
   "globallock": {
@@ -844,6 +847,9 @@
     },
     "resetusertokenapi": {
       "getname": "重置用户的令牌"
+    },
+    "searchsystemuserapi": {
+      "getname": "查询系统内置用户"
     },
     "searchuserexportfileapi": {
       "getname": "用户导出文件列表",
