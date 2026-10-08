@@ -69,7 +69,7 @@ public class SyncLdapUserSchedule extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "同步LDAP的用户信息";
+        return "nmtas.scheduler.job.syncldapuser.name";
     }
 
     @Prop({

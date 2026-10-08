@@ -26,7 +26,6 @@ import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
-import neatlogic.framework.util.TimeUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -405,7 +404,7 @@ public class SystemUserAuthorizationApiTest {
         user.setUserName(uuid);
         user.setAuthorization("test-authorization");
         user.setIsSuperAdmin(false);
-        UserContext.init(user, new AuthenticationInfoVo(uuid), TimeUtil.ZONE_TIME);
+        UserContext.init(user, new AuthenticationInfoVo(uuid));
     }
 
     /** 构造关闭审计的接口描述，避免测试访问真实存储。 */

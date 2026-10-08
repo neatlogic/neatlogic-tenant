@@ -695,6 +695,45 @@
     "saveserverapi": {
       "getname": "保存服务器信息"
     },
+    "scheduler": {
+      "job": {
+        "syncldapteam": {
+          "name": "全量同步 LDAP 组织架构"
+        },
+        "syncldapuser": {
+          "name": "同步 LDAP 用户信息"
+        }
+      }
+    },
+    "searchschedulermemoryapi": {
+      "getname": "查询内存中的定时作业列表",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "handler": "作业组件",
+            "jobgroupname": "作业组名",
+            "jobname": "作业名（精确查询；jobName 不为空时，jobGroupName 也不能为空）",
+            "keyword": "关键字",
+            "moduleid": "模块 ID",
+            "needaudit": "是否保存执行记录（0：不保存；1：保存）",
+            "pagesize": "页大小",
+            "state": "作业状态"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页码",
+            "pagecount": "总页数",
+            "pagesize": "页大小",
+            "rownum": "总行数",
+            "tbodylist": "内存中的定时作业列表"
+          }
+        }
+      }
+    },
     "systemnoticesearchapi": {
       "getname": "查询系统公告",
       "input": {

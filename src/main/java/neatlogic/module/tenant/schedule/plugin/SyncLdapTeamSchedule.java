@@ -50,7 +50,7 @@ public class SyncLdapTeamSchedule extends PublicJobBase {
 
     @Override
     public String getName() {
-        return "全量同步LDAP的组织架构";
+        return "nmtas.scheduler.job.syncldapteam.name";
     }
 
     @Prop({

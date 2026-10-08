@@ -695,6 +695,45 @@
     "saveserverapi": {
       "getname": "Save server information"
     },
+    "scheduler": {
+      "job": {
+        "syncldapteam": {
+          "name": "Synchronize LDAP Organization Structure"
+        },
+        "syncldapuser": {
+          "name": "Synchronize LDAP User Information"
+        }
+      }
+    },
+    "searchschedulermemoryapi": {
+      "getname": "Search In-Memory Scheduled Jobs",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "handler": "Job Component",
+            "jobgroupname": "Job Group Name",
+            "jobname": "Job Name (exact query; jobGroupName is also required when jobName is provided)",
+            "keyword": "Keyword",
+            "moduleid": "Module ID",
+            "needaudit": "Save Execution Records (0: No; 1: Yes)",
+            "pagesize": "Page Size",
+            "state": "Job Status"
+          }
+        }
+      },
+      "output": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "pagecount": "Page Count",
+            "pagesize": "Page Size",
+            "rownum": "Total Rows",
+            "tbodylist": "In-Memory Scheduled Job List"
+          }
+        }
+      }
+    },
     "systemnoticesearchapi": {
       "getname": "Query System Notices",
       "input": {

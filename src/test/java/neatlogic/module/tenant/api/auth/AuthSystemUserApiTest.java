@@ -27,7 +27,6 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.service.UserService;
-import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.tenant.api.user.UserAuthSaveApi;
 import neatlogic.module.tenant.api.user.UserAuthSearchApi;
 import org.junit.After;
@@ -520,7 +519,7 @@ public class AuthSystemUserApiTest {
         user.setUserName(uuid);
         user.setIsSuperAdmin(false);
         user.setAuthorization("test-authorization");
-        UserContext.init(user, new AuthenticationInfoVo(uuid), TimeUtil.ZONE_TIME);
+        UserContext.init(user, new AuthenticationInfoVo(uuid));
     }
 
     /** 构造关闭审计的真实接口描述。 */

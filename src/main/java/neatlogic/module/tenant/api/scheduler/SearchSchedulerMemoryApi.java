@@ -58,7 +58,7 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询内存的定时作业列表";
+        return "nmtas.searchschedulermemoryapi.getname";
     }
 
     @Override
@@ -71,24 +71,24 @@ public class SearchSchedulerMemoryApi extends PrivateApiComponentBase {
         return "scheduler/memory/search";
     }
 
-    @Input({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "jobName", type = ApiParamType.STRING, desc = "作业名(精确查询),jobName不为空时，jobGroupName也不可以为空"),
-            @Param(name = "jobGroupName", type = ApiParamType.STRING, desc = "作业组名"),
-            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键字"),
-            @Param(name = "handler", type = ApiParamType.STRING, desc = "作业组件"),
-            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "term.cmdb.moduleid"),
-            @Param(name = "state", type = ApiParamType.STRING, desc = "作业状态"),
-            @Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "是否保存执行记录(0:不保存，1:保存)")
+    @Input({@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.input.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.input.param.desc.pagesize"),
+            @Param(name = "jobName", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.jobname"),
+            @Param(name = "jobGroupName", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.jobgroupname"),
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.keyword"),
+            @Param(name = "handler", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.handler"),
+            @Param(name = "moduleId", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.moduleid"),
+            @Param(name = "state", type = ApiParamType.STRING, desc = "nmtas.searchschedulermemoryapi.input.param.desc.state"),
+            @Param(name = "needAudit", type = ApiParamType.ENUM, rule = "0,1", desc = "nmtas.searchschedulermemoryapi.input.param.desc.needaudit")
     })
     @Output({
-            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页码"),
-            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "页大小"),
-            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "总页数"),
-            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "总行数"),
-            @Param(name = "tbodyList", explode = JobInfoVo[].class, desc = "内存的定时作业列表")
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.output.param.desc.currentpage"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.output.param.desc.pagesize"),
+            @Param(name = "pageCount", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.output.param.desc.pagecount"),
+            @Param(name = "rowNum", type = ApiParamType.INTEGER, desc = "nmtas.searchschedulermemoryapi.output.param.desc.rownum"),
+            @Param(name = "tbodyList", explode = JobInfoVo[].class, desc = "nmtas.searchschedulermemoryapi.output.param.desc.tbodylist")
     })
-    @Description(desc = "查询内存的定时作业列表")
+    @Description(desc = "nmtas.searchschedulermemoryapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String jobGroupName = paramObj.getString("jobGroupName");
