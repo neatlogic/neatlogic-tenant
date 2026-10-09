@@ -3,12 +3,15 @@ package neatlogic.module.tenant.api.auth;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.ISystemUser;
 import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.exception.auth.AuthNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -19,7 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 
-/** 权限管理查询系统内置用户，只展示注册身份和当前权限的直接成员。 */
+/** 权限管理查询系统用户及页面、代码两种授权来源，代码来源始终只读。 */
 @Service
 @AuthAction(action = AUTHORITY_MODIFY.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -42,7 +45,7 @@ public class SearchAuthSystemUserApi extends PrivateApiComponentBase {
         return null;
     }
 
-    /** 未指定权限时返回所有注册用户；指定权限时批量查询直接成员，不构造凭据或展开角色权限。 */
+    /** 未指定权限时返回注册用户；指定权限时合并页面成员及代码包含权限，不构造凭据。 */
     @Input({
             @Param(name = "auth", type = ApiParamType.STRING, desc = "common.auth")
     })
@@ -72,13 +75,26 @@ public class SearchAuthSystemUserApi extends PrivateApiComponentBase {
         }
         JSONArray tbodyList = new JSONArray();
         for (ISystemUser systemUser : systemUserList) {
-            if (filterByAuth && !memberUuidSet.contains(systemUser.getUserUuid())) {
+            boolean isPageAuth = memberUuidSet.contains(systemUser.getUserUuid());
+            List<UserAuthVo> codeAuthList = new ArrayList<>();
+            if (filterByAuth) {
+                for (AuthBase codeAuth : AuthFactory.getDefaultAuthListBySystemUser(systemUser.getUserUuid())) {
+                    codeAuthList.add(new UserAuthVo(systemUser.getUserUuid(), codeAuth));
+                }
+                AuthActionChecker.getAuthList(codeAuthList);
+            }
+            boolean isCodeAuth = codeAuthList.stream().anyMatch(codeAuth -> Objects.equals(codeAuth.getAuth(), auth));
+            if (filterByAuth && !isPageAuth && !isCodeAuth) {
                 continue;
             }
             JSONObject userObj = new JSONObject();
             userObj.put("uuid", systemUser.getUserUuid());
             userObj.put("userId", systemUser.getUserId());
             userObj.put("userName", systemUser.getUserName());
+            if (filterByAuth) {
+                userObj.put("isPageAuth", isPageAuth);
+                userObj.put("isCodeAuth", isCodeAuth);
+            }
             tbodyList.add(userObj);
         }
         JSONObject result = new JSONObject();

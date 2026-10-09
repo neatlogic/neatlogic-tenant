@@ -4,7 +4,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.util.$;
 import neatlogic.framework.form.dao.mapper.FormMapper;
@@ -21,7 +20,7 @@ import java.util.Objects;
 import neatlogic.framework.globallock.GlobalLockOperationManager;
 
 @Service
-@AuthUser(SystemUser.AUTOEXEC)
+
 @OperationType(type = OperationTypeEnum.OPERATE)
 @AuthAction(action = NoAuth.class)
 public class GlobalLockApi extends PrivateApiComponentBase {

@@ -15,6 +15,9 @@ package neatlogic.module.tenant.api.user;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.auth.core.AuthFactory;
+import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/** 分别查询页面、角色和代码来源权限，复用统一权限包含关系。 */
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
@@ -58,7 +62,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "用户权限查询接口";
+        return "auth.user.search";
     }
 
     @Override
@@ -66,14 +70,18 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /**
+     * 页面直接授权与代码内置授权分别返回，内置权限及其包含权限只读展示。
+     */
     @Input({
-            @Param( name = "userUuid", type = ApiParamType.STRING, desc = "用户uuid", isRequired = true)
+            @Param( name = "userUuid", type = ApiParamType.STRING, desc = "common.useruuid", isRequired = true)
     })
     @Output({
-            @Param( name = "userAuthObj", type = ApiParamType.JSONARRAY, desc = "用户权限集合"),
-            @Param( name = "userRoleAuthObj", type = ApiParamType.JSONARRAY, desc = "用户角色权限集合")
+            @Param( name = "userAuthObj", type = ApiParamType.JSONOBJECT, desc = "auth.user.pageauth"),
+            @Param( name = "userRoleAuthObj", type = ApiParamType.JSONOBJECT, desc = "auth.user.roleauth"),
+            @Param(name = "userCodeAuthObj", type = ApiParamType.JSONOBJECT, desc = "auth.systemuser.codeauth")
     })
-    @Description(desc = "用户权限查询接口")
+    @Description(desc = "auth.user.search")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         JSONObject returnObj = new JSONObject();
@@ -160,6 +168,17 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         }
         returnObj.put("userAuthObj", userAuthObj);
         returnObj.put("userRoleAuthObj", userRoleAuthObj);
+        List<UserAuthVo> codeAuthList = new ArrayList<>();
+        for (AuthBase auth : AuthFactory.getDefaultAuthListBySystemUser(userUuid)) {
+            codeAuthList.add(new UserAuthVo(userUuid, auth));
+        }
+        AuthActionChecker.getAuthList(codeAuthList);
+        JSONObject userCodeAuthObj = new JSONObject();
+        for (UserAuthVo auth : codeAuthList) {
+            userCodeAuthObj.computeIfAbsent(auth.getAuthGroup(), key -> new JSONArray());
+            userCodeAuthObj.getJSONArray(auth.getAuthGroup()).add(auth.getAuth());
+        }
+        returnObj.put("userCodeAuthObj", userCodeAuthObj);
         return returnObj;
     }
 }

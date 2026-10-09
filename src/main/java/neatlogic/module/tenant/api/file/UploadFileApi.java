@@ -19,7 +19,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.exception.file.*;
 import neatlogic.framework.exception.user.NoTenantException;
@@ -45,7 +44,7 @@ import java.util.List;
 
 @Service
 @Transactional
-@AuthUser(SystemUser.AUTOEXEC)
+
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {

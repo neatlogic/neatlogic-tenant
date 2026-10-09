@@ -5,7 +5,13 @@
       "list": "Get Permission Group List"
     },
     "systemuser": {
+      "codeauth": "Code-Defined Permissions",
       "search": "Search built-in system users for permissions"
+    },
+    "user": {
+      "pageauth": "Page-Assigned Permissions",
+      "roleauth": "Role Permissions",
+      "search": "Search User Permissions"
     }
   },
   "globallock": {
@@ -31,6 +37,11 @@
     "waitreason": "Wait Reason"
   },
   "nmta": {
+    "apimanagegetapi": {
+      "config": "API Configuration",
+      "getname": "Get API Configuration",
+      "token": "API Token"
+    },
     "formtreeselecthandlerlistapi": {
       "description": {
         "desc": "API for listing tree select data sources"

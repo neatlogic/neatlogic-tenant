@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.auth.core.ApiAuthContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -13,6 +12,9 @@ import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.systemuser.ISystemUser;
 import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
+import neatlogic.framework.common.util.ModuleUtil;
+import neatlogic.framework.dto.module.ModuleVo;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -42,6 +44,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +67,13 @@ public class AuthSystemUserApiTest {
     private int writeCount;
     private String failureMethod;
     private String failureUuid;
+
+    /** 反射注入测试权限后同步默认授权索引，避免测试依赖生产注册顺序。 */
+    private static void rebuildDefaultAuthIndex() throws Exception {
+        Method method = AuthFactory.class.getDeclaredMethod("initializeDefaultAuthMap");
+        method.setAccessible(true);
+        method.invoke(null);
+    }
 
     /** 安装 Mapper 与用户展开服务替身，保留全局注册表和鉴权对象供恢复。 */
     @Before
@@ -148,8 +158,9 @@ public class AuthSystemUserApiTest {
         systemUserMap.putAll(originalSystemUserMap);
         authMap.clear();
         authMap.putAll(originalAuthMap);
+        rebuildDefaultAuthIndex();
         checkerMapperField.set(null, originalCheckerMapper);
-        ApiAuthContext.release();
+
         if (UserContext.get() != null) {
             UserContext.get().release();
         }
@@ -200,6 +211,77 @@ public class AuthSystemUserApiTest {
         Assert.assertEquals(1, result.getInteger("rowNum").intValue());
         Assert.assertEquals("system", result.getJSONArray("tbodyList").getJSONObject(0).getString("uuid"));
         Assert.assertEquals(1, memberQueryCount);
+    }
+
+    /** 代码包含权限单独回显；添加、撤销页面来源均不会修改代码来源或扩展身份的有效权限。 */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldKeepCodeAuthReadOnlyAcrossAuthorizationApis() throws Exception {
+        registerExtension();
+        authMap.put(TEST_CODE_AUTH.class.getSimpleName(), new TEST_CODE_AUTH());
+        rebuildDefaultAuthIndex();
+        Map<String, List<String>> cache = (Map<String, List<String>>) field(TenantContext.class, "tenantModuleGroupListMap").get(null);
+        List<String> originalGroups = cache.put("test-tenant", new ArrayList<>());
+        ModuleVo module = new ModuleVo();
+        module.setId("auth-api-test-framework");
+        module.setGroup("framework");
+        ModuleUtil.addModule(module);
+        try {
+            JSONObject query = systemRequest("USER_MODIFY", "extension-uuid");
+            JSONObject result = (JSONObject) listApi.myDoService(query);
+            Assert.assertEquals(2, result.getInteger("rowNum").intValue());
+            for (Object value : result.getJSONArray("tbodyList")) {
+                JSONObject row = (JSONObject) value;
+                Assert.assertFalse(row.getBooleanValue("isPageAuth"));
+                Assert.assertTrue(row.getBooleanValue("isCodeAuth"));
+            }
+            Assert.assertEquals(0, writeCount);
+            Assert.assertTrue(AuthActionChecker.check("extension-id", USER_MODIFY.class));
+
+            saveApi.myDoService(query);
+            JSONObject both = ((JSONObject) listApi.myDoService(query)).getJSONArray("tbodyList").stream()
+                    .map(value -> (JSONObject) value).filter(row -> "extension-uuid".equals(row.getString("uuid"))).findFirst().get();
+            Assert.assertTrue(both.getBooleanValue("isPageAuth"));
+            Assert.assertTrue(both.getBooleanValue("isCodeAuth"));
+            deleteApi.myDoService(query);
+            Assert.assertTrue(auths("extension-uuid").isEmpty());
+            Assert.assertTrue(AuthActionChecker.check("extension-uuid", USER_MODIFY.class));
+
+            UserAuthSearchApi userSearchApi = new UserAuthSearchApi();
+            inject(userSearchApi, "userMapper", mapper);
+            inject(userSearchApi, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
+                    new Class<?>[]{TeamMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+            inject(userSearchApi, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
+                    new Class<?>[]{RoleMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+            JSONObject userQuery = new JSONObject();
+            userQuery.put("userUuid", "extension-uuid");
+            JSONObject userResult = (JSONObject) userSearchApi.myDoService(userQuery);
+            Assert.assertTrue(userResult.getJSONObject("userAuthObj").isEmpty());
+            Assert.assertEquals(Set.of("TEST_CODE_AUTH", "USER_MODIFY"),
+                    new HashSet<>(userResult.getJSONObject("userCodeAuthObj").getJSONArray("framework").toJavaList(String.class)));
+        } finally {
+            ModuleUtil.removeModule(module);
+            if (originalGroups == null) {
+                cache.remove("test-tenant");
+            } else {
+                cache.put("test-tenant", originalGroups);
+            }
+        }
+    }
+
+    /** 仅用于模拟模块对已有权限的包含授权，不加入生产权限声明。 */
+    public static class TEST_CODE_AUTH extends USER_MODIFY {
+        /** 为两种注册身份模拟代码默认授权。 */
+        @Override
+        public List<ISystemUser> getDefaultSystemUserList() {
+            return Arrays.asList(SystemUser.SYSTEM, SystemUserFactory.getSystemUserByUser("extension-id"));
+        }
+
+        /** 展开时复用统一校验器对已有权限的包含逻辑。 */
+        @Override
+        public List<Class<? extends AuthBase>> getIncludeAuths() {
+            return Collections.singletonList(USER_MODIFY.class);
+        }
     }
 
     /** 空工厂在带权限与不带权限时均返回空列表，不产生无约束授权查询。 */

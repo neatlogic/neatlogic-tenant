@@ -22,7 +22,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.RunnerStatus;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 
 @Service
-@AuthUser(SystemUser.ANONYMOUS)
+
 @Transactional
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
-import neatlogic.framework.auth.core.ApiAuthContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -123,7 +122,7 @@ public class SystemUserAuthorizationApiTest {
         systemUserMap.clear();
         systemUserMap.putAll(originalSystemUserMap);
         checkerMapperField.set(null, originalCheckerMapper);
-        ApiAuthContext.release();
+
         if (UserContext.get() != null) {
             UserContext.get().release();
         }
@@ -241,12 +240,12 @@ public class SystemUserAuthorizationApiTest {
         }
     }
 
-    /** 未豁免 API 中使用实时权限查询，授权后放行、撤权后立即拒绝。 */
+    /** 统一鉴权使用实时权限查询，授权后放行、撤权后立即拒绝。 */
     @Test
     public void shouldApplyGrantAndRevokeOnNextPermissionCheck() throws Exception {
         String uuid = SystemUser.SYSTEM.getUserUuid();
         initUser(uuid);
-        ApiAuthContext.enter(SearchSystemUserApi.class);
+
         Assert.assertFalse(AuthActionChecker.check(USER_MODIFY.class));
         saveApi.myDoService(request("cover", Collections.singletonList(uuid), "USER_MODIFY"));
         Assert.assertTrue(AuthActionChecker.check(USER_MODIFY.class));
@@ -267,7 +266,7 @@ public class SystemUserAuthorizationApiTest {
             authMap.put(DATA_WAREHOUSE_BASE.class.getSimpleName(), new DATA_WAREHOUSE_BASE());
             String uuid = SystemUser.SYSTEM.getUserUuid();
             initUser(uuid);
-            ApiAuthContext.enter(SearchSystemUserApi.class);
+
             Assert.assertFalse(AuthActionChecker.check(DATA_WAREHOUSE_BASE.class));
             saveApi.myDoService(request("cover", Collections.singletonList(uuid), "DATA_WAREHOUSE_MODIFY"));
             Assert.assertTrue(AuthActionChecker.check(DATA_WAREHOUSE_BASE.class));
@@ -279,7 +278,7 @@ public class SystemUserAuthorizationApiTest {
         }
     }
 
-    /** 普通用户及未豁免系统用户缺少 USER_MODIFY 时，真实执行入口拒绝列表和保存。 */
+    /** 普通用户及系统用户缺少 USER_MODIFY 时，真实执行入口拒绝列表和保存。 */
     @Test
     public void shouldDenyBothApiEntrypointsWithoutUserModify() throws Exception {
         for (String uuid : Arrays.asList("ordinary-user", SystemUser.SYSTEM.getUserUuid())) {
@@ -299,7 +298,7 @@ public class SystemUserAuthorizationApiTest {
         SearchSystemUserApi api = new SearchSystemUserApi();
         JSONObject result = (JSONObject) api.doService(apiVo(api), new JSONObject(), null);
         Assert.assertEquals(systemUserMap.size(), result.getJSONArray("tbodyList").size());
-        Assert.assertFalse(ApiAuthContext.isCurrentSystemUserExempt());
+
     }
 
     /** Spring 事务拦截器发现原有事务注解，后续写入异常会回滚整个批次。 */
@@ -417,13 +416,13 @@ public class SystemUserAuthorizationApiTest {
         return apiVo;
     }
 
-    /** 调用公共执行入口并确认拒绝后无鉴权作用域残留。 */
+    /** 调用公共执行入口并确认缺少权限时拒绝执行。 */
     private void assertDenied(PrivateApiComponentBase api, JSONObject request) throws Exception {
         try {
             api.doService(apiVo(api), request, null);
             Assert.fail("缺少 USER_MODIFY 时接口应拒绝执行");
         } catch (PermissionDeniedException expected) {
-            Assert.assertFalse(ApiAuthContext.isCurrentSystemUserExempt());
+
         }
     }
 }

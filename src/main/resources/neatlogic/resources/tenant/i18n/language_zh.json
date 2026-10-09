@@ -5,7 +5,13 @@
       "list": "获取权限组列表"
     },
     "systemuser": {
+      "codeauth": "代码内置授权",
       "search": "查询权限系统内置用户"
+    },
+    "user": {
+      "pageauth": "页面授权集合",
+      "roleauth": "角色授权集合",
+      "search": "查询用户权限"
     }
   },
   "globallock": {
@@ -31,6 +37,11 @@
     "waitreason": "等待原因"
   },
   "nmta": {
+    "apimanagegetapi": {
+      "config": "接口配置信息",
+      "getname": "获取接口配置信息",
+      "token": "接口 Token"
+    },
     "formtreeselecthandlerlistapi": {
       "description": {
         "desc": "获取树形下拉框数据源列表接口"

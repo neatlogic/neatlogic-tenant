@@ -18,7 +18,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.CacheControlType;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.documentonline.exception.DocumentOnlineNotFoundException;
 import neatlogic.framework.documentonline.util.DocumentOnlineManager;
 import neatlogic.framework.exception.user.NoTenantException;
@@ -39,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 
 @Service
-@AuthUser(SystemUser.ANONYMOUS)
+
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBase {
