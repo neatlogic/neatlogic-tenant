@@ -842,6 +842,19 @@
     "teamdeleteapi": {
       "getname": "删除分组"
     },
+    "teamlevellistapi": {
+      "description": {
+        "desc": "获取组织架构等级列表"
+      },
+      "getname": "获取组织架构等级列表",
+      "output": {
+        "param": {
+          "desc": {
+            "teamlevellist": "组织架构等级列表"
+          }
+        }
+      }
+    },
     "teamsaveapi": {
       "getname": "保存组信息"
     }

@@ -842,6 +842,19 @@
     "teamdeleteapi": {
       "getname": "Delete Group"
     },
+    "teamlevellistapi": {
+      "description": {
+        "desc": "Get the organization hierarchy level list"
+      },
+      "getname": "Get the organization hierarchy level list",
+      "output": {
+        "param": {
+          "desc": {
+            "teamlevellist": "Organization hierarchy level list"
+          }
+        }
+      }
+    },
     "teamsaveapi": {
       "getname": "Save group information"
     }
