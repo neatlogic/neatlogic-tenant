@@ -61,8 +61,7 @@ public class ToggleSqlInterceptorApi extends PrivateApiComponentBase {
                 // 清空时同时清理sqlId和URL两类监控配置及两类审计数据
                 SqlCostInterceptor.SqlIdMap.clear();
                 SqlCostInterceptor.UrlMap.clear();
-                SqlAuditManager.clearSqlAudit();
-                SqlAuditManager.clearRequestSqlAudit();
+                SqlAuditManager.clearAllSqlAudit();
             } else if (action.equalsIgnoreCase("insert")) {
                 // 添加监控时允许sql id和url同时填写，分别进入不同监控集合
                 if (StringUtils.isNotBlank(id)) {

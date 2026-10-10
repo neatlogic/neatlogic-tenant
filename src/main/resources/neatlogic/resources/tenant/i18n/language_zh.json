@@ -367,6 +367,10 @@
     "searchsqlauditapi": {
       "getname": "获取SQL耗时"
     },
+    "updatesqlauditmodeapi": {
+      "getname": "更新SQL审计保存模式",
+      "savemode": "保存模式：recent 保留最近记录，slowest 保留耗时最长记录"
+    },
     "togglesqlinterceptorapi": {
       "getname": "控制系统SQL追踪",
       "input": {

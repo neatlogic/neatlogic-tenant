@@ -367,6 +367,10 @@
     "searchsqlauditapi": {
       "getname": "Time consumption for obtaining SQL"
     },
+    "updatesqlauditmodeapi": {
+      "getname": "Update SQL audit save mode",
+      "savemode": "Save mode: recent retains the latest records, slowest retains the slowest records"
+    },
     "togglesqlinterceptorapi": {
       "getname": "Control System SQL Tracking",
       "input": {
