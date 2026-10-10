@@ -350,7 +350,12 @@
       "getname": "获取默认首页配置信息"
     },
     "getsqlexplainapi": {
-      "getname": "获取SQL执行计划"
+      "getname": "获取SQL执行计划",
+      "includeplanjson": "是否获取 JSON 执行计划",
+      "planjson": "JSON 执行计划",
+      "datasourcekey": "执行 SQL 的数据源标识",
+      "databasename": "实际执行数据库名称",
+      "datasourcenotfound": "数据源“{0}”不存在或已卸载，请重新采集 SQL"
     },
     "getusersessionqueueinfoapi": {
       "getname": "获取用户会话队列信息"

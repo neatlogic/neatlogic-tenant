@@ -10,93 +10,44 @@
 
 package neatlogic.module.tenant.api.healthcheck;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.dao.mapper.healthcheck.SqlStatusMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.store.mysql.DatabaseVendor;
-import neatlogic.framework.store.mysql.DatasourceManager;
-import org.apache.commons.lang3.StringUtils;
+import neatlogic.module.tenant.service.healthcheck.SqlExplainService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class GetSqlExplainApi extends PrivateApiComponentBase {
     @Resource
-    private SqlStatusMapper sqlStatusMapper;
+    private SqlExplainService sqlExplainService;
 
+    /** 保持传统表格响应，并按原始执行数据源获取结构化预估计划。 */
     @Input({
             @Param(name = "sql", type = ApiParamType.STRING, desc = "common.sql"),
+            @Param(name = "includePlanJson", type = ApiParamType.INTEGER, rule = "0,1", defaultValue = "0", desc = "nmtah.getsqlexplainapi.includeplanjson"),
+            @Param(name = "datasourceKey", type = ApiParamType.STRING, desc = "nmtah.getsqlexplainapi.datasourcekey"),
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "common.tbodylist"),
             @Param(explode = BasePageVo.class),
             @Param(name = "sql", type = ApiParamType.STRING, desc = "common.sql"),
+            @Param(name = "planJson", type = ApiParamType.JSONOBJECT, desc = "nmtah.getsqlexplainapi.planjson"),
+            @Param(name = "databaseName", type = ApiParamType.STRING, desc = "nmtah.getsqlexplainapi.databasename"),
     })
     @Description(desc = "nmtah.getsqlexplainapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        JSONObject resultObj = new JSONObject();
-        String sql = paramObj.getString("sql");
-        resultObj.put("sql", sql);
-        resultObj.put("currentPage", 1);
-        resultObj.put("pageCount", 1);
-        int rowNum = 0;
-        int pageSize = 0;
-        if (StringUtils.isNotBlank(sql)) {
-            // SQL监控前端传入原始SQL，这里统一拼接EXPLAIN后查询执行计划
-            sql = "EXPLAIN " + sql;
-            List<Map<String, Object>> linkedHashMapList = sqlStatusMapper.selectListBySql(sql);
-            resultObj.put("tbodyList", linkedHashMapList);
-            rowNum = linkedHashMapList.size();
-            pageSize = (rowNum / 20 + 1) * 20;
-            if (Objects.equals(DatasourceManager.getDatabaseId(), DatabaseVendor.MYSQL.getDatabaseId())) {
-                JSONArray theadList = new JSONArray()
-                        .fluentAdd(new JSONObject().fluentPut("key", "id").fluentPut("title", "id"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "select_type").fluentPut("title", "select_type"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "table").fluentPut("title", "table"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "partitions").fluentPut("title", "partitions"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "type").fluentPut("title", "type"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "possible_keys").fluentPut("title", "possible_keys"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "key").fluentPut("title", "key"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "key_len").fluentPut("title", "key_len"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "ref").fluentPut("title", "ref"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "rows").fluentPut("title", "rows"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "filtered").fluentPut("title", "filtered"))
-                        .fluentAdd(new JSONObject().fluentPut("key", "Extra").fluentPut("title", "Extra"))
-                        ;
-                resultObj.put("theadList", theadList);
-            } else {
-                List<String> theadKeyList = new ArrayList<>();
-                JSONArray theadList = new JSONArray();
-                for (Map<String, Object> map : linkedHashMapList) {
-                    for (Map.Entry<String, Object> entry : map.entrySet()) {
-                        String key = entry.getKey();
-                        if (!theadKeyList.contains(key)) {
-                            theadKeyList.add(key);
-                            theadList.add(new JSONObject().fluentPut("key", key).fluentPut("title", key));
-                        }
-                    }
-                }
-                resultObj.put("theadList", theadList);
-            }
-        }
-        resultObj.put("pageSize", pageSize);
-        resultObj.put("rowNum", rowNum);
-        return resultObj;
+        return sqlExplainService.getSqlExplain(paramObj.getString("sql"), paramObj.getString("datasourceKey"),
+                paramObj.getInteger("includePlanJson"));
     }
 
     @Override

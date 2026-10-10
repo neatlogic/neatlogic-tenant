@@ -350,7 +350,12 @@
       "getname": "Get homepage configuration information"
     },
     "getsqlexplainapi": {
-      "getname": "Get SQL Execution Plan"
+      "getname": "Get SQL Execution Plan",
+      "includeplanjson": "Include JSON execution plan",
+      "planjson": "JSON execution plan",
+      "datasourcekey": "SQL execution datasource key",
+      "databasename": "Actual execution database name",
+      "datasourcenotfound": "Datasource \"{0}\" does not exist or has been unloaded. Please collect the SQL again."
     },
     "getusersessionqueueinfoapi": {
       "getname": "Retrieve user session queue information"
