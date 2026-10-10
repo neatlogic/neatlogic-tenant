@@ -38,9 +38,10 @@ public class TeamLevelListApi extends PrivateApiComponentBase {
         return "team/level/list";
     }
 
+    /** 返回组织架构等级列表接口名称。 */
     @Override
     public String getName() {
-        return "获取组织架构等级列表";
+        return "nmtat.teamlevellistapi.getname";
     }
 
     @Override
@@ -48,10 +49,11 @@ public class TeamLevelListApi extends PrivateApiComponentBase {
         return null;
     }
 
+    /** 返回按当前语言解析后的组织架构等级列表。 */
     @Output({
-            @Param(explode = ValueTextVo[].class, desc = "组织架构等级列表")
+            @Param(explode = ValueTextVo[].class, desc = "nmtat.teamlevellistapi.output.param.desc.teamlevellist")
     })
-    @Description(desc = "获取组织架构等级列表")
+    @Description(desc = "nmtat.teamlevellistapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         List<ValueTextVo> resultList = new ArrayList<>();
