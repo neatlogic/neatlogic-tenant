@@ -340,6 +340,9 @@
     }
   },
   "nmtah": {
+    "capturethreadsnapshotapi": {
+      "getname": "采集并分析线程快照"
+    },
     "activehomepageapi": {
       "getname": "激活默认首页配置信息"
     },

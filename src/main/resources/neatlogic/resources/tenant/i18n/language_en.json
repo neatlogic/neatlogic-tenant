@@ -340,6 +340,9 @@
     }
   },
   "nmtah": {
+    "capturethreadsnapshotapi": {
+      "getname": "Capture and analyze thread snapshot"
+    },
     "activehomepageapi": {
       "getname": "Activate homepage configuration information"
     },
