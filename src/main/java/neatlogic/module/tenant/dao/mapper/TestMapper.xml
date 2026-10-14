@@ -30,11 +30,13 @@
 
     <select id="getGzipContentCountByTableNameAndColumnName" resultType="int">
         SELECT COUNT(1) FROM `${tableName}`
-        WHERE `${columnName}`
+        WHERE
         <if test="action == 'compress'">
-            NOT
+            `${columnName}` NOT LIKE 'GZIP:%' and CHAR_LENGTH(`${columnName}`) > 1000
         </if>
-        LIKE 'GZIP:%'
+        <if test="action == 'uncompress'">
+            `${columnName}` LIKE 'GZIP:%'
+        </if>
     </select>
 
     <resultMap id="gzipContentMap" type="java.util.LinkedHashMap">
@@ -43,10 +45,14 @@
 
     <select id="getGzipContentListByTableNameAndColumnName" resultMap="gzipContentMap">
         SELECT `${columnName}` AS content FROM `${tableName}`
-        WHERE `${columnName}`
+        WHERE
         <if test="action == 'compress'">
-            NOT
-        </if>LIKE 'GZIP:%' LIMIT 10
+            `${columnName}` NOT LIKE 'GZIP:%' and CHAR_LENGTH(`${columnName}`) > 1000
+        </if>
+        <if test="action == 'uncompress'">
+            `${columnName}` LIKE 'GZIP:%'
+        </if>
+        LIMIT 10
     </select>
 
     <update id="updateGzipContentByTableNameAndColumnName">

@@ -337,6 +337,19 @@
     },
     "searchfeatureusageauditapi": {
       "getname": "查询功能使用审计列表"
+    },
+    "uploadfileapi": {
+      "getname": "附件上传",
+      "input": {
+        "param": {
+          "desc": {
+            "param": "附件参数名称",
+            "extendparam": "扩展参数",
+            "type": "附件类型",
+            "uniquekey": "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复"
+          }
+        }
+      }
     }
   },
   "nmtah": {
