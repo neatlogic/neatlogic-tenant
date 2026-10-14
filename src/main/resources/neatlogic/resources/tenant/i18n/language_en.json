@@ -337,6 +337,19 @@
     },
     "searchfeatureusageauditapi": {
       "getname": "Query function using audit list"
+    },
+    "uploadfileapi": {
+      "getname": "Attachment Upload",
+      "input": {
+        "param": {
+          "desc": {
+            "param": "Attachment Parameter Name",
+            "extendparam": "Extended Parameters",
+            "type": "Attachment Type",
+            "uniquekey": "Required when attachment names must be unique. Attachments with the same uniqueKey value cannot have duplicate names."
+          }
+        }
+      }
     }
   },
   "nmtah": {

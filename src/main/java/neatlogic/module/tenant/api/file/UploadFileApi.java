@@ -61,7 +61,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "附件上传";
+        return "nmtaf.uploadfileapi.getname";
     }
 
     @Override
@@ -69,12 +69,12 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
-            @Param(name = "extendParam", type = ApiParamType.JSONOBJECT, desc = "扩展参数"),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
-            @Param(name = "uniqueKey", type = ApiParamType.STRING, desc = "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复")})
+    @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "nmtaf.uploadfileapi.input.param.desc.param", isRequired = true),
+            @Param(name = "extendParam", type = ApiParamType.JSONOBJECT, desc = "nmtaf.uploadfileapi.input.param.desc.extendparam"),
+            @Param(name = "type", type = ApiParamType.STRING, desc = "nmtaf.uploadfileapi.input.param.desc.type", isRequired = true),
+            @Param(name = "uniqueKey", type = ApiParamType.STRING, desc = "nmtaf.uploadfileapi.input.param.desc.uniquekey")})
     @Output({@Param(explode = FileVo.class)})
-    @Description(desc = "附件上传")
+    @Description(desc = "nmtaf.uploadfileapi.getname")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String tenantUuid = TenantContext.get().getTenantUuid();
