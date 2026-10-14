@@ -70,6 +70,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "附件参数名称", isRequired = true),
+            @Param(name = "extendParam", type = ApiParamType.JSONOBJECT, desc = "扩展参数"),
             @Param(name = "type", type = ApiParamType.STRING, desc = "附件类型", isRequired = true),
             @Param(name = "uniqueKey", type = ApiParamType.STRING, desc = "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复")})
     @Output({@Param(explode = FileVo.class)})
@@ -171,6 +172,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         fileVo.setUniqueKey(uk);
                         oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), uk);
                     }
+                    fileVo.setExtendParam(paramObj.getJSONObject("extendParam"));
                     String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo);
                     if (StringUtils.isNotBlank(filePath)) {
                         fileVo.setPath(filePath);
