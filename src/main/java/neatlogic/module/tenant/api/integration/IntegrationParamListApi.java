@@ -64,7 +64,7 @@ public class IntegrationParamListApi extends PrivateApiComponentBase {
 		if (handler == null) {
 			throw new IntegrationHandlerNotFoundException(integrationVo.getHandler());
 		}
-		// 查询统一合并固定和自定义参数，mode 只筛选方向，不影响定义来源。
+		// 查询统一合并固定和自定义参数，并附当前集成有效默认值；mode 仅筛选方向。
 		return IntegrationPatternUtil.merge(handler, configObj, mode);
 	}
 }

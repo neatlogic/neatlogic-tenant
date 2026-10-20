@@ -23,6 +23,7 @@ import neatlogic.framework.exception.integration.IntegrationNameRepeatsException
 import neatlogic.framework.exception.integration.IntegrationRateLimitConfigInvalidException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
+import neatlogic.framework.integration.core.IntegrationDefaultValueUtil;
 import neatlogic.framework.integration.core.IntegrationRateLimitManager;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
@@ -90,6 +91,10 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
             throw new IntegrationUrlIllegalException(integrationVo.getUrl());
         }
         validateRateLimitConfig(integrationVo);
+        // 保存时清除历史枚举选项元数据；直接调用接口同样遵守新版文本默认值规则。
+        IntegrationDefaultValueUtil.normalizeForSave(integrationVo.getConfig());
+        // 服务端复核当前规范的默认值，防止绕过页面写入错误类型或不兼容结构。
+        IntegrationDefaultValueUtil.validate(handler, integrationVo.getConfig());
         integrationVo.setIsActive(1);
         if (StringUtils.isNotBlank(jsonObj.getString("uuid"))) {
             integrationMapper.updateIntegration(integrationVo);
