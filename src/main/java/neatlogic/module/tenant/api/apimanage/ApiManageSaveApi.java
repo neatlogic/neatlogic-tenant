@@ -14,6 +14,7 @@ package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.restful.mcp.McpApiConfigResolver;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.INTERFACE_MODIFY;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -85,6 +86,10 @@ public class ApiManageSaveApi extends PrivateApiComponentBase {
         ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
         if (apiHandlerVo == null) {
             throw new ParamIrregularException("handler");
+        }
+        // 未提供开关的旧调用方只更新其他配置，不应重置用户选择。
+        if (!jsonObj.containsKey("isMcp")) {
+            apiVo.setIsMcp(McpApiConfigResolver.resolveIsMcp(ramApiVo, ApiMapper.getApiByToken(apiVo.getToken())));
         }
         apiVo.setType(apiHandlerVo.getType());
         apiVo.setModuleId(apiHandlerVo.getModuleId());

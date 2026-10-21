@@ -36,6 +36,31 @@
     "wait": "Waiting",
     "waitreason": "Wait Reason"
   },
+  "nmai": {
+    "aitool": {
+      "sendemailtool": {
+        "desc": {
+          "main": "Only used for sending emails. Use this tool only when the user explicitly asks to send an email."
+        },
+        "label": "Send Email",
+        "message": {
+          "frompassword": "{0} email password",
+          "missingparams": "Missing {0}, unable to execute the current tool",
+          "noauth": "The current user does not have permission to execute this tool",
+          "nomailserver": "No active mail server is configured, unable to execute the current tool",
+          "paramseparator": ", "
+        },
+        "param": {
+          "body": "Email body",
+          "cc": "CC email address",
+          "from": "Sender email address. If this parameter is not provided, the platform default mailbox is used as the sender.",
+          "password": "Sender email password",
+          "subject": "Email subject",
+          "to": "Recipient email address"
+        }
+      }
+    }
+  },
   "nmta": {
     "apimanagegetapi": {
       "config": "API Configuration",
@@ -343,8 +368,8 @@
       "input": {
         "param": {
           "desc": {
-            "param": "Attachment Parameter Name",
             "extendparam": "Extended Parameters",
+            "param": "Attachment Parameter Name",
             "type": "Attachment Type",
             "uniquekey": "Required when attachment names must be unique. Attachments with the same uniqueKey value cannot have duplicate names."
           }
@@ -353,11 +378,11 @@
     }
   },
   "nmtah": {
-    "capturethreadsnapshotapi": {
-      "getname": "Capture and analyze thread snapshot"
-    },
     "activehomepageapi": {
       "getname": "Activate homepage configuration information"
+    },
+    "capturethreadsnapshotapi": {
+      "getname": "Capture and analyze thread snapshot"
     },
     "deletehomepageapi": {
       "getname": "Delete homepage configuration information"
@@ -366,12 +391,12 @@
       "getname": "Get homepage configuration information"
     },
     "getsqlexplainapi": {
+      "databasename": "Actual execution database name",
+      "datasourcekey": "SQL execution datasource key",
+      "datasourcenotfound": "Datasource \"{0}\" does not exist or has been unloaded. Please collect the SQL again.",
       "getname": "Get SQL Execution Plan",
       "includeplanjson": "Include JSON execution plan",
-      "planjson": "JSON execution plan",
-      "datasourcekey": "SQL execution datasource key",
-      "databasename": "Actual execution database name",
-      "datasourcenotfound": "Datasource \"{0}\" does not exist or has been unloaded. Please collect the SQL again."
+      "planjson": "JSON execution plan"
     },
     "getusersessionqueueinfoapi": {
       "getname": "Retrieve user session queue information"
@@ -388,10 +413,6 @@
     "searchsqlauditapi": {
       "getname": "Time consumption for obtaining SQL"
     },
-    "updatesqlauditmodeapi": {
-      "getname": "Update SQL audit save mode",
-      "savemode": "Save mode: recent retains the latest records, slowest retains the slowest records"
-    },
     "togglesqlinterceptorapi": {
       "getname": "Control System SQL Tracking",
       "input": {
@@ -399,6 +420,10 @@
           "desc": "Need to count SQL URLs based on HTTP requests, where * represents all URLs"
         }
       }
+    },
+    "updatesqlauditmodeapi": {
+      "getname": "Update SQL audit save mode",
+      "savemode": "Save mode: recent retains the latest records, slowest retains the slowest records"
     }
   },
   "nmtai": {
@@ -770,19 +795,6 @@
         }
       }
     },
-    "systemnoticesearchapi": {
-      "getname": "Query System Notices",
-      "input": {
-        "param": {
-          "desc": {
-            "currentpage": "Current Page",
-            "keyword": "Keyword",
-            "needpage": "Whether pagination is required; defaults to true",
-            "pagesize": "Number of Items per Page"
-          }
-        }
-      }
-    },
     "systemnoticepullapi": {
       "getname": "Pull system announcement",
       "input": {
@@ -796,6 +808,19 @@
         "param": {
           "desc": {
             "popupnoticeidlist": "List of announcement IDs that need to pop up"
+          }
+        }
+      }
+    },
+    "systemnoticesearchapi": {
+      "getname": "Query System Notices",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "Current Page",
+            "keyword": "Keyword",
+            "needpage": "Whether pagination is required; defaults to true",
+            "pagesize": "Number of Items per Page"
           }
         }
       }
@@ -1049,6 +1074,19 @@
       "postotherserverapi": {
         "notfound": "Cannot find application server with server ID '{0}'",
         "nothost": "The corresponding data in the 'serverless' table of the application server with server ID' {0} 'is not configured with a host"
+      }
+    }
+  },
+  "tenant": {
+    "mcp": {
+      "mail": {
+        "failed": "Email delivery failed: {0}"
+      }
+    },
+    "mcpexamples": {
+      "mail": {
+        "description": "Requires configured platform mail settings and the original notification administration permission. Replace recipients and content; cc is optional. This documentation example does not send email automatically.",
+        "title": "Send Email with Platform Mail Configuration"
       }
     }
   },

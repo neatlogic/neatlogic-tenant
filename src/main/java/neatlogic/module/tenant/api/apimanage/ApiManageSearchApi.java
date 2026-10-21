@@ -14,6 +14,7 @@ package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.restful.mcp.McpApiConfigResolver;
 import com.alibaba.fastjson.TypeReference;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -126,6 +127,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
         for (ApiVo api : dbAllApiList) {
             ApiVo ramApi = ramApiMap.get(api.getToken());
             if (ramApi != null) {
+                api.setIsMcp(McpApiConfigResolver.resolveIsMcp(ramApi, api));
                 api.setIsPrivate(true);
                 api.setApiType(ApiKind.SYSTEM.getValue());
                 api.setHandler(ramApi.getHandler());
@@ -248,7 +250,7 @@ public class ApiManageSearchApi extends PrivateApiComponentBase {
             }
             if (isMcp != null) {
                 ApiVo dbApi = dbApiMap.get(api.getToken());
-                Integer apiIsMcp = dbApi != null ? dbApi.getIsMcp() : api.getIsMcp();
+                Integer apiIsMcp = McpApiConfigResolver.resolveIsMcp(api, dbApi);
                 if (!Objects.equals(isMcp, apiIsMcp)) {
                     return false;
                 }

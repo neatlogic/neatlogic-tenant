@@ -1,6 +1,7 @@
 package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.restful.mcp.McpApiConfigResolver;
 import com.alibaba.fastjson.JSONArray;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
@@ -64,7 +65,7 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
 
         ApiVo api = buildApiForMetadata(ramApi, dbApi);
         JSONObject resultObj = new JSONObject();
-        resultObj.put("enabled", dbApi != null && Objects.equals(dbApi.getIsMcp(), 1));
+        resultObj.put("enabled", Objects.equals(McpApiConfigResolver.resolveIsMcp(ramApi, dbApi), 1));
         resultObj.put("available", isAvailable(ramApi, dbApi));
         resultObj.put("unavailableReason", getUnavailableReason(ramApi, dbApi));
         String endpoint = "/api/mcp/" + TenantContext.get().getTenantUuid();
@@ -112,38 +113,18 @@ public class ApiManageMcpHelpGetApi extends PrivateApiComponentBase {
     }
 
     private ApiVo buildApiForMetadata(ApiVo ramApi, ApiVo dbApi) throws CloneNotSupportedException {
-        // 元数据以运行时API为准，再叠加DB里的MCP开关和审计等管理配置。
-        ApiVo api;
-        if (ramApi != null) {
-            api = ramApi.clone();
-        } else {
-            api = dbApi;
-        }
-        if (dbApi != null) {
-            api.setIsMcp(dbApi.getIsMcp());
-            api.setIsActive(dbApi.getIsActive());
-            api.setNeedAudit(dbApi.getNeedAudit());
-            api.setQps(dbApi.getQps());
-        }
-        return api;
+        return McpApiConfigResolver.merge(ramApi, dbApi);
     }
 
     private boolean isAvailable(ApiVo ramApi, ApiVo dbApi) {
-        return dbApi != null
-                && Objects.equals(dbApi.getIsMcp(), 1)
-                && Objects.equals(dbApi.getIsActive(), 1)
-                && ramApi != null
-                && Objects.equals(ApiType.OBJECT.getValue(), ramApi.getType());
+        return McpApiConfigResolver.isAvailable(ramApi, dbApi);
     }
 
     private String getUnavailableReason(ApiVo ramApi, ApiVo dbApi) {
-        if (dbApi == null) {
-            return "接口尚未保存配置";
-        }
-        if (!Objects.equals(dbApi.getIsMcp(), 1)) {
+        if (!Objects.equals(McpApiConfigResolver.resolveIsMcp(ramApi, dbApi), 1)) {
             return "接口未启用MCP服务";
         }
-        if (!Objects.equals(dbApi.getIsActive(), 1)) {
+        if (!Objects.equals(dbApi == null ? ramApi == null ? 0 : ramApi.getIsActive() : dbApi.getIsActive(), 1)) {
             return "接口未激活";
         }
         if (ramApi == null) {
