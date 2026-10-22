@@ -36,13 +36,13 @@ import javax.annotation.Resource;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-/** 将公网图片下载到现有附件存储，并登记当前租户的附件信息。 */
+/** 将网络图片下载到现有附件存储，并登记当前租户的附件信息。 */
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
 @Transactional(rollbackFor = Exception.class)
-public class DownloadImageFromUrlApi extends PrivateApiComponentBase {
-    private static final Logger logger = LoggerFactory.getLogger(DownloadImageFromUrlApi.class);
+public class UploadImageFromUrlApi extends PrivateApiComponentBase {
+    private static final Logger logger = LoggerFactory.getLogger(UploadImageFromUrlApi.class);
 
     @Resource
     private FileMapper fileMapper;
@@ -50,7 +50,7 @@ public class DownloadImageFromUrlApi extends PrivateApiComponentBase {
     /** 使用独立 token，避免与已有图片二进制下载接口冲突。 */
     @Override
     public String getToken() {
-        return "image/download/from/url";
+        return "image/upload/from/url";
     }
 
     /** 返回接口名称，供接口管理和帮助信息展示。 */
@@ -66,9 +66,9 @@ public class DownloadImageFromUrlApi extends PrivateApiComponentBase {
     }
 
     /** 下载并保存图片，只有文件保存成功后才写入附件记录。 */
-    @Input({@Param(name = "url", type = ApiParamType.STRING, isRequired = true, desc = "公网图片地址")})
+    @Input({@Param(name = "url", type = ApiParamType.STRING, isRequired = true, desc = "网络图片地址")})
     @Output({@Param(explode = FileVo.class)})
-    @Description(desc = "通过公网 HTTP/HTTPS 图片地址保存附件并返回文件信息")
+    @Description(desc = "通过网络 HTTP/HTTPS 图片地址保存附件并返回文件信息")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String tenantUuid = TenantContext.get().getTenantUuid();
