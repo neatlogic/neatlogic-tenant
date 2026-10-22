@@ -375,6 +375,19 @@
           }
         }
       }
+    },
+    "uploadimagefromurlapi": {
+      "cleanupfile": "Failed to clean up the network image. Storage path: {}",
+      "description": {
+        "desc": "Save an attachment from an HTTP/HTTPS image URL and return its file information."
+      },
+      "getname": "Download Network Image to Server",
+      "input": {
+        "param": {
+          "desc": "Network Image URL"
+        }
+      },
+      "mydoservice": "The image storage path is empty."
     }
   },
   "nmtah": {
@@ -1064,6 +1077,44 @@
       "getname": "Save working time window information"
     }
   },
+  "nmtef": {
+    "networkimagecontenttypeexception": {
+      "networkimagecontenttypeexception": "The content returned by the URL is not an image."
+    },
+    "networkimagedimensionsexception": {
+      "networkimagedimensionsexception": "Invalid image dimensions: {0} x {1}. Each side must not exceed 10000 pixels and the total must not exceed 20000000 pixels."
+    },
+    "networkimagedownloadexception": {
+      "networkimagedownloadexception": "Failed to download the network image: {0}"
+    },
+    "networkimageencodingexception": {
+      "networkimageencodingexception": "Failed to re-encode the network image."
+    },
+    "networkimageformatmismatchexception": {
+      "networkimageformatmismatchexception": "The declared image type, actual format and filename extension must match."
+    },
+    "networkimagehttpstatusexception": {
+      "networkimagehttpstatusexception": "Image download failed. HTTP status code: {0}"
+    },
+    "networkimageinvalidcontentexception": {
+      "networkimageinvalidcontentexception": "The network image is invalid, corrupted or cannot be completely decoded."
+    },
+    "networkimageredirectexception": {
+      "networkimageredirectexception": "The image download exceeded the redirect limit or the redirect target URL is missing."
+    },
+    "networkimageunsupportedformatexception": {
+      "networkimageunsupportedformatexception": "Unsupported network image type: {0}. Only JPEG and PNG are supported."
+    },
+    "networkimageurlemptyexception": {
+      "networkimageurlemptyexception": "The image URL must not be empty."
+    },
+    "networkimageurlformatexception": {
+      "networkimageurlformatexception": "The image URL format is invalid."
+    },
+    "networkimageurlillegalexception": {
+      "networkimageurlillegalexception": "The image URL must use HTTP/HTTPS and must not contain user credentials."
+    }
+  },
   "nmteu": {
     "userpasswordrepeatexception": {
       "userpasswordrepeatexception": "The new password is the same as the old password. Please confirm and try again"
@@ -1075,6 +1126,11 @@
         "notfound": "Cannot find application server with server ID '{0}'",
         "nothost": "The corresponding data in the 'serverless' table of the application server with server ID' {0} 'is not configured with a host"
       }
+    }
+  },
+  "nmtu": {
+    "networkimagedownloader": {
+      "deletetemporaryfile": "Failed to delete the temporary network image file: {}"
     }
   },
   "tenant": {
