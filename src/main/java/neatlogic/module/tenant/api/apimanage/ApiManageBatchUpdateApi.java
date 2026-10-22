@@ -90,6 +90,10 @@ public class ApiManageBatchUpdateApi extends PrivateApiComponentBase {
 			if(!tokenList.contains(api.getToken())) {
 				continue;
 			}
+            // getApiList() 返回全局共享的接口定义，列表元素同时被 apiMap 引用。
+            // 直接修改会污染系统默认值，影响其他租户未落库接口的配置读取和变更判断，且数据库事务回滚无法撤销内存修改。
+            // 因此首次落库前先克隆副本，保留系统默认值，仅在副本上应用当前租户的配置并保存。
+            api = api.clone();
 			boolean isUpdate = false;
 			if(!apiVo.getIsActive().equals(api.getIsActive())) {
 				api.setIsActive(apiVo.getIsActive());

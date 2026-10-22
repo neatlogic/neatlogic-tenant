@@ -68,13 +68,15 @@ public class ApiManageNeedAuditUpdateApi extends PrivateApiComponentBase {
             ApiMapper.updateApiNeedAuditByToken(token);
             return 1 - apiVo.getNeedAudit();
         } else {
-            ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(apiVo.getToken());
+            ApiVo ramApiVo = PrivateApiComponentFactory.getApiByToken(token);
             if (ramApiVo == null) {
-                ramApiVo = PublicApiComponentFactory.getApiByToken(apiVo.getToken());
+                ramApiVo = PublicApiComponentFactory.getApiByToken(token);
                 if (ramApiVo == null) {
                     throw new ApiNotFoundException(token);
                 }
             }
+            // 新保存的审计配置继承系统默认 MCP 状态，不能污染注册对象。
+            ramApiVo = ramApiVo.clone();
             ramApiVo.setNeedAudit(1);
             ApiMapper.replaceApi(ramApiVo);
             return 1;

@@ -13,6 +13,7 @@
 package neatlogic.module.tenant.api.apimanage;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.restful.mcp.McpApiConfigResolver;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -86,6 +87,7 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 		ApiVo apiVo = ApiMapper.getApiByTokenWithoutPsw(token);
 		if(apiVo != null) {
             if(api != null){
+                apiVo.setIsMcp(McpApiConfigResolver.resolveIsMcp(api, apiVo));
                 apiVo.setAuthTypeList(api.getAuthTypeList());
                 apiVo.setHandler(api.getHandler());
                 apiVo.setModuleId(api.getModuleId());
@@ -102,6 +104,7 @@ public class ApiManageGetApi extends PrivateApiComponentBase {
 
 		}
 		if(api != null) {
+            api = api.clone();
 			api.setRequiredAuthList(getRequiredAuthList(api));
 			return api;
 		}

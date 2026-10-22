@@ -14,17 +14,14 @@ package neatlogic.module.tenant.api.integration;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.core.AuthActionChecker;
-import neatlogic.framework.auth.label.INTEGRATION_MODIFY;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNotFoundException;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
+import neatlogic.framework.integration.core.IntegrationAuthorityChecker;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationResultVo;
@@ -45,8 +42,6 @@ import javax.annotation.Resource;
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class RunIntegrationApi extends PrivateApiComponentBase {
-
-    private static final String EXECUTE_ACTION = "execute";
 
     @Resource
     private IntegrationMapper integrationMapper;
@@ -79,19 +74,8 @@ public class RunIntegrationApi extends PrivateApiComponentBase {
         if (integrationVo == null) {
             throw new IntegrationNotFoundException(jsonObj.getString("uuid"));
         }
-        UserContext userContext = UserContext.get();
-        if (!AuthActionChecker.check(INTEGRATION_MODIFY.class)) {
-            int matchCount = integrationMapper.checkUserHasIntegrationAuthority(
-                    integrationVo.getUuid(),
-                    EXECUTE_ACTION,
-                    userContext.getUserUuid(),
-                    userContext.getTeamUuidList(),
-                    userContext.getRoleUuidList()
-            );
-            if (matchCount == 0) {
-                throw new PermissionDeniedException();
-            }
-        }
+        // 发现入口与原执行入口共用同一集成授权规则。
+        IntegrationAuthorityChecker.checkExecute(integrationVo.getUuid(), integrationMapper);
         jsonObj.remove("uuid");
         integrationVo.setParamObj(jsonObj);
         IIntegrationHandler handler = IntegrationHandlerFactory.getHandler(integrationVo.getHandler());

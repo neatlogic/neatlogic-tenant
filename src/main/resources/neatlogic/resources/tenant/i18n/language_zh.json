@@ -36,6 +36,31 @@
     "wait": "是否等待",
     "waitreason": "等待原因"
   },
+  "nmai": {
+    "aitool": {
+      "sendemailtool": {
+        "desc": {
+          "main": "仅用于发送邮件。当用户明确询问发送邮件时才使用。"
+        },
+        "label": "发送邮件",
+        "message": {
+          "frompassword": "{0}邮箱密码",
+          "missingparams": "缺少{0}，无法执行当前工具",
+          "noauth": "当前用户没有权限执行当前工具",
+          "nomailserver": "缺少激活的邮件服务器，无法执行当前工具",
+          "paramseparator": "、"
+        },
+        "param": {
+          "body": "邮件正文",
+          "cc": "抄送邮箱地址",
+          "from": "发件人邮箱地址(如果不提供该参数则使用平台默认邮箱作为发件人邮箱地址)",
+          "password": "发件人邮箱地址密码",
+          "subject": "邮件主题",
+          "to": "收件人邮箱地址"
+        }
+      }
+    }
+  },
   "nmta": {
     "apimanagegetapi": {
       "config": "接口配置信息",
@@ -343,21 +368,34 @@
       "input": {
         "param": {
           "desc": {
-            "param": "附件参数名称",
             "extendparam": "扩展参数",
+            "param": "附件参数名称",
             "type": "附件类型",
             "uniquekey": "当附件名称需要唯一时需要提供，相同uniqueKey值的附件名称不能重复"
           }
         }
       }
+    },
+    "uploadimagefromurlapi": {
+      "cleanupfile": "清理网络图片失败，存储路径：{}",
+      "description": {
+        "desc": "通过网络 HTTP/HTTPS 图片地址保存附件并返回文件信息"
+      },
+      "getname": "下载网络图片到服务器",
+      "input": {
+        "param": {
+          "desc": "网络图片地址"
+        }
+      },
+      "mydoservice": "图片保存路径为空"
     }
   },
   "nmtah": {
-    "capturethreadsnapshotapi": {
-      "getname": "采集并分析线程快照"
-    },
     "activehomepageapi": {
       "getname": "激活默认首页配置信息"
+    },
+    "capturethreadsnapshotapi": {
+      "getname": "采集并分析线程快照"
     },
     "deletehomepageapi": {
       "getname": "删除默认首页配置信息"
@@ -366,12 +404,12 @@
       "getname": "获取默认首页配置信息"
     },
     "getsqlexplainapi": {
+      "databasename": "实际执行数据库名称",
+      "datasourcekey": "执行 SQL 的数据源标识",
+      "datasourcenotfound": "数据源“{0}”不存在或已卸载，请重新采集 SQL",
       "getname": "获取SQL执行计划",
       "includeplanjson": "是否获取 JSON 执行计划",
-      "planjson": "JSON 执行计划",
-      "datasourcekey": "执行 SQL 的数据源标识",
-      "databasename": "实际执行数据库名称",
-      "datasourcenotfound": "数据源“{0}”不存在或已卸载，请重新采集 SQL"
+      "planjson": "JSON 执行计划"
     },
     "getusersessionqueueinfoapi": {
       "getname": "获取用户会话队列信息"
@@ -388,10 +426,6 @@
     "searchsqlauditapi": {
       "getname": "获取SQL耗时"
     },
-    "updatesqlauditmodeapi": {
-      "getname": "更新SQL审计保存模式",
-      "savemode": "保存模式：recent 保留最近记录，slowest 保留耗时最长记录"
-    },
     "togglesqlinterceptorapi": {
       "getname": "控制系统SQL追踪",
       "input": {
@@ -399,6 +433,10 @@
           "desc": "需要按HTTP请求统计SQL的URL，*代表全部URL"
         }
       }
+    },
+    "updatesqlauditmodeapi": {
+      "getname": "更新SQL审计保存模式",
+      "savemode": "保存模式：recent 保留最近记录，slowest 保留耗时最长记录"
     }
   },
   "nmtai": {
@@ -770,19 +808,6 @@
         }
       }
     },
-    "systemnoticesearchapi": {
-      "getname": "查询系统公告",
-      "input": {
-        "param": {
-          "desc": {
-            "currentpage": "当前页",
-            "keyword": "关键字",
-            "needpage": "是否需要分页，默认值为 true",
-            "pagesize": "每页数据条目"
-          }
-        }
-      }
-    },
     "systemnoticepullapi": {
       "getname": "拉取系统公告",
       "input": {
@@ -796,6 +821,19 @@
         "param": {
           "desc": {
             "popupnoticeidlist": "需要弹窗的公告ID列表"
+          }
+        }
+      }
+    },
+    "systemnoticesearchapi": {
+      "getname": "查询系统公告",
+      "input": {
+        "param": {
+          "desc": {
+            "currentpage": "当前页",
+            "keyword": "关键字",
+            "needpage": "是否需要分页，默认值为 true",
+            "pagesize": "每页数据条目"
           }
         }
       }
@@ -1039,6 +1077,44 @@
       "getname": "保存工作时间窗口信息"
     }
   },
+  "nmtef": {
+    "networkimagecontenttypeexception": {
+      "networkimagecontenttypeexception": "网络地址返回的内容不是图片"
+    },
+    "networkimagedimensionsexception": {
+      "networkimagedimensionsexception": "图片尺寸不符合要求：{0}×{1}，单边最多10000像素，总像素最多20000000"
+    },
+    "networkimagedownloadexception": {
+      "networkimagedownloadexception": "下载网络图片失败：{0}"
+    },
+    "networkimageencodingexception": {
+      "networkimageencodingexception": "网络图片重新编码失败"
+    },
+    "networkimageformatmismatchexception": {
+      "networkimageformatmismatchexception": "图片声明类型、实际格式和文件扩展名必须一致"
+    },
+    "networkimagehttpstatusexception": {
+      "networkimagehttpstatusexception": "图片下载失败，HTTP状态码：{0}"
+    },
+    "networkimageinvalidcontentexception": {
+      "networkimageinvalidcontentexception": "网络图片内容无效、已损坏或无法完整解码"
+    },
+    "networkimageredirectexception": {
+      "networkimageredirectexception": "图片下载重定向次数超限或缺少目标地址"
+    },
+    "networkimageunsupportedformatexception": {
+      "networkimageunsupportedformatexception": "不支持的网络图片类型：{0}，仅支持 JPEG 和 PNG"
+    },
+    "networkimageurlemptyexception": {
+      "networkimageurlemptyexception": "图片地址不能为空"
+    },
+    "networkimageurlformatexception": {
+      "networkimageurlformatexception": "图片地址格式不正确"
+    },
+    "networkimageurlillegalexception": {
+      "networkimageurlillegalexception": "图片地址必须是不含用户凭据的 HTTP/HTTPS 地址"
+    }
+  },
   "nmteu": {
     "userpasswordrepeatexception": {
       "userpasswordrepeatexception": "新密码和旧密码相同,请确认后重试"
@@ -1049,6 +1125,24 @@
       "postotherserverapi": {
         "notfound": "找不到serverId为“{0}”的应用服务器",
         "nothost": "serverId为“{0}”的应用服务器的`server_status`表中对应数据没有配置host"
+      }
+    }
+  },
+  "nmtu": {
+    "networkimagedownloader": {
+      "deletetemporaryfile": "删除网络图片临时文件失败：{}"
+    }
+  },
+  "tenant": {
+    "mcp": {
+      "mail": {
+        "failed": "邮件发送失败：{0}"
+      }
+    },
+    "mcpexamples": {
+      "mail": {
+        "description": "需已配置平台邮件服务器且当前身份拥有原通知管理权限；替换收件人与内容，cc 可选。此示例仅用于文档，不自动发送。",
+        "title": "使用平台邮件配置发送邮件"
       }
     }
   },
