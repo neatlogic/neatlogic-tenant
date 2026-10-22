@@ -18,6 +18,6 @@ public class NetworkImageUrlIllegalException extends ApiRuntimeException {
 
     /** 沿用现有地址合法性错误文案。 */
     public NetworkImageUrlIllegalException() {
-        super("图片地址必须是不含用户凭据的 HTTP/HTTPS 地址");
+        super("nmtef.networkimageurlillegalexception.networkimageurlillegalexception");
     }
 }

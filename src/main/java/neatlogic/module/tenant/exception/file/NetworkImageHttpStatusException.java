@@ -18,6 +18,6 @@ public class NetworkImageHttpStatusException extends ApiRuntimeException {
 
     /** 保留响应状态码，以参数化文案说明下载失败原因。 */
     public NetworkImageHttpStatusException(int status) {
-        super("图片下载失败，HTTP状态码：{0}", status);
+        super("nmtef.networkimagehttpstatusexception.networkimagehttpstatusexception", status);
     }
 }

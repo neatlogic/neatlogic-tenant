@@ -23,6 +23,7 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.util.$;
 import neatlogic.module.tenant.util.NetworkImageDownloader;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ public class UploadImageFromUrlApi extends PrivateApiComponentBase {
     /** 返回接口名称，供接口管理和帮助信息展示。 */
     @Override
     public String getName() {
-        return "下载网络图片到服务器";
+        return "nmtaf.uploadimagefromurlapi.getname";
     }
 
     /** 本接口不需要额外配置页面。 */
@@ -66,9 +67,9 @@ public class UploadImageFromUrlApi extends PrivateApiComponentBase {
     }
 
     /** 下载并保存图片，只有文件保存成功后才写入附件记录。 */
-    @Input({@Param(name = "url", type = ApiParamType.STRING, isRequired = true, desc = "网络图片地址")})
+    @Input({@Param(name = "url", type = ApiParamType.STRING, isRequired = true, desc = "nmtaf.uploadimagefromurlapi.input.param.desc")})
     @Output({@Param(explode = FileVo.class)})
-    @Description(desc = "通过网络 HTTP/HTTPS 图片地址保存附件并返回文件信息")
+    @Description(desc = "nmtaf.uploadimagefromurlapi.description.desc")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String tenantUuid = TenantContext.get().getTenantUuid();
@@ -90,7 +91,7 @@ public class UploadImageFromUrlApi extends PrivateApiComponentBase {
                 filePath = FileUtil.saveData(tenantUuid, inputStream, fileVo);
             }
             if (StringUtils.isBlank(filePath)) {
-                throw new UploadFileFailedException("图片保存路径为空");
+                throw new UploadFileFailedException($.t("nmtaf.uploadimagefromurlapi.mydoservice"));
             }
             fileVo.setPath(filePath);
             boolean cleanupRegistered = false;
@@ -132,7 +133,7 @@ public class UploadImageFromUrlApi extends PrivateApiComponentBase {
         try {
             FileUtil.deleteData(filePath);
         } catch (Exception ex) {
-            logger.error("清理网络图片失败，存储路径：{}", filePath, ex);
+            logger.error($.t("nmtaf.uploadimagefromurlapi.cleanupfile"), filePath, ex);
         }
     }
 }

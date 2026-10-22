@@ -20,6 +20,6 @@ public class NetworkImageDownloadException extends ApiRuntimeException {
 
     /** 保留原始输入输出异常及其说明，便于定位下载失败原因。 */
     public NetworkImageDownloadException(IOException cause) {
-        super("下载网络图片失败：{0}", cause, cause.getMessage());
+        super("nmtef.networkimagedownloadexception.networkimagedownloadexception", cause, cause.getMessage());
     }
 }

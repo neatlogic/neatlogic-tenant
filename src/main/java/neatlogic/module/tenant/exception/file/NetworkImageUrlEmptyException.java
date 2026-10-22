@@ -18,6 +18,6 @@ public class NetworkImageUrlEmptyException extends ApiRuntimeException {
 
     /** 沿用现有空地址错误文案。 */
     public NetworkImageUrlEmptyException() {
-        super("图片地址不能为空");
+        super("nmtef.networkimageurlemptyexception.networkimageurlemptyexception");
     }
 }

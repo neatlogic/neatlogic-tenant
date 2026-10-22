@@ -18,6 +18,6 @@ public class NetworkImageRedirectException extends ApiRuntimeException {
 
     /** 沿用现有重定向错误文案，供调用方区分跳转失败。 */
     public NetworkImageRedirectException() {
-        super("图片下载重定向次数超限或缺少目标地址");
+        super("nmtef.networkimageredirectexception.networkimageredirectexception");
     }
 }

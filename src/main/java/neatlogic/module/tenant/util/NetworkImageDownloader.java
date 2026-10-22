@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.exception.file.EmptyFileException;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileTooLargeException;
+import neatlogic.framework.util.$;
 import neatlogic.module.tenant.exception.file.NetworkImageContentTypeException;
 import neatlogic.module.tenant.exception.file.NetworkImageDownloadException;
 import neatlogic.module.tenant.exception.file.NetworkImageHttpStatusException;
@@ -215,7 +216,7 @@ public class NetworkImageDownloader {
             try {
                 Files.deleteIfExists(file);
             } catch (IOException ex) {
-                logger.error("删除网络图片临时文件失败：{}", file, ex);
+                logger.error($.t("nmtu.networkimagedownloader.deletetemporaryfile"), file, ex);
             }
         }
     }

@@ -18,6 +18,6 @@ public class NetworkImageUrlFormatException extends ApiRuntimeException {
 
     /** 保留原始解析异常及现有地址格式错误文案。 */
     public NetworkImageUrlFormatException(Throwable cause) {
-        super("图片地址格式不正确", cause);
+        super("nmtef.networkimageurlformatexception.networkimageurlformatexception", cause);
     }
 }

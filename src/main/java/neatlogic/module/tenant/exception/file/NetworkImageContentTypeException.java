@@ -18,6 +18,6 @@ public class NetworkImageContentTypeException extends ApiRuntimeException {
 
     /** 沿用现有内容类型错误文案。 */
     public NetworkImageContentTypeException() {
-        super("网络地址返回的内容不是图片");
+        super("nmtef.networkimagecontenttypeexception.networkimagecontenttypeexception");
     }
 }

@@ -375,6 +375,19 @@
           }
         }
       }
+    },
+    "uploadimagefromurlapi": {
+      "cleanupfile": "清理网络图片失败，存储路径：{}",
+      "description": {
+        "desc": "通过网络 HTTP/HTTPS 图片地址保存附件并返回文件信息"
+      },
+      "getname": "下载网络图片到服务器",
+      "input": {
+        "param": {
+          "desc": "网络图片地址"
+        }
+      },
+      "mydoservice": "图片保存路径为空"
     }
   },
   "nmtah": {
@@ -1064,6 +1077,29 @@
       "getname": "保存工作时间窗口信息"
     }
   },
+  "nmtef": {
+    "networkimagecontenttypeexception": {
+      "networkimagecontenttypeexception": "网络地址返回的内容不是图片"
+    },
+    "networkimagedownloadexception": {
+      "networkimagedownloadexception": "下载网络图片失败：{0}"
+    },
+    "networkimagehttpstatusexception": {
+      "networkimagehttpstatusexception": "图片下载失败，HTTP状态码：{0}"
+    },
+    "networkimageredirectexception": {
+      "networkimageredirectexception": "图片下载重定向次数超限或缺少目标地址"
+    },
+    "networkimageurlemptyexception": {
+      "networkimageurlemptyexception": "图片地址不能为空"
+    },
+    "networkimageurlformatexception": {
+      "networkimageurlformatexception": "图片地址格式不正确"
+    },
+    "networkimageurlillegalexception": {
+      "networkimageurlillegalexception": "图片地址必须是不含用户凭据的 HTTP/HTTPS 地址"
+    }
+  },
   "nmteu": {
     "userpasswordrepeatexception": {
       "userpasswordrepeatexception": "新密码和旧密码相同,请确认后重试"
@@ -1075,6 +1111,11 @@
         "notfound": "找不到serverId为“{0}”的应用服务器",
         "nothost": "serverId为“{0}”的应用服务器的`server_status`表中对应数据没有配置host"
       }
+    }
+  },
+  "nmtu": {
+    "networkimagedownloader": {
+      "deletetemporaryfile": "删除网络图片临时文件失败：{}"
     }
   },
   "tenant": {
