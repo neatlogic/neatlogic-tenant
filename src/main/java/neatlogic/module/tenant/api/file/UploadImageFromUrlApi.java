@@ -1,6 +1,11 @@
 /*
- * Copyright (C) 2026 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright (C) 2025  TechSure Co., Ltd.  All Rights Reserved.
+ * This file is part of the NeatLogic software.
  * Licensed under the NeatLogic Sustainable Use License (NSUL), Version 4.x – 2025.
+ * You may use this file only in compliance with the License.
+ * See the LICENSE file distributed with this work for the full license text.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  */
 package neatlogic.module.tenant.api.file;
 
@@ -29,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -41,7 +45,6 @@ import java.nio.file.Files;
 @Service
 @AuthAction(action = NoAuth.class)
 @OperationType(type = OperationTypeEnum.CREATE)
-@Transactional(rollbackFor = Exception.class)
 public class UploadImageFromUrlApi extends PrivateApiComponentBase {
     private static final Logger logger = LoggerFactory.getLogger(UploadImageFromUrlApi.class);
 
