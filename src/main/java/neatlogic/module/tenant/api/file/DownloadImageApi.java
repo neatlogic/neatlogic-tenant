@@ -27,12 +27,11 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
-import org.apache.commons.io.IOUtils;
+import neatlogic.module.tenant.util.ImageFileSnapshot;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -66,6 +65,7 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
+    /** 验证图片内容并使用服务端 MIME 输出，保持匿名访问能力。 */
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "common.id", isRequired = true)})
     @Description(desc = "nmtaf.downloadimageapi.getname")
@@ -77,17 +77,14 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
         if (StringUtils.isBlank(tenantUuid)) {
             throw new NoTenantException();
         }
-        if (fileVo != null && fileVo.getType().equals("image")) {
-            ServletOutputStream os;
-            InputStream in;
-            in = FileUtil.getData(fileVo.getPath());
-            if (in != null) {
-                response.setContentType(fileVo.getContentType());
-                os = response.getOutputStream();
-                IOUtils.copyLarge(in, os);
-                os.flush();
-                os.close();
-                in.close();
+        if (fileVo != null && "image".equals(fileVo.getType())) {
+            // 历史记录中的类型和 MIME 不能替代对实际内容的校验。
+            try (InputStream input = FileUtil.getData(fileVo.getPath())) {
+                if (input != null) {
+                    try (ImageFileSnapshot image = ImageFileSnapshot.createForDownload(input)) {
+                        image.writeTo(response);
+                    }
+                }
             }
         } else {
             throw new FileNotFoundException(id);

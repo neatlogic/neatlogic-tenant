@@ -25,14 +25,13 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
-import org.apache.commons.io.IOUtils;
+import neatlogic.module.tenant.util.ImageFileSnapshot;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -63,6 +62,7 @@ public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBa
         return null;
     }
 
+    /** 仅返回在线文档中的有效图片，保留现有匿名 URL 契约。 */
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
     @Input({@Param(name = "filePath", type = ApiParamType.STRING, desc = "文件路径", isRequired = true)})
     @Description(desc = "图片下载接口")
@@ -79,11 +79,10 @@ public class DownloadClasspathImageApi extends PrivateBinaryStreamApiComponentBa
         if (StringUtils.isBlank(TenantContext.get().getTenantUuid())) {
             throw new NoTenantException();
         }
-        String contentType = "image/" + resource.getFilename().substring(resource.getFilename().lastIndexOf("."));
-        response.setContentType(contentType);
-
-        try (ServletOutputStream os = response.getOutputStream();InputStream in = resource.getInputStream()) {
-            IOUtils.copyLarge(in, os);
+        // 文档资源定位由框架限定目录，输出前继续确认实际图片格式。
+        try (InputStream input = resource.getInputStream();
+             ImageFileSnapshot image = ImageFileSnapshot.createForDownload(input)) {
+            image.writeTo(response);
         }
         return null;
     }

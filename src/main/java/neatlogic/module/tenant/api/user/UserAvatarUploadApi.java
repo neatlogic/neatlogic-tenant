@@ -29,6 +29,7 @@ import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
+import neatlogic.module.tenant.util.ImageFileSnapshot;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 
 @Service
 @Transactional
@@ -71,6 +73,7 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
         return true;
     }
 
+    /** 校验图片真实内容后保存，保留编辑器和头像上传的原有返回格式。 */
     @Output({@Param(explode = FileVo.class)})
     @Description(desc = "用户头像上传")
     @Override
@@ -86,7 +89,7 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
         JSONObject returnObj = new JSONObject();
         try {
             MultipartFile multipartFile = multipartRequest.getFile(paramName);
-            if (multipartFile != null && multipartFile.getName() != null && multipartFile.getContentType().startsWith("image")) {
+            if (multipartFile != null) {
                 String oldFileName = multipartFile.getOriginalFilename();
                 Long size = multipartFile.getSize();
 
@@ -95,8 +98,14 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setSize(size);
                 fileVo.setUserUuid(userUuid);
                 fileVo.setType("image");
-                fileVo.setContentType(multipartFile.getContentType());
-                String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo);
+                String filePath;
+                // 只读取上传内容一次，保存与实际格式校验相同的图片快照。
+                try (InputStream input = multipartFile.getInputStream();
+                     ImageFileSnapshot image = ImageFileSnapshot.create(input, oldFileName);
+                     InputStream verified = image.openStream()) {
+                    fileVo.setContentType(image.getContentType());
+                    filePath = FileUtil.saveData(tenantUuid, verified, fileVo);
+                }
                 fileVo.setPath(filePath);
                 fileMapper.insertFile(fileVo);
                 Long fileId = fileVo.getId();

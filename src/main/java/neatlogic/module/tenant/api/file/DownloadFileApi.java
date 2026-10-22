@@ -32,6 +32,7 @@ import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
+import neatlogic.module.tenant.util.ImageFileSnapshot;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,7 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
+    /** 按既有附件权限下载，并对图片内容执行与专用入口一致的安全校验。 */
     @CacheControl(cacheControlType = CacheControlType.MAXAGE, maxAge = 30000)
     @Input({@Param(name = "id", type = ApiParamType.LONG, desc = "附件id", isRequired = true),
             @Param(name = "lastModified", type = ApiParamType.DOUBLE, desc = "最后修改时间（秒，支持小数位）")})
@@ -92,21 +94,26 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                 IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
                 if (fileTypeHandler != null) {
                     if (Objects.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
-                        ServletOutputStream os;
-                        InputStream in;
-                        in = FileUtil.getData(fileVo.getPath());
-                        if (in != null) {
-                            if (StringUtils.isBlank(fileVo.getContentType())) {
-                                response.setContentType("application/octet-stream");
-                            } else {
-                                response.setContentType(fileVo.getContentType());
+                        try (InputStream input = FileUtil.getData(fileVo.getPath())) {
+                            if (input != null) {
+                                response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileVo.getName()) + "\"");
+                                if ("image".equalsIgnoreCase(fileVo.getType())) {
+                                    // 通用下载同样校验图片，防止历史污染记录绕过图片专用入口。
+                                    try (ImageFileSnapshot image = ImageFileSnapshot.createForDownload(input)) {
+                                        image.writeTo(response);
+                                    }
+                                } else {
+                                    if (StringUtils.isBlank(fileVo.getContentType())) {
+                                        response.setContentType("application/octet-stream");
+                                    } else {
+                                        response.setContentType(fileVo.getContentType());
+                                    }
+                                    try (ServletOutputStream output = response.getOutputStream()) {
+                                        IOUtils.copyLarge(input, output);
+                                        output.flush();
+                                    }
+                                }
                             }
-                            response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileVo.getName()) + "\"");
-                            os = response.getOutputStream();
-                            IOUtils.copyLarge(in, os);
-                            os.flush();
-                            os.close();
-                            in.close();
                         }
                         isNeedDownLoad = true;
                     } else {

@@ -30,6 +30,7 @@ import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
+import neatlogic.module.tenant.util.ImageFileSnapshot;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.util.List;
 
 @Service
@@ -69,6 +71,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
         return null;
     }
 
+    /** 沿用附件处理器和配置约束，保存图片时额外校验实际格式。 */
     @Input({@Param(name = "param", type = ApiParamType.STRING, desc = "nmtaf.uploadfileapi.input.param.desc.param", isRequired = true),
             @Param(name = "extendParam", type = ApiParamType.JSONOBJECT, desc = "nmtaf.uploadfileapi.input.param.desc.extendparam"),
             @Param(name = "type", type = ApiParamType.STRING, desc = "nmtaf.uploadfileapi.input.param.desc.type", isRequired = true),
@@ -173,7 +176,7 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
                         oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), uk);
                     }
                     fileVo.setExtendParam(paramObj.getJSONObject("extendParam"));
-                    String filePath = FileUtil.saveData(tenantUuid, multipartFile.getInputStream(), fileVo);
+                    String filePath = saveUploadedData(tenantUuid, multipartFile, fileVo);
                     if (StringUtils.isNotBlank(filePath)) {
                         fileVo.setPath(filePath);
                         if (oldFileVo == null) {
@@ -195,6 +198,21 @@ public class UploadFileApi extends PrivateBinaryStreamApiComponentBase {
             }
         }
         return null;
+    }
+
+    /** 通用附件入口中的图片必须经过相同校验，其他附件保留原有保存逻辑。 */
+    private String saveUploadedData(String tenantUuid, MultipartFile multipartFile, FileVo fileVo) throws Exception {
+        try (InputStream input = multipartFile.getInputStream()) {
+            if ("image".equalsIgnoreCase(fileVo.getType())) {
+                try (ImageFileSnapshot image = ImageFileSnapshot.create(input, fileVo.getName());
+                     InputStream verified = image.openStream()) {
+                    fileVo.setContentType(image.getContentType());
+                    return FileUtil.saveData(tenantUuid, verified, fileVo);
+                }
+            } else {
+                return FileUtil.saveData(tenantUuid, input, fileVo);
+            }
+        }
     }
 
 }
