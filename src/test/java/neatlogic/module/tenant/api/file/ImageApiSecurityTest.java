@@ -178,6 +178,45 @@ public class ImageApiSecurityTest {
         Assert.assertEquals(accepted.getString("url"), JSONObject.parseObject(user.getUserInfo()).getString("avatar"));
     }
 
+    /** 浏览器裁剪默认使用无扩展名的 blob，兼容该名称时仍须拒绝伪造内容及具名格式错配。 */
+    @Test
+    public void shouldAcceptCropBlobWithoutRelaxingImageValidation() throws Exception {
+        UserAvatarUploadApi api = new UserAvatarUploadApi();
+        inject(api, "fileMapper", fileMapper);
+        UserVo user = new UserVo();
+        UserMapper userMapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(), new Class[]{UserMapper.class},
+                (proxy, method, args) -> {
+                    if ("getUserByUuid".equals(method.getName())) {
+                        return user;
+                    }
+                    if ("updateUserInfo".equals(method.getName())) {
+                        avatarUpdates++;
+                        return 1;
+                    }
+                    throw new AssertionError(method.getName());
+                });
+        inject(api, "userMapper", userMapper);
+        for (String format : new String[]{"jpeg", "png", "gif"}) {
+            byte[] bytes = image(format);
+            JSONObject result = (JSONObject) api.myDoService(new JSONObject(), request(new Upload("blob", "text/html", bytes)), null);
+            Assert.assertTrue(result.toJSONString(), result.getBooleanValue("uploaded"));
+            Assert.assertEquals("avatar." + format, savedFile.getName());
+            Assert.assertEquals("image/" + format, savedFile.getContentType());
+            Assert.assertEquals("api/binary/image/download?id=100", result.getString("url"));
+            Assert.assertArrayEquals(bytes, storedData);
+        }
+        FileVo lastSavedFile = savedFile;
+        for (Upload upload : new Upload[]{
+                new Upload("blob", "image/jpeg", "<script>alert(1)</script>".getBytes(StandardCharsets.UTF_8)),
+                new Upload("blob", "image/png", "<svg xmlns='http://www.w3.org/2000/svg'/>".getBytes(StandardCharsets.UTF_8)),
+                new Upload("avatar.jpg", "image/jpeg", image("png"))}) {
+            JSONObject result = (JSONObject) api.myDoService(new JSONObject(), request(upload), null);
+            Assert.assertFalse(result.toJSONString(), result.getBooleanValue("uploaded"));
+            Assert.assertSame(lastSavedFile, savedFile);
+        }
+        Assert.assertEquals(3, avatarUpdates);
+    }
+
     /** 通用上传保存方法也验证图片，其他附件仍按原 MIME 和原始内容保存。 */
     @Test
     public void shouldProtectGenericUploadWithoutChangingAttachments() throws Exception {

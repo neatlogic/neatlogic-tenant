@@ -43,6 +43,11 @@ public final class ImageFileSnapshot implements AutoCloseable {
 
     /** 下载历史图片按实际内容识别，兼容已有文件名与真实格式不一致的记录。 */
     public static ImageFileSnapshot createForDownload(InputStream input) throws IOException {
+        return createFromContent(input);
+    }
+
+    /** 按真实图片内容创建快照，兼容裁剪器没有原始文件名的 Blob，仍拒绝非图片内容。 */
+    public static ImageFileSnapshot createFromContent(InputStream input) throws IOException {
         return create(input, null, false);
     }
 

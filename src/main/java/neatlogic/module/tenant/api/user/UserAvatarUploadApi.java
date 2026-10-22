@@ -99,12 +99,22 @@ public class UserAvatarUploadApi extends PrivateBinaryStreamApiComponentBase {
                 fileVo.setUserUuid(userUuid);
                 fileVo.setType("image");
                 String filePath;
-                // 只读取上传内容一次，保存与实际格式校验相同的图片快照。
-                try (InputStream input = multipartFile.getInputStream();
-                     ImageFileSnapshot image = ImageFileSnapshot.create(input, oldFileName);
-                     InputStream verified = image.openStream()) {
-                    fileVo.setContentType(image.getContentType());
-                    filePath = FileUtil.saveData(tenantUuid, verified, fileVo);
+                // 旧版裁剪器提交 Blob 时文件名固定为 blob，按真实内容识别后补齐安全文件名。
+                try (InputStream input = multipartFile.getInputStream()) {
+                    ImageFileSnapshot snapshot;
+                    if ("blob".equals(oldFileName)) {
+                        snapshot = ImageFileSnapshot.createFromContent(input);
+                    } else {
+                        snapshot = ImageFileSnapshot.create(input, oldFileName);
+                    }
+                    try (ImageFileSnapshot image = snapshot;
+                         InputStream verified = image.openStream()) {
+                        fileVo.setContentType(image.getContentType());
+                        if ("blob".equals(oldFileName)) {
+                            fileVo.setName("avatar." + image.getContentType().substring("image/".length()));
+                        }
+                        filePath = FileUtil.saveData(tenantUuid, verified, fileVo);
+                    }
                 }
                 fileVo.setPath(filePath);
                 fileMapper.insertFile(fileVo);

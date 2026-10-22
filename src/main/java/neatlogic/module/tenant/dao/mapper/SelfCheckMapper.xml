@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="neatlogic.module.tenant.dao.mapper.SelfCheckMapper">
+
+    <select id="getScenarioById" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioVo">
+        select id, name, description, status, version, fcu, fcd, lcu, lcd
+        from selfcheck_scenario
+        where id = #{value}
+    </select>
+
+    <select id="getScenarioLockById" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioVo">
+        select id, name, description, status, version, fcu, fcd, lcu, lcd
+        from selfcheck_scenario
+        where id = #{value}
+        for update
+    </select>
+
+    <select id="searchScenario" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioVo">
+        select a.id, a.name, a.description, a.status, a.version, a.fcu, a.fcd, a.lcu, a.lcd,
+               (select count(1) from selfcheck_scenario_item i where i.scenario_id = a.id) as itemCount,
+               case
+                   when not exists(select 1 from selfcheck_scenario_item i where i.scenario_id = a.id and i.is_active = 1) then 0
+                   when exists(select 1 from selfcheck_scenario_item i where i.scenario_id = a.id and i.is_active = 1 and i.is_script_valid = 0) then 0
+                   else 1
+               end as isScriptValid
+        from selfcheck_scenario a
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (a.name like concat('%', #{keyword}, '%') or a.description like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">and a.status = #{status}</if>
+        </where>
+        order by a.lcd desc, a.id desc
+        limit #{startNum}, #{pageSize}
+    </select>
+
+    <select id="searchScenarioCount" resultType="java.lang.Integer">
+        select count(1)
+        from selfcheck_scenario
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (name like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+    </select>
+
+    <insert id="insertScenario" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioVo">
+        insert into selfcheck_scenario(id, name, description, status, version, fcu, fcd, lcu, lcd)
+        values (#{id}, #{name}, #{description}, #{status}, #{version}, #{fcu}, now(), #{lcu}, now())
+    </insert>
+
+    <update id="updateScenario" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioVo">
+        update selfcheck_scenario
+        set name = #{name}, description = #{description}, status = #{status},
+            version = version + 1, lcu = #{lcu}, lcd = now()
+        where id = #{id} and version = #{version}
+    </update>
+
+    <update id="updateScenarioStatus">
+        update selfcheck_scenario
+        set status = #{status}, version = version + 1, lcu = #{lcu}, lcd = now()
+        where id = #{id} and version = #{version}
+    </update>
+
+    <delete id="deleteScenarioById">
+        delete from selfcheck_scenario where id = #{value}
+    </delete>
+
+    <select id="getScenarioItemListByScenarioId" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioItemVo">
+        select id, scenario_id as scenarioId, name, is_active as isActive, sort,
+               api_token as apiToken, request_param as requestParam, verify_script as verifyScript,
+               is_script_valid as isScriptValid, script_diagnostic_list as scriptDiagnosticList,
+               api_timeout as apiTimeout, script_timeout as scriptTimeout
+        from selfcheck_scenario_item
+        where scenario_id = #{value}
+        order by sort, id
+    </select>
+
+    <insert id="insertScenarioItem" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckScenarioItemVo">
+        insert into selfcheck_scenario_item(id, scenario_id, name, is_active, sort, api_token,
+                                            request_param, verify_script, is_script_valid, script_diagnostic_list,
+                                            api_timeout, script_timeout)
+        values (#{id}, #{scenarioId}, #{name}, #{isActive}, #{sort}, #{apiToken},
+                #{requestParam}, #{verifyScript}, #{isScriptValid}, #{scriptDiagnosticList},
+                #{apiTimeout}, #{scriptTimeout})
+    </insert>
+
+    <delete id="deleteScenarioItemByScenarioId">
+        delete from selfcheck_scenario_item where scenario_id = #{value}
+    </delete>
+
+    <select id="getRunById" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunVo">
+        select r.id, r.scenario_id as scenarioId, r.scenario_name as scenarioName,
+               r.scenario_version as scenarioVersion, r.trigger_type as triggerType, r.status,
+               r.running_key as runningKey, r.executor_uuid as executorUuid,
+               u.user_name as userName, r.server_id as serverId, r.item_count as itemCount,
+               r.start_time as startTime, r.end_time as endTime,
+               r.duration_ms as durationMs, r.success_count as successCount, r.failed_count as failedCount,
+               r.error_message as errorMessage, r.fcu, r.fcd
+        from selfcheck_run r
+        left join `user` u on u.uuid = r.executor_uuid
+        where r.id = #{value}
+    </select>
+
+    <select id="searchRun" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunVo">
+        select r.id, r.scenario_id as scenarioId, r.scenario_name as scenarioName,
+               r.scenario_version as scenarioVersion, r.trigger_type as triggerType, r.status,
+               r.executor_uuid as executorUuid, u.user_name as userName, r.server_id as serverId,
+               r.item_count as itemCount,
+               r.start_time as startTime, r.end_time as endTime, r.duration_ms as durationMs,
+               r.success_count as successCount, r.failed_count as failedCount,
+               r.error_message as errorMessage, r.fcu, r.fcd
+        from selfcheck_run r
+        left join `user` u on u.uuid = r.executor_uuid
+        <where>
+            <if test="scenarioId != null">and r.scenario_id = #{scenarioId}</if>
+            <if test="status != null and status != ''">and r.status = #{status}</if>
+            <if test="keyword != null and keyword != ''">and r.scenario_name like concat('%', #{keyword}, '%')</if>
+        </where>
+        order by r.fcd desc, r.id desc
+        limit #{startNum}, #{pageSize}
+    </select>
+
+    <select id="searchRunCount" resultType="java.lang.Integer">
+        select count(1)
+        from selfcheck_run
+        <where>
+            <if test="scenarioId != null">and scenario_id = #{scenarioId}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="keyword != null and keyword != ''">and scenario_name like concat('%', #{keyword}, '%')</if>
+        </where>
+    </select>
+
+    <select id="countRunningRunByScenarioId" resultType="java.lang.Integer">
+        select count(1) from selfcheck_run
+        where scenario_id = #{value} and status in ('PENDING', 'RUNNING')
+    </select>
+
+    <insert id="insertRun" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunVo">
+        insert into selfcheck_run(id, scenario_id, scenario_name, scenario_version, trigger_type, status,
+                                  running_key, executor_uuid, server_id, item_count, start_time, end_time,
+                                  duration_ms, success_count, failed_count,
+                                  error_message, fcu, fcd)
+        values (#{id}, #{scenarioId}, #{scenarioName}, #{scenarioVersion}, #{triggerType}, #{status},
+                #{runningKey}, #{executorUuid}, #{serverId}, #{itemCount}, #{startTime}, #{endTime},
+                #{durationMs}, #{successCount}, #{failedCount},
+                #{errorMessage}, #{fcu}, now())
+    </insert>
+
+    <update id="updateRun" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunVo">
+        update selfcheck_run
+        set status = #{status}, start_time = #{startTime}, end_time = #{endTime}, duration_ms = #{durationMs},
+            running_key = #{runningKey}, item_count = #{itemCount}, success_count = #{successCount},
+            failed_count = #{failedCount}, error_message = #{errorMessage}
+        where id = #{id}
+    </update>
+
+    <update id="abortUnfinishedRunItem">
+        update selfcheck_run_item i
+        inner join selfcheck_run r on r.id = i.run_id
+        set i.status = 'ABORTED', i.end_time = now(),
+            i.duration_ms = timestampdiff(microsecond, i.start_time, now()) div 1000
+        where i.status in ('PENDING', 'RUNNING')
+          and r.status in ('PENDING', 'RUNNING')
+          and r.server_id = #{serverId}
+    </update>
+
+    <update id="abortUnfinishedRun">
+        update selfcheck_run
+        set status = 'ABORTED', end_time = now(),
+            duration_ms = timestampdiff(microsecond, start_time, now()) div 1000,
+            running_key = null, error_message = '服务重启导致执行中断'
+        where status in ('PENDING', 'RUNNING') and server_id = #{serverId}
+    </update>
+
+    <select id="getRunItemListByRunId" resultType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunItemVo">
+        select id, run_id as runId, scenario_item_id as scenarioItemId, item_name as itemName, sort,
+               api_token as apiToken, api_name as apiName, api_risk as apiRisk,
+               request_snapshot as requestSnapshot, verify_script as verifyScript,
+               api_timeout as apiTimeout, script_timeout as scriptTimeout, status, phase_list as phaseList,
+               response_snapshot as responseSnapshot, script_result as scriptResult,
+               console_log_list as consoleLogList, diagnostic_list as diagnosticList,
+               cleanup_status as cleanupStatus, start_time as startTime, end_time as endTime,
+               duration_ms as durationMs, truncated_field_list as truncatedFieldList, trace_id as traceId
+        from selfcheck_run_item
+        where run_id = #{value}
+        order by sort, id
+    </select>
+
+    <insert id="insertRunItem" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunItemVo">
+        insert into selfcheck_run_item(id, run_id, scenario_item_id, item_name, sort,
+                                       api_token, api_name, api_risk, request_snapshot, verify_script,
+                                       api_timeout, script_timeout, status, phase_list, response_snapshot,
+                                       script_result, console_log_list, diagnostic_list, cleanup_status,
+                                       start_time, end_time, duration_ms, truncated_field_list, trace_id)
+        values (#{id}, #{runId}, #{scenarioItemId}, #{itemName}, #{sort},
+                #{apiToken}, #{apiName}, #{apiRisk}, #{requestSnapshot}, #{verifyScript},
+                #{apiTimeout}, #{scriptTimeout}, #{status}, #{phaseList}, #{responseSnapshot},
+                #{scriptResult}, #{consoleLogList}, #{diagnosticList}, #{cleanupStatus},
+                #{startTime}, #{endTime}, #{durationMs}, #{truncatedFieldList}, #{traceId})
+    </insert>
+
+    <update id="updateRunItem" parameterType="neatlogic.module.tenant.dto.selfcheck.SelfCheckRunItemVo">
+        update selfcheck_run_item
+        set status = #{status}, phase_list = #{phaseList}, response_snapshot = #{responseSnapshot},
+            script_result = #{scriptResult}, console_log_list = #{consoleLogList}, diagnostic_list = #{diagnosticList},
+            cleanup_status = #{cleanupStatus}, start_time = #{startTime}, end_time = #{endTime},
+            duration_ms = #{durationMs}, truncated_field_list = #{truncatedFieldList}, trace_id = #{traceId}
+        where id = #{id}
+    </update>
+
+    <select id="checkMysqlConnection" resultType="java.lang.Integer">
+        select 1
+    </select>
+</mapper>
