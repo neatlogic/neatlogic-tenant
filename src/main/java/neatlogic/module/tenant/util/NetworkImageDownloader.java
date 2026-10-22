@@ -15,8 +15,9 @@ import neatlogic.framework.exception.file.EmptyFileException;
 import neatlogic.framework.exception.file.FileExtNotAllowedException;
 import neatlogic.framework.exception.file.FileTooLargeException;
 import neatlogic.framework.util.$;
-import neatlogic.module.tenant.exception.file.NetworkImageContentTypeException;
 import neatlogic.module.tenant.exception.file.NetworkImageDownloadException;
+import neatlogic.module.tenant.exception.file.NetworkImageEncodingException;
+import neatlogic.module.tenant.exception.file.NetworkImageFormatMismatchException;
 import neatlogic.module.tenant.exception.file.NetworkImageHttpStatusException;
 import neatlogic.module.tenant.exception.file.NetworkImageRedirectException;
 import neatlogic.module.tenant.exception.file.NetworkImageUrlEmptyException;
@@ -52,70 +53,94 @@ public class NetworkImageDownloader {
     public DownloadedImage download(String url, JSONObject config) throws Exception {
         URI current = validateUri(url);
         Path temporaryFile = null;
+        Path sanitizedFile = null;
+        boolean ownershipTransferred = false;
         long maxSize = config == null ? 0 : config.getLongValue("maxSize");
-        try (CloseableHttpClient client = createHttpClient()) {
-            for (int redirectCount = 0; ; redirectCount++) {
-                HttpGet request = new HttpGet(current);
-                request.setHeader("Accept", "image/*");
-                request.setHeader("Accept-Encoding", "identity");
-                try (CloseableHttpResponse response = client.execute(request)) {
-                    int status = response.getStatusLine().getStatusCode();
-                    if (isRedirect(status)) {
-                        Header location = response.getFirstHeader("Location");
-                        if (redirectCount >= MAX_REDIRECTS || location == null || StringUtils.isBlank(location.getValue())) {
-                            // 使用专属异常标识重定向失败，保留既有触发条件。
-                            throw new NetworkImageRedirectException();
-                        }
-                        // 每一跳重新校验地址格式，确保重定向仍使用 HTTP/HTTPS。
-                        current = validateUri(current.resolve(location.getValue()).toString());
-                        continue;
-                    }
-                    if (status != 200) {
-                        // 状态码交给专属异常作为文案参数，避免在下载器中拼接错误信息。
-                        throw new NetworkImageHttpStatusException(status);
-                    }
-                    HttpEntity entity = response.getEntity();
-                    Header typeHeader = response.getFirstHeader("Content-Type");
-                    String contentType = typeHeader == null ? "" : typeHeader.getValue().split(";", 2)[0].trim().toLowerCase(Locale.ROOT);
-                    if (!contentType.matches("image/[a-z0-9!#$&^_.+\\-]+")) {
-                        // 内容类型错误与网络传输错误分别返回明确的异常类型。
-                        throw new NetworkImageContentTypeException();
-                    }
-                    if (entity == null) {
-                        throw new EmptyFileException();
-                    }
-                    String name = resolveFileName(current, contentType);
-                    validateExtension(name, config);
-                    if (maxSize > 0 && entity.getContentLength() > maxSize) {
-                        throw new FileTooLargeException(entity.getContentLength(), maxSize);
-                    }
-                    temporaryFile = createTemporaryFile();
-                    long size = 0;
-                    try (InputStream input = entity.getContent(); OutputStream output = Files.newOutputStream(temporaryFile)) {
-                        byte[] buffer = new byte[8192];
-                        int length;
-                        while ((length = input.read(buffer)) != -1) {
-                            size += length;
-                            if (maxSize > 0 && size > maxSize) {
-                                throw new FileTooLargeException(size, maxSize);
+        try {
+            DownloadedImage result;
+            try (CloseableHttpClient client = createHttpClient()) {
+                for (int redirectCount = 0; ; redirectCount++) {
+                    HttpGet request = new HttpGet(current);
+                    request.setHeader("Accept", "image/*");
+                    request.setHeader("Accept-Encoding", "identity");
+                    try (CloseableHttpResponse response = client.execute(request)) {
+                        int status = response.getStatusLine().getStatusCode();
+                        if (isRedirect(status)) {
+                            Header location = response.getFirstHeader("Location");
+                            if (redirectCount >= MAX_REDIRECTS || location == null || StringUtils.isBlank(location.getValue())) {
+                                // 使用专属异常标识重定向失败，保留既有触发条件。
+                                throw new NetworkImageRedirectException();
                             }
-                            output.write(buffer, 0, length);
+                            // 每一跳重新校验地址格式，确保重定向仍使用 HTTP/HTTPS。
+                            current = validateUri(current.resolve(location.getValue()).toString());
+                            continue;
                         }
+                        if (status != 200) {
+                            // 状态码交给专属异常作为文案参数，避免在下载器中拼接错误信息。
+                            throw new NetworkImageHttpStatusException(status);
+                        }
+                        HttpEntity entity = response.getEntity();
+                        Header typeHeader = response.getFirstHeader("Content-Type");
+                        // 声明类型仅用于选择 JPEG/PNG 校验器，随后仍需校验实际图片内容。
+                        String contentType = NetworkImageSanitizer.normalizeContentType(typeHeader == null ? null : typeHeader.getValue());
+                        if (entity == null) {
+                            throw new EmptyFileException();
+                        }
+                        String name = resolveFileName(current, contentType);
+                        validateExtension(name, config);
+                        if (maxSize > 0 && entity.getContentLength() > maxSize) {
+                            throw new FileTooLargeException(entity.getContentLength(), maxSize);
+                        }
+                        temporaryFile = createTemporaryFile();
+                        long size = 0;
+                        try (InputStream input = entity.getContent(); OutputStream output = Files.newOutputStream(temporaryFile)) {
+                            byte[] buffer = new byte[8192];
+                            int length;
+                            while ((length = input.read(buffer)) != -1) {
+                                size += length;
+                                if (maxSize > 0 && size > maxSize) {
+                                    throw new FileTooLargeException(size, maxSize);
+                                }
+                                output.write(buffer, 0, length);
+                            }
+                        }
+                        if (size == 0) {
+                            throw new EmptyFileException();
+                        }
+                        // 原始网络数据不得进入附件存储，仅保存完整解码后重新编码的标准图片。
+                        sanitizedFile = createTemporaryFile();
+                        createSanitizer().sanitize(temporaryFile, sanitizedFile, contentType);
+                        long sanitizedSize = Files.size(sanitizedFile);
+                        // 编码器即使未抛异常，也不能将空输出作为有效附件交给持久化流程。
+                        if (sanitizedSize == 0) {
+                            throw new NetworkImageEncodingException(new IOException("Image encoder produced an empty file"));
+                        }
+                        if (maxSize > 0 && sanitizedSize > maxSize) {
+                            throw new FileTooLargeException(sanitizedSize, maxSize);
+                        }
+                        result = new DownloadedImage(sanitizedFile, name, contentType, sanitizedSize);
                     }
-                    if (size == 0) {
-                        throw new EmptyFileException();
-                    }
-                    return new DownloadedImage(temporaryFile, name, contentType, size);
+                    break;
                 }
             }
+            // 响应和客户端都关闭成功后才移交文件，避免 close 异常导致临时文件泄漏。
+            ownershipTransferred = true;
+            return result;
         } catch (IOException ex) {
-            deleteTemporaryFile(temporaryFile);
             // 保留原始输入输出异常，专属异常负责格式化下载失败文案。
             throw new NetworkImageDownloadException(ex);
-        } catch (Exception | Error ex) {
+        } finally {
+            // 原始文件始终删除；重新编码文件仅在成功返回后由 DownloadedImage 管理。
             deleteTemporaryFile(temporaryFile);
-            throw ex;
+            if (!ownershipTransferred) {
+                deleteTemporaryFile(sanitizedFile);
+            }
         }
+    }
+
+    /** 创建独立的图片内容校验与重新编码器，便于验证编码失败路径。 */
+    protected NetworkImageSanitizer createSanitizer() {
+        return new NetworkImageSanitizer();
     }
 
     /** 使用 HttpClient 默认 DNS 解析与 TLS 证书校验，仅设置下载超时和请求行为。 */
@@ -126,7 +151,7 @@ public class NetworkImageDownloader {
                 .disableCookieManagement().disableAuthCaching().disableContentCompression().build();
     }
 
-    /** 使用系统临时目录，避免整张图片占用堆内存。 */
+    /** 下载流及编码输出写入系统临时文件；像素解码另由校验器按尺寸上限分配内存。 */
     protected Path createTemporaryFile() throws IOException {
         return Files.createTempFile("neatlogic-network-image-", ".tmp");
     }
@@ -171,19 +196,17 @@ public class NetworkImageDownloader {
         if (name.length() > 180) {
             name = name.substring(0, 180);
         }
-        if (name.lastIndexOf('.') <= 0) {
-            String subtype = contentType.substring("image/".length());
-            String extension;
-            switch (subtype) {
-                case "jpeg": case "pjpeg": extension = "jpg"; break;
-                case "svg+xml": extension = "svg"; break;
-                case "x-icon": case "vnd.microsoft.icon": extension = "ico"; break;
-                case "x-png": extension = "png"; break;
-                case "x-ms-bmp": extension = "bmp"; break;
-                case "tiff": extension = "tif"; break;
-                default: extension = subtype.replaceAll("[^a-z0-9]", ""); break;
+        int extensionIndex = name.lastIndexOf('.');
+        if (extensionIndex <= 0) {
+            name += "image/jpeg".equals(contentType) ? ".jpg" : ".png";
+        } else {
+            // 已有扩展名必须与规范化格式相符，不能通过改名掩盖声明不一致。
+            String extension = name.substring(extensionIndex + 1).toLowerCase(Locale.ROOT);
+            boolean matches = "image/jpeg".equals(contentType)
+                    ? "jpg".equals(extension) || "jpeg".equals(extension) : "png".equals(extension);
+            if (!matches) {
+                throw new NetworkImageFormatMismatchException();
             }
-            name += "." + extension;
         }
         return name;
     }
@@ -233,7 +256,7 @@ public class NetworkImageDownloader {
         private final String contentType;
         private final long size;
 
-        /** 记录已完整下载并通过附件规则校验的临时图片。 */
+        /** 记录完整解码、重新编码且通过附件规则校验的最终临时图片及其大小。 */
         public DownloadedImage(Path file, String name, String contentType, long size) {
             this.file = file;
             this.name = name;
@@ -250,7 +273,7 @@ public class NetworkImageDownloader {
         /** 返回不含附加参数的图片 MIME 类型。 */
         public String getContentType() { return contentType; }
 
-        /** 返回实际读取的字节数。 */
+        /** 返回重新编码后最终文件的字节数，供附件存储和 FileVo.size 使用。 */
         public long getSize() { return size; }
 
         /** 使用完成后删除临时文件，清理异常不改变接口业务结果。 */

@@ -1081,14 +1081,29 @@
     "networkimagecontenttypeexception": {
       "networkimagecontenttypeexception": "The content returned by the URL is not an image."
     },
+    "networkimagedimensionsexception": {
+      "networkimagedimensionsexception": "Invalid image dimensions: {0} x {1}. Each side must not exceed 10000 pixels and the total must not exceed 20000000 pixels."
+    },
     "networkimagedownloadexception": {
       "networkimagedownloadexception": "Failed to download the network image: {0}"
+    },
+    "networkimageencodingexception": {
+      "networkimageencodingexception": "Failed to re-encode the network image."
+    },
+    "networkimageformatmismatchexception": {
+      "networkimageformatmismatchexception": "The declared image type, actual format and filename extension must match."
     },
     "networkimagehttpstatusexception": {
       "networkimagehttpstatusexception": "Image download failed. HTTP status code: {0}"
     },
+    "networkimageinvalidcontentexception": {
+      "networkimageinvalidcontentexception": "The network image is invalid, corrupted or cannot be completely decoded."
+    },
     "networkimageredirectexception": {
       "networkimageredirectexception": "The image download exceeded the redirect limit or the redirect target URL is missing."
+    },
+    "networkimageunsupportedformatexception": {
+      "networkimageunsupportedformatexception": "Unsupported network image type: {0}. Only JPEG and PNG are supported."
     },
     "networkimageurlemptyexception": {
       "networkimageurlemptyexception": "The image URL must not be empty."

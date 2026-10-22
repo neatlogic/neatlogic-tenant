@@ -1081,14 +1081,29 @@
     "networkimagecontenttypeexception": {
       "networkimagecontenttypeexception": "网络地址返回的内容不是图片"
     },
+    "networkimagedimensionsexception": {
+      "networkimagedimensionsexception": "图片尺寸不符合要求：{0}×{1}，单边最多10000像素，总像素最多20000000"
+    },
     "networkimagedownloadexception": {
       "networkimagedownloadexception": "下载网络图片失败：{0}"
+    },
+    "networkimageencodingexception": {
+      "networkimageencodingexception": "网络图片重新编码失败"
+    },
+    "networkimageformatmismatchexception": {
+      "networkimageformatmismatchexception": "图片声明类型、实际格式和文件扩展名必须一致"
     },
     "networkimagehttpstatusexception": {
       "networkimagehttpstatusexception": "图片下载失败，HTTP状态码：{0}"
     },
+    "networkimageinvalidcontentexception": {
+      "networkimageinvalidcontentexception": "网络图片内容无效、已损坏或无法完整解码"
+    },
     "networkimageredirectexception": {
       "networkimageredirectexception": "图片下载重定向次数超限或缺少目标地址"
+    },
+    "networkimageunsupportedformatexception": {
+      "networkimageunsupportedformatexception": "不支持的网络图片类型：{0}，仅支持 JPEG 和 PNG"
     },
     "networkimageurlemptyexception": {
       "networkimageurlemptyexception": "图片地址不能为空"
