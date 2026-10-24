@@ -14,6 +14,8 @@ package neatlogic.module.tenant.api.user;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONType;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthFactory;
@@ -43,7 +45,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /** 分别查询页面、角色和代码来源权限，复用统一权限包含关系。 */
@@ -205,7 +209,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         return returnObj;
     }
 
-    /** 批量补充角色及分组名称，直接角色优先，同类来源按文字排序并去重。 */
+    /** 批量补充原始角色名称及结构化分组路径，展示文案由前端国际化处理。 */
     private JSONArray getRoleAuthSourcePathList(List<RoleAuthVo> directAuthList, List<RoleAuthVo> teamAuthList,
                                                Map<String, Set<String>> roleTeamUuidMap) {
         Set<String> roleUuidSet = new LinkedHashSet<>();
@@ -219,29 +223,32 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         if (CollectionUtils.isNotEmpty(roleUuidSet)) {
             for (RoleVo role : roleMapper.getRoleByUuidList(new ArrayList<>(roleUuidSet))) {
                 if (StringUtils.isNotBlank(role.getName())) {
-                    roleNameMap.put(role.getUuid(), role.getName().endsWith("角色") ? role.getName() : role.getName() + "角色");
+                    roleNameMap.put(role.getUuid(), role.getName());
                 }
             }
         }
         Set<String> teamUuidSet = new LinkedHashSet<>();
         roleTeamUuidMap.values().forEach(teamUuidSet::addAll);
-        Map<String, String> teamPathMap = new HashMap<>();
+        Map<String, TeamVo> teamMap = new HashMap<>();
+        Map<String, List<String>> teamPathMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(teamUuidSet)) {
             for (TeamVo team : teamMapper.getTeamByUuidList(new ArrayList<>(teamUuidSet))) {
-                // 本次请求每个分组只解析一次，复用已保存路径；缺失时再查祖先及自身。
-                String path = team.getUpwardNamePath();
-                if (StringUtils.isBlank(path)) {
-                    path = getTeamSourcePath(team);
-                }
-                if (StringUtils.isNotBlank(path)) {
-                    teamPathMap.put(team.getUuid(), path.endsWith("分组") ? path : path + "分组");
+                // 每个分组仅解析一次；原始名称不增删后缀，缺路径时复用祖先查询。
+                List<String> names = StringUtils.isBlank(team.getUpwardNamePath())
+                        ? getTeamSourcePath(team) : Arrays.asList(team.getUpwardNamePath().split("/", -1));
+                if (CollectionUtils.isNotEmpty(names) && names.stream().noneMatch(StringUtils::isBlank)) {
+                    teamMap.put(team.getUuid(), team);
+                    teamPathMap.put(team.getUuid(), names);
                 }
             }
         }
-        Map<String, Map<String, Set<String>>> directSources = new TreeMap<>();
-        Map<String, Map<String, Set<String>>> teamSources = new TreeMap<>();
+        // 按权限组和权限编码隔离来源，同角色在不同所属分组下的来源分别保留。
+        Map<String, Map<String, List<SourcePathVo>>> sources = new TreeMap<>();
         for (RoleAuthVo auth : CollectionUtils.emptyIfNull(directAuthList)) {
-            addSourcePath(directSources, auth, roleNameMap.get(auth.getRoleUuid()));
+            String name = roleNameMap.get(auth.getRoleUuid());
+            if (name != null) {
+                addSourcePath(sources, auth, new SourcePathVo(auth.getRoleUuid(), name, null, Collections.emptyList(), null));
+            }
         }
         for (RoleAuthVo auth : CollectionUtils.emptyIfNull(teamAuthList)) {
             String roleName = roleNameMap.get(auth.getRoleUuid());
@@ -249,32 +256,33 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 continue;
             }
             for (String teamUuid : roleTeamUuidMap.getOrDefault(auth.getRoleUuid(), Collections.emptySet())) {
-                String teamPath = teamPathMap.get(teamUuid);
-                if (teamPath != null) {
-                    addSourcePath(teamSources, auth, teamPath + "的" + roleName);
+                TeamVo team = teamMap.get(teamUuid);
+                if (team != null) {
+                    addSourcePath(sources, auth, new SourcePathVo(auth.getRoleUuid(), roleName,
+                            teamUuid, teamPathMap.get(teamUuid), team.getLft()));
                 }
             }
         }
-        // 使用嵌套映射按权限组、编码匹配，避免同编码跨组串用来源。
-        Map<String, Map<String, Set<String>>> sources = new TreeMap<>();
-        for (Map<String, Map<String, Set<String>>> category : java.util.Arrays.asList(directSources, teamSources)) {
-            category.forEach((group, authMap) -> authMap.forEach((auth, paths) -> sources
-                    .computeIfAbsent(group, key -> new TreeMap<>())
-                    .computeIfAbsent(auth, key -> new LinkedHashSet<>()).addAll(paths)));
-        }
+        // 直接角色优先并按名称、UUID排序；分组按树顺序排列，相同lft或缺失lft有稳定次序。
+        Comparator<SourcePathVo> comparator = Comparator.comparing((SourcePathVo source) -> source.getTeamUuid() != null)
+                .thenComparing(SourcePathVo::getTeamLft, Comparator.nullsLast(Integer::compareTo))
+                .thenComparing(SourcePathVo::getTeamUuid, Comparator.nullsFirst(String::compareTo))
+                .thenComparing(SourcePathVo::getRoleName)
+                .thenComparing(SourcePathVo::getRoleUuid);
         JSONArray result = new JSONArray();
         sources.forEach((group, authMap) -> authMap.forEach((auth, paths) -> {
+            paths.sort(comparator);
             JSONObject source = new JSONObject();
             source.put("authGroup", group);
             source.put("auth", auth);
-            source.put("sourcePathList", new ArrayList<>(paths));
+            source.put("sourcePathList", paths);
             result.add(source);
         }));
         return result;
     }
 
     /** 缺失路径时按祖先层级重建；资料不完整时留空，由前端回退原只读提示。 */
-    private String getTeamSourcePath(TeamVo team) {
+    private List<String> getTeamSourcePath(TeamVo team) {
         if (team.getLft() == null || team.getRht() == null) {
             return null;
         }
@@ -297,15 +305,58 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
             names.add(ancestor.getName());
             previous = ancestor;
         }
-        return team.getUuid().equals(previous.getUuid()) ? String.join("/", names) : null;
+        return team.getUuid().equals(previous.getUuid()) ? names : null;
     }
 
-    /** 同一权限内合并来源，使用有序集合保证多角色重复授权只显示一条相同路径。 */
-    private void addSourcePath(Map<String, Map<String, Set<String>>> sources, RoleAuthVo auth, String path) {
-        if (StringUtils.isBlank(path) || StringUtils.isBlank(auth.getAuthGroup()) || StringUtils.isBlank(auth.getAuth())) {
+    /** 按角色UUID和所属分组UUID去重，不能因同名角色或同名分组丢失来源。 */
+    private void addSourcePath(Map<String, Map<String, List<SourcePathVo>>> sources, RoleAuthVo auth, SourcePathVo source) {
+        if (StringUtils.isBlank(auth.getAuthGroup()) || StringUtils.isBlank(auth.getAuth())) {
             return;
         }
-        sources.computeIfAbsent(auth.getAuthGroup(), key -> new TreeMap<>())
-                .computeIfAbsent(auth.getAuth(), key -> new TreeSet<>()).add(path);
+        List<SourcePathVo> paths = sources.computeIfAbsent(auth.getAuthGroup(), key -> new TreeMap<>())
+                .computeIfAbsent(auth.getAuth(), key -> new ArrayList<>());
+        if (paths.stream().noneMatch(path -> Objects.equals(path.getRoleUuid(), source.getRoleUuid())
+                && Objects.equals(path.getTeamUuid(), source.getTeamUuid()))) {
+            paths.add(source);
+        }
+    }
+
+    /** 来源仅在本接口使用；局部序列化配置确保HTTP返回保留直接角色的null分组字段。 */
+    @JSONType(serialzeFeatures = SerializerFeature.WriteMapNullValue)
+    public static class SourcePathVo {
+        private final String roleUuid;
+        private final String roleName;
+        private final String teamUuid;
+        private final List<String> teamPathNameList;
+        private final Integer teamLft;
+
+        /** 保存原始名称和用户所属分组信息，不拼接中文展示文案。 */
+        public SourcePathVo(String roleUuid, String roleName, String teamUuid, List<String> teamPathNameList, Integer teamLft) {
+            this.roleUuid = roleUuid;
+            this.roleName = roleName;
+            this.teamUuid = teamUuid;
+            this.teamPathNameList = teamPathNameList;
+            this.teamLft = teamLft;
+        }
+
+        public String getRoleUuid() {
+            return roleUuid;
+        }
+
+        public String getRoleName() {
+            return roleName;
+        }
+
+        public String getTeamUuid() {
+            return teamUuid;
+        }
+
+        public List<String> getTeamPathNameList() {
+            return teamPathNameList;
+        }
+
+        public Integer getTeamLft() {
+            return teamLft;
+        }
     }
 }
