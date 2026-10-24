@@ -91,7 +91,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
             @Param( name = "userRoleAuthObj", type = ApiParamType.JSONOBJECT, desc = "auth.user.roleauth"),
             @Param(name = "userCodeAuthObj", type = ApiParamType.JSONOBJECT, desc = "auth.systemuser.codeauth"),
             // 只新增来源说明，不改变既有授权字段及其过滤规则。
-            @Param(name = "userRoleAuthSourcePathList", type = ApiParamType.JSONARRAY, desc = "角色权限来源路径列表")
+            @Param(name = "userRoleAuthSourcePathList", type = ApiParamType.JSONARRAY, desc = "nmtau.userauthsearchapi.output.param.desc")
     })
     @Description(desc = "auth.user.search")
     @Override
