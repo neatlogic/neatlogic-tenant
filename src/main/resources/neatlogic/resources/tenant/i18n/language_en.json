@@ -988,6 +988,13 @@
     "updateuserexportfileisreadapi": {
       "getname": "Update user exported files to read"
     },
+    "userauthsearchapi": {
+      "output": {
+        "param": {
+          "desc": "Role Permission Source Path List"
+        }
+      }
+    },
     "userdatasaveapi": {
       "getname": "Save user data"
     },

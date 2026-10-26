@@ -988,6 +988,13 @@
     "updateuserexportfileisreadapi": {
       "getname": "更新用户导出文件为已读"
     },
+    "userauthsearchapi": {
+      "output": {
+        "param": {
+          "desc": "角色权限来源路径列表"
+        }
+      }
+    },
     "userdatasaveapi": {
       "getname": "保存用户数据"
     },
