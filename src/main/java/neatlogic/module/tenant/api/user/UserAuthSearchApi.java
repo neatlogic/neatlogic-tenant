@@ -85,6 +85,16 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
     }
 
     /**
+     * 是否禁用返回值循环引用检查
+     *
+     * @return true false
+     */
+    @Override
+    public boolean disableReturnCircularReferenceDetect() {
+        return true;
+    }
+
+    /**
      * 页面直接授权与代码内置授权分别返回，内置权限及其包含权限只读展示。
      */
     @Input({
