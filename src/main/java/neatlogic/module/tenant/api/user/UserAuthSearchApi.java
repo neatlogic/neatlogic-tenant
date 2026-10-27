@@ -30,6 +30,7 @@ import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.restful.annotation.*;
+import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import org.apache.commons.collections4.CollectionUtils;
@@ -65,6 +66,16 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
 
     @Resource
     private TeamMapper teamMapper;
+
+    /**
+     * 是否支持匿名访问
+     *
+     * @return true false
+     */
+    @Override
+    public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
+        return super.supportAnonymousAccess();
+    }
 
     @Resource
     private RoleMapper roleMapper;
