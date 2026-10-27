@@ -15,7 +15,7 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 public class NetworkImageUnsupportedFormatException extends ApiRuntimeException {
     private static final long serialVersionUID = 1L;
 
-    /** 记录不支持的声明类型，仅允许指定的 JPEG 和 PNG 类型。 */
+    /** 记录不支持的声明类型，仅允许指定的 JPEG、PNG 和 GIF 类型。 */
     public NetworkImageUnsupportedFormatException(String contentType) {
         super("nmtef.networkimageunsupportedformatexception.networkimageunsupportedformatexception", contentType);
     }

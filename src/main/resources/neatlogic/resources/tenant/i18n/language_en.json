@@ -1085,6 +1085,9 @@
     }
   },
   "nmtef": {
+    "networkimageanimationlimitexception": {
+      "networkimageanimationlimitexception": "GIF animation exceeds the processing limit: canvas {0} x {1}, {2} frames. At most 200 frames and 200000000 total canvas pixels are allowed."
+    },
     "networkimagecontenttypeexception": {
       "networkimagecontenttypeexception": "The content returned by the URL is not an image."
     },
@@ -1110,7 +1113,7 @@
       "networkimageredirectexception": "The image download exceeded the redirect limit or the redirect target URL is missing."
     },
     "networkimageunsupportedformatexception": {
-      "networkimageunsupportedformatexception": "Unsupported network image type: {0}. Only JPEG and PNG are supported."
+      "networkimageunsupportedformatexception": "Unsupported network image type: {0}. Only JPEG, PNG and GIF are supported."
     },
     "networkimageurlemptyexception": {
       "networkimageurlemptyexception": "The image URL must not be empty."

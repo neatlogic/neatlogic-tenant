@@ -43,7 +43,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.zip.CRC32;
 
-/** 完整解码并重新编码 JPEG/PNG，仅保留安全像素，移除原始元数据及附加内容。 */
+/** 完整解码并重新编码 JPEG/PNG/GIF，重建安全像素和必要动画信息，移除附加内容。 */
 public class NetworkImageSanitizer {
     private static final byte[] PNG_SIGNATURE = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
     private static final int MAX_DIMENSION = 10000;
@@ -61,6 +61,9 @@ public class NetworkImageSanitizer {
         if ("image/png".equals(type) || "image/x-png".equals(type)) {
             return "image/png";
         }
+        if ("image/gif".equals(type)) {
+            return "image/gif";
+        }
         throw new NetworkImageUnsupportedFormatException(type);
     }
 
@@ -75,6 +78,11 @@ public class NetworkImageSanitizer {
     /** 校验结构、实际解码格式和全部解码告警，再写出无原始元数据的新图片。 */
     public void sanitize(Path source, Path target, String canonicalContentType) {
         String type = normalizeContentType(canonicalContentType);
+        if ("image/gif".equals(type)) {
+            // 动画采用独立的逐帧处理链路，不能通过通用单帧读取而丢失其余画面。
+            createGifSanitizer().sanitize(source, target);
+            return;
+        }
         BufferedImage decoded = null;
         BufferedImage sanitized = null;
         try {
@@ -139,6 +147,11 @@ public class NetworkImageSanitizer {
         }
     }
 
+    /** 创建独立 GIF 动画校验器，允许验证内部结构文件及编码失败清理路径。 */
+    protected NetworkGifSanitizer createGifSanitizer() {
+        return new NetworkGifSanitizer();
+    }
+
     /** 以全新 metadata 写出，JPEG 使用 RGB 和显式 0.95 质量，PNG 保留 alpha。 */
     protected void writeImage(BufferedImage image, Path target, String formatName) throws IOException {
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(formatName);
@@ -174,6 +187,12 @@ public class NetworkImageSanitizer {
         boolean png = Arrays.equals(PNG_SIGNATURE, prefix);
         boolean jpeg = prefix.length >= 3 && (prefix[0] & 255) == 255
                 && (prefix[1] & 255) == 216 && (prefix[2] & 255) == 255;
+        if (prefix.length >= 6) {
+            String signature = new String(prefix, 0, 6, StandardCharsets.US_ASCII);
+            if ("GIF87a".equals(signature) || "GIF89a".equals(signature)) {
+                throw new NetworkImageFormatMismatchException();
+            }
+        }
         if (!png && !jpeg) {
             throw new NetworkImageInvalidContentException();
         }
