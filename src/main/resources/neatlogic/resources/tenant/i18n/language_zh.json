@@ -1085,6 +1085,9 @@
     }
   },
   "nmtef": {
+    "networkimageanimationlimitexception": {
+      "networkimageanimationlimitexception": "GIF动画超出处理上限：画布{0}×{1}，帧数{2}，最多200帧，累计画布像素最多200000000"
+    },
     "networkimagecontenttypeexception": {
       "networkimagecontenttypeexception": "网络地址返回的内容不是图片"
     },
@@ -1110,7 +1113,7 @@
       "networkimageredirectexception": "图片下载重定向次数超限或缺少目标地址"
     },
     "networkimageunsupportedformatexception": {
-      "networkimageunsupportedformatexception": "不支持的网络图片类型：{0}，仅支持 JPEG 和 PNG"
+      "networkimageunsupportedformatexception": "不支持的网络图片类型：{0}，仅支持 JPEG、PNG 和 GIF"
     },
     "networkimageurlemptyexception": {
       "networkimageurlemptyexception": "图片地址不能为空"
