@@ -1144,7 +1144,8 @@
     "mcp": {
       "mail": {
         "failed": "Email delivery failed: {0}"
-      }
+      },
+      "mailhelp": "Send notifications or reports requested by the user using the mail configuration, with recipients and optional CC. Valid mail configuration and appropriate permissions are required; this operation actually sends email."
     },
     "mcpexamples": {
       "mail": {

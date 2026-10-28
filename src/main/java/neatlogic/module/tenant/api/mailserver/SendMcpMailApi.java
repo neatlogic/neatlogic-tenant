@@ -27,6 +27,9 @@ public class SendMcpMailApi extends PrivateApiComponentBase {
     @Override public String getName() { return "nmai.aitool.sendemailtool.label"; }
     /** 接口配置沿用平台 API 管理。 */
     @Override public String getConfig() { return null; }
+    /** API 帮助与 MCP 共用所属模块的场景说明。 */
+    @Override public String getDescription() { return "tenant.mcp.mailhelp"; }
+
     @Input({
         @Param(name="subject", type=ApiParamType.STRING, desc="nmai.aitool.sendemailtool.param.subject", isRequired=true),
         @Param(name="body", type=ApiParamType.STRING, desc="nmai.aitool.sendemailtool.param.body", isRequired=true),
@@ -37,7 +40,7 @@ public class SendMcpMailApi extends PrivateApiComponentBase {
     })
     @Output({})
     @Example(title="tenant.mcpexamples.mail.title", description="tenant.mcpexamples.mail.description", example="{\"subject\":\"Operations Report\",\"body\":\"Replace with the approved report content\",\"to\":\"recipient@example.com\",\"cc\":\"reviewer@example.com\"}")
-    @Description(desc="nmai.aitool.sendemailtool.label")
+    @Description(desc="tenant.mcp.mailhelp")
     /** 参数经公共 API 校验后委托原业务服务。 */
     @Override public Object myDoService(JSONObject input) throws Exception {
         return mailService.send(input);
