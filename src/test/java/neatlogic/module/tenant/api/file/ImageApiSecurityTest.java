@@ -78,6 +78,8 @@ public class ImageApiSecurityTest {
                 new Class[]{IFileStorageHandler.class}, (proxy, method, args) -> {
                     switch (method.getName()) {
                         case "getData": return new ByteArrayInputStream(storedData);
+                        // 动态代理显式调用接口默认实现，验证已有仅提供流的处理器仍可下载图片。
+                        case "getDownloadData": return java.lang.reflect.InvocationHandler.invokeDefault(proxy, method, args);
                         case "saveData":
                             storedData = IOUtils.toByteArray((InputStream) args[1]);
                             return "TEST:picture";
