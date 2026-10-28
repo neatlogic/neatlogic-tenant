@@ -56,7 +56,7 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     /**
-     * 图片下载支持匿名访问，但token需要加密
+     * 图片下载支持匿名访问，但token需要加上签名
      * @return
      */
     @Override
