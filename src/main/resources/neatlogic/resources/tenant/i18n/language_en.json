@@ -261,6 +261,8 @@
   "nmtadd": {
     "dashboarddatasource": {
       "defaultvalue": "Selected values for option display",
+      "fieldlist": "Dashboard data source field list",
+      "fieldlisthelp": "Each field contains only id, label, type, isCondition, inputType and config; config is the original field control configuration object.",
       "get": "Get dashboard data source",
       "idlist": "Data source ID list",
       "list": "List dashboard data sources",

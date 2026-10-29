@@ -261,6 +261,8 @@
   "nmtadd": {
     "dashboarddatasource": {
       "defaultvalue": "选中值回显列表",
+      "fieldlist": "大屏数据源字段列表",
+      "fieldlisthelp": "字段列表中每项仅包含 id、label、type、isCondition、inputType、config 六个属性；config 为原字段控件配置对象。",
       "get": "获取大屏数据源详情",
       "idlist": "数据源 ID 列表",
       "list": "查询大屏数据源列表",

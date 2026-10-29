@@ -1,5 +1,6 @@
 package neatlogic.module.tenant.api.dashboard.datasource;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -8,16 +9,18 @@ import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.bootstrap.NeatLogicWebApplicationContext;
+import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
 import neatlogic.framework.dashboard.datasource.core.IDashboardDatasourceHandler;
 import neatlogic.framework.dashboard.datasource.exception.DashboardDatasourceTypeNotSupportedException;
-import neatlogic.framework.datawarehouse.dto.DataSourceVo;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.annotation.NotDefined;
+import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.core.ApiValidateAndHelpBase;
 import neatlogic.framework.restful.core.IApiComponent;
@@ -125,7 +128,7 @@ public class DashboardDatasourceApiTest {
         }
     }
 
-    /** 处理器迁移不改变租户 API 的路径、国际化名称和可选类型参数元数据。 */
+    /** 保留路径和类型参数元数据，详情仅声明通用 JSON 字段列表，避免泄露数据仓库 DTO。 */
     @Test
     public void shouldPreserveApiMetadataAndTenantOwnership() throws Exception {
         String[] tokens = {"dashboard/datasource/list", "dashboard/datasource/get", "dashboard/datasource/data/search"};
@@ -144,6 +147,18 @@ public class DashboardDatasourceApiTest {
             assertFalse(type.isRequired());
             assertEquals("nmtadd.dashboarddatasource.type", type.desc());
         }
+        // 详情协议只声明 fieldList，不通过 explode 展开底层数据源或字段 DTO。
+        Method detailMethod = GetDashboardDatasourceApi.class.getMethod("myDoService", JSONObject.class);
+        assertEquals(JSONObject.class, detailMethod.getReturnType());
+        Output detailOutput = detailMethod.getAnnotation(Output.class);
+        assertNotNull(detailOutput);
+        assertEquals(1, detailOutput.value().length);
+        Param fieldList = detailOutput.value()[0];
+        assertEquals("fieldList", fieldList.name());
+        assertEquals(ApiParamType.JSONARRAY, fieldList.type());
+        assertEquals("nmtadd.dashboarddatasource.fieldlist", fieldList.desc());
+        assertEquals("nmtadd.dashboarddatasource.fieldlisthelp", fieldList.help());
+        assertEquals(NotDefined.class, fieldList.explode());
     }
 
     /** 使用真实注册器验证租户归属和新路径，并完整恢复被注册器修改的全局缓存。 */
@@ -335,15 +350,25 @@ public class DashboardDatasourceApiTest {
     private static class RecordingHandler implements IDashboardDatasourceHandler {
         private final String type;
         private final JSONObject listResponse = new JSONObject();
-        private final DataSourceVo detailResponse = new DataSourceVo();
+        private final JSONObject detailResponse = new JSONObject();
         private final JSONObject dataResponse = new JSONObject();
         private int calls;
         private String lastOperation;
         private JSONObject lastParams;
 
-        /** 为每个注册类型建立独立 Handler 实例。 */
+        /** 为两个注册类型分别建立仅含 fieldList 的详情响应，验证原始 JSON 被直接返回。 */
         private RecordingHandler(String type) {
             this.type = type;
+            JSONObject field = new JSONObject();
+            field.put("id", 101L);
+            field.put("label", type);
+            field.put("type", "text");
+            field.put("isCondition", 1);
+            field.put("inputType", "text");
+            field.put("config", JSONObject.parseObject("{\"placeholder\":\"请输入\"}"));
+            JSONArray fieldList = new JSONArray();
+            fieldList.add(field);
+            detailResponse.put("fieldList", fieldList);
         }
 
         /** 声明可供真实工厂选择的测试类型。 */
@@ -359,9 +384,9 @@ public class DashboardDatasourceApiTest {
             return listResponse;
         }
 
-        /** 记录详情操作并保持 DataSourceVo 返回契约。 */
+        /** 记录详情操作并保持最小 JSONObject 返回契约。 */
         @Override
-        public DataSourceVo getDatasource(JSONObject params) {
+        public JSONObject getDatasource(JSONObject params) {
             record("getDatasource", params);
             return detailResponse;
         }

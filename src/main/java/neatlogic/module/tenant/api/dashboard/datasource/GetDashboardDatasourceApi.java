@@ -5,7 +5,6 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
-import neatlogic.framework.datawarehouse.dto.DataSourceVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -34,15 +33,16 @@ public class GetDashboardDatasourceApi extends PrivateApiComponentBase {
         return null;
     }
 
-    /** 保留原查询参数和返回结构，缺省类型由工厂兼容旧大屏，未知类型明确拒绝。 */
+    /** 详情仅声明 fieldList 字段列表，返回通用 JSON；缺省类型和未知类型由工厂统一处理。 */
     @Input({
             @Param(name = "datasourceType", type = ApiParamType.STRING, desc = "nmtadd.dashboarddatasource.type"),
             @Param(name = "id", type = ApiParamType.LONG, desc = "common.id", isRequired = true)
     })
-    @Output({@Param(explode = DataSourceVo.class)})
+    @Output({@Param(name = "fieldList", type = ApiParamType.JSONARRAY, desc = "nmtadd.dashboarddatasource.fieldlist",
+            help = "nmtadd.dashboarddatasource.fieldlisthelp")})
     @Description(desc = "nmtadd.dashboarddatasource.get")
     @Override
-    public Object myDoService(JSONObject jsonObj) {
+    public JSONObject myDoService(JSONObject jsonObj) {
         return DashboardDatasourceHandlerFactory.getHandler(jsonObj.getString("datasourceType")).getDatasource(jsonObj);
     }
 }
