@@ -1094,11 +1094,6 @@
       "getname": "保存工作时间窗口信息"
     }
   },
-  "nmted": {
-    "dashboarddatasourcetypenotsupportedexception": {
-      "message": "不支持的大屏数据源类型：{0}"
-    }
-  },
   "nmtef": {
     "networkimageanimationlimitexception": {
       "networkimageanimationlimitexception": "GIF动画超出处理上限：画布{0}×{1}，帧数{2}，最多200帧，累计画布像素最多200000000"

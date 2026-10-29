@@ -1094,11 +1094,6 @@
       "getname": "Save working time window information"
     }
   },
-  "nmted": {
-    "dashboarddatasourcetypenotsupportedexception": {
-      "message": "Unsupported dashboard data source type: {0}"
-    }
-  },
   "nmtef": {
     "networkimageanimationlimitexception": {
       "networkimageanimationlimitexception": "GIF animation exceeds the processing limit: canvas {0} x {1}, {2} frames. At most 200 frames and 200000000 total canvas pixels are allowed."

@@ -6,13 +6,16 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
+import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.bootstrap.NeatLogicWebApplicationContext;
 import neatlogic.framework.dao.mapper.UserMapper;
+import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
+import neatlogic.framework.dashboard.datasource.core.IDashboardDatasourceHandler;
+import neatlogic.framework.dashboard.datasource.exception.DashboardDatasourceTypeNotSupportedException;
 import neatlogic.framework.datawarehouse.dto.DataSourceVo;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
-import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.annotation.Description;
@@ -23,13 +26,10 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentFactory;
 import neatlogic.framework.restful.core.privateapi.PrivateApiRegistrar;
 import neatlogic.framework.restful.dto.ApiHandlerVo;
 import neatlogic.framework.restful.dto.ApiVo;
-//import neatlogic.framework.auth.label.REPORT_BASE;
-import neatlogic.module.tenant.service.dashboard.DashboardDatasourceService;
-import neatlogic.module.tenant.service.dashboard.DashboardDatasourceServiceImpl;
-import neatlogic.module.tenant.exception.dashboard.DashboardDatasourceTypeNotSupportedException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -45,16 +45,31 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-/** 验证真实 API 委托与公共权限校验链，避免仅依靠源码字符串检查。 */
+/** 验证真实模块注册、API 类型分发和当前 NoAuth 契约，不依赖数据库或 HTTP。 */
 public class DashboardDatasourceApiTest {
     private static final String USER_UUID = "dashboard-datasource-test-user";
+    private static final String[] OPERATIONS = {"listDatasource", "getDatasource", "searchDatasourceData"};
     private Field mapperField;
     private Object originalMapper;
     private List<UserAuthVo> grants;
+    private Map<String, IDashboardDatasourceHandler> handlers;
+    private Map<String, IDashboardDatasourceHandler> originalHandlers;
+    private RecordingHandler datawarehouseHandler;
+    private RecordingHandler extensionHandler;
 
-    /** 建立普通租户/非管理员用户，并用可控授权结果替代真实数据库。 */
+    /** 隔离静态工厂并通过真实模块刷新事件注册两个测试 Handler，普通用户默认不授予功能权限。 */
     @Before
+    @SuppressWarnings("unchecked")
     public void initialize() throws Exception {
+        Field handlerField = DashboardDatasourceHandlerFactory.class.getDeclaredField("handlerMap");
+        handlerField.setAccessible(true);
+        handlers = (Map<String, IDashboardDatasourceHandler>) handlerField.get(null);
+        originalHandlers = new HashMap<>(handlers);
+        handlers.clear();
+        datawarehouseHandler = new RecordingHandler("datawarehouse");
+        extensionHandler = new RecordingHandler("test-extension");
+        registerHandler("tenant", datawarehouseHandler);
+        registerHandler("test-extension-module", extensionHandler);
         mapperField = AuthActionChecker.class.getDeclaredField("userMapper");
         mapperField.setAccessible(true);
         originalMapper = mapperField.get(null);
@@ -79,6 +94,10 @@ public class DashboardDatasourceApiTest {
     /** 恢复静态依赖并释放线程上下文，防止污染其他模块测试。 */
     @After
     public void cleanup() throws Exception {
+        if (handlers != null && originalHandlers != null) {
+            handlers.clear();
+            handlers.putAll(originalHandlers);
+        }
         if (mapperField != null) {
             mapperField.set(null, originalMapper);
         }
@@ -90,49 +109,41 @@ public class DashboardDatasourceApiTest {
         }
     }
 
-    /** 只授予 REPORT_BASE 的用户通过三个接口公共权限检查。 */
+    /** 三个接口保留 NoAuth，普通用户是否具有数据仓库权限均不影响功能权限检查。 */
     @Test
-    public void shouldAllowReportPermissionWithoutDatawarehousePermission() throws Exception {
-//        grants = Collections.singletonList(new UserAuthVo(USER_UUID, REPORT_BASE.class.getSimpleName()));
-//        assertTrue(AuthActionChecker.check(REPORT_BASE.class));
+    public void shouldPreserveNoAuthContract() throws Exception {
         assertFalse(AuthActionChecker.check(DATA_WAREHOUSE_BASE.class));
-        for (PrivateApiComponentBase api : apis()) {
-            validateAuth(api);
-            AuthAction[] actions = api.getClass().getAnnotationsByType(AuthAction.class);
-            assertEquals(1, actions.length);
-//            assertEquals(REPORT_BASE.class, actions[0].action());
-        }
-    }
-
-    /** 无报表权限的用户不能访问新接口，即使拥有数据仓库权限。 */
-    @Test
-    public void shouldRejectUserWithoutReportPermission() {
         for (List<UserAuthVo> permissionList : Arrays.asList(Collections.<UserAuthVo>emptyList(),
                 Collections.singletonList(new UserAuthVo(USER_UUID, DATA_WAREHOUSE_BASE.class.getSimpleName())))) {
             grants = permissionList;
             for (PrivateApiComponentBase api : apis()) {
-                assertThrows(PermissionDeniedException.class, () -> validateAuth(api));
+                validateAuth(api);
+                AuthAction[] actions = api.getClass().getAnnotationsByType(AuthAction.class);
+                assertEquals(1, actions.length);
+                assertEquals(NoAuth.class, actions[0].action());
             }
         }
     }
 
-    /** 迁移后实现属于租户模块，共享权限仍保留原报表权限标识与展示元数据。 */
+    /** 处理器迁移不改变租户 API 的路径、国际化名称和可选类型参数元数据。 */
     @Test
-    public void shouldPreservePermissionMetadataAndTenantOwnership() {
-//        REPORT_BASE permission = new REPORT_BASE();
-//        assertEquals("neatlogic.framework.auth.label.REPORT_BASE", permission.getClass().getName());
-//        assertEquals("REPORT_BASE", permission.getAuthName());
-//        assertEquals("auth.report_base.name", permission.getAuthDisplayName());
-//        assertEquals("auth.report_base.description", permission.getAuthIntroduction());
-//        assertEquals("report", permission.getAuthGroup());
-//        assertEquals("report", permission.getAuthModule());
-//        assertEquals(Integer.valueOf(1), permission.getSort());
-        for (PrivateApiComponentBase api : apis()) {
+    public void shouldPreserveApiMetadataAndTenantOwnership() throws Exception {
+        String[] tokens = {"dashboard/datasource/list", "dashboard/datasource/get", "dashboard/datasource/data/search"};
+        String[] names = {"nmtadd.dashboarddatasource.list", "nmtadd.dashboarddatasource.get", "nmtadd.dashboarddatasource.searchdata"};
+        List<PrivateApiComponentBase> components = apis();
+        for (int i = 0; i < components.size(); i++) {
+            PrivateApiComponentBase api = components.get(i);
             assertEquals("neatlogic.module.tenant.api.dashboard.datasource", api.getClass().getPackage().getName());
+            assertEquals(tokens[i], api.getToken());
+            assertEquals(names[i], api.getName());
+            Method method = api.getClass().getMethod("myDoService", JSONObject.class);
+            assertEquals(names[i], method.getAnnotation(Description.class).desc());
+            Param type = Arrays.stream(method.getAnnotation(Input.class).value())
+                    .filter(param -> "datasourceType".equals(param.name())).findFirst().orElse(null);
+            assertNotNull(type);
+            assertFalse(type.isRequired());
+            assertEquals("nmtadd.dashboarddatasource.type", type.desc());
         }
-        assertEquals("neatlogic.module.tenant.service.dashboard", DashboardDatasourceService.class.getPackage().getName());
-        assertEquals("neatlogic.module.tenant.service.dashboard", DashboardDatasourceServiceImpl.class.getPackage().getName());
-        assertEquals("neatlogic.module.tenant.exception.dashboard", DashboardDatasourceTypeNotSupportedException.class.getPackage().getName());
     }
 
     /** 使用真实注册器验证租户归属和新路径，并完整恢复被注册器修改的全局缓存。 */
@@ -140,7 +151,7 @@ public class DashboardDatasourceApiTest {
     public void shouldRegisterDashboardApisUnderTenantModule() {
         List<PrivateApiComponentBase> components = apis();
         Map<String, IApiComponent> originalComponents = new HashMap<>(PrivateApiComponentFactory.getComponentMap());
-        Map<String, ApiHandlerVo> originalHandlers = new HashMap<>(PrivateApiComponentFactory.getApiHandlerMap());
+        Map<String, ApiHandlerVo> originalApiHandlers = new HashMap<>(PrivateApiComponentFactory.getApiHandlerMap());
         List<ApiHandlerVo> originalHandlerList = new ArrayList<>(PrivateApiComponentFactory.getApiHandlerList());
         Map<String, ApiVo> originalApis = new HashMap<>(PrivateApiComponentFactory.getApiMap());
         List<ApiVo> originalApiList = new ArrayList<>(PrivateApiComponentFactory.getApiList());
@@ -148,13 +159,9 @@ public class DashboardDatasourceApiTest {
         String[] oldTokens = {"report/statement/datasource/list", "report/statement/datasource/get",
                 "report/statement/datasource/data/search"};
         for (PrivateApiComponentBase component : components) {
-            // 工厂遇到重复 Token 或缺失权限注解会退出 JVM，先给出可诊断的测试失败。
-            assertFalse(PrivateApiComponentFactory.getApiMap().containsKey(component.getToken()));
+            // 工厂遇到缺失权限注解会退出 JVM，先给出可诊断的测试失败。
             assertNotNull(component.getClass().getAnnotation(AuthAction.class));
             assertFalse(component.getToken().contains("{"));
-        }
-        for (String oldToken : oldTokens) {
-            assertFalse(PrivateApiComponentFactory.getApiMap().containsKey(oldToken));
         }
         // 只替代 Spring Bean 扫描，接口检查、处理器元数据与 Token 注册均执行框架真实逻辑。
         NeatLogicWebApplicationContext context = new NeatLogicWebApplicationContext() {
@@ -170,9 +177,16 @@ public class DashboardDatasourceApiTest {
         context.setId("tenant");
         context.setGroup("framework");
         try {
+            // 隔离既有注册，避免与其他测试的同名 Token 冲突；finally 恢复原内容。
+            PrivateApiComponentFactory.getComponentMap().clear();
+            PrivateApiComponentFactory.getApiHandlerMap().clear();
+            PrivateApiComponentFactory.getApiHandlerList().clear();
+            PrivateApiComponentFactory.getApiMap().clear();
+            PrivateApiComponentFactory.getApiList().clear();
+            PrivateApiComponentFactory.ExemptTokenMap.clear();
             new PrivateApiRegistrar().register(context);
-            assertEquals(originalApiList.size() + 3, PrivateApiComponentFactory.getApiList().size());
-            assertEquals(originalHandlerList.size() + 3, PrivateApiComponentFactory.getApiHandlerList().size());
+            assertEquals(3, PrivateApiComponentFactory.getApiList().size());
+            assertEquals(3, PrivateApiComponentFactory.getApiHandlerList().size());
             for (PrivateApiComponentBase component : components) {
                 ApiVo api = PrivateApiComponentFactory.getApiMap().get(component.getToken());
                 assertNotNull(api);
@@ -192,7 +206,7 @@ public class DashboardDatasourceApiTest {
             PrivateApiComponentFactory.getComponentMap().clear();
             PrivateApiComponentFactory.getComponentMap().putAll(originalComponents);
             PrivateApiComponentFactory.getApiHandlerMap().clear();
-            PrivateApiComponentFactory.getApiHandlerMap().putAll(originalHandlers);
+            PrivateApiComponentFactory.getApiHandlerMap().putAll(originalApiHandlers);
             PrivateApiComponentFactory.getApiHandlerList().clear();
             PrivateApiComponentFactory.getApiHandlerList().addAll(originalHandlerList);
             PrivateApiComponentFactory.getApiMap().clear();
@@ -204,41 +218,63 @@ public class DashboardDatasourceApiTest {
         }
     }
 
-    /** 三个接口使用固定 Token 并原样委托参数/响应，不嵌套 Status/Return。 */
+    /** 两种已注册类型分别处理三个操作，原始 JSONObject 与返回对象均不复制、不包装。 */
     @Test
-    public void shouldDelegateEachApiWithoutChangingContract() throws Exception {
-        List<PrivateApiComponentBase> apis = apis();
-        String[] tokens = {"dashboard/datasource/list", "dashboard/datasource/get", "dashboard/datasource/data/search"};
-        String[] methods = {"listDatasource", "getDatasource", "searchDatasourceData"};
-        String[] names = {"nmtadd.dashboarddatasource.list", "nmtadd.dashboarddatasource.get", "nmtadd.dashboarddatasource.searchdata"};
-        for (int i = 0; i < apis.size(); i++) {
-            PrivateApiComponentBase api = apis.get(i);
-            String expectedMethod = methods[i];
-            JSONObject params = new JSONObject();
-            params.put("datasourceType", "datawarehouse");
-            params.put("id", 10L);
-            params.put("dataSourceId", 10L);
-            Object response = i == 1 ? new DataSourceVo() : new JSONObject();
-            DashboardDatasourceService service = (DashboardDatasourceService) Proxy.newProxyInstance(
-                    DashboardDatasourceService.class.getClassLoader(), new Class<?>[]{DashboardDatasourceService.class},
-                    (proxy, method, args) -> {
-                        assertEquals(expectedMethod, method.getName());
-                        assertSame(params, args[0]);
-                        return response;
-                    });
-            Field serviceField = api.getClass().getDeclaredField("dashboardDatasourceService");
-            serviceField.setAccessible(true);
-            serviceField.set(api, service);
-            assertEquals(tokens[i], api.getToken());
-            assertEquals(names[i], api.getName());
-            assertEquals(names[i], api.getClass().getMethod("myDoService", JSONObject.class).getAnnotation(Description.class).desc());
-            assertSame(response, api.getClass().getMethod("myDoService", JSONObject.class).invoke(api, params));
-            Input input = api.getClass().getMethod("myDoService", JSONObject.class).getAnnotation(Input.class);
-            Param type = Arrays.stream(input.value()).filter(p -> "datasourceType".equals(p.name())).findFirst().orElse(null);
-            assertNotNull(type);
-            assertFalse(type.isRequired());
-            assertEquals("nmtadd.dashboarddatasource.type", type.desc());
+    public void shouldDispatchEachApiToRegisteredHandler() throws Exception {
+        List<PrivateApiComponentBase> components = apis();
+        for (RecordingHandler handler : Arrays.asList(datawarehouseHandler, extensionHandler)) {
+            RecordingHandler other = handler == datawarehouseHandler ? extensionHandler : datawarehouseHandler;
+            int otherCalls = other.calls;
+            for (int i = 0; i < components.size(); i++) {
+                JSONObject params = requestParams();
+                params.put("datasourceType", handler.getType());
+                JSONObject before = JSONObject.parseObject(params.toJSONString());
+                int calls = handler.calls;
+                assertSame(handler.response(i), invokeApi(components.get(i), params));
+                assertSame(params, handler.lastParams);
+                assertEquals(before, params);
+                assertEquals(OPERATIONS[i], handler.lastOperation);
+                assertEquals(calls + 1, handler.calls);
+                assertEquals(otherCalls, other.calls);
+            }
         }
+    }
+
+    /** 缺省、null、空字符串和空白类型均由工厂兼容旧大屏，API 不回写或改写参数。 */
+    @Test
+    public void shouldDefaultMissingAndBlankTypesForEachApi() throws Exception {
+        List<PrivateApiComponentBase> components = apis();
+        for (int variant = 0; variant < 4; variant++) {
+            for (int i = 0; i < components.size(); i++) {
+                JSONObject params = requestParams();
+                if (variant > 0) {
+                    params.put("datasourceType", new String[]{null, null, "", " \t\r\n"}[variant]);
+                }
+                Object originalType = params.get("datasourceType");
+                assertSame(datawarehouseHandler.response(i), invokeApi(components.get(i), params));
+                assertSame(params, datawarehouseHandler.lastParams);
+                assertEquals(OPERATIONS[i], datawarehouseHandler.lastOperation);
+                assertEquals(variant > 0, params.containsKey("datasourceType"));
+                assertEquals(originalType, params.get("datasourceType"));
+            }
+        }
+        assertEquals(12, datawarehouseHandler.calls);
+        assertEquals(0, extensionHandler.calls);
+    }
+
+    /** 未注册或拼写不匹配的非空类型直接报错，任何 Handler 都不得收到查询。 */
+    @Test
+    public void shouldRejectUnsupportedTypesBeforeQuerying() {
+        for (String type : new String[]{"integration", "unknown", " datawarehouse ", "DATAWAREHOUSE"}) {
+            for (PrivateApiComponentBase api : apis()) {
+                JSONObject params = requestParams();
+                params.put("datasourceType", type);
+                assertThrows(DashboardDatasourceTypeNotSupportedException.class, () -> invokeApi(api, params));
+                assertEquals(type, params.getString("datasourceType"));
+            }
+        }
+        assertEquals(0, datawarehouseHandler.calls);
+        assertEquals(0, extensionHandler.calls);
     }
 
     /** 使用框架真实权限入口，仅省略与本次权限规则无关的参数和 HTTP 处理。 */
@@ -255,8 +291,101 @@ public class DashboardDatasourceApiTest {
         }
     }
 
+    /** 调用真实 API 方法，并解包反射异常以校验业务异常类型。 */
+    private Object invokeApi(PrivateApiComponentBase api, JSONObject params) throws Exception {
+        try {
+            return api.getClass().getMethod("myDoService", JSONObject.class).invoke(api, params);
+        } catch (InvocationTargetException exception) {
+            if (exception.getCause() instanceof Exception) {
+                throw (Exception) exception.getCause();
+            }
+            throw exception;
+        }
+    }
+
+    /** 保留筛选、回显、排序、限制和分页等代表性参数，验证委托入口不改写协议。 */
+    private JSONObject requestParams() {
+        return JSONObject.parseObject("{\"moduleId\":\"autoexec\",\"keyword\":\"demo\",\"defaultValue\":[10],"
+                + "\"idList\":[10],\"isActive\":1,\"id\":10,\"dataSourceId\":10,"
+                + "\"conditionList\":[{\"fieldId\":1,\"expression\":\"eq\",\"valueList\":[\"demo\"]}],"
+                + "\"sortList\":[{\"fieldId\":2,\"sortType\":\"desc\"}],"
+                + "\"limit\":0,\"isExpired\":0,\"currentPage\":2,\"pageSize\":20}");
+    }
+
+    /** 仅替代模块 Bean 扫描，注册流程执行父类对真实 ContextRefreshedEvent 的处理。 */
+    private void registerHandler(String moduleId, IDashboardDatasourceHandler handler) {
+        NeatLogicWebApplicationContext context = new NeatLogicWebApplicationContext() {
+            @Override
+            public <T> Map<String, T> getBeansOfType(Class<T> type) {
+                Map<String, T> beans = new LinkedHashMap<>();
+                beans.put("dashboardDatasourceHandler", type.cast(handler));
+                return beans;
+            }
+        };
+        context.setId(moduleId);
+        new DashboardDatasourceHandlerFactory().onApplicationEvent(new ContextRefreshedEvent(context));
+    }
+
     /** 返回本次新增的三个真实接口实例。 */
     private List<PrivateApiComponentBase> apis() {
         return Arrays.asList(new ListDashboardDatasourceApi(), new GetDashboardDatasourceApi(), new SearchDashboardDatasourceDataApi());
+    }
+
+    /** 测试替身只记录委托并返回独立对象，扩展类型不会引入真实集成取数实现。 */
+    private static class RecordingHandler implements IDashboardDatasourceHandler {
+        private final String type;
+        private final JSONObject listResponse = new JSONObject();
+        private final DataSourceVo detailResponse = new DataSourceVo();
+        private final JSONObject dataResponse = new JSONObject();
+        private int calls;
+        private String lastOperation;
+        private JSONObject lastParams;
+
+        /** 为每个注册类型建立独立 Handler 实例。 */
+        private RecordingHandler(String type) {
+            this.type = type;
+        }
+
+        /** 声明可供真实工厂选择的测试类型。 */
+        @Override
+        public String getType() {
+            return type;
+        }
+
+        /** 记录列表操作并返回原始响应实例。 */
+        @Override
+        public JSONObject listDatasource(JSONObject params) {
+            record("listDatasource", params);
+            return listResponse;
+        }
+
+        /** 记录详情操作并保持 DataSourceVo 返回契约。 */
+        @Override
+        public DataSourceVo getDatasource(JSONObject params) {
+            record("getDatasource", params);
+            return detailResponse;
+        }
+
+        /** 记录动态取数操作并返回原始响应实例。 */
+        @Override
+        public JSONObject searchDatasourceData(JSONObject params) {
+            record("searchDatasourceData", params);
+            return dataResponse;
+        }
+
+        /** 累计调用用于确认未知类型拒绝和不同 Handler 之间无串用。 */
+        private void record(String operation, JSONObject params) {
+            calls++;
+            lastOperation = operation;
+            lastParams = params;
+        }
+
+        /** 按三个 API 的固定顺序获取预期响应实例。 */
+        private Object response(int index) {
+            if (index == 0) {
+                return listResponse;
+            }
+            return index == 1 ? detailResponse : dataResponse;
+        }
     }
 }
