@@ -29,6 +29,7 @@ import neatlogic.framework.file.core.FileTypeHandlerFactory;
 import neatlogic.framework.file.core.IFileTypeHandler;
 import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
+import neatlogic.framework.file.dto.FileDownloadVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
@@ -43,6 +44,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Service
@@ -94,20 +97,23 @@ public class DownloadFileApi extends PrivateBinaryStreamApiComponentBase {
                 IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
                 if (fileTypeHandler != null) {
                     if (Objects.equals(userUuid, fileVo.getUserUuid()) || fileTypeHandler.valid(userUuid, fileVo, paramObj)) {
-                        try (InputStream input = FileUtil.getData(fileVo.getPath())) {
+                        // 下载内容和元信息来自同一次存储请求，关闭结果时同时释放文件流。
+                        try (FileDownloadVo download = FileUtil.getDownloadData(fileVo.getPath())) {
+                            InputStream input = download == null ? null : download.getInputStream();
                             if (input != null) {
-                                response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(fileVo.getName()) + "\"");
+                                // 使用有效远端文件名，完整保留后缀；编码分号、引号等以兼容现有前端解析。
+                                String fileName = StringUtils.defaultIfBlank(download.getFileName(), fileVo.getName());
+                                response.setHeader("Content-Disposition", " attachment; filename=\""
+                                        + URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20") + "\"");
                                 if ("image".equalsIgnoreCase(fileVo.getType())) {
                                     // 通用下载同样校验图片，防止历史污染记录绕过图片专用入口。
                                     try (ImageFileSnapshot image = ImageFileSnapshot.createForDownload(input)) {
                                         image.writeTo(response);
                                     }
                                 } else {
-                                    if (StringUtils.isBlank(fileVo.getContentType())) {
-                                        response.setContentType("application/octet-stream");
-                                    } else {
-                                        response.setContentType(fileVo.getContentType());
-                                    }
+                                    // 远端可能返回 ZIP 等转换格式，缺少元信息时保留原附件的媒体类型。
+                                    String contentType = StringUtils.defaultIfBlank(download.getContentType(), fileVo.getContentType());
+                                    response.setContentType(StringUtils.defaultIfBlank(contentType, "application/octet-stream"));
                                     try (ServletOutputStream output = response.getOutputStream()) {
                                         IOUtils.copyLarge(input, output);
                                         output.flush();
