@@ -55,9 +55,13 @@ public class DownloadImageApi extends PrivateBinaryStreamApiComponentBase {
         return "nmtaf.downloadimageapi.getname";
     }
 
+    /**
+     * 图片下载支持匿名访问，但token需要加上签名
+     * @return
+     */
     @Override
     public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
-        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITHOUT_ENCRYPTION;
+        return ApiAnonymousAccessSupportEnum.ANONYMOUS_ACCESS_WITH_ENCRYPTION;
     }
 
     @Override
