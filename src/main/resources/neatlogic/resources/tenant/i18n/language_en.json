@@ -258,6 +258,16 @@
       }
     }
   },
+  "nmtadd": {
+    "dashboarddatasource": {
+      "defaultvalue": "Selected values for option display",
+      "get": "Get dashboard data source",
+      "idlist": "Data source ID list",
+      "list": "List dashboard data sources",
+      "searchdata": "Search dashboard data source data",
+      "type": "Data source type; missing or blank defaults to datawarehouse, the only currently supported type"
+    }
+  },
   "nmtae": {
     "extramenuapi": {
       "getname": "Obtain the interface for adding menu lists with permissions"
@@ -1082,6 +1092,11 @@
     },
     "worktimesaveapi": {
       "getname": "Save working time window information"
+    }
+  },
+  "nmted": {
+    "dashboarddatasourcetypenotsupportedexception": {
+      "message": "Unsupported dashboard data source type: {0}"
     }
   },
   "nmtef": {

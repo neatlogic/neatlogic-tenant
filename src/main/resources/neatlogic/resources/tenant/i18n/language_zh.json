@@ -258,6 +258,16 @@
       }
     }
   },
+  "nmtadd": {
+    "dashboarddatasource": {
+      "defaultvalue": "选中值回显列表",
+      "get": "获取大屏数据源详情",
+      "idlist": "数据源 ID 列表",
+      "list": "查询大屏数据源列表",
+      "searchdata": "查询大屏数据源数据",
+      "type": "数据源类型，缺省或空白按 datawarehouse 处理，当前仅支持 datawarehouse"
+    }
+  },
   "nmtae": {
     "extramenuapi": {
       "getname": "获取拥有权限的附加菜单列表接口"
@@ -1082,6 +1092,11 @@
     },
     "worktimesaveapi": {
       "getname": "保存工作时间窗口信息"
+    }
+  },
+  "nmted": {
+    "dashboarddatasourcetypenotsupportedexception": {
+      "message": "不支持的大屏数据源类型：{0}"
     }
   },
   "nmtef": {
