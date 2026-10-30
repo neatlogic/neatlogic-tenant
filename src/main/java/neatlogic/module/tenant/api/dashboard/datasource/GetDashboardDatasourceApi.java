@@ -33,10 +33,10 @@ public class GetDashboardDatasourceApi extends PrivateApiComponentBase {
         return null;
     }
 
-    /** 详情仅声明 fieldList 字段列表，返回通用 JSON；缺省类型和未知类型由工厂统一处理。 */
+    /** 详情使用字符串 ID 兼容集成 UUID 和原数值 ID，返回通用 fieldList；来源类型由工厂处理。 */
     @Input({
             @Param(name = "datasourceType", type = ApiParamType.STRING, desc = "nmtadd.dashboarddatasource.type"),
-            @Param(name = "id", type = ApiParamType.LONG, desc = "common.id", isRequired = true)
+            @Param(name = "id", type = ApiParamType.STRING, desc = "common.id", isRequired = true)
     })
     @Output({@Param(name = "fieldList", type = ApiParamType.JSONARRAY, desc = "nmtadd.dashboarddatasource.fieldlist",
             help = "nmtadd.dashboarddatasource.fieldlisthelp")})

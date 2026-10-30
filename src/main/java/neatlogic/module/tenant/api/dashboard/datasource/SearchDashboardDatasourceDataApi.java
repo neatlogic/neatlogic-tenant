@@ -6,6 +6,7 @@ import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
+import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -34,10 +35,10 @@ public class SearchDashboardDatasourceDataApi extends PrivateApiComponentBase {
         return null;
     }
 
-    /** 保留原查询参数和返回结构，缺省类型由工厂兼容旧大屏，未知类型明确拒绝。 */
+    /** 字符串 dataSourceId 同时接收集成 UUID 和原数值 ID，其余参数、返回结构及类型分发保持不变。 */
     @Input({
             @Param(name = "datasourceType", type = ApiParamType.STRING, desc = "nmtadd.dashboarddatasource.type"),
-            @Param(name = "dataSourceId", type = ApiParamType.LONG, desc = "nmtad.searchdatasourcedataapi.input.param.desc.datasourceid", isRequired = true),
+            @Param(name = "dataSourceId", type = ApiParamType.STRING, desc = "nmtad.searchdatasourcedataapi.input.param.desc.datasourceid", isRequired = true),
             @Param(name = "conditionList", type = ApiParamType.JSONARRAY, desc = "nmtad.searchdatasourcedataapi.input.param.desc.conditionlist"),
             @Param(name = "sortList", type = ApiParamType.JSONARRAY, desc = "nmtad.searchdatasourcedataapi.input.param.desc.sortlist"),
             @Param(name = "limit", type = ApiParamType.INTEGER, desc = "nmtad.searchdatasourcedataapi.input.param.desc.limit"),
@@ -48,7 +49,8 @@ public class SearchDashboardDatasourceDataApi extends PrivateApiComponentBase {
     @Output({@Param(explode = BasePageVo.class), @Param(name = "theadList", type = ApiParamType.JSONARRAY), @Param(name = "tbodyList", type = ApiParamType.JSONARRAY)})
     @Description(desc = "nmtadd.dashboarddatasource.searchdata")
     @Override
-    public Object myDoService(JSONObject jsonObj) {
+    public Object myDoService(JSONObject jsonObj) throws PermissionDeniedException {
+        // 保留来源执行权限异常类型，交由调度器返回原有权限拒绝响应。
         return DashboardDatasourceHandlerFactory.getHandler(jsonObj.getString("datasourceType")).searchDatasourceData(jsonObj);
     }
 }

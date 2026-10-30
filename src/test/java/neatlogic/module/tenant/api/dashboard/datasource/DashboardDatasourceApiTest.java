@@ -159,6 +159,15 @@ public class DashboardDatasourceApiTest {
         assertEquals("nmtadd.dashboarddatasource.fieldlist", fieldList.desc());
         assertEquals("nmtadd.dashboarddatasource.fieldlisthelp", fieldList.help());
         assertEquals(NotDefined.class, fieldList.explode());
+        // 列表同样只声明通用 JSON 选项，不把数值 ID DTO 作为集成 UUID 的输出契约。
+        Method listMethod = ListDashboardDatasourceApi.class.getMethod("myDoService", JSONObject.class);
+        Param options = Arrays.stream(listMethod.getAnnotation(Output.class).value())
+                .filter(param -> "tbodyList".equals(param.name())).findFirst().orElse(null);
+        assertNotNull(options);
+        assertEquals(ApiParamType.JSONARRAY, options.type());
+        assertEquals("nmtadd.dashboarddatasource.tbodylist", options.desc());
+        assertEquals("nmtadd.dashboarddatasource.tbodylisthelp", options.help());
+        assertEquals(NotDefined.class, options.explode());
     }
 
     /** 使用真实注册器验证租户归属和新路径，并完整恢复被注册器修改的全局缓存。 */
@@ -253,6 +262,42 @@ public class DashboardDatasourceApiTest {
                 assertEquals(otherCalls, other.calls);
             }
         }
+    }
+
+    /** 真实输入校验同时接收 UUID、数字和数字字符串，再将原 JSONObject 交给对应 Handler。 */
+    @Test
+    public void shouldAcceptUuidAndNumericDatasourceIds() throws Exception {
+        RecordingHandler integration = new RecordingHandler("integration");
+        registerHandler("framework", integration);
+        String uuid = "91f50f88-cc4a-42f3-8538-bcb57be0302c";
+        for (Object id : new Object[]{uuid, 101L, "101"}) {
+            RecordingHandler handler = uuid.equals(id) ? integration : datawarehouseHandler;
+            for (int i = 1; i < 3; i++) {
+                PrivateApiComponentBase api = apis().get(i);
+                String parameter = i == 1 ? "id" : "dataSourceId";
+                JSONObject params = new JSONObject();
+                params.put("datasourceType", handler.getType());
+                params.put(parameter, id);
+                Method method = api.getClass().getMethod("myDoService", JSONObject.class);
+                Param idParam = Arrays.stream(method.getAnnotation(Input.class).value())
+                        .filter(param -> parameter.equals(param.name())).findFirst().orElse(null);
+                assertNotNull(idParam);
+                assertEquals(ApiParamType.STRING, idParam.type());
+                assertTrue(idParam.isRequired());
+                // 执行真实框架 STRING 校验；旧 JSON 数字也能规范为字符串，原 Handler 的 getLong 仍可读取。
+                api.validInput(method, params);
+                assertEquals(String.valueOf(id), params.get(parameter));
+                assertSame(handler.response(i), invokeApi(api, params));
+                assertSame(params, handler.lastParams);
+                assertEquals(OPERATIONS[i], handler.lastOperation);
+                if (handler == datawarehouseHandler) {
+                    assertEquals(Long.valueOf(101L), handler.lastParams.getLong(parameter));
+                }
+            }
+        }
+        assertEquals(2, integration.calls);
+        assertEquals(4, datawarehouseHandler.calls);
+        assertEquals(0, extensionHandler.calls);
     }
 
     /** 缺省、null、空字符串和空白类型均由工厂兼容旧大屏，API 不回写或改写参数。 */

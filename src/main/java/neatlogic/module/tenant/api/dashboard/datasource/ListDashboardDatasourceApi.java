@@ -6,7 +6,6 @@ import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
 import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
-import neatlogic.framework.datawarehouse.dto.DataSourceVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -46,7 +45,9 @@ public class ListDashboardDatasourceApi extends PrivateApiComponentBase {
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "common.currentpage"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "common.pagesize")
     })
-    @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", explode = DataSourceVo[].class)})
+    // 不展开数据仓库 DTO，列表选项以通用 id、label 兼容数值 ID 和集成 UUID。
+    @Output({@Param(explode = BasePageVo.class), @Param(name = "tbodyList", type = ApiParamType.JSONARRAY,
+            desc = "nmtadd.dashboarddatasource.tbodylist", help = "nmtadd.dashboarddatasource.tbodylisthelp")})
     @Description(desc = "nmtadd.dashboarddatasource.list")
     @Override
     public Object myDoService(JSONObject jsonObj) {
