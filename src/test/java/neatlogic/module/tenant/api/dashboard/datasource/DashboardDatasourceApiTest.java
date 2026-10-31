@@ -10,6 +10,7 @@ import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.bootstrap.NeatLogicWebApplicationContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.dto.ValueTextVo;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dashboard.datasource.core.DashboardDatasourceHandlerFactory;
 import neatlogic.framework.dashboard.datasource.core.IDashboardDatasourceHandler;
@@ -22,6 +23,8 @@ import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.annotation.NotDefined;
 import neatlogic.framework.restful.annotation.Output;
 import neatlogic.framework.restful.annotation.Description;
+import neatlogic.framework.restful.annotation.OperationType;
+import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.ApiValidateAndHelpBase;
 import neatlogic.framework.restful.core.IApiComponent;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -173,7 +176,8 @@ public class DashboardDatasourceApiTest {
     /** 使用真实注册器验证租户归属和新路径，并完整恢复被注册器修改的全局缓存。 */
     @Test
     public void shouldRegisterDashboardApisUnderTenantModule() {
-        List<PrivateApiComponentBase> components = apis();
+        List<PrivateApiComponentBase> components = new ArrayList<>(apis());
+        components.add(new ListDashboardDatasourceTypeApi());
         Map<String, IApiComponent> originalComponents = new HashMap<>(PrivateApiComponentFactory.getComponentMap());
         Map<String, ApiHandlerVo> originalApiHandlers = new HashMap<>(PrivateApiComponentFactory.getApiHandlerMap());
         List<ApiHandlerVo> originalHandlerList = new ArrayList<>(PrivateApiComponentFactory.getApiHandlerList());
@@ -209,8 +213,8 @@ public class DashboardDatasourceApiTest {
             PrivateApiComponentFactory.getApiList().clear();
             PrivateApiComponentFactory.ExemptTokenMap.clear();
             new PrivateApiRegistrar().register(context);
-            assertEquals(3, PrivateApiComponentFactory.getApiList().size());
-            assertEquals(3, PrivateApiComponentFactory.getApiHandlerList().size());
+            assertEquals(4, PrivateApiComponentFactory.getApiList().size());
+            assertEquals(4, PrivateApiComponentFactory.getApiHandlerList().size());
             for (PrivateApiComponentBase component : components) {
                 ApiVo api = PrivateApiComponentFactory.getApiMap().get(component.getToken());
                 assertNotNull(api);
@@ -226,7 +230,7 @@ public class DashboardDatasourceApiTest {
                 assertFalse(PrivateApiComponentFactory.getApiMap().containsKey(oldToken));
             }
         } finally {
-            // 三个固定路径不写正则索引；其余会修改的索引和列表按原对象内容精确恢复。
+            // 四个固定路径不写正则索引；其余会修改的索引和列表按原对象内容精确恢复。
             PrivateApiComponentFactory.getComponentMap().clear();
             PrivateApiComponentFactory.getComponentMap().putAll(originalComponents);
             PrivateApiComponentFactory.getApiHandlerMap().clear();
@@ -337,6 +341,71 @@ public class DashboardDatasourceApiTest {
         assertEquals(0, extensionHandler.calls);
     }
 
+    /** 类型列表无须指定来源，严格返回 tbodyList 与 value/text，不调用数据源的任何查询方法。 */
+    @Test
+    public void shouldListDatasourceTypesWithoutQueryingSources() {
+        RecordingHandler integration = new RecordingHandler("integration");
+        registerHandler("framework", integration);
+        JSONObject params = new JSONObject().fluentPut("pageSize", 100);
+        JSONObject before = JSONObject.parseObject(params.toJSONString());
+        JSONObject result = new ListDashboardDatasourceTypeApi().myDoService(params);
+        assertEquals(Collections.singleton("tbodyList"), result.keySet());
+        JSONArray options = result.getJSONArray("tbodyList");
+        assertEquals(3, options.size());
+        assertEquals(Arrays.asList("datawarehouse", "integration", "test-extension"),
+                Arrays.asList(options.getJSONObject(0).getString("value"), options.getJSONObject(1).getString("value"),
+                        options.getJSONObject(2).getString("value")));
+        for (int i = 0; i < options.size(); i++) {
+            JSONObject option = options.getJSONObject(i);
+            assertEquals(2, option.size());
+            assertTrue(option.containsKey("value"));
+            assertTrue(option.containsKey("text"));
+        }
+        assertEquals("数据仓库", options.getJSONObject(0).getString("text"));
+        assertEquals("集成", options.getJSONObject(1).getString("text"));
+        assertEquals(before, params);
+        assertEquals(0, datawarehouseHandler.calls);
+        assertEquals(0, extensionHandler.calls);
+        assertEquals(0, integration.calls);
+    }
+
+    /** 没有注册类型时保留空数组契约，不补造类型或分页属性。 */
+    @Test
+    public void shouldReturnEmptyTypeListWhenNoHandlerRegistered() {
+        handlers.clear();
+        JSONObject result = new ListDashboardDatasourceTypeApi().myDoService(new JSONObject());
+        assertEquals(Collections.singleton("tbodyList"), result.keySet());
+        assertTrue(result.get("tbodyList") instanceof List);
+        assertTrue(result.getJSONArray("tbodyList").isEmpty());
+        assertEquals("{\"tbodyList\":[]}", result.toJSONString());
+    }
+
+    /** 新接口与既有入口保持 NoAuth，元数据描述对象数组中的 value/text 并归属 tenant。 */
+    @Test
+    public void shouldDeclareTypeListMetadataAndNoAuth() throws Exception {
+        ListDashboardDatasourceTypeApi api = new ListDashboardDatasourceTypeApi();
+        assertEquals("dashboard/datasource/type/list", api.getToken());
+        assertEquals("nmtadd.dashboarddatasource.typelist", api.getName());
+        assertEquals("neatlogic.module.tenant.api.dashboard.datasource", api.getClass().getPackage().getName());
+        assertNull(api.getConfig());
+        assertFalse(AuthActionChecker.check(DATA_WAREHOUSE_BASE.class));
+        validateAuth(api);
+        assertEquals(NoAuth.class, api.getClass().getAnnotation(AuthAction.class).action());
+        assertEquals(OperationTypeEnum.SEARCH, api.getClass().getAnnotation(OperationType.class).type());
+        Method method = api.getClass().getMethod("myDoService", JSONObject.class);
+        assertEquals(JSONObject.class, method.getReturnType());
+        assertEquals(0, method.getAnnotation(Input.class).value().length);
+        assertEquals(api.getName(), method.getAnnotation(Description.class).desc());
+        Param[] output = method.getAnnotation(Output.class).value();
+        assertEquals(1, output.length);
+        assertEquals("tbodyList", output[0].name());
+        assertEquals(ApiParamType.JSONARRAY, output[0].type());
+        assertEquals(ValueTextVo[].class, output[0].explode());
+        assertEquals("nmtadd.dashboarddatasource.typeoptions", output[0].desc());
+        assertEquals("nmtadd.dashboarddatasource.typeoptionshelp", output[0].help());
+        assertEquals(2, ValueTextVo.class.getDeclaredFields().length);
+    }
+
     /** 使用框架真实权限入口，仅省略与本次权限规则无关的参数和 HTTP 处理。 */
     private void validateAuth(PrivateApiComponentBase api) throws Exception {
         Method method = ApiValidateAndHelpBase.class.getDeclaredMethod("validAuth", Class.class);
@@ -420,6 +489,12 @@ public class DashboardDatasourceApiTest {
         @Override
         public String getType() {
             return type;
+        }
+
+        /** 类型选项只读取名称，不应执行任何查询操作。 */
+        @Override
+        public String getTypeName() {
+            return "datawarehouse".equals(type) ? "数据仓库" : "integration".equals(type) ? "集成" : type;
         }
 
         /** 记录列表操作并返回原始响应实例。 */

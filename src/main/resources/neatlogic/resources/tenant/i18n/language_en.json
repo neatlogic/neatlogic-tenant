@@ -269,7 +269,10 @@
       "searchdata": "Search dashboard data source data",
       "tbodylist": "Dashboard data source options",
       "tbodylisthelp": "Each option contains id and label: data warehouse IDs are numeric, integration IDs are UUID strings, and label is the data source display name.",
-      "type": "Data source type: datawarehouse or integration; missing or blank defaults to datawarehouse"
+      "type": "Data source type: datawarehouse or integration; missing or blank defaults to datawarehouse",
+      "typelist": "List dashboard datasource types",
+      "typeoptions": "Dashboard datasource type options",
+      "typeoptionshelp": "Each item contains value (the registered datasource type) and text (the type name in the current language), without pagination."
     }
   },
   "nmtae": {

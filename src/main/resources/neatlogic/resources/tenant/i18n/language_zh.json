@@ -269,7 +269,10 @@
       "searchdata": "查询大屏数据源数据",
       "tbodylist": "大屏数据源选项列表",
       "tbodylisthelp": "每项包含 id、label：数据仓库 id 为数值 ID，集成 id 为 UUID 字符串，label 为数据源显示名称。",
-      "type": "数据源类型，支持 datawarehouse、integration，缺省或空白按 datawarehouse 处理"
+      "type": "数据源类型，支持 datawarehouse、integration，缺省或空白按 datawarehouse 处理",
+      "typelist": "查询大屏数据源类型列表",
+      "typeoptions": "大屏数据源类型选项列表",
+      "typeoptionshelp": "每项包含 value（已注册的数据源类型标识）和 text（当前语言的类型名称），不返回分页信息。"
     }
   },
   "nmtae": {
