@@ -232,10 +232,6 @@
     },
     "searchdatasourcedataapi": {
       "getname": "Query Data Source Data",
-      "header": {
-        "expiretime": "Expiration Time",
-        "inserttime": "Sync Time"
-      },
       "input": {
         "param": {
           "desc": {

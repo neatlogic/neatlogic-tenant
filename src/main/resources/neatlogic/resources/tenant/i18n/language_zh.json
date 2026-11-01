@@ -232,10 +232,6 @@
     },
     "searchdatasourcedataapi": {
       "getname": "查询数据源数据",
-      "header": {
-        "expiretime": "过期时间",
-        "inserttime": "同步时间"
-      },
       "input": {
         "param": {
           "desc": {
