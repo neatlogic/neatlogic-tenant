@@ -261,10 +261,15 @@ public class SelfCheckServiceImpl implements SelfCheckService {
     /** 按正式链路调试单个未保存检查项，并保留审计记录。 */
     @Override
     public SelfCheckRunItemVo testItem(JSONObject paramObj) {
-        JSONObject itemBaseObj = new JSONObject(paramObj);
+        // JSONObject 的 Map 构造器共享原映射，先复制以免移除配置字段时丢失原请求参数。
+        JSONObject itemBaseObj = new JSONObject(new HashMap<>(paramObj));
         itemBaseObj.remove("requestParam");
         SelfCheckScenarioItemVo itemVo = itemBaseObj.toJavaObject(SelfCheckScenarioItemVo.class);
         itemVo.setRequestParamObj(paramObj.getJSONObject("requestParam"));
+        // 未保存的单项调试不经过场景排序，缺省为第一项以满足执行快照的非空约束。
+        if (itemVo.getSort() == null) {
+            itemVo.setSort(1);
+        }
         fillAndValidateItem(itemVo);
         SelfCheckRunVo runVo = new SelfCheckRunVo();
         runVo.setId(null);

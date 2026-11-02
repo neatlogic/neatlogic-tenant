@@ -81,7 +81,7 @@ public class NetworkImageDownloader {
                         }
                         HttpEntity entity = response.getEntity();
                         Header typeHeader = response.getFirstHeader("Content-Type");
-                        // 声明类型仅用于选择 JPEG/PNG 校验器，随后仍需校验实际图片内容。
+                        // 声明类型仅用于选择 JPEG/PNG/GIF 校验器，随后仍需校验实际图片内容。
                         String contentType = NetworkImageSanitizer.normalizeContentType(typeHeader == null ? null : typeHeader.getValue());
                         if (entity == null) {
                             throw new EmptyFileException();
@@ -198,12 +198,13 @@ public class NetworkImageDownloader {
         }
         int extensionIndex = name.lastIndexOf('.');
         if (extensionIndex <= 0) {
-            name += "image/jpeg".equals(contentType) ? ".jpg" : ".png";
+            name += "image/jpeg".equals(contentType) ? ".jpg" : "image/gif".equals(contentType) ? ".gif" : ".png";
         } else {
             // 已有扩展名必须与规范化格式相符，不能通过改名掩盖声明不一致。
             String extension = name.substring(extensionIndex + 1).toLowerCase(Locale.ROOT);
             boolean matches = "image/jpeg".equals(contentType)
-                    ? "jpg".equals(extension) || "jpeg".equals(extension) : "png".equals(extension);
+                    ? "jpg".equals(extension) || "jpeg".equals(extension)
+                    : "image/gif".equals(contentType) ? "gif".equals(extension) : "png".equals(extension);
             if (!matches) {
                 throw new NetworkImageFormatMismatchException();
             }
