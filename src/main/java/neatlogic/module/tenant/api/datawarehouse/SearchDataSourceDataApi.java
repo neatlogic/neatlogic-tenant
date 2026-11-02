@@ -39,7 +39,7 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "datawarehouse/datasource/data/search";//
+        return "datawarehouse/datasource/data/search";
     }
 
     @Override

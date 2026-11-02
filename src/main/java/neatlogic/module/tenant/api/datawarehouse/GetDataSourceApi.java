@@ -35,7 +35,7 @@ public class GetDataSourceApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "datawarehouse/datasource/get";//
+        return "datawarehouse/datasource/get";
     }
 
     @Override
