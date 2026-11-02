@@ -18,18 +18,14 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import neatlogic.framework.datawarehouse.dto.DataSourceVo;
+import neatlogic.framework.datawarehouse.service.DataSourceService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.util.TableResultUtil;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_BASE.class)
@@ -37,7 +33,7 @@ import java.util.List;
 public class SearchDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
+    private DataSourceService dataSourceService;
 
     @Override
     public String getToken() {
@@ -63,18 +59,8 @@ public class SearchDataSourceApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         DataSourceVo reportDataSourceVo = JSON.toJavaObject(jsonObj, DataSourceVo.class);
-        if (CollectionUtils.isNotEmpty(reportDataSourceVo.getDefaultValue())) {
-            List<Long> idList = new ArrayList<>();
-            for (int i = 0; i < reportDataSourceVo.getDefaultValue().size(); i++) {
-                idList.add(reportDataSourceVo.getDefaultValue().getLongValue(i));
-            }
-            reportDataSourceVo.setIdList(idList);
-        }
-        List<DataSourceVo> reportDataSourceList = reportDataSourceMapper.searchDataSource(reportDataSourceVo);
-        if (CollectionUtils.isNotEmpty(reportDataSourceList)) {
-            reportDataSourceVo.setRowNum(reportDataSourceMapper.searchDataSourceCount(reportDataSourceVo));
-        }
-        return TableResultUtil.getResult(reportDataSourceList, reportDataSourceVo);
+        // 查询委托公共数据源服务，回显转换和分页行为由服务统一保留。
+        return dataSourceService.searchDataSource(reportDataSourceVo);
     }
 
 }

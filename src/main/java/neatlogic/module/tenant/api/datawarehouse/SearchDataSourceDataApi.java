@@ -13,28 +13,20 @@
 package neatlogic.module.tenant.api.datawarehouse;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.dto.BasePageVo;
-import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceDataMapper;
-import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import neatlogic.framework.datawarehouse.dto.DataSourceDataVo;
-import neatlogic.framework.datawarehouse.dto.DataSourceFieldVo;
-import neatlogic.framework.datawarehouse.dto.DataSourceVo;
-import neatlogic.framework.datawarehouse.exceptions.DataSourceIsNotFoundException;
+import neatlogic.framework.datawarehouse.service.DataSourceService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.util.$;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
 
 @Service
 @AuthAction(action = DATA_WAREHOUSE_BASE.class)
@@ -42,9 +34,7 @@ import java.util.List;
 public class SearchDataSourceDataApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper reportDataSourceMapper;
-    @Resource
-    private DataWarehouseDataSourceDataMapper reportDataSourceDataMapper;
+    private DataSourceService dataSourceService;
 
 
     @Override
@@ -72,53 +62,8 @@ public class SearchDataSourceDataApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         DataSourceDataVo reportDataSourceDataVo = JSON.toJavaObject(jsonObj, DataSourceDataVo.class);
-        //去掉没有值的条件
-        //reportDataSourceDataVo.getConditionList().removeIf(d -> d.getValue() == null || StringUtils.isBlank(d.getValue().toString()));
-        DataSourceVo reportDataSourceVo = reportDataSourceMapper.getDataSourceById(reportDataSourceDataVo.getDataSourceId());
-        if (reportDataSourceVo == null) {
-            throw new DataSourceIsNotFoundException(reportDataSourceDataVo.getDataSourceId());
-        }
-        JSONObject returnObj = new JSONObject();
-        if (CollectionUtils.isNotEmpty(reportDataSourceVo.getFieldList())) {
-            reportDataSourceDataVo.setFieldList(reportDataSourceVo.getFieldList());
-            int rowNum = reportDataSourceDataMapper.searchDataSourceDataCount(reportDataSourceDataVo);
-            reportDataSourceDataVo.setRowNum(rowNum);
-            List<HashMap<String, Object>> resultList = reportDataSourceDataMapper.searchDataSourceData(reportDataSourceDataVo);
-
-            JSONArray headerList = new JSONArray();
-           /* JSONObject idHeadObj = new JSONObject();
-            idHeadObj.put("key", "id");
-            idHeadObj.put("title", "#");
-            headerList.add(idHeadObj);*/
-
-            for (DataSourceFieldVo fieldVo : reportDataSourceVo.getFieldList()) {
-                JSONObject headObj = new JSONObject();
-                headObj.put("key", "field_" + fieldVo.getId());
-                headObj.put("name", fieldVo.getName());
-                headObj.put("title", fieldVo.getLabel());
-                headerList.add(headObj);
-            }
-
-            JSONObject insertTimeHeadObj = new JSONObject();
-            insertTimeHeadObj.put("key", "insertTime");
-            insertTimeHeadObj.put("title", $.t("nmtad.searchdatasourcedataapi.header.inserttime"));
-            insertTimeHeadObj.put("type", "time");
-            headerList.add(insertTimeHeadObj);
-
-            JSONObject expiredTimeHeadObj = new JSONObject();
-            expiredTimeHeadObj.put("key", "expireTime");
-            expiredTimeHeadObj.put("title", $.t("nmtad.searchdatasourcedataapi.header.expiretime"));
-            expiredTimeHeadObj.put("type", "time");
-            headerList.add(expiredTimeHeadObj);
-
-            returnObj.put("currentPage", reportDataSourceDataVo.getCurrentPage());
-            returnObj.put("pageSize", reportDataSourceDataVo.getPageSize());
-            returnObj.put("pageCount", reportDataSourceDataVo.getPageCount());
-            returnObj.put("rowNum", reportDataSourceDataVo.getRowNum());
-            returnObj.put("theadList", headerList);
-            returnObj.put("tbodyList", resultList);
-        }
-        return returnObj;
+        // 查询委托公共数据源服务，条件、排序、限行与表头组装沿用原有规则。
+        return dataSourceService.searchDataSourceData(reportDataSourceDataVo);
     }
 
 }

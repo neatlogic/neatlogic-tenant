@@ -232,10 +232,6 @@
     },
     "searchdatasourcedataapi": {
       "getname": "Query Data Source Data",
-      "header": {
-        "expiretime": "Expiration Time",
-        "inserttime": "Sync Time"
-      },
       "input": {
         "param": {
           "desc": {
@@ -256,6 +252,23 @@
       "mydoservice": {
         "error": "Unable to find document with docID {0}"
       }
+    }
+  },
+  "nmtadd": {
+    "dashboarddatasource": {
+      "defaultvalue": "Selected values for option display",
+      "fieldlist": "Dashboard data source field list",
+      "fieldlisthelp": "Each field contains only id, label, type, isCondition, inputType and config; config is the original field control configuration object.",
+      "get": "Get dashboard data source",
+      "idlist": "Data source ID list",
+      "list": "List dashboard data sources",
+      "searchdata": "Search dashboard data source data",
+      "tbodylist": "Dashboard data source options",
+      "tbodylisthelp": "Each option contains id and label: data warehouse IDs are numeric, integration IDs are UUID strings, and label is the data source display name.",
+      "type": "Data source type: datawarehouse or integration; missing or blank defaults to datawarehouse",
+      "typelist": "List dashboard datasource types",
+      "typeoptions": "Dashboard datasource type options",
+      "typeoptionshelp": "Each item contains value (the registered datasource type) and text (the type name in the current language), without pagination."
     }
   },
   "nmtae": {

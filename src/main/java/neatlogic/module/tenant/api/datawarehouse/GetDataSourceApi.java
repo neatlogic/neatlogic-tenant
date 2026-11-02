@@ -16,8 +16,8 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.DATA_WAREHOUSE_BASE;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.datawarehouse.dao.mapper.DataWarehouseDataSourceMapper;
 import neatlogic.framework.datawarehouse.dto.DataSourceVo;
+import neatlogic.framework.datawarehouse.service.DataSourceService;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -31,7 +31,7 @@ import javax.annotation.Resource;
 public class GetDataSourceApi extends PrivateApiComponentBase {
 
     @Resource
-    private DataWarehouseDataSourceMapper dataSourceMapper;
+    private DataSourceService dataSourceService;
 
     @Override
     public String getToken() {
@@ -54,7 +54,8 @@ public class GetDataSourceApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         Long id = jsonObj.getLong("id");
-        return dataSourceMapper.getDataSourceById(id);
+        // 查询委托公共数据源服务，完整详情及不存在时的 null 返回保持原样。
+        return dataSourceService.getDataSourceById(id);
     }
 
 }

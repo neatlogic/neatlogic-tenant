@@ -232,10 +232,6 @@
     },
     "searchdatasourcedataapi": {
       "getname": "查询数据源数据",
-      "header": {
-        "expiretime": "过期时间",
-        "inserttime": "同步时间"
-      },
       "input": {
         "param": {
           "desc": {
@@ -256,6 +252,23 @@
       "mydoservice": {
         "error": "找不到docID为{0}的文档"
       }
+    }
+  },
+  "nmtadd": {
+    "dashboarddatasource": {
+      "defaultvalue": "选中值回显列表",
+      "fieldlist": "大屏数据源字段列表",
+      "fieldlisthelp": "字段列表中每项仅包含 id、label、type、isCondition、inputType、config 六个属性；config 为原字段控件配置对象。",
+      "get": "获取大屏数据源详情",
+      "idlist": "数据源 ID 列表",
+      "list": "查询大屏数据源列表",
+      "searchdata": "查询大屏数据源数据",
+      "tbodylist": "大屏数据源选项列表",
+      "tbodylisthelp": "每项包含 id、label：数据仓库 id 为数值 ID，集成 id 为 UUID 字符串，label 为数据源显示名称。",
+      "type": "数据源类型，支持 datawarehouse、integration，缺省或空白按 datawarehouse 处理",
+      "typelist": "查询大屏数据源类型列表",
+      "typeoptions": "大屏数据源类型选项列表",
+      "typeoptionshelp": "每项包含 value（已注册的数据源类型标识）和 text（当前语言的类型名称），不返回分页信息。"
     }
   },
   "nmtae": {
