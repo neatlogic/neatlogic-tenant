@@ -8,13 +8,13 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.auth.core.AuthBase;
 import neatlogic.framework.auth.core.AuthFactory;
+import neatlogic.framework.auth.core.AuthModule;
 import neatlogic.framework.auth.label.AUTHORITY_MODIFY;
 import neatlogic.framework.auth.label.USER_MODIFY;
 import neatlogic.framework.common.constvalue.systemuser.ISystemUser;
-import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
+import neatlogic.framework.common.constvalue.systemuser.SystemUserFactory;
 import neatlogic.framework.common.util.ModuleUtil;
-import neatlogic.framework.dto.module.ModuleVo;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
@@ -22,6 +22,7 @@ import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.RoleAuthVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
+import neatlogic.framework.dto.module.ModuleVo;
 import neatlogic.framework.exception.auth.AuthNotFoundException;
 import neatlogic.framework.exception.type.ParamIrregularException;
 import neatlogic.framework.exception.type.PermissionDeniedException;
@@ -270,6 +271,7 @@ public class AuthSystemUserApiTest {
     }
 
     /** 仅用于模拟模块对已有权限的包含授权，不加入生产权限声明。 */
+    @AuthModule("framework")
     public static class TEST_CODE_AUTH extends USER_MODIFY {
         /** 为两种注册身份模拟代码默认授权。 */
         @Override
