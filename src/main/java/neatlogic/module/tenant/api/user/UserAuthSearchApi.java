@@ -67,16 +67,6 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
     @Resource
     private TeamMapper teamMapper;
 
-    /**
-     * 是否支持匿名访问
-     *
-     * @return true false
-     */
-    @Override
-    public ApiAnonymousAccessSupportEnum supportAnonymousAccess() {
-        return super.supportAnonymousAccess();
-    }
-
     @Resource
     private RoleMapper roleMapper;
 
