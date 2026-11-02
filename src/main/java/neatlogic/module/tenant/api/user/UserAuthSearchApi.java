@@ -206,6 +206,10 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 }
             }
         }
+        // 直接授权先按原角色集合完成过滤，再统一计算和合并包含权限，写入返回对象后不再修改。
+        Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap = getIncludedAuthPathMap(
+                userAuthList, userRoleAuthList, teamRoleAuthList);
+        mergeIncludedAuths(userRoleAuthObj, includedAuthPathMap);
         returnObj.put("userAuthObj", userAuthObj);
         returnObj.put("userRoleAuthObj", userRoleAuthObj);
         List<UserAuthVo> codeAuthList = new ArrayList<>();
@@ -220,16 +224,54 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         }
         returnObj.put("userCodeAuthObj", userCodeAuthObj);
         // 来源组装独立于旧逻辑，在权限去重后仍保留每个角色、每个所属分组的来源。
-        // 页面直接授权已经生成，随后合并包含项不会把重复的直接授权从保存集合中滤掉。
+        // 来源仅复用已计算的包含链，不再传递或修改已写入返回对象的角色权限集合。
         returnObj.put("userRoleAuthSourcePathList", getRoleAuthSourcePathList(userAuthList, userRoleAuthList,
-                teamRoleAuthList, roleTeamUuidMap, userRoleAuthObj));
+                teamRoleAuthList, roleTeamUuidMap, includedAuthPathMap));
         return returnObj;
+    }
+
+    /** 按根权限编码排序并缓存包含链，数据库三类授权中的相同根只遍历一次。 */
+    private Map<String, Map<AuthBase, List<JSONObject>>> getIncludedAuthPathMap(List<UserAuthVo> userAuthList,
+                                                                            List<RoleAuthVo> directAuthList,
+                                                                            List<RoleAuthVo> teamAuthList) {
+        Set<String> roots = new TreeSet<>();
+        for (UserAuthVo auth : CollectionUtils.emptyIfNull(userAuthList)) {
+            roots.add(auth.getAuth());
+        }
+        for (RoleAuthVo auth : CollectionUtils.emptyIfNull(directAuthList)) {
+            roots.add(auth.getAuth());
+        }
+        for (RoleAuthVo auth : CollectionUtils.emptyIfNull(teamAuthList)) {
+            roots.add(auth.getAuth());
+        }
+        Map<String, Map<AuthBase, List<JSONObject>>> result = new TreeMap<>();
+        for (String rootName : roots) {
+            AuthBase root = AuthFactory.getAuthInstance(rootName);
+            if (root != null) {
+                result.put(rootName, getIncludeAuthPaths(root));
+            }
+        }
+        return result;
+    }
+
+    /** 写入返回字段前合并全部包含权限，沿用原有追加及去重顺序，不依赖来源资料是否完整。 */
+    private void mergeIncludedAuths(JSONObject userRoleAuthObj,
+                                    Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap) {
+        for (Map<AuthBase, List<JSONObject>> paths : includedAuthPathMap.values()) {
+            for (AuthBase target : paths.keySet()) {
+                userRoleAuthObj.computeIfAbsent(target.getAuthGroup(), key -> new JSONArray());
+                JSONArray auths = userRoleAuthObj.getJSONArray(target.getAuthGroup());
+                if (!auths.contains(target.getAuthName())) {
+                    auths.add(target.getAuthName());
+                }
+            }
+        }
     }
 
     /** 批量补充原始角色名称及结构化分组路径，展示文案由前端国际化处理。 */
     private JSONArray getRoleAuthSourcePathList(List<UserAuthVo> userAuthList, List<RoleAuthVo> directAuthList,
                                                List<RoleAuthVo> teamAuthList, Map<String, Set<String>> roleTeamUuidMap,
-                                               JSONObject userRoleAuthObj) {
+                                               Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap) {
         Set<String> roleUuidSet = new LinkedHashSet<>();
         for (RoleAuthVo auth : CollectionUtils.emptyIfNull(directAuthList)) {
             if (StringUtils.isNotBlank(auth.getRoleUuid())) {
@@ -281,8 +323,8 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 }
             }
         }
-        // 仅从数据库授权展开；代码默认授权仍完全由原来的userCodeAuthObj流程处理。
-        addIncludedAuthSources(userAuthList, directAuthList, teamAuthList, sources, userRoleAuthObj);
+        // 仅复用数据库授权的包含链生成来源；代码默认授权仍由userCodeAuthObj流程处理。
+        addIncludedAuthSources(userAuthList, directAuthList, teamAuthList, sources, includedAuthPathMap);
         // 原角色来源优先；包含来源按用户直接、直接角色、分组树顺序排列，根权限编码作稳定次序。
         Comparator<SourcePathVo> comparator = Comparator.comparing((SourcePathVo source) -> source instanceof IncludeSourcePathVo)
                 .thenComparing(source -> source.getRoleUuid() != null)
@@ -304,14 +346,12 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         return result;
     }
 
-    /** 独立展开数据库根权限；角色资料缺失也要回显包含权限，来源不足时由前端回退提示。 */
+    /** 从缓存包含链补充来源，角色资料缺失时不伪造说明，不再修改角色权限集合。 */
     private void addIncludedAuthSources(List<UserAuthVo> userAuthList, List<RoleAuthVo> directAuthList,
                                         List<RoleAuthVo> teamAuthList, Map<String, Map<String, List<SourcePathVo>>> sources,
-                                        JSONObject userRoleAuthObj) {
-        Set<String> roots = new TreeSet<>();
+                                        Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap) {
         Map<String, List<SourcePathVo>> rootSources = new HashMap<>();
         for (UserAuthVo auth : CollectionUtils.emptyIfNull(userAuthList)) {
-            roots.add(auth.getAuth());
             // 用户直接授权没有角色和分组信息，显式null字段继续由局部序列化配置保留。
             rootSources.computeIfAbsent(auth.getAuth(), key -> new ArrayList<>())
                     .add(new SourcePathVo(null, null, null, Collections.emptyList(), null));
@@ -319,7 +359,6 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         List<RoleAuthVo> roleAuths = new ArrayList<>(CollectionUtils.emptyIfNull(directAuthList));
         roleAuths.addAll(CollectionUtils.emptyIfNull(teamAuthList));
         for (RoleAuthVo auth : roleAuths) {
-            roots.add(auth.getAuth());
             // 此时sources仅含原角色来源，快照后再展开，避免把包含项当成新的数据库根权限。
             for (SourcePathVo source : sources.getOrDefault(auth.getAuthGroup(), Collections.emptyMap())
                     .getOrDefault(auth.getAuth(), Collections.emptyList())) {
@@ -328,18 +367,10 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 }
             }
         }
-        for (String rootName : roots) {
-            AuthBase root = AuthFactory.getAuthInstance(rootName);
-            if (root == null) {
-                continue;
-            }
-            for (Map.Entry<AuthBase, List<JSONObject>> entry : getIncludeAuthPaths(root).entrySet()) {
+        for (Map.Entry<String, Map<AuthBase, List<JSONObject>>> rootEntry : includedAuthPathMap.entrySet()) {
+            String rootName = rootEntry.getKey();
+            for (Map.Entry<AuthBase, List<JSONObject>> entry : rootEntry.getValue().entrySet()) {
                 AuthBase target = entry.getKey();
-                userRoleAuthObj.computeIfAbsent(target.getAuthGroup(), key -> new JSONArray());
-                JSONArray auths = userRoleAuthObj.getJSONArray(target.getAuthGroup());
-                if (!auths.contains(target.getAuthName())) {
-                    auths.add(target.getAuthName());
-                }
                 RoleAuthVo targetAuth = new RoleAuthVo();
                 targetAuth.setAuthGroup(target.getAuthGroup());
                 targetAuth.setAuth(target.getAuthName());
