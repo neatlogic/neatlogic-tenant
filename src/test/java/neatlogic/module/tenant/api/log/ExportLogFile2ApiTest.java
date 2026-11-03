@@ -62,6 +62,11 @@ public class ExportLogFile2ApiTest {
         return "log/file/export2";
     }
 
+    /** 兼容接口沿用原下载名称，主接口按现有 distinct 命名约定覆写。 */
+    protected String groupedFileName() {
+        return "error.log";
+    }
+
     /** 备份环境并注入单节点 Mapper，测试只操作临时目录中的日志。 */
     @Before
     public void setup() throws Exception {
@@ -100,7 +105,7 @@ public class ExportLogFile2ApiTest {
         Assert.assertTrue(((JSONObject) api.myDoService(param, null, response.proxy())).isEmpty());
         Assert.assertEquals(header(2) + header(3) + "same\n", response.text());
         Assert.assertEquals("application/octet-stream", response.contentType);
-        Assert.assertEquals(" attachment; filename=\"127.0.0.1-101-" + TimeUtil.yyyymmdd() + "-error.log\"",
+        Assert.assertEquals(" attachment; filename=\"127.0.0.1-101-" + TimeUtil.yyyymmdd() + "-" + groupedFileName() + "\"",
                 response.headers.get("Content-Disposition"));
         Assert.assertTrue(response.closed);
     }
@@ -113,8 +118,21 @@ public class ExportLogFile2ApiTest {
         Response response = new Response();
         api.myDoService(params(101, "error.log"), null, response.proxy());
         Assert.assertEquals(header(1) + "message\n", response.text());
-        Assert.assertEquals(" attachment; filename=\"101-" + TimeUtil.yyyymmdd() + "-error.log\"",
+        Assert.assertEquals(" attachment; filename=\"101-" + TimeUtil.yyyymmdd() + "-" + groupedFileName() + "\"",
                 response.headers.get("Content-Disposition"));
+    }
+
+    /** 两个分组下载入口均执行真实工具逻辑，仅给较早消息增加一行堆栈省略说明。 */
+    @Test
+    public void shouldDownloadCompressedStackTailsWithNotice() throws Exception {
+        String frame = "\tat sample.Trace.run(Trace.java:1)\n";
+        Files.writeString(new File(logDirectory, "error.log").toPath(),
+                header(1) + "old exception\n" + frame + header(2) + "latest exception\n" + frame,
+                StandardCharsets.UTF_8);
+        Response response = new Response();
+        api.myDoService(params(101, "error.log"), null, response.proxy());
+        Assert.assertEquals(header(1) + "old exception\n已省略相同的堆栈行\n"
+                + header(2) + "latest exception\n" + frame, response.text());
     }
 
     /** 远程节点执行同一个接口，原参数原样传递，入口节点不能再次处理下载结果。 */

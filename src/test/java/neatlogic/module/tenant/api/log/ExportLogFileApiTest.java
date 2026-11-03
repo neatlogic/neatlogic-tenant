@@ -42,6 +42,12 @@ public class ExportLogFileApiTest extends ExportLogFile2ApiTest {
         return "log/file/export";
     }
 
+    /** 主接口现有分组下载名称带 distinct 标识，原始模式命名不变。 */
+    @Override
+    protected String groupedFileName() {
+        return "distinct-error.log";
+    }
+
     /** 安装生产本地文件处理器，使原始模式也通过真实文件流验证。 */
     @Before
     @SuppressWarnings("unchecked")

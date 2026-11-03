@@ -39,6 +39,12 @@ public final class LogFileExportUtil {
     private static final DateTimeFormatter LOG_TIME = DateTimeFormatter
             .ofPattern("uuuu-MM-dd HH:mm:ss.SSS").withResolverStyle(ResolverStyle.STRICT);
     private static final String SQL_PREFIX = "执行SQL语句 ";
+    // 仅识别标准 Java 堆栈行，普通消息及顶层异常描述不参与公共尾部压缩。
+    private static final Pattern STACK_TRACE_LINE = Pattern.compile(
+            "(?:[\\t ]+at[\\t ]+[^\\s()]+\\([^\\r\\n()]*\\)[\\t ]*"
+                    + "|[\\t ]*(?:Caused by:|Suppressed:)[\\t ]+\\S[^\\r\\n]*"
+                    + "|[\\t ]+\\.\\.\\.[\\t ]+\\d+[\\t ]+(?:common frames omitted|more)[\\t ]*)");
+    private static final String OMITTED_STACK_NOTICE = "已省略相同的堆栈行\n";
 
     /** 无状态工具类仅通过静态方法调用，不注册为 Spring Bean。 */
     private LogFileExportUtil() {
@@ -194,6 +200,32 @@ public final class LogFileExportUtil {
         return -1;
     }
 
+    /** 与固定的完整基准从尾部逐行比较，仅删除连续相同的堆栈行，保留此前的全部原文。 */
+    private static String compressCommonStackTail(String message, String reference) {
+        // 只排除终止换行产生的虚拟空项；真实空白尾行会因不属于堆栈而阻断比较。
+        int messageEnd = message.endsWith("\n") ? message.length() - 1 : message.length();
+        int referenceEnd = reference.endsWith("\n") ? reference.length() - 1 : reference.length();
+        int retainedEnd = message.length();
+        while (messageEnd > 0 && referenceEnd > 0) {
+            int messageStart = message.lastIndexOf('\n', messageEnd - 1) + 1;
+            int referenceStart = reference.lastIndexOf('\n', referenceEnd - 1) + 1;
+            String line = message.substring(messageStart, messageEnd);
+            String referenceLine = reference.substring(referenceStart, referenceEnd);
+            // 缩进和空格均精确比较，首个不同行或非堆栈行之前的内容不再裁剪。
+            if (!line.equals(referenceLine) || !STACK_TRACE_LINE.matcher(line).matches()) {
+                break;
+            }
+            retainedEnd = messageStart;
+            messageEnd = Math.max(0, messageStart - 1);
+            referenceEnd = Math.max(0, referenceStart - 1);
+        }
+        if (retainedEnd == message.length()) {
+            return message;
+        }
+        // 实际删除过堆栈时仅补一行说明，前缀保留的换行确保说明与下一条日志头分行。
+        return message.substring(0, retainedEnd) + OMITTED_STACK_NOTICE;
+    }
+
     /** 文件读取与单元测试共用的最小读取接口，返回 null 表示到达文件头。 */
     @FunctionalInterface
     interface ReverseLineReader {
@@ -240,6 +272,8 @@ public final class LogFileExportUtil {
     private static class LogGroup {
         private final Deque<LogRecord> records = new ArrayDeque<>();
         private final List<Set<String>> seenParts = List.of(new HashSet<>(), new HashSet<>(), new HashSet<>());
+        // 逆向首次遇到的非空消息就是同组最新消息，始终保留完整原文作为固定基准。
+        private String latestMessage;
 
         /** 逆向首次看到某段正文即为它最后一次出现的位置，正文只挂载在此处。 */
         private void add(String header, String body) {
@@ -247,6 +281,14 @@ public final class LogFileExportUtil {
             for (int i = 0; i < parts.length; i++) {
                 if (parts[i].isEmpty() || !seenParts.get(i).add(parts[i])) {
                     parts[i] = "";
+                }
+            }
+            if (!parts[2].isEmpty()) {
+                if (latestMessage == null) {
+                    latestMessage = parts[2];
+                } else {
+                    // 整段消息去重仍基于裁剪前原文；仅对需要输出的较早消息压缩尾部。
+                    parts[2] = compressCommonStackTail(parts[2], latestMessage);
                 }
             }
             records.addFirst(new LogRecord(header, parts));

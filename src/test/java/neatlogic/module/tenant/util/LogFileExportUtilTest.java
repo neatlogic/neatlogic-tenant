@@ -22,6 +22,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** 使用真实文件和计数读取器验证日志正文、分组顺序及提前停止行为。 */
 public class LogFileExportUtilTest {
+    private static final String OMITTED = "已省略相同的堆栈行\n";
+    private static final String FRAME_A = "\tat sample.Trace.a(Trace.java:1)\n";
+    private static final String FRAME_B = "\tat sample.Trace.b(Trace.java:2)\n";
+    private static final String FRAME_C = "\tat sample.Trace.c(Trace.java:3)\n";
+
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -34,6 +39,165 @@ public class LogFileExportUtilTest {
         Assert.assertEquals(16, actual.lines().filter(line -> line.startsWith("[ERROR]")).count());
         Assert.assertEquals(5, actual.lines().filter(line -> line.startsWith("[ERROR]"))
                 .map(line -> line.split(" ")[3]).distinct().count());
+    }
+
+    /** 附件四条不同 IP 的异常保留描述，64 行相同栈帧压缩为最新记录中的 16 行。 */
+    @Test
+    public void shouldCompressPastedExceptionStackTailsWithNotices() throws Exception {
+        String actual = export(resource("stack-tail-source.log"), null);
+        Assert.assertEquals(resource("stack-tail-expected.log"), actual);
+        Assert.assertEquals(4, actual.lines().filter(line -> line.startsWith("[ERROR]")).count());
+        Assert.assertEquals(16, actual.lines().filter(line -> line.startsWith("\tat ")).count());
+        Assert.assertEquals(3, actual.lines().filter(line -> line.equals("已省略相同的堆栈行")).count());
+    }
+
+    /** A、B 都与完整 C 比较；B 被裁剪后不能成为 A 的基准，也不能修改 C 的完整内容。 */
+    @Test
+    public void shouldAlwaysCompareWithLatestCompleteMessage() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String c = header(3, "a.Logger[10]");
+        String source = a + "first\n" + FRAME_A + FRAME_C
+                + b + "middle\n" + FRAME_B + FRAME_C + c + "latest\n" + FRAME_A + FRAME_C;
+        Assert.assertEquals(a + "first\n" + OMITTED + b + "middle\n" + FRAME_B + OMITTED
+                + c + "latest\n" + FRAME_A + FRAME_C, export(source, null));
+    }
+
+    /** 即使较早两条堆栈相同，只要与最后一条的末行不同，就不能采用相邻比较而裁剪。 */
+    @Test
+    public void shouldKeepStacksWhenLatestTailDiffers() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String c = header(3, "a.Logger[10]");
+        String source = a + "first\n" + FRAME_A + b + "middle\n" + FRAME_A + c + "latest\n" + FRAME_B;
+        Assert.assertEquals(source, export(source, null));
+    }
+
+    /** 删除相同尾帧后遇到不同栈帧即停止，只增加一行说明，不删除更前面的帧。 */
+    @Test
+    public void shouldStopAtFirstDifferentStackFrame() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        Assert.assertEquals(a + "old\n" + FRAME_A + OMITTED + b + "new\n" + FRAME_B + FRAME_C,
+                export(a + "old\n" + FRAME_A + FRAME_C + b + "new\n" + FRAME_B + FRAME_C, null));
+    }
+
+    /** 相同普通尾行、真实空白尾行和无法确认格式的行阻断压缩，不增加说明。 */
+    @Test
+    public void shouldNotCompressOrdinaryOrUnrecognizedTailLines() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        for (String tail : new String[]{"ordinary tail\n", "\n", "\tat not-a-frame\n", "at sample.Trace.a(Trace.java:1)\n"}) {
+            String source = a + "old\n" + FRAME_A + tail + b + "new\n" + FRAME_A + tail;
+            Assert.assertEquals(source, export(source, null));
+        }
+    }
+
+    /** 顶层异常描述或中间普通行即使相同也保留，说明在已删除堆栈的原位置单独成行。 */
+    @Test
+    public void shouldKeepExceptionDescriptionsAndOrdinaryLinesBeforeTail() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        for (String text : new String[]{"java.lang.IllegalStateException: same\n", "ordinary line\n"}) {
+            Assert.assertEquals(a + "old\n" + text + OMITTED + b + "new\n" + text + FRAME_A,
+                    export(a + "old\n" + text + FRAME_A + b + "new\n" + text + FRAME_A, null));
+        }
+    }
+
+    /** 栈帧的缩进或尾部空格有差异时，不归一化后再删除。 */
+    @Test
+    public void shouldCompareStackIndentationAndSpacesExactly() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        for (String frame : new String[]{FRAME_A.replace("\t", "    "), FRAME_A.replace(")\n", ") \n")}) {
+            String source = a + "old\n" + frame + b + "new\n" + FRAME_A;
+            Assert.assertEquals(source, export(source, null));
+        }
+    }
+
+    /** Caused by、Suppressed 和两种省略帧格式均属于可压缩的堆栈行。 */
+    @Test
+    public void shouldRecognizeCauseSuppressedAndOmittedFrameLines() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String tail = "Caused by: java.lang.IllegalStateException: cause\n" + FRAME_A
+                + "\tSuppressed: java.lang.RuntimeException: suppressed\n" + FRAME_B
+                + "\t... 2 common frames omitted\n\t... 3 more\n";
+        Assert.assertEquals(a + "old\n" + OMITTED + b + "new\n" + tail,
+                export(a + "old\n" + tail + b + "new\n" + tail, null));
+    }
+
+    /** 旧消息只包含公共栈帧时仍保留头部和说明，下一条头部不能与说明粘连。 */
+    @Test
+    public void shouldKeepHeaderAndNoticeWhenEntireStackOnlyMessageIsCompressed() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        Assert.assertEquals(a + OMITTED + b + "latest\n" + FRAME_A,
+                export(a + FRAME_A + b + "latest\n" + FRAME_A, null));
+    }
+
+    /** 完全相同的消息仍走已有整段去重，不额外添加堆栈省略说明。 */
+    @Test
+    public void shouldDeduplicateWholeMessagesWithoutNewNotice() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String message = "exception\n" + FRAME_A;
+        Assert.assertEquals(a + b + message, export(a + message + b + message, null));
+    }
+
+    /** 同样的栈帧在不同 logger 组中独立保留，不能跨组裁剪。 */
+    @Test
+    public void shouldNotShareMessageReferenceAcrossGroups() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "b.Logger[10]");
+        String source = a + "old\n" + FRAME_A + b + "new\n" + FRAME_A;
+        Assert.assertEquals(source, export(source, null));
+    }
+
+    /** 最后一条消息为空时使用最近的非空消息；基准没有堆栈时保留更早的堆栈。 */
+    @Test
+    public void shouldUseLastNonEmptyMessageAsFixedReference() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String c = header(3, "a.Logger[10]");
+        Assert.assertEquals(a + "old\n" + OMITTED + b + "latest\n" + FRAME_A + c,
+                export(a + "old\n" + FRAME_A + b + "latest\n" + FRAME_A + c, null));
+        String withoutStackReference = a + "old\n" + FRAME_A + b + "latest ordinary\n";
+        Assert.assertEquals(withoutStackReference, export(withoutStackReference, null));
+    }
+
+    /** 请求参数和 SQL 即使包含相同堆栈文本也只进行原有整段去重，消息单独压缩。 */
+    @Test
+    public void shouldCompressOnlyMessageAndKeepParameterAndSqlDifferences() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String first = "{\"ip\":\"old\"}\n执行SQL语句 sample.Mapper:select 1\n";
+        String last = "{\"ip\":\"new\"}\n执行SQL语句 sample.Mapper:select 2\n";
+        Assert.assertEquals(a + first + "old\n" + OMITTED + b + last + "new\n" + FRAME_A,
+                export(a + first + "old\n" + FRAME_A + b + last + "new\n" + FRAME_A, null));
+    }
+
+    /** LF、CRLF 和无末尾换行均只排除虚拟空项，并保留真实空白尾行。 */
+    @Test
+    public void shouldCompressAcrossLineEndingsWithoutDroppingRealBlankLines() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String source = a + "old\n" + FRAME_A + b + "new\n" + FRAME_A;
+        String expected = a + "old\n" + OMITTED + b + "new\n" + FRAME_A;
+        Assert.assertEquals(expected, export(source.replace("\n", "\r\n"), null));
+        Assert.assertEquals(expected, export(source.substring(0, source.length() - 1), null));
+        String withBlanks = a + "old\n" + FRAME_A + "\n" + b + "new\n" + FRAME_A + "\n";
+        Assert.assertEquals(withBlanks, export(withBlanks, null));
+    }
+
+    /** 时间过滤仍以完整记录为单位，只有筛选后较早消息增加说明。 */
+    @Test
+    public void shouldCompressRetainedMessagesAfterTimeFiltering() throws Exception {
+        String a = header(1, "a.Logger[10]");
+        String b = header(2, "a.Logger[10]");
+        String c = header(3, "a.Logger[10]");
+        Assert.assertEquals(b + "middle\n" + OMITTED + c + "latest\n" + FRAME_A,
+                export(a + "old\n" + FRAME_A + b + "middle\n" + FRAME_A + c + "latest\n" + FRAME_A, time(2)));
     }
 
     /** 三部分分别去重，A/B/A 的 A 留在最后一次出现处；不同线程和租户仍属于同组。 */
