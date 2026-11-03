@@ -97,6 +97,9 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                             if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
                                 prefix = serverClusterVo.getIp() + "-" + prefix;
                             }
+                            if ("groupAndDeduplicate".equals(paramObj.getString("type"))) {
+                                prefix += "-distinct";
+                            }
                             response.setContentType("application/octet-stream");
                             response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + file.getName()) + "\"");
                             if ("groupAndDeduplicate".equals(paramObj.getString("type"))) {
