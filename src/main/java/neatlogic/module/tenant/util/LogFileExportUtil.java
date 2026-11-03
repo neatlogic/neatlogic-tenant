@@ -1,8 +1,7 @@
-package neatlogic.module.tenant.service.log;
+package neatlogic.module.tenant.util;
 
 import com.alibaba.fastjson.JSONValidator;
 import org.apache.commons.io.input.ReversedLinesFileReader;
-import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,8 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** 将指定文件中的日志逆向读取、按调用位置分组，并分别去重请求参数、SQL 和消息。 */
-@Service
-public class LogFileExportService {
+public final class LogFileExportUtil {
     // 必须匹配完整头部，避免将堆栈、SQL 中的方括号误认为新记录。
     private static final Pattern HEADER_PATTERN = Pattern.compile(
             "^\\[(TRACE|DEBUG|INFO|WARN|ERROR|OFF|ALL) *\\]"
@@ -42,8 +40,12 @@ public class LogFileExportService {
             .ofPattern("uuuu-MM-dd HH:mm:ss.SSS").withResolverStyle(ResolverStyle.STRICT);
     private static final String SQL_PREFIX = "执行SQL语句 ";
 
+    /** 无状态工具类仅通过静态方法调用，不注册为 Spring Bean。 */
+    private LogFileExportUtil() {
+    }
+
     /** 按服务器时区过滤记录，以 UTF-8 写入输出流；流的生命周期由调用接口管理。 */
-    public void export(File file, Long startTime, OutputStream output) throws IOException {
+    public static void export(File file, Long startTime, OutputStream output) throws IOException {
         ExportContent content;
         try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
                 .setFile(file).setBufferSize(8192).setCharset(StandardCharsets.UTF_8).get()) {
@@ -59,7 +61,7 @@ public class LogFileExportService {
     }
 
     /** 逐行恢复一条完整记录；单独保留读取接口便于验证时间边界确实停止后续读取。 */
-    ExportContent readLogs(ReverseLineReader reader, Long startTime) throws IOException {
+    static ExportContent readLogs(ReverseLineReader reader, Long startTime) throws IOException {
         ExportContent result = new ExportContent();
         Deque<String> bodyLines = new ArrayDeque<>();
         ZoneId zone = ZoneId.systemDefault();
@@ -88,7 +90,7 @@ public class LogFileExportService {
     }
 
     /** 提前停止后仍保留不带可识别时间的文件前导内容。 */
-    private void writeLeadingContent(File file, Writer writer) throws IOException {
+    private static void writeLeadingContent(File file, Writer writer) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             ZoneId zone = ZoneId.systemDefault();
@@ -100,7 +102,7 @@ public class LogFileExportService {
     }
 
     /** 只在解析时忽略 UTF-8 BOM，头部输出仍保留原始文本。 */
-    private Header parseHeader(String line, ZoneId zone) {
+    private static Header parseHeader(String line, ZoneId zone) {
         String text = line.startsWith("\uFEFF") ? line.substring(1) : line;
         Matcher matcher = HEADER_PATTERN.matcher(text);
         if (!matcher.matches()) {

@@ -16,9 +16,9 @@ import neatlogic.framework.heartbeat.dao.mapper.ServerMapper;
 import neatlogic.framework.heartbeat.dto.ServerClusterVo;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.Param;
+import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStreamApiComponentBase;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.tenant.service.ServerService;
-import neatlogic.module.tenant.service.log.LogFileExportService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,8 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -44,16 +42,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-/** 使用真实日志处理服务和节点、响应替身验证本地下载及跨节点转发契约。 */
+/** 使用真实日志处理工具和节点、响应替身验证本地下载及跨节点转发契约。 */
 public class ExportLogFile2ApiTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
-    private final ExportLogFile2Api api = new ExportLogFile2Api();
-    private final CountingService service = new CountingService();
-    private ServerClusterVo server;
-    private File logDirectory;
+    protected final PrivateBinaryStreamApiComponentBase api = createApi();
+    protected ServerClusterVo server;
+    protected File logDirectory;
     private String oldLogHome;
     private int oldServerId;
+
+    /** 兼容接口测试使用真实静态工具；主接口测试覆写此入口以复用相同回归场景。 */
+    protected PrivateBinaryStreamApiComponentBase createApi() {
+        return new ExportLogFile2Api();
+    }
+
+    /** 声明当前被测接口的公开路径。 */
+    protected String token() {
+        return "log/file/export2";
+    }
 
     /** 备份环境并注入单节点 Mapper，测试只操作临时目录中的日志。 */
     @Before
@@ -68,7 +75,6 @@ public class ExportLogFile2ApiTest {
         server.setServerId(101);
         server.setIp("127.0.0.1");
         inject(api, "serverMapper", mapper());
-        inject(api, "logFileExportService", service);
     }
 
     /** 恢复全局配置和线程上下文，避免改变其他测试的文件根目录。 */
@@ -83,7 +89,7 @@ public class ExportLogFile2ApiTest {
         TenantContext.get().release();
     }
 
-    /** 真实服务完成开始时间过滤和去重，保留原有下载名称、内容类型及返回对象。 */
+    /** 真实工具完成开始时间过滤和去重，保留原有下载名称、内容类型及返回对象。 */
     @Test
     public void shouldDownloadGroupedLocalFileWithStartTime() throws Exception {
         Files.writeString(new File(logDirectory, "error.log").toPath(),
@@ -96,8 +102,6 @@ public class ExportLogFile2ApiTest {
         Assert.assertEquals("application/octet-stream", response.contentType);
         Assert.assertEquals(" attachment; filename=\"127.0.0.1-101-" + TimeUtil.yyyymmdd() + "-error.log\"",
                 response.headers.get("Content-Disposition"));
-        Assert.assertEquals(Long.valueOf(time(2)), service.startTime);
-        Assert.assertEquals(1, service.calls);
         Assert.assertTrue(response.closed);
     }
 
@@ -109,7 +113,6 @@ public class ExportLogFile2ApiTest {
         Response response = new Response();
         api.myDoService(params(101, "error.log"), null, response.proxy());
         Assert.assertEquals(header(1) + "message\n", response.text());
-        Assert.assertNull(service.startTime);
         Assert.assertEquals(" attachment; filename=\"101-" + TimeUtil.yyyymmdd() + "-error.log\"",
                 response.headers.get("Content-Disposition"));
     }
@@ -124,9 +127,8 @@ public class ExportLogFile2ApiTest {
         JSONObject param = params(102, "error.log");
         param.put("startTime", time(2));
         Response response = new Response();
-        ExportLogFile2Api target = new ExportLogFile2Api();
+        PrivateBinaryStreamApiComponentBase target = createApi();
         inject(target, "serverMapper", mapper());
-        inject(target, "logFileExportService", service);
         int[] forwards = {0};
         inject(api, "serverService", Proxy.newProxyInstance(ServerService.class.getClassLoader(),
                 new Class<?>[]{ServerService.class}, (proxy, method, args) -> {
@@ -145,13 +147,11 @@ public class ExportLogFile2ApiTest {
                 }));
         api.myDoService(param, null, response.proxy());
         Assert.assertEquals(1, forwards[0]);
-        Assert.assertEquals(1, service.calls);
-        Assert.assertEquals(Long.valueOf(time(2)), service.startTime);
         Assert.assertEquals(header(2) + header(3) + "same\n", response.text());
         Assert.assertTrue(response.headers.get("Content-Disposition").contains("10.0.0.2-102-"));
     }
 
-    /** 文件不存在、目录和越界路径必须在日志服务和响应写入前拒绝。 */
+    /** 文件不存在、目录和越界路径必须在日志处理和响应写入前拒绝。 */
     @Test
     public void shouldRejectMissingDirectoryAndUnsafePaths() throws Exception {
         Assert.assertThrows(FileNotFoundException.class,
@@ -163,7 +163,6 @@ public class ExportLogFile2ApiTest {
             Assert.assertThrows(FilePathIllegalException.class,
                     () -> api.myDoService(params(101, path), null, new Response().proxy()));
         }
-        Assert.assertEquals(0, service.calls);
     }
 
     /** 节点不存在或日志根路径缺失时延续现有错误处理。 */
@@ -174,7 +173,6 @@ public class ExportLogFile2ApiTest {
         System.clearProperty(SystemProperty.LOG4J_HOME);
         Assert.assertThrows(SystemPropertyNotFoundException.class,
                 () -> api.myDoService(params(101, "error.log"), null, new Response().proxy()));
-        Assert.assertEquals(0, service.calls);
     }
 
     /** 跨节点错误不能被吞掉或误当作下载成功。 */
@@ -185,15 +183,14 @@ public class ExportLogFile2ApiTest {
                 new Class<?>[]{ServerService.class}, (proxy, method, args) -> "remote download failed"));
         Assert.assertThrows(ApiRuntimeException.class,
                 () -> api.myDoService(params(102, "error.log"), null, new Response().proxy()));
-        Assert.assertEquals(0, service.calls);
     }
 
     /** 接口路径和管理员权限保持不变，开始时间在接口元数据中为可选 LONG。 */
     @Test
     public void shouldKeepApiContractAndDeclareOptionalStartTime() throws Exception {
-        Assert.assertEquals("log/file/export2", api.getToken());
-        Assert.assertEquals(ADMIN.class, ExportLogFile2Api.class.getAnnotation(AuthAction.class).action());
-        Input input = ExportLogFile2Api.class.getMethod("myDoService", JSONObject.class,
+        Assert.assertEquals(token(), api.getToken());
+        Assert.assertEquals(ADMIN.class, api.getClass().getAnnotation(AuthAction.class).action());
+        Input input = api.getClass().getMethod("myDoService", JSONObject.class,
                 HttpServletRequest.class, HttpServletResponse.class).getAnnotation(Input.class);
         Param startTime = Arrays.stream(input.value()).filter(param -> "startTime".equals(param.name())).findFirst().get();
         Assert.assertEquals(ApiParamType.LONG, startTime.type());
@@ -201,7 +198,7 @@ public class ExportLogFile2ApiTest {
     }
 
     /** 按当前测试节点返回 Mapper 数据，不触碰真实数据库。 */
-    private ServerMapper mapper() {
+    protected ServerMapper mapper() {
         return (ServerMapper) Proxy.newProxyInstance(ServerMapper.class.getClassLoader(),
                 new Class<?>[]{ServerMapper.class}, (proxy, method, args) -> {
                     Assert.assertEquals("getServerLockByServerId", method.getName());
@@ -210,48 +207,35 @@ public class ExportLogFile2ApiTest {
     }
 
     /** 为接口注入最小依赖，保持生产字段封装不变。 */
-    private void inject(Object target, String name, Object value) throws Exception {
-        Field field = ExportLogFile2Api.class.getDeclaredField(name);
+    protected void inject(Object target, String name, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(name);
         field.setAccessible(true);
         field.set(target, value);
     }
 
     /** 构造下载参数；开始时间由各测试按需添加。 */
-    private JSONObject params(int serverId, String fileName) {
+    protected JSONObject params(int serverId, String fileName) {
         JSONObject result = new JSONObject();
         result.put("serverId", serverId);
         result.put("fileName", fileName);
+        result.put("type", "groupAndDeduplicate");
         return result;
     }
 
     /** 构造服务器默认时区的毫秒时间戳。 */
-    private long time(int second) {
+    protected long time(int second) {
         return LocalDateTime.of(2026, 10, 30, 17, 0, second).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     /** 构造固定 logger 的真实日志头。 */
-    private String header(int second) {
+    protected String header(int second) {
         return String.format("[ERROR]2026-10-30 17:00:%02d.000 [thread] a.Logger[10] [tenant(system)]  -\n", second);
     }
 
-    /** 调用真实处理逻辑，同时计数以检测本地重复处理及参数丢失。 */
-    private static class CountingService extends LogFileExportService {
-        private int calls;
-        private Long startTime;
-
-        /** 记录接口传入的参数后执行真实文件导出。 */
-        @Override
-        public void export(File file, Long startTime, OutputStream output) throws IOException {
-            calls++;
-            this.startTime = startTime;
-            super.export(file, startTime, output);
-        }
-    }
-
     /** 收集响应头和字节流，避免启动 Servlet 容器。 */
-    private static class Response {
-        private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        private final Map<String, String> headers = new HashMap<>();
+    protected static class Response {
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        final Map<String, String> headers = new HashMap<>();
         private String contentType;
         private boolean closed;
         private final ServletOutputStream output = new ServletOutputStream() {
@@ -270,7 +254,7 @@ public class ExportLogFile2ApiTest {
         };
 
         /** 仅模拟该接口使用的响应方法，额外调用立即使测试失败。 */
-        private HttpServletResponse proxy() {
+        HttpServletResponse proxy() {
             return (HttpServletResponse) Proxy.newProxyInstance(HttpServletResponse.class.getClassLoader(),
                     new Class<?>[]{HttpServletResponse.class}, (proxy, method, args) -> {
                         switch (method.getName()) {
@@ -283,7 +267,7 @@ public class ExportLogFile2ApiTest {
         }
 
         /** 按导出契约使用 UTF-8 解码响应内容。 */
-        private String text() {
+        String text() {
             return new String(bytes.toByteArray(), StandardCharsets.UTF_8);
         }
     }

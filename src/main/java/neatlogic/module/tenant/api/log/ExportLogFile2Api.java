@@ -33,7 +33,7 @@ import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStr
 import neatlogic.framework.util.FileSafeUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.tenant.service.ServerService;
-import neatlogic.module.tenant.service.log.LogFileExportService;
+import neatlogic.module.tenant.util.LogFileExportUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -55,10 +55,6 @@ public class ExportLogFile2Api extends PrivateBinaryStreamApiComponentBase {
 
     @Resource
     private ServerService serverService;
-
-    // 日志解析和分组仅在文件所在节点执行，远程请求沿用原转发链路。
-    @Resource
-    private LogFileExportService logFileExportService;
 
     @Override
     public String getName() {
@@ -101,7 +97,7 @@ public class ExportLogFile2Api extends PrivateBinaryStreamApiComponentBase {
                             response.setContentType("application/octet-stream");
                             response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + file.getName()) + "\"");
                             // 逆向筛选后分组输出，不再直接复制整个原始日志文件。
-                            logFileExportService.export(file, paramObj.getLong("startTime"), os);
+                            LogFileExportUtil.export(file, paramObj.getLong("startTime"), os);
                             os.flush();
                         }
                     } else {

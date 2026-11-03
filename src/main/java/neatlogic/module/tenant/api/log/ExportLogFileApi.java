@@ -34,6 +34,7 @@ import neatlogic.framework.restful.core.privateapi.binarystream.PrivateBinaryStr
 import neatlogic.framework.util.FileSafeUtil;
 import neatlogic.framework.util.TimeUtil;
 import neatlogic.module.tenant.service.ServerService;
+import neatlogic.module.tenant.util.LogFileExportUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,9 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
     @Input({
             @Param(name = "serverId", type = ApiParamType.INTEGER, isRequired = true, desc = "term.framework.serverid"),
             @Param(name = "fileName", type = ApiParamType.STRING, isRequired = true, desc = "common.path"),
+            // 未传导出类型时兼容原始文件下载，开始时间仅用于分组去重。
+            @Param(name = "type", type = ApiParamType.STRING, desc = "common.type"),
+            @Param(name = "startTime", type = ApiParamType.LONG, desc = "common.starttime"),
     })
     @Description(desc = "nmtal.exportlogfileapi.getname")
     @Override
@@ -88,23 +92,29 @@ public class ExportLogFileApi extends PrivateBinaryStreamApiComponentBase {
                 File file = FileSafeUtil.getDownloadFile(fileName, log4jHome);
                 if (file.exists()) {
                     if (file.isFile()) {
-                        String path = file.getPath();
-                        if (!path.startsWith("file:")) {
-                            path = "file:" + path;
-                        }
-                        try (InputStream in = FileUtil.getData(path);) {
-                            if (in != null) {
-                                try (ServletOutputStream os = response.getOutputStream()) {
-                                    String prefix = serverId + "-" + TimeUtil.yyyymmdd();
-                                    if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
-                                        prefix = serverClusterVo.getIp() + "-" + prefix;
+                        try (ServletOutputStream os = response.getOutputStream()) {
+                            String prefix = serverId + "-" + TimeUtil.yyyymmdd();
+                            if (StringUtils.isNotBlank(serverClusterVo.getIp())) {
+                                prefix = serverClusterVo.getIp() + "-" + prefix;
+                            }
+                            response.setContentType("application/octet-stream");
+                            response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + file.getName()) + "\"");
+                            if ("groupAndDeduplicate".equals(paramObj.getString("type"))) {
+                                // 仅在文件所在节点执行分组和时间过滤，保持远程转发参数不变。
+                                LogFileExportUtil.export(file, paramObj.getLong("startTime"), os);
+                            } else {
+                                // 原始模式逐字节复制，不因开始时间或编码处理改变原文件。
+                                String path = file.getPath();
+                                if (!path.startsWith("file:")) {
+                                    path = "file:" + path;
+                                }
+                                try (InputStream in = FileUtil.getData(path)) {
+                                    if (in != null) {
+                                        IOUtils.copyLarge(in, os);
                                     }
-                                    response.setContentType("application/octet-stream");
-                                    response.setHeader("Content-Disposition", " attachment; filename=\"" + neatlogic.framework.util.FileUtil.getEncodedFileName(prefix + "-" + file.getName()) + "\"");
-                                    IOUtils.copyLarge(in, os);
-                                    os.flush();
                                 }
                             }
+                            os.flush();
                         }
                     } else {
                         throw new FileNotFoundException(FileNotFoundException.Type.DIRECTORY, log4jHome);

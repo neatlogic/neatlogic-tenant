@@ -1,4 +1,4 @@
-package neatlogic.module.tenant.service.log;
+package neatlogic.module.tenant.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -21,10 +21,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** 使用真实文件和计数读取器验证日志正文、分组顺序及提前停止行为。 */
-public class LogFileExportServiceTest {
+public class LogFileExportUtilTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
-    private final LogFileExportService service = new LogFileExportService();
 
     /** 按文字规则逐文本验证附件；原人工示例的三处差异保留在测试资源说明中。 */
     @Test
@@ -135,7 +134,7 @@ public class LogFileExportServiceTest {
                 "latest stack", "latest", header(3, "a.Logger[10]").stripTrailing(),
                 "old stack", header(1, "a.Logger[10]").stripTrailing()));
         AtomicInteger reads = new AtomicInteger();
-        LogFileExportService.ExportContent content = service.readLogs(() -> {
+        LogFileExportUtil.ExportContent content = LogFileExportUtil.readLogs(() -> {
             int index = reads.getAndIncrement();
             Assert.assertTrue("遇到较早头部后不应再次读取", index < reversed.size());
             return reversed.get(index);
@@ -195,7 +194,7 @@ public class LogFileExportServiceTest {
         File file = folder.newFile();
         Files.writeString(file.toPath(), source, StandardCharsets.UTF_8);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        service.export(file, startTime, output);
+        LogFileExportUtil.export(file, startTime, output);
         return output.toString(StandardCharsets.UTF_8.name());
     }
 
