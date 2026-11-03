@@ -134,17 +134,18 @@ public class ExportLogFileApiTest {
                 response.headers.get("Content-Disposition"));
     }
 
-    /** 分组下载入口执行真实工具逻辑，仅给较早消息增加一行堆栈省略说明。 */
+    /** 分组下载入口折叠较早消息的七个连续栈帧，保留首尾帧和最新异常全文。 */
     @Test
-    public void shouldDownloadCompressedStackTailsWithNotice() throws Exception {
+    public void shouldDownloadFoldedStacksWithOmittedLineCount() throws Exception {
         String frame = "\tat sample.Trace.run(Trace.java:1)\n";
+        String stack = frame.repeat(7);
         Files.writeString(new File(logDirectory, "error.log").toPath(),
-                header(1) + "old exception\n" + frame + header(2) + "latest exception\n" + frame,
+                header(1) + "old exception\n" + stack + header(2) + "latest exception\n" + stack,
                 StandardCharsets.UTF_8);
         Response response = new Response();
         api.myDoService(params(101, "error.log"), null, response.proxy());
-        Assert.assertEquals(header(1) + "old exception\n已省略相同的堆栈行\n"
-                + header(2) + "latest exception\n" + frame, response.text());
+        Assert.assertEquals(header(1) + "old exception\n" + frame + "\t已省略5行重复堆栈\n" + frame
+                + header(2) + "latest exception\n" + stack, response.text());
     }
 
     /** 远程节点执行同一个接口，原参数原样传递，入口节点不能再次处理下载结果。 */

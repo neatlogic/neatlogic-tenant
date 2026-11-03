@@ -21,6 +21,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,12 +40,12 @@ public final class LogFileExportUtil {
     private static final DateTimeFormatter LOG_TIME = DateTimeFormatter
             .ofPattern("uuuu-MM-dd HH:mm:ss.SSS").withResolverStyle(ResolverStyle.STRICT);
     private static final String SQL_PREFIX = "执行SQL语句 ";
-    // 仅识别标准 Java 堆栈行，普通消息及顶层异常描述不参与公共尾部压缩。
+    // 仅识别标准 Java 堆栈行，普通消息及顶层异常描述会截断匹配段。
     private static final Pattern STACK_TRACE_LINE = Pattern.compile(
             "(?:[\\t ]+at[\\t ]+[^\\s()]+\\([^\\r\\n()]*\\)[\\t ]*"
                     + "|[\\t ]*(?:Caused by:|Suppressed:)[\\t ]+\\S[^\\r\\n]*"
                     + "|[\\t ]+\\.\\.\\.[\\t ]+\\d+[\\t ]+(?:common frames omitted|more)[\\t ]*)");
-    private static final String OMITTED_STACK_NOTICE = "已省略相同的堆栈行\n";
+    private static final int MIN_STACK_MATCH = 7;
 
     /** 无状态工具类仅通过静态方法调用，不注册为 Spring Bean。 */
     private LogFileExportUtil() {
@@ -200,30 +201,86 @@ public final class LogFileExportUtil {
         return -1;
     }
 
-    /** 与固定的完整基准从尾部逐行比较，仅删除连续相同的堆栈行，保留此前的全部原文。 */
-    private static String compressCommonStackTail(String message, String reference) {
-        // 只排除终止换行产生的虚拟空项；真实空白尾行会因不属于堆栈而阻断比较。
-        int messageEnd = message.endsWith("\n") ? message.length() - 1 : message.length();
-        int referenceEnd = reference.endsWith("\n") ? reference.length() - 1 : reference.length();
-        int retainedEnd = message.length();
-        while (messageEnd > 0 && referenceEnd > 0) {
-            int messageStart = message.lastIndexOf('\n', messageEnd - 1) + 1;
-            int referenceStart = reference.lastIndexOf('\n', referenceEnd - 1) + 1;
-            String line = message.substring(messageStart, messageEnd);
-            String referenceLine = reference.substring(referenceStart, referenceEnd);
-            // 缩进和空格均精确比较，首个不同行或非堆栈行之前的内容不再裁剪。
-            if (!line.equals(referenceLine) || !STACK_TRACE_LINE.matcher(line).matches()) {
-                break;
+    /** 同组较早消息共用此索引，候选位置全部来自最新的完整非空消息。 */
+    private static final class StackTraceIndex {
+        private final List<String> reference;
+        private final int[] stackLengths;
+        private final Map<List<String>, List<Integer>> candidates = new HashMap<>();
+
+        /** 从后往前计算各位置的连续堆栈长度，只为完整的七行窗口建立索引。 */
+        private StackTraceIndex(String message) {
+            reference = message.lines().toList();
+            stackLengths = new int[reference.size() + 1];
+            for (int i = reference.size() - 1; i >= 0; i--) {
+                if (STACK_TRACE_LINE.matcher(reference.get(i)).matches()) {
+                    stackLengths[i] = stackLengths[i + 1] + 1;
+                }
             }
-            retainedEnd = messageStart;
-            messageEnd = Math.max(0, messageStart - 1);
-            referenceEnd = Math.max(0, referenceStart - 1);
+            for (int i = 0; i < reference.size(); i++) {
+                if (stackLengths[i] >= MIN_STACK_MATCH) {
+                    List<String> window = reference.subList(i, i + MIN_STACK_MATCH);
+                    candidates.computeIfAbsent(window, key -> new ArrayList<>()).add(i);
+                }
+            }
         }
-        if (retainedEnd == message.length()) {
-            return message;
+
+        /** 同一窗口可能在基准中多次出现，逐行精确比较，选取该起点的最长匹配。 */
+        private int longestMatch(List<String> lines, int start) {
+            List<Integer> positions = candidates.get(lines.subList(start, start + MIN_STACK_MATCH));
+            if (positions == null) {
+                return 0;
+            }
+            int remaining = lines.size() - start;
+            int longest = 0;
+            for (int position : positions) {
+                // 基准中的非堆栈行、真实空行均为边界，不同缩进和行号也会终止延伸。
+                int limit = Math.min(remaining, stackLengths[position]);
+                if (limit <= longest) {
+                    continue;
+                }
+                int length = MIN_STACK_MATCH;
+                while (length < limit && reference.get(position + length).equals(lines.get(start + length))) {
+                    length++;
+                }
+                longest = Math.max(longest, length);
+                if (longest == remaining) {
+                    break;
+                }
+            }
+            return longest;
         }
-        // 实际删除过堆栈时仅补一行说明，前缀保留的换行确保说明与下一条日志头分行。
-        return message.substring(0, retainedEnd) + OMITTED_STACK_NOTICE;
+
+        /** 按较早消息的原文顺序折叠互不重叠的匹配段，未匹配部分逐行保留。 */
+        private String fold(String message) {
+            if (candidates.isEmpty()) {
+                return message;
+            }
+            List<String> lines = message.lines().toList();
+            int unwritten = 0;
+            StringBuilder result = new StringBuilder();
+            for (int start = 0; start + MIN_STACK_MATCH <= lines.size();) {
+                int length = longestMatch(lines, start);
+                if (length == 0) {
+                    start++;
+                    continue;
+                }
+                for (int i = unwritten; i <= start; i++) {
+                    result.append(lines.get(i)).append('\n');
+                }
+                // 首尾两行保留原文，制表符后的说明仅计入中间实际省略的行数。
+                result.append("\t已省略").append(length - 2).append("行重复堆栈\n");
+                start += length;
+                result.append(lines.get(start - 1)).append('\n');
+                unwritten = start;
+            }
+            if (unwritten == 0) {
+                return message;
+            }
+            for (int i = unwritten; i < lines.size(); i++) {
+                result.append(lines.get(i)).append('\n');
+            }
+            return result.toString();
+        }
     }
 
     /** 文件读取与单元测试共用的最小读取接口，返回 null 表示到达文件头。 */
@@ -272,8 +329,8 @@ public final class LogFileExportUtil {
     private static class LogGroup {
         private final Deque<LogRecord> records = new ArrayDeque<>();
         private final List<Set<String>> seenParts = List.of(new HashSet<>(), new HashSet<>(), new HashSet<>());
-        // 逆向首次遇到的非空消息就是同组最新消息，始终保留完整原文作为固定基准。
-        private String latestMessage;
+        // 逆向首次遇到非空消息时建立一次索引，该消息完整输出且始终作为同组基准。
+        private StackTraceIndex latestStackIndex;
 
         /** 逆向首次看到某段正文即为它最后一次出现的位置，正文只挂载在此处。 */
         private void add(String header, String body) {
@@ -284,11 +341,11 @@ public final class LogFileExportUtil {
                 }
             }
             if (!parts[2].isEmpty()) {
-                if (latestMessage == null) {
-                    latestMessage = parts[2];
+                if (latestStackIndex == null) {
+                    latestStackIndex = new StackTraceIndex(parts[2]);
                 } else {
-                    // 整段消息去重仍基于裁剪前原文；仅对需要输出的较早消息压缩尾部。
-                    parts[2] = compressCommonStackTail(parts[2], latestMessage);
+                    // 整段消息去重使用原文，只有仍需输出的较早消息才折叠重复片段。
+                    parts[2] = latestStackIndex.fold(parts[2]);
                 }
             }
             records.addFirst(new LogRecord(header, parts));
