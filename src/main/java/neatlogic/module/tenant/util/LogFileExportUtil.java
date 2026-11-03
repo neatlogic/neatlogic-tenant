@@ -19,10 +19,10 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +65,6 @@ public final class LogFileExportUtil {
         ExportContent result = new ExportContent();
         Deque<String> bodyLines = new ArrayDeque<>();
         ZoneId zone = ZoneId.systemDefault();
-        long sequence = 0;
         String line;
         while ((line = reader.readLine()) != null) {
             Header header = parseHeader(line, zone);
@@ -79,9 +78,7 @@ public final class LogFileExportUtil {
                 return result;
             }
             LogGroup group = result.groups.computeIfAbsent(header.logger, key -> new LogGroup());
-            group.firstSequence = sequence;
             group.add(line, joinLines(bodyLines));
-            sequence++;
             bodyLines.clear();
         }
         // 文件头没有匹配到头部的文本不参与分组或时间过滤。
@@ -217,15 +214,16 @@ public final class LogFileExportUtil {
 
     /** 保存头部与唯一正文，不累计重复的异常堆栈。 */
     static class ExportContent {
-        private final Map<String, LogGroup> groups = new HashMap<>();
+        // 插入顺序是各组在逆向读取时首次出现的顺序，对应原文件中各组最后出现的位置。
+        private final Map<String, LogGroup> groups = new LinkedHashMap<>();
         private String leadingContent = "";
         private boolean stoppedAtStartTime;
 
-        /** 逆向读取序号越大，原文件位置越早；据此恢复组及组内记录的正序。 */
+        /** 反转分组发现顺序，使原文件中最后出现的组排在末尾，组内仍按原文件正序输出。 */
         void write(Writer writer) throws IOException {
             writer.write(leadingContent);
             List<LogGroup> orderedGroups = new ArrayList<>(groups.values());
-            orderedGroups.sort(Comparator.comparingLong((LogGroup group) -> group.firstSequence).reversed());
+            Collections.reverse(orderedGroups);
             for (LogGroup group : orderedGroups) {
                 for (LogRecord record : group.records) {
                     writer.write(record.header);
@@ -242,7 +240,6 @@ public final class LogFileExportUtil {
     private static class LogGroup {
         private final Deque<LogRecord> records = new ArrayDeque<>();
         private final List<Set<String>> seenParts = List.of(new HashSet<>(), new HashSet<>(), new HashSet<>());
-        private long firstSequence;
 
         /** 逆向首次看到某段正文即为它最后一次出现的位置，正文只挂载在此处。 */
         private void add(String header, String body) {

@@ -51,15 +51,50 @@ public class LogFileExportUtilTest {
                 + h3 + "{\"a\":1}\n" + sqlB + "message A\n", export(source, null));
     }
 
-    /** 组按原文件最早位置排列，logger 或行号不同均不能合并。 */
+    /** A1、B1、A2、C1 按最后出现位置输出为 B、A、C，logger 或行号不同均不能合并。 */
     @Test
-    public void shouldOrderGroupsByEarliestOccurrenceAndKeepLinesSeparate() throws Exception {
+    public void shouldOrderGroupsByLatestOccurrenceAndKeepLinesSeparate() throws Exception {
         String a1 = header(1, "a.Logger[10]");
         String b = header(2, "b.Logger[10]");
         String a2 = header(3, "a.Logger[10]");
         String otherLine = header(4, "a.Logger[11]");
-        Assert.assertEquals(a1 + a2 + "same\n" + b + "same\n" + otherLine + "same\n",
+        Assert.assertEquals(b + "same\n" + a1 + a2 + "same\n" + otherLine + "same\n",
                 export(a1 + "same\n" + b + "same\n" + a2 + "same\n" + otherLine + "same\n", null));
+    }
+
+    /** 多组交错时逆向首先发现的 B 组最后输出，组内头部正序及唯一正文位置保持不变。 */
+    @Test
+    public void shouldPutFirstReverseDiscoveredGroupLast() throws Exception {
+        String a1 = header(1, "a.Logger[10]");
+        String b1 = header(2, "b.Logger[10]");
+        String a2 = header(3, "a.Logger[10]");
+        String c = header(4, "c.Logger[10]");
+        String b2 = header(5, "b.Logger[10]");
+        String source = a1 + "A\n" + b1 + "B1\n" + a2 + "A\n" + c + "C\n" + b2 + "B2\n";
+        Assert.assertEquals(a1 + a2 + "A\n" + c + "C\n" + b1 + "B1\n" + b2 + "B2\n",
+                export(source, null));
+    }
+
+    /** 日志时间乱序时仍按文件位置排列分组，不按时间戳排序；组内也维持原始位置顺序。 */
+    @Test
+    public void shouldOrderByFilePositionInsteadOfTimestamp() throws Exception {
+        String a1 = header(8, "a.Logger[10]");
+        String b = header(9, "b.Logger[10]");
+        String a2 = header(2, "a.Logger[10]");
+        Assert.assertEquals(b + "B\n" + a1 + a2 + "A\n",
+                export(a1 + "A\n" + b + "B\n" + a2 + "A\n", null));
+    }
+
+    /** 时间过滤后仅依据保留下来的组排序，文件前导内容仍先输出。 */
+    @Test
+    public void shouldOrderRetainedGroupsAfterStartTime() throws Exception {
+        String old = header(1, "old.Logger[10]");
+        String a1 = header(2, "a.Logger[10]");
+        String b = header(3, "b.Logger[10]");
+        String a2 = header(4, "a.Logger[10]");
+        String prefix = "前导原文\n";
+        Assert.assertEquals(prefix + b + "B\n" + a1 + a2 + "A\n",
+                export(prefix + old + "old\n" + a1 + "A\n" + b + "B\n" + a2 + "A\n", time(2)));
     }
 
     /** 请求 JSON 的嵌套、括号字符串及转义引号不会导致 SQL 和堆栈错位。 */
