@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -54,9 +55,10 @@ public final class LogFileExportUtil {
     /** 按服务器时区过滤记录，以 UTF-8 写入输出流；流的生命周期由调用接口管理。 */
     public static void export(File file, Long startTime, OutputStream output) throws IOException {
         ExportContent content;
-        try (ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
+        try (RandomAccessFile input = new RandomAccessFile(file, "r");
+             ReversedLinesFileReader reader = ReversedLinesFileReader.builder()
                 .setFile(file).setBufferSize(8192).setCharset(StandardCharsets.UTF_8).get()) {
-            content = readLogs(reader::readLine, startTime);
+            content = readLogs(preserveFirstEmptyLine(reader, input), startTime);
         }
         Writer writer = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
         if (content.stoppedAtStartTime) {
@@ -65,6 +67,59 @@ public final class LogFileExportUtil {
         }
         content.write(writer);
         writer.flush();
+    }
+
+    /** Commons IO 2.16.1 在文件无末尾换行时会跳过第一个真实空行，这里按原始字节位置补回。 */
+    private static ReverseLineReader preserveFirstEmptyLine(ReversedLinesFileReader reader, RandomAccessFile input)
+            throws IOException {
+        long length = input.length();
+        if (length == 0 || isLineBreak(byteAt(input, length - 1))) {
+            return reader::readLine;
+        }
+        return new ReverseLineReader() {
+            private long position = length;
+
+            /** 只跟踪首个空行之前的记录，补回后继续直接使用原读取器。 */
+            @Override
+            public String readLine() throws IOException {
+                if (position < 0) {
+                    return reader.readLine();
+                }
+                int lastByte = byteAt(input, position - 1);
+                if (isLineBreak(lastByte)) {
+                    position--;
+                    if (lastByte == '\n' && position > 0 && byteAt(input, position - 1) == '\r') {
+                        position--;
+                    }
+                }
+                if (position == 0 || isLineBreak(byteAt(input, position - 1))) {
+                    // 先返回真实空行，下次原读取器恰好跳过这一行，使两者位置重新一致。
+                    position = -1;
+                    return "";
+                }
+                String line = reader.readLine();
+                if (line == null) {
+                    position = -1;
+                } else {
+                    position -= line.getBytes(StandardCharsets.UTF_8).length;
+                    if (position == 0) {
+                        position = -1;
+                    }
+                }
+                return line;
+            }
+        };
+    }
+
+    /** 按位置只读检查行分隔符，修复过程不会写入源日志或扫描尚未请求的记录。 */
+    private static int byteAt(RandomAccessFile input, long position) throws IOException {
+        input.seek(position);
+        return input.read();
+    }
+
+    /** UTF-8 的 LF、CRLF 行分隔符均由 ASCII 字节组成。 */
+    private static boolean isLineBreak(int value) {
+        return value == '\n' || value == '\r';
     }
 
     /** 逐行恢复一条完整记录；单独保留读取接口便于验证时间边界确实停止后续读取。 */
@@ -325,6 +380,16 @@ public final class LogFileExportUtil {
         }
     }
 
+    /** 重复入参和 SQL 在原位置输出行数说明，整段重复的消息继续省略。 */
+    private static String repeatedPartNotice(String part, int partIndex) {
+        if (partIndex == 2) {
+            return "";
+        }
+        String name = partIndex == 0 ? "请求入参" : "执行SQL语句";
+        // 正文已统一为 LF，lines 保留内部真实空行，忽略终止换行产生的虚拟空项。
+        return "已省略相同" + name + part.lines().count() + "行\n";
+    }
+
     /** 每部分有独立的去重集合，线程、租户、URL 均不影响同一调用位置的分组。 */
     private static class LogGroup {
         private final Deque<LogRecord> records = new ArrayDeque<>();
@@ -332,12 +397,13 @@ public final class LogFileExportUtil {
         // 逆向首次遇到非空消息时建立一次索引，该消息完整输出且始终作为同组基准。
         private StackTraceIndex latestStackIndex;
 
-        /** 逆向首次看到某段正文即为它最后一次出现的位置，正文只挂载在此处。 */
+        /** 完整正文挂载在最后一次出现的位置，更早的重复入参和 SQL 输出省略说明。 */
         private void add(String header, String body) {
             String[] parts = splitBody(body);
             for (int i = 0; i < parts.length; i++) {
-                if (parts[i].isEmpty() || !seenParts.get(i).add(parts[i])) {
-                    parts[i] = "";
+                // 去重集合只存原文，说明仅替换输出内容，空部分无需生成说明。
+                if (!parts[i].isEmpty() && !seenParts.get(i).add(parts[i])) {
+                    parts[i] = repeatedPartNotice(parts[i], i);
                 }
             }
             if (!parts[2].isEmpty()) {
@@ -352,12 +418,12 @@ public final class LogFileExportUtil {
         }
     }
 
-    /** 每次发生均保存原始头部，正文仅引用该位置应输出的唯一部分。 */
+    /** 每次发生均保存原始头部，正文引用该位置应输出的原文或省略说明。 */
     private static class LogRecord {
         private final String header;
         private final String[] parts;
 
-        /** 保存单条记录的输出信息，重复部分已替换为空字符串。 */
+        /** 保存单条记录的输出信息，重复部分已替换为说明或空字符串。 */
         private LogRecord(String header, String[] parts) {
             this.header = header;
             this.parts = parts;

@@ -25,6 +25,9 @@ public class LogFileExportUtilTest {
     // 七个不同的栈帧用于核对折叠门槛、首尾帧及省略行数。
     private static final String SEVEN_FRAMES = frames(1, 7);
     private static final String FOLDED_SEVEN = frame(1) + "\t已省略5行重复堆栈\n" + frame(7);
+    // 单行正文的省略说明用于逐文本核对输出位置和末尾换行。
+    private static final String REPEATED_PARAM = "已省略相同请求入参1行\n";
+    private static final String REPEATED_SQL = "已省略相同执行SQL语句1行\n";
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -199,7 +202,7 @@ public class LogFileExportUtilTest {
                 export(a + SEVEN_FRAMES + b + SEVEN_FRAMES + c + SEVEN_FRAMES, time(2)));
     }
 
-    /** 三部分分别去重，A/B/A 的 A 留在最后一次出现处；不同线程和租户仍属于同组。 */
+    /** 三部分分别去重，A/B/A 的较早入参和 SQL 输出说明，不同线程和租户仍属同组。 */
     @Test
     public void shouldDeduplicateEachPartAcrossWholeGroup() throws Exception {
         String h1 = header(1, "a.Logger[10]", "thread-a", "tenant-a", "");
@@ -208,10 +211,76 @@ public class LogFileExportUtilTest {
         String sqlA = "执行SQL语句 a.Mapper:select 1\n";
         String sqlB = "执行SQL语句 a.Mapper:select 2\n";
         String source = h1 + "{\"a\":1}\n" + sqlA + "message A\n"
-                + h2 + "{\"a\":2}\n" + sqlA + "message B\n"
-                + h3 + "{\"a\":1}\n" + sqlB + "message A\n";
-        Assert.assertEquals(h1 + h2 + "{\"a\":2}\n" + sqlA + "message B\n"
-                + h3 + "{\"a\":1}\n" + sqlB + "message A\n", export(source, null));
+                + h2 + "{\"a\":2}\n" + sqlB + "message B\n"
+                + h3 + "{\"a\":1}\n" + sqlA + "message A\n";
+        Assert.assertEquals(h1 + REPEATED_PARAM + REPEATED_SQL
+                + h2 + "{\"a\":2}\n" + sqlB + "message B\n"
+                + h3 + "{\"a\":1}\n" + sqlA + "message A\n", export(source, null));
+    }
+
+    /** 单独或同时重复的入参和 SQL，在每次较早记录后分别输出说明，最新原文完整保留。 */
+    @Test
+    public void shouldShowNoticesAtEveryRepeatedPart() throws Exception {
+        String param = "{\"a\":1}\n";
+        String sql = "执行SQL语句 a.Mapper:select 1\n";
+        String[] bodies = {param, sql, param + sql};
+        String[] notices = {REPEATED_PARAM, REPEATED_SQL, REPEATED_PARAM + REPEATED_SQL};
+        String h1 = header(1, "a.Logger[10]");
+        String h2 = header(2, "a.Logger[10]");
+        String h3 = header(3, "a.Logger[10]");
+        for (int i = 0; i < bodies.length; i++) {
+            Assert.assertEquals(h1 + notices[i] + h2 + notices[i] + h3 + bodies[i],
+                    export(h1 + bodies[i] + h2 + bodies[i] + h3 + bodies[i], null));
+        }
+    }
+
+    /** 五行 JSON 包括括号及真实空行，UTF-8 字节长度和转义换行不影响物理行数。 */
+    @Test
+    public void shouldCountRepeatedPhysicalLinesAcrossLineEndings() throws Exception {
+        String param = "{\n\n  \"text\":\"中文😀first\\nsecond\",\n  \"nested\":{\"n\":1}\n}\n";
+        String sql = "执行SQL语句 a.Mapper:select 1\n";
+        String h1 = header(1, "a.Logger[10]");
+        String h2 = header(2, "a.Logger[10]");
+        String source = h1 + param + sql + h2 + param + sql;
+        String withoutFinalNewline = source.substring(0, source.length() - 1);
+        String expected = h1 + "已省略相同请求入参5行\n" + REPEATED_SQL + h2 + param + sql;
+        for (String text : new String[]{source, withoutFinalNewline,
+                source.replace("\n", "\r\n"), withoutFinalNewline.replace("\n", "\r\n")}) {
+            Assert.assertEquals(expected, export(text, null));
+        }
+    }
+
+    /** 无末尾换行时，前导或正文中的第一个空行也应保留，包含连续多个空行的情况。 */
+    @Test
+    public void shouldPreserveFirstEmptyLineWithoutFinalNewline() throws Exception {
+        String h1 = header(1, "a.Logger[10]");
+        for (String source : new String[]{"\n" + h1 + "中文😀", h1 + "before\n\nafter",
+                h1 + "before\n\n\nafter"}) {
+            Assert.assertEquals(source + "\n", export(source, null));
+            Assert.assertEquals(source + "\n", export(source.replace("\n", "\r\n"), null));
+        }
+    }
+
+    /** 相同入参和 SQL 按 logger 与行号分别去重，各组首次正文完整输出。 */
+    @Test
+    public void shouldKeepIdenticalParametersAndSqlAcrossGroups() throws Exception {
+        String body = "{\"a\":1}\n执行SQL语句 a.Mapper:select 1\n";
+        String source = header(1, "a.Logger[10]") + body + header(2, "b.Logger[10]") + body
+                + header(3, "a.Logger[11]") + body;
+        Assert.assertEquals(source, export(source, null));
+    }
+
+    /** 说明只出现在时间范围内的重复记录中，范围内仅剩最新记录时输出完整原文。 */
+    @Test
+    public void shouldShowPartNoticesOnlyForRetainedRecords() throws Exception {
+        String body = "{\"a\":1}\n执行SQL语句 a.Mapper:select 1\n";
+        String h1 = header(1, "a.Logger[10]");
+        String h2 = header(2, "a.Logger[10]");
+        String h3 = header(3, "a.Logger[10]");
+        String source = h1 + body + h2 + body + h3 + body;
+        Assert.assertEquals(h2 + REPEATED_PARAM + REPEATED_SQL + h3 + body, export(source, time(2)));
+        Assert.assertEquals(h3 + body, export(source, time(3)));
+        Assert.assertEquals("", export(source, time(4)));
     }
 
     /** A1、B1、A2、C1 按最后出现位置输出为 B、A、C，logger 或行号不同均不能合并。 */
@@ -260,7 +329,7 @@ public class LogFileExportUtilTest {
                 export(prefix + old + "old\n" + a1 + "A\n" + b + "B\n" + a2 + "A\n", time(2)));
     }
 
-    /** 请求 JSON 的嵌套、括号字符串及转义引号不会导致 SQL 和堆栈错位。 */
+    /** 请求 JSON 的嵌套、括号字符串及转义引号不会导致 SQL 说明和堆栈错位。 */
     @Test
     public void shouldParseMultilineJsonWithEscapedCharacters() throws Exception {
         String json = JSON.toJSONString(Map.of("nested", List.of(Map.of("text", "} [ \" \\"))),
@@ -268,29 +337,29 @@ public class LogFileExportUtilTest {
         String sql = "执行SQL语句 a.Mapper:select '中文'\n";
         String h1 = header(1, "a.Logger[10]");
         String h2 = header(2, "a.Logger[10]");
-        Assert.assertEquals(h1 + json + h2 + sql + "message\n\tat frame\n",
+        Assert.assertEquals(h1 + json + REPEATED_SQL + h2 + sql + "message\n\tat frame\n",
                 export(h1 + json + sql + "message\n\tat frame\n"
                         + h2 + sql + "message\n\tat frame\n", null));
     }
 
-    /** 参数中出现 @type 时仍按普通 JSON 文本识别，不尝试加载类型或实例化对象。 */
+    /** 含 @type 的参数按普通 JSON 文本保留，重复 SQL 在参数之后输出说明。 */
     @Test
     public void shouldValidateJsonWithoutInterpretingTypeMetadata() throws Exception {
         String h1 = header(1, "a.Logger[10]");
         String h2 = header(2, "a.Logger[10]");
         String param = "{\"@type\":\"not.a.RealClass\",\"value\":1}\n";
         String sql = "执行SQL语句 a.Mapper:select 1\n";
-        Assert.assertEquals(h1 + param + h2 + sql + "message\n",
+        Assert.assertEquals(h1 + param + REPEATED_SQL + h2 + sql + "message\n",
                 export(h1 + param + sql + "message\n" + h2 + sql + "message\n", null));
     }
 
-    /** 文本比较保留 JSON 排版和堆栈差异，不能因为异常描述相同而丢失不同调用链。 */
+    /** JSON 排版、SQL 空格和堆栈差异均按原文比较，不对不同正文生成重复说明。 */
     @Test
     public void shouldKeepWhitespaceAndDistinctStacks() throws Exception {
         String h1 = header(1, "a.Logger[10]");
         String h2 = header(2, "a.Logger[10]");
-        String first = "{\"a\":1}\nexception\n\tat first\n";
-        String second = "{ \"a\":1 }\nexception\n\tat second\n";
+        String first = "{\"a\":1}\n执行SQL语句 a.Mapper:select  1\nexception\n\tat first\n";
+        String second = "{ \"a\":1 }\n执行SQL语句 a.Mapper:select 1\nexception\n\tat second\n";
         Assert.assertEquals(h1 + first + h2 + second, export(h1 + first + h2 + second, null));
     }
 
@@ -356,14 +425,14 @@ public class LogFileExportUtilTest {
         Assert.assertEquals("plain file\n\n", export("plain file\n\n", time(4)));
     }
 
-    /** 中文跨越多个读取块、长 SQL 和长堆栈不会乱码或按行错误去重。 */
+    /** 中文跨越多个读取块时保持原文，长 SQL 仍按一个物理行生成重复说明。 */
     @Test
     public void shouldReadLongUtf8LinesAcrossBlocks() throws Exception {
         String sql = "执行SQL语句 a.Mapper:select '" + "中文😀".repeat(10000) + "'\n";
         String stack = "exception\n" + "\tat 中文调用栈\n".repeat(10000);
         String h1 = header(1, "a.Logger[10]");
         String h2 = header(2, "a.Logger[10]");
-        Assert.assertEquals(h1 + h2 + sql + stack, export(h1 + sql + stack + h2 + sql + stack, null));
+        Assert.assertEquals(h1 + REPEATED_SQL + h2 + sql + stack, export(h1 + sql + stack + h2 + sql + stack, null));
     }
 
     /** 空文件、空正文、BOM、不同换行及末尾无换行均可导出。 */

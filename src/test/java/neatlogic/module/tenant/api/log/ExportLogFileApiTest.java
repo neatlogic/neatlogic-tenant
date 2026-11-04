@@ -134,6 +134,19 @@ public class ExportLogFileApiTest {
                 response.headers.get("Content-Disposition"));
     }
 
+    /** 真实分组下载在重复正文原位置输出入参和 SQL 行数说明，并保留最新原文。 */
+    @Test
+    public void shouldDownloadRepeatedParameterAndSqlNotices() throws Exception {
+        String body = "{\n  \"value\":1\n}\n执行SQL语句 a.Mapper:select 1\n";
+        Files.writeString(new File(logDirectory, "error.log").toPath(),
+                header(1) + body + "old message\n" + header(2) + body + "latest message\n",
+                StandardCharsets.UTF_8);
+        Response response = new Response();
+        api.myDoService(params(101, "error.log"), null, response.proxy());
+        Assert.assertEquals(header(1) + "已省略相同请求入参3行\n已省略相同执行SQL语句1行\nold message\n"
+                + header(2) + body + "latest message\n", response.text());
+    }
+
     /** 分组下载入口折叠较早消息的七个连续栈帧，保留首尾帧和最新异常全文。 */
     @Test
     public void shouldDownloadFoldedStacksWithOmittedLineCount() throws Exception {
