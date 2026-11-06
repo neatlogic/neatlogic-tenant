@@ -67,6 +67,22 @@
       "getname": "Get API Configuration",
       "token": "API Token"
     },
+    "decryptcipherapi": {
+      "description": {
+        "desc": "Decrypt Input Text"
+      },
+      "getname": "Decrypt Input Text",
+      "input": {
+        "param": {
+          "desc": "Input Text"
+        }
+      },
+      "output": {
+        "param": {
+          "desc": "Decrypted Text"
+        }
+      }
+    },
     "formtreeselecthandlerlistapi": {
       "description": {
         "desc": "API for listing tree select data sources"
