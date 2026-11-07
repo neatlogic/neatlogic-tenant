@@ -67,6 +67,22 @@
       "getname": "获取接口配置信息",
       "token": "接口 Token"
     },
+    "decryptcipherapi": {
+      "description": {
+        "desc": "解密输入文本"
+      },
+      "getname": "解密输入文本",
+      "input": {
+        "param": {
+          "desc": "输入文本"
+        }
+      },
+      "output": {
+        "param": {
+          "desc": "解密后的文本"
+        }
+      }
+    },
     "formtreeselecthandlerlistapi": {
       "description": {
         "desc": "获取树形下拉框数据源列表接口"
