@@ -237,7 +237,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         // 来源仅复用已计算的包含链，不再传递或修改已写入返回对象的角色权限集合。
         JSONArray roleAuthSourcePathList = getRoleAuthSourcePathList(userAuthList, userRoleAuthList,
                 teamRoleAuthList, roleTeamUuidMap, includedAuthPathMap);
-        returnObj.put("userRoleAuthSourcePathList", roleAuthSourcePathList);
+//        returnObj.put("userRoleAuthSourcePathList", roleAuthSourcePathList);
 //        System.out.println("roleAuthSourcePathList = " + roleAuthSourcePathList);
         String roleAuthSourcePathListStr = JSONObject.toJSONString(roleAuthSourcePathList, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
         List<UserAuthVo> javaList = JSONArray.parseArray(roleAuthSourcePathListStr, UserAuthVo.class);
@@ -263,10 +263,12 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 return o1.getAuth().compareTo(o2.getAuth());
             }
         });
-        String returnObjString = JSONObject.toJSONString(javaList, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
+        returnObj.put("userRoleAuthSourcePathList", javaList);
+
+        String returnObjString = JSONObject.toJSONString(returnObj, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
         JSONObject resultObj = myDoService2(jsonObj);
-        JSONArray userRoleAuthSourcePathList = resultObj.getJSONArray("userRoleAuthSourcePathList");
-        String resultObjString = JSONObject.toJSONString(userRoleAuthSourcePathList, SerializerFeature.MapSortField);
+//        JSONArray userRoleAuthSourcePathList = resultObj.getJSONArray("userRoleAuthSourcePathList");
+        String resultObjString = JSONObject.toJSONString(resultObj, SerializerFeature.MapSortField);
         if (!Objects.equals(resultObjString, returnObjString)) {
             System.out.println("returnObjString = " + returnObjString);
             System.out.println("resultObjString = " + resultObjString);
