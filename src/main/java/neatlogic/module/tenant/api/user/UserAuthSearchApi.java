@@ -25,14 +25,11 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.RoleMapper;
 import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
-import neatlogic.framework.dto.RoleAuthVo;
-import neatlogic.framework.dto.RoleVo;
-import neatlogic.framework.dto.TeamVo;
-import neatlogic.framework.dto.UserAuthVo;
+import neatlogic.framework.dto.*;
 import neatlogic.framework.restful.annotation.*;
-import neatlogic.framework.restful.constvalue.ApiAnonymousAccessSupportEnum;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -63,6 +60,9 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
     
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserService userService;
 
     @Resource
     private TeamMapper teamMapper;
@@ -131,10 +131,12 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 if (userRoleAuthObj.containsKey(roleAuth.getAuthGroup())){
                     JSONArray authArray = userRoleAuthObj.getJSONArray(roleAuth.getAuthGroup());
                     authArray.add(roleAuth.getAuth());
+                    authArray.sort(Comparator.comparing(Object::toString));//
                 }else {
                     JSONArray authArray = new JSONArray();
                     authArray.add(roleAuth.getAuth());
                     userRoleAuthObj.put(roleAuth.getAuthGroup(), authArray);
+                    authArray.sort(Comparator.comparing(Object::toString));//
                 }
             }
         }
@@ -178,14 +180,20 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                     if (userRoleAuthObj.containsKey(roleAuth.getAuthGroup())){
                         JSONArray authArray = userRoleAuthObj.getJSONArray(roleAuth.getAuthGroup());
                         authArray.add(roleAuth.getAuth());
+                        authArray.sort(Comparator.comparing(Object::toString));//
                     }else {
                         JSONArray authArray = new JSONArray();
                         authArray.add(roleAuth.getAuth());
+                        authArray.sort(Comparator.comparing(Object::toString));//
                         userRoleAuthObj.put(roleAuth.getAuthGroup(), authArray);
                     }
                 }
             }
         }
+        // 直接授权先按原角色集合完成过滤，再统一计算和合并包含权限，写入返回对象后不再修改。
+        Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap = getIncludedAuthPathMap(
+                userAuthList, userRoleAuthList, teamRoleAuthList);
+        mergeIncludedAuths(userRoleAuthObj, includedAuthPathMap);
         JSONObject userAuthObj = new JSONObject();
         if (CollectionUtils.isNotEmpty(userAuthList)) {
             for (UserAuthVo authVo : userAuthList) {
@@ -195,21 +203,23 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                     sameGroup = userRoleAuthMap.get(authVo.getAuth()).equals(authVo.getAuthGroup());
                 }
                 if (!sameAuth || !sameGroup) {
+                    JSONArray jsonArray = userRoleAuthObj.getJSONArray(authVo.getAuthGroup());
+                    if (CollectionUtils.isNotEmpty(jsonArray) && jsonArray.contains(authVo.getAuth())) {
+                        continue;
+                    }
                     if (userAuthObj.containsKey(authVo.getAuthGroup())){
                         JSONArray authArray = userAuthObj.getJSONArray(authVo.getAuthGroup());
                         authArray.add(authVo.getAuth());
+                        authArray.sort(Comparator.comparing(Object::toString));//
                     }else {
                         JSONArray authArray = new JSONArray();
                         authArray.add(authVo.getAuth());
+                        authArray.sort(Comparator.comparing(Object::toString));//
                         userAuthObj.put(authVo.getAuthGroup(), authArray);
                     }
                 }
             }
         }
-        // 直接授权先按原角色集合完成过滤，再统一计算和合并包含权限，写入返回对象后不再修改。
-        Map<String, Map<AuthBase, List<JSONObject>>> includedAuthPathMap = getIncludedAuthPathMap(
-                userAuthList, userRoleAuthList, teamRoleAuthList);
-        mergeIncludedAuths(userRoleAuthObj, includedAuthPathMap);
         returnObj.put("userAuthObj", userAuthObj);
         returnObj.put("userRoleAuthObj", userRoleAuthObj);
         List<UserAuthVo> codeAuthList = new ArrayList<>();
@@ -225,8 +235,105 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         returnObj.put("userCodeAuthObj", userCodeAuthObj);
         // 来源组装独立于旧逻辑，在权限去重后仍保留每个角色、每个所属分组的来源。
         // 来源仅复用已计算的包含链，不再传递或修改已写入返回对象的角色权限集合。
-        returnObj.put("userRoleAuthSourcePathList", getRoleAuthSourcePathList(userAuthList, userRoleAuthList,
-                teamRoleAuthList, roleTeamUuidMap, includedAuthPathMap));
+        JSONArray roleAuthSourcePathList = getRoleAuthSourcePathList(userAuthList, userRoleAuthList,
+                teamRoleAuthList, roleTeamUuidMap, includedAuthPathMap);
+        returnObj.put("userRoleAuthSourcePathList", roleAuthSourcePathList);
+//        System.out.println("roleAuthSourcePathList = " + roleAuthSourcePathList);
+        String roleAuthSourcePathListStr = JSONObject.toJSONString(roleAuthSourcePathList, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
+        List<UserAuthVo> javaList = JSONArray.parseArray(roleAuthSourcePathListStr, UserAuthVo.class);
+        javaList.sort(new Comparator<UserAuthVo>() {
+            @Override
+            public int compare(UserAuthVo o1, UserAuthVo o2) {
+                o1.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+                    @Override
+                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+                        return o1Str.compareTo(o2Str);
+                    }
+                });
+                o2.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+                    @Override
+                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+                        return o1Str.compareTo(o2Str);
+                    }
+                });
+                return o1.getAuth().compareTo(o2.getAuth());
+            }
+        });
+        String returnObjString = JSONObject.toJSONString(javaList, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
+        JSONObject resultObj = myDoService2(jsonObj);
+        JSONArray userRoleAuthSourcePathList = resultObj.getJSONArray("userRoleAuthSourcePathList");
+        String resultObjString = JSONObject.toJSONString(userRoleAuthSourcePathList, SerializerFeature.MapSortField);
+        if (!Objects.equals(resultObjString, returnObjString)) {
+            System.out.println("returnObjString = " + returnObjString);
+            System.out.println("resultObjString = " + resultObjString);
+            return null;
+        }
+        return returnObj;
+    }
+
+    private JSONObject myDoService2(JSONObject jsonObj) {
+        String userUuid = jsonObj.getString("userUuid");
+        List<UserAuthVo> userAuthList = userService.getAuthSourcePathList2(userUuid);
+        Map<String, List<String>> userAuthObj = new HashMap<>();
+        Map<String, List<String>> userRoleAuthObj = new HashMap<>();
+        List<UserAuthVo> userRoleAuthSourcePathList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(userAuthList)) {
+            for (UserAuthVo authVo : userAuthList) {
+                if (CollectionUtils.isNotEmpty(authVo.getSourcePathList())) {
+                    List<String> strings = userRoleAuthObj.computeIfAbsent(authVo.getAuthGroup(), k -> new ArrayList<>());
+                    strings.add(authVo.getAuth());
+                    strings.sort(String::compareTo);
+                    authVo.setUserUuid(null);
+                    userRoleAuthSourcePathList.add(authVo);
+                } else {
+                    List<String> strings = userAuthObj.computeIfAbsent(authVo.getAuthGroup(), k -> new ArrayList<>());
+                    strings.add(authVo.getAuth());
+                    strings.sort(String::compareTo);
+                }
+            }
+        }
+
+        JSONObject returnObj = new JSONObject();
+        returnObj.put("userAuthObj", userAuthObj);
+        returnObj.put("userRoleAuthObj", userRoleAuthObj);
+        List<UserAuthVo> codeAuthList = new ArrayList<>();
+        for (AuthBase auth : AuthFactory.getDefaultAuthListBySystemUser(userUuid)) {
+            codeAuthList.add(new UserAuthVo(userUuid, auth));
+        }
+        AuthActionChecker.getAuthList(codeAuthList);
+        JSONObject userCodeAuthObj = new JSONObject();
+        for (UserAuthVo auth : codeAuthList) {
+            userCodeAuthObj.computeIfAbsent(auth.getAuthGroup(), key -> new JSONArray());
+            userCodeAuthObj.getJSONArray(auth.getAuthGroup()).add(auth.getAuth());
+        }
+        returnObj.put("userCodeAuthObj", userCodeAuthObj);
+        userRoleAuthSourcePathList.sort(new Comparator<UserAuthVo>() {
+            @Override
+            public int compare(UserAuthVo o1, UserAuthVo o2) {
+                o1.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+                    @Override
+                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+                        return o1Str.compareTo(o2Str);
+                    }
+                });
+                o2.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+                    @Override
+                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+                        return o1Str.compareTo(o2Str);
+                    }
+                });
+                return o1.getAuth().compareTo(o2.getAuth());
+            }
+        });
+        returnObj.put("userRoleAuthSourcePathList", userRoleAuthSourcePathList);
         return returnObj;
     }
 
@@ -263,6 +370,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
                 JSONArray auths = userRoleAuthObj.getJSONArray(target.getAuthGroup());
                 if (!auths.contains(target.getAuthName())) {
                     auths.add(target.getAuthName());
+                    auths.sort(Comparator.comparing(Object::toString));//
                 }
             }
         }
