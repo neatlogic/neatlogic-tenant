@@ -266,7 +266,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         returnObj.put("userRoleAuthSourcePathList", javaList);
 
         String returnObjString = JSONObject.toJSONString(returnObj, SerializerFeature.MapSortField, SerializerFeature.DisableCircularReferenceDetect);
-        JSONObject resultObj = myDoService2(jsonObj);
+        JSONObject resultObj = getResult(jsonObj);
 //        JSONArray userRoleAuthSourcePathList = resultObj.getJSONArray("userRoleAuthSourcePathList");
         String resultObjString = JSONObject.toJSONString(resultObj, SerializerFeature.MapSortField);
         if (!Objects.equals(resultObjString, returnObjString)) {
@@ -277,7 +277,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
         return returnObj;
     }
 
-    private JSONObject myDoService2(JSONObject jsonObj) {
+    private JSONObject getResult(JSONObject jsonObj) {
         String userUuid = jsonObj.getString("userUuid");
         List<UserAuthVo> userAuthList = userService.getUserAuthListByUserUuid(userUuid);
         Map<String, List<String>> userAuthObj = new HashMap<>();
@@ -313,28 +313,28 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
             userCodeAuthObj.getJSONArray(auth.getAuthGroup()).add(auth.getAuth());
         }
         returnObj.put("userCodeAuthObj", userCodeAuthObj);
-        userRoleAuthSourcePathList.sort(new Comparator<UserAuthVo>() {
-            @Override
-            public int compare(UserAuthVo o1, UserAuthVo o2) {
-                o1.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
-                    @Override
-                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
-                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
-                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
-                        return o1Str.compareTo(o2Str);
-                    }
-                });
-                o2.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
-                    @Override
-                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
-                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
-                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
-                        return o1Str.compareTo(o2Str);
-                    }
-                });
-                return o1.getAuth().compareTo(o2.getAuth());
-            }
-        });
+//        userRoleAuthSourcePathList.sort(new Comparator<UserAuthVo>() {
+//            @Override
+//            public int compare(UserAuthVo o1, UserAuthVo o2) {
+//                o1.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+//                    @Override
+//                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+//                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+//                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+//                        return o1Str.compareTo(o2Str);
+//                    }
+//                });
+//                o2.getSourcePathList().sort(new Comparator<neatlogic.framework.dto.SourcePathVo>() {
+//                    @Override
+//                    public int compare(neatlogic.framework.dto.SourcePathVo o1, neatlogic.framework.dto.SourcePathVo o2) {
+//                        String o1Str = JSONObject.toJSONString(o1, SerializerFeature.SortField);
+//                        String o2Str = JSONObject.toJSONString(o2, SerializerFeature.SortField);
+//                        return o1Str.compareTo(o2Str);
+//                    }
+//                });
+//                return o1.getAuth().compareTo(o2.getAuth());
+//            }
+//        });
         returnObj.put("userRoleAuthSourcePathList", userRoleAuthSourcePathList);
         return returnObj;
     }
