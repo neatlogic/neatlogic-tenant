@@ -84,12 +84,6 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
     @Description(desc = "auth.user.search")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
-        // 统一由服务查询授权并通过getResult组装，避免旧逻辑重复查询及对比失败返回null。
-        return getResult(jsonObj);
-    }
-
-    /** 基于统一授权结果区分直接与只读来源，并独立补充代码内置权限。 */
-    private JSONObject getResult(JSONObject jsonObj) {
         String userUuid = jsonObj.getString("userUuid");
         List<UserAuthVo> userAuthList = userService.getUserAuthListByUserUuid(userUuid);
         Map<String, List<String>> userAuthObj = new HashMap<>();
