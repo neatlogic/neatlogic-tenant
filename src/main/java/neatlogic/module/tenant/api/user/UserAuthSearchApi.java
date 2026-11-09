@@ -279,7 +279,7 @@ public class UserAuthSearchApi extends PrivateApiComponentBase {
 
     private JSONObject myDoService2(JSONObject jsonObj) {
         String userUuid = jsonObj.getString("userUuid");
-        List<UserAuthVo> userAuthList = userService.getAuthSourcePathList2(userUuid);
+        List<UserAuthVo> userAuthList = userService.getUserAuthListByUserUuid(userUuid);
         Map<String, List<String>> userAuthObj = new HashMap<>();
         Map<String, List<String>> userRoleAuthObj = new HashMap<>();
         List<UserAuthVo> userRoleAuthSourcePathList = new ArrayList<>();
