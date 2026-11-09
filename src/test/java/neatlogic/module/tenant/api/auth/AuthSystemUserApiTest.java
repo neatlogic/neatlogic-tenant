@@ -90,6 +90,11 @@ public class AuthSystemUserApiTest {
         mapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(), new Class<?>[]{UserMapper.class},
                 (proxy, method, args) -> {
                     switch (method.getName()) {
+                        // 查询服务需要用户资料，保持系统用户与普通用户的共享存储用例可用。
+                        case "getUserByUuid":
+                            UserVo user = new UserVo();
+                            user.setUuid((String) args[0]);
+                            return user;
                         case "getUserUuidListByAuthAndUserUuidList":
                             memberQueryCount++;
                             String auth = (String) args[0];

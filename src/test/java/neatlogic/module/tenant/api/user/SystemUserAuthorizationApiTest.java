@@ -71,6 +71,11 @@ public class SystemUserAuthorizationApiTest {
         UserMapper mapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(),
                 new Class[]{UserMapper.class}, (proxy, method, args) -> {
                     switch (method.getName()) {
+                        // 为查询服务新增的存在性检查提供测试用户，系统身份仍由原注册表维护。
+                        case "getUserByUuid":
+                            UserVo user = new UserVo();
+                            user.setUuid((String) args[0]);
+                            return user;
                         case "checkUserIsExists":
                             if (ordinaryUserUuidSet.contains(args[0])) {
                                 return 1;

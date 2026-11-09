@@ -11,6 +11,7 @@ import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.SourcePathVo;
 import neatlogic.framework.dto.TeamVo;
 import neatlogic.framework.dto.UserAuthVo;
+import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.service.UserService;
 import neatlogic.framework.service.UserServiceImpl;
 import org.junit.Assert;
@@ -162,6 +163,11 @@ public class UserAuthSourcePathTest {
                 (proxy, method, args) -> {
                     queries.merge(method.getName(), 1, Integer::sum);
                     switch (method.getName()) {
+                        // 真实服务先校验用户存在，再查询三类授权。
+                        case "getUserByUuid":
+                            UserVo user = new UserVo();
+                            user.setUuid(USER_UUID);
+                            return user;
                         case "searchUserAuthByUserUuid": return Collections.singletonList(auth("process", "Z_DIRECT", null));
                         case "searchUserRoleAuthByUserUuid": return Collections.singletonList(roleAuth("r", "A_ROLE"));
                         default: throw new AssertionError(method.getName());
