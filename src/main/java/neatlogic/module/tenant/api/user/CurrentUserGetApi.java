@@ -62,7 +62,7 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取当前用户信息";
+        return "nmtau.currentusergetapi.getname";
     }
 
     @Override
@@ -72,7 +72,7 @@ public class CurrentUserGetApi extends PrivateApiComponentBase {
 
     @Input({})
     @Output({})
-    @Description(desc = "获取当前用户信息")
+    @Description(desc = "nmtau.currentusergetapi.description.desc")
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         UserContext userContext = UserContext.get();
