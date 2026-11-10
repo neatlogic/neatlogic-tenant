@@ -955,6 +955,12 @@
     "cleansubmitkeyapi": {
       "getname": "手动清理重复提交SubmitKeyMap"
     },
+    "currentusergetapi": {
+      "getname": "获取当前用户信息",
+      "description": {
+        "desc": "获取当前用户信息"
+      }
+    },
     "deleteuserdataapi": {
       "getname": "删除用户数据"
     },

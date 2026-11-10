@@ -955,6 +955,12 @@
     "cleansubmitkeyapi": {
       "getname": "Manually clear duplicate SubmitKeyMap submissions"
     },
+    "currentusergetapi": {
+      "getname": "Get Current User Information",
+      "description": {
+        "desc": "Get current user information."
+      }
+    },
     "deleteuserdataapi": {
       "getname": "Delete user data"
     },

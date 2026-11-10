@@ -30,6 +30,7 @@ import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
 import neatlogic.framework.service.UserService;
+import neatlogic.framework.service.UserServiceImpl;
 import neatlogic.module.tenant.api.user.UserAuthSaveApi;
 import neatlogic.module.tenant.api.user.UserAuthSearchApi;
 import org.junit.After;
@@ -89,6 +90,11 @@ public class AuthSystemUserApiTest {
         mapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(), new Class<?>[]{UserMapper.class},
                 (proxy, method, args) -> {
                     switch (method.getName()) {
+                        // 查询服务需要用户资料，保持系统用户与普通用户的共享存储用例可用。
+                        case "getUserByUuid":
+                            UserVo user = new UserVo();
+                            user.setUuid((String) args[0]);
+                            return user;
                         case "getUserUuidListByAuthAndUserUuidList":
                             memberQueryCount++;
                             String auth = (String) args[0];
@@ -249,11 +255,7 @@ public class AuthSystemUserApiTest {
             Assert.assertTrue(AuthActionChecker.check("extension-uuid", USER_MODIFY.class));
 
             UserAuthSearchApi userSearchApi = new UserAuthSearchApi();
-            inject(userSearchApi, "userMapper", mapper);
-            inject(userSearchApi, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
-                    new Class<?>[]{TeamMapper.class}, (proxy, method, args) -> Collections.emptyList()));
-            inject(userSearchApi, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
-                    new Class<?>[]{RoleMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+            bindUserSearchService(userSearchApi);
             JSONObject userQuery = new JSONObject();
             userQuery.put("userUuid", "extension-uuid");
             JSONObject userResult = (JSONObject) userSearchApi.myDoService(userQuery);
@@ -438,11 +440,7 @@ public class AuthSystemUserApiTest {
     public void shouldShareStorageWithUserAuthorizationApis() throws Exception {
         saveApi.myDoService(systemRequest("USER_MODIFY", "system"));
         UserAuthSearchApi userSearchApi = new UserAuthSearchApi();
-        inject(userSearchApi, "userMapper", mapper);
-        inject(userSearchApi, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
-                new Class<?>[]{TeamMapper.class}, (proxy, method, args) -> Collections.emptyList()));
-        inject(userSearchApi, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
-                new Class<?>[]{RoleMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+        bindUserSearchService(userSearchApi);
         JSONObject userQuery = new JSONObject();
         userQuery.put("userUuid", "system");
         JSONObject userResult = (JSONObject) userSearchApi.myDoService(userQuery);
@@ -657,6 +655,17 @@ public class AuthSystemUserApiTest {
         Field result = type.getDeclaredField(name);
         result.setAccessible(true);
         return result;
+    }
+
+    /** API改为委托服务后，通过真实查询链验证共享存储及代码内置授权。 */
+    private void bindUserSearchService(UserAuthSearchApi api) throws Exception {
+        UserServiceImpl service = new UserServiceImpl();
+        inject(service, "userMapper", mapper);
+        inject(service, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
+                new Class<?>[]{TeamMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+        inject(service, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
+                new Class<?>[]{RoleMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+        inject(api, "userService", service);
     }
 
     /** 在测试中注入 Mapper 或服务替身。 */

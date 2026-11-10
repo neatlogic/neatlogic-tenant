@@ -19,12 +19,14 @@ import neatlogic.framework.dao.mapper.TeamMapper;
 import neatlogic.framework.dao.mapper.UserMapper;
 import neatlogic.framework.dto.AuthenticationInfoVo;
 import neatlogic.framework.dto.RoleAuthVo;
+import neatlogic.framework.dto.RoleVo;
 import neatlogic.framework.dto.UserAuthVo;
 import neatlogic.framework.dto.UserVo;
 import neatlogic.framework.exception.type.PermissionDeniedException;
 import neatlogic.framework.exception.user.UserNotFoundException;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.restful.dto.ApiVo;
+import neatlogic.framework.service.UserServiceImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -69,6 +71,11 @@ public class SystemUserAuthorizationApiTest {
         UserMapper mapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(),
                 new Class[]{UserMapper.class}, (proxy, method, args) -> {
                     switch (method.getName()) {
+                        // 为查询服务新增的存在性检查提供测试用户，系统身份仍由原注册表维护。
+                        case "getUserByUuid":
+                            UserVo user = new UserVo();
+                            user.setUuid((String) args[0]);
+                            return user;
                         case "checkUserIsExists":
                             if (ordinaryUserUuidSet.contains(args[0])) {
                                 return 1;
@@ -104,11 +111,27 @@ public class SystemUserAuthorizationApiTest {
         saveApi = new UserAuthSaveApi();
         inject(saveApi, "userMapper", mapper);
         searchApi = new UserAuthSearchApi();
-        inject(searchApi, "userMapper", mapper);
-        inject(searchApi, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
+        // 查询入口委托真实服务，保存及查询继续共享同一份内存授权存储。
+        UserServiceImpl userService = new UserServiceImpl();
+        inject(userService, "userMapper", mapper);
+        inject(userService, "teamMapper", Proxy.newProxyInstance(TeamMapper.class.getClassLoader(),
                 new Class[]{TeamMapper.class}, (proxy, method, args) -> Collections.emptyList()));
-        inject(searchApi, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
-                new Class[]{RoleMapper.class}, (proxy, method, args) -> Collections.emptyList()));
+        inject(userService, "roleMapper", Proxy.newProxyInstance(RoleMapper.class.getClassLoader(),
+                new Class[]{RoleMapper.class}, (proxy, method, args) -> {
+                    // 服务只回显具有可信来源的角色权限，补齐原始授权对应的角色资料。
+                    if ("getRoleByUuidList".equals(method.getName())) {
+                        List<RoleVo> roles = new ArrayList<>();
+                        for (String uuid : (List<String>) args[0]) {
+                            RoleVo role = new RoleVo();
+                            role.setUuid(uuid);
+                            role.setName("继承角色");
+                            roles.add(role);
+                        }
+                        return roles;
+                    }
+                    return Collections.emptyList();
+                }));
+        inject(searchApi, "userService", userService);
         checkerMapperField = AuthActionChecker.class.getDeclaredField("userMapper");
         checkerMapperField.setAccessible(true);
         originalCheckerMapper = checkerMapperField.get(null);
@@ -198,6 +221,8 @@ public class SystemUserAuthorizationApiTest {
     public void shouldKeepInheritedRolePermissionsInExistingResponse() throws Exception {
         String uuid = SystemUser.SYSTEM.getUserUuid();
         RoleAuthVo inherited = new RoleAuthVo();
+        // 授权及其角色资料必须具有相同身份，才能生成有效角色来源。
+        inherited.setRoleUuid("inherited-role");
         inherited.setAuth("AUTHORITY_MODIFY");
         inherited.setAuthGroup("framework");
         roleAuthList.add(inherited);

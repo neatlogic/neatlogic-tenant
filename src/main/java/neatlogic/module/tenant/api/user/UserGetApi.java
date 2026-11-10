@@ -37,6 +37,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.framework.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,9 @@ public class UserGetApi extends PrivateApiComponentBase {
 
     @Resource
     private AuthenticationInfoService authenticationInfoService;
+
+    @Resource
+    private UserService userService;
 
     @Override
     public String getToken() {
@@ -117,39 +121,41 @@ public class UserGetApi extends PrivateApiComponentBase {
                 userVo.setRoleList(roleMapper.getRoleByUuidList(userVo.getRoleUuidList()));
             }
             //超级管理员拥有所有权限
-            if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
-                List<AuthBase> authBaseList = AuthFactory.getAuthList();
-                List<UserAuthVo> userAuthVos = new ArrayList<>();
-                for (AuthBase authBase : authBaseList) {
-                    String authGroupName = authBase.getAuthGroup();
-                    if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
-                        continue;
-                    }
-                    userAuthVos.add(new UserAuthVo(userUuid, authBase));
-                }
-                userVo.setUserAuthList(userAuthVos);
-            } else {
-
-                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
-                List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(userAuthVoList)) {
-                    userAuthVoList.forEach(auth -> {
-                        //过滤反射后不存在非法auth
-                        AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
-                        if (authBase != null) {
-                            List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
-                            List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
-                            //过滤该租户没有tenantGroup对应的auth
-                            if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
-                                filteredUserAuthVoList.add(auth);
-                            }
-                        }
-                    });
-
-                    AuthActionChecker.getAuthList(filteredUserAuthVoList);
-                    userVo.setUserAuthList(filteredUserAuthVoList);
-                }
-            }
+//            if (userVo.getIsSuperAdmin() != null && userVo.getIsSuperAdmin()) {
+//                List<AuthBase> authBaseList = AuthFactory.getAuthList();
+//                List<UserAuthVo> userAuthVos = new ArrayList<>();
+//                for (AuthBase authBase : authBaseList) {
+//                    String authGroupName = authBase.getAuthGroup();
+//                    if (!TenantContext.get().getActiveModuleMap().containsKey(authGroupName)) {
+//                        continue;
+//                    }
+//                    userAuthVos.add(new UserAuthVo(userUuid, authBase));
+//                }
+//                userVo.setUserAuthList(userAuthVos);
+//            } else {
+//
+//                List<UserAuthVo> userAuthVoList = userMapper.searchUserAllAuthByUserAuth(authenticationInfoVo);
+//                List<UserAuthVo> filteredUserAuthVoList = new ArrayList<>();
+//                if (CollectionUtils.isNotEmpty(userAuthVoList)) {
+//                    userAuthVoList.forEach(auth -> {
+//                        //过滤反射后不存在非法auth
+//                        AuthBase authBase = AuthFactory.getAuthInstance(auth.getAuth());
+//                        if (authBase != null) {
+//                            List<ModuleGroupVo> moduleGroupVos = TenantContext.get().getActiveModuleGroupList();
+//                            List<String> activeModuleGroupList = moduleGroupVos.stream().map(ModuleGroupVo::getGroup).collect(Collectors.toList());
+//                            //过滤该租户没有tenantGroup对应的auth
+//                            if (CollectionUtils.isNotEmpty(moduleGroupVos) && activeModuleGroupList.contains(auth.getAuthGroup())) {
+//                                filteredUserAuthVoList.add(auth);
+//                            }
+//                        }
+//                    });
+//
+//                    AuthActionChecker.getAuthList(filteredUserAuthVoList);
+//                    userVo.setUserAuthList(filteredUserAuthVoList);
+//                }
+//            }
+            List<UserAuthVo> userAuthList = userService.getUserAuthListByUserUuid(userUuid);
+            userVo.setUserAuthList(userAuthList);
             List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
             userVo.setTeamList(teamList);
             List<String> teamUuidList = userVo.getTeamUuidList();
