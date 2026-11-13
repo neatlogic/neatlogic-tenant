@@ -304,32 +304,27 @@ public class DashboardDatasourceApiTest {
         assertEquals(0, extensionHandler.calls);
     }
 
-    /** 缺省、null、空字符串和空白类型均由工厂兼容旧大屏，API 不回写或改写参数。 */
+    /** 显式数据仓库类型按原参数分发，API 不回写或改写请求。 */
     @Test
-    public void shouldDefaultMissingAndBlankTypesForEachApi() throws Exception {
+    public void shouldPreserveExplicitDatawarehouseTypeForEachApi() throws Exception {
         List<PrivateApiComponentBase> components = apis();
-        for (int variant = 0; variant < 4; variant++) {
-            for (int i = 0; i < components.size(); i++) {
-                JSONObject params = requestParams();
-                if (variant > 0) {
-                    params.put("datasourceType", new String[]{null, null, "", " \t\r\n"}[variant]);
-                }
-                Object originalType = params.get("datasourceType");
-                assertSame(datawarehouseHandler.response(i), invokeApi(components.get(i), params));
-                assertSame(params, datawarehouseHandler.lastParams);
-                assertEquals(OPERATIONS[i], datawarehouseHandler.lastOperation);
-                assertEquals(variant > 0, params.containsKey("datasourceType"));
-                assertEquals(originalType, params.get("datasourceType"));
-            }
+        for (int i = 0; i < components.size(); i++) {
+            JSONObject params = requestParams();
+            params.put("datasourceType", "datawarehouse");
+            JSONObject before = JSONObject.parseObject(params.toJSONString());
+            assertSame(datawarehouseHandler.response(i), invokeApi(components.get(i), params));
+            assertSame(params, datawarehouseHandler.lastParams);
+            assertEquals(OPERATIONS[i], datawarehouseHandler.lastOperation);
+            assertEquals(before, params);
         }
-        assertEquals(12, datawarehouseHandler.calls);
+        assertEquals(3, datawarehouseHandler.calls);
         assertEquals(0, extensionHandler.calls);
     }
 
-    /** 未注册或拼写不匹配的非空类型直接报错，任何 Handler 都不得收到查询。 */
+    /** 空字符串、空白及未注册的显式类型直接报错，任何 Handler 都不得收到查询。 */
     @Test
     public void shouldRejectUnsupportedTypesBeforeQuerying() {
-        for (String type : new String[]{"integration", "unknown", " datawarehouse ", "DATAWAREHOUSE"}) {
+        for (String type : new String[]{"", " \t\r\n", "integration", "unknown", " datawarehouse ", "DATAWAREHOUSE"}) {
             for (PrivateApiComponentBase api : apis()) {
                 JSONObject params = requestParams();
                 params.put("datasourceType", type);

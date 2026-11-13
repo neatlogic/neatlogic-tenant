@@ -9,7 +9,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,12 +31,23 @@ public class LogFileExportUtilTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    /** 按文字规则逐文本验证附件；原人工示例的三处差异保留在测试资源说明中。 */
+    /** 内联构造十六条、五个分组的日志，逐文本验证正文去重，不依赖缺失的附件资源。 */
     @Test
-    public void shouldMatchPastedLogsUsingExactTextRules() throws Exception {
-        String source = resource("source.log");
-        String actual = export(source, null);
-        Assert.assertEquals(resource("expected-strict.log"), actual);
+    public void shouldMatchGroupedLogsUsingExactTextRules() throws Exception {
+        StringBuilder source = new StringBuilder();
+        StringBuilder expected = new StringBuilder();
+        int second = 1;
+        for (int group = 0; group < 5; group++) {
+            int count = group == 0 ? 4 : 3;
+            String body = "{\"group\":" + group + "}\n执行SQL语句 sample.Mapper:select " + group + "\nmessage " + group + "\n";
+            for (int record = 0; record < count; record++) {
+                String logHeader = header(second++, "sample.Logger" + group + "[10]");
+                source.append(logHeader).append(body);
+                expected.append(logHeader).append(record == count - 1 ? body : REPEATED_PARAM + REPEATED_SQL);
+            }
+        }
+        String actual = export(source.toString(), null);
+        Assert.assertEquals(expected.toString(), actual);
         Assert.assertEquals(16, actual.lines().filter(line -> line.startsWith("[ERROR]")).count());
         Assert.assertEquals(5, actual.lines().filter(line -> line.startsWith("[ERROR]"))
                 .map(line -> line.split(" ")[3]).distinct().count());
@@ -45,21 +55,42 @@ public class LogFileExportUtilTest {
 
     /** 四条不同 IP 的异常保留描述，前三段各保留首尾帧，最新的十六个栈帧完整保留。 */
     @Test
-    public void shouldFoldPastedSixteenFrameStacks() throws Exception {
-        String actual = export(resource("stack-tail-source.log"), null);
-        Assert.assertEquals(resource("stack-tail-expected.log"), actual);
+    public void shouldFoldSixteenFrameStacks() throws Exception {
+        StringBuilder source = new StringBuilder();
+        StringBuilder expected = new StringBuilder();
+        String stack = frames(1, 16);
+        String folded = frame(1) + "\t已省略14行重复堆栈\n" + frame(16);
+        for (int record = 1; record <= 4; record++) {
+            String prefix = header(record, "sample.Logger[10]", "thread", "tenant(system)",
+                    "/api/test(192.0.2." + record + ")") + "连接失败 IP:192.0.2." + record + "\n";
+            source.append(prefix).append(stack);
+            expected.append(prefix).append(record == 4 ? stack : folded);
+        }
+        String actual = export(source.toString(), null);
+        Assert.assertEquals(expected.toString(), actual);
         Assert.assertEquals(4, actual.lines().filter(line -> line.startsWith("[ERROR]")).count());
         Assert.assertEquals(22, actual.lines().filter(line -> line.startsWith("\tat ")).count());
         Assert.assertEquals(3, actual.lines().filter(line -> line.equals("\t已省略14行重复堆栈")).count());
     }
 
-    /** 附件中的四段匹配分别省略 13、8、43、51 行，最新消息连同 SQL 按原文验证。 */
+    /** 内联四段堆栈分别省略 13、8、43、51 行，最新消息连同 SQL 按原文保留。 */
     @Test
-    public void shouldMatchPastedMultiBlockExportExactly() throws Exception {
-        String source = resource("stack-block-source.log");
-        String actual = export(source, null);
-        Assert.assertEquals(resource("stack-block-expected.log"), actual);
-        Assert.assertTrue(actual.endsWith(source.substring(source.lastIndexOf("[ERROR]"))));
+    public void shouldMatchMultiBlockExportExactly() throws Exception {
+        StringBuilder blocks = new StringBuilder();
+        StringBuilder folded = new StringBuilder();
+        int start = 1;
+        for (int count : new int[]{15, 10, 45, 53}) {
+            String separator = "block " + start + "\n";
+            blocks.append(separator).append(frames(start, count));
+            folded.append(separator).append(frame(start)).append("\t已省略")
+                    .append(count - 2).append("行重复堆栈\n").append(frame(start + count - 1));
+            start += count;
+        }
+        String older = header(1, "sample.Logger[10]") + "执行SQL语句 sample.Mapper:select 1\nolder\n";
+        String latest = header(2, "sample.Logger[10]") + "执行SQL语句 sample.Mapper:select 2\nlatest\n" + blocks;
+        String actual = export(older + blocks + latest, null);
+        Assert.assertEquals(older + folded + latest, actual);
+        Assert.assertTrue(actual.endsWith(latest));
     }
 
     /** 中部与末尾使用同一门槛，错开起点的七行可折叠，六行始终完整保留。 */
@@ -477,14 +508,6 @@ public class LogFileExportUtilTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         LogFileExportUtil.export(file, startTime, output);
         return output.toString(StandardCharsets.UTF_8.name());
-    }
-
-    /** 读取从用户附件整理出的固定样例。 */
-    private String resource(String name) throws Exception {
-        try (InputStream input = getClass().getResourceAsStream("/logexport/" + name)) {
-            Assert.assertNotNull(input);
-            return new String(input.readAllBytes(), StandardCharsets.UTF_8).replace("\r\n", "\n");
-        }
     }
 
     /** 构造同一服务器时区下的测试时间。 */

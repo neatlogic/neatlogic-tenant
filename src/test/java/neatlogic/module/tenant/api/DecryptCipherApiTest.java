@@ -29,7 +29,7 @@ public class DecryptCipherApiTest {
     @Test
     public void declaresAdminOnlyPrivateApiWithAuditDisabled() throws Exception {
         assertEquals("/cipher/decrypt", api.getToken());
-        assertEquals("解密输入文本", api.getName());
+        assertEquals("nmta.decryptcipherapi.getname", api.getName());
         assertNull(api.getConfig());
         assertEquals(0, api.needAudit());
         assertEquals(ADMIN.class, DecryptCipherApi.class.getAnnotation(AuthAction.class).action());
