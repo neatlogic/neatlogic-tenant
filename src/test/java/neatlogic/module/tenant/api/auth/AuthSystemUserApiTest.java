@@ -90,8 +90,13 @@ public class AuthSystemUserApiTest {
         mapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(), new Class<?>[]{UserMapper.class},
                 (proxy, method, args) -> {
                     switch (method.getName()) {
-                        // 查询服务需要用户资料，保持系统用户与普通用户的共享存储用例可用。
+                        // 内置身份由代码注册，无需存在用户表记录；避免替身掩盖授权查询的身份校验缺陷。
                         case "getUserByUuid":
+                            for (ISystemUser systemUser : SystemUserFactory.getSystemUserList()) {
+                                if (systemUser.getUserUuid().equals(args[0])) {
+                                    return null;
+                                }
+                            }
                             UserVo user = new UserVo();
                             user.setUuid((String) args[0]);
                             return user;
@@ -454,6 +459,10 @@ public class AuthSystemUserApiTest {
         authObj.put("framework", array("AUTHORITY_MODIFY"));
         userSave.put("userAuthList", authObj);
         userSaveApi.myDoService(userSave);
+        // 保存后重新打开授权查询，应回显新权限且不再保留已覆盖的旧权限。
+        JSONObject savedResult = (JSONObject) userSearchApi.myDoService(userQuery);
+        Assert.assertEquals(Collections.singletonList("AUTHORITY_MODIFY"),
+                savedResult.getJSONObject("userAuthObj").getJSONArray("framework").toJavaList(String.class));
         JSONObject filter = new JSONObject();
         filter.put("auth", "USER_MODIFY");
         Assert.assertEquals(0, ((JSONObject) listApi.myDoService(filter)).getInteger("rowNum").intValue());
