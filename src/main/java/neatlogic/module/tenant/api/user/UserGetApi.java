@@ -37,6 +37,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.service.AuthenticationInfoService;
+import neatlogic.framework.service.TeamService;
 import neatlogic.framework.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +67,9 @@ public class UserGetApi extends PrivateApiComponentBase {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private TeamService teamService;
 
     @Override
     public String getToken() {
@@ -156,9 +160,18 @@ public class UserGetApi extends PrivateApiComponentBase {
 //            }
             List<UserAuthVo> userAuthList = userService.getUserAuthListByUserUuid(userUuid);
             userVo.setUserAuthList(userAuthList);
-            List<TeamVo> teamList = teamMapper.getTeamListByUserUuid(userUuid);
-            userVo.setTeamList(teamList);
-            List<String> teamUuidList = userVo.getTeamUuidList();
+            List<String> teamUuidList = teamMapper.getTeamUuidListByUserUuid(userUuid);
+            if (CollectionUtils.isNotEmpty(teamUuidList)) {
+                List<TeamVo> teamList = teamMapper.getTeamByUuidList(teamUuidList);
+                for (TeamVo team : teamList) {
+                    List<String> pathNameList = teamService.getParentPathList(team);
+                    if (CollectionUtils.isNotEmpty(pathNameList)) {
+                        team.setFullPath(String.join("->", pathNameList));
+                        team.setParentPathList(pathNameList);
+                    }
+                }
+                userVo.setTeamList(teamList);
+            }
             /**
              * 补充分组角色信息,以用户的a分组为例
              * 1、根据a分组的父节点（需要穿透）找到roleList
@@ -167,7 +180,7 @@ public class UserGetApi extends PrivateApiComponentBase {
              */
             List<RoleVo> teamRoleList = new ArrayList<>();
             Map<String, RoleVo> roleVoMap = new HashMap<>();
-            teamList.forEach(e -> teamRoleList.addAll(roleMapper.getParentTeamRoleListWithCheckedChildrenByTeam(e)));
+            userVo.getTeamList().forEach(e -> teamRoleList.addAll(roleMapper.getParentTeamRoleListWithCheckedChildrenByTeam(e)));
             if (CollectionUtils.isNotEmpty(teamUuidList)) {
                 teamRoleList.addAll(roleMapper.getRoleListWithTeamByTeamUuidList(teamUuidList));
             }

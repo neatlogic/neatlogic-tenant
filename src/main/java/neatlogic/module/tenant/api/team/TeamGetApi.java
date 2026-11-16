@@ -22,11 +22,10 @@ import neatlogic.framework.exception.team.TeamNotFoundException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import neatlogic.framework.service.TeamService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
@@ -34,8 +33,11 @@ import java.util.List;
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TeamGetApi extends PrivateApiComponentBase {
 
-    @Autowired
+    @Resource
     private TeamMapper teamMapper;
+
+    @Resource
+    private TeamService teamService;
 
     @Override
     public String getToken() {
@@ -85,16 +87,20 @@ public class TeamGetApi extends PrivateApiComponentBase {
         int userCount = teamMapper.searchUserCountByTeamUuid(team.getUuid());
         teamVo.setUserCount(userCount);
         int isEdit = jsonObj.getIntValue("isEdit");
-        List<String> pathNameList = new ArrayList<>();
-        String upwardNamePath = teamVo.getUpwardNamePath();
-        if (StringUtils.isNotBlank(upwardNamePath)) {
-            String[] upwardNameArray = upwardNamePath.split("/");
-            for (String upwardName : upwardNameArray) {
-                if (isEdit == 0 || !upwardName.equals(teamVo.getName())) {
-                    pathNameList.add(upwardName);
-                }
-            }
+        List<String> pathNameList = teamService.getParentPathList(team);
+        if (isEdit == 1) {
+            pathNameList = pathNameList.subList(0, pathNameList.size() - 1);
         }
+//        List<String> pathNameList = new ArrayList<>();
+//        String upwardNamePath = teamVo.getUpwardNamePath();
+//        if (StringUtils.isNotBlank(upwardNamePath)) {
+//            String[] upwardNameArray = upwardNamePath.split("/");
+//            for (String upwardName : upwardNameArray) {
+//                if (isEdit == 0 || !upwardName.equals(teamVo.getName())) {
+//                    pathNameList.add(upwardName);
+//                }
+//            }
+//        }
         teamVo.setPathNameList(pathNameList);
         teamVo.setTeamUserTitleList(teamMapper.getTeamUserTitleListByTeamUuid(uuid));
         return teamVo;
