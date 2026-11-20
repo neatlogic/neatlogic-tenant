@@ -21,6 +21,7 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.integration.core.IIntegrationHandler;
 import neatlogic.framework.integration.core.IntegrationHandlerFactory;
+import neatlogic.framework.integration.core.IntegrationStatusCodeTransformUtil;
 import neatlogic.framework.integration.dto.IntegrationResultVo;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -69,7 +70,12 @@ public class IntegrationTestApi extends PrivateApiComponentBase {
         if (!isMethodSupported(handler, integrationVo.getMethod())) {
             throw new ApiRuntimeException("当前集成处理器不支持请求方式：" + integrationVo.getMethod());
         }
+        IntegrationStatusCodeTransformUtil.validate(handler, integrationVo.getConfig());
         IntegrationResultVo resultVo = handler.sendRequest(integrationVo, FrameworkRequestFrom.TEST);
+        // 转换已判定为失败时直接展示原始响应与诊断，避免用成功输出规范重复报错。
+        if (resultVo.getStatusCodeTransformDetail() != null && resultVo.getStatusCode() >= 400) {
+            return resultVo;
+        }
         try {
             handler.validate(resultVo);
         } catch (ApiRuntimeException ex) {

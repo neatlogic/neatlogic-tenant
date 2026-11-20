@@ -21,10 +21,7 @@ import neatlogic.framework.exception.integration.HttpMethodNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationHandlerNotFoundException;
 import neatlogic.framework.exception.integration.IntegrationNameRepeatsException;
 import neatlogic.framework.exception.integration.IntegrationRateLimitConfigInvalidException;
-import neatlogic.framework.integration.core.IIntegrationHandler;
-import neatlogic.framework.integration.core.IntegrationHandlerFactory;
-import neatlogic.framework.integration.core.IntegrationDefaultValueUtil;
-import neatlogic.framework.integration.core.IntegrationRateLimitManager;
+import neatlogic.framework.integration.core.*;
 import neatlogic.framework.integration.dao.mapper.IntegrationMapper;
 import neatlogic.framework.integration.dto.IntegrationVo;
 import neatlogic.framework.restful.annotation.Description;
@@ -90,6 +87,7 @@ public class IntegrationSaveApi extends PrivateApiComponentBase {
         if (integrationVo.getUrl().contains("integration/run/")) {
             throw new IntegrationUrlIllegalException(integrationVo.getUrl());
         }
+        IntegrationStatusCodeTransformUtil.validate(handler, integrationVo.getConfig());
         validateRateLimitConfig(integrationVo);
         // 保存时清除历史枚举选项元数据；直接调用接口同样遵守新版文本默认值规则。
         IntegrationDefaultValueUtil.normalizeForSave(integrationVo.getConfig());
